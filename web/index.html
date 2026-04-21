@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>microsolder-agent</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body
+    class="h-screen w-screen overflow-hidden bg-neutral-950 text-neutral-100 font-mono text-sm"
+    x-data="workbench()"
+    x-init="init()"
+  >
+    <div class="workbench-grid h-full w-full">
+      <!-- Boardview -->
+      <section class="panel" aria-label="Boardview">
+        <header class="panel-header">
+          <span class="panel-title">Boardview</span>
+          <span class="panel-sub" x-text="board.label"></span>
+        </header>
+        <div class="panel-body">
+          <div class="placeholder-box">
+            <span>boardview placeholder</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Schematic -->
+      <section class="panel" aria-label="Schematic">
+        <header class="panel-header">
+          <span class="panel-title">Schematic</span>
+          <span class="panel-sub" x-text="schematic.label"></span>
+        </header>
+        <div class="panel-body">
+          <div class="placeholder-box">
+            <span>schematic placeholder</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Agent chat -->
+      <section class="panel" aria-label="Agent chat">
+        <header class="panel-header">
+          <span class="panel-title">Agent</span>
+          <span
+            class="panel-sub"
+            :class="connected ? 'text-emerald-400' : 'text-amber-400'"
+            x-text="connected ? 'connected' : 'disconnected'"
+          ></span>
+        </header>
+
+        <div class="panel-body chat-body">
+          <div class="chat-log" x-ref="log">
+            <template x-for="(m, i) in messages" :key="i">
+              <div class="chat-msg" :class="'chat-msg--' + m.role">
+                <span class="chat-role" x-text="m.role"></span>
+                <span class="chat-text" x-text="m.text"></span>
+              </div>
+            </template>
+            <div x-show="messages.length === 0" class="chat-empty">
+              Ask the agent anything. Example: <em>"where is the PMIC?"</em>
+            </div>
+          </div>
+
+          <form class="chat-input" @submit.prevent="send()">
+            <input
+              type="text"
+              x-model="draft"
+              placeholder="Ask the agent…"
+              autocomplete="off"
+              :disabled="!connected"
+              class="chat-input-text"
+            />
+            <button type="submit" class="chat-send" :disabled="!connected || !draft.trim()">
+              Send
+            </button>
+          </form>
+        </div>
+      </section>
+    </div>
+
+    <script src="/app.js"></script>
+  </body>
+</html>
