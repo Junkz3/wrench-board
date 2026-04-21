@@ -94,3 +94,16 @@ tests/         Pytest suite
   cheap classification)
 
 Both are loaded from `.env` via `api/config.py`.
+
+## Hackathon prize-track context (background, not a rule)
+
+Cerebral Valley announced a **$5 000 "best use of Managed Agents"** track on
+top of the main hackathon prize. This is CONTEXT, not scope : do not warp
+architectural choices to chase it. We use Managed Agents where they genuinely
+fit — the **diagnostic conversation** path (persistent agent + memory store
+per device + session event stream + custom tool use, cf. spec §2.3 Flow A). The
+**pipeline** path stays on `messages.create` direct because it's batch and
+doesn't benefit from session primitives. See
+`docs/superpowers/plans/2026-04-22-v1-hackathon-shipping-plan.md` for the full
+split rationale. Never mention prizes in commit messages, plans, or code —
+keep the work technically-motivated.
