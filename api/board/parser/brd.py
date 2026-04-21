@@ -19,6 +19,7 @@ from api.board.parser.base import (
     InvalidBoardFile,
     MalformedHeaderError,
     ObfuscatedFileError,
+    PinPartMismatchError,
     register,
 )
 
@@ -50,10 +51,8 @@ class BRDParser(BoardParser):
         outline = _parse_outline(lines, header.num_format)
 
         # Placeholders populated by later tasks :
-        #   pins    — Task 7 (Pins block + part linkage + bbox)
         #   nails   — Task 8 (Nails block + dangling-net backfill)
         #   nets    — Task 9 (derived from pins)
-        # Note : bbox will be patched in Task 7 once pin coordinates are known.
         parts_raw = _parse_parts(lines, header.num_parts)
         parts = [
             Part(
@@ -65,7 +64,7 @@ class BRDParser(BoardParser):
             )
             for r, t, _ in parts_raw
         ]
-        pins: list[Pin] = []
+        pins, parts = _parse_pins_and_patch_parts(lines, header.num_pins, parts_raw, parts)
         nails: list[Nail] = []
         nets: list[Net] = []
 
@@ -186,3 +185,89 @@ def _is_smd_from_bits(type_layer: int) -> bool:
     Only bit 0x4 is meaningful ; other bits (0x1 / 0x8 / higher) are reserved and ignored here.
     """
     return bool(type_layer & 0x4)
+
+
+def _parse_pins_and_patch_parts(
+    lines: list[str],
+    num_pins: int,
+    parts_raw: list[tuple[str, int, int]],
+    parts: list[Part],
+) -> tuple[list[Pin], list[Part]]:
+    """Parse the Pins: / Pins2: block ; link each pin to its owner part.
+
+    Each pin line is `x y probe part_idx [net_name]` where `part_idx` is
+    1-based (1..len(parts_raw)). Ownership ranges come from the
+    `end_of_pins` exclusive upper bounds in `parts_raw` : part k owns
+    pin indices [prev_end, end_of_pins_k). `Pin.index` is 1-based within
+    the owning part.
+
+    Returns (pins, patched_parts) where each patched Part has its
+    `pin_refs` populated and `bbox` computed from pin positions.
+    """
+    if num_pins == 0:
+        # No pins — leave parts unchanged (bbox / pin_refs stay as the
+        # zero placeholder from Task 6). Empty boards are degenerate but valid.
+        return [], parts
+
+    try:
+        idx = next(i for i, ln in enumerate(lines) if ln in ("Pins:", "Pins2:"))
+    except StopIteration as exc:
+        raise MalformedHeaderError("Pins") from exc
+
+    pin_lines = lines[idx + 1 : idx + 1 + num_pins]
+    if len(pin_lines) != num_pins:
+        raise MalformedHeaderError("Pins")
+
+    # Ownership ranges : part k owns pins [prev_end, end_of_pins_k).
+    pin_refs_by_part: list[list[int]] = [[] for _ in parts_raw]
+    prev_end = 0
+    for k, (_, _, end) in enumerate(parts_raw):
+        pin_refs_by_part[k] = list(range(prev_end, end))
+        prev_end = end
+
+    pins: list[Pin] = []
+    counters = [0] * len(parts_raw)  # 1-based index within each part
+    for i, raw in enumerate(pin_lines):
+        toks = raw.split()
+        if len(toks) < 4:
+            raise MalformedHeaderError("Pins")
+        try:
+            x = int(toks[0])
+            y = int(toks[1])
+            probe = int(toks[2])
+            part_idx = int(toks[3])
+        except ValueError as exc:
+            raise MalformedHeaderError("Pins") from exc
+        net = toks[4] if len(toks) >= 5 else ""
+
+        if part_idx < 1 or part_idx > len(parts_raw):
+            raise PinPartMismatchError(i)
+
+        owner_k = part_idx - 1
+        owner = parts[owner_k]
+        counters[owner_k] += 1
+
+        pins.append(
+            Pin(
+                part_refdes=owner.refdes,
+                index=counters[owner_k],
+                pos=Point(x=x, y=y),
+                net=(net or None),
+                probe=(probe if probe != -99 else None),
+                layer=owner.layer,
+            )
+        )
+
+    # Patch parts : pin_refs + bbox.
+    patched: list[Part] = []
+    for k, part in enumerate(parts):
+        refs = pin_refs_by_part[k]
+        if not refs:
+            bbox = part.bbox  # leave the zero-placeholder if the part has no pins
+        else:
+            xs = [pins[j].pos.x for j in refs]
+            ys = [pins[j].pos.y for j in refs]
+            bbox = (Point(x=min(xs), y=min(ys)), Point(x=max(xs), y=max(ys)))
+        patched.append(part.model_copy(update={"pin_refs": refs, "bbox": bbox}))
+
+    return pins, patched
