@@ -22,15 +22,39 @@ class Settings(BaseSettings):
     )
     anthropic_model_main: str = Field(
         default="claude-opus-4-7",
-        description="Main reasoning model used by the agent loop.",
+        description="Main reasoning model used by every sub-agent of the pipeline.",
     )
     anthropic_model_fast: str = Field(
         default="claude-haiku-4-5",
-        description="Fast model for validation / formatting / cheap classification.",
+        description="Reserved for lightweight classification / formatting tasks.",
     )
 
     port: int = Field(default=8000, description="HTTP server port.")
     log_level: str = Field(default="INFO", description="Log level name.")
+
+    # --- Pipeline V2 settings -------------------------------------------------
+    memory_root: str = Field(
+        default="memory",
+        description="Root directory under which per-device knowledge packs are written.",
+    )
+    pipeline_max_revise_rounds: int = Field(
+        default=1,
+        ge=0,
+        le=3,
+        description=(
+            "Maximum number of audit→revise→re-audit rounds before accepting the pack "
+            "with residual issues. Values > 2 are reserved for debug."
+        ),
+    )
+    pipeline_cache_warmup_seconds: float = Field(
+        default=1.0,
+        ge=0.0,
+        le=10.0,
+        description=(
+            "Seconds to wait between dispatching writer 1 and writers 2+3, so Anthropic "
+            "materializes the cache entry before the parallel readers arrive."
+        ),
+    )
 
 
 _settings: Settings | None = None

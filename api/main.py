@@ -16,6 +16,7 @@ from fastapi.staticfiles import StaticFiles
 from api import __version__
 from api.config import get_settings
 from api.logging_setup import configure_logging
+from api.pipeline import router as pipeline_router
 
 logger = logging.getLogger("microsolder.main")
 
@@ -28,7 +29,9 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     settings = get_settings()
     configure_logging(settings.log_level)
     logger.info("microsolder-agent v%s starting up", __version__)
-    logger.info("main model=%s fast model=%s", settings.anthropic_model_main, settings.anthropic_model_fast)
+    logger.info(
+        "main model=%s fast model=%s", settings.anthropic_model_main, settings.anthropic_model_fast
+    )
     yield
     logger.info("microsolder-agent shutting down")
 
@@ -47,6 +50,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(pipeline_router)
 
 
 @app.get("/health")
