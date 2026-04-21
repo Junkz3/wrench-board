@@ -108,3 +108,41 @@ def test_pin_part_mismatch_raises(tmp_path: Path):
     )
     with pytest.raises(PinPartMismatchError):
         BRDParser().parse_file(bad)
+
+
+def test_pin_ownership_cross_validated(tmp_path: Path):
+    """If end_of_pins boundaries disagree with part_idx, the parser must refuse."""
+    bad = tmp_path / "ownership_mismatch.brd"
+    # var_data: 4 outline points, 2 parts, 2 pins, 0 nails.
+    # Parts : R1 owns pins [0..1) (end_of_pins=1), C1 owns pins [1..2) (end_of_pins=2).
+    # But pin 0 claims part_idx=2 (C1), contradicting the R1 boundary.
+    bad.write_text(
+        "str_length: 0\n"
+        "var_data: 4 2 2 0\n"
+        "Format:\n0 0\n10 0\n10 10\n0 10\n"
+        "Parts:\nR1 5 1\nC1 6 2\n"
+        "Pins:\n"
+        "1 1 -99 2 NET\n"  # pin 0 : claims part_idx=2 (C1) but boundary places it in R1
+        "2 2 -99 2 NET\n"  # pin 1 : correctly claims C1
+    )
+    with pytest.raises(PinPartMismatchError) as excinfo:
+        BRDParser().parse_file(bad)
+    # The raised error should identify pin 0 as the offender.
+    assert excinfo.value.pin_index == 0
+
+
+def test_parses_file_with_zero_pins(tmp_path: Path):
+    """A file declaring 1 part and 0 pins must parse ; the part keeps its zero bbox."""
+    f = tmp_path / "zero_pins.brd"
+    f.write_text(
+        "str_length: 0\nvar_data: 4 1 0 0\nFormat:\n0 0\n10 0\n10 10\n0 10\nParts:\nR1 5 0\n"
+    )
+    board = BRDParser().parse_file(f)
+    assert len(board.parts) == 1
+    assert len(board.pins) == 0
+    r1 = board.part_by_refdes("R1")
+    assert r1 is not None
+    assert r1.pin_refs == []
+    # Zero-pin parts keep the zero-placeholder bbox (known limitation,
+    # addressed when Task 8+ lands proper Optional-bbox support).
+    assert r1.bbox[0].x == 0 and r1.bbox[1].x == 0

@@ -258,6 +258,16 @@ def _parse_pins_and_patch_parts(
             )
         )
 
+    # Cross-validate the two ownership sources (end_of_pins boundaries vs the
+    # part_idx on each pin line). If they disagree, the file is inconsistent —
+    # raise rather than silently producing a board where pin.part_refdes
+    # contradicts parts[k].pin_refs (anti-hallucination hard rule #5).
+    for k, refs in enumerate(pin_refs_by_part):
+        expected = parts[k].refdes
+        for i in refs:
+            if pins[i].part_refdes != expected:
+                raise PinPartMismatchError(i)
+
     # Patch parts : pin_refs + bbox.
     patched: list[Part] = []
     for k, part in enumerate(parts):
