@@ -96,6 +96,10 @@ def test_net_flags():
 def test_nail_model():
     nail = Nail(probe=1, pos=Point(x=100, y=200), layer=Layer.TOP, net="+3V3")
     assert nail.probe == 1
+    assert nail.pos.x == 100
+    assert nail.pos.y == 200
+    assert nail.layer == Layer.TOP
+    assert nail.net == "+3V3"
 
 
 def test_board_indexes_built_after_construction():
@@ -112,3 +116,22 @@ def test_board_is_json_serializable_without_private_indexes():
     # private indexes must not leak into serialization
     assert "_refdes_index" not in dumped
     assert "_net_index" not in dumped
+
+
+def test_board_model_copy_rebuilds_indexes():
+    """model_copy must not leave stale indexes, otherwise part_by_refdes lies."""
+    board = _sample_board()
+
+    new_parts = [
+        Part(
+            refdes="U99",
+            layer=Layer.TOP,
+            is_smd=True,
+            bbox=(Point(x=0, y=0), Point(x=1, y=1)),
+            pin_refs=[],
+        )
+    ]
+    copy = board.model_copy(update={"parts": new_parts})
+
+    assert copy.part_by_refdes("U99") is not None
+    assert copy.part_by_refdes("R1") is None  # old index entry must be gone

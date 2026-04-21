@@ -1,4 +1,4 @@
-"""Board data model — Pydantic v2 types (Point, Layer, Pin, Part). Immutability is layered on in a later task alongside the Board index classes."""
+"""Board data model — Pydantic v2 types for Point, Layer, Pin, Part, Net, Nail, and Board. Board carries private refdes/net indexes built in model_post_init ; see part_by_refdes() and net_by_name()."""
 
 from __future__ import annotations
 
@@ -67,6 +67,12 @@ class Board(BaseModel):
     def model_post_init(self, __context) -> None:
         object.__setattr__(self, "_refdes_index", {p.refdes: p for p in self.parts})
         object.__setattr__(self, "_net_index", {n.name: n for n in self.nets})
+
+    def model_copy(self, *, update=None, deep=False):
+        copy = super().model_copy(update=update, deep=deep)
+        object.__setattr__(copy, "_refdes_index", {p.refdes: p for p in copy.parts})
+        object.__setattr__(copy, "_net_index", {n.name: n for n in copy.nets})
+        return copy
 
     def part_by_refdes(self, refdes: str) -> Part | None:
         return self._refdes_index.get(refdes)
