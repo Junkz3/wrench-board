@@ -148,7 +148,7 @@ def test_parses_file_with_zero_pins(tmp_path: Path):
     assert r1.bbox[0].x == 0 and r1.bbox[1].x == 0
 
 
-def test_parses_nails_and_backfills_dangling_nets():
+def test_parses_nails_block():
     """The minimal fixture declares one nail on probe 1 for +3V3."""
     board = BRDParser().parse_file(FIXTURE_DIR / "minimal.brd")
     assert len(board.nails) == 1

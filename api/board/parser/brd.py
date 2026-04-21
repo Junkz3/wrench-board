@@ -310,6 +310,10 @@ def _parse_nails(lines: list[str], n: int) -> list[Nail]:
         except ValueError as exc:
             raise MalformedHeaderError("Nails") from exc
         net = toks[4]
+        # Valid `side` values are 1 (top probe) and 2 (bottom probe).
+        # Any other integer is treated as bottom — a conservative fallback
+        # that matches observed exporter behavior and avoids hard-failing
+        # on slightly-malformed files. Not raising here is intentional.
         layer = Layer.TOP if side == 1 else Layer.BOTTOM
         out.append(Nail(probe=probe, pos=Point(x=x, y=y), layer=layer, net=net))
     if len(out) != n:
@@ -323,6 +327,10 @@ def _backfill_empty_nets(pins: list[Pin], nails: list[Nail]) -> list[Pin]:
     Only pins with `pin.net is None` AND `pin.probe in nail_map` are
     rewritten. An explicitly declared net always wins — a blank net token
     on a pin line means "look up via probe", never "overwrite".
+
+    If two nails share the same probe number (malformed file), the last
+    entry in declaration order wins. This is the natural `dict` comprehension
+    behavior and callers should not rely on it.
     """
     if not nails:
         return pins
