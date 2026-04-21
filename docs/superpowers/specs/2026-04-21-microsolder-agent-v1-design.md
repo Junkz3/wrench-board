@@ -2523,3 +2523,281 @@ Le point narratif clé : **le même setup n'aurait pas donné cette réponse il 
 **Préparation J-1 démo** : les sessions 1, 2, 3 sont enregistrées avec vrais tokens API (pour avoir les rules réellement promues dans `rules.json`), puis seeded en DB. La session 4 est live, mais l'état `evidence.json` + `rules.json` est déjà dans l'état post-session-3. Aucune simulation : la rule learned qui sert la démo live est le **vrai artefact** produit par le pipeline.
 
 ---
+
+## 9. UI layout général
+
+### 9.1 Shell de l'application
+
+Grid fixe, commun à toutes les sections :
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ topbar (48px) — brand · crumbs · mode-pill · actions       │
+├──┬──────────────────────────────────────────────────────────┤
+│R │ metabar (44px) — device id · warn · filters · search    │
+│a ├──────────────────────────────────────────────────────────┤
+│i │                                                          │
+│l │ content-area (section courante, plein espace)           │
+│  │                                                          │
+│5 │                                                          │
+│2 │                                                          │
+│p │                                                          │
+│x │                                                          │
+├──┴──────────────────────────────────────────────────────────┤
+│ statusbar (28px) — agent · model · counts · zoom            │
+└─────────────────────────────────────────────────────────────┘
+```
+
+Le **panel LLM droit** (voir §9.3) se superpose par-dessus `content-area` en mode push quand ouvert.
+
+### 9.2 Rail gauche — liste canonique des sections
+
+**8 boutons** dans l'ordre :
+
+1. **Home** — liste des devices (alias : « Bibliothèque »)
+2. **PCB** — boardviewer (intégration Boardviewer spec §11)
+3. **Schematic** — viewer PDF + navigation par net
+4. **Graphe** — knowledge graph (v3 design déjà porté)
+5. **Memory Bank** — 3 onglets Timeline / Knowledge / Stats
+6. **Agent** — 4 onglets Config / Historique / Traces / Coûts
+7. **Profile** — fiche utilisateur hybride (§7.5 state + §11)
+8. **Aide** — raccourcis clavier + lien README (tout en bas du rail)
+
+Au chargement initial, `Home` est actif. L'utilisateur choisit un device → bascule vers `Graphe` (vue la plus visuelle) avec le device sélectionné en query param (`?device=<slug>`).
+
+### 9.3 Panel LLM — push on-demand (décision §Q3 brainstorming)
+
+Panel droit, largeur fixe ~420 px, slides depuis la droite en rétrécissant le `content-area` (pas d'overlay). Toggle via bouton topbar ou raccourci `⌘J`. Fermé par défaut à l'entrée d'une section. Contient :
+
+- Header : nom du modèle actif (Opus 4.7 par défaut), sélecteur (Opus 4.7 / Sonnet 4.6 / Haiku 4.5), bouton fermer
+- Stream de messages avec rendering markdown + highlight code
+- Affichage des `agent.custom_tool_use` en pastilles cliquables (qui révèlent inputs + tool_result)
+- Input bas avec upload fichier + send (Enter)
+
+### 9.4 Cible iPad landscape
+
+- Breakpoint minimum : 1024×768 px (iPad 11" portrait) — layout reste utilisable, rail se réduit à 44 px sans labels
+- Optimum : 1366×1024 px (iPad Pro 12.9" landscape) — cible principale, graphe + panel LLM côte-à-côte confortables
+- Desktop ≥ 1440 px : panel LLM peut rester ouvert par défaut sans sacrifier le content
+
+### 9.5 Organisation des fichiers
+
+```
+web/
+├── index.html                     # shell + router (vanilla JS, pas de framework)
+├── css/
+│   ├── shell.css                  # topbar, rail, metabar, statusbar (partagés)
+│   └── sections.css               # styles spécifiques par section
+├── js/
+│   ├── router.js                  # hash-router #home / #pcb / #graphe / ...
+│   ├── api.js                     # wrapper fetch sur /pipeline/*, /devices/*, ...
+│   ├── llm-panel.js               # gestion panel LLM droit
+│   └── sections/
+│       ├── home.js                # Home / Bibliothèque
+│       ├── pcb.js                 # Boardviewer (consomme Boardviewer API)
+│       ├── schematic.js           # PDF + nets
+│       ├── graphe.js              # Knowledge graph (refactor du v3 inline)
+│       ├── memory-bank.js         # 3 onglets
+│       ├── agent.js               # 4 onglets
+│       ├── profile.js             # Formulaire + stats
+│       └── aide.js                # Modal raccourcis
+└── boardviewer/                   # Agent Boardviewer (cf. §2.7)
+```
+
+Zéro build step maintenu : `<script type="module">` pour les imports, CDN pour D3/Alpine/PDF.js.
+
+---
+
+## 10. Sections UI — détail par section
+
+### 10.1 Home / Bibliothèque
+
+Grille de cartes (3–4 colonnes selon largeur), une carte par device connu. Chaque carte :
+- Photo / render stylisé du device (fond dégradé + SVG icône famille)
+- `display_name` + `vendor/model`
+- Badge `origin` (verified from schematic / inferred from public sources)
+- Stat : *N sessions · M cases résolus · dernière activité*
+- Clic sur carte → navigue vers `#graphe?device=<slug>`
+- Bouton « **+ Générer un nouveau device** » → modal avec champ `device_label` (texte libre) + optionnel upload PDF schematic → POST `/pipeline/generate`, suit le stream via `/ws/generation/{job_id}` dans un mini-panel
+
+### 10.2 PCB (Boardviewer)
+
+Consomme le composant `web/boardviewer/` d'Agent Boardviewer. microsolder-agent fournit uniquement le shell de la section :
+- En-tête : device courant, toggle face Top/Bottom, reset view
+- Canvas plein écran (Agent Boardviewer)
+- Panel latéral droit (collapsable) : liste filtrable des refdes visibles, click → `focus_component`
+
+Le panel LLM droit fonctionne par-dessus, comme ailleurs.
+
+### 10.3 Schematic
+
+Viewer PDF (PDF.js) + colonne droite avec :
+- Liste des pages + miniatures
+- Recherche par `net_canonical_name` → highlight sur la page courante
+- Onglet secondaire : liste des nets extraits (cf. `api/schematic/net_extraction.py`)
+
+Tool UI dédié : `open_schematic_page(page)`, `highlight_schematic_net(net_name)`.
+
+### 10.4 Graphe (knowledge graph)
+
+Refactor du design v3 déjà porté dans `web/index.html` inline → extraction vers `web/js/sections/graphe.js`. Data loadée via `GET /pipeline/packs/{slug}/graph` (nouvel endpoint §12). Empty state conservé si pas de device.
+
+### 10.5 Memory Bank — 3 onglets
+
+- **Timeline** : liste des sessions du device (`GET /sessions?device_id=...`), expandable en détail (events, tool calls, résumé).
+- **Knowledge** : browser des fichiers du pack (registry.json, architecture.md, rules.json, dictionary.json) avec viewer JSON/Markdown et bouton « régénérer ce fichier » (déclenche `run_single_writer_revision`).
+- **Stats** : 4 tuiles (`quality.consistency_score`, `intrinsic_effectiveness`, `cases_resolved`, `cost_total_usd`) + mini-graph de l'évolution de la qualité au fil des regénérations.
+
+### 10.6 Agent — 4 onglets
+
+- **Config** : sélecteur modèle (`ANTHROPIC_MODEL_MAIN`), system prompt preview (read-only), toggle tools disponibles.
+- **Historique** : liste des sessions diagnostic passées (séparément des generation jobs), lien vers replay.
+- **Traces** : table `subagent_calls` requêtable, durée par rôle, failures highlighted.
+- **Coûts** : cf. §11.3, graphiques et totaux.
+
+### 10.7 Profile
+
+Deux colonnes :
+- **Gauche — manuel** : formulaire éditable (`display_name`, `declared_level` radio, `declared_skills` liste avec ajout).
+- **Droite — dérivé** : tuiles de stats calculées depuis `cases` (niveau estimé, spécialisations détectées, avg resolution time).
+
+### 10.8 Aide
+
+Modal sur `⌘?` ou clic bouton Aide. Liste des raccourcis (`⌘K` search, `⌘J` toggle panel LLM, `Esc` close inspector, `1`-`8` pour naviguer au rail), lien vers README GitHub.
+
+---
+
+## 11. Profil & cost tracking
+
+### 11.1 Modèle de profil hybride
+
+```python
+class Profile(BaseModel):
+    display_name: str = "Technician"
+    declared_level: Literal["beginner", "intermediate", "advanced", "expert"] | None
+    declared_skills: list[SkillEntry]
+    derived_cache: ProfileDerivedCache
+```
+
+Le `derived_cache` est recalculé à la demande (pas à chaque `GET`) :
+- `estimated_level` : fonction de `cases_resolved`, `avg_resolution_time_min`, complexité (devices touchés dont `confidence_cap`)
+- `specializations` : agrégation par type de composant touché dans les cases résolus
+- `last_recomputed` : timestamp
+
+L'agent diagnostic lit `declared_level OR estimated_level` pour adapter son niveau de guidage (plus pédagogique pour beginner, plus direct pour expert — consigne explicite dans le system prompt §7.4 couche 1).
+
+### 11.2 Pricing table (référence)
+
+Expose dans `api/telemetry/pricing.py` :
+
+```python
+PRICING = {
+    "claude-opus-4-7":  {"input":  5.00, "output": 25.00,
+                         "cache_write_5m": 6.25, "cache_write_1h": 10.00, "cache_read": 0.50},
+    "claude-sonnet-4-6":{"input":  3.00, "output": 15.00,
+                         "cache_write_5m": 3.75, "cache_write_1h":  6.00, "cache_read": 0.30},
+    "claude-haiku-4-5": {"input":  1.00, "output":  5.00,
+                         "cache_write_5m": 1.25, "cache_write_1h":  2.00, "cache_read": 0.10},
+}
+WEB_SEARCH_USD_PER_CALL = 0.01
+```
+
+Prix en USD par million de tokens. `pricing_snapshot` JSONB de `cost_tracking` stocke cette table au moment du calcul (§3.2.9) → audit possible si Anthropic change ses tarifs.
+
+### 11.3 Usage accounting
+
+À chaque appel Anthropic, `api/telemetry/usage.py::record_usage()` INSERT une ligne dans `cost_tracking` avec :
+- Tokens bruts (`input`, `output`, `cache_creation`, `cache_read`)
+- Modèle + rôle (`diagnostic`, `registry_builder`, ...)
+- Coût calculé en USD avec `PRICING` × snapshot
+- Lien vers `session_id` + `subagent_call_id`
+
+### 11.4 Onglet Coûts UI
+
+Dans la section Agent :
+- **Hero** : total session / total projet (gros chiffres)
+- **Par modèle** : donut chart répartition Opus/Sonnet/Haiku
+- **Par phase** : bar chart vertical des phases pipeline + diagnostic
+- **Cache savings** : `(cache_read_tokens × normal_price - cache_read_tokens × cache_price)` cumulé, affiché en « Économies grâce au cache »
+- **Table brute** : dernières 50 lignes de `cost_tracking`, filtrables par `agent_role` / `model`
+
+---
+
+## 12. Plan de livraison J+0 → J+5 avec gates
+
+| Jour | Date | Objectifs | Gate fin de journée |
+|---|---|---|---|
+| **J+0** | 2026-04-21 (lun) ✅ | Scaffolding FastAPI + spec V1 brainstorming (§1–§8) | Repo lançable (`make run`, tests verts), spec rédigé |
+| **J+1** | 2026-04-22 (mar) ✅ | Pivot V2 « knowledge factory » + pipeline 4 phases + port du knowledge graph v3 | Pipeline compile + endpoints montés, UI knowledge graph empty-state visible |
+| **J+2** | 2026-04-23 (mer) | **Endpoint `/pipeline/packs/{slug}/graph`** + **Home/Bibliothèque** + **boardviewer Tier-1 integration** (avec Agent B) + **premier run réel pipeline sur Pi 4** (quand crédits API reçus) | Un device généré visible dans Home, clic charge le graphe |
+| **J+3** | 2026-04-24 (jeu) | **Diagnostic agent** (`messages.create` simple, pas Managed Agents pour hackathon) + **3 premiers tools `mb_*`** (`get_component`, `get_rules_for_symptoms`, `save_case`) + **panel LLM** fonctionnel | Conversation live : *« où est le PMIC ? »* → réponse avec refdes validé + highlight boardview |
+| **J+4** | 2026-04-25 (ven) | **Tournage Framework Laptop 13** (matin — cf. §1.3) · **iPhone X deep-research run** · **3 sessions seed** du cycle apprenant (§8.8) · **polish UI** des sections Memory Bank + Agent + Coûts | Scénario démo tournable bout en bout sans coupure |
+| **J+5** | 2026-04-26 (sam) | **Montage vidéo 3 min** (ElevenLabs VO anglaise) · **résumé 100–200 mots** · **commit README final** · **submission Cerebral Valley avant 20:00 EST** | Vidéo + repo public + résumé soumis |
+
+**Gates explicites — si raté, action d'urgence définie :**
+- Fin J+1 : V2 pipeline ne tourne pas → report API call sur fixtures statiques mock + MVP graph-only
+- Fin J+2 : Managed Agents bloque ou crédits non reçus → `LocalOrchestrator` (§6.8) + mock pack Pi 4 à la main
+- Fin J+3 : diagnostic agent inutilisable → démo « knowledge factory only », skip la partie conversation
+- Fin J+4 : démo non tournable → backup narratif « pipeline + graphe » sans boardviewer live
+
+---
+
+## 13. Risques & mitigations
+
+| Risque | Impact | Probabilité | Mitigation |
+|---|---|---|---|
+| **Managed Agents beta instable** | Pipeline échoue, impossible de générer pack | Moyenne | Interface `SubAgentOrchestrator` permet bascule `LocalOrchestrator` en ~2-3 h (cf. §6.8 + plan détaillé ci-dessous). V2 déjà livré utilise `messages.create` direct — ce risque n'affecte que la migration future. |
+| **Rate limit `web_search_20250305`** | Phase 1/3 deep research ralentit ou échoue | Moyenne | Cache Postgres `web_search_cache` TTL 7 j. Permet de re-rouler la démo sans repayer. En urgence : pré-générer les résultats web de la démo avant J+5 et les injecter. |
+| **Scope creep UI** (envie d'ajouter des sections) | Ne pas finir la démo | Élevée | Liste canonique des 8 sections §9.2 figée. Toute demande d'ajout → post-hackathon. |
+| **Contenu propriétaire** (schematic Apple dans repo) | Disqualification hackathon | Basse | Checklist `CLAUDE.md` règle #4 + review git diff avant chaque commit sur `memory/apple/*`. Dossier `memory/apple/iphone-x/sources/` reste vide (cf. §4.1). |
+| **Budget 500 $ crédit API épuisé** | Impossible de tourner la démo | Moyenne | Prompt caching 3 couches (§5.10) obligatoire. Haiku pour Phase 5 (facts) et classification symptômes §7.4. Monitoring via onglet Coûts — alarm si > 80 % budget. |
+| **Pi 4 physique non-disponible pour tournage live** | Pas de B-roll board réelle | Élevée | Plans statiques atelier + microscope USB + interface capturée en screen-record. Storyboard ne dépend pas d'une board filmée live. |
+| **Anglais parlé insuffisant pour voix off démo** | Vidéo non-soumettable | Basse | **ElevenLabs** voice generation, scripts écrits en amont (J+4 soir). |
+| **Crédits API Anthropic pas reçus avant J+2** | Pipeline non-testable en réel | Moyenne | Crédits perso en backup, fixture mock pack Pi 4 pour débloquer frontend. |
+
+### 13.1 Plan de bascule `LocalOrchestrator` détaillé
+
+Si à J+2 le bootstrap Managed Agents échoue (4xx persistants, beta header rejeté, etc.), bascule en ~2-3 h :
+
+**Étape 1** — créer `api/orchestration/local.py` :
+
+```python
+class LocalOrchestrator(SubAgentOrchestrator):
+    """Fallback implementation using messages.create directly.
+    No managed agents, no beta. Each sub-agent = one messages.create call
+    with role-specific system prompt + forced tool."""
+
+    def __init__(self, client: AsyncAnthropic, role_configs: dict[str, RoleConfig]):
+        self._client = client
+        self._roles = role_configs  # role → {model, system_prompt, tools}
+
+    async def run_registry_builder(self, *, session_id, device_id, sources, mode):
+        config = self._roles["registry_builder"]
+        response = await self._client.messages.create(
+            model=config.model,
+            max_tokens=16000,
+            system=config.system_prompt,
+            messages=self._compose_registry_user_message(sources, mode),
+            tools=config.tools,
+            tool_choice={"type": "tool", "name": "submit_registry"},
+        )
+        return self._extract_and_validate(response, Registry)
+    # ... mêmes wrappers pour les 6 autres rôles
+```
+
+**Étape 2** — bascule runtime via env var `ORCHESTRATION_MODE=local` :
+
+```python
+# api/orchestration/__init__.py
+def get_orchestrator(client: AsyncAnthropic) -> SubAgentOrchestrator:
+    mode = os.environ.get("ORCHESTRATION_MODE", "managed")
+    if mode == "local":
+        return LocalOrchestrator(client, load_role_configs())
+    return ManagedAgentOrchestrator(client, load_agent_ids())
+```
+
+**Étape 3** — mentionner dans README : *« Pipeline runs on Claude API + tool use (local orchestration) for hackathon reliability; production target is Managed Agents. »*
+
+Temps estimé : 2-3 h grâce à l'interface `SubAgentOrchestrator` déjà définie.
+
+---
