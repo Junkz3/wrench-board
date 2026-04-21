@@ -26,12 +26,16 @@ class ObfuscatedFileError(InvalidBoardFile):
 
 
 class MalformedHeaderError(InvalidBoardFile):
+    """Raised when a known block (e.g. `Parts:`, `Pins:`) is present but malformed."""
+
     def __init__(self, field: str):
         super().__init__(f"malformed header block: {field}")
         self.field = field
 
 
 class PinPartMismatchError(InvalidBoardFile):
+    """Raised when a pin references a part index that doesn't exist."""
+
     def __init__(self, pin_index: int):
         super().__init__(f"pin {pin_index} references an unknown part")
         self.pin_index = pin_index
@@ -41,6 +45,12 @@ class BoardParser(ABC):
     """Abstract parser. One subclass per file format."""
 
     extensions: tuple[str, ...] = ()
+
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+        # Only enforce on concrete subclasses — intermediate ABCs are allowed to be empty.
+        if not getattr(cls, "__abstractmethods__", None) and not cls.extensions:
+            raise TypeError(f"{cls.__name__} must declare a non-empty 'extensions' tuple")
 
     def parse_file(self, path: Path) -> Board:
         raw = path.read_bytes()
@@ -63,6 +73,8 @@ def register(parser_cls: type[BoardParser]) -> type[BoardParser]:
 
 def parser_for(path: Path) -> BoardParser:
     ext = path.suffix.lower()
+    if not ext:
+        raise UnsupportedFormatError(f"file has no extension: {path.name!r}")
     cls = _REGISTRY.get(ext)
     if cls is None:
         raise UnsupportedFormatError(f"no parser registered for extension {ext!r}")
