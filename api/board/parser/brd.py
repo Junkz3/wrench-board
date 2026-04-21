@@ -131,7 +131,19 @@ def _parse_outline(lines: list[str], n: int) -> list[Point]:
 
 
 def _parse_parts(lines: list[str], n: int) -> list[tuple[str, int, int]]:
-    """Parse the Parts: / Pins1: block. Returns [(refdes, type_layer, end_of_pins), ...]."""
+    """Parse the Parts: / Pins1: block.
+
+    Returns a list of `(refdes, type_layer, end_of_pins)` tuples.
+
+    `end_of_pins` is the 1-based exclusive upper bound of pin indices owned by
+    this part (used in Task 7 for pin-to-part linkage). Part k owns pins in
+    [prev_end, end_of_pins_k), with prev_end starting at 0.
+
+    Real-world `.brd` files from some exporters append extra whitespace-separated
+    tokens (footprint, pad-count) after the three required fields. We accept
+    any line with >= 3 tokens and silently ignore the rest, which matches
+    observed behavior of the OpenBoardView reference tooling.
+    """
     if n == 0:
         return []
     try:
@@ -160,6 +172,8 @@ def _layer_from_bits(type_layer: int) -> Layer:
     """Single-bit scheme : bit 0x2 set → bottom layer, else top.
 
     Validated against the fixture : 5 (0b0101) → top, 10 (0b1010) → bottom.
+
+    Only bit 0x2 is meaningful ; other bits (0x1 / 0x8 / higher) are reserved and ignored here.
     """
     return Layer.BOTTOM if (type_layer & 0x2) else Layer.TOP
 
@@ -168,5 +182,7 @@ def _is_smd_from_bits(type_layer: int) -> bool:
     """Bit 0x4 set → SMD, else through-hole.
 
     Validated : 5 → SMD, 10 → through-hole.
+
+    Only bit 0x4 is meaningful ; other bits (0x1 / 0x8 / higher) are reserved and ignored here.
     """
     return bool(type_layer & 0x4)

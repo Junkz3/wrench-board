@@ -54,6 +54,7 @@ def test_parses_parts_block_with_layer_bits():
     r1 = board.part_by_refdes("R1")
     c1 = board.part_by_refdes("C1")
     assert r1 is not None
+    assert c1 is not None
     assert r1.layer == Layer.TOP
     assert r1.is_smd is True
     assert c1.layer == Layer.BOTTOM
