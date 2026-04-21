@@ -1,0 +1,112 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# --- Virtual envs ---
+.venv/
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# --- Testing / coverage ---
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# --- Tooling caches ---
+.ruff_cache/
+.mypy_cache/
+.pyre/
+.pytype/
+
+# --- Jupyter ---
+.ipynb_checkpoints
+*.ipynb
+
+# --- Frontend (if a build step is ever added) ---
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+.parcel-cache/
+dist-frontend/
+
+# --- Env / secrets ---
+.env
+.env.*
+!.env.example
+*.secret
+secrets/
+credentials.json
+
+# --- Editors / IDEs ---
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.zed/
+
+# --- OS ---
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# --- Logs / runtime ---
+*.log
+logs/
+pids/
+*.pid
+*.seed
+
+# --- Project-specific: hackathon anti-contamination ---
+brain_dump_hackathon.md
+notes_perso/
+ref_repairmind/
+scratch/
+TODO.local.md
+
+# --- Superpowers brainstorming (visual companion mockups) ---
+.superpowers/
+
+# --- Project-specific: artifacts ---
+data/
+downloads/
+board_assets/*.pdf
+!board_assets/.gitkeep
