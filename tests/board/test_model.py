@@ -24,7 +24,13 @@ def test_part_bbox_from_two_points():
         pin_refs=[0, 1, 2, 3],
     )
     assert part.refdes == "U7"
+    assert part.layer == Layer.TOP
+    assert part.is_smd is True
+    assert part.bbox[0].x == 0
+    assert part.bbox[0].y == 0
     assert part.bbox[1].x == 100
+    assert part.bbox[1].y == 50
+    assert part.pin_refs == [0, 1, 2, 3]
 
 
 def test_pin_with_optional_net():
@@ -38,3 +44,14 @@ def test_pin_with_optional_net():
     )
     assert pin.net is None
     assert pin.probe is None
+
+    pin_with_net = Pin(
+        part_refdes="U7",
+        index=2,
+        pos=Point(x=30, y=40),
+        net="+3V3",
+        probe=7,
+        layer=Layer.TOP,
+    )
+    assert pin_with_net.net == "+3V3"
+    assert pin_with_net.probe == 7

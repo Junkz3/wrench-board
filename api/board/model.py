@@ -1,4 +1,4 @@
-"""Board data model — Pydantic v2 immutable types."""
+"""Board data model — Pydantic v2 types (Point, Layer, Pin, Part). Immutability is layered on in a later task alongside the Board index classes."""
 
 from __future__ import annotations
 
