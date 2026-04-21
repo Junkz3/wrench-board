@@ -146,3 +146,48 @@ def test_parses_file_with_zero_pins(tmp_path: Path):
     # Zero-pin parts keep the zero-placeholder bbox (known limitation,
     # addressed when Task 8+ lands proper Optional-bbox support).
     assert r1.bbox[0].x == 0 and r1.bbox[1].x == 0
+
+
+def test_parses_nails_and_backfills_dangling_nets():
+    """The minimal fixture declares one nail on probe 1 for +3V3."""
+    board = BRDParser().parse_file(FIXTURE_DIR / "minimal.brd")
+    assert len(board.nails) == 1
+    nail = board.nails[0]
+    assert nail.probe == 1
+    assert nail.net == "+3V3"
+    assert nail.layer == Layer.TOP
+    assert nail.pos.x == 400
+    assert nail.pos.y == 100
+
+
+def test_empty_net_is_backfilled_from_nails(tmp_path: Path):
+    """Lenovo variant : pin with empty net + matching probe should be resolved."""
+    f = tmp_path / "lenovo.brd"
+    f.write_text(
+        "str_length: 0\n"
+        "var_data: 4 1 1 1\n"
+        "Format:\n0 0\n10 0\n10 10\n0 10\n"
+        "Parts:\nR1 5 1\n"
+        "Pins:\n5 5 42 1 \n"  # empty net_name, probe=42
+        "Nails:\n42 5 5 1 +5V0\n"
+    )
+    board = BRDParser().parse_file(f)
+    assert board.pins[0].net == "+5V0"
+    assert board.nails[0].probe == 42
+    assert board.nails[0].net == "+5V0"
+
+
+def test_pin_net_not_overwritten_when_already_set(tmp_path: Path):
+    """If pin.net is already set, a matching nail must NOT overwrite it."""
+    f = tmp_path / "conflict.brd"
+    f.write_text(
+        "str_length: 0\n"
+        "var_data: 4 1 1 1\n"
+        "Format:\n0 0\n10 0\n10 10\n0 10\n"
+        "Parts:\nR1 5 1\n"
+        "Pins:\n5 5 99 1 EXPLICIT_NET\n"
+        "Nails:\n99 5 5 1 NAIL_NET\n"
+    )
+    board = BRDParser().parse_file(f)
+    # Explicit net wins over nail-based backfill.
+    assert board.pins[0].net == "EXPLICIT_NET"

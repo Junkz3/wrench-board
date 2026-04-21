@@ -50,9 +50,6 @@ class BRDParser(BoardParser):
         header = _parse_header(lines)
         outline = _parse_outline(lines, header.num_format)
 
-        # Placeholders populated by later tasks :
-        #   nails   — Task 8 (Nails block + dangling-net backfill)
-        #   nets    — Task 9 (derived from pins)
         parts_raw = _parse_parts(lines, header.num_parts)
         parts = [
             Part(
@@ -65,7 +62,11 @@ class BRDParser(BoardParser):
             for r, t, _ in parts_raw
         ]
         pins, parts = _parse_pins_and_patch_parts(lines, header.num_pins, parts_raw, parts)
-        nails: list[Nail] = []
+        nails = _parse_nails(lines, header.num_nails)
+        pins = _backfill_empty_nets(pins, nails)
+
+        # Placeholder populated by the next task :
+        #   nets    — Task 9 (derived from pins)
         nets: list[Net] = []
 
         return Board(
@@ -281,3 +282,55 @@ def _parse_pins_and_patch_parts(
         patched.append(part.model_copy(update={"pin_refs": refs, "bbox": bbox}))
 
     return pins, patched
+
+
+def _parse_nails(lines: list[str], n: int) -> list[Nail]:
+    """Parse the Nails: block.
+
+    Each line is `probe x y side net_name` where `side == 1` → `Layer.TOP`,
+    else `Layer.BOTTOM`. An absent `Nails:` block with `n == 0` is valid.
+    """
+    if n == 0:
+        return []
+    try:
+        idx = lines.index("Nails:")
+    except ValueError as exc:
+        raise MalformedHeaderError("Nails") from exc
+
+    out: list[Nail] = []
+    for raw in lines[idx + 1 : idx + 1 + n]:
+        toks = raw.split()
+        if len(toks) < 5:
+            raise MalformedHeaderError("Nails")
+        try:
+            probe = int(toks[0])
+            x = int(toks[1])
+            y = int(toks[2])
+            side = int(toks[3])
+        except ValueError as exc:
+            raise MalformedHeaderError("Nails") from exc
+        net = toks[4]
+        layer = Layer.TOP if side == 1 else Layer.BOTTOM
+        out.append(Nail(probe=probe, pos=Point(x=x, y=y), layer=layer, net=net))
+    if len(out) != n:
+        raise MalformedHeaderError("Nails")
+    return out
+
+
+def _backfill_empty_nets(pins: list[Pin], nails: list[Nail]) -> list[Pin]:
+    """Backfill pin.net from the nail probe map (Lenovo variant).
+
+    Only pins with `pin.net is None` AND `pin.probe in nail_map` are
+    rewritten. An explicitly declared net always wins — a blank net token
+    on a pin line means "look up via probe", never "overwrite".
+    """
+    if not nails:
+        return pins
+    nail_by_probe: dict[int, str] = {n.probe: n.net for n in nails}
+    patched: list[Pin] = []
+    for pin in pins:
+        if pin.net is None and pin.probe is not None and pin.probe in nail_by_probe:
+            patched.append(pin.model_copy(update={"net": nail_by_probe[pin.probe]}))
+        else:
+            patched.append(pin)
+    return patched
