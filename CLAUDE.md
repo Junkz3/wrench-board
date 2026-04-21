@@ -79,6 +79,11 @@ tests/         Pytest suite
   - Never rewrite history (`reset --soft`, `rebase -i`, `commit --amend`)
     once another agent has committed on top of yours — leave the sub-optimal
     commit and split better next time.
+  - **Never `git push` without explicit authorization from Alexis** —
+    committing locally is encouraged, pushing to `origin` is not. Always ask
+    first (« tu veux que je push ? ») even if the commits look clean. This
+    applies to `push`, `push --force`, `push --set-upstream`, and any
+    equivalent. No exceptions, even for a trivial `docs:` commit.
 - **Verify before declaring done.** Run `make test` before saying a change
   is complete. UI changes require a manual check in the browser.
 
