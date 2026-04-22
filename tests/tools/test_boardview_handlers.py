@@ -4,7 +4,7 @@ import pytest
 
 from api.board.parser.test_link import BRDParser
 from api.session.state import SessionState
-from api.tools.boardview import annotate, filter_by_type, flip_board, focus_component, highlight_component, highlight_net, reset_view
+from api.tools.boardview import annotate, draw_arrow, filter_by_type, flip_board, focus_component, highlight_component, highlight_net, measure_distance, reset_view, show_pin
 
 FIXTURE_DIR = Path(__file__).parent.parent / "board" / "fixtures"
 
@@ -137,3 +137,34 @@ def test_filter_by_type_with_empty_prefix_clears(session):
     result = filter_by_type(session, prefix="")
     assert result["ok"] is True
     assert session.filter_prefix is None
+
+
+def test_draw_arrow_between_parts(session):
+    result = draw_arrow(session, from_refdes="R1", to_refdes="C1")
+    assert result["ok"] is True
+    arrow_id = result["event"].id
+    assert arrow_id in session.arrows
+
+
+def test_measure_distance_returns_mm(session):
+    result = measure_distance(session, refdes_a="R1", refdes_b="C1")
+    assert result["ok"] is True
+    # Pin coords in fixture: R1 at (100,100)-(100,200) centered 100,150
+    # C1 at (400,100)-(400,200) centered 400,150
+    # Distance = 300 mils = 7.62 mm
+    assert 7.0 < result["event"].distance_mm < 8.0
+
+
+def test_show_pin_happy_path(session):
+    result = show_pin(session, refdes="R1", pin=1)
+    assert result["ok"] is True
+    ev = result["event"]
+    assert ev.refdes == "R1"
+    assert ev.pin == 1
+    assert ev.pos == (100, 100)
+
+
+def test_show_pin_unknown_pin(session):
+    result = show_pin(session, refdes="R1", pin=99)
+    assert result["ok"] is False
+    assert result["reason"] == "unknown-pin"

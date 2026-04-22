@@ -5,9 +5,9 @@ from __future__ import annotations
 import uuid
 from typing import Any
 
-from api.board.validator import is_valid_refdes, resolve_net, resolve_part, suggest_similar
+from api.board.validator import is_valid_refdes, resolve_net, resolve_part, resolve_pin, suggest_similar
 from api.session.state import SessionState
-from api.tools.ws_events import Annotate as AnnotateEvent, Filter, Flip, Focus, Highlight, HighlightNet, ResetView
+from api.tools.ws_events import Annotate as AnnotateEvent, DrawArrow, Filter, Flip, Focus, Highlight, HighlightNet, Measure, ResetView, ShowPin
 
 
 def _no_board(session: SessionState) -> dict[str, Any] | None:
@@ -125,3 +125,67 @@ def filter_by_type(session: SessionState, *, prefix: str) -> dict[str, Any]:
     session.filter_prefix = prefix if prefix else None
     event = Filter(prefix=session.filter_prefix)
     return {"ok": True, "summary": f"Filter: {prefix or 'none'}.", "event": event}
+
+
+def _part_center(part) -> tuple[int, int]:
+    (a, b) = part.bbox
+    return ((a.x + b.x) // 2, (a.y + b.y) // 2)
+
+
+def draw_arrow(session: SessionState, *, from_refdes: str, to_refdes: str) -> dict[str, Any]:
+    err = _no_board(session)
+    if err:
+        return err
+    a = resolve_part(session.board, from_refdes)
+    b = resolve_part(session.board, to_refdes)
+    if a is None:
+        return _unknown_refdes(session, from_refdes)
+    if b is None:
+        return _unknown_refdes(session, to_refdes)
+    arr_id = f"arr-{uuid.uuid4().hex[:8]}"
+    frm = _part_center(a)
+    to = _part_center(b)
+    session.arrows[arr_id] = {"from": list(frm), "to": list(to)}
+    event = DrawArrow(**{"from": frm, "to": to, "id": arr_id})
+    return {
+        "ok": True,
+        "summary": f"Drew arrow from {from_refdes} to {to_refdes}.",
+        "event": event,
+    }
+
+
+def measure_distance(session: SessionState, *, refdes_a: str, refdes_b: str) -> dict[str, Any]:
+    err = _no_board(session)
+    if err:
+        return err
+    pa = resolve_part(session.board, refdes_a)
+    pb = resolve_part(session.board, refdes_b)
+    if pa is None:
+        return _unknown_refdes(session, refdes_a)
+    if pb is None:
+        return _unknown_refdes(session, refdes_b)
+    (ax, ay) = _part_center(pa)
+    (bx, by) = _part_center(pb)
+    dx_mils = ax - bx
+    dy_mils = ay - by
+    # 1 mil = 0.0254 mm
+    distance_mm = round(((dx_mils**2 + dy_mils**2) ** 0.5) * 0.0254, 2)
+    event = Measure(from_refdes=refdes_a, to_refdes=refdes_b, distance_mm=distance_mm)
+    return {
+        "ok": True,
+        "summary": f"{refdes_a} ↔ {refdes_b}: {distance_mm} mm.",
+        "event": event,
+    }
+
+
+def show_pin(session: SessionState, *, refdes: str, pin: int) -> dict[str, Any]:
+    err = _no_board(session)
+    if err:
+        return err
+    if not is_valid_refdes(session.board, refdes):
+        return _unknown_refdes(session, refdes)
+    p = resolve_pin(session.board, refdes, pin)
+    if p is None:
+        return {"ok": False, "reason": "unknown-pin", "suggestions": []}
+    event = ShowPin(refdes=refdes, pin=pin, pos=(p.pos.x, p.pos.y))
+    return {"ok": True, "summary": f"{refdes}.{pin} at ({p.pos.x}, {p.pos.y}).", "event": event}
