@@ -4,7 +4,7 @@ import pytest
 
 from api.board.parser.test_link import BRDParser
 from api.session.state import SessionState
-from api.tools.boardview import focus_component, highlight_component, reset_view
+from api.tools.boardview import flip_board, focus_component, highlight_component, highlight_net, reset_view
 
 FIXTURE_DIR = Path(__file__).parent.parent / "board" / "fixtures"
 
@@ -84,3 +84,29 @@ def test_reset_view_clears_everything(session):
     assert session.net_highlight is None
     assert session.dim_unrelated is False
     assert result["event"].type == "boardview.reset_view"
+
+
+def test_highlight_net_happy_path(session):
+    result = highlight_net(session, net="+3V3")
+    assert result["ok"] is True
+    ev = result["event"]
+    assert ev.type == "boardview.highlight_net"
+    assert ev.net == "+3V3"
+    assert session.net_highlight == "+3V3"
+    assert len(ev.pin_refs) >= 1
+
+
+def test_highlight_net_unknown(session):
+    result = highlight_net(session, net="MISSING")
+    assert result["ok"] is False
+    assert result["reason"] == "unknown-net"
+
+
+def test_flip_board_toggles_side(session):
+    assert session.layer == "top"
+    result = flip_board(session)
+    assert result["ok"] is True
+    assert result["event"].new_side == "bottom"
+    assert session.layer == "bottom"
+    flip_board(session)
+    assert session.layer == "top"

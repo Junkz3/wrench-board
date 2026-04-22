@@ -4,9 +4,9 @@ from __future__ import annotations
 
 from typing import Any
 
-from api.board.validator import is_valid_refdes, resolve_part, suggest_similar
+from api.board.validator import is_valid_refdes, resolve_net, resolve_part, suggest_similar
 from api.session.state import SessionState
-from api.tools.ws_events import Focus, Highlight, ResetView
+from api.tools.ws_events import Flip, Focus, Highlight, HighlightNet, ResetView
 
 
 def _no_board(session: SessionState) -> dict[str, Any] | None:
@@ -81,3 +81,25 @@ def reset_view(session: SessionState) -> dict[str, Any]:
     session.arrows = {}
     session.filter_prefix = None
     return {"ok": True, "summary": "View reset.", "event": ResetView()}
+
+
+def highlight_net(session: SessionState, *, net: str) -> dict[str, Any]:
+    err = _no_board(session)
+    if err:
+        return err
+    n = resolve_net(session.board, net)
+    if n is None:
+        return {"ok": False, "reason": "unknown-net", "suggestions": []}
+    session.net_highlight = net
+    event = HighlightNet(net=net, pin_refs=n.pin_refs)
+    summary = f"Highlighted net {net} ({len(n.pin_refs)} pins)."
+    return {"ok": True, "summary": summary, "event": event}
+
+
+def flip_board(session: SessionState, *, preserve_cursor: bool = False) -> dict[str, Any]:
+    err = _no_board(session)
+    if err:
+        return err
+    session.layer = "bottom" if session.layer == "top" else "top"
+    event = Flip(new_side=session.layer, preserve_cursor=preserve_cursor)
+    return {"ok": True, "summary": f"Flipped to {session.layer}.", "event": event}
