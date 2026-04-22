@@ -25,6 +25,11 @@ except ImportError:
     # BRDParser not yet implemented. Safe during bootstrap.
     pass
 
+# Stub parsers — file exists, registry is wired, parse() raises
+# NotImplementedError until the format is actually supported.
+# See docs/superpowers/specs/2026-04-22-boardview-formats-roadmap.md
+from api.board.parser import asc, bdv, bv, cad, cst, f2b, fz, gr, tvw  # noqa: F401, E402
+
 
 __all__ = [
     "BoardParser",

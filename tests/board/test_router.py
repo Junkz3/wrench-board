@@ -45,6 +45,18 @@ def test_parse_rejects_empty_upload():
     assert r.json()["detail"]["detail"] == "empty-file"
 
 
+def test_parse_returns_501_for_stub_parser_extensions():
+    """A registered but not-yet-implemented format must yield 501, not 500."""
+    r = client.post(
+        "/api/board/parse",
+        files={"file": ("something.fz", b"any content", "application/octet-stream")},
+    )
+    assert r.status_code == 501
+    body = r.json()["detail"]
+    assert body["detail"] == "parser-not-implemented"
+    assert "PCB Repair Tool" in body["message"]
+
+
 def test_parse_rejects_unknown_extension():
     r = client.post("/api/board/parse", files={"file": ("weird.xyz", b"garbage", "application/octet-stream")})
     assert r.status_code == 415
