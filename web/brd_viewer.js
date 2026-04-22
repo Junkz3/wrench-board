@@ -230,20 +230,50 @@ function draw() {
     ctx.strokeRect(rx, ry, rw, rh);
   }
 
-  // ---- pins (only when zoom >= 2) ----
-  if (vp.zoom >= 2) {
-    const pins = board.pins || [];
-    const pinColor = cssVar('--text-2') || '#a9b6cc';
-    ctx.fillStyle = pinColor;
-    for (const pin of pins) {
-      if (pin.layer !== LAYER_BOTH) {
-        if (activeSide === LAYER_TOP    && pin.layer !== LAYER_TOP)    continue;
-        if (activeSide === LAYER_BOTTOM && pin.layer !== LAYER_BOTTOM) continue;
-      }
-      const s = milsToScreen(pin.pos.x, pin.pos.y, boardW);
+  // ---- pins ----
+  // Each pin is drawn at its real pad size and shape (from KiCad).
+  // Rects are axis-aligned (part rotation not applied to the pad rect yet —
+  // accepted imprecision for rotated packages at MVP scope).
+  const pins = board.pins || [];
+  const pinFill   = 'rgba(169, 182, 204, 0.9)';   // --text-2 at slight transparency
+  const pinStroke = 'rgba(230, 237, 247, 1)';     // --text, sharp edge
+  ctx.lineWidth = 1;
+  for (const pin of pins) {
+    if (pin.layer !== LAYER_BOTH) {
+      if (activeSide === LAYER_TOP    && pin.layer !== LAYER_TOP)    continue;
+      if (activeSide === LAYER_BOTTOM && pin.layer !== LAYER_BOTTOM) continue;
+    }
+    const s = milsToScreen(pin.pos.x, pin.pos.y, boardW);
+
+    // pad_size is in mils, convert to screen via zoom. Fallback to 30x30 mils
+    // (~0.75mm) for pins lacking size (BRD2 / Test_Link don't carry it).
+    const sizeMils = pin.pad_size || [30, 30];
+    const sw = sizeMils[0] * vp.zoom;
+    const sh = sizeMils[1] * vp.zoom;
+    // Clamp to at least 2 px so pins stay visible when zoomed out hard.
+    const w = Math.max(sw, 2);
+    const h = Math.max(sh, 2);
+
+    ctx.fillStyle   = pinFill;
+    ctx.strokeStyle = pinStroke;
+
+    const shape = pin.pad_shape || 'circle';
+    if (shape === 'rect' || shape === 'roundrect' || shape === 'trapezoid') {
+      ctx.fillRect(s.x - w / 2, s.y - h / 2, w, h);
+      if (vp.zoom >= 1.5) ctx.strokeRect(s.x - w / 2, s.y - h / 2, w, h);
+    } else if (shape === 'oval') {
+      // Oval = ellipse at pad center
       ctx.beginPath();
-      ctx.arc(s.x, s.y, 1.2, 0, Math.PI * 2);
+      ctx.ellipse(s.x, s.y, w / 2, h / 2, 0, 0, Math.PI * 2);
       ctx.fill();
+      if (vp.zoom >= 1.5) ctx.stroke();
+    } else {
+      // circle / custom / fallback
+      const r = Math.max(w, h) / 2;
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, r, 0, Math.PI * 2);
+      ctx.fill();
+      if (vp.zoom >= 1.5) ctx.stroke();
     }
   }
 }
