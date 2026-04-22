@@ -16,17 +16,58 @@ function resolveBoardUrl() {
 const BRD_URL  = resolveBoardUrl();
 const PARSE_URL = '/api/board/parse';
 
-const state = { board: null, partsSorted: null };
+const state = { board: null, partsSorted: null, partBodyBboxes: null };
 
-// Sort parts by descending bbox area so big packages (SoM connectors, BGA SoCs)
-// are drawn first and dense clusters of small passives on top of them remain
-// visible. Bbox is guaranteed normalized by the BRD2 parser post-fix.
-function sortPartsByAreaDesc(parts) {
+// whitequark/kicad-boardview uses module.GetBoundingBox() which includes
+// silkscreen + reference text + value text, so PART bboxes are ~5x bigger
+// than the actual component body. Recompute a tighter "body" bbox from each
+// part's pin cluster + small padding so rendered rectangles approximate the
+// physical component size. Falls back to the BRD2 bbox when no pins.
+function computeBodyBbox(part, pinsById) {
+  const pins = (part.pin_refs || []).map(i => pinsById[i]).filter(Boolean);
+  if (pins.length === 0) {
+    return part.bbox;
+  }
+  let x0 = pins[0].pos.x, x1 = pins[0].pos.x;
+  let y0 = pins[0].pos.y, y1 = pins[0].pos.y;
+  for (const p of pins) {
+    if (p.pos.x < x0) x0 = p.pos.x;
+    if (p.pos.x > x1) x1 = p.pos.x;
+    if (p.pos.y < y0) y0 = p.pos.y;
+    if (p.pos.y > y1) y1 = p.pos.y;
+  }
+  // Pad so 2-pad components (0603 R/C with pins on one axis only) stay visible
+  // in the orthogonal direction. Proportional on big footprints, floored for
+  // tiny ones. 30 mils ~= 0.75 mm — roughly matches the 0603 body half-width.
+  const padX = Math.max(30, (x1 - x0) * 0.15);
+  const padY = Math.max(30, (y1 - y0) * 0.15);
+  return [
+    { x: x0 - padX, y: y0 - padY },
+    { x: x1 + padX, y: y1 + padY },
+  ];
+}
+
+// Map part.refdes -> body bbox (pin-derived). Computed once per board.
+function computeAllBodyBboxes(board) {
+  const pinsById = board.pins || [];
+  const out = new Map();
+  for (const p of board.parts || []) {
+    out.set(p.refdes, computeBodyBbox(p, pinsById));
+  }
+  return out;
+}
+
+// Sort parts by descending body-bbox area so big packages (SoM connectors,
+// BGA SoCs) are drawn first and dense clusters of small passives on top of
+// them remain visible.
+function sortPartsByAreaDesc(parts, bodyBboxes) {
   return [...parts].sort((a, b) => {
-    const aw = a.bbox[1].x - a.bbox[0].x;
-    const ah = a.bbox[1].y - a.bbox[0].y;
-    const bw = b.bbox[1].x - b.bbox[0].x;
-    const bh = b.bbox[1].y - b.bbox[0].y;
+    const ab = bodyBboxes.get(a.refdes) || a.bbox;
+    const bb = bodyBboxes.get(b.refdes) || b.bbox;
+    const aw = ab[1].x - ab[0].x;
+    const ah = ab[1].y - ab[0].y;
+    const bw = bb[1].x - bb[0].x;
+    const bh = bb[1].y - bb[0].y;
     return (bw * bh) - (aw * ah);
   });
 }
@@ -160,7 +201,9 @@ function draw() {
       if (activeSide === LAYER_TOP    && part.layer !== LAYER_TOP)    continue;
       if (activeSide === LAYER_BOTTOM && part.layer !== LAYER_BOTTOM) continue;
     }
-    const bbox = part.bbox;
+    // Prefer the pin-derived body bbox (tighter, matches physical component)
+    // over the BRD2 bbox which is inflated by silkscreen + ref/value text.
+    const bbox = state.partBodyBboxes?.get(part.refdes) || part.bbox;
     if (!bbox || bbox.length < 2) continue;
 
     const a = milsToScreen(bbox[0].x, bbox[0].y, boardW);
@@ -405,7 +448,8 @@ export async function initBoardview(containerEl) {
   }
 
   state.board = board;
-  state.partsSorted = sortPartsByAreaDesc(board.parts || []);
+  state.partBodyBboxes = computeAllBodyBboxes(board);
+  state.partsSorted = sortPartsByAreaDesc(board.parts || [], state.partBodyBboxes);
   mountCanvas(containerEl, board);
 }
 
