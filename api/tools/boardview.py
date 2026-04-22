@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
+import uuid
 from typing import Any
 
 from api.board.validator import is_valid_refdes, resolve_net, resolve_part, suggest_similar
 from api.session.state import SessionState
-from api.tools.ws_events import Flip, Focus, Highlight, HighlightNet, ResetView
+from api.tools.ws_events import Annotate as AnnotateEvent, Filter, Flip, Focus, Highlight, HighlightNet, ResetView
 
 
 def _no_board(session: SessionState) -> dict[str, Any] | None:
@@ -103,3 +104,24 @@ def flip_board(session: SessionState, *, preserve_cursor: bool = False) -> dict[
     session.layer = "bottom" if session.layer == "top" else "top"
     event = Flip(new_side=session.layer, preserve_cursor=preserve_cursor)
     return {"ok": True, "summary": f"Flipped to {session.layer}.", "event": event}
+
+
+def annotate(session: SessionState, *, refdes: str, label: str) -> dict[str, Any]:
+    err = _no_board(session)
+    if err:
+        return err
+    if not is_valid_refdes(session.board, refdes):
+        return _unknown_refdes(session, refdes)
+    ann_id = f"ann-{uuid.uuid4().hex[:8]}"
+    session.annotations[ann_id] = {"refdes": refdes, "label": label}
+    event = AnnotateEvent(refdes=refdes, label=label, id=ann_id)
+    return {"ok": True, "summary": f"Annotated {refdes}.", "event": event}
+
+
+def filter_by_type(session: SessionState, *, prefix: str) -> dict[str, Any]:
+    err = _no_board(session)
+    if err:
+        return err
+    session.filter_prefix = prefix if prefix else None
+    event = Filter(prefix=session.filter_prefix)
+    return {"ok": True, "summary": f"Filter: {prefix or 'none'}.", "event": event}

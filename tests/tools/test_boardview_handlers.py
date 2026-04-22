@@ -4,7 +4,7 @@ import pytest
 
 from api.board.parser.test_link import BRDParser
 from api.session.state import SessionState
-from api.tools.boardview import flip_board, focus_component, highlight_component, highlight_net, reset_view
+from api.tools.boardview import annotate, filter_by_type, flip_board, focus_component, highlight_component, highlight_net, reset_view
 
 FIXTURE_DIR = Path(__file__).parent.parent / "board" / "fixtures"
 
@@ -110,3 +110,30 @@ def test_flip_board_toggles_side(session):
     assert session.layer == "bottom"
     flip_board(session)
     assert session.layer == "top"
+
+
+def test_annotate_adds_to_session(session):
+    result = annotate(session, refdes="R1", label="Pull-up 10k")
+    assert result["ok"] is True
+    ann_id = result["event"].id
+    assert ann_id in session.annotations
+    assert session.annotations[ann_id]["label"] == "Pull-up 10k"
+
+
+def test_annotate_invalid_refdes(session):
+    result = annotate(session, refdes="UFOO", label="...")
+    assert result["ok"] is False
+
+
+def test_filter_by_type_sets_session(session):
+    result = filter_by_type(session, prefix="R")
+    assert result["ok"] is True
+    assert result["event"].prefix == "R"
+    assert session.filter_prefix == "R"
+
+
+def test_filter_by_type_with_empty_prefix_clears(session):
+    session.filter_prefix = "U"
+    result = filter_by_type(session, prefix="")
+    assert result["ok"] is True
+    assert session.filter_prefix is None
