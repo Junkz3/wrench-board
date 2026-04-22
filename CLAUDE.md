@@ -249,19 +249,19 @@ in French. Code identifiers, console logs, and comments stay in English.
 - **Streaming over polling.** Agent output flows to the client through the
   WebSocket, token by token / event by event. Never batch a full response
   before sending.
-- **Commit hygiene — one commit = one logical concern.** Descriptive English
-  messages, conventional-commits style (`feat(scope):`, `fix(scope):`,
+- **Commit hygiene — one commit = one user-visible change.** Descriptive
+  English messages, conventional-commits style (`feat(scope):`, `fix(scope):`,
   `refactor(scope):`, `chore(scope):`, `docs(scope):`, `test(scope):`). Each
   commit passes tests and is independently reviewable by a hackathon judge
-  reading the history.
-  - Never bundle a cleanup (`git rm`, rename, dead-code removal) inside a
-    feature or fix commit — it goes in its own `chore(scope):` or
-    `refactor(scope):` commit even when the diff feels small.
+  reading the history. A cohesive feature lands as **one** commit — a rename
+  + CSS + HTML + JS wiring that all serves the same user-visible change stay
+  together. Split only when concerns are genuinely separable (docs vs code,
+  backend vs frontend, or when one sub-change is risky enough to want
+  isolated revert).
   - Never bundle changes from two different domains (e.g. `web/` + `api/`
     pivots) into the same commit, even if they land in the same working
-    session. Stage narrowly, commit narrowly.
-  - If you catch yourself writing a commit message with two distinct body
-    paragraphs describing unrelated things, **stop and split**.
+    session. Stage narrowly across domain boundaries, commit cohesively
+    within a domain.
   - Never rewrite history (`reset --soft`, `rebase -i`, `commit --amend`)
     once another agent has committed on top of yours — leave the sub-optimal
     commit and split better next time.
