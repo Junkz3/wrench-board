@@ -96,6 +96,54 @@ async def get_pack(device_slug: str) -> PackSummary:
     return _summarize_pack(pack_dir)
 
 
+def _read_optional_json(path: Path) -> dict | None:
+    """Return the parsed JSON at path, or None if the file is absent.
+
+    Raises HTTPException(422) if the file exists but is not valid JSON.
+    """
+    if not path.exists():
+        return None
+    try:
+        return json.loads(path.read_text())
+    except json.JSONDecodeError as exc:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Invalid JSON in {path.name}: {exc}",
+        ) from exc
+
+
+@router.get("/packs/{device_slug}/full")
+async def get_pack_full(device_slug: str) -> dict:
+    """Return every JSON artefact of a pack in a single payload.
+
+    Missing files become `null` — never fabricated (hard rule #5). Consumed by
+    the Memory Bank UI so it can render all five sections in one fetch.
+    """
+    settings = get_settings()
+    slug = _slugify(device_slug)
+    pack_dir = Path(settings.memory_root) / slug
+    if not pack_dir.exists():
+        raise HTTPException(status_code=404, detail=f"No pack for device_slug={slug!r}")
+
+    registry = _read_optional_json(pack_dir / "registry.json")
+    knowledge_graph = _read_optional_json(pack_dir / "knowledge_graph.json")
+    rules = _read_optional_json(pack_dir / "rules.json")
+    dictionary = _read_optional_json(pack_dir / "dictionary.json")
+    audit_verdict = _read_optional_json(pack_dir / "audit_verdict.json")
+
+    device_label = (registry or {}).get("device_label") or slug
+
+    return {
+        "device_slug": slug,
+        "device_label": device_label,
+        "registry": registry,
+        "knowledge_graph": knowledge_graph,
+        "rules": rules,
+        "dictionary": dictionary,
+        "audit_verdict": audit_verdict,
+    }
+
+
 @router.get("/packs/{device_slug}/graph")
 async def get_pack_graph(device_slug: str) -> dict:
     """Return the combined graph payload ({nodes, edges}) consumed by web/index.html."""
