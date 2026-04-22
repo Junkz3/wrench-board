@@ -147,10 +147,13 @@ function hitTestPart(sx, sy) {
 }
 
 // Hit-test: given screen-px coords, return the index of the pin under the cursor.
-// Considers each pin's actual pad bbox (size × zoom), with a small tolerance margin
-// so very small pads remain clickable at low zoom. Among overlapping hits (dense
-// clusters) pick the smallest pad — it's visually on top in our draw order.
-// Only pins on the active side (plus BOTH) are considered.
+// Each pin has a pad_size (in mils) AND a pad_rotation_deg (for multi-row
+// packages like QFP/BGA where the side-row pads are rotated 90° vs top/bottom).
+// To test containment correctly we transform the click point into the pad's
+// local frame (inverse of the -rotDeg applied at draw time) and test against
+// an axis-aligned rectangle there.
+// A small tolerance margin (default 4 px) keeps very small pads clickable at
+// low zoom. Among overlapping hits (dense clusters) pick the smallest pad.
 function hitTestPin(sx, sy, tolerancePx = PIN_HIT_TOLERANCE_PX) {
   if (!state.board) return null;
   const pins = state.board.pins || [];
@@ -168,7 +171,21 @@ function hitTestPin(sx, sy, tolerancePx = PIN_HIT_TOLERANCE_PX) {
     const sizeMils = pin.pad_size || [30, 30];
     const halfW = Math.max(sizeMils[0] * vp.zoom / 2, 2) + tolerancePx;
     const halfH = Math.max(sizeMils[1] * vp.zoom / 2, 2) + tolerancePx;
-    if (sx >= p.x - halfW && sx <= p.x + halfW && sy >= p.y - halfH && sy <= p.y + halfH) {
+
+    // Transform click into the pad's local frame. The draw applied
+    // ctx.rotate(-rotRad); to invert, rotate (dx, dy) by +rotRad.
+    const dx = sx - p.x;
+    const dy = sy - p.y;
+    const rotDeg = pin.pad_rotation_deg || 0;
+    let lx = dx, ly = dy;
+    if (rotDeg) {
+      const r = rotDeg * Math.PI / 180;
+      const c = Math.cos(r);
+      const s = Math.sin(r);
+      lx = dx * c - dy * s;
+      ly = dx * s + dy * c;
+    }
+    if (lx >= -halfW && lx <= halfW && ly >= -halfH && ly <= halfH) {
       const area = halfW * halfH;
       if (area < bestArea) {
         bestArea = area;
@@ -600,7 +617,6 @@ function updateInspector() {
 
   // Compute per-net pin counts for this part
   const netCounts = new Map();  // netName → count
-  const partPins = (part.pin_refs || []).map(i => state.board.pins[i]).filter(Boolean);
   let firstPinByNet = new Map();  // netName → first pin index (for click-to-trace)
   for (const pinIdx of (part.pin_refs || [])) {
     const pin = state.board.pins[pinIdx];
@@ -610,7 +626,36 @@ function updateInspector() {
     netCounts.set(net, (netCounts.get(net) || 0) + 1);
     if (!firstPinByNet.has(net)) firstPinByNet.set(net, pinIdx);
   }
-  const netsSorted = [...netCounts.entries()].sort((a, b) => b[1] - a[1]);
+  const selectedNetName_hoisted = state.selectedPinIdx != null
+    ? (state.board.pins[state.selectedPinIdx]?.net || null)
+    : null;
+  // Promote the currently-selected net to the top of the list so the user
+  // doesn't have to scroll past GND / power rails to find it.
+  const netsSorted = [...netCounts.entries()].sort((a, b) => {
+    if (a[0] === selectedNetName_hoisted) return -1;
+    if (b[0] === selectedNetName_hoisted) return 1;
+    return b[1] - a[1];
+  });
+
+  // Linked parts: other footprints that share a signal/clock/reset net with
+  // this part. Power and ground are intentionally skipped — GND touches
+  // nearly every part and would produce a useless "everything is linked"
+  // list. The remaining relations reflect real signal topology.
+  const linked = new Map();  // otherRefdes → Set<netName>
+  for (const pinIdx of (part.pin_refs || [])) {
+    const pin = state.board.pins[pinIdx];
+    if (!pin || !pin.net) continue;
+    const cat = state.netCategory?.get(pin.net) || 'signal';
+    if (cat === 'power' || cat === 'ground') continue;
+    const sibs = state.pinsByNet?.get(pin.net) || [];
+    for (const sibIdx of sibs) {
+      const sib = state.board.pins[sibIdx];
+      if (!sib || sib.part_refdes === part.refdes) continue;
+      if (!linked.has(sib.part_refdes)) linked.set(sib.part_refdes, new Set());
+      linked.get(sib.part_refdes).add(pin.net);
+    }
+  }
+  const linkedSorted = [...linked.entries()].sort((a, b) => b[1].size - a[1].size);
 
   // Compute dimensions from body bbox
   const bbox = state.partBodyBboxes?.get(part.refdes) || part.bbox;
@@ -646,18 +691,34 @@ function updateInspector() {
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6l-12 12"/></svg>
       </button>
     </header>
-    <div class="brd-ins-value">${escapeHtml(part.value || '—')}</div>
-    <div class="brd-ins-footprint">${escapeHtml(part.footprint || '—')}</div>
-    <div class="brd-ins-meta">
-      <span>${layerLabel}</span><span>·</span>
-      <span>rot ${rot}</span><span>·</span>
-      <span>${smdLabel}</span>
+    <div class="brd-ins-scroll">
+      <div class="brd-ins-body">
+        <div class="brd-ins-value">${escapeHtml(part.value || '—')}</div>
+        <div class="brd-ins-footprint">${escapeHtml(part.footprint || '—')}</div>
+        <div class="brd-ins-meta">
+          <span>${layerLabel}</span>
+          <span>rot ${rot}</span>
+          <span>${smdLabel}</span>
+        </div>
+        <div class="brd-ins-size">${wMm} × ${hMm} mm · ${pinCount} pin${pinCount > 1 ? 's' : ''}</div>
+      </div>
+      ${netsSorted.length > 0 ? `
+        <div class="brd-ins-section-label">Nets du composant (${netsSorted.length})</div>
+        <ul class="brd-ins-netlist">${netList}</ul>
+      ` : ''}
+      ${linkedSorted.length > 0 ? `
+        <div class="brd-ins-section-label">Composants liés (${linkedSorted.length})</div>
+        <ul class="brd-ins-linklist">${
+          linkedSorted.map(([ref, netSet]) => {
+            const count = netSet.size;
+            return `<li class="brd-ins-link" data-refdes="${escapeHtml(ref)}">
+              <span class="brd-ins-link-ref">${escapeHtml(ref)}</span>
+              <span class="brd-ins-link-count">${count} net${count > 1 ? 's' : ''}</span>
+            </li>`;
+          }).join('')
+        }</ul>
+      ` : ''}
     </div>
-    <div class="brd-ins-size">${wMm} × ${hMm} mm · ${pinCount} pin${pinCount > 1 ? 's' : ''}</div>
-    ${netsSorted.length > 0 ? `
-      <div class="brd-ins-section-label">Nets du composant (${netsSorted.length})</div>
-      <ul class="brd-ins-netlist">${netList}</ul>
-    ` : ''}
   `;
 
   // Wire interactions
@@ -675,6 +736,19 @@ function updateInspector() {
       if (Number.isNaN(pinIdx)) return;
       state.selectedPinIdx = pinIdx;
       // Keep the same part selected — user is exploring its nets
+      updateInspector();
+      const tb = document.querySelector('.brd-toolbar');
+      if (tb) updateNetReadout(tb);
+      requestRedraw();
+    });
+  });
+  el.querySelectorAll('.brd-ins-link').forEach(li => {
+    li.addEventListener('click', () => {
+      const refdes = li.dataset.refdes;
+      const target = state.partByRefdes?.get(refdes);
+      if (!target) return;
+      state.selectedPart = target;
+      state.selectedPinIdx = null;
       updateInspector();
       const tb = document.querySelector('.brd-toolbar');
       if (tb) updateNetReadout(tb);
