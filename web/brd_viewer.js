@@ -3,6 +3,9 @@
 const BOARD_FIXTURES = {
   'mnt-reform': '/boards/mnt-reform-motherboard.brd',
   'bilayer': '/boards/bilayer_minimal.brd',
+  // 0BSD reference fixture from whitequark/kicad-boardview — 245 parts,
+  // 165 top + 80 bottom, canonical production-grade bilayer test board.
+  'whitequark': '/boards/whitequark-example.brd',
 };
 const DEFAULT_BOARD = 'mnt-reform';
 function resolveBoardUrl() {
