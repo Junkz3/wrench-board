@@ -1,0 +1,141 @@
+/* ============ LLM PANEL — diagnostic agent chat (push-mode) ============ */
+/* Docked right-side panel. When body.llm-open, main content zones shrink
+   to leave the 420px strip. Designed to feel like the Inspector / Tweaks
+   chrome: flat surfaces, 1px semantic borders, JetBrains Mono for any
+   machine payload (tool calls, IDs), Inter for prose. */
+
+.llm-panel{
+  position:fixed;top:48px;right:0;bottom:28px;width:420px;
+  background:linear-gradient(180deg,var(--bg-2),var(--bg));
+  border-left:1px solid var(--border);
+  display:none;flex-direction:column;z-index:24;
+}
+body:not(.no-metabar) .llm-panel{top:92px}
+.llm-panel.open{display:flex}
+
+/* Push main content under the panel — every section that owns a fixed
+   right edge. `.brd-root` is `position:absolute; inset:0` inside its
+   `.stub` parent, so shrinking `.stub` here already shrinks the board
+   canvas — do NOT re-apply `right:420px` on `.brd-root` or it offsets
+   twice (you get a dead gap between the board and the panel). */
+body.llm-open .canvas,
+body.llm-open .home,
+body.llm-open .stub{right:420px}
+
+/* --- head --- */
+.llm-head{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 14px;border-bottom:1px solid var(--border);
+  background:linear-gradient(180deg,rgba(192,132,252,.06),transparent);
+}
+.llm-head .type-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:3px 8px;border-radius:4px;
+  background:rgba(192,132,252,.12);color:var(--violet);
+  border:1px solid rgba(192,132,252,.3);
+  font-family:var(--mono);font-size:10px;letter-spacing:.4px;text-transform:uppercase;
+}
+.llm-head h3{margin:0;font-size:13px;font-weight:600;color:var(--text);flex:1}
+.llm-head .llm-model{font-family:var(--mono);font-size:10.5px;color:var(--text-3);font-weight:400}
+
+/* --- tier segmented control — user picks reasoning depth --- */
+.llm-tiers{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:4px;
+  padding:8px 12px;border-bottom:1px solid var(--border-soft);
+  background:var(--bg-2);
+}
+.llm-tier{
+  padding:6px 10px;border-radius:5px;
+  background:var(--panel);border:1px solid var(--border);
+  color:var(--text-3);font-family:inherit;font-size:11px;
+  letter-spacing:.3px;text-transform:uppercase;cursor:pointer;
+  transition:all .15s;
+}
+.llm-tier:hover{color:var(--text-2);border-color:#2e4468}
+.llm-tier.on{
+  color:var(--violet);border-color:rgba(192,132,252,.4);
+  background:rgba(192,132,252,.08);
+}
+.llm-tier[data-tier="fast"].on{color:var(--emerald);border-color:rgba(52,211,153,.4);background:rgba(52,211,153,.08)}
+.llm-tier[data-tier="normal"].on{color:var(--cyan);border-color:rgba(56,189,248,.4);background:rgba(56,189,248,.08)}
+.llm-tier[data-tier="deep"].on{color:var(--violet);border-color:rgba(192,132,252,.4);background:rgba(192,132,252,.08)}
+
+/* --- status strip (connected / device slug / mode) --- */
+.llm-status{
+  padding:5px 14px;font-family:var(--mono);font-size:10.5px;
+  color:var(--text-3);border-bottom:1px solid var(--border-soft);
+  display:flex;align-items:center;gap:8px;
+}
+.llm-status .dot{width:6px;height:6px;border-radius:50%;background:var(--text-3)}
+.llm-status.connecting .dot{background:var(--amber);box-shadow:0 0 6px var(--amber);animation:pulse 2.4s ease-in-out infinite}
+.llm-status.connected  .dot{background:var(--emerald);box-shadow:0 0 6px var(--emerald)}
+.llm-status.closed     .dot{background:var(--amber)}
+.llm-status.error      .dot{background:oklch(0.70 0.22 25);box-shadow:0 0 6px oklch(0.70 0.22 25)}
+.llm-status .device-tag{
+  padding:1px 6px;border-radius:3px;background:var(--panel);border:1px solid var(--border);
+  color:var(--text-2);font-size:10px;letter-spacing:.3px;text-transform:uppercase;
+}
+
+/* --- log --- */
+.llm-log{
+  flex:1;overflow-y:auto;padding:12px 14px;
+  display:flex;flex-direction:column;gap:9px;
+  font-size:12.5px;line-height:1.55;
+}
+.llm-log::-webkit-scrollbar{width:6px}
+.llm-log::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+.llm-log::-webkit-scrollbar-track{background:transparent}
+
+.llm-log .msg{padding:8px 10px;border-radius:6px;overflow-wrap:anywhere}
+.llm-log .msg .role{
+  display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.5px;
+  text-transform:uppercase;color:var(--text-3);margin-bottom:3px;
+}
+.llm-log .msg.user{background:rgba(56,189,248,.08);border-left:2px solid var(--cyan);color:var(--text)}
+.llm-log .msg.user .role{color:var(--cyan)}
+.llm-log .msg.assistant{background:var(--panel);border-left:2px solid var(--border);color:var(--text)}
+.llm-log .msg.assistant .role{color:var(--text-2)}
+
+.llm-log .tool{
+  font-family:var(--mono);font-size:10.5px;
+  padding:4px 10px;color:var(--text-3);
+  display:flex;align-items:center;gap:8px;
+}
+.llm-log .tool .arrow{color:var(--violet)}
+.llm-log .tool .name{color:var(--violet);font-weight:500}
+.llm-log .tool .args{color:var(--text-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px}
+
+.llm-log .sys{
+  font-family:var(--mono);font-size:10.5px;color:var(--text-3);
+  padding:3px 10px;
+}
+.llm-log .sys.err{color:oklch(0.72 0.20 25)}
+
+/* --- input --- */
+.llm-input{
+  display:flex;gap:6px;padding:10px 12px;
+  border-top:1px solid var(--border);
+  background:var(--bg-2);
+}
+.llm-input input{
+  flex:1;background:var(--panel);border:1px solid var(--border);color:var(--text);
+  border-radius:5px;padding:8px 10px;font-family:inherit;font-size:12.5px;outline:none;
+  transition:border-color .15s;
+}
+.llm-input input:focus{border-color:var(--cyan)}
+.llm-input input::placeholder{color:var(--text-3)}
+.llm-input button{
+  background:rgba(56,189,248,.12);color:var(--cyan);
+  border:1px solid rgba(56,189,248,.3);border-radius:5px;
+  padding:0 14px;cursor:pointer;font-family:inherit;font-size:11px;
+  letter-spacing:.4px;text-transform:uppercase;transition:all .15s;
+  display:inline-flex;align-items:center;gap:6px;
+}
+.llm-input button:hover{background:rgba(56,189,248,.18);border-color:rgba(56,189,248,.5)}
+.llm-input button:disabled{opacity:.45;cursor:not-allowed}
+
+/* topbar toggle — matches the existing .top-btn visually */
+.top-btn.llm-toggle.on{
+  color:var(--violet);border-color:rgba(192,132,252,.35);
+  background:rgba(192,132,252,.08);
+}
