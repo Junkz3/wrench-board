@@ -137,6 +137,103 @@ forced-tool `input_schema`. Never duplicate a shape — import from there.
   / `resolve_net` / `resolve_pin` first. `suggest_similar` gives Levenshtein
   neighbours for the "did you mean" recovery path.
 
+## Frontend design language (`web/index.html`)
+
+The web shell is a **pro-tool diagnostics workbench** — Figma / KiCad / Zed.
+Dense, dark, purposeful. Match this aesthetic when editing `web/`; don't drift
+toward a generic SaaS-card, Bootstrap, or "rounded-cartoon + emoji" look.
+
+### Design tokens (CSS variables in `:root`)
+
+- **Surfaces**, darkest → highest: `--bg-deep`, `--bg`, `--bg-2`, `--panel`, `--panel-2`
+- **Text**, primary → tertiary: `--text`, `--text-2`, `--text-3`
+- **Borders**: `--border` (hard line), `--border-soft` (inner divider)
+- **Semantic accents** (OKLCH — **locked to meaning, never repurpose**):
+  - `--amber`   → **symptom** — what the client observes
+  - `--cyan`    → **component** — refdes, chip, connector
+  - `--emerald` → **net / rail** — power and signal
+  - `--violet`  → **action** — reflow, replace, clean
+
+  A new domain concept must map to one of these four families or introduce its
+  own token — never reuse a semantic color for an unrelated affordance, and
+  never hard-code a hex color when a token exists.
+
+### Layout shell (all `position: fixed`)
+
+Pro-tool chrome — do not break this skeleton:
+
+| Band       | Size    | Role                                                   |
+|------------|---------|--------------------------------------------------------|
+| Top bar    | 48 px   | brand · breadcrumbs · mode pill · global actions       |
+| Left rail  | 52 px   | canonical section switcher (8 entries, hash-routed)    |
+| Metabar    | 44 px   | device context · filter chips · search                 |
+| Workspace  | flex    | the view for the current section                       |
+| Status bar | 28 px   | agent state · counts · zoom readout (mono)             |
+
+Sections are URL-hash routed via `SECTIONS` and `navigate()`: `#home`, `#pcb`,
+`#schematic`, `#graphe`, `#memory-bank`, `#agent`, `#profile`, `#aide`. Adding a
+section = append to `SECTIONS`, add a rail button with `data-section="…"`, and
+ship either a real DOM block or a `<section class="stub">` placeholder.
+
+### Typography
+
+- **Inter** — all UI prose, labels, buttons, headings
+- **JetBrains Mono** — refdes, IDs, slugs, keyboard hints, column chips,
+  metadata, status bar, confidence values, any fixed-format machine payload
+- Body 13 px · chrome 11–12 px · mono chips 10–10.5 px (`text-transform: uppercase`
+  + `letter-spacing: .4px` for the "workshop label" feel)
+
+### Interaction vocabulary
+
+- All hover/state transitions `.15s`; semantic motion gets weight
+  (inspector slide-in `.28s cubic-bezier(.2,.8,.2,1)`, mode-pill pulse 2.4 s
+  infinite).
+- Hover = elevate: brighten text, deepen border, swap `--panel` → `--panel-2`.
+- **Graph focus pattern**: the `.has-focus` modifier on the graph root fades
+  non-neighbor nodes to `opacity: .15` and active links to `.06` — reuse this
+  for any graph-like view, don't invent a new dimming scheme.
+- Floating overlays (legend, zoom controls, inspector, tweaks, tooltip, empty
+  state) are **glass**: `rgba(panel, .85–.96)` + `backdrop-filter: blur(8–14px)`
+  + 1 px `--border`. No opaque floating panels.
+
+### Graph visual grammar (do not dilute)
+
+- **Shape = type**: circle = symptom · rounded square = component · hexagon =
+  net · diamond = action. A new node type needs a new shape.
+- **Stroke style = relation**, with matching SVG markers in `<defs>`:
+  `causes` dashed amber · `powers` solid emerald · `connected_to` thin grey ·
+  `resolves` dotted violet. Reuse `arrow-causes` / `arrow-powers` /
+  `arrow-connected` / `arrow-resolves` — never invent an edge color or style
+  locally.
+- **Reading flow is strictly left-to-right**: Actions → Components → Nets →
+  Symptoms. The `.col-band` strip enforces it visually; the force simulation
+  uses `forceX(d._tx).strength(0.8)` to keep columns stable. Don't weaken it or
+  reorder the narrative.
+
+### Icons
+
+All UI icons are **inline SVG**, 16×16 (or 12×12 via `.icon-sm`), with
+`stroke="currentColor"`, `stroke-width="1.6"`, `stroke-linecap="round"`,
+`stroke-linejoin="round"`, `fill="none"`. No emoji, no icon font, no external
+icon library.
+
+### Copy
+
+UI ships in **French** (« Bibliothèque », « Graphe de connaissances »,
+« Démarrer diagnostic »). Keep new UI strings, button labels and helper text
+in French. Code identifiers, console logs, and comments stay in English.
+
+### Don'ts
+
+- No Tailwind, utility-class framework, or component library (Radix, shadcn…).
+  Vanilla HTML/CSS/JS — see Stack.
+- No `linear-gradient` beyond the two already wired (topbar, inspector head) —
+  flat surfaces + single accent borders carry the mood.
+- No scrollbars on `<body>` — the shell is `overflow: hidden` and each zone
+  scrolls internally (thin 6 px `::-webkit-scrollbar` when needed).
+- Never hard-code the semantic four colors when the CSS variable exists; never
+  repurpose them for an unrelated UI state (loading, "info", etc.).
+
 ## Development principles
 
 - **Clean separation.** Top-level boundaries are `api/`, `web/`, `tests/`.
