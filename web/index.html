@@ -454,6 +454,29 @@
   .brd-inspector ::-webkit-scrollbar-track{background:transparent}
   .brd-inspector ::-webkit-scrollbar-thumb{background:rgba(169,182,204,.18);border-radius:3px}
   .brd-inspector ::-webkit-scrollbar-thumb:hover{background:rgba(169,182,204,.35)}
+
+  /* Boardview colour-config rows — only visible when #pcb is the active section */
+  .tweak-row.pcb-only{display:none}
+  body[data-section="pcb"] .tweak-row.pcb-only{display:flex;flex-direction:column;gap:8px}
+  .brd-color-grid{display:flex;flex-direction:column;gap:4px}
+  .brd-color-row{display:flex;align-items:center;gap:10px;padding:4px 6px;border-radius:4px;font-family:var(--mono);font-size:11px;color:var(--text-2)}
+  .brd-color-row:hover{background:var(--panel-2)}
+  .brd-color-row > span:first-child{flex:0 0 auto}
+  .brd-color-row > span:nth-child(2){flex:1;color:var(--text)}
+  .brd-color-dot{width:8px;height:8px;border-radius:50%;background:var(--text-3);box-shadow:0 0 6px currentColor}
+  .brd-color-dot[data-cat="power"]{background:var(--amber);color:var(--amber)}
+  .brd-color-dot[data-cat="ground"]{background:var(--text-3);color:var(--text-3);box-shadow:none}
+  .brd-color-dot[data-cat="signal"]{background:var(--emerald);color:var(--emerald)}
+  .brd-color-dot[data-cat="clock"]{background:rgba(214,165,255,1);color:rgba(214,165,255,1)}
+  .brd-color-dot[data-cat="reset"]{background:rgba(255,160,150,1);color:rgba(255,160,150,1)}
+  .brd-color-dot[data-cat="no-net"]{background:transparent;box-shadow:inset 0 0 0 1.5px rgba(230,237,247,.6)}
+  .brd-color-row input[type="color"]{flex:0 0 auto;width:30px;height:22px;border:1px solid var(--border);border-radius:4px;background:transparent;cursor:pointer;padding:0}
+  .brd-color-row input[type="color"]::-webkit-color-swatch-wrapper{padding:1px}
+  .brd-color-row input[type="color"]::-webkit-color-swatch{border:0;border-radius:3px}
+  /* Reset button — full-width, subtle but clearly clickable */
+  .brd-color-reset{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:6px 10px;margin-top:4px;background:var(--bg-deep);color:var(--text-2);border:1px solid var(--border);border-radius:4px;font-family:var(--mono);font-size:10.5px;letter-spacing:.3px;cursor:pointer;transition:background .12s,color .12s,border-color .12s}
+  .brd-color-reset:hover{background:var(--panel-2);color:var(--text);border-color:#2e4468}
+  .brd-color-reset:active{transform:translateY(1px)}
 </style>
 </head>
 <body>
@@ -748,6 +771,21 @@
       <label>Vitesse des particules <span id="tParticleVal" style="font-family:var(--mono);color:var(--text-3)">1×</span></label>
       <input type="range" id="tParticle" min="0" max="3" step="0.1" value="1" />
     </div>
+    <div class="tweak-row pcb-only">
+      <label>Couleurs boardview</label>
+      <div class="brd-color-grid">
+        <div class="brd-color-row"><span class="brd-color-dot" data-cat="signal"></span><span>Signal</span><input type="color" id="brdCol-signal" data-cat="signal"></div>
+        <div class="brd-color-row"><span class="brd-color-dot" data-cat="power"></span><span>Power</span><input type="color" id="brdCol-power" data-cat="power"></div>
+        <div class="brd-color-row"><span class="brd-color-dot" data-cat="ground"></span><span>Ground</span><input type="color" id="brdCol-ground" data-cat="ground"></div>
+        <div class="brd-color-row"><span class="brd-color-dot" data-cat="clock"></span><span>Clock</span><input type="color" id="brdCol-clock" data-cat="clock"></div>
+        <div class="brd-color-row"><span class="brd-color-dot" data-cat="reset"></span><span>Reset</span><input type="color" id="brdCol-reset" data-cat="reset"></div>
+        <div class="brd-color-row"><span class="brd-color-dot" data-cat="no-net"></span><span>NC</span><input type="color" id="brdCol-no-net" data-cat="no-net"></div>
+      </div>
+      <button id="brdColReset" class="brd-color-reset">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+        Réinitialiser les couleurs
+      </button>
+    </div>
   </div>
 </div>
 
@@ -931,8 +969,8 @@ function updateChrome(section, deviceSlug, pack) {
 
   // Metabar — Graphe-only. body.no-metabar pulls .canvas/.home/.stub up.
   document.body.classList.toggle("no-metabar", section !== "graphe");
-  // Section-specific attribute so scoped styles (e.g. section-only Tweaks
-  // rows in the Réglages panel) can match via body[data-section="…"].
+  // Section-specific class so scoped styles (boardview colour config rows in
+  // the Tweaks panel, etc.) can show / hide per active section.
   document.body.dataset.section = section;
   if (section !== "graphe") return;
 
@@ -1654,11 +1692,14 @@ window.addEventListener("resize", () => {
 })();
 
 /* Wire section-agnostic top-bar controls at the top level so they stay
-   reachable whether or not initGraphWithData() runs. The Tweaks panel
-   open/close handlers used to live inside that function and were therefore
-   never bound on #home / #pcb / etc. Script sits at end of <body>, run
-   immediately via IIFE (no DOMContentLoaded dependency). */
+   reachable whether or not the graph init (and its enclosing function,
+   which historically owned these handlers) runs. Covers the Tweaks panel
+   open/close buttons AND the boardview colour pickers inside that panel.
+   Script lives at the end of <body>, so run immediately rather than
+   waiting for DOMContentLoaded (which may already have fired). */
 (function wireTopLevelControls() {
+  // ---- Tweaks panel open/close (previously wired inside initGraphWithData
+  // and therefore never bound on #home / #pcb / etc.) ----
   const tweaksPanelEl  = document.getElementById("tweaksPanel");
   const tweaksToggleEl = document.getElementById("tweaksToggle");
   const tweaksCloseEl  = document.getElementById("tweaksClose");
@@ -1667,6 +1708,41 @@ window.addEventListener("resize", () => {
   }
   if (tweaksPanelEl && tweaksCloseEl) {
     tweaksCloseEl.addEventListener("click", () => tweaksPanelEl.classList.remove("show"));
+  }
+
+  // ---- Boardview colour pickers ----
+  // The `input` listeners can be attached immediately — the <input type="color">
+  // nodes are already in the DOM. But syncing their initial values depends on
+  // `window.getBoardviewColors` which is defined by brd_viewer.js (an ES module
+  // with implicit `defer`), so we run the initial sync after DOMContentLoaded
+  // when deferred modules are guaranteed to have executed.
+  const syncInputs = () => {
+    const current = (window.getBoardviewColors && window.getBoardviewColors()) || {};
+    document.querySelectorAll('input[type="color"][data-cat]').forEach(inp => {
+      const cat = inp.dataset.cat;
+      if (current[cat]) inp.value = current[cat];
+    });
+  };
+  document.querySelectorAll('input[type="color"][data-cat]').forEach(inp => {
+    inp.addEventListener('input', (e) => {
+      window.setBoardviewNetColor?.(inp.dataset.cat, e.target.value);
+    });
+  });
+  document.getElementById("brdColReset")?.addEventListener("click", () => {
+    window.resetBoardviewColors?.();
+    syncInputs();
+  });
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", syncInputs);
+  } else {
+    // DOM is already ready — but the deferred module may not have executed yet.
+    // Poll briefly until window.getBoardviewColors is defined (typically 1-2 frames).
+    let tries = 0;
+    const tick = () => {
+      if (window.getBoardviewColors) { syncInputs(); return; }
+      if (++tries < 40) requestAnimationFrame(tick);
+    };
+    tick();
   }
 })();
 </script>

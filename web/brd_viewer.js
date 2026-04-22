@@ -27,10 +27,114 @@ const state = {
   selectedPinIdx: null,   // currently highlighted pin (index into board.pins)
   selectedPart: null,     // currently highlighted part (object or null)
   hoveredPinIdx: null,    // pin under the cursor (for click-affordance outline)
+  netColorHex: null,      // { signal, power, ground, clock, reset, 'no-net' } → "#rrggbb"
+  pinPalette: null,       // rebuilt rgba palette derived from netColorHex
 };
 
 const RATNEST_MAX_PINS = 50;  // skip drawing fly-lines for huge nets (GND has ~500)
 const PIN_HIT_TOLERANCE_PX = 4;  // extra margin around the pad rect for easier clicks at low zoom
+
+// ---------- Net colour configuration ----------
+// Default hex per category; override-able at runtime via window.setBoardviewNetColor,
+// persisted in localStorage so the technician's palette survives reloads.
+const DEFAULT_NET_HEX = {
+  signal:   '#a9b6cc',
+  power:    '#f59e0b',
+  ground:   '#6e7d96',
+  clock:    '#c084fc',
+  reset:    '#f58278',
+  'no-net': '#e6edf7',
+};
+const NET_COLOR_STORAGE_KEY = 'msa.pcb.netColors';
+
+function hexToRgba(hex, alpha) {
+  const h = (hex || '').replace('#', '');
+  const full = h.length === 3
+    ? h.split('').map(c => c + c).join('')
+    : h.padEnd(6, '0').slice(0, 6);
+  const r = parseInt(full.slice(0, 2), 16) || 0;
+  const g = parseInt(full.slice(2, 4), 16) || 0;
+  const b = parseInt(full.slice(4, 6), 16) || 0;
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
+function loadNetColors() {
+  try {
+    const raw = localStorage.getItem(NET_COLOR_STORAGE_KEY);
+    if (!raw) return { ...DEFAULT_NET_HEX };
+    const parsed = JSON.parse(raw);
+    return { ...DEFAULT_NET_HEX, ...parsed };
+  } catch { return { ...DEFAULT_NET_HEX }; }
+}
+
+function saveNetColors(hexMap) {
+  try { localStorage.setItem(NET_COLOR_STORAGE_KEY, JSON.stringify(hexMap)); } catch {}
+}
+
+// Rebuild the full pin palette (fill/stroke rgba tuples, trace colours, fly-line
+// colour) from the current hex configuration. Called on init and on every colour
+// change — cheap (six categories × a handful of rgba strings).
+function rebuildPinPalette() {
+  const c = state.netColorHex || DEFAULT_NET_HEX;
+  state.pinPalette = {
+    PIN_COLORS: {
+      signal:   { normal: [hexToRgba(c.signal, 0.90), hexToRgba(c.signal, 1.00)],
+                  dim:    [hexToRgba(c.signal, 0.22), hexToRgba(c.signal, 0.35)] },
+      power:    { normal: [hexToRgba(c.power,  0.90), hexToRgba(c.power,  1.00)],
+                  dim:    [hexToRgba(c.power,  0.28), hexToRgba(c.power,  0.45)] },
+      ground:   { normal: [hexToRgba(c.ground, 0.55), hexToRgba(c.ground, 0.70)],
+                  dim:    [hexToRgba(c.ground, 0.20), hexToRgba(c.ground, 0.30)] },
+      clock:    { normal: [hexToRgba(c.clock,  0.90), hexToRgba(c.clock,  1.00)],
+                  dim:    [hexToRgba(c.clock,  0.25), hexToRgba(c.clock,  0.40)] },
+      reset:    { normal: [hexToRgba(c.reset,  0.95), hexToRgba(c.reset,  1.00)],
+                  dim:    [hexToRgba(c.reset,  0.25), hexToRgba(c.reset,  0.40)] },
+      // no-net: fill transparent so the pin reads as hollow; stroke takes colour
+      'no-net': { normal: ['rgba(0,0,0,0)',  hexToRgba(c['no-net'], 0.65)],
+                  dim:    ['rgba(0,0,0,0)',  hexToRgba(c['no-net'], 0.28)] },
+    },
+    PIN_NET_SEL: {
+      signal:   [hexToRgba(c.signal, 0.95), hexToRgba(c.signal, 1.00)],
+      power:    [hexToRgba(c.power,  1.00), hexToRgba(c.power,  1.00)],
+      ground:   [hexToRgba(c.ground, 0.95), hexToRgba(c.ground, 1.00)],
+      clock:    [hexToRgba(c.clock,  1.00), hexToRgba(c.clock,  1.00)],
+      reset:    [hexToRgba(c.reset,  1.00), hexToRgba(c.reset,  1.00)],
+      'no-net': [hexToRgba(c['no-net'], 0.95), hexToRgba(c['no-net'], 1.00)],
+    },
+    FLY_LINE_COLOR: {
+      signal:   hexToRgba(c.signal, 0.55),
+      power:    hexToRgba(c.power,  0.65),
+      ground:   hexToRgba(c.ground, 0.50),
+      clock:    hexToRgba(c.clock,  0.65),
+      reset:    hexToRgba(c.reset,  0.65),
+      'no-net': hexToRgba(c['no-net'], 0.40),
+    },
+  };
+}
+
+// Initialise colour state on module load so the palette is ready before first draw.
+state.netColorHex = loadNetColors();
+rebuildPinPalette();
+
+// ---------- Public API for the Tweaks panel ----------
+window.setBoardviewNetColor = function setBoardviewNetColor(category, hex) {
+  if (!(category in DEFAULT_NET_HEX)) return;
+  state.netColorHex[category] = hex;
+  saveNetColors(state.netColorHex);
+  rebuildPinPalette();
+  requestRedraw();
+};
+window.resetBoardviewColors = function resetBoardviewColors() {
+  state.netColorHex = { ...DEFAULT_NET_HEX };
+  saveNetColors(state.netColorHex);
+  rebuildPinPalette();
+  requestRedraw();
+};
+window.getBoardviewColors = function getBoardviewColors() {
+  return { ...state.netColorHex };
+};
+window.getBoardviewColorDefaults = function getBoardviewColorDefaults() {
+  return { ...DEFAULT_NET_HEX };
+};
 
 // whitequark/kicad-boardview (for BRD2 / Test_Link) uses module.GetBoundingBox()
 // which includes silkscreen + reference text + value text, so PART bboxes from
@@ -381,41 +485,12 @@ function draw() {
   //   category: 'signal' | 'power' | 'ground'
   // Keeping category colours in the dim state lets the tech still see which of
   // the non-traced pins are power / ground / signal during net exploration.
-  const PIN_COLORS = {
-    signal:   { normal: ['rgba(169,182,204,0.90)', 'rgba(230,237,247,1)'],
-                dim:    ['rgba(169,182,204,0.22)', 'rgba(169,182,204,0.35)'] },
-    power:    { normal: ['rgba(245,158,11,0.90)',  'rgba(252,180,60,1)'],
-                dim:    ['rgba(245,158,11,0.28)',  'rgba(252,180,60,0.45)'] },
-    ground:   { normal: ['rgba(110,125,150,0.55)', 'rgba(140,155,180,0.7)'],
-                dim:    ['rgba(110,125,150,0.20)', 'rgba(140,155,180,0.30)'] },
-    clock:    { normal: ['rgba(192,132,252,0.90)', 'rgba(214,165,255,1)'],
-                dim:    ['rgba(192,132,252,0.25)', 'rgba(214,165,255,0.40)'] },
-    reset:    { normal: ['rgba(245,130,120,0.95)', 'rgba(255,170,160,1)'],
-                dim:    ['rgba(245,130,120,0.25)', 'rgba(255,170,160,0.40)'] },
-    // Outline-only hollow pin — clearly "nothing inside" without competing
-    // with the filled-gray ground category. Transparent fill, white-ish stroke.
-    'no-net': { normal: ['rgba(0,0,0,0)', 'rgba(230,237,247,0.65)'],
-                dim:    ['rgba(0,0,0,0)', 'rgba(169,182,204,0.28)'] },
-  };
-  // Net-selection colours keyed by category of the traced net. Power nets
-  // trace in amber (reinforces "this is a rail"), ground in silver-white
-  // (distinct from the dim GND default), signals stay emerald.
-  const PIN_NET_SEL = {
-    signal:   ['rgba(52,211,153,0.95)',  'rgba(160,240,200,1)'],
-    power:    ['rgba(255,200,60,1)',     'rgba(255,232,160,1)'],
-    ground:   ['rgba(220,226,237,0.95)', 'rgba(255,255,255,1)'],
-    clock:    ['rgba(214,165,255,1)',    'rgba(235,210,255,1)'],
-    reset:    ['rgba(255,160,150,1)',    'rgba(255,205,200,1)'],
-    'no-net': ['rgba(255,110,110,0.95)', 'rgba(255,170,170,1)'],
-  };
-  const FLY_LINE_COLOR = {
-    signal:   'rgba(52,211,153,0.55)',
-    power:    'rgba(252,180,60,0.65)',
-    ground:   'rgba(210,220,235,0.50)',
-    clock:    'rgba(214,165,255,0.65)',
-    reset:    'rgba(255,170,160,0.65)',
-    'no-net': 'rgba(255,110,110,0.40)',
-  };
+  // Colour palette comes from state.pinPalette (rebuilt from user config +
+  // localStorage — see rebuildPinPalette above). Users can tweak via the
+  // Tweaks panel without touching code.
+  const PIN_COLORS    = state.pinPalette.PIN_COLORS;
+  const PIN_NET_SEL   = state.pinPalette.PIN_NET_SEL;
+  const FLY_LINE_COLOR = state.pinPalette.FLY_LINE_COLOR;
 
   // Determine the selected net (if any) from state.selectedPinIdx
   const selectedPin = state.selectedPinIdx != null ? pins[state.selectedPinIdx] : null;
