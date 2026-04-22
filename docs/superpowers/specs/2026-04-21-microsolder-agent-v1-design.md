@@ -1,5 +1,18 @@
 # microsolder-agent — Design Spec v1
 
+> **⚠️ ARCHIVE — brainstorming historique (2026-04-21). Ne pas implémenter depuis ce doc.**
+>
+> Le produit a pivoté depuis cette spec. Pour la logique actuelle, voir :
+> - **Architecture backend** : `2026-04-22-backend-v2-knowledge-factory.md`
+> - **Cible démo** : MNT Reform motherboard (cf. `CLAUDE.md` — plus de triptyque Pi 4 / Framework / iPhone)
+> - **Code source** : `api/pipeline/`, `api/board/parser/`, `api/tools/`
+>
+> **Encore valide dans ce doc** : §4 (layout disque des knowledge packs), §10.5 (UI Memory Bank — 3 onglets Timeline / Knowledge / Stats), §10.6 (UI Agent — 4 onglets Config / Historique / Traces / Coûts), §10.7 (Profile), §10.8 (Aide).
+>
+> **Périmé dans ce doc** : §1.3 (triptyque de devices), §3 (schema Postgres — on est disque-only), toute mention de `api/memory_bank/` (renommé `api/pipeline/`), toute mention de Raspberry Pi 4, les 7 tools `mb_*` (devenus 12 tool handlers boardview dans `api/tools/`), "Document-Centric" (remplacé par "Knowledge-Centric" via web_search).
+
+---
+
 > Agent-native board-level diagnostics workbench piloté par Claude Opus 4.7.
 
 | Champ | Valeur |

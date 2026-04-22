@@ -1,5 +1,17 @@
 # Boardview — design spec
 
+> **⚠️ ARCHIVE — brainstorming historique (2026-04-21). Ne pas implémenter depuis ce doc.**
+>
+> Le Boardview a été livré et a divergé de ce plan. Pour la réalité du code :
+> - **Parser principal** : `.kicad_pcb` direct via `pcbnew` (cf. `api/board/parser/kicad.py`) — on est parti sur KiCad au lieu de `.brd2` comme prévu ici
+> - **Fixtures** : `web/boards/mnt-reform-motherboard.kicad_pcb` (seule cible démo, plus de Pi 4 ni Framework ni iPhone)
+> - **Frontend** : `web/brd_viewer.js` (ES module, canvas renderer, pan/zoom/flip/net-tracing/inspector/Tweaks)
+> - **Tools agent** : `api/tools/boardview.py` — 12 handlers (`highlight_component`, `focus_component`, `highlight_net`, `flip_board`, `annotate`, `filter_by_type`, `draw_arrow`, `measure_distance`, `show_pin`, `dim_unrelated`, `layer_visibility`, `reset_view`), pas 14 comme prévu ici
+>
+> Ce doc reste utile comme trace du raisonnement initial (choix du format, refus de l'obfuscation OBV, règle anti-hallucination côté renderer), mais les listes de fichiers, de tools et le triptyque de devices sont périmés.
+
+---
+
 **Date :** 2026-04-21
 **Scope :** panneau Boardview du workbench `microsolder-agent` (parser, rendu, tool surface agent, intégration session). Hors scope : agent loop Claude, panneau Schematic, pipeline knowledge.
 **Hackathon :** Anthropic × Cerebral Valley « Built with Opus 4.7 » — livraison démo 2026-04-26.
