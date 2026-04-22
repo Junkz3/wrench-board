@@ -443,15 +443,32 @@
    (component | symptom | net | action) + typed relations
    (causes | powers | connected_to | resolves).
    ========================================================= */
-const DATA = { nodes: [], edges: [] };
+let DATA = { nodes: [], edges: [] };
 
-// Toggle the empty-state overlay until graph data is wired in from the backend.
-(() => {
+async function loadGraphFromBackend() {
+  const params = new URLSearchParams(window.location.search);
+  const slug = params.get("device");
+  if (!slug) return null;
+  try {
+    const res = await fetch(`/pipeline/packs/${encodeURIComponent(slug)}/graph`);
+    if (!res.ok) {
+      console.warn(`loadGraphFromBackend: ${res.status} for slug=${slug}`);
+      return null;
+    }
+    return await res.json();
+  } catch (err) {
+    console.error("loadGraphFromBackend: fetch failed", err);
+    return null;
+  }
+}
+
+function setEmptyState(visible) {
   const el = document.getElementById("emptyState");
   if (!el) return;
-  if (DATA.nodes.length === 0) el.classList.remove("hidden");
-  else el.classList.add("hidden");
-})();
+  el.classList.toggle("hidden", !visible);
+}
+
+setEmptyState(true);  // show the card synchronously; the fetch may replace it
 
 const TYPE_COLORS = { component:"oklch(0.82 0.14 210)", symptom:"oklch(0.82 0.16 75)", net:"oklch(0.78 0.15 155)", action:"oklch(0.78 0.14 295)" };
 const TYPE_FILL   = { component:"oklch(0.82 0.14 210 / 0.22)", symptom:"oklch(0.82 0.16 75 / 0.22)", net:"oklch(0.78 0.15 155 / 0.22)", action:"oklch(0.78 0.14 295 / 0.22)" };
@@ -461,7 +478,10 @@ const REL_LABEL_FR  = { causes:"provoque", powers:"alimente", connected_to:"conn
 // Strict L→R narrative — must match the visible .col-band order in the HTML.
 const COL_ORDER = ["action","component","net","symptom"];
 
-const svg = d3.select("#graph");
+function initGraphWithData(data) {
+  DATA = data;
+
+  const svg = d3.select("#graph");
 const gRoot = d3.select("#graphRoot");
 const canvasEl = document.getElementById("canvas");
 const W = () => canvasEl.clientWidth;
@@ -908,11 +928,22 @@ window.addEventListener("resize", () => {
   sim.alpha(0.5).restart();
 });
 
+  sim.alpha(1).restart();
+  for (let i=0;i<80;i++) sim.tick();
+  linkSel.attr("d", linkPath);
+  nodeSel.attr("transform", d => `translate(${d.x},${d.y})`);
+}
+
 /* ---------- INIT ---------- */
-sim.alpha(1).restart();
-for (let i=0;i<80;i++) sim.tick();
-linkSel.attr("d", linkPath);
-nodeSel.attr("transform", d => `translate(${d.x},${d.y})`);
+(async function bootstrap() {
+  const fetched = await loadGraphFromBackend();
+  if (fetched && fetched.nodes && fetched.nodes.length > 0) {
+    setEmptyState(false);
+    initGraphWithData(fetched);
+  } else {
+    setEmptyState(true);
+  }
+})();
 </script>
 </body>
 </html>
