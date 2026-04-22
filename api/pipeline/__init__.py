@@ -1,21 +1,29 @@
 """Pipeline package — FastAPI router for the knowledge-generation factory.
 
 Exposes:
-    POST /pipeline/generate  — run the full pipeline for one device (blocking).
-    GET  /pipeline/packs     — list packs on disk.
-    GET  /pipeline/packs/{device_slug}  — return metadata for a generated pack.
+    POST /pipeline/generate          — run the full pipeline (blocking).
+    POST /pipeline/repairs           — create a repair + fire-and-forget pipeline.
+    WS   /pipeline/progress/{slug}   — stream live pipeline progress events.
+    GET  /pipeline/packs             — list packs on disk.
+    GET  /pipeline/packs/{slug}      — pack metadata.
+    GET  /pipeline/packs/{slug}/full — every JSON artefact in one payload.
 """
 
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
+import time
+import uuid
+from datetime import UTC, datetime
 from pathlib import Path
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel, Field
 
 from api.config import get_settings
+from api.pipeline import events
 from api.pipeline.graph_transform import pack_to_graph_payload
 from api.pipeline.orchestrator import _slugify, generate_knowledge_pack
 from api.pipeline.schemas import PipelineResult
@@ -142,6 +150,151 @@ async def get_pack_full(device_slug: str) -> dict:
         "dictionary": dictionary,
         "audit_verdict": audit_verdict,
     }
+
+
+class RepairRequest(BaseModel):
+    device_label: str = Field(
+        min_length=2,
+        max_length=200,
+        description="Human-readable device identifier (e.g. 'MNT Reform motherboard').",
+    )
+    symptom: str = Field(
+        min_length=5,
+        max_length=2000,
+        description="Free-form description of what the client observes.",
+    )
+
+
+class RepairResponse(BaseModel):
+    repair_id: str
+    device_slug: str
+    device_label: str
+    pipeline_started: bool = Field(
+        description="True when a background pipeline run was kicked off — False when "
+        "the pack is already complete on disk and no rebuild is needed."
+    )
+
+
+def _pack_is_complete(pack_dir: Path) -> bool:
+    """A pack is 'complete' when the 4 writer files are present — audit is optional."""
+    return all(
+        (pack_dir / name).exists()
+        for name in ("registry.json", "knowledge_graph.json", "rules.json", "dictionary.json")
+    )
+
+
+def _persist_repair(
+    memory_root: Path,
+    slug: str,
+    device_label: str,
+    symptom: str,
+) -> str:
+    """Write the repair metadata to memory/{slug}/repairs/{repair_id}.json.
+
+    Returns the generated repair_id. The file gives the diagnostic conversation
+    a durable record of the client's original complaint even if the session
+    closes mid-flight.
+    """
+    repair_id = uuid.uuid4().hex[:12]
+    repairs_dir = memory_root / slug / "repairs"
+    repairs_dir.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "repair_id": repair_id,
+        "device_slug": slug,
+        "device_label": device_label,
+        "symptom": symptom,
+        "created_at": datetime.now(UTC).isoformat(),
+    }
+    (repairs_dir / f"{repair_id}.json").write_text(
+        json.dumps(payload, indent=2, ensure_ascii=False),
+        encoding="utf-8",
+    )
+    return repair_id
+
+
+async def _run_pipeline_with_events(device_label: str, slug: str) -> None:
+    """Background task: run the pipeline, relaying its events on the bus."""
+    t0 = time.monotonic()
+    try:
+        await generate_knowledge_pack(
+            device_label,
+            on_event=lambda ev: events.publish(slug, ev),
+        )
+    except Exception as exc:
+        logger.exception("[API] background pipeline failed for slug=%r", slug)
+        await events.publish(
+            slug,
+            {
+                "type": "pipeline_failed",
+                "status": "ERROR",
+                "error": str(exc),
+                "elapsed_s": time.monotonic() - t0,
+            },
+        )
+
+
+@router.post("/repairs", response_model=RepairResponse)
+async def create_repair(request: RepairRequest) -> RepairResponse:
+    """Register a repair and kick off the pipeline in the background.
+
+    The response returns immediately with the generated repair_id and device_slug.
+    Real-time pipeline progress is streamed via WS /pipeline/progress/{slug}.
+    If the pack is already complete on disk we skip the pipeline to save tokens —
+    the client can proceed straight to the Memory Bank.
+    """
+    settings = get_settings()
+    memory_root = Path(settings.memory_root)
+    slug = _slugify(request.device_label)
+    pack_dir = memory_root / slug
+
+    repair_id = _persist_repair(memory_root, slug, request.device_label, request.symptom)
+
+    if _pack_is_complete(pack_dir):
+        logger.info(
+            "[API] /pipeline/repairs · pack already complete for slug=%r — skipping rebuild",
+            slug,
+        )
+        return RepairResponse(
+            repair_id=repair_id,
+            device_slug=slug,
+            device_label=request.device_label,
+            pipeline_started=False,
+        )
+
+    logger.info("[API] /pipeline/repairs · firing pipeline for slug=%r", slug)
+    # Fire-and-forget. Errors land on the progress WS as pipeline_failed.
+    asyncio.create_task(_run_pipeline_with_events(request.device_label, slug))
+    return RepairResponse(
+        repair_id=repair_id,
+        device_slug=slug,
+        device_label=request.device_label,
+        pipeline_started=True,
+    )
+
+
+@router.websocket("/progress/{device_slug}")
+async def progress_ws(websocket: WebSocket, device_slug: str) -> None:
+    """Stream pipeline events for this slug until the client disconnects.
+
+    Emits a `{type:"subscribed", device_slug}` ack as soon as the subscription
+    is live, so the client knows it won't miss subsequent events. Terminal
+    events (pipeline_finished / pipeline_failed) are still delivered normally;
+    it's up to the client to close the socket when it's done consuming.
+    """
+    slug = _slugify(device_slug)
+    await websocket.accept()
+    queue = events.subscribe(slug)
+    try:
+        await websocket.send_text(
+            json.dumps({"type": "subscribed", "device_slug": slug})
+        )
+        while True:
+            event = await queue.get()
+            await websocket.send_text(json.dumps(event))
+    except WebSocketDisconnect:
+        logger.info("[API] /pipeline/progress/%s · client disconnected", slug)
+    finally:
+        events.unsubscribe(slug, queue)
 
 
 @router.get("/packs/{device_slug}/graph")
