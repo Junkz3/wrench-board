@@ -91,7 +91,19 @@ async def call_with_forced_tool(
             validated = output_schema.model_validate(tool_use.input)
             return validated
         except ValidationError as exc:
-            # Keep the error short enough to fit in a retry prompt
+            # Defensive unwrap: under forced tool_choice without thinking, Opus
+            # occasionally stringifies nested structures — e.g. sends
+            # `{"rules": "<JSON of the whole RulesSet>"}` instead of the typed
+            # list. Try to recover before burning another retry.
+            recovered = _try_unwrap(tool_use.input, output_schema)
+            if recovered is not None:
+                logger.warning(
+                    "[%s] recovered from stringified payload on attempt=%d",
+                    log_label,
+                    attempt,
+                )
+                return recovered
+
             last_error = (
                 f"Validation failed for {forced_tool_name} payload:\n{exc}\n"
                 "Payload received: "
@@ -103,3 +115,49 @@ async def call_with_forced_tool(
         f"[{log_label}] Failed to produce a valid {forced_tool_name} output after "
         f"{max_attempts} attempts. Last error:\n{last_error}"
     )
+
+
+def _try_unwrap(payload: object, output_schema: type[T]) -> T | None:
+    """Recover from two observed malformations of the tool input.
+
+    Case A — top-level string fields contain JSON (the model double-encoded a
+             nested list / dict). We json.loads every string value that looks
+             like JSON, then re-validate.
+    Case B — the whole target was collapsed into one field, e.g.
+             `{"rules": "<JSON of {schema_version, rules}>"}`. After unwrap we
+             try to validate each top-level value against the target schema.
+
+    Returns a validated model or None if neither case applies.
+    """
+    if not isinstance(payload, dict):
+        return None
+
+    unwrapped: dict[str, object] = {}
+    changed = False
+    for key, value in payload.items():
+        if isinstance(value, str):
+            stripped = value.strip()
+            if stripped and stripped[0] in "[{":
+                try:
+                    unwrapped[key] = json.loads(stripped)
+                    changed = True
+                    continue
+                except (json.JSONDecodeError, ValueError):
+                    pass
+        unwrapped[key] = value
+
+    if changed:
+        try:
+            return output_schema.model_validate(unwrapped)
+        except ValidationError:
+            pass
+
+    # Case B — maybe one of the unwrapped values IS the target shape.
+    for value in unwrapped.values():
+        if isinstance(value, dict):
+            try:
+                return output_schema.model_validate(value)
+            except ValidationError:
+                continue
+
+    return None
