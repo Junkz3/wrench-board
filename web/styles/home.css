@@ -4,14 +4,30 @@
 .home-head{display:flex;align-items:flex-end;gap:16px;margin-bottom:24px;border-bottom:1px solid var(--border);padding-bottom:16px}
 .home-head h1{margin:0;font-size:22px;font-weight:600;letter-spacing:-.3px}
 .home-head .home-sub{flex:1;margin:0;color:var(--text-3);font-size:13px;line-height:1.5}
-.home-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+
+/* ---- Brand > model hierarchy ---- */
+.home-sections{display:flex;flex-direction:column;gap:28px}
+.home-brand{display:flex;flex-direction:column;gap:12px}
+.home-brand-head{display:flex;align-items:baseline;gap:12px;padding-bottom:6px;border-bottom:1px solid var(--border-soft)}
+.home-brand-name{margin:0;font-size:13px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;color:var(--text)}
+.home-brand-count{font-size:10.5px;color:var(--text-3);letter-spacing:.4px;text-transform:uppercase}
+.home-brand-uncategorized .home-brand-name{color:var(--text-3)}
+.home-brand-body{display:flex;flex-direction:column;gap:14px}
+.home-model{display:flex;flex-direction:column;gap:8px}
+.home-model-head{display:flex;align-items:center;gap:8px}
+.home-model-name{font-size:12px;font-weight:500;color:var(--text-2)}
+.home-model-count{font-size:10px;color:var(--text-3);padding:1px 6px;border:1px solid var(--border-soft);border-radius:10px;letter-spacing:.3px}
+
+.home-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
 .home-card{position:relative;padding:16px 18px;background:var(--panel);border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:all .15s;text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:8px}
 .home-card:hover{border-color:rgba(56,189,248,.45);background:var(--panel-2);transform:translateY(-1px)}
 .home-card .slug{font-family:var(--mono);font-size:10.5px;color:var(--text-3)}
 .home-card .name{font-size:15px;font-weight:600;color:var(--text)}
 .home-card .badges{display:flex;gap:6px;flex-wrap:wrap}
 .home-card .badge{padding:2px 7px;border-radius:10px;font-size:10.5px;font-family:var(--mono);border:1px solid var(--border);color:var(--text-2)}
+.home-card .badge.mono{text-transform:uppercase;letter-spacing:.3px}
 .home-card .badge.ok{color:var(--emerald);border-color:rgba(52,211,153,.3);background:rgba(52,211,153,.08)}
 .home-card .badge.warn{color:var(--amber);border-color:rgba(245,158,11,.3);background:rgba(245,158,11,.08)}
+
 .home-empty{text-align:center;padding:60px 20px;color:var(--text-3)}
 .home-empty.hidden{display:none}

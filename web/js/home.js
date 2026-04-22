@@ -20,30 +20,118 @@ export async function loadHomePacks() {
   }
 }
 
-export function renderHome(packs) {
-  const grid = document.getElementById("homeGrid");
+export async function loadTaxonomy() {
+  try {
+    const res = await fetch("/pipeline/taxonomy");
+    if (!res.ok) return {brands: {}, uncategorized: []};
+    return await res.json();
+  } catch (err) {
+    console.warn("loadTaxonomy failed", err);
+    return {brands: {}, uncategorized: []};
+  }
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => (
+    {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]
+  ));
+}
+
+function humanizeSlug(slug) {
+  return slug.replace(/-/g, " ").replace(/^./, c => c.toUpperCase());
+}
+
+function cardHTML(entry, packIndex) {
+  const p = packIndex.get(entry.device_slug) || {};
+  const complete = entry.complete;
+  const badges = [
+    `<span class="badge ${complete ? 'ok' : 'warn'}">${complete ? 'pack complet' : 'incomplet'}</span>`,
+    p.has_audit_verdict ? '<span class="badge">audité</span>' : '',
+    entry.form_factor ? `<span class="badge mono">${escapeHtml(entry.form_factor)}</span>` : '',
+    entry.version ? `<span class="badge mono">${escapeHtml(entry.version)}</span>` : '',
+  ].filter(Boolean).join("");
+  return `
+    <a class="home-card" href="?device=${encodeURIComponent(entry.device_slug)}">
+      <div class="slug">${escapeHtml(entry.device_slug)}</div>
+      <div class="name">${escapeHtml(entry.device_label || humanizeSlug(entry.device_slug))}</div>
+      <div class="badges">${badges}</div>
+    </a>
+  `;
+}
+
+function brandBlockHTML(brandName, models, packIndex) {
+  const modelNames = Object.keys(models).sort((a, b) => a.localeCompare(b));
+  const totalPacks = modelNames.reduce((n, m) => n + models[m].length, 0);
+  const counter = `${totalPacks} ${totalPacks > 1 ? 'réparations' : 'réparation'} · ${modelNames.length} ${modelNames.length > 1 ? 'modèles' : 'modèle'}`;
+  const modelBlocks = modelNames.map(modelName => {
+    const entries = models[modelName].slice().sort((a, b) =>
+      (a.device_label || a.device_slug).localeCompare(b.device_label || b.device_slug)
+    );
+    const cards = entries.map(e => cardHTML(e, packIndex)).join("");
+    return `
+      <div class="home-model">
+        <div class="home-model-head">
+          <span class="home-model-name">${escapeHtml(modelName)}</span>
+          <span class="home-model-count mono">${entries.length}</span>
+        </div>
+        <div class="home-grid">${cards}</div>
+      </div>
+    `;
+  }).join("");
+  return `
+    <section class="home-brand">
+      <header class="home-brand-head">
+        <h2 class="home-brand-name">${escapeHtml(brandName)}</h2>
+        <span class="home-brand-count mono">${counter}</span>
+      </header>
+      <div class="home-brand-body">${modelBlocks}</div>
+    </section>
+  `;
+}
+
+function uncategorizedBlockHTML(entries, packIndex) {
+  const cards = entries
+    .slice()
+    .sort((a, b) => (a.device_label || a.device_slug).localeCompare(b.device_label || b.device_slug))
+    .map(e => cardHTML(e, packIndex))
+    .join("");
+  const counter = `${entries.length} ${entries.length > 1 ? 'réparations' : 'réparation'}`;
+  return `
+    <section class="home-brand home-brand-uncategorized">
+      <header class="home-brand-head">
+        <h2 class="home-brand-name">Non catégorisé</h2>
+        <span class="home-brand-count mono">${counter}</span>
+      </header>
+      <div class="home-brand-body">
+        <div class="home-model">
+          <div class="home-grid">${cards}</div>
+        </div>
+      </div>
+    </section>
+  `;
+}
+
+export function renderHome(packs, taxonomy) {
+  const container = document.getElementById("homeSections");
   const empty = document.getElementById("homeEmpty");
-  grid.innerHTML = "";
-  if (packs.length === 0) {
+  container.innerHTML = "";
+
+  const packIndex = new Map(packs.map(p => [p.device_slug, p]));
+
+  const brandNames = Object.keys(taxonomy.brands || {}).sort((a, b) => a.localeCompare(b));
+  const uncategorized = taxonomy.uncategorized || [];
+
+  if (brandNames.length === 0 && uncategorized.length === 0) {
     empty.classList.remove("hidden");
     return;
   }
   empty.classList.add("hidden");
-  for (const p of packs) {
-    const card = document.createElement("a");
-    card.className = "home-card";
-    card.href = `?device=${encodeURIComponent(p.device_slug)}`;
-    const complete = p.has_registry && p.has_knowledge_graph && p.has_rules && p.has_dictionary;
-    card.innerHTML = `
-      <div class="slug">${p.device_slug}</div>
-      <div class="name">${p.device_slug.replace(/-/g, " ").replace(/^./, c => c.toUpperCase())}</div>
-      <div class="badges">
-        <span class="badge ${complete ? 'ok' : 'warn'}">${complete ? 'pack complet' : 'incomplet'}</span>
-        ${p.has_audit_verdict ? '<span class="badge">audité</span>' : ''}
-      </div>
-    `;
-    grid.appendChild(card);
+
+  const blocks = brandNames.map(brand => brandBlockHTML(brand, taxonomy.brands[brand], packIndex));
+  if (uncategorized.length > 0) {
+    blocks.push(uncategorizedBlockHTML(uncategorized, packIndex));
   }
+  container.innerHTML = blocks.join("");
 }
 
 /* ---------- NEW REPAIR MODAL ---------- */
