@@ -22,11 +22,21 @@ class Settings(BaseSettings):
     )
     anthropic_model_main: str = Field(
         default="claude-opus-4-7",
-        description="Main reasoning model used by every sub-agent of the pipeline.",
+        description=(
+            "Top-tier reasoning model. Pipeline roles: Cartographe, Clinicien, "
+            "Auditor. Diagnostic 'deep' tier."
+        ),
     )
     anthropic_model_fast: str = Field(
         default="claude-haiku-4-5",
         description="Reserved for lightweight classification / formatting tasks.",
+    )
+    anthropic_model_sonnet: str = Field(
+        default="claude-sonnet-4-6",
+        description=(
+            "Mid-tier model. Pipeline roles: Scout, Registry Builder, "
+            "Lexicographe — structured extraction without heavy synthesis."
+        ),
     )
 
     port: int = Field(default=8000, description="HTTP server port.")

@@ -137,7 +137,9 @@ async def _run_single_writer(
 async def run_writers_parallel(
     *,
     client: AsyncAnthropic,
-    model: str,
+    cartographe_model: str,
+    clinicien_model: str,
+    lexicographe_model: str,
     device_label: str,
     raw_dump: str,
     registry: Registry,
@@ -146,11 +148,19 @@ async def run_writers_parallel(
     """Launch the 3 writers with a staggered start for cache warming.
 
     Writer 1 (Cartographe) goes first — it writes the cache. We sleep briefly, then
-    fire writers 2 (Clinicien) and 3 (Lexicographe) concurrently; both should hit
-    the cached prefix.
+    fire writers 2 (Clinicien) and 3 (Lexicographe) concurrently.
+
+    Prompt cache is model-scoped, so Cartographe + Clinicien (same model) share a
+    cache entry, while Lexicographe — typically a cheaper model — writes its own.
+    That split costs one extra cache_creation per run but saves far more on the
+    per-component extraction tokens.
     """
     logger.info(
-        "[Writers] Starting parallel writers (cache_warmup=%.1fs) for device=%r",
+        "[Writers] Starting parallel writers "
+        "(cart=%s clin=%s lex=%s · cache_warmup=%.1fs) for device=%r",
+        cartographe_model,
+        clinicien_model,
+        lexicographe_model,
         cache_warmup_seconds,
         device_label,
     )
@@ -158,7 +168,7 @@ async def run_writers_parallel(
     kg_task = asyncio.create_task(
         _run_single_writer(
             client=client,
-            model=model,
+            model=cartographe_model,
             device_label=device_label,
             raw_dump=raw_dump,
             registry=registry,
@@ -178,7 +188,7 @@ async def run_writers_parallel(
     rules_task = asyncio.create_task(
         _run_single_writer(
             client=client,
-            model=model,
+            model=clinicien_model,
             device_label=device_label,
             raw_dump=raw_dump,
             registry=registry,
@@ -192,7 +202,7 @@ async def run_writers_parallel(
     dict_task = asyncio.create_task(
         _run_single_writer(
             client=client,
-            model=model,
+            model=lexicographe_model,
             device_label=device_label,
             raw_dump=raw_dump,
             registry=registry,
@@ -219,7 +229,9 @@ async def run_writers_parallel(
 async def run_single_writer_revision(
     *,
     client: AsyncAnthropic,
-    model: str,
+    cartographe_model: str,
+    clinicien_model: str,
+    lexicographe_model: str,
     device_label: str,
     raw_dump: str,
     registry: Registry,
@@ -227,19 +239,33 @@ async def run_single_writer_revision(
     revision_brief: str,
     previous_output_json: str,
 ) -> KnowledgeGraph | RulesSet | Dictionary:
-    """Re-run one writer with a revision brief from the Auditor."""
+    """Re-run one writer with a revision brief from the Auditor.
+
+    Must use the same model that produced the original output, so the revised
+    artefact stays coherent with the first pass (same taste, same shape).
+    """
     # Import here to avoid circular import if orchestrator ever imports this module.
     from api.pipeline.prompts import REVISER_USER_TEMPLATE
 
     mapping = {
-        "knowledge_graph": (SUBMIT_KG_TOOL_NAME, KnowledgeGraph, "Cartographe-Revise"),
-        "rules": (SUBMIT_RULES_TOOL_NAME, RulesSet, "Clinicien-Revise"),
-        "dictionary": (SUBMIT_DICT_TOOL_NAME, Dictionary, "Lexicographe-Revise"),
+        "knowledge_graph": (
+            SUBMIT_KG_TOOL_NAME,
+            KnowledgeGraph,
+            "Cartographe-Revise",
+            cartographe_model,
+        ),
+        "rules": (SUBMIT_RULES_TOOL_NAME, RulesSet, "Clinicien-Revise", clinicien_model),
+        "dictionary": (
+            SUBMIT_DICT_TOOL_NAME,
+            Dictionary,
+            "Lexicographe-Revise",
+            lexicographe_model,
+        ),
     }
     if file_name not in mapping:
         raise ValueError(f"Unknown file_name for revision: {file_name!r}")
 
-    tool_name, output_schema, log_label = mapping[file_name]
+    tool_name, output_schema, log_label, model = mapping[file_name]
 
     # Keep the shared cached prefix identical so the cache still serves.
     shared_prefix = WRITER_SHARED_USER_PREFIX_TEMPLATE.format(

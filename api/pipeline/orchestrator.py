@@ -94,28 +94,47 @@ async def generate_knowledge_pack(
     )
     emit = _wrap_on_event(on_event)
 
-    model = settings.anthropic_model_main  # claude-opus-4-7
+    # Per-phase model distribution. Opus handles synthesis + judgment (graph,
+    # rules, audit); Sonnet handles extraction (web research, registry, per-component
+    # sheets) — cheaper and plenty for those shapes.
+    model_main = settings.anthropic_model_main  # Opus
+    model_sonnet = settings.anthropic_model_sonnet  # Sonnet
+    models_by_role = {
+        "scout": model_sonnet,
+        "registry": model_sonnet,
+        "cartographe": model_main,
+        "clinicien": model_main,
+        "lexicographe": model_sonnet,
+        "auditor": model_main,
+    }
     slug = _slugify(device_label)
 
     pack_dir = _pack_path(device_label, memory_root)
     pack_dir.mkdir(parents=True, exist_ok=True)
 
     logger.info("=" * 72)
-    logger.info("Pipeline start · device=%r · model=%s · pack=%s", device_label, model, pack_dir)
+    logger.info(
+        "Pipeline start · device=%r · models=%s · pack=%s",
+        device_label,
+        models_by_role,
+        pack_dir,
+    )
     logger.info("=" * 72)
 
     await emit({
         "type": "pipeline_started",
         "device_slug": slug,
         "device_label": device_label,
-        "model": model,
+        "models": models_by_role,
     })
 
     try:
         # -------- Phase 1 — Scout ------------------------------------------------
         t0 = time.monotonic()
         await emit({"type": "phase_started", "phase": "scout"})
-        raw_dump = await run_scout(client=client, model=model, device_label=device_label)
+        raw_dump = await run_scout(
+            client=client, model=models_by_role["scout"], device_label=device_label
+        )
         (pack_dir / "raw_research_dump.md").write_text(raw_dump, encoding="utf-8")
         logger.info("[Pipeline] Phase 1 complete · raw_research_dump.md written")
         await emit({"type": "phase_finished", "phase": "scout", "elapsed_s": time.monotonic() - t0})
@@ -124,7 +143,10 @@ async def generate_knowledge_pack(
         t0 = time.monotonic()
         await emit({"type": "phase_started", "phase": "registry"})
         registry = await run_registry_builder(
-            client=client, model=model, device_label=device_label, raw_dump=raw_dump
+            client=client,
+            model=models_by_role["registry"],
+            device_label=device_label,
+            raw_dump=raw_dump,
         )
         (pack_dir / "registry.json").write_text(
             registry.model_dump_json(indent=2), encoding="utf-8"
@@ -145,7 +167,9 @@ async def generate_knowledge_pack(
         await emit({"type": "phase_started", "phase": "writers"})
         kg, rules, dictionary = await run_writers_parallel(
             client=client,
-            model=model,
+            cartographe_model=models_by_role["cartographe"],
+            clinicien_model=models_by_role["clinicien"],
+            lexicographe_model=models_by_role["lexicographe"],
             device_label=device_label,
             raw_dump=raw_dump,
             registry=registry,
@@ -174,7 +198,7 @@ async def generate_knowledge_pack(
         while True:
             verdict = await run_auditor(
                 client=client,
-                model=model,
+                model=models_by_role["auditor"],
                 device_label=device_label,
                 registry=registry,
                 knowledge_graph=kg,
@@ -218,7 +242,9 @@ async def generate_knowledge_pack(
             )
             kg, rules, dictionary = await _apply_revisions(
                 client=client,
-                model=model,
+                cartographe_model=models_by_role["cartographe"],
+                clinicien_model=models_by_role["clinicien"],
+                lexicographe_model=models_by_role["lexicographe"],
                 device_label=device_label,
                 raw_dump=raw_dump,
                 registry=registry,
@@ -301,7 +327,9 @@ def _write_writer_outputs(
 async def _apply_revisions(
     *,
     client: AsyncAnthropic,
-    model: str,
+    cartographe_model: str,
+    clinicien_model: str,
+    lexicographe_model: str,
     device_label: str,
     raw_dump: str,
     registry: Registry,
@@ -313,42 +341,35 @@ async def _apply_revisions(
     """Re-run each writer flagged by the auditor and return the updated tuple."""
     kg, rules, dictionary = current_kg, current_rules, current_dictionary
 
+    common_kwargs = {
+        "client": client,
+        "cartographe_model": cartographe_model,
+        "clinicien_model": clinicien_model,
+        "lexicographe_model": lexicographe_model,
+        "device_label": device_label,
+        "raw_dump": raw_dump,
+        "registry": registry,
+        "revision_brief": verdict.revision_brief,
+    }
+
     for file_name in verdict.files_to_rewrite:
         if file_name == "knowledge_graph":
-            previous_json = kg.model_dump_json(indent=2)
             kg = await run_single_writer_revision(
-                client=client,
-                model=model,
-                device_label=device_label,
-                raw_dump=raw_dump,
-                registry=registry,
                 file_name=file_name,
-                revision_brief=verdict.revision_brief,
-                previous_output_json=previous_json,
+                previous_output_json=kg.model_dump_json(indent=2),
+                **common_kwargs,
             )
         elif file_name == "rules":
-            previous_json = rules.model_dump_json(indent=2)
             rules = await run_single_writer_revision(
-                client=client,
-                model=model,
-                device_label=device_label,
-                raw_dump=raw_dump,
-                registry=registry,
                 file_name=file_name,
-                revision_brief=verdict.revision_brief,
-                previous_output_json=previous_json,
+                previous_output_json=rules.model_dump_json(indent=2),
+                **common_kwargs,
             )
         elif file_name == "dictionary":
-            previous_json = dictionary.model_dump_json(indent=2)
             dictionary = await run_single_writer_revision(
-                client=client,
-                model=model,
-                device_label=device_label,
-                raw_dump=raw_dump,
-                registry=registry,
                 file_name=file_name,
-                revision_brief=verdict.revision_brief,
-                previous_output_json=previous_json,
+                previous_output_json=dictionary.model_dump_json(indent=2),
+                **common_kwargs,
             )
         else:
             logger.warning("[Pipeline] Skipping unknown file_name in revise: %r", file_name)
