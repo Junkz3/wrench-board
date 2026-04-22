@@ -94,6 +94,20 @@ class Settings(BaseSettings):
         ),
     )
 
+    # --- Managed Agents memory stores -----------------------------------------
+    # The memory_stores primitive is in Research Preview as of 2026-04. Once
+    # access is granted, flipping this flag wires the pipeline + diagnostic
+    # paths together: pipeline output is seeded into each device's store, and
+    # diagnostic sessions can write findings back. All call sites degrade
+    # gracefully when the flag is off (no SDK calls, no errors).
+    ma_memory_store_enabled: bool = Field(
+        default=False,
+        description=(
+            "Gate for Anthropic Managed Agents memory_stores integration. Off "
+            "until the Research Preview grants our account access."
+        ),
+    )
+
 
 _settings: Settings | None = None
 

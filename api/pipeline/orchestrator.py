@@ -20,6 +20,7 @@ from typing import Any
 
 from anthropic import AsyncAnthropic
 
+from api.agent.memory_seed import seed_memory_store_from_pack
 from api.config import get_settings
 from api.pipeline.auditor import run_auditor
 from api.pipeline.drift import compute_drift
@@ -308,12 +309,22 @@ async def generate_knowledge_pack(
         logger.info("Pipeline end · pack=%s · rounds=%d", pack_dir, rounds_used)
         logger.info("=" * 72)
 
+        # Prize-move: seed the device's Managed-Agents memory store with the
+        # freshly approved pack so diagnostic sessions read canonical knowledge
+        # via memory_search/memory_read instead of re-loading JSON on every tool
+        # call. No-op when the research-preview flag is off.
+        seed_status = await seed_memory_store_from_pack(
+            client=client, device_slug=slug, pack_dir=pack_dir
+        )
+        logger.info("[Pipeline] Memory-store seed status=%s", seed_status)
+
         await emit({
             "type": "pipeline_finished",
             "device_slug": slug,
             "status": verdict.overall_status,
             "revise_rounds_used": rounds_used,
             "consistency_score": verdict.consistency_score,
+            "memory_store_seed": seed_status,
         })
 
         # NOTE: token totals are aggregated via the stdout logs of `call_with_forced_tool`
