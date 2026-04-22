@@ -4,9 +4,9 @@ from __future__ import annotations
 
 from typing import Any
 
-from api.board.validator import is_valid_refdes, suggest_similar
+from api.board.validator import is_valid_refdes, resolve_part, suggest_similar
 from api.session.state import SessionState
-from api.tools.ws_events import Highlight
+from api.tools.ws_events import Focus, Highlight, ResetView
 
 
 def _no_board(session: SessionState) -> dict[str, Any] | None:
@@ -46,3 +46,38 @@ def highlight_component(
     event = Highlight(refdes=targets, color=color, additive=additive)
     summary = f"Highlighted {', '.join(targets)}."
     return {"ok": True, "summary": summary, "event": event}
+
+
+def focus_component(session: SessionState, *, refdes: str, zoom: float = 2.5) -> dict[str, Any]:
+    err = _no_board(session)
+    if err:
+        return err
+    part = resolve_part(session.board, refdes)
+    if part is None:
+        return _unknown_refdes(session, refdes)
+
+    auto_flipped = False
+    target_side = "top" if part.layer.value & 1 else "bottom"
+    if session.layer != target_side:
+        session.layer = target_side
+        auto_flipped = True
+
+    session.highlights = {refdes}
+
+    bbox = ((part.bbox[0].x, part.bbox[0].y), (part.bbox[1].x, part.bbox[1].y))
+    event = Focus(refdes=refdes, bbox=bbox, zoom=zoom, auto_flipped=auto_flipped)
+    summary = f"Focused on {refdes} ({target_side})."
+    return {"ok": True, "summary": summary, "event": event}
+
+
+def reset_view(session: SessionState) -> dict[str, Any]:
+    err = _no_board(session)
+    if err:
+        return err
+    session.highlights = set()
+    session.net_highlight = None
+    session.dim_unrelated = False
+    session.annotations = {}
+    session.arrows = {}
+    session.filter_prefix = None
+    return {"ok": True, "summary": "View reset.", "event": ResetView()}
