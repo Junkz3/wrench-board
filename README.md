@@ -35,8 +35,7 @@ Run the tests with `make test`.
 
 ## Project status
 
-In development — **Built with Opus 4.7 Hackathon 2026** (Anthropic × Cerebral Valley,
-April 21–26 2026). All code written from scratch during the hackathon week.
+In active development.
 
 ## License
 

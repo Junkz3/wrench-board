@@ -7,20 +7,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 `microsolder-agent` is an agent-native diagnostics workbench for board-level
 electronics repair. Claude Opus 4.7 drives a three-panel UI (boardview,
 schematic, chat+journal) through tool calls, in response to a microsoldering
-technician's natural-language questions. The target demo board is the
-MNT Reform motherboard (CERN-OHL-S-2.0, fully open-hardware KiCad sources).
-Built for the Anthropic × Cerebral Valley "Built with Opus 4.7" hackathon,
-April 21–26 2026.
+technician's natural-language questions.
 
 ## Hard rules — NEVER violate
 
-1. **All code written from scratch during the hackathon week.** Never copy
-   from any external codebase.
+1. **All code written from scratch.** Never copy from any external codebase.
 2. **Apache 2.0** is the license for all code in this repo.
 3. **Permissive dependencies only** (MIT, Apache 2.0, BSD). Never pull in
    GPL, AGPL, or LGPL packages.
 4. **Open hardware only.** No proprietary schematics or boardviews — no
-   Apple, Samsung, ZXW, WUXINJI content. Target is the MNT Reform motherboard.
+   Apple, Samsung, ZXW, WUXINJI content.
 5. **No hallucinated component IDs.** Every refdes (e.g. `U7`, `C29`) the
    agent mentions must be validated against parsed board data *before* being
    shown to the user. Tools that cannot answer return structured
@@ -69,7 +65,7 @@ api/
   logging_setup.py Single stdout handler, idempotent
   pipeline/        V2 knowledge factory — Scout → Registry → Writers(×3 parallel) → Auditor
   board/           Boardview domain: model (Board/Part/Pin/Net), parser registry, validator
-  agent/           Stub — diagnostic conversation (Managed Agents) lands here, Phase C
+  agent/           Stub — diagnostic conversation (Managed Agents) lands here
   session/         Stub — per-session state / journal
   vision/          Stub — image / PDF rendering helpers
   tools/           Stub — mb_* custom tools exposed to the diagnostic agent
@@ -90,14 +86,14 @@ There are **two distinct LLM paths**, by design:
    Batch / one-shot / structured output. No session state. Used to build
    per-device knowledge packs.
 
-2. **Diagnostic conversation** — `api/agent/` (Phase C, not yet landed).
+2. **Diagnostic conversation** — `api/agent/`.
    **Anthropic Managed Agents**: persistent agent + memory store per device +
    session event stream + custom `mb_*` tools. Fallback `DIAGNOSTIC_MODE=direct`
    env var pivots to `messages.create` if the MA beta blocks us.
 
 The split is deliberate — the pipeline doesn't benefit from session primitives
-(see `docs/superpowers/plans/2026-04-22-v1-hackathon-shipping-plan.md` for the
-rationale). Do not migrate pipeline to Managed Agents.
+(see `docs/superpowers/specs/2026-04-21-microsolder-agent-v1-design.md` §2.3
+for the rationale). Do not migrate pipeline to Managed Agents.
 
 ### The 4-phase pipeline (`api/pipeline/`)
 
@@ -252,8 +248,8 @@ in French. Code identifiers, console logs, and comments stay in English.
 - **Commit hygiene — one commit = one user-visible change.** Descriptive
   English messages, conventional-commits style (`feat(scope):`, `fix(scope):`,
   `refactor(scope):`, `chore(scope):`, `docs(scope):`, `test(scope):`). Each
-  commit passes tests and is independently reviewable by a hackathon judge
-  reading the history. A cohesive feature lands as **one** commit — a rename
+  commit passes tests and is independently reviewable by an outside reader
+  walking the history cold. A cohesive feature lands as **one** commit — a rename
   + CSS + HTML + JS wiring that all serves the same user-visible change stay
   together. Split only when concerns are genuinely separable (docs vs code,
   backend vs frontend, or when one sub-change is risky enough to want
@@ -303,17 +299,15 @@ Both are loaded from `.env` via `api/config.py`.
   the on-disk knowledge-pack store.
 - `docs/superpowers/specs/2026-04-21-boardview-design.md` — boardview / parser
   spec. §7 has the `.brd` Test_Link field layout the parser is built against.
-- `docs/superpowers/plans/2026-04-22-v1-hackathon-shipping-plan.md` — current
-  shipping plan (Phases A→D through 2026-04-26). This is the source of truth
-  for what ships this week and what is explicitly out of scope.
+- `docs/superpowers/plans/` — current implementation plan. Source of truth
+  for in-progress scope. Plans are dated and temporary by nature.
+- `docs/HACKATHON.md` — submission context (only relevant until the original
+  build window closes).
 
-## Hackathon prize-track context (background, not a rule)
+## Editorial rule — keep this file permanent
 
-Cerebral Valley announced a **$5 000 "best use of Managed Agents"** track on
-top of the main hackathon prize. This is CONTEXT, not scope: do not warp
-architectural choices to chase it. We use Managed Agents where they genuinely
-fit — the **diagnostic conversation** path (persistent agent + memory store
-per device + session event stream + custom tool use, cf. spec §2.3 Flow A). The
-**pipeline** path stays on `messages.create` direct because it's batch and
-doesn't benefit from session primitives. Never mention prizes in commit
-messages, plans, or code — keep the work technically-motivated.
+Temporal pressure framing ("this week", "ship by X", "demo", "hackathon",
+"prize track") never appears in `CLAUDE.md` or `README.md`. That content
+lives in `docs/HACKATHON.md` or a dated plan file under
+`docs/superpowers/plans/` only. When editing either file, strip any phrasing
+that would read as outdated six months from now.
