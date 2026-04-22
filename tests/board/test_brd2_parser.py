@@ -43,6 +43,44 @@ def test_parses_mnt_reform_motherboard():
     assert hdmi is not None
 
 
+def test_part_bbox_is_normalized_to_min_max(tmp_path: Path):
+    """PART lines with y1 > y2 (common in whitequark converter output after Y-flip) must
+    be normalized so that bbox[0] is (min_x, min_y) and bbox[1] is (max_x, max_y),
+    per the `Part.bbox: tuple[Point, Point]  # (min, max)` invariant in the model."""
+    f = tmp_path / "inverted.brd"
+    f.write_text(
+        "0\n"
+        "BRDOUT: 0 100 100\n"
+        "\n"
+        "NETS: 0\n"
+        "\n"
+        # x1=50 x2=30 (x reversed); y1=200 y2=80 (y reversed — typical BRD2 output)
+        "PARTS: 1\n"
+        "R1 50 200 30 80 0 1\n"
+        "\n"
+        "PINS: 0\n"
+        "\n"
+        "NAILS: 0\n"
+    )
+    board = BRD2Parser().parse_file(f)
+    (a, b) = board.parts[0].bbox
+    assert a.x <= b.x and a.y <= b.y, f"bbox not normalized: {a} > {b}"
+    assert (a.x, a.y) == (30, 80)
+    assert (b.x, b.y) == (50, 200)
+
+
+def test_mnt_reform_all_part_bboxes_are_normalized():
+    """Regression guard : every part in the committed MNT Reform fixture must have a
+    normalized bbox. The whitequark converter emits y1 > y2 for all 493 parts, so this
+    test catches any regression where the normalization is removed or bypassed."""
+    path = REPO_ROOT / "board_assets" / "mnt-reform-motherboard.brd"
+    board = BRD2Parser().parse_file(path)
+    for part in board.parts:
+        a, b = part.bbox
+        assert a.x <= b.x, f"{part.refdes}: x not normalized ({a.x} > {b.x})"
+        assert a.y <= b.y, f"{part.refdes}: y not normalized ({a.y} > {b.y})"
+
+
 def test_rejects_plain_test_link_by_mistake(tmp_path: Path):
     """A Test_Link file handed to BRD2Parser must refuse, not silently produce garbage."""
     f = tmp_path / "wrong_format.brd"

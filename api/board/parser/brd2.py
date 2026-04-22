@@ -340,6 +340,11 @@ def _link_pins_to_parts(
                 )
             )
 
+        # Normalize bbox to (min, max) — whitequark's pcbnew2boardview emits
+        # y1 > y2 after its global Y-flip without renormalizing the corners,
+        # and `Part.bbox` is documented as `(min, max)` in api/board/model.py.
+        bbox_lo = Point(x=min(x1, x2), y=min(y1, y2))
+        bbox_hi = Point(x=max(x1, x2), y=max(y1, y2))
         parts.append(
             Part(
                 refdes=refdes,
@@ -348,7 +353,7 @@ def _link_pins_to_parts(
                 # come from KiCad SMD-first designs. Callers needing hard
                 # through-hole classification must use schematic / footprint data.
                 is_smd=True,
-                bbox=(Point(x=x1, y=y1), Point(x=x2, y=y2)),
+                bbox=(bbox_lo, bbox_hi),
                 pin_refs=pin_refs,
             )
         )
