@@ -27,6 +27,7 @@ class Pin(BaseModel):
     layer: Layer
     pad_shape: str | None = None
     pad_size: tuple[int, int] | None = None
+    pad_rotation_deg: float | None = None
 
 
 class Part(BaseModel):

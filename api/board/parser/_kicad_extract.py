@@ -108,7 +108,10 @@ def main(path: str) -> None:
         }
         parts.append(part_entry)
 
-        # Per-pin data
+        # Per-pin data — note: each pad has its own orientation independent
+        # of the parent footprint (on multi-row packages like QFP / BGA the
+        # pads on the sides are rotated 90° relative to the top/bottom pads,
+        # regardless of the footprint's overall placement rotation).
         for pad in pads:
             pos = pad.GetPosition()
             size = pad.GetSize()
@@ -116,6 +119,7 @@ def main(path: str) -> None:
             shape = PAD_SHAPE_NAMES.get(shape_id, "custom")
             net_code = pad.GetNetCode()
             pin_side_flipped = pad.IsFlipped()
+            pad_rot = pad.GetOrientationDegrees() if hasattr(pad, "GetOrientationDegrees") else 0.0
             pins.append({
                 "x": nm_to_mils(pos.x),
                 "y": nm_to_mils(pos.y),
@@ -123,6 +127,7 @@ def main(path: str) -> None:
                 "side": 2 if pin_side_flipped else 1,
                 "pad_shape": shape,
                 "pad_size": [nm_to_mils(size.x), nm_to_mils(size.y)],
+                "pad_rotation_deg": pad_rot,
                 "pin_number": pad.GetNumber(),
             })
             pin_index_counter += 1

@@ -155,6 +155,7 @@ def _json_to_board(data: dict, *, file_hash: str, board_id: str) -> Board:
                     layer=pin_layer,
                     pad_shape=pr.get("pad_shape"),
                     pad_size=pad_size,
+                    pad_rotation_deg=pr.get("pad_rotation_deg"),
                 )
             )
 
