@@ -931,6 +931,9 @@ function updateChrome(section, deviceSlug, pack) {
 
   // Metabar — Graphe-only. body.no-metabar pulls .canvas/.home/.stub up.
   document.body.classList.toggle("no-metabar", section !== "graphe");
+  // Section-specific attribute so scoped styles (e.g. section-only Tweaks
+  // rows in the Réglages panel) can match via body[data-section="…"].
+  document.body.dataset.section = section;
   if (section !== "graphe") return;
 
   const deviceEl = document.getElementById("metaDevice");
@@ -1647,6 +1650,23 @@ window.addEventListener("resize", () => {
     }
   } else if (initial === "home") {
     renderHome(await loadHomePacks());
+  }
+})();
+
+/* Wire section-agnostic top-bar controls at the top level so they stay
+   reachable whether or not initGraphWithData() runs. The Tweaks panel
+   open/close handlers used to live inside that function and were therefore
+   never bound on #home / #pcb / etc. Script sits at end of <body>, run
+   immediately via IIFE (no DOMContentLoaded dependency). */
+(function wireTopLevelControls() {
+  const tweaksPanelEl  = document.getElementById("tweaksPanel");
+  const tweaksToggleEl = document.getElementById("tweaksToggle");
+  const tweaksCloseEl  = document.getElementById("tweaksClose");
+  if (tweaksPanelEl && tweaksToggleEl) {
+    tweaksToggleEl.addEventListener("click", () => tweaksPanelEl.classList.toggle("show"));
+  }
+  if (tweaksPanelEl && tweaksCloseEl) {
+    tweaksCloseEl.addEventListener("click", () => tweaksPanelEl.classList.remove("show"));
   }
 })();
 </script>
