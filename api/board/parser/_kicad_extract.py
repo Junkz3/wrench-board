@@ -72,25 +72,38 @@ def main(path: str) -> None:
         attrs = fp.GetAttributes()
         is_smd = bool(attrs & pcbnew.FP_SMD)
 
-        # Pads-only bounding box (union over pad.GetBoundingBox() in board coords)
-        pads = list(fp.Pads())
-        if pads:
-            x0 = y0 = float("inf")
-            x1 = y1 = float("-inf")
-            for pad in pads:
-                bb = pad.GetBoundingBox()
-                if bb.GetLeft() < x0:
-                    x0 = bb.GetLeft()
-                if bb.GetTop() < y0:
-                    y0 = bb.GetTop()
-                if bb.GetRight() > x1:
-                    x1 = bb.GetRight()
-                if bb.GetBottom() > y1:
-                    y1 = bb.GetBottom()
+        # Bounding box = physical footprint extent (silkscreen + pads + courtyard),
+        # excluding reference / value text. This matches what a repair tech sees
+        # on the real PCB — including EMI cages on connectors like SD / audio
+        # jacks, and the full module silkscreen outline for SoM / BGA packages.
+        # Pads-only would undercount cages; default GetBoundingBox() would
+        # overcount by including floating ref labels.
+        nbb = fp.GetBoundingBox(False, False)
+        if nbb.GetWidth() > 0 and nbb.GetHeight() > 0:
+            x0, y0 = nbb.GetLeft(), nbb.GetTop()
+            x1, y1 = nbb.GetRight(), nbb.GetBottom()
         else:
-            # Fallback: overall bbox
-            bb = fp.GetBoundingBox()
-            x0, y0, x1, y1 = bb.GetLeft(), bb.GetTop(), bb.GetRight(), bb.GetBottom()
+            # Edge case: footprint has neither silkscreen nor pads. Fall back
+            # to the pads-only union, else the default bbox.
+            pads_list = list(fp.Pads())
+            if pads_list:
+                x0 = y0 = float("inf")
+                x1 = y1 = float("-inf")
+                for pad in pads_list:
+                    bb = pad.GetBoundingBox()
+                    if bb.GetLeft() < x0:
+                        x0 = bb.GetLeft()
+                    if bb.GetTop() < y0:
+                        y0 = bb.GetTop()
+                    if bb.GetRight() > x1:
+                        x1 = bb.GetRight()
+                    if bb.GetBottom() > y1:
+                        y1 = bb.GetBottom()
+            else:
+                bb = fp.GetBoundingBox()
+                x0, y0, x1, y1 = bb.GetLeft(), bb.GetTop(), bb.GetRight(), bb.GetBottom()
+
+        pads = list(fp.Pads())  # still needed downstream for per-pin iteration
 
         part_first_pin = pin_index_counter
         part_entry = {

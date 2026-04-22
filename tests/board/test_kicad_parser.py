@@ -33,14 +33,17 @@ def test_parses_mnt_reform_motherboard_kicad_pcb():
     board = KicadPcbParser().parse_file(KICAD_FIXTURE)
     assert board.source_format == "kicad_pcb"
     assert len(board.parts) > 400  # motherboard25 has 505
-    # Pads-only bbox, not inflated — U1 should be ~19x70 mm (not 28x72 mm)
+    # Bbox is silkscreen + pads + courtyard (no text) — matches what a tech
+    # sees on the real PCB including EMI cages and module outlines. For U1
+    # SoM connector the full module silkscreen covers ~28x72 mm (vs the
+    # pads-only 19x70 mm that excludes the physical module body).
     u1 = board.part_by_refdes("U1")
     assert u1 is not None, "U1 should exist on MNT Reform"
     w = u1.bbox[1].x - u1.bbox[0].x
     h = u1.bbox[1].y - u1.bbox[0].y
-    # 19 mm = 748 mils, 70 mm = 2756 mils — allow generous range
-    assert 600 < w < 850, f"U1 width {w} outside expected 600-850 mils"
-    assert 2500 < h < 2900, f"U1 height {h} outside expected 2500-2900 mils"
+    # 28 mm = 1102 mils, 72 mm = 2835 mils — allow generous range
+    assert 1000 < w < 1200, f"U1 width {w} outside expected 1000-1200 mils"
+    assert 2700 < h < 2950, f"U1 height {h} outside expected 2700-2950 mils"
 
 
 def test_kicad_parser_fills_rich_fields():
