@@ -29,7 +29,7 @@ class GenerateRequest(BaseModel):
     device_label: str = Field(
         min_length=2,
         max_length=200,
-        description="Human-readable device identifier (e.g. 'Raspberry Pi 4 Model B').",
+        description="Human-readable device identifier (e.g. 'MNT Reform motherboard').",
     )
 
 

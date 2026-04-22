@@ -554,7 +554,7 @@ function showSection(which) {
 }
 
 document.getElementById("homeNewBtn").addEventListener("click", () => {
-  const label = prompt("Nom du device à générer (ex. 'Raspberry Pi 4 Model B') :");
+  const label = prompt("Nom du device à générer (ex. 'MNT Reform motherboard') :");
   if (!label) return;
   fetch("/pipeline/generate", {
     method: "POST",

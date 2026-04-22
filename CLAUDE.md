@@ -8,8 +8,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 electronics repair. Claude Opus 4.7 drives a three-panel UI (boardview,
 schematic, chat+journal) through tool calls, in response to a microsoldering
 technician's natural-language questions. The target demo board is the
-Raspberry Pi 4 Model B (open hardware, public official schematics). Built for
-the Anthropic × Cerebral Valley "Built with Opus 4.7" hackathon, April 21–26 2026.
+MNT Reform motherboard (CERN-OHL-S-2.0, fully open-hardware KiCad sources).
+Built for the Anthropic × Cerebral Valley "Built with Opus 4.7" hackathon,
+April 21–26 2026.
 
 ## Hard rules — NEVER violate
 
@@ -19,7 +20,7 @@ the Anthropic × Cerebral Valley "Built with Opus 4.7" hackathon, April 21–26 
 3. **Permissive dependencies only** (MIT, Apache 2.0, BSD). Never pull in
    GPL, AGPL, or LGPL packages.
 4. **Open hardware only.** No proprietary schematics or boardviews — no
-   Apple, Samsung, ZXW, WUXINJI content. Target is the Raspberry Pi 4.
+   Apple, Samsung, ZXW, WUXINJI content. Target is the MNT Reform motherboard.
 5. **No hallucinated component IDs.** Every refdes (e.g. `U7`, `C29`) the
    agent mentions must be validated against parsed board data *before* being
    shown to the user. Tools that cannot answer return structured
@@ -127,8 +128,10 @@ forced-tool `input_schema`. Never duplicate a shape — import from there.
   Concrete parsers use the `@register` decorator and declare `extensions = (...)`.
   Dispatch via `parser_for(path)`. Adding a new format = one new file in
   `parser/`, no changes to base.
-- `parser/brd.py` — clean-room OpenBoardView `.brd` (Test_Link) parser. Refuses
-  OBV-signature obfuscated files (`ObfuscatedFileError`).
+- `parser/test_link.py` — clean-room OpenBoardView `.brd` (Test_Link) parser.
+  Refuses OBV-signature obfuscated files (`ObfuscatedFileError`). A sibling
+  `parser/brd2.py` for the BRD2 format (kicad-boardview output) is coming in
+  parallel — the fixture `board_assets/mnt-reform-motherboard.brd` is BRD2.
 - `validator.py` — anti-hallucination guardrail (pure functions, no I/O). Every
   refdes the agent plans to surface passes `is_valid_refdes` / `resolve_part`
   / `resolve_net` / `resolve_pin` first. `suggest_similar` gives Levenshtein

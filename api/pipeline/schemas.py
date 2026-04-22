@@ -76,7 +76,7 @@ class Registry(BaseModel):
 
     schema_version: Literal["1.0"] = "1.0"
     device_label: str = Field(
-        description="Human-readable device identifier (e.g. 'Raspberry Pi 4 Model B')."
+        description="Human-readable device identifier (e.g. 'MNT Reform motherboard')."
     )
     components: list[RegistryComponent] = Field(default_factory=list)
     signals: list[RegistrySignal] = Field(default_factory=list)
@@ -146,7 +146,7 @@ class DiagnosticStep(BaseModel):
 class Rule(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    id: str = Field(description="Stable identifier, e.g. 'rule-pi4-001'.")
+    id: str = Field(description="Stable identifier, e.g. 'rule-reform-001'.")
     symptoms: list[str] = Field(min_length=1)
     likely_causes: list[Cause] = Field(min_length=1)
     diagnostic_steps: list[DiagnosticStep] = Field(default_factory=list)

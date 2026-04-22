@@ -31,7 +31,7 @@ Claude in response to the technician's questions. The user never clicks a
   `claude-haiku-4-5` (fast validation/formatting)
 - **Frontend:** Vanilla HTML/CSS/JS, Tailwind CSS (CDN), Alpine.js (CDN),
   PDF.js (CDN) — no build step
-- **Target board:** Raspberry Pi 4 Model B (open hardware, official public schematics)
+- **Target board:** MNT Reform motherboard (CERN-OHL-S-2.0, fully open-hardware KiCad sources)
 
 ## Quick start
 
