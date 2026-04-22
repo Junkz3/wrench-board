@@ -1,4 +1,16 @@
-const BRD_URL  = '/boards/mnt-reform-motherboard.brd';
+// Board fixture selection via `?board=<slug>` query param. Default = MNT Reform.
+// Known slugs map to files under /boards/. Unknown slugs fall back to default.
+const BOARD_FIXTURES = {
+  'mnt-reform': '/boards/mnt-reform-motherboard.brd',
+  'bilayer': '/boards/bilayer_minimal.brd',
+};
+const DEFAULT_BOARD = 'mnt-reform';
+function resolveBoardUrl() {
+  const slug = new URLSearchParams(window.location.search).get('board');
+  return BOARD_FIXTURES[slug] || BOARD_FIXTURES[DEFAULT_BOARD];
+}
+
+const BRD_URL  = resolveBoardUrl();
 const PARSE_URL = '/api/board/parse';
 
 const state = { board: null, partsSorted: null };
