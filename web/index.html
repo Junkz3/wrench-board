@@ -181,6 +181,25 @@
   .empty-state-card code{display:block;font-family:var(--mono);font-size:11px;color:var(--cyan);padding:10px 12px;background:var(--bg-deep);border:1px solid var(--border);border-radius:6px;text-align:left;overflow-x:auto;white-space:pre;margin-top:4px}
   .empty-state.hidden{display:none}
 
+  /* =========== HOME / BIBLIOTHÈQUE =========== */
+  .home{position:fixed;top:92px;left:52px;right:0;bottom:28px;overflow:auto;padding:32px 40px;z-index:2}
+  .home.hidden{display:none}
+  .home-head{display:flex;align-items:flex-end;gap:16px;margin-bottom:24px;border-bottom:1px solid var(--border);padding-bottom:16px}
+  .home-head h1{margin:0;font-size:22px;font-weight:600;letter-spacing:-.3px}
+  .home-head .home-sub{flex:1;margin:0;color:var(--text-3);font-size:13px;line-height:1.5}
+  .home-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+  .home-card{position:relative;padding:16px 18px;background:var(--panel);border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:all .15s;text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:8px}
+  .home-card:hover{border-color:rgba(56,189,248,.45);background:var(--panel-2);transform:translateY(-1px)}
+  .home-card .slug{font-family:var(--mono);font-size:10.5px;color:var(--text-3)}
+  .home-card .name{font-size:15px;font-weight:600;color:var(--text)}
+  .home-card .badges{display:flex;gap:6px;flex-wrap:wrap}
+  .home-card .badge{padding:2px 7px;border-radius:10px;font-size:10.5px;font-family:var(--mono);border:1px solid var(--border);color:var(--text-2)}
+  .home-card .badge.ok{color:var(--emerald);border-color:rgba(52,211,153,.3);background:rgba(52,211,153,.08)}
+  .home-card .badge.warn{color:var(--amber);border-color:rgba(245,158,11,.3);background:rgba(245,158,11,.08)}
+  .home-empty{text-align:center;padding:60px 20px;color:var(--text-3)}
+  .home-empty.hidden{display:none}
+  .canvas.hidden{display:none}
+
   /* =========== TOOLTIP =========== */
   .tooltip{position:fixed;pointer-events:none;background:rgba(10,17,32,.95);border:1px solid var(--border);border-radius:6px;padding:8px 10px;font-size:11.5px;color:var(--text);backdrop-filter:blur(6px);box-shadow:0 8px 20px rgba(0,0,0,.4);max-width:260px;z-index:40;opacity:0;transform:translateY(3px);transition:opacity .12s,transform .12s}
   .tooltip.show{opacity:1;transform:translateY(0)}
@@ -264,8 +283,29 @@
   </div>
 </div>
 
+<!-- ============ HOME / BIBLIOTHÈQUE ============ -->
+<section class="home hidden" id="homeSection">
+  <header class="home-head">
+    <h1>Bibliothèque</h1>
+    <p class="home-sub">Devices avec un knowledge pack généré. Clique pour ouvrir le graphe.</p>
+    <button class="btn primary" id="homeNewBtn">
+      <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+      Générer un nouveau device
+    </button>
+  </header>
+
+  <div class="home-grid" id="homeGrid">
+    <!-- cards injected by JS -->
+  </div>
+
+  <div class="home-empty hidden" id="homeEmpty">
+    <h3>Aucun pack généré pour l'instant</h3>
+    <p>Lance le pipeline sur un device pour voir sa carte apparaître ici.</p>
+  </div>
+</section>
+
 <!-- ============ CANVAS ============ -->
-<div class="canvas" id="canvas">
+<div class="canvas hidden" id="canvas">
   <div class="grid-bg"></div>
 
   <!-- LOGICAL COLUMN BANDS: strict L→R reading flow
@@ -469,6 +509,65 @@ function setEmptyState(visible) {
 }
 
 setEmptyState(true);  // show the card synchronously; the fetch may replace it
+
+/* ---------- HOME / BIBLIOTHÈQUE ---------- */
+async function loadHomePacks() {
+  try {
+    const res = await fetch("/pipeline/packs");
+    if (!res.ok) return [];
+    return await res.json();
+  } catch (err) {
+    console.warn("loadHomePacks failed", err);
+    return [];
+  }
+}
+
+function renderHome(packs) {
+  const grid = document.getElementById("homeGrid");
+  const empty = document.getElementById("homeEmpty");
+  grid.innerHTML = "";
+  if (packs.length === 0) {
+    empty.classList.remove("hidden");
+    return;
+  }
+  empty.classList.add("hidden");
+  for (const p of packs) {
+    const card = document.createElement("a");
+    card.className = "home-card";
+    card.href = `?device=${encodeURIComponent(p.device_slug)}`;
+    const complete = p.has_registry && p.has_knowledge_graph && p.has_rules && p.has_dictionary;
+    card.innerHTML = `
+      <div class="slug">${p.device_slug}</div>
+      <div class="name">${p.device_slug.replace(/-/g, " ").replace(/^./, c => c.toUpperCase())}</div>
+      <div class="badges">
+        <span class="badge ${complete ? 'ok' : 'warn'}">${complete ? 'pack complet' : 'incomplet'}</span>
+        ${p.has_audit_verdict ? '<span class="badge">audité</span>' : ''}
+      </div>
+    `;
+    grid.appendChild(card);
+  }
+}
+
+function showSection(which) {
+  document.getElementById("homeSection").classList.toggle("hidden", which !== "home");
+  document.getElementById("canvas").classList.toggle("hidden", which !== "graphe");
+}
+
+document.getElementById("homeNewBtn").addEventListener("click", () => {
+  const label = prompt("Nom du device à générer (ex. 'Raspberry Pi 4 Model B') :");
+  if (!label) return;
+  fetch("/pipeline/generate", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({device_label: label}),
+  }).then(res => {
+    if (!res.ok) return res.json().then(e => alert("Erreur: " + JSON.stringify(e)));
+    return res.json().then(r => {
+      alert(`Pack généré: ${r.device_slug}`);
+      window.location.href = `?device=${encodeURIComponent(r.device_slug)}`;
+    });
+  });
+});
 
 const TYPE_COLORS = { component:"oklch(0.82 0.14 210)", symptom:"oklch(0.82 0.16 75)", net:"oklch(0.78 0.15 155)", action:"oklch(0.78 0.14 295)" };
 const TYPE_FILL   = { component:"oklch(0.82 0.14 210 / 0.22)", symptom:"oklch(0.82 0.16 75 / 0.22)", net:"oklch(0.78 0.15 155 / 0.22)", action:"oklch(0.78 0.14 295 / 0.22)" };
@@ -936,12 +1035,23 @@ window.addEventListener("resize", () => {
 
 /* ---------- INIT ---------- */
 (async function bootstrap() {
-  const fetched = await loadGraphFromBackend();
-  if (fetched && fetched.nodes && fetched.nodes.length > 0) {
-    setEmptyState(false);
-    initGraphWithData(fetched);
+  const params = new URLSearchParams(window.location.search);
+  const slug = params.get("device");
+  if (slug) {
+    // Device-scoped view → show graph
+    showSection("graphe");
+    const fetched = await loadGraphFromBackend();
+    if (fetched && fetched.nodes && fetched.nodes.length > 0) {
+      setEmptyState(false);
+      initGraphWithData(fetched);
+    } else {
+      setEmptyState(true);
+    }
   } else {
-    setEmptyState(true);
+    // No device → show Home
+    showSection("home");
+    const packs = await loadHomePacks();
+    renderHome(packs);
   }
 })();
 </script>
