@@ -135,3 +135,56 @@ def test_board_model_copy_rebuilds_indexes():
 
     assert copy.part_by_refdes("U99") is not None
     assert copy.part_by_refdes("R1") is None  # old index entry must be gone
+
+
+def test_part_rich_fields_default_to_none():
+    p = Part(
+        refdes="U1",
+        layer=Layer.TOP,
+        is_smd=True,
+        bbox=(Point(x=0, y=0), Point(x=100, y=100)),
+        pin_refs=[0],
+    )
+    assert p.value is None
+    assert p.footprint is None
+    assert p.rotation_deg is None
+
+
+def test_part_rich_fields_accept_values():
+    p = Part(
+        refdes="U1",
+        layer=Layer.TOP,
+        is_smd=True,
+        bbox=(Point(x=0, y=0), Point(x=100, y=100)),
+        pin_refs=[0],
+        value="iMX8MP-SoM",
+        footprint="Connector_PinSocket:SoM-BTB-400",
+        rotation_deg=90.0,
+    )
+    assert p.value == "iMX8MP-SoM"
+    assert p.footprint == "Connector_PinSocket:SoM-BTB-400"
+    assert p.rotation_deg == 90.0
+
+
+def test_pin_rich_fields_default_to_none():
+    pin = Pin(
+        part_refdes="U1",
+        index=1,
+        pos=Point(x=10, y=20),
+        layer=Layer.TOP,
+    )
+    assert pin.pad_shape is None
+    assert pin.pad_size is None
+
+
+def test_pin_rich_fields_accept_values():
+    pin = Pin(
+        part_refdes="U1",
+        index=1,
+        pos=Point(x=10, y=20),
+        layer=Layer.TOP,
+        pad_shape="rect",
+        pad_size=(40, 20),
+    )
+    assert pin.pad_shape == "rect"
+    assert pin.pad_size == (40, 20)

@@ -25,6 +25,8 @@ class Pin(BaseModel):
     net: str | None = None
     probe: int | None = None
     layer: Layer
+    pad_shape: str | None = None
+    pad_size: tuple[int, int] | None = None
 
 
 class Part(BaseModel):
@@ -33,6 +35,9 @@ class Part(BaseModel):
     is_smd: bool
     bbox: tuple[Point, Point]  # (min, max)
     pin_refs: list[int]
+    value: str | None = None
+    footprint: str | None = None
+    rotation_deg: float | None = None
 
 
 class Net(BaseModel):
