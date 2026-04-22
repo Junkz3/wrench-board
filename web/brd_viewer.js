@@ -22,6 +22,7 @@ const state = {
   partsSorted: null,
   partBodyBboxes: null,
   pinsByNet: null,        // Map<netName, number[]>  pin indices grouped by net
+  netCategory: null,      // Map<netName, 'power' | 'ground' | 'signal'>
   selectedPinIdx: null,   // currently highlighted pin (index into board.pins)
   hoveredPinIdx: null,    // pin under the cursor (for click-affordance outline)
 };
@@ -72,6 +73,20 @@ function computeAllBodyBboxes(board) {
   const out = new Map();
   for (const p of board.parts || []) {
     out.set(p.refdes, computeBodyBbox(p, pinsById));
+  }
+  return out;
+}
+
+// Classify each net as 'power' (+3V3, +5V, VBAT, VCC…), 'ground' (GND, VSS…),
+// or 'signal' (everything else) so we can colour pins distinctively — a
+// technician spots power / ground topology at a glance instead of hunting
+// through a uniform cyan sea.
+function computeNetCategory(board) {
+  const out = new Map();
+  for (const n of board.nets || []) {
+    if (n.is_power) out.set(n.name, 'power');
+    else if (n.is_ground) out.set(n.name, 'ground');
+    else out.set(n.name, 'signal');
   }
   return out;
 }
@@ -297,8 +312,14 @@ function draw() {
   const pinStrokeDefault = 'rgba(230, 237, 247, 1)';     // --text, sharp edge
   const pinFillDim       = 'rgba(169, 182, 204, 0.22)';
   const pinStrokeDim     = 'rgba(169, 182, 204, 0.35)';
-  const pinFillNet       = 'rgba(52, 211, 153, 0.95)';   // --emerald
+  const pinFillNet       = 'rgba(52, 211, 153, 0.95)';   // --emerald (selected)
   const pinStrokeNet     = 'rgba(160, 240, 200, 1)';
+  // Net-category colours (applied only when no net is explicitly selected —
+  // the emerald selection override takes priority to keep the trace readable)
+  const pinFillPower     = 'rgba(245, 158, 11, 0.90)';   // --amber
+  const pinStrokePower   = 'rgba(252, 180, 60, 1)';
+  const pinFillGround    = 'rgba(110, 125, 150, 0.55)';  // dim gray (GND is everywhere)
+  const pinStrokeGround  = 'rgba(140, 155, 180, 0.7)';
 
   // Determine the selected net (if any) from state.selectedPinIdx
   const selectedPin = state.selectedPinIdx != null ? pins[state.selectedPinIdx] : null;
@@ -323,7 +344,7 @@ function draw() {
     const w = Math.max(sw, 2);
     const h = Math.max(sh, 2);
 
-    // Net-highlight coloring
+    // Pin colour: selected-net override > category > default
     if (netPinSet) {
       if (netPinSet.has(i)) {
         ctx.fillStyle = pinFillNet;
@@ -333,8 +354,17 @@ function draw() {
         ctx.strokeStyle = pinStrokeDim;
       }
     } else {
-      ctx.fillStyle   = pinFillDefault;
-      ctx.strokeStyle = pinStrokeDefault;
+      const category = pin.net ? state.netCategory?.get(pin.net) : null;
+      if (category === 'power') {
+        ctx.fillStyle   = pinFillPower;
+        ctx.strokeStyle = pinStrokePower;
+      } else if (category === 'ground') {
+        ctx.fillStyle   = pinFillGround;
+        ctx.strokeStyle = pinStrokeGround;
+      } else {
+        ctx.fillStyle   = pinFillDefault;
+        ctx.strokeStyle = pinStrokeDefault;
+      }
     }
 
     // Apply this pin's own pad rotation — each pad carries its own orientation
@@ -758,6 +788,7 @@ export async function initBoardview(containerEl) {
   state.partBodyBboxes = computeAllBodyBboxes(board);
   state.partsSorted = sortPartsByAreaDesc(board.parts || [], state.partBodyBboxes);
   state.pinsByNet = computePinsByNet(board);
+  state.netCategory = computeNetCategory(board);
   state.selectedPinIdx = null;
   mountCanvas(containerEl, board);
 }
