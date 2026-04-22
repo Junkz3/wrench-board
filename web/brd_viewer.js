@@ -36,14 +36,14 @@ function computeBodyBbox(part, pinsById) {
     if (p.pos.y < y0) y0 = p.pos.y;
     if (p.pos.y > y1) y1 = p.pos.y;
   }
-  // Pad so 2-pad components (0603 R/C with pins on one axis only) stay visible
-  // in the orthogonal direction. Proportional on big footprints, floored for
-  // tiny ones. 30 mils ~= 0.75 mm — roughly matches the 0603 body half-width.
-  const padX = Math.max(30, (x1 - x0) * 0.15);
-  const padY = Math.max(30, (y1 - y0) * 0.15);
+  // Pad with a fixed 15 mils (~0.4 mm) so 2-pad passives (0603/1210) stay
+  // visible in the axis orthogonal to the pad separation, and single-pin
+  // mounting holes render as a 30x30 mil dot. No percentage padding — it
+  // inflates big connectors (J3, U1, etc.) visibly beyond their real size.
+  const pad = 15;
   return [
-    { x: x0 - padX, y: y0 - padY },
-    { x: x1 + padX, y: y1 + padY },
+    { x: x0 - pad, y: y0 - pad },
+    { x: x1 + pad, y: y1 + pad },
   ];
 }
 
