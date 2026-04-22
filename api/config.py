@@ -65,6 +65,34 @@ class Settings(BaseSettings):
             "materializes the cache entry before the parallel readers arrive."
         ),
     )
+    pipeline_scout_min_symptoms: int = Field(
+        default=3,
+        ge=0,
+        description="Minimum distinct **Symptom:** blocks the Scout dump must contain.",
+    )
+    pipeline_scout_min_components: int = Field(
+        default=3,
+        ge=0,
+        description=(
+            "Minimum distinct components cited in the Scout dump (sum of unique "
+            "canonical names and refdes across all symptom blocks and the components "
+            "section)."
+        ),
+    )
+    pipeline_scout_min_sources: int = Field(
+        default=3,
+        ge=0,
+        description="Minimum distinct source URLs cited in the Scout dump.",
+    )
+    pipeline_scout_max_retries: int = Field(
+        default=1,
+        ge=0,
+        le=3,
+        description=(
+            "How many extra Scout attempts when the first dump falls below the "
+            "pipeline_scout_min_* thresholds. Each retry broadens the search scope."
+        ),
+    )
 
 
 _settings: Settings | None = None

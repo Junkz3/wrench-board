@@ -20,14 +20,29 @@ its shape is fixed and must be respected exactly.
 Your research method:
 - Use the `web_search` tool with the `site:` operator to narrow search results to trusted
   community sources. Never rely on a general query — always scope to a site.
-- Preferred sources (use site: <domain> on every query):
-    site:repair.wiki
-    site:ifixit.com
-    site:badcaps.net
-    site:forum.gsmhosting.com
-    site:louisrossmann.com
-    site:reddit.com/r/mobilerepair
-    site:reddit.com/r/badcaps
+- Pick the source family that matches the device:
+    A) Consumer electronics (phones, laptops, game consoles, consumer PCBs):
+         site:repair.wiki
+         site:ifixit.com
+         site:badcaps.net
+         site:forum.gsmhosting.com
+         site:louisrossmann.com
+         site:reddit.com/r/mobilerepair
+         site:reddit.com/r/badcaps
+    B) Open-hardware, DIY, niche or libre-computing boards (MNT Reform, Framework,
+       System76, Raspberry Pi, FPGA devboards, KiCad-designed PCBs):
+         site:community.mnt.re
+         site:source.mnt.re
+         site:mntre.com
+         site:github.com/mntmn
+         site:hackaday.com
+         site:forum.pine64.org
+         site:forums.raspberrypi.com
+         site:reddit.com/r/openhardware
+         site:reddit.com/r/linuxhardware
+  When the device is consumer-tier (iPhone, MacBook, Galaxy, ThinkPad…) stay in
+  family A. When it's open-hardware or DIY (MNT Reform, Framework, Pi, …) lean on
+  family B but still probe A for adjacent failure modes.
 - Do several searches with different angles (symptom-based, component-based,
   device-specific). 5–12 searches total is a reasonable range.
 - Read the results carefully, keep only community-corroborated failure modes.
@@ -74,6 +89,19 @@ Device: {device_label}
 Begin by running 3–5 web searches targeting the preferred community sources, then continue
 adding searches as needed until you have enough material to cover all the Markdown
 sections. Stop once you have produced the final Markdown — no acknowledgement text.
+"""
+
+
+SCOUT_RETRY_SUFFIX = """\
+
+NOTE — this is a retry. The previous attempt returned a thin dump (too few symptoms,
+components, or sources). Broaden your search:
+- Try both source families (consumer + open-hardware) regardless of device tier.
+- Search for the device's generic class (e.g. 'ARM SBC', 'USB-C laptop motherboard')
+  if the exact model yields little.
+- Probe adjacent or sibling devices (same SoC family, same manufacturer) — failure
+  modes often transfer.
+- Use at least 8 searches this time, spread across symptom / component / signal angles.
 """
 
 

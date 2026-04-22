@@ -133,7 +133,13 @@ async def generate_knowledge_pack(
         t0 = time.monotonic()
         await emit({"type": "phase_started", "phase": "scout"})
         raw_dump = await run_scout(
-            client=client, model=models_by_role["scout"], device_label=device_label
+            client=client,
+            model=models_by_role["scout"],
+            device_label=device_label,
+            min_symptoms=settings.pipeline_scout_min_symptoms,
+            min_components=settings.pipeline_scout_min_components,
+            min_sources=settings.pipeline_scout_min_sources,
+            max_retries=settings.pipeline_scout_max_retries,
         )
         (pack_dir / "raw_research_dump.md").write_text(raw_dump, encoding="utf-8")
         logger.info("[Pipeline] Phase 1 complete · raw_research_dump.md written")
