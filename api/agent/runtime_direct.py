@@ -296,6 +296,7 @@ async def _dispatch_mb_tool(
             label=payload.get("label"),
             refdes=payload.get("refdes"),
             index=payload.get("index"),
+            domain=payload.get("domain"),
         )
     if name == "mb_hypothesize":
         from api.tools.hypothesize import mb_hypothesize as _mb_hypothesize
@@ -360,6 +361,16 @@ async def _dispatch_mb_tool(
         return _mb_clr(
             device_slug=device_slug, repair_id=session_id or "",
             memory_root=memory_root,
+        )
+    if name == "mb_validate_finding":
+        from api.tools.validation import mb_validate_finding as _mb_val
+        return _mb_val(
+            device_slug=device_slug,
+            repair_id=session_id or "",
+            memory_root=memory_root,
+            fixes=payload.get("fixes", []),
+            tech_note=payload.get("tech_note"),
+            agent_confidence=payload.get("agent_confidence", "high"),
         )
     if name == "mb_expand_knowledge":
         return await mb_expand_knowledge(
@@ -515,11 +526,13 @@ async def run_diagnostic_session_direct(
     import asyncio as _asyncio
 
     from api.tools.measurements import set_ws_emitter
+    from api.tools.validation import set_ws_emitter as set_validation_emitter
 
     def _emit(event: dict) -> None:
         _asyncio.create_task(ws.send_json(event))
 
     set_ws_emitter(_emit)
+    set_validation_emitter(_emit)
 
     try:
         while True:
@@ -571,3 +584,4 @@ async def run_diagnostic_session_direct(
         )
     finally:
         set_ws_emitter(None)
+        set_validation_emitter(None)

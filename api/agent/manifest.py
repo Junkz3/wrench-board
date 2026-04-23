@@ -285,6 +285,46 @@ MB_TOOLS: list[dict] = [
     },
     {
         "type": "custom",
+        "name": "mb_validate_finding",
+        "description": (
+            "Enregistre le(s) composant(s) coupable(s) confirmé(s) par le tech à la "
+            "fin d'une repair. À appeler UNIQUEMENT quand un trigger 'Marquer fix' "
+            "a été reçu ET que les fixes sont confirmés (pas d'auto-validation sur "
+            "contexte ambigu). `fixes` est une liste d'objets "
+            "{refdes, mode ∈ (dead|alive|anomalous|hot|shorted|passive_swap), rationale}."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "fixes": {
+                    "type": "array",
+                    "description": "Liste des composants fixés lors de la repair.",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "refdes": {"type": "string"},
+                            "mode": {
+                                "type": "string",
+                                "enum": ["dead", "alive", "anomalous", "hot", "shorted", "passive_swap"],
+                            },
+                            "rationale": {"type": "string"},
+                        },
+                        "required": ["refdes", "mode", "rationale"],
+                    },
+                    "minItems": 1,
+                },
+                "tech_note": {"type": ["string", "null"]},
+                "agent_confidence": {
+                    "type": "string",
+                    "enum": ["high", "medium", "low"],
+                    "default": "high",
+                },
+            },
+            "required": ["fixes"],
+        },
+    },
+    {
+        "type": "custom",
         "name": "mb_expand_knowledge",
         "description": (
             "Grow this device's memory bank around a focus symptom area. "

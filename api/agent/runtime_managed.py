@@ -324,6 +324,16 @@ async def _dispatch_tool(
             device_slug=device_slug, repair_id=repair_id or "",
             memory_root=memory_root,
         )
+    if name == "mb_validate_finding":
+        from api.tools.validation import mb_validate_finding as _mb_val
+        return _mb_val(
+            device_slug=device_slug,
+            repair_id=repair_id or "",
+            memory_root=memory_root,
+            fixes=payload.get("fixes", []),
+            tech_note=payload.get("tech_note"),
+            agent_confidence=payload.get("agent_confidence", "high"),
+        )
     if name == "mb_expand_knowledge":
         return await mb_expand_knowledge(
             client=client, device_slug=device_slug,
@@ -577,11 +587,13 @@ async def run_diagnostic_session_managed(
     events_by_id: dict[str, Any] = {}
 
     from api.tools.measurements import set_ws_emitter
+    from api.tools.validation import set_ws_emitter as set_validation_emitter
 
     def _emit(event: dict) -> None:
         asyncio.create_task(ws.send_json(event))
 
     set_ws_emitter(_emit)
+    set_validation_emitter(_emit)
 
     try:
         recv_task = asyncio.create_task(
@@ -627,6 +639,7 @@ async def run_diagnostic_session_managed(
         except Exception:  # noqa: BLE001 — best-effort
             pass
         set_ws_emitter(None)
+        set_validation_emitter(None)
 
 
 async def _replay_ma_history_to_ws(

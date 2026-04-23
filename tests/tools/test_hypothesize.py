@@ -193,3 +193,9 @@ def test_mb_hypothesize_manifest_exposes_new_signature():
     ]
     for tool_name in new_tools:
         assert tool_name in names, f"{tool_name} not found in manifest"
+
+
+def test_mb_validate_finding_in_manifest():
+    from api.agent.manifest import MB_TOOLS
+    names = [t["name"] for t in MB_TOOLS]
+    assert "mb_validate_finding" in names
