@@ -62,3 +62,47 @@ def test_unwrap_leaves_good_payload_alone_then_fails():
     # No strings to unwrap, so changed=False → falls through to the value-level
     # check which also won't find anything. Expected: None.
     assert recovered is None
+
+
+def test_deep_unwrap_recovers_doubly_stringified_payload():
+    """Haiku-class pathology: a stringified list whose items contain another
+    stringified field. The original shallow unwrap couldn't recover this; the
+    deep walk must."""
+    inner_causes = (
+        '[{"refdes":"U7","probability":0.5,"mechanism":"short"}]'
+    )
+    payload = {
+        "schema_version": "1.0",
+        "rules": (
+            '[{"id":"r1","symptoms":["x"],'
+            f'"likely_causes":{inner_causes!s},'
+            '"diagnostic_steps":[],"confidence":0.6,"sources":[]}]'
+        ),
+    }
+    recovered = _try_unwrap(payload, RulesSet)
+    assert recovered is not None
+    assert len(recovered.rules) == 1
+    assert recovered.rules[0].likely_causes[0].refdes == "U7"
+
+
+def test_deep_unwrap_handles_stringified_inside_nested_dict():
+    """A nested dict has a stringified list field — unwrap must recurse into
+    the dict and not just look at top-level string values."""
+    payload = {
+        "schema_version": "1.0",
+        "rules": [
+            {
+                "id": "r1",
+                "symptoms": '["x","y"]',  # stringified list, nested
+                "likely_causes": [
+                    {"refdes": "U7", "probability": 0.5, "mechanism": "short"}
+                ],
+                "diagnostic_steps": [],
+                "confidence": 0.6,
+                "sources": [],
+            }
+        ],
+    }
+    recovered = _try_unwrap(payload, RulesSet)
+    assert recovered is not None
+    assert recovered.rules[0].symptoms == ["x", "y"]
