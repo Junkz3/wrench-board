@@ -19,6 +19,7 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from api.pipeline.schematic.schemas import AnalyzedBootSequence, ElectricalGraph
+from api.pipeline.schematic.simulator import SimulationEngine
 
 # ---------------------------------------------------------------------------
 # Tunable constants — exported so tests and scripts can override without
@@ -131,6 +132,62 @@ class HypothesizeResult(BaseModel):
     observations_echo: Observations
     hypotheses: list[Hypothesis]
     pruning: PruningStats
+
+
+# ---------------------------------------------------------------------------
+# Forward simulation — mode-aware dispatcher
+# ---------------------------------------------------------------------------
+
+
+def _empty_cascade() -> dict:
+    return {
+        "dead_comps": frozenset(),
+        "dead_rails": frozenset(),
+        "shorted_rails": frozenset(),
+        "anomalous_comps": frozenset(),
+        "hot_comps": frozenset(),
+        "final_verdict": "",
+        "blocked_at_phase": None,
+    }
+
+
+def _simulate_dead(
+    electrical: ElectricalGraph,
+    analyzed_boot: AnalyzedBootSequence | None,
+    killed: list[str],
+) -> dict:
+    """Forward cascade when one or more refdes are fully dead (power-off)."""
+    tl = SimulationEngine(
+        electrical, analyzed_boot=analyzed_boot, killed_refdes=killed,
+    ).run()
+    c = _empty_cascade()
+    c["dead_comps"] = frozenset(set(tl.cascade_dead_components) | set(killed))
+    c["dead_rails"] = frozenset(tl.cascade_dead_rails)
+    c["final_verdict"] = tl.final_verdict
+    c["blocked_at_phase"] = tl.blocked_at_phase
+    return c
+
+
+def _simulate_failure(
+    electrical: ElectricalGraph,
+    analyzed_boot: AnalyzedBootSequence | None,
+    refdes: str,
+    mode: str,
+) -> dict:
+    """Run the forward cascade of a single failed (refdes, mode) pair.
+
+    Dispatches by mode. `anomalous`, `hot`, `shorted` are implemented in
+    Tasks 3-5. Phase 2+ modes should extend this dispatcher.
+    """
+    if mode == "dead":
+        return _simulate_dead(electrical, analyzed_boot, [refdes])
+    if mode == "anomalous":
+        raise NotImplementedError("anomalous lands in Task 3")
+    if mode == "hot":
+        raise NotImplementedError("hot lands in Task 4")
+    if mode == "shorted":
+        raise NotImplementedError("shorted lands in Task 5")
+    raise ValueError(f"unknown failure mode: {mode!r}")
 
 
 # ---------------------------------------------------------------------------
