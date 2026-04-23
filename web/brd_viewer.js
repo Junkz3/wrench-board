@@ -1031,6 +1031,17 @@ function attachInteraction(containerEl, toolbar, badge) {
         updateNetReadout(toolbar);
         updateInspector();
         requestRedraw();
+        // Broadcast the selection so sibling modules (e.g. schematic_minimap)
+        // can react without coupling to this file's internals.
+        const selRef = state.user.selectedPart?.refdes || null;
+        const selPin = state.user.selectedPinIdx != null ? state.board.pins[state.user.selectedPinIdx] : null;
+        window.dispatchEvent(new CustomEvent('bv:selection', { detail: {
+          refdes: selRef,
+          pinIdx: state.user.selectedPinIdx,
+          pinNumber: selPin?.number ?? null,
+          pinName: selPin?.name ?? null,
+          pinNet: selPin?.net ?? null,
+        }}));
       }
     }
   });
@@ -1043,6 +1054,9 @@ function attachInteraction(containerEl, toolbar, badge) {
       updateNetReadout(toolbar);
       updateInspector();
       requestRedraw();
+      window.dispatchEvent(new CustomEvent('bv:selection', { detail: {
+        refdes: null, pinIdx: null, pinNumber: null, pinName: null, pinNet: null,
+      }}));
     }
   });
 
@@ -1113,6 +1127,14 @@ function mountCanvas(containerEl, board) {
         <path d="M4 9V5h4M20 9V5h-4M4 15v4h4M20 15v4h-4"/>
       </svg>
     </button>
+    <button class="brd-btn" id="brd-mm-btn" title="Minimap relations schematic au clic" aria-pressed="true">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="5.5" cy="12" r="2.2"/>
+        <circle cx="18.5" cy="6" r="2.2"/>
+        <circle cx="18.5" cy="18" r="2.2"/>
+        <path d="M7.6 11.1L16.4 6.9M7.6 12.9L16.4 17.1"/>
+      </svg>
+    </button>
     <span class="brd-net" style="display:none;font-family:var(--mono);font-size:11px;color:var(--emerald);padding:0 8px;border-left:1px solid var(--border);margin-left:4px;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
     <span class="brd-zoom" style="font-family:var(--mono);font-size:11px;color:var(--text-2);min-width:42px;text-align:right">1.00×</span>`;
   containerEl.appendChild(toolbar);
@@ -1153,6 +1175,26 @@ function mountCanvas(containerEl, board) {
     requestRedraw();
   });
   annotBtn.classList.add('active');  // default ON
+
+  // Schematic-relations minimap toggle — reflects localStorage so user
+  // preference persists across reloads. State is broadcast to the
+  // schematic_minimap module via a CustomEvent so the two files stay
+  // decoupled (no shared globals or imports).
+  const mmBtn = toolbar.querySelector('#brd-mm-btn');
+  let mmEnabled = true;
+  try {
+    const stored = localStorage.getItem('bvMinimapEnabled');
+    if (stored === 'false') mmEnabled = false;
+  } catch (_) { /* ignore */ }
+  mmBtn.setAttribute('aria-pressed', String(mmEnabled));
+  mmBtn.classList.toggle('active', mmEnabled);
+  mmBtn.addEventListener('click', () => {
+    mmEnabled = !mmEnabled;
+    try { localStorage.setItem('bvMinimapEnabled', String(mmEnabled)); } catch (_) {}
+    mmBtn.setAttribute('aria-pressed', String(mmEnabled));
+    mmBtn.classList.toggle('active', mmEnabled);
+    window.dispatchEvent(new CustomEvent('bv:minimap-toggle', { detail: { enabled: mmEnabled } }));
+  });
 
   // ResizeObserver — keeps canvas sharp on window resize
   const ro = new ResizeObserver(() => {

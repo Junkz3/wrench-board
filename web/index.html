@@ -15,6 +15,7 @@
 <link rel="stylesheet" href="styles/stub.css">
 <link rel="stylesheet" href="styles/modal.css">
 <link rel="stylesheet" href="styles/brd.css">
+<link rel="stylesheet" href="styles/brd_minimap.css">
 <link rel="stylesheet" href="styles/memory_bank.css">
 <link rel="stylesheet" href="styles/pipeline_progress.css">
 <link rel="stylesheet" href="styles/llm.css">
@@ -79,6 +80,40 @@
 <!-- Stub sections — progressively replaced in following tasks -->
 <section class="stub hidden" data-section-stub="pcb">
   <div id="brdRoot" class="brd-root"></div>
+  <!-- Relations-schematic minimap — populated by js/schematic_minimap.js when
+       the user clicks a part or pin in the boardview. Glass overlay top-left. -->
+  <div id="bvMinimap" class="bv-minimap hidden" aria-hidden="true">
+    <header class="bv-minimap-head">
+      <span class="bv-minimap-title" id="bvMinimapKind">Relations</span>
+      <span class="bv-minimap-ref" id="bvMinimapRef">—</span>
+      <span class="bv-minimap-sub" id="bvMinimapSub"></span>
+      <button class="bv-minimap-close" id="bvMinimapClose" aria-label="Fermer">
+        <svg class="icon icon-sm" viewBox="0 0 24 24" width="12" height="12">
+          <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </header>
+    <svg id="bvMinimapSvg" class="bv-minimap-svg" viewBox="0 0 360 200" preserveAspectRatio="xMidYMid meet">
+      <defs>
+        <marker id="bv-mm-arrow-powers" viewBox="0 -5 10 10" refX="9" refY="0"
+                markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M0,-4L8,0L0,4" fill="oklch(0.78 0.15 155)" opacity="0.85"/>
+        </marker>
+        <marker id="bv-mm-arrow-produces" viewBox="0 -5 10 10" refX="9" refY="0"
+                markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M0,-4L8,0L0,4" fill="oklch(0.82 0.14 210)" opacity="0.85"/>
+        </marker>
+        <marker id="bv-mm-arrow-decouples" viewBox="0 -5 10 10" refX="9" refY="0"
+                markerWidth="5" markerHeight="5" orient="auto">
+          <path d="M0,-4L8,0L0,4" fill="oklch(0.78 0.14 295)" opacity="0.8"/>
+        </marker>
+      </defs>
+      <g id="bvMinimapLinks"></g>
+      <g id="bvMinimapNodes"></g>
+    </svg>
+    <div class="bv-minimap-body" id="bvMinimapBody"></div>
+    <div class="bv-minimap-empty" id="bvMinimapEmpty">Clique un composant du board.</div>
+  </div>
 </section>
 <!-- ============ SCHEMATIC — electrical-graph viewer ============ -->
 <section class="sch-root hidden" data-section-stub="schematic" id="schematicSection">
@@ -527,6 +562,7 @@
 
 <script type="module" src="js/main.js"></script>
 <script type="module" src="brd_viewer.js" defer></script>
+<script type="module" src="js/schematic_minimap.js" defer></script>
 <script type="module" src="/js/profile.js"></script>
 </body>
 </html>

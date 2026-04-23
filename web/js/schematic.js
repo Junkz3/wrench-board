@@ -1352,6 +1352,21 @@ function setSelectedRail(railId) {
   }
 }
 
+// External-focus bridge — the boardview minimap dispatches this event when
+// the user clicks a rail in the mini-graph. If this module is already
+// initialized (model built), we switch to rail-focus in place; otherwise
+// the paired localStorage write gets picked up on next loadSchematic().
+window.addEventListener("schematic:focus-rail", (ev) => {
+  const railId = ev.detail?.railId;
+  if (!railId) return;
+  if (STATE.layoutMode !== "railfocus") {
+    STATE.layoutMode = "railfocus";
+    try { localStorage.setItem("schLayoutMode", "railfocus"); } catch (_) {}
+    if (STATE.graph) fullRender(STATE.graph);
+  }
+  setSelectedRail(railId);
+});
+
 /* ---------------------------------------------------------------------- *
  * KILL-SWITCH — BFS forward through produces + powers edges              *
  * ---------------------------------------------------------------------- */
@@ -2547,6 +2562,15 @@ function fullRender(graph) {
 }
 
 export async function loadSchematic() {
+  // Re-read persisted prefs on every section entry — another module (e.g.
+  // the boardview minimap) may have flipped layoutMode / selectedRailId
+  // between visits, and the module-level STATE init only runs once.
+  try {
+    const storedMode = localStorage.getItem("schLayoutMode");
+    if (storedMode) STATE.layoutMode = storedMode;
+    STATE.selectedRailId = localStorage.getItem("schSelectedRail") || null;
+  } catch (_) { /* ignore */ }
+
   const slug = getDeviceSlug();
   STATE.slug = slug;
   if (!slug) {

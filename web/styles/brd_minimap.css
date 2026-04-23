@@ -1,0 +1,133 @@
+/* Relations-schematic minimap — glass overlay shown on the boardview when
+   the user clicks a part or pin. Non-navigational: it visualizes the
+   schematic neighborhood of the selection, it does not re-layout on click.
+   Shapes and stroke colors mirror the main schematic view (emerald=rail,
+   cyan=component, violet=decoupling) for cross-view consistency. */
+
+.bv-minimap{
+  position:absolute;top:16px;left:16px;
+  width:360px;min-height:120px;max-height:calc(100vh - 60px);
+  background:linear-gradient(180deg,rgba(20,32,48,.94),rgba(15,24,42,.94));
+  border:1px solid var(--border);
+  border-radius:10px;
+  box-shadow:0 18px 50px rgba(0,0,0,.55),0 0 0 1px rgba(52,211,153,.04);
+  backdrop-filter:blur(12px);
+  z-index:8;
+  display:flex;flex-direction:column;
+  overflow:hidden;
+  transition:opacity .18s;
+}
+.bv-minimap.hidden{display:none}
+
+.bv-minimap-head{
+  display:flex;align-items:center;gap:8px;
+  padding:9px 12px 8px;
+  border-bottom:1px solid var(--border);
+  background:rgba(10,17,32,.4);
+}
+.bv-minimap-title{
+  font-family:var(--mono);font-size:10px;
+  color:var(--text-3);
+  text-transform:uppercase;letter-spacing:.5px;font-weight:700;
+  flex-shrink:0;
+}
+.bv-minimap-ref{
+  font-family:var(--mono);font-size:12.5px;font-weight:600;
+  color:var(--cyan);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;flex-shrink:0;
+}
+.bv-minimap-sub{
+  flex:1;
+  font-family:var(--mono);font-size:10px;
+  color:var(--text-3);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;
+}
+.bv-minimap[data-kind="net"] .bv-minimap-ref{color:oklch(0.88 0.15 155)}
+.bv-minimap-close{
+  flex-shrink:0;
+  width:22px;height:22px;padding:0;
+  background:transparent;border:0;
+  color:var(--text-3);cursor:pointer;
+  border-radius:4px;
+  display:flex;align-items:center;justify-content:center;
+  transition:background .12s,color .12s;
+}
+.bv-minimap-close:hover{background:var(--panel-2);color:var(--text)}
+
+.bv-minimap-svg{
+  width:100%;height:190px;
+  display:block;
+  background:radial-gradient(circle at 50% 40%,rgba(56,189,248,.04),transparent 60%);
+}
+
+/* --- body: structured text below the svg graph --- */
+.bv-minimap-body{
+  flex:1;
+  min-height:0;
+  overflow-y:auto;
+  padding:8px 12px 12px;
+  border-top:1px solid var(--border-soft);
+  font-family:var(--mono);font-size:10.5px;
+  color:var(--text-2);
+  line-height:1.55;
+}
+.bv-minimap-body::-webkit-scrollbar{width:6px}
+.bv-minimap-body::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+.bv-minimap-body.hidden{display:none}
+
+.bv-mm-section{margin:0 0 8px}
+.bv-mm-section:last-child{margin-bottom:0}
+.bv-mm-section-head{font-size:9px;letter-spacing:.5px;text-transform:uppercase;color:var(--text-3);font-weight:700;margin-bottom:3px}
+
+.bv-mm-row{display:flex;align-items:center;gap:6px;padding:1px 0;min-width:0;flex-wrap:wrap}
+.bv-mm-pinlabel{color:var(--text-3);flex-shrink:0}
+.bv-mm-pinnum{color:var(--text);font-weight:600;flex-shrink:0}
+.bv-mm-arrow{color:var(--text-3);font-weight:400}
+.bv-mm-chip{padding:1px 6px;border-radius:3px;background:var(--bg-deep);border:1px solid var(--border);font-size:10px;color:var(--text-2);cursor:pointer;transition:all .12s;flex-shrink:0}
+.bv-mm-chip:hover{filter:brightness(1.3);border-color:var(--border-soft)}
+.bv-mm-chip.rail{color:var(--emerald);border-color:rgba(52,211,153,.3);background:rgba(52,211,153,.08)}
+.bv-mm-chip.gnd{color:var(--text-3);border-color:rgba(110,125,150,.35);background:rgba(30,42,60,.45)}
+.bv-mm-chip.signal{color:var(--cyan);border-color:rgba(56,189,248,.3);background:rgba(56,189,248,.06)}
+.bv-mm-chip.comp{color:var(--cyan);border-color:rgba(56,189,248,.3);background:rgba(56,189,248,.06)}
+.bv-mm-chip.comp.producer{color:var(--amber);border-color:rgba(245,158,11,.35);background:rgba(245,158,11,.08);font-weight:600}
+.bv-mm-chip.comp.self{color:var(--text);border-color:rgba(245,158,11,.4);background:rgba(245,158,11,.12);font-weight:700}
+.bv-mm-chip.cap{color:var(--violet);border-color:rgba(192,132,252,.3);background:rgba(192,132,252,.06);font-size:9.5px;padding:1px 5px}
+.bv-mm-muted{color:var(--text-3);font-size:10px}
+.bv-mm-more{color:var(--text-3);font-size:9.5px;padding-left:4px}
+.bv-mm-spof{padding:1px 6px;border-radius:3px;font-size:9.5px;font-weight:700;background:rgba(236,100,75,.12);color:oklch(0.85 0.15 25);border:1px solid rgba(236,100,75,.3)}
+
+.bv-minimap-empty{
+  padding:22px 14px;
+  font-family:var(--mono);font-size:11px;
+  color:var(--text-3);text-align:center;
+  line-height:1.5;
+}
+
+/* --- links --- */
+.bv-mm-link{fill:none;stroke-linecap:round;transition:stroke-opacity .15s}
+.bv-mm-link-powers{stroke:oklch(0.78 0.15 155);stroke-opacity:.8;stroke-width:1.4}
+.bv-mm-link-produces{stroke:oklch(0.82 0.14 210);stroke-opacity:.75;stroke-width:1.4;stroke-dasharray:5 3}
+.bv-mm-link-decouples{stroke:oklch(0.78 0.14 295);stroke-opacity:.6;stroke-width:1.1;stroke-dasharray:2 3}
+
+/* --- nodes --- */
+.bv-mm-node{cursor:default}
+.bv-mm-node.clickable{cursor:pointer}
+.bv-mm-node.clickable:hover .bv-mm-rail-shape{filter:brightness(1.35);stroke-width:1.8}
+.bv-mm-node.clickable:hover .bv-mm-rail-label{fill:var(--text)}
+.bv-mm-node text{pointer-events:none;paint-order:stroke;stroke:rgba(10,17,32,.92);stroke-width:3px}
+
+/* center component — the thing the user clicked */
+.bv-mm-center-shape{fill:rgba(56,189,248,.18);stroke:oklch(0.82 0.14 210);stroke-width:1.8}
+.bv-mm-center-label{font-family:var(--mono);font-size:11px;font-weight:700;fill:var(--text);text-anchor:middle}
+.bv-mm-center-sub{font-family:var(--mono);font-size:8.5px;fill:var(--text-3);text-anchor:middle}
+
+/* rails (hex) — same emerald family as the main schematic */
+.bv-mm-rail-shape{fill:rgba(52,211,153,.16);stroke:oklch(0.78 0.15 155);stroke-width:1.4}
+.bv-mm-rail-shape.decouples{stroke:oklch(0.78 0.14 295);fill:rgba(192,132,252,.14)}
+.bv-mm-rail-label{font-family:var(--mono);font-size:9.5px;font-weight:600;fill:oklch(0.88 0.15 155);text-anchor:middle}
+.bv-mm-rail-sub{font-family:var(--mono);font-size:8px;fill:var(--text-3);text-anchor:middle}
+.bv-mm-rail-shape.decouples ~ .bv-mm-rail-label,
+.bv-mm-node.kind-decouples .bv-mm-rail-label{fill:oklch(0.82 0.13 295)}
+
+/* role legend in the empty/no-data state */
+.bv-mm-nodata{font-family:var(--mono);font-size:10.5px;fill:var(--text-3);text-anchor:middle}
