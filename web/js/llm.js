@@ -152,6 +152,12 @@ function connect() {
         // until the tech actually types.
         logSys("contexte device + symptôme chargé · l'agent attend ton premier message");
         break;
+      case "session_resumed":
+        // Managed mode: we picked up an existing MA session so the agent
+        // remembers the conversation. The UI log is empty (we don't replay
+        // past events in managed mode yet) — warn the tech.
+        logSys("session reprise · l'agent garde tout le contexte précédent (ton chat était plus haut dans la session MA)");
+        break;
       case "message":
         logMessage(payload.role || "assistant", payload.text || "", payload.replay === true);
         break;

@@ -26,7 +26,11 @@ from typing import Any, Literal
 from anthropic import AsyncAnthropic
 from fastapi import WebSocket, WebSocketDisconnect
 
-from api.agent.chat_history import build_session_intro
+from api.agent.chat_history import (
+    build_session_intro,
+    load_ma_session_id,
+    save_ma_session_id,
+)
 from api.agent.dispatch_bv import dispatch_bv
 from api.agent.managed_ids import get_agent, load_managed_ids
 from api.agent.memory_stores import ensure_memory_store
@@ -164,18 +168,46 @@ async def run_diagnostic_session_managed(
             }
         ]
 
-    try:
-        session = await client.beta.sessions.create(**session_kwargs)
-    except Exception as exc:  # noqa: BLE001
-        logger.exception("[Diag-MA] session create failed for device=%s", device_slug)
-        await ws.accept()
-        await ws.send_json({"type": "error", "text": f"session create failed: {exc}"})
-        await ws.close()
-        return
+    # Reuse the repair's previously-persisted MA session when possible —
+    # that's how conversation context survives a WS close/reopen.
+    reused_session_id = load_ma_session_id(
+        device_slug=device_slug, repair_id=repair_id
+    )
+    session = None
+    resumed = False
+    if reused_session_id:
+        try:
+            session = await client.beta.sessions.retrieve(reused_session_id)
+            resumed = True
+            logger.info(
+                "[Diag-MA] Resuming existing session=%s for repair=%s",
+                reused_session_id, repair_id,
+            )
+        except Exception as exc:  # noqa: BLE001
+            logger.warning(
+                "[Diag-MA] could not resume session=%s (%s) — creating fresh",
+                reused_session_id, exc,
+            )
+            session = None
+
+    if session is None:
+        try:
+            session = await client.beta.sessions.create(**session_kwargs)
+        except Exception as exc:  # noqa: BLE001
+            logger.exception(
+                "[Diag-MA] session create failed for device=%s", device_slug
+            )
+            await ws.accept()
+            await ws.send_json({"type": "error", "text": f"session create failed: {exc}"})
+            await ws.close()
+            return
+        save_ma_session_id(
+            device_slug=device_slug, repair_id=repair_id, session_id=session.id
+        )
 
     logger.info(
-        "[Diag-MA] session=%s device=%s tier=%s model=%s memory=%s",
-        session.id, device_slug, tier, agent_info["model"], memory_store_id,
+        "[Diag-MA] session=%s device=%s tier=%s model=%s memory=%s resumed=%s",
+        session.id, device_slug, tier, agent_info["model"], memory_store_id, resumed,
     )
 
     await ws.accept()
@@ -193,13 +225,12 @@ async def run_diagnostic_session_managed(
         }
     )
 
-    # The MA runtime needs the device intro prefixed to the TECH's FIRST
-    # real message (see _forward_ws_to_session) — we don't post anything to
-    # the session ourselves, because doing so would trigger an immediate
-    # agent turn (burning tokens) before the tech has even typed. Instead
-    # we surface the context on the WS and stash the intro for prefixing
-    # on the first user submit.
-    intro = build_session_intro(device_slug=device_slug, repair_id=repair_id)
+    # The intro (device context + reported symptom) only needs injection on
+    # a FRESH session. When we resume, the MA session already carries the
+    # full conversation history including the original intro.
+    intro = None if resumed else build_session_intro(
+        device_slug=device_slug, repair_id=repair_id
+    )
     if intro:
         await ws.send_json({
             "type": "context_loaded",
@@ -210,6 +241,12 @@ async def run_diagnostic_session_managed(
             "[Diag-MA] Stashed session intro for repair=%s (awaiting tech input)",
             repair_id,
         )
+    if resumed:
+        await ws.send_json({
+            "type": "session_resumed",
+            "session_id": session.id,
+            "repair_id": repair_id,
+        })
 
     # Cache: agent.custom_tool_use events by event.id, so we can look up
     # name+input when `requires_action` arrives and only hands us event_ids.
@@ -244,9 +281,17 @@ async def run_diagnostic_session_managed(
     except WebSocketDisconnect:
         logger.info("[Diag-MA] WS disconnected for device=%s", device_slug)
     finally:
+        # DO NOT archive: we want this session reusable on the next reopen
+        # so the tech picks up the conversation where they left off. MA
+        # keeps idle sessions alive (checkpoint TTL ~30 days per the beta
+        # docs). We only interrupt in case the stream was mid-turn, so the
+        # next connection doesn't inherit a stuck session_status_running.
         try:
-            await client.beta.sessions.archive(session.id)
-        except Exception:  # noqa: BLE001 — archive is best-effort
+            await client.beta.sessions.events.send(
+                session.id,
+                events=[{"type": "user.interrupt"}],
+            )
+        except Exception:  # noqa: BLE001 — best-effort
             pass
 
 

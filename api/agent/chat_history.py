@@ -128,6 +128,58 @@ def load_events(
     return events
 
 
+def save_ma_session_id(
+    *,
+    device_slug: str,
+    repair_id: str | None,
+    session_id: str,
+    memory_root: Path | None = None,
+) -> None:
+    """Persist the MA session_id on the repair's metadata so we can resume it
+    on the next WS open — otherwise every reopen creates a fresh MA session
+    and the conversation context is lost. Silent no-op on any error.
+    """
+    if not repair_id or not session_id:
+        return
+    settings = get_settings()
+    memory_root = memory_root or Path(settings.memory_root)
+    path = _metadata_file(memory_root, device_slug, repair_id)
+    if not path.exists():
+        return
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        if payload.get("ma_session_id") == session_id:
+            return
+        payload["ma_session_id"] = session_id
+        payload["ma_session_linked_at"] = datetime.now(UTC).isoformat()
+        path.write_text(
+            json.dumps(payload, indent=2, ensure_ascii=False) + "\n",
+            encoding="utf-8",
+        )
+    except (OSError, json.JSONDecodeError) as exc:
+        logger.warning(
+            "[ChatHistory] save_ma_session_id failed for repair=%s: %s",
+            repair_id,
+            exc,
+        )
+
+
+def load_ma_session_id(
+    *,
+    device_slug: str,
+    repair_id: str | None,
+    memory_root: Path | None = None,
+) -> str | None:
+    """Return the persisted MA session_id for a repair, or None."""
+    meta = load_repair_metadata(
+        device_slug=device_slug, repair_id=repair_id, memory_root=memory_root
+    )
+    if not meta:
+        return None
+    sid = meta.get("ma_session_id")
+    return sid if isinstance(sid, str) and sid else None
+
+
 def load_repair_metadata(
     *,
     device_slug: str,

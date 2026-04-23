@@ -128,3 +128,36 @@ def test_touch_status_noop_when_file_missing(tmp_path, monkeypatch):
         status="closed",
         memory_root=tmp_path,
     )
+
+
+def test_save_and_load_ma_session_id(tmp_path, monkeypatch):
+    from api.agent.chat_history import load_ma_session_id, save_ma_session_id
+
+    monkeypatch.setenv("MEMORY_ROOT", str(tmp_path))
+    rdir = tmp_path / "demo-pi" / "repairs"
+    rdir.mkdir(parents=True)
+    meta_path = rdir / "r1.json"
+    meta_path.write_text(json.dumps({
+        "repair_id": "r1",
+        "device_slug": "demo-pi",
+        "device_label": "Demo Pi",
+        "symptom": "no boot",
+        "status": "open",
+        "created_at": "2026-04-22T12:00:00+00:00",
+    }))
+
+    assert load_ma_session_id(
+        device_slug="demo-pi", repair_id="r1", memory_root=tmp_path
+    ) is None
+
+    save_ma_session_id(
+        device_slug="demo-pi", repair_id="r1", session_id="sesn_abc123",
+        memory_root=tmp_path,
+    )
+    assert load_ma_session_id(
+        device_slug="demo-pi", repair_id="r1", memory_root=tmp_path
+    ) == "sesn_abc123"
+
+    updated = json.loads(meta_path.read_text())
+    assert updated["ma_session_id"] == "sesn_abc123"
+    assert "ma_session_linked_at" in updated
