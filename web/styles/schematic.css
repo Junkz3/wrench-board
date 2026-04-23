@@ -1,0 +1,363 @@
+/* ============ SCHEMATIC ROOT ============ */
+.sch-root{position:fixed;top:92px;left:52px;right:0;bottom:0;background:var(--bg);overflow:hidden}
+.sch-root.hidden{display:none}
+body.no-metabar .sch-root{top:48px}
+body.no-metabar .sch-inspector{top:60px}
+
+.sch-canvas{position:absolute;inset:0;cursor:grab}
+.sch-canvas:active{cursor:grabbing}
+.sch-canvas.hidden{display:none}
+.sch-canvas svg{width:100%;height:100%;display:block;touch-action:none}
+
+/* subtle workshop grid */
+.sch-grid{position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(rgba(45,70,110,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(45,70,110,.05) 1px,transparent 1px);background-size:48px 48px}
+
+/* =========== GRID (phase × voltage) =========== */
+/* Horizontal voltage-band backdrops — the "bus rails" the eye follows. */
+.sch-vrow-band{fill:rgba(56,189,248,.025);stroke:rgba(56,189,248,.1);stroke-width:1;stroke-dasharray:8 6}
+.sch-vrow-band.vrow-0{fill:rgba(245,158,11,.035);stroke:rgba(245,158,11,.18)}   /* ≥12V amber */
+.sch-vrow-band.vrow-1{fill:rgba(56,189,248,.03);stroke:rgba(56,189,248,.18)}    /* 5-11V cyan */
+.sch-vrow-band.vrow-2{fill:rgba(52,211,153,.03);stroke:rgba(52,211,153,.18)}    /* 3V3 emerald */
+.sch-vrow-band.vrow-3{fill:rgba(192,132,252,.03);stroke:rgba(192,132,252,.18)}  /* 1V8-2V5 violet */
+.sch-vrow-head{fill:rgba(20,32,48,.92);stroke:var(--border);stroke-width:1}
+.sch-vrow-label{font-family:var(--mono);font-size:10px;fill:var(--text);text-anchor:middle;letter-spacing:.4px;text-transform:uppercase;font-weight:700}
+
+/* Vertical phase column guides (lighter — they're the secondary axis) */
+.sch-phase-col{fill:rgba(255,255,255,.012);stroke:rgba(255,255,255,.05);stroke-width:1}
+.sch-phase-col.col-none{fill:rgba(110,125,150,.04);stroke:rgba(110,125,150,.12)}
+.sch-phase-head{fill:rgba(20,32,48,.92);stroke:rgba(245,158,11,.35);stroke-width:1}
+.sch-phase-label{font-family:var(--mono);font-size:12px;fill:var(--amber);text-anchor:middle;letter-spacing:.5px;font-weight:700}
+.sch-phase-sub{font-family:var(--mono);font-size:9.5px;fill:var(--text-3);text-anchor:middle}
+
+/* =========== PHASE CHIP ON RAILS =========== */
+.sch-phase-chip{font-family:var(--mono);font-size:9px;font-weight:600;fill:var(--amber);text-anchor:middle;paint-order:stroke;stroke:var(--bg);stroke-width:3px}
+
+/* =========== SPOF BADGE (top-5 critical nodes) =========== */
+.sch-spof-badge{font-family:var(--mono);font-size:9.5px;font-weight:700;fill:oklch(0.78 0.17 25);text-anchor:middle;paint-order:stroke;stroke:var(--bg);stroke-width:3.2px;letter-spacing:.4px}
+.sch-node.spof .sch-shape{stroke:oklch(0.75 0.17 25)!important;stroke-width:2.4px!important;filter:drop-shadow(0 0 6px rgba(236,100,75,.35))}
+.sch-node.spof:not(.focus):not(.neighbor):not(.downstream):not(.upstream) .sch-shape{animation:spof-pulse 2.6s ease-in-out infinite}
+@keyframes spof-pulse{0%,100%{filter:drop-shadow(0 0 4px rgba(236,100,75,.25))}50%{filter:drop-shadow(0 0 10px rgba(236,100,75,.55))}}
+
+/* =========== CRITICALITY BLOCK IN INSPECTOR =========== */
+.sch-criticality{background:rgba(52,211,153,.04);border-left:2px solid var(--emerald);padding-left:10px}
+.sch-criticality.spof{background:rgba(236,100,75,.06);border-left-color:oklch(0.75 0.17 25)}
+.sch-criticality.spof h3{color:oklch(0.82 0.17 25)!important}
+
+/* Domain badge block — shows the net's functional domain + Opus/regex
+   description in the inspector. */
+.sch-domain{background:rgba(56,189,248,.04);border-left:2px solid var(--cyan);padding-left:10px}
+.sch-domain h3{color:var(--cyan)!important;text-transform:lowercase;letter-spacing:.3px}
+.sch-domain-desc{font-size:12px;color:var(--text-2);line-height:1.45;margin-bottom:4px}
+.sch-domain-meta{font-size:11px;color:var(--text-3);font-family:var(--mono);display:flex;gap:6px;align-items:center}
+.sch-domain-meta .k{text-transform:uppercase;letter-spacing:.3px}
+.sch-domain-meta .mono{color:var(--text)}
+.sch-crit-row{display:flex;flex-direction:column;gap:6px}
+.sch-crit-bar{height:8px;background:var(--bg-deep);border-radius:4px;overflow:hidden;border:1px solid var(--border)}
+.sch-crit-fill{height:100%;background:linear-gradient(90deg,var(--emerald),var(--amber),oklch(0.75 0.17 25));border-radius:4px;transition:width .3s ease-out}
+.sch-crit-val{font-size:11.5px;color:var(--text-2);font-family:var(--mono)}
+.sch-crit-val strong{color:var(--text);font-weight:700}
+
+/* =========== LINKS =========== */
+.sch-link{fill:none;stroke-linecap:round;transition:stroke-opacity .2s,stroke .2s}
+.sch-link-produces{stroke:oklch(0.82 0.14 210);stroke-opacity:.7;stroke-width:1.4;stroke-dasharray:5 3}
+.sch-link-powers{stroke:oklch(0.78 0.15 155);stroke-opacity:.78;stroke-width:1.4}
+.sch-link-decouples{stroke:oklch(0.78 0.14 295);stroke-opacity:.55;stroke-width:1.1;stroke-dasharray:2 3}
+/* Signal edges — toggled via "Signaux". Visible even at low zoom, with
+   color per subkind so a tech can tell an enable from a clock at a glance. */
+.sch-link-signal{stroke:#9fb4d4;stroke-opacity:.55;stroke-width:1.3;stroke-dasharray:3 3}
+.sch-link-signal[data-subkind="enables"]{stroke:oklch(0.82 0.16 75);stroke-opacity:.8}
+.sch-link-signal[data-subkind="clocks"]{stroke:oklch(0.78 0.15 155);stroke-opacity:.8}
+.sch-link-signal[data-subkind="resets"]{stroke:oklch(0.72 0.20 25);stroke-opacity:.9}
+.sch-link-signal[data-subkind="produces_signal"]{stroke:oklch(0.82 0.14 210);stroke-opacity:.7}
+.sch-link-signal[data-subkind="consumes_signal"]{stroke:oklch(0.78 0.14 295);stroke-opacity:.6;stroke-dasharray:2 5}
+.sch-link-signal[data-subkind="feedback_in"]{stroke:oklch(0.75 0.17 30);stroke-opacity:.7}
+#schGraph.has-focus .sch-link:not(.active-link){stroke-opacity:.06}
+#schGraph.has-focus .sch-link.active-link{stroke-opacity:1;stroke-width:2}
+
+/* =========== NODES =========== */
+.sch-node{cursor:pointer;transition:opacity .2s}
+.sch-shape{transition:filter .2s,stroke-width .2s}
+.sch-shape-rail{fill:rgba(52,211,153,.14);stroke:oklch(0.78 0.15 155);stroke-width:1.8}
+.sch-shape-comp{fill:rgba(56,189,248,.12);stroke:oklch(0.82 0.14 210);stroke-width:1.4}
+.sch-shape-passive{fill:rgba(56,189,248,.08);stroke:oklch(0.70 0.10 210);stroke-width:1}
+.sch-shape-small{fill:rgba(110,125,150,.15);stroke:rgba(110,125,150,.5);stroke-width:1}
+
+/* Importance-based shape tinting */
+.sch-node.i-4 .sch-shape-comp{fill:rgba(56,189,248,.18);stroke-width:1.8}
+.sch-node.i-3 .sch-shape-comp{fill:rgba(56,189,248,.14);stroke-width:1.5}
+.sch-node.i-1 .sch-shape-passive,
+.sch-node.i-0 .sch-shape-passive{fill:rgba(150,170,200,.10);stroke:rgba(150,170,200,.35);stroke-width:.8}
+
+/* Special type tints */
+.sch-node.t-connector .sch-shape-comp{fill:rgba(192,132,252,.15);stroke:oklch(0.78 0.14 295)}
+.sch-node.t-fuse .sch-shape-comp{fill:rgba(245,158,11,.15);stroke:oklch(0.82 0.16 75)}
+.sch-node.t-led .sch-shape-comp{fill:rgba(245,158,11,.20);stroke:oklch(0.82 0.16 75)}
+.sch-node.t-diode .sch-shape-comp{fill:rgba(245,158,11,.10);stroke:oklch(0.75 0.14 75)}
+
+.sch-node.nostuff .sch-shape{stroke-dasharray:3 3;opacity:.55}
+
+/* =========== SCHEMATIC SYMBOLS (per component type) =========== */
+/* Stroke-only look, KiCad-like. Each type gets a family colour. */
+.sch-sym-body{fill:none;stroke:var(--text-2);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.sch-sym-pin{stroke:var(--text-3);stroke-width:1;stroke-linecap:round}
+
+.sch-sym-resistor{stroke:oklch(0.82 0.14 75);fill:rgba(245,158,11,.06)}            /* warm beige */
+.sch-sym-cap{stroke:oklch(0.82 0.14 210);stroke-width:2}                            /* cyan plates */
+.sch-sym-inductor{stroke:oklch(0.80 0.13 155);stroke-width:1.8;fill:none}          /* emerald coil */
+.sch-sym-ferrite{stroke:oklch(0.78 0.10 60);fill:rgba(200,160,110,.08)}            /* tan bead */
+.sch-sym-diode{stroke:oklch(0.82 0.16 75);fill:oklch(0.82 0.16 75 / 0.25)}         /* amber filled triangle */
+.sch-sym-diode-bar{stroke:oklch(0.82 0.16 75);stroke-width:2}
+.sch-sym-led-ray{stroke:oklch(0.85 0.18 75);stroke-width:1.2;fill:none}             /* brighter amber rays */
+.sch-sym-fuse{stroke:oklch(0.78 0.16 30);fill:rgba(236,100,75,.08)}                 /* red-amber pill */
+.sch-sym-transistor{stroke:oklch(0.82 0.14 210);stroke-width:1.6;fill:rgba(56,189,248,.06)}
+.sch-sym-crystal{stroke:oklch(0.78 0.14 295);fill:rgba(192,132,252,.08)}            /* violet */
+.sch-sym-connector{stroke:oklch(0.78 0.14 295);fill:rgba(192,132,252,.1)}
+
+/* Focus / SPOF adjustments — override stroke width + glow */
+.sch-node.spof .sch-sym-body{stroke-width:2.2}
+#schGraph.has-focus .sch-node.focus .sch-sym-body{stroke-width:2.4;filter:drop-shadow(0 0 8px rgba(52,211,153,.5))}
+#schGraph.has-focus .sch-node.downstream .sch-sym-body{stroke:oklch(0.75 0.17 25)}
+
+/* =========== LABELS (LOD via #schGraph[data-zoom]) =========== */
+.sch-label{font-family:var(--mono);font-size:11px;font-weight:600;fill:var(--text);text-anchor:middle;pointer-events:none;paint-order:stroke;stroke:var(--bg);stroke-width:3.5px}
+.sch-label-rail{fill:oklch(0.88 0.15 155)}
+.sch-label-comp.lvl-4{font-size:11.5px}
+.sch-label-comp.lvl-3{font-size:10.5px}
+.sch-label-comp.lvl-2{font-size:9.5px}
+.sch-label-comp.lvl-1{font-size:8.5px;font-weight:500;opacity:.7}
+.sch-label-comp.lvl-0{font-size:8px;font-weight:500;opacity:.55}
+.sch-sub{font-family:var(--mono);font-size:9.5px;fill:var(--text-3);text-anchor:middle;pointer-events:none;paint-order:stroke;stroke:var(--bg);stroke-width:3px}
+
+/* Hide small labels at low zoom */
+#schGraph[data-zoom="low"] .sch-label-comp.lvl-0,
+#schGraph[data-zoom="low"] .sch-label-comp.lvl-1,
+#schGraph[data-zoom="low"] .sch-label-comp.lvl-2,
+#schGraph[data-zoom="low"] .sch-sub-comp,
+#schGraph[data-zoom="low"] .sch-pin-label{display:none}
+#schGraph[data-zoom="mid"] .sch-label-comp.lvl-0,
+#schGraph[data-zoom="mid"] .sch-label-comp.lvl-1,
+#schGraph[data-zoom="mid"] .sch-pin-label{display:none}
+
+/* =========== PINS =========== */
+.sch-pin-dot{fill:oklch(0.78 0.15 155);stroke:var(--bg);stroke-width:.8}
+.sch-pin-lead{stroke:oklch(0.78 0.15 155);stroke-width:1;stroke-linecap:round;opacity:.75}
+.sch-pin.role-power_in .sch-pin-dot{fill:oklch(0.78 0.15 155)}
+.sch-pin.role-power_in .sch-pin-lead{stroke:oklch(0.78 0.15 155)}
+.sch-pin.role-power_out .sch-pin-dot,
+.sch-pin.role-switch_node .sch-pin-dot{fill:oklch(0.78 0.15 155)}
+.sch-pin.role-ground .sch-pin-dot{fill:#6e7d96;stroke:#6e7d96}
+.sch-pin.role-ground .sch-pin-lead{stroke:#6e7d96;opacity:.55}
+.sch-pin.role-enable_in .sch-pin-dot,
+.sch-pin.role-enable_out .sch-pin-dot{fill:oklch(0.82 0.16 75)}
+.sch-pin.role-enable_in .sch-pin-lead,
+.sch-pin.role-enable_out .sch-pin-lead{stroke:oklch(0.82 0.16 75)}
+.sch-pin.role-reset_in .sch-pin-dot,
+.sch-pin.role-reset_out .sch-pin-dot,
+.sch-pin.role-power_good_out .sch-pin-dot{fill:oklch(0.78 0.14 295)}
+.sch-pin.role-signal_in .sch-pin-dot,
+.sch-pin.role-signal_out .sch-pin-dot{fill:#6e7d96}
+.sch-pin-label{font-family:var(--mono);font-size:7.5px;fill:var(--text-3);pointer-events:none;paint-order:stroke;stroke:var(--bg);stroke-width:2px}
+.sch-pin-hidden{font-family:var(--mono);font-size:8px;fill:var(--text-3);pointer-events:none;font-weight:500}
+
+/* =========== FOCUS STATE =========== */
+#schGraph.has-focus .sch-node:not(.focus):not(.neighbor):not(.downstream):not(.upstream){opacity:.10}
+#schGraph.has-focus .sch-node.focus .sch-shape{filter:drop-shadow(0 0 14px rgba(52,211,153,.8));stroke-width:2.8px}
+#schGraph.has-focus .sch-node.focus.sch-node-component .sch-shape{filter:drop-shadow(0 0 14px rgba(56,189,248,.85))}
+#schGraph.has-focus .sch-node.neighbor .sch-shape{stroke-width:2px;filter:brightness(1.15)}
+
+/* Kill-switch cascade — downstream nodes (those that die if focus dies) */
+#schGraph.has-focus .sch-node.downstream .sch-shape{stroke:oklch(0.72 0.17 25);stroke-width:1.8px;filter:drop-shadow(0 0 6px rgba(236,100,75,.5))}
+#schGraph.has-focus .sch-node.downstream .sch-label{fill:oklch(0.82 0.15 25)}
+#schGraph.has-focus .sch-link.active-link{stroke-opacity:.95;stroke-width:2.2}
+
+/* Upstream chain — the power feeding this node */
+#schGraph.has-focus .sch-node.upstream .sch-shape{stroke:oklch(0.80 0.14 220);stroke-width:1.6px;filter:drop-shadow(0 0 4px rgba(56,189,248,.4))}
+
+/* Role badges in inspector */
+.sch-role-badge{padding:2px 8px;border-radius:4px;font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.3px}
+.sch-role-badge.role-source{background:rgba(56,189,248,.14);color:var(--cyan);border:1px solid rgba(56,189,248,.35)}
+.sch-role-badge.role-consumer{background:rgba(52,211,153,.12);color:var(--emerald);border:1px solid rgba(52,211,153,.3)}
+.sch-role-badge.role-decoupling{background:rgba(192,132,252,.12);color:var(--violet);border:1px solid rgba(192,132,252,.3)}
+
+.sch-type-badge.rail{background:rgba(52,211,153,.12);color:var(--emerald);border-color:rgba(52,211,153,.3)}
+.sch-type-badge.source,
+.sch-type-badge.consumer{background:rgba(56,189,248,.12);color:var(--cyan);border-color:rgba(56,189,248,.3)}
+.sch-type-badge.decoupling{background:rgba(192,132,252,.12);color:var(--violet);border-color:rgba(192,132,252,.3)}
+.sch-type-badge.phase{background:rgba(245,158,11,.12);color:var(--amber);border-color:rgba(245,158,11,.3)}
+
+.sch-chips .chip.cyan{color:var(--cyan);border-color:rgba(56,189,248,.3);background:rgba(56,189,248,.06)}
+.sch-chips .chip.violet{color:var(--violet);border-color:rgba(192,132,252,.3);background:rgba(192,132,252,.06)}
+.sch-chips .chip.amber{color:var(--amber);border-color:rgba(245,158,11,.3);background:rgba(245,158,11,.06)}
+.sch-chips .chip.clickable{cursor:pointer;transition:all .12s}
+.sch-chips .chip.clickable:hover{filter:brightness(1.3);transform:translateY(-1px)}
+
+/* =========== BOOT TIMELINE (bottom strip) =========== */
+.sch-boot-timeline{position:absolute;left:0;right:0;bottom:0;height:148px;background:linear-gradient(0deg,rgba(10,17,32,.98),rgba(10,17,32,.92));border-top:1px solid var(--border);padding:8px 12px 10px;z-index:4;overflow:hidden}
+.sch-boot-timeline.hidden{display:none}
+.sch-boot-grid{display:grid;gap:8px;height:calc(100% - 22px)}
+.sch-boot-col{position:relative;background:rgba(20,32,48,.55);border:1px solid var(--border);border-radius:6px;padding:6px 8px;display:flex;flex-direction:column;gap:3px;overflow:hidden;cursor:pointer;transition:all .15s}
+.sch-boot-col:hover{border-color:rgba(245,158,11,.4);background:rgba(30,42,60,.7)}
+.sch-boot-col.active{border-color:var(--amber);background:rgba(245,158,11,.08);box-shadow:0 0 0 1px rgba(245,158,11,.3) inset}
+.sch-boot-head{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.4px;min-width:0;flex-wrap:nowrap}
+.sch-boot-phase{padding:2px 7px;background:rgba(245,158,11,.15);color:var(--amber);border:1px solid rgba(245,158,11,.3);border-radius:4px;font-weight:700;flex-shrink:0}
+.sch-boot-name{color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1}
+.sch-boot-rails,.sch-boot-comps{display:flex;flex-wrap:wrap;gap:3px;max-height:40px;overflow:hidden}
+.sch-boot-rails .chip,.sch-boot-comps .chip{padding:2px 5px;border-radius:3px;font-size:9.5px;cursor:pointer}
+.sch-boot-more{font-family:var(--mono);font-size:9px;color:var(--text-3);padding:2px 5px}
+
+/* Single-line rows inside a phase card (compact mode) */
+.sch-boot-line{display:flex;align-items:center;gap:4px;overflow:hidden;min-width:0;height:18px}
+.sch-boot-line-label{flex:0 0 10px;font-family:var(--mono);font-size:9.5px;color:var(--text-3);font-weight:700;letter-spacing:.3px}
+.sch-boot-line .chip{flex-shrink:0;padding:1px 5px;border-radius:2px;font-size:9.5px;cursor:pointer;line-height:1.3}
+.sch-boot-line .chip:hover{filter:brightness(1.25)}
+.sch-boot-more{flex-shrink:0;font-family:var(--mono);font-size:9px;color:var(--text-3);padding:1px 4px}
+
+/* Single-line SPOF row */
+.sch-boot-spof{display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:9.5px;color:var(--text-2);padding:2px 4px;border-radius:3px;background:rgba(10,17,32,.4);height:18px;overflow:hidden;min-width:0}
+.sch-boot-spof.crit-hi{background:rgba(236,100,75,.10);color:oklch(0.85 0.14 25)}
+.sch-boot-spof.crit-mid{background:rgba(245,158,11,.08);color:var(--amber)}
+.sch-boot-spof-icon{font-weight:700;flex-shrink:0}
+.sch-boot-spof-label{flex-shrink:0;color:var(--text-3);letter-spacing:.3px;text-transform:uppercase;font-size:8.5px}
+.sch-boot-spof-ref{flex-shrink:0;color:var(--cyan);cursor:pointer;text-decoration:underline dotted transparent;transition:text-decoration-color .15s}
+.sch-boot-spof-ref:hover{text-decoration-color:var(--cyan)}
+.sch-boot-spof-pct{flex-shrink:0;margin-left:auto;font-weight:700;color:var(--text)}
+.sch-boot-empty{color:var(--text-3);text-align:center;padding:30px;font-size:12px}
+
+/* Boot source badge + reanalyze button */
+.sch-boot-headbar{display:flex;align-items:center;gap:12px;padding:0 4px 6px;font-size:10.5px;font-family:var(--mono)}
+.sch-boot-src{padding:3px 10px;border-radius:4px;letter-spacing:.4px;text-transform:uppercase;font-weight:600}
+.sch-boot-src.analyzer{background:rgba(56,189,248,.14);color:var(--cyan);border:1px solid rgba(56,189,248,.35)}
+.sch-boot-src.compiler{background:rgba(245,158,11,.10);color:var(--amber);border:1px solid rgba(245,158,11,.3)}
+.sch-boot-seq,.sch-boot-conf{color:var(--text-3)}
+.sch-boot-seq .mono,.sch-boot-conf .mono{color:var(--text);font-weight:600}
+.sch-reanalyze{margin-left:auto;padding:4px 12px;border-radius:4px;background:rgba(56,189,248,.08);color:var(--cyan);border:1px solid rgba(56,189,248,.3);font-family:var(--mono);font-size:10px;letter-spacing:.3px;text-transform:uppercase;cursor:pointer;transition:all .15s}
+.sch-reanalyze:hover{background:rgba(56,189,248,.14)}
+.sch-reanalyze:disabled{opacity:.5;cursor:wait}
+
+/* Phase criticality — highlights the phase whose gate has the biggest blast radius */
+.sch-boot-col.crit-hi{border-color:oklch(0.7 0.17 25)!important;box-shadow:0 0 0 1px rgba(236,100,75,.35) inset}
+.sch-boot-col.crit-mid{border-color:oklch(0.75 0.16 75)!important;box-shadow:0 0 0 1px rgba(245,158,11,.3) inset}
+.sch-boot-crit{display:flex;flex-direction:column;gap:3px;padding:3px 0 2px}
+.sch-boot-crit-bar{height:4px;background:var(--bg-deep);border:1px solid var(--border);border-radius:2px;overflow:hidden}
+.sch-boot-crit-fill{height:100%;background:var(--emerald);transition:width .3s}
+.sch-boot-crit-fill.crit-mid{background:var(--amber)}
+.sch-boot-crit-fill.crit-hi{background:oklch(0.75 0.17 25)}
+.sch-boot-crit-lbl{font-family:var(--mono);font-size:9.5px;color:var(--text-2);display:flex;align-items:center;gap:5px;letter-spacing:.2px}
+.sch-boot-crit-lbl .mono{color:var(--cyan)}
+.sch-boot-crit-lbl .mono.clickable{cursor:pointer;text-decoration:underline dotted transparent;transition:text-decoration-color .15s}
+.sch-boot-crit-lbl .mono.clickable:hover{text-decoration-color:var(--cyan)}
+.sch-boot-crit-lbl strong{color:var(--text);font-weight:700}
+.sch-boot-crit-icon{font-weight:800;color:var(--text-3)}
+.sch-boot-col.crit-hi .sch-boot-crit-icon{color:oklch(0.82 0.17 25)}
+.sch-boot-col.crit-mid .sch-boot-crit-icon{color:var(--amber)}
+
+/* Per-phase kind + confidence badges */
+.sch-boot-kind{flex-shrink:0;padding:1px 6px;border-radius:3px;font-size:9px;letter-spacing:.3px;text-transform:uppercase;font-weight:600}
+.sch-boot-kind.kindalwayson{background:rgba(52,211,153,.15);color:var(--emerald);border:1px solid rgba(52,211,153,.3)}
+.sch-boot-kind.kindsequenced{background:rgba(56,189,248,.15);color:var(--cyan);border:1px solid rgba(56,189,248,.3)}
+.sch-boot-kind.kindondemand{background:rgba(192,132,252,.15);color:var(--violet);border:1px solid rgba(192,132,252,.3)}
+.sch-boot-phase-conf{flex-shrink:0;font-family:var(--mono);font-size:9px;color:var(--text-3);padding:1px 4px;background:rgba(10,17,32,.5);border-radius:3px}
+
+/* Evidence list (in inspector phase view) */
+.sch-evidence{margin:0;padding-left:18px;font-size:11.5px;color:var(--text-2);line-height:1.45}
+.sch-evidence li{margin-bottom:4px}
+.sch-evidence li::marker{color:var(--cyan)}
+
+/* Make room at the bottom of the canvas for the timeline (must match
+   .sch-boot-timeline height). If you bump the timeline's `height`, bump
+   the `bottom` here too. */
+.sch-canvas{bottom:148px}
+body.no-metabar .sch-canvas{bottom:148px}
+
+/* Shrink schematic root when the diagnostic chat panel is docked right,
+   matching how `.canvas`, `.home`, `.stub` do it (see styles/llm.css). */
+body.llm-open .sch-root{right:420px}
+
+/* Missing / stub component (referenced in rails but absent from components map) */
+.sch-node.missing .sch-shape{stroke-dasharray:2 2;opacity:.5}
+
+.sch-node:hover .sch-shape{filter:brightness(1.25)}
+
+/* =========== STATS + CONTROLS BAR =========== */
+.sch-statsbar{position:absolute;top:16px;left:16px;display:flex;gap:8px;z-index:5;flex-wrap:wrap;max-width:calc(100% - 200px)}
+.sch-stat{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:20px;background:rgba(10,17,32,.92);border:1px solid var(--border);backdrop-filter:blur(6px);font-family:var(--mono);font-size:10.5px;letter-spacing:.3px;color:var(--text-2)}
+.sch-stat .k{color:var(--text-3);text-transform:uppercase}
+.sch-stat .v{color:var(--text);font-weight:600}
+.sch-stat-total{color:var(--text-3);font-weight:400;margin-left:1px;font-size:9.5px}
+.sch-stat-pill{padding:5px 10px;border-radius:20px;background:rgba(52,211,153,.1);color:var(--emerald);border:1px solid rgba(52,211,153,.3);font-family:var(--mono);font-size:10.5px;text-transform:uppercase;letter-spacing:.4px;display:none}
+.sch-stat-pill.on{display:inline-flex}
+.sch-stat-pill.warn{background:rgba(245,158,11,.1);color:var(--amber);border-color:rgba(245,158,11,.3)}
+.sch-toggle{padding:5px 10px;border-radius:20px;background:rgba(10,17,32,.92);color:var(--text-3);border:1px solid var(--border);font-family:var(--mono);font-size:10.5px;letter-spacing:.3px;text-transform:uppercase;cursor:pointer;transition:all .15s}
+.sch-toggle:hover{color:var(--text);border-color:var(--border-soft)}
+.sch-toggle.on{background:rgba(52,211,153,.14);color:var(--emerald);border-color:rgba(52,211,153,.35)}
+
+/* Segmented layout-mode selector (Power-tree / Grille phase×V) */
+.sch-mode-toggle{display:inline-flex;background:rgba(10,17,32,.92);border:1px solid var(--border);border-radius:20px;overflow:hidden;backdrop-filter:blur(6px)}
+.sch-mode-btn{padding:5px 12px;background:transparent;border:0;color:var(--text-3);font-family:var(--mono);font-size:10.5px;letter-spacing:.3px;text-transform:uppercase;cursor:pointer;transition:all .15s;border-right:1px solid var(--border)}
+.sch-mode-btn:last-child{border-right:0}
+.sch-mode-btn:hover{color:var(--text);background:rgba(30,42,60,.5)}
+.sch-mode-btn.on{background:rgba(56,189,248,.14);color:var(--cyan)}
+
+/* Power-tree mode — horizontal bus lines */
+.sch-pt-busline{stroke:rgba(52,211,153,.28);stroke-width:1;stroke-dasharray:6 4}
+.sch-pt-band-label{font-family:var(--mono);font-size:10px;fill:var(--text-3);letter-spacing:.5px;text-transform:uppercase;font-weight:700;pointer-events:none}
+.sch-pt-orphan-divider{stroke:rgba(110,125,150,.45);stroke-width:1;stroke-dasharray:3 6}
+.sch-pt-orphan-label{font-family:var(--mono);font-size:10.5px;fill:var(--text-3);letter-spacing:.5px;text-transform:uppercase;font-weight:700;pointer-events:none}
+
+.sch-filter{position:absolute;top:16px;right:16px;z-index:5;display:flex;align-items:center;gap:8px;background:rgba(10,17,32,.92);border:1px solid var(--border);border-radius:20px;backdrop-filter:blur(6px);padding:4px 10px}
+.sch-filter input{background:transparent;border:0;color:var(--text);font-family:var(--mono);font-size:11px;padding:4px 6px;min-width:130px;outline:none}
+.sch-filter input::placeholder{color:var(--text-3)}
+.sch-filter-status{font-family:var(--mono);font-size:10px;color:var(--text-3);min-width:70px;text-align:right}
+
+/* =========== ZOOM CONTROLS =========== */
+.sch-zoom{position:absolute;right:16px;bottom:16px;display:flex;flex-direction:column;gap:6px;background:rgba(20,32,48,.85);border:1px solid var(--border);backdrop-filter:blur(8px);border-radius:8px;padding:6px;z-index:5}
+.sch-zoom-btn{width:34px;height:34px;border-radius:5px;background:transparent;border:0;color:var(--text-2);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s}
+.sch-zoom-btn:hover{background:var(--panel-2);color:var(--text)}
+.sch-zoom-sep{height:1px;background:var(--border);margin:2px 4px}
+.sch-zoom-label{font-family:var(--mono);font-size:10px;color:var(--text-3);text-align:center;padding:2px 0}
+
+/* =========== INSPECTOR =========== */
+.sch-inspector{position:fixed;top:104px;right:16px;bottom:40px;width:390px;background:linear-gradient(180deg,rgba(20,32,48,.96),rgba(15,26,46,.96));border:1px solid var(--border);border-radius:10px;box-shadow:0 20px 60px rgba(0,0,0,.5),0 0 0 1px rgba(52,211,153,.05);backdrop-filter:blur(14px);z-index:30;display:flex;flex-direction:column;transform:translateX(calc(100% + 24px));transition:transform .28s cubic-bezier(.2,.8,.2,1);overflow:hidden}
+.sch-inspector.open{transform:translateX(0)}
+.sch-insp-head{padding:14px 16px 12px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:6px;position:relative}
+.sch-insp-head h2{margin:0;font-size:20px;font-weight:600;letter-spacing:-.2px;font-family:var(--mono);color:var(--text)}
+.sch-insp-head .sub{font-family:var(--mono);font-size:11px;color:var(--text-3)}
+.sch-type-badge{position:absolute;top:12px;right:14px;padding:3px 8px;border-radius:10px;font-size:10px;font-family:var(--mono);letter-spacing:.4px;text-transform:uppercase;background:rgba(52,211,153,.12);color:var(--emerald);border:1px solid rgba(52,211,153,.3)}
+.sch-type-badge.rail{background:rgba(52,211,153,.12);color:var(--emerald);border-color:rgba(52,211,153,.3)}
+.sch-type-badge.component{background:rgba(56,189,248,.12);color:var(--cyan);border-color:rgba(56,189,248,.3)}
+.sch-insp-close{position:absolute;top:10px;left:10px;background:transparent;border:0;color:var(--text-3);cursor:pointer;width:26px;height:26px;border-radius:4px;display:flex;align-items:center;justify-content:center}
+.sch-insp-close:hover{background:var(--panel-2);color:var(--text)}
+.sch-insp-body{flex:1;overflow:auto;padding:14px 16px 20px}
+.sch-insp-body::-webkit-scrollbar{width:6px}
+.sch-insp-body::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+.sch-insp-section{padding-bottom:14px;margin-bottom:14px;border-bottom:1px solid var(--border-soft)}
+.sch-insp-section:last-child{border-bottom:0;margin-bottom:0}
+.sch-insp-section h3{margin:0 0 8px 0;font-family:var(--mono);font-size:10px;color:var(--text-3);font-weight:500;letter-spacing:.5px;text-transform:uppercase}
+.sch-meta-grid{display:grid;grid-template-columns:95px 1fr;gap:6px 10px;font-size:12px}
+.sch-meta-grid dt{color:var(--text-3);font-family:var(--mono);font-size:10.5px}
+.sch-meta-grid dd{margin:0;color:var(--text)}
+.sch-meta-grid dd .mono{font-family:var(--mono);color:var(--cyan)}
+.sch-meta-grid dd .muted{color:var(--text-3)}
+.sch-meta-grid dd .warn{color:var(--amber);font-family:var(--mono)}
+.sch-chips{display:flex;flex-wrap:wrap;gap:5px}
+.sch-chips .chip{padding:3px 8px;border-radius:4px;background:var(--bg-deep);border:1px solid var(--border);font-family:var(--mono);font-size:10.5px;color:var(--text-2)}
+.sch-chips .chip.emerald{color:var(--emerald);border-color:rgba(52,211,153,.3);background:rgba(52,211,153,.06)}
+.muted{color:var(--text-3);font-size:11px}
+
+.sch-pin-table{width:100%;border-collapse:collapse;font-size:11px}
+.sch-pin-table th{text-align:left;padding:5px 6px;border-bottom:1px solid var(--border);font-weight:500;color:var(--text-3);font-family:var(--mono);font-size:9.5px;text-transform:uppercase;letter-spacing:.3px}
+.sch-pin-table td{padding:4px 6px;border-bottom:1px solid var(--border-soft);vertical-align:top}
+.sch-pin-table tr:last-child td{border-bottom:0}
+.sch-pin-table td.mono{color:var(--text-2)}
+.sch-pin-table td .chip{padding:2px 6px;font-size:10px}
+.sch-pin-table td.pin-role{color:var(--text-3);font-size:10px}
+
+/* =========== EMPTY STATE =========== */
+.sch-empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:3}
+.sch-empty.hidden{display:none}
+.sch-empty-card{max-width:560px;padding:26px 30px;background:rgba(20,32,48,.94);border:1px solid var(--border);border-radius:12px;backdrop-filter:blur(12px);text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.sch-empty-card .glyph{width:44px;height:44px;margin:0 auto 10px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 30% 30%,rgba(52,211,153,.35),transparent 60%);border:1px solid rgba(52,211,153,.25);color:var(--emerald)}
+.sch-empty-card h3{margin:6px 0 6px;font-size:15px;font-weight:600;color:var(--text)}
+.sch-empty-card p{margin:0 0 12px;font-size:12.5px;color:var(--text-2);line-height:1.55}
+.sch-empty-card code{display:block;font-family:var(--mono);font-size:11px;color:var(--emerald);padding:10px 12px;background:var(--bg-deep);border:1px solid var(--border);border-radius:6px;text-align:left;overflow-x:auto;white-space:pre;margin-top:4px}
+.sch-empty-hint.hidden{display:none}
