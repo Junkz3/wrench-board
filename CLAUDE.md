@@ -17,10 +17,17 @@ technician's natural-language questions.
    GPL, AGPL, or LGPL packages.
 4. **Open hardware only.** No proprietary schematics or boardviews — no
    Apple, Samsung, ZXW, WUXINJI content.
-5. **No hallucinated component IDs.** Every refdes (e.g. `U7`, `C29`) the
-   agent mentions must be validated against parsed board data *before* being
-   shown to the user. Tools that cannot answer return structured
-   null/unknown — never fake data.
+5. **No hallucinated component IDs.** Defense in depth, two layers.
+   (1) Tool discipline: every refdes the agent surfaces must originate from
+   a tool lookup (`mb_get_component` for memory bank + board aggregation, or
+   a `bv_*` tool that cross-checks the parsed board). These tools never
+   fabricate — they return `{found: false, closest_matches: [...]}` for
+   unknown refdes, and the system prompt instructs the agent to pick from
+   `closest_matches` or ask the user. (2) Post-hoc sanitizer: every outbound
+   agent `message` text is scanned for refdes-shaped tokens (regex
+   `\b[A-Z]{1,3}\d{1,4}\b`) and, when a board is loaded, validated against
+   `session.board.part_by_refdes`. Unknown matches are wrapped as
+   `⟨?U999⟩` in the delivered text and logged server-side.
 
 ## Stack
 
