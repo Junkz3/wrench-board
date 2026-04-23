@@ -273,7 +273,7 @@ async def run_diagnostic_session_managed(
         emit_task = asyncio.create_task(
             _forward_session_to_ws(
                 ws, client, session.id, device_slug, memory_root, events_by_id,
-                session_state,
+                session_state, agent_info["model"],
             ),
             name="session->ws",
         )
@@ -460,8 +460,14 @@ async def _forward_session_to_ws(
     memory_root: Path,
     events_by_id: dict[str, Any],
     session_state: SessionState,
+    agent_model: str,
 ) -> None:
-    """Stream session events to the WS and dispatch custom tool calls."""
+    """Stream session events to the WS and dispatch custom tool calls.
+
+    `agent_model` is the tier's configured model (claude-haiku-4-5 etc.),
+    used as a fallback when MA's span.model_request_end doesn't carry a
+    model name on its model_usage payload.
+    """
     # AsyncAnthropic: `.stream(...)` returns a coroutine resolving to an
     # `AsyncStream[...]`. We must await first, then use it as an async
     # context manager — otherwise we get `TypeError: 'coroutine' object
@@ -491,13 +497,20 @@ async def _forward_session_to_ws(
                     await ws.send_json({"type": "thinking", "text": text})
 
             elif etype == "span.model_request_end":
-                # MA attaches token usage to the span terminator. Pull it, price
-                # it using the tier's model, and surface a turn_cost event so
-                # the chat footer can display per-turn and running-total spend.
+                # MA attaches token usage to the span terminator. The model
+                # name may or may not be carried on model_usage across SDK
+                # versions — fall back to the tier-configured agent model
+                # (claude-haiku-4-5 / sonnet-4-6 / opus-4-7) so pricing still
+                # resolves.
                 usage = getattr(event, "model_usage", None)
                 if usage is not None:
+                    model_label = (
+                        getattr(usage, "model", None)
+                        or getattr(event, "model", None)
+                        or agent_model
+                    )
                     cost = compute_turn_cost(
-                        getattr(usage, "model", None) or "",
+                        model_label,
                         input_tokens=getattr(usage, "input_tokens", 0) or 0,
                         output_tokens=getattr(usage, "output_tokens", 0) or 0,
                         cache_read_input_tokens=getattr(usage, "cache_read_input_tokens", 0) or 0,
