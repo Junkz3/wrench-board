@@ -7,6 +7,7 @@ from api.pipeline.schematic.schemas import (
     AnalyzedBootPhase,
     AnalyzedBootSequence,
     AnalyzedBootTrigger,
+    BootPhase,
     ComponentNode,
     ElectricalGraph,
     NetNode,
@@ -202,3 +203,21 @@ def test_run_kill_lpc_sequencer_stalls_enable_dependent_phase():
     # But U12/U19 (power_in on +5V) stayed off.
     assert last.components["U12"] == "off"
     assert last.components["U19"] == "off"
+
+
+def test_run_fallback_without_analyzed_boot_uses_compiler_sequence():
+    """When analyzed_boot is None, fall back to ElectricalGraph.boot_sequence."""
+    graph = _mnt_like_graph()
+    # Compiler-style phases: no `kind`, triggers_next is list[str], no drivers.
+    graph.boot_sequence = [
+        BootPhase(index=1, name="P1", rails_stable=["VIN", "LPC_VCC"],  components_entering=["U18"], triggers_next=["5V_PWR_EN"]),
+        BootPhase(index=2, name="P2", rails_stable=["+5V"],              components_entering=["U7"],  triggers_next=["3V3_PWR_EN"]),
+        BootPhase(index=3, name="P3", rails_stable=["+3V3"],             components_entering=["U12", "U19"], triggers_next=[]),
+    ]
+    engine = SimulationEngine(graph, analyzed_boot=None)
+    tl = engine.run()
+    assert tl.final_verdict == "completed"
+    # Compiler phases are 1-indexed (Kahn starts at 1), analyzer is 0-indexed.
+    assert [s.phase_index for s in tl.states] == [1, 2, 3]
+    # Triggers without a driver are unconditionally asserted.
+    assert tl.states[-1].signals["5V_PWR_EN"] == "high"
