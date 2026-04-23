@@ -1,0 +1,1297 @@
+[
+  {
+    "id": "mnt-reform-motherboard-kill-F1-rails",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "F1"
+    ],
+    "sample_strategy": "rails",
+    "observations": {
+      "dead_comps": [],
+      "alive_comps": [],
+      "dead_rails": [
+        "VIN"
+      ],
+      "alive_rails": [
+        "+5V",
+        "3V3",
+        "3V3_HBSU"
+      ]
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-kill-F1-comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "F1"
+    ],
+    "sample_strategy": "comps",
+    "observations": {
+      "dead_comps": [
+        "C149",
+        "C160",
+        "C161",
+        "F1",
+        "Q3"
+      ],
+      "alive_comps": [
+        "C111",
+        "C148"
+      ],
+      "dead_rails": [],
+      "alive_rails": []
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-kill-F1-mixed",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "F1"
+    ],
+    "sample_strategy": "mixed",
+    "observations": {
+      "dead_comps": [
+        "C160",
+        "F1"
+      ],
+      "alive_comps": [
+        "C11",
+        "R130",
+        "R161"
+      ],
+      "dead_rails": [
+        "VIN"
+      ],
+      "alive_rails": [
+        "EDP_BL_VCC"
+      ]
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-kill-FB12-rails",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "FB12"
+    ],
+    "sample_strategy": "rails",
+    "observations": {
+      "dead_comps": [],
+      "alive_comps": [],
+      "dead_rails": [
+        "VCC"
+      ],
+      "alive_rails": [
+        "VBUS"
+      ]
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-kill-FB12-comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "FB12"
+    ],
+    "sample_strategy": "comps",
+    "observations": {
+      "dead_comps": [
+        "FB12",
+        "U10"
+      ],
+      "alive_comps": [
+        "C3",
+        "C63",
+        "R8"
+      ],
+      "dead_rails": [],
+      "alive_rails": []
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-kill-FB12-mixed",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "FB12"
+    ],
+    "sample_strategy": "mixed",
+    "observations": {
+      "dead_comps": [
+        "FB12",
+        "U10"
+      ],
+      "alive_comps": [
+        "FB9"
+      ],
+      "dead_rails": [
+        "VCC"
+      ],
+      "alive_rails": [
+        "3V3_HBSU",
+        "SPKVDD2"
+      ]
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-kill-FB14-rails",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "FB14"
+    ],
+    "sample_strategy": "rails",
+    "observations": {
+      "dead_comps": [],
+      "alive_comps": [],
+      "dead_rails": [
+        "EDP_LCD_VCC"
+      ],
+      "alive_rails": [
+        "+1V8",
+        "+3V3",
+        "DBVDD"
+      ]
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-kill-FB14-comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "FB14"
+    ],
+    "sample_strategy": "comps",
+    "observations": {
+      "dead_comps": [
+        "FB14",
+        "J24"
+      ],
+      "alive_comps": [
+        "C119",
+        "C130",
+        "C51",
+        "R46"
+      ],
+      "dead_rails": [],
+      "alive_rails": []
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-kill-FB14-mixed",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "FB14"
+    ],
+    "sample_strategy": "mixed",
+    "observations": {
+      "dead_comps": [
+        "FB14",
+        "J24"
+      ],
+      "alive_comps": [
+        "U5"
+      ],
+      "dead_rails": [
+        "EDP_LCD_VCC"
+      ],
+      "alive_rails": [
+        "3V3_HBSU",
+        "EDP_BL_VCC"
+      ]
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-kill-FB15-rails",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "FB15"
+    ],
+    "sample_strategy": "rails",
+    "observations": {
+      "dead_comps": [],
+      "alive_comps": [],
+      "dead_rails": [
+        "EDP_BL_VCC"
+      ],
+      "alive_rails": [
+        "24V_IN",
+        "AVDD"
+      ]
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-kill-FB15-comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "FB15"
+    ],
+    "sample_strategy": "comps",
+    "observations": {
+      "dead_comps": [
+        "FB15",
+        "J24"
+      ],
+      "alive_comps": [
+        "C38",
+        "R112",
+        "R179",
+        "R64"
+      ],
+      "dead_rails": [],
+      "alive_rails": []
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-kill-FB15-mixed",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "FB15"
+    ],
+    "sample_strategy": "mixed",
+    "observations": {
+      "dead_comps": [
+        "FB15",
+        "J24"
+      ],
+      "alive_comps": [
+        "C9",
+        "FB9"
+      ],
+      "dead_rails": [
+        "EDP_BL_VCC"
+      ],
+      "alive_rails": [
+        "3V3"
+      ]
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-kill-FB18-rails",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "FB18"
+    ],
+    "sample_strategy": "rails",
+    "observations": {
+      "dead_comps": [],
+      "alive_comps": [],
+      "dead_rails": [
+        "DCVDD"
+      ],
+      "alive_rails": [
+        "+1V8",
+        "3V3_HBSU"
+      ]
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-kill-FB18-comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "FB18"
+    ],
+    "sample_strategy": "comps",
+    "observations": {
+      "dead_comps": [
+        "FB18",
+        "U3"
+      ],
+      "alive_comps": [
+        "Q3",
+        "R192"
+      ],
+      "dead_rails": [],
+      "alive_rails": []
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-kill-FB18-mixed",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "FB18"
+    ],
+    "sample_strategy": "mixed",
+    "observations": {
+      "dead_comps": [
+        "FB18",
+        "U3"
+      ],
+      "alive_comps": [
+        "C87"
+      ],
+      "dead_rails": [
+        "DCVDD"
+      ],
+      "alive_rails": [
+        "SPKVDD2",
+        "VIN"
+      ]
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-kill-FB19-rails",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "FB19"
+    ],
+    "sample_strategy": "rails",
+    "observations": {
+      "dead_comps": [],
+      "alive_comps": [],
+      "dead_rails": [
+        "SPKVDD1"
+      ],
+      "alive_rails": [
+        "+5V",
+        "3V3"
+      ]
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-kill-FB19-comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "FB19"
+    ],
+    "sample_strategy": "comps",
+    "observations": {
+      "dead_comps": [
+        "FB19",
+        "U3"
+      ],
+      "alive_comps": [
+        "C156",
+        "U9"
+      ],
+      "dead_rails": [],
+      "alive_rails": []
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-kill-FB19-mixed",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "FB19"
+    ],
+    "sample_strategy": "mixed",
+    "observations": {
+      "dead_comps": [
+        "FB19",
+        "U3"
+      ],
+      "alive_comps": [
+        "C128",
+        "J12",
+        "R151"
+      ],
+      "dead_rails": [
+        "SPKVDD1"
+      ],
+      "alive_rails": [
+        "3V3_HBSU",
+        "LPC_VCC"
+      ]
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-kill-FB20-rails",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "FB20"
+    ],
+    "sample_strategy": "rails",
+    "observations": {
+      "dead_comps": [],
+      "alive_comps": [],
+      "dead_rails": [
+        "DBVDD"
+      ],
+      "alive_rails": [
+        "3V3_HBSU",
+        "SPKVDD1",
+        "VOUT"
+      ]
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-kill-FB20-comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "FB20"
+    ],
+    "sample_strategy": "comps",
+    "observations": {
+      "dead_comps": [
+        "FB20",
+        "U3"
+      ],
+      "alive_comps": [
+        "C30",
+        "J18",
+        "J7"
+      ],
+      "dead_rails": [],
+      "alive_rails": []
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-kill-FB20-mixed",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "FB20"
+    ],
+    "sample_strategy": "mixed",
+    "observations": {
+      "dead_comps": [
+        "FB20",
+        "U3"
+      ],
+      "alive_comps": [
+        "C45",
+        "Q7",
+        "R8"
+      ],
+      "dead_rails": [
+        "DBVDD"
+      ],
+      "alive_rails": [
+        "+5V"
+      ]
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-kill-FB21-rails",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "FB21"
+    ],
+    "sample_strategy": "rails",
+    "observations": {
+      "dead_comps": [],
+      "alive_comps": [],
+      "dead_rails": [
+        "AVDD"
+      ],
+      "alive_rails": [
+        "+1V2",
+        "PCIE1_PWR",
+        "VOUT"
+      ]
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-kill-FB21-comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "FB21"
+    ],
+    "sample_strategy": "comps",
+    "observations": {
+      "dead_comps": [
+        "FB21",
+        "U3"
+      ],
+      "alive_comps": [
+        "C157",
+        "FB18"
+      ],
+      "dead_rails": [],
+      "alive_rails": []
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-kill-FB21-mixed",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "FB21"
+    ],
+    "sample_strategy": "mixed",
+    "observations": {
+      "dead_comps": [
+        "FB21",
+        "U3"
+      ],
+      "alive_comps": [
+        "C75"
+      ],
+      "dead_rails": [
+        "AVDD"
+      ],
+      "alive_rails": [
+        "+1V8",
+        "VOUT"
+      ]
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-kill-J15-rails",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "J15"
+    ],
+    "sample_strategy": "rails",
+    "observations": {
+      "dead_comps": [],
+      "alive_comps": [],
+      "dead_rails": [],
+      "alive_rails": [
+        "+5V",
+        "USB_PWR",
+        "VIN"
+      ]
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-kill-J15-comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "J15"
+    ],
+    "sample_strategy": "comps",
+    "observations": {
+      "dead_comps": [
+        "J15"
+      ],
+      "alive_comps": [
+        "C35",
+        "C87",
+        "R12"
+      ],
+      "dead_rails": [],
+      "alive_rails": []
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-kill-J15-mixed",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "J15"
+    ],
+    "sample_strategy": "mixed",
+    "observations": {
+      "dead_comps": [
+        "J15"
+      ],
+      "alive_comps": [
+        "J11",
+        "R16",
+        "Y3"
+      ],
+      "dead_rails": [],
+      "alive_rails": [
+        "PCIE1_PWR"
+      ]
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-kill-J18-rails",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "J18"
+    ],
+    "sample_strategy": "rails",
+    "observations": {
+      "dead_comps": [],
+      "alive_comps": [],
+      "dead_rails": [],
+      "alive_rails": [
+        "24V_IN",
+        "3V3_PWR_AUX",
+        "VBUS"
+      ]
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-kill-J18-comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "J18"
+    ],
+    "sample_strategy": "comps",
+    "observations": {
+      "dead_comps": [
+        "J18"
+      ],
+      "alive_comps": [
+        "FB3",
+        "R188",
+        "R21"
+      ],
+      "dead_rails": [],
+      "alive_rails": []
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-kill-J18-mixed",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "J18"
+    ],
+    "sample_strategy": "mixed",
+    "observations": {
+      "dead_comps": [
+        "J18"
+      ],
+      "alive_comps": [
+        "J6",
+        "R103"
+      ],
+      "dead_rails": [],
+      "alive_rails": [
+        "3V3"
+      ]
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-kill-U1-rails",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "U1"
+    ],
+    "sample_strategy": "rails",
+    "observations": {
+      "dead_comps": [],
+      "alive_comps": [],
+      "dead_rails": [],
+      "alive_rails": [
+        "+1V8"
+      ]
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-kill-U1-comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "U1"
+    ],
+    "sample_strategy": "comps",
+    "observations": {
+      "dead_comps": [
+        "U1"
+      ],
+      "alive_comps": [
+        "C107",
+        "R120",
+        "R143"
+      ],
+      "dead_rails": [],
+      "alive_rails": []
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-kill-U1-mixed",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "U1"
+    ],
+    "sample_strategy": "mixed",
+    "observations": {
+      "dead_comps": [
+        "U1"
+      ],
+      "alive_comps": [
+        "R143"
+      ],
+      "dead_rails": [],
+      "alive_rails": [
+        "+1V2"
+      ]
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-kill-U12-rails",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "U12"
+    ],
+    "sample_strategy": "rails",
+    "observations": {
+      "dead_comps": [],
+      "alive_comps": [],
+      "dead_rails": [
+        "+3V3"
+      ],
+      "alive_rails": [
+        "+1V8"
+      ]
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-kill-U12-comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "U12"
+    ],
+    "sample_strategy": "comps",
+    "observations": {
+      "dead_comps": [
+        "C19",
+        "FB4",
+        "U12"
+      ],
+      "alive_comps": [
+        "C76",
+        "CC2244",
+        "Q6",
+        "R41"
+      ],
+      "dead_rails": [],
+      "alive_rails": []
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-kill-U12-mixed",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "U12"
+    ],
+    "sample_strategy": "mixed",
+    "observations": {
+      "dead_comps": [
+        "R48",
+        "U12"
+      ],
+      "alive_comps": [
+        "R77"
+      ],
+      "dead_rails": [
+        "+3V3"
+      ],
+      "alive_rails": [
+        "3V3",
+        "EDP_BL_VCC"
+      ]
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-kill-U13-rails",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "U13"
+    ],
+    "sample_strategy": "rails",
+    "observations": {
+      "dead_comps": [],
+      "alive_comps": [],
+      "dead_rails": [
+        "+1V2"
+      ],
+      "alive_rails": [
+        "DBVDD",
+        "EDP_BL_VCC",
+        "EDP_LCD_VCC"
+      ]
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-kill-U13-comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "U13"
+    ],
+    "sample_strategy": "comps",
+    "observations": {
+      "dead_comps": [
+        "FB12",
+        "FB2",
+        "U13"
+      ],
+      "alive_comps": [
+        "D9",
+        "R62",
+        "SW1"
+      ],
+      "dead_rails": [],
+      "alive_rails": []
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-kill-U13-mixed",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "U13"
+    ],
+    "sample_strategy": "mixed",
+    "observations": {
+      "dead_comps": [
+        "FB12",
+        "U13"
+      ],
+      "alive_comps": [
+        "C50"
+      ],
+      "dead_rails": [
+        "+1V2"
+      ],
+      "alive_rails": [
+        "24V_IN",
+        "3V3_PWR_AUX"
+      ]
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-kill-U14-rails",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "U14"
+    ],
+    "sample_strategy": "rails",
+    "observations": {
+      "dead_comps": [],
+      "alive_comps": [],
+      "dead_rails": [
+        "LPC_VCC"
+      ],
+      "alive_rails": [
+        "EDP_BL_VCC"
+      ]
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-kill-U14-comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "U14"
+    ],
+    "sample_strategy": "comps",
+    "observations": {
+      "dead_comps": [
+        "C140",
+        "U14",
+        "U5"
+      ],
+      "alive_comps": [
+        "C104",
+        "C149",
+        "R82",
+        "U7"
+      ],
+      "dead_rails": [],
+      "alive_rails": []
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-kill-U14-mixed",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "U14"
+    ],
+    "sample_strategy": "mixed",
+    "observations": {
+      "dead_comps": [
+        "C47",
+        "U14"
+      ],
+      "alive_comps": [
+        "Q11",
+        "Q15"
+      ],
+      "dead_rails": [
+        "LPC_VCC"
+      ],
+      "alive_rails": [
+        "1V1_HBSU"
+      ]
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-kill-U19-rails",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "U19"
+    ],
+    "sample_strategy": "rails",
+    "observations": {
+      "dead_comps": [],
+      "alive_comps": [],
+      "dead_rails": [
+        "+1V5"
+      ],
+      "alive_rails": [
+        "3V3_PWR_AUX",
+        "EDP_LCD_VCC"
+      ]
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-kill-U19-comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "U19"
+    ],
+    "sample_strategy": "comps",
+    "observations": {
+      "dead_comps": [
+        "C120",
+        "C123",
+        "U11",
+        "U19"
+      ],
+      "alive_comps": [
+        "C53",
+        "D14"
+      ],
+      "dead_rails": [],
+      "alive_rails": []
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-kill-U19-mixed",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "U19"
+    ],
+    "sample_strategy": "mixed",
+    "observations": {
+      "dead_comps": [
+        "C119",
+        "U19"
+      ],
+      "alive_comps": [
+        "C13",
+        "R118",
+        "R68"
+      ],
+      "dead_rails": [
+        "+1V5"
+      ],
+      "alive_rails": [
+        "SPKVDD2"
+      ]
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-kill-U2-rails",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "U2"
+    ],
+    "sample_strategy": "rails",
+    "observations": {
+      "dead_comps": [],
+      "alive_comps": [],
+      "dead_rails": [
+        "VOUT"
+      ],
+      "alive_rails": [
+        "LPC_VCC"
+      ]
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-kill-U2-comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "U2"
+    ],
+    "sample_strategy": "comps",
+    "observations": {
+      "dead_comps": [
+        "C11",
+        "C12",
+        "U2"
+      ],
+      "alive_comps": [
+        "C139",
+        "C76",
+        "R34",
+        "Y2"
+      ],
+      "dead_rails": [],
+      "alive_rails": []
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-kill-U2-mixed",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "U2"
+    ],
+    "sample_strategy": "mixed",
+    "observations": {
+      "dead_comps": [
+        "C11",
+        "C122",
+        "U2"
+      ],
+      "alive_comps": [
+        "R142"
+      ],
+      "dead_rails": [
+        "VOUT"
+      ],
+      "alive_rails": [
+        "SPKVDD1",
+        "USB_PWR"
+      ]
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-kill-U20-rails",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "U20"
+    ],
+    "sample_strategy": "rails",
+    "observations": {
+      "dead_comps": [],
+      "alive_comps": [],
+      "dead_rails": [
+        "PCIE1_PWR"
+      ],
+      "alive_rails": [
+        "VBUS"
+      ]
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-kill-U20-comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "U20"
+    ],
+    "sample_strategy": "comps",
+    "observations": {
+      "dead_comps": [
+        "C52",
+        "C53",
+        "C54",
+        "C58",
+        "U20"
+      ],
+      "alive_comps": [
+        "D23",
+        "D8",
+        "L9",
+        "R199"
+      ],
+      "dead_rails": [],
+      "alive_rails": []
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-kill-U20-mixed",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "U20"
+    ],
+    "sample_strategy": "mixed",
+    "observations": {
+      "dead_comps": [
+        "C124",
+        "U20"
+      ],
+      "alive_comps": [
+        "R142",
+        "R181"
+      ],
+      "dead_rails": [
+        "PCIE1_PWR"
+      ],
+      "alive_rails": [
+        "LPC_VCC"
+      ]
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-kill-U24-rails",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "U24"
+    ],
+    "sample_strategy": "rails",
+    "observations": {
+      "dead_comps": [],
+      "alive_comps": [],
+      "dead_rails": [
+        "USB_PWR"
+      ],
+      "alive_rails": [
+        "+1V8",
+        "3V3"
+      ]
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-kill-U24-comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "U24"
+    ],
+    "sample_strategy": "comps",
+    "observations": {
+      "dead_comps": [
+        "C71",
+        "C77",
+        "FB15",
+        "FB9",
+        "U24"
+      ],
+      "alive_comps": [
+        "D18",
+        "R173",
+        "R199",
+        "U12"
+      ],
+      "dead_rails": [],
+      "alive_rails": []
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-kill-U24-mixed",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "U24"
+    ],
+    "sample_strategy": "mixed",
+    "observations": {
+      "dead_comps": [
+        "C69",
+        "FB15",
+        "FB5",
+        "U24"
+      ],
+      "alive_comps": [
+        "C153",
+        "R24"
+      ],
+      "dead_rails": [
+        "USB_PWR"
+      ],
+      "alive_rails": [
+        "+3V3"
+      ]
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-kill-U27-rails",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "U27"
+    ],
+    "sample_strategy": "rails",
+    "observations": {
+      "dead_comps": [],
+      "alive_comps": [],
+      "dead_rails": [
+        "3V3_PWR_AUX"
+      ],
+      "alive_rails": [
+        "24V_IN",
+        "USBH_3V3"
+      ]
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-kill-U27-comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "U27"
+    ],
+    "sample_strategy": "comps",
+    "observations": {
+      "dead_comps": [
+        "FB1",
+        "FB14",
+        "U27"
+      ],
+      "alive_comps": [
+        "C122",
+        "C8",
+        "Q12",
+        "U28"
+      ],
+      "dead_rails": [],
+      "alive_rails": []
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-kill-U27-mixed",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "U27"
+    ],
+    "sample_strategy": "mixed",
+    "observations": {
+      "dead_comps": [
+        "FB14",
+        "U27"
+      ],
+      "alive_comps": [
+        "C1",
+        "C118"
+      ],
+      "dead_rails": [
+        "3V3_PWR_AUX"
+      ],
+      "alive_rails": [
+        "1V1_HBSU",
+        "VIN"
+      ]
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-kill-U7-rails",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "U7"
+    ],
+    "sample_strategy": "rails",
+    "observations": {
+      "dead_comps": [],
+      "alive_comps": [],
+      "dead_rails": [
+        "+5V"
+      ],
+      "alive_rails": [
+        "+1V2",
+        "+1V8",
+        "+3V3"
+      ]
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-kill-U7-comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "U7"
+    ],
+    "sample_strategy": "comps",
+    "observations": {
+      "dead_comps": [
+        "C129",
+        "D12",
+        "U17",
+        "U7"
+      ],
+      "alive_comps": [
+        "C168",
+        "C29",
+        "J21",
+        "R125"
+      ],
+      "dead_rails": [],
+      "alive_rails": []
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-kill-U7-mixed",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "U7"
+    ],
+    "sample_strategy": "mixed",
+    "observations": {
+      "dead_comps": [
+        "C35",
+        "U7"
+      ],
+      "alive_comps": [
+        "C116",
+        "SW3"
+      ],
+      "dead_rails": [
+        "+5V"
+      ],
+      "alive_rails": [
+        "VBUS"
+      ]
+    }
+  }
+]
