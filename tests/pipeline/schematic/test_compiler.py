@@ -345,3 +345,29 @@ def test_decouples_edge_direction_tolerant():
     elec = compile_electrical_graph(reversed_g)
     assert elec.power_rails["30V_GATE"].decoupling == ["C16"]
     assert elec.power_rails["+5V"].decoupling == ["C33"]
+
+
+@pytest.mark.parametrize(
+    "ground_label",
+    ["GND", "AGND", "DGND", "PGND", "SGND", "GND_1", "AGND_CODEC"],
+)
+def test_ground_nets_excluded_from_power_rails(ground_label: str):
+    """Vision tags GND nets with is_power=True; compiler must NOT promote them
+    to power_rails. They have hundreds of pin connections that would drown
+    every other rail in the downstream UI."""
+    g = SchematicGraph(
+        device_slug="demo",
+        source_pdf="/tmp/demo.pdf",
+        page_count=1,
+        components={
+            "U1": ComponentNode(refdes="U1", type="ic", pages=[1]),
+        },
+        nets={
+            "+3V3": NetNode(label="+3V3", is_power=True, is_global=True, pages=[1]),
+            ground_label: NetNode(label=ground_label, is_power=True, is_global=True, pages=[1]),
+        },
+        typed_edges=[],
+    )
+    elec = compile_electrical_graph(g)
+    assert "+3V3" in elec.power_rails
+    assert ground_label not in elec.power_rails

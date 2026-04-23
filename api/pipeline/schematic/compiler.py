@@ -88,9 +88,17 @@ _RAIL_LABEL_NOISE = {
     "DNC",            # Do-not-connect
 }
 
+# Ground nets are incorrectly tagged `is_power=True` by the vision pass because
+# the power-symbol heuristic doesn't distinguish VCC from GND. Ground is NOT
+# a rail to sequence or visualise — it has hundreds of pin connections that
+# would drown every other rail in the downstream UI.
+_GROUND_LABEL = re.compile(r"^(?:GND|AGND|DGND|PGND|SGND)(?:_[A-Z0-9]+)?$")
+
 
 def _is_noise_rail_label(label: str) -> bool:
     if label in _RAIL_LABEL_NOISE:
+        return True
+    if _GROUND_LABEL.match(label):
         return True
     # OCR glitch — text overlapping wires makes pdfplumber double every letter
     # ('GND' -> 'GGNNDD'). Heuristic: run-length compression halves the length
