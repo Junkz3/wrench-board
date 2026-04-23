@@ -1099,7 +1099,7 @@
         "FB22": "dead"
       },
       "state_rails": {
-        "3V3_PWR_AUX": "dead"
+        "+3V3": "shorted"
       }
     }
   },
@@ -1116,11 +1116,11 @@
     "observations": {
       "state_comps": {
         "R135": "dead",
-        "R136": "dead",
+        "U27": "dead",
         "J9": "alive"
       },
       "state_rails": {
-        "PCIE1_PWR": "dead"
+        "+3V3": "shorted"
       }
     }
   },
@@ -1193,7 +1193,7 @@
         "R180": "alive"
       },
       "state_rails": {
-        "+1V2": "dead"
+        "+5V": "shorted"
       }
     }
   },
@@ -1300,11 +1300,10 @@
     "observations": {
       "state_comps": {
         "FB1": "dead",
-        "R195": "alive"
+        "C15": "alive"
       },
       "state_rails": {
-        "3V3_PWR_AUX": "shorted",
-        "EDP_LCD_VCC": "dead"
+        "3V3_PWR_AUX": "shorted"
       }
     }
   },
@@ -1360,7 +1359,7 @@
         "U13": "dead"
       },
       "state_rails": {
-        "VCC": "dead"
+        "+1V2": "shorted"
       }
     }
   },
@@ -1510,7 +1509,7 @@
         "C76": "dead"
       },
       "state_rails": {
-        "EDP_BL_VCC": "dead"
+        "USB_PWR": "shorted"
       }
     }
   },
@@ -1526,12 +1525,11 @@
     "sample_strategy": "partial_rails_plus_one_alive",
     "observations": {
       "state_comps": {
+        "FB15": "dead",
         "FB8": "dead",
-        "FB9": "dead",
-        "C3": "alive"
+        "R48": "alive"
       },
       "state_rails": {
-        "EDP_BL_VCC": "dead",
         "USB_PWR": "shorted"
       }
     }
@@ -1566,7 +1564,7 @@
     "observations": {
       "state_comps": {
         "FB18": "anomalous",
-        "R139": "alive"
+        "C64": "alive"
       },
       "state_rails": {}
     }
@@ -1583,9 +1581,7 @@
     "sample_strategy": "partial_comps",
     "observations": {
       "state_comps": {
-        "C167": "dead",
-        "FB4": "dead",
-        "R48": "dead"
+        "U12": "dead"
       },
       "state_rails": {}
     }
@@ -1602,12 +1598,11 @@
     "sample_strategy": "partial_rails_plus_one_alive",
     "observations": {
       "state_comps": {
-        "R47": "dead",
-        "U27": "dead",
-        "C34": "alive"
+        "U12": "dead",
+        "Q2": "alive"
       },
       "state_rails": {
-        "DCVDD": "dead"
+        "+3V3": "shorted"
       }
     }
   },
@@ -1641,7 +1636,7 @@
     "observations": {
       "state_comps": {
         "FB19": "anomalous",
-        "R150": "alive"
+        "C130": "alive"
       },
       "state_rails": {}
     }
@@ -1658,11 +1653,11 @@
     "sample_strategy": "partial_comps",
     "observations": {
       "state_comps": {
-        "FB21": "dead"
+        "C19": "dead",
+        "FB21": "dead",
+        "R136": "dead"
       },
-      "state_rails": {
-        "+3V3": "shorted"
-      }
+      "state_rails": {}
     }
   },
   {
@@ -1677,11 +1672,11 @@
     "sample_strategy": "partial_rails_plus_one_alive",
     "observations": {
       "state_comps": {
-        "U20": "dead",
-        "C142": "alive"
+        "R144": "dead",
+        "R36": "alive"
       },
       "state_rails": {
-        "DCVDD": "dead"
+        "+3V3": "shorted"
       }
     }
   },
@@ -1715,7 +1710,7 @@
     "observations": {
       "state_comps": {
         "FB2": "anomalous",
-        "R20": "alive"
+        "C74": "alive"
       },
       "state_rails": {}
     }
@@ -1733,8 +1728,7 @@
     "observations": {
       "state_comps": {
         "FB12": "dead",
-        "FB2": "dead",
-        "U13": "dead"
+        "FB2": "dead"
       },
       "state_rails": {
         "+1V2": "shorted"
@@ -1753,12 +1747,11 @@
     "sample_strategy": "partial_rails_plus_one_alive",
     "observations": {
       "state_comps": {
-        "FB12": "dead",
-        "L1": "alive"
+        "FB2": "dead",
+        "R172": "alive"
       },
       "state_rails": {
-        "+1V2": "shorted",
-        "VCC": "dead"
+        "+1V2": "shorted"
       }
     }
   },
@@ -1813,7 +1806,7 @@
         "FB21": "dead"
       },
       "state_rails": {
-        "AVDD": "dead"
+        "+3V3": "shorted"
       }
     }
   },
@@ -1834,7 +1827,7 @@
         "C101": "alive"
       },
       "state_rails": {
-        "DBVDD": "dead"
+        "+3V3": "shorted"
       }
     }
   },
@@ -1906,8 +1899,7 @@
         "C60": "alive"
       },
       "state_rails": {
-        "AVDD": "dead",
-        "DCVDD": "dead"
+        "+3V3": "shorted"
       }
     }
   },

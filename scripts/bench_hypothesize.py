@@ -46,6 +46,7 @@ def main() -> None:
     )
 
     samples_ms: list[float] = []
+    samples_ms_by_mode: dict[str, list[float]] = {}
     single_tested: list[int] = []
     pair_tested: list[int] = []
     for _ in range(args.iterations):
@@ -56,14 +57,30 @@ def main() -> None:
             )
             t0 = time.perf_counter_ns()
             res = hypothesize(eg, analyzed_boot=ab, observations=obs)
-            samples_ms.append((time.perf_counter_ns() - t0) / 1e6)
+            elapsed_ms = (time.perf_counter_ns() - t0) / 1e6
+            samples_ms.append(elapsed_ms)
+
+            # Track per-mode timings.
+            mode = sc["ground_truth_modes"][0]
+            if mode not in samples_ms_by_mode:
+                samples_ms_by_mode[mode] = []
+            samples_ms_by_mode[mode].append(elapsed_ms)
+
             single_tested.append(res.pruning.single_candidates_tested)
             pair_tested.append(res.pruning.two_fault_pairs_tested)
 
     samples_ms.sort()
 
-    def pct(p: float) -> float:
-        return samples_ms[max(0, int(len(samples_ms) * p) - 1)]
+    def pct(samples: list[float], p: float) -> float:
+        if not samples:
+            return 0.0
+        sorted_samples = sorted(samples)
+        return sorted_samples[max(0, int(len(sorted_samples) * p) - 1)]
+
+    # Per-mode p95 reporting.
+    per_mode_p95: dict[str, float] = {}
+    for mode in sorted(samples_ms_by_mode.keys()):
+        per_mode_p95[mode] = round(pct(samples_ms_by_mode[mode], 0.95), 3)
 
     print(
         json.dumps(
@@ -73,10 +90,11 @@ def main() -> None:
                 "iterations_each": args.iterations,
                 "ms": {
                     "mean": round(statistics.fmean(samples_ms), 3),
-                    "p50": round(pct(0.50), 3),
-                    "p95": round(pct(0.95), 3),
-                    "p99": round(pct(0.99), 3),
+                    "p50": round(pct(samples_ms, 0.50), 3),
+                    "p95": round(pct(samples_ms, 0.95), 3),
+                    "p99": round(pct(samples_ms, 0.99), 3),
                 },
+                "per_mode_p95": per_mode_p95,
                 "single_candidates_tested": {
                     "mean": round(statistics.fmean(single_tested), 1),
                     "max": max(single_tested),
