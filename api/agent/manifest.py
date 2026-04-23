@@ -104,7 +104,12 @@ MB_TOOLS: list[dict] = [
             "query='boot_phase' with index returns that phase's rails and "
             "components; "
             "query='list_rails' returns a brief catalogue of every rail; "
-            "query='list_boot' returns a brief catalogue of boot phases. "
+            "query='list_boot' returns a brief catalogue of boot phases; "
+            "query='critical_path' returns the board's Single-Points-Of-Failure "
+            "ranked by blast_radius (how many nodes die if X fails) plus the "
+            "critical gate at each boot phase. Use BEFORE telling the tech "
+            "which component to measure first when a rail is absent — the "
+            "top SPOF is usually the highest-leverage probe point. "
             "Returns {found: false, reason: 'no_schematic_graph'} if the "
             "schematic hasn't been ingested yet — don't retry, just proceed "
             "without rail context."
@@ -121,6 +126,7 @@ MB_TOOLS: list[dict] = [
                         "boot_phase",
                         "list_rails",
                         "list_boot",
+                        "critical_path",
                     ],
                 },
                 "label": {
@@ -315,12 +321,80 @@ BV_TOOLS: list[dict] = [
 ]
 
 
+PROFILE_TOOLS: list[dict] = [
+    {
+        "type": "custom",
+        "name": "profile_get",
+        "description": (
+            "Read the technician's profile: identity, current level, "
+            "verbosity preference, list of available and missing tools, and "
+            "summary of mastered/practiced/learning skills with usage counts. "
+            "Call once at session start if the system prompt context is stale, "
+            "or when the tech reports having updated their profile."
+        ),
+        "input_schema": {"type": "object", "properties": {}, "additionalProperties": False},
+    },
+    {
+        "type": "custom",
+        "name": "profile_check_skills",
+        "description": (
+            "Given a list of candidate skill ids from the catalogue (e.g. "
+            "reflow_bga, short_isolation), return for each: the tech's status "
+            "(unlearned|learning|practiced|mastered), usage count, whether the "
+            "required tools are available, and if not the missing tool ids. "
+            "Use BEFORE proposing an action plan so you can adapt depth per step "
+            "and skip actions with missing tools."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "candidate_skills": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "minItems": 1,
+                },
+            },
+            "required": ["candidate_skills"],
+        },
+    },
+    {
+        "type": "custom",
+        "name": "profile_track_skill",
+        "description": (
+            "Record that the technician has executed an action requiring this "
+            "skill, with evidence. Call ONLY after explicit confirmation from "
+            "the tech that the action was performed. action_summary must be at "
+            "least 20 characters and quote the actual fix (refdes, symptom, "
+            "outcome) — the backend rejects thin evidence."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "skill_id": {"type": "string"},
+                "evidence": {
+                    "type": "object",
+                    "properties": {
+                        "repair_id": {"type": "string"},
+                        "device_slug": {"type": "string"},
+                        "symptom": {"type": "string"},
+                        "action_summary": {"type": "string", "minLength": 20},
+                        "date": {"type": "string"},
+                    },
+                    "required": ["repair_id", "device_slug", "symptom", "action_summary", "date"],
+                },
+            },
+            "required": ["skill_id", "evidence"],
+        },
+    },
+]
+
+
 def build_tools_manifest(session: SessionState) -> list[dict]:
-    """Return the tools list for `session`, exposing `bv_*` only when board is loaded."""
-    manifest: list[dict] = list(MB_TOOLS)
+    """Return the tools list for `session`. `profile_*` always present; `bv_*`
+    only when a board is loaded. Future: `sch_*` when a schematic is attached."""
+    manifest: list[dict] = list(MB_TOOLS) + list(PROFILE_TOOLS)
     if session.board is not None:
         manifest.extend(BV_TOOLS)
-    # Future: if session.schematic is not None: manifest.extend(SCH_TOOLS)
     return manifest
 
 

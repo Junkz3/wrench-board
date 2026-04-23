@@ -15,13 +15,17 @@ def _session_with_board() -> SessionState:
     return s
 
 
-def test_mb_tools_has_four_entries() -> None:
-    assert len(MB_TOOLS) == 4
+def test_mb_tools_contains_core_four_plus_expand() -> None:
+    # The core four are the lookup/record set this chantier shipped. A fifth
+    # tool (mb_expand_knowledge) was added out-of-band — we assert the core
+    # set is present without pinning an exact count, so future growth is
+    # allowed but regressions on the four foundational names still trip.
     names = {t["name"] for t in MB_TOOLS}
-    assert names == {
+    core = {
         "mb_get_component", "mb_get_rules_for_symptoms",
         "mb_list_findings", "mb_record_finding",
     }
+    assert core.issubset(names)
 
 
 def test_bv_tools_has_twelve_entries() -> None:
@@ -36,7 +40,8 @@ def test_bv_tools_has_twelve_entries() -> None:
 
 
 def test_every_tool_has_name_description_input_schema() -> None:
-    for tool in MB_TOOLS + BV_TOOLS:
+    from api.agent.manifest import PROFILE_TOOLS
+    for tool in MB_TOOLS + BV_TOOLS + PROFILE_TOOLS:
         assert isinstance(tool["name"], str) and tool["name"]
         assert isinstance(tool["description"], str) and tool["description"]
         assert isinstance(tool["input_schema"], dict)
@@ -44,20 +49,28 @@ def test_every_tool_has_name_description_input_schema() -> None:
         assert "properties" in tool["input_schema"]
 
 
-def test_manifest_without_board_has_only_mb_tools() -> None:
+def test_manifest_without_board_has_only_mb_and_profile_tools() -> None:
+    from api.agent.manifest import PROFILE_TOOLS
     session = SessionState()  # board=None
     manifest = build_tools_manifest(session)
     names = {t["name"] for t in manifest}
-    assert names == {t["name"] for t in MB_TOOLS}
-    assert len(manifest) == 4
+    expected = {t["name"] for t in MB_TOOLS} | {t["name"] for t in PROFILE_TOOLS}
+    assert names == expected
+    assert len(manifest) == len(MB_TOOLS) + len(PROFILE_TOOLS)
 
 
 def test_manifest_with_board_adds_bv_tools() -> None:
+    from api.agent.manifest import PROFILE_TOOLS
     session = _session_with_board()
     manifest = build_tools_manifest(session)
     names = {t["name"] for t in manifest}
-    assert names == {t["name"] for t in MB_TOOLS} | {t["name"] for t in BV_TOOLS}
-    assert len(manifest) == 16
+    expected = (
+        {t["name"] for t in MB_TOOLS}
+        | {t["name"] for t in BV_TOOLS}
+        | {t["name"] for t in PROFILE_TOOLS}
+    )
+    assert names == expected
+    assert len(manifest) == len(MB_TOOLS) + len(BV_TOOLS) + len(PROFILE_TOOLS)
 
 
 def test_manifest_has_no_sch_tools_regardless_of_session() -> None:
@@ -111,3 +124,11 @@ def test_mb_list_findings_limit_constraints() -> None:
     limit = schema["properties"]["limit"]
     assert limit.get("minimum") == 1
     assert limit.get("maximum") == 100
+
+
+def test_profile_tools_always_present() -> None:
+    names_no_board = {t["name"] for t in build_tools_manifest(SessionState())}
+    assert {"profile_get", "profile_check_skills", "profile_track_skill"} <= names_no_board
+
+    names_with_board = {t["name"] for t in build_tools_manifest(_session_with_board())}
+    assert {"profile_get", "profile_check_skills", "profile_track_skill"} <= names_with_board
