@@ -282,6 +282,40 @@ def test_run_stabilises_rail_with_enable_net_via_sequencer_auto_assert():
     assert last.signals.get("3V3_PWR_EN") == "high"
 
 
+def test_run_sourceless_rails_are_always_stable():
+    """Rails with source_refdes=None are external supplies / compiler orphans
+    and should be treated as always-on — not left 'off' just because the
+    analyzer didn't list them in any rails_stable.
+    """
+    graph = _mnt_like_graph()
+    # Inject an external rail nobody schedules.
+    from api.pipeline.schematic.schemas import NetNode, PowerRail
+    graph.nets["EXTERNAL_24V"] = NetNode(label="EXTERNAL_24V", is_power=True, is_global=True)
+    graph.power_rails["EXTERNAL_24V"] = PowerRail(label="EXTERNAL_24V", source_refdes=None)
+    # Same for a compiler orphan (real name, no source).
+    graph.nets["USBH_3V3"] = NetNode(label="USBH_3V3", is_power=True, is_global=True)
+    graph.power_rails["USBH_3V3"] = PowerRail(label="USBH_3V3", source_refdes=None)
+
+    tl = SimulationEngine(graph, analyzed_boot=_mnt_like_analyzed()).run()
+    assert tl.final_verdict == "completed"
+    # Stable from Φ0 onward — never scheduled, no source, no enable.
+    for state in tl.states:
+        assert state.rails["EXTERNAL_24V"] == "stable"
+        assert state.rails["USBH_3V3"] == "stable"
+
+
+def test_run_sourceless_rail_survives_kill_of_unrelated_refdes():
+    """Killing an IC that doesn't source a sourceless rail must not affect it."""
+    graph = _mnt_like_graph()
+    from api.pipeline.schematic.schemas import NetNode, PowerRail
+    graph.nets["VBUS"] = NetNode(label="VBUS", is_power=True, is_global=True)
+    graph.power_rails["VBUS"] = PowerRail(label="VBUS", source_refdes=None)
+
+    tl = SimulationEngine(graph, analyzed_boot=_mnt_like_analyzed(), killed_refdes=["U7"]).run()
+    for state in tl.states:
+        assert state.rails["VBUS"] == "stable"
+
+
 @pytest.mark.skipif(
     not (Path(__file__).resolve().parents[3]
          / "memory/mnt-reform-motherboard/electrical_graph.json").exists(),

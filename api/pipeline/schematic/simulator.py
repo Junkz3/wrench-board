@@ -87,7 +87,15 @@ class SimulationEngine:
         return out
 
     def run(self) -> SimulationTimeline:
-        rails: dict[str, RailState] = {label: "off" for label in self.electrical.power_rails}
+        # External supplies / compiler-orphaned rails (no source IC) are presumed
+        # always-on. They're either physical inputs (VIN connector, battery, USB
+        # VBUS) or vision-missed sources the analyzer never scheduled. Marking
+        # them stable from Φ0 matches technician intuition — a killed IC can't
+        # turn off a rail it doesn't drive.
+        rails: dict[str, RailState] = {
+            label: ("stable" if rail.source_refdes is None else "off")
+            for label, rail in self.electrical.power_rails.items()
+        }
         components: dict[str, ComponentState] = {}
         signals: dict[str, SignalState] = {}
         # Pre-seed every component as off; kills override immediately.
