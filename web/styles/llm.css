@@ -481,7 +481,7 @@ body.llm-open .stub{right:420px}
 .conv-chip[aria-expanded="true"] .chevron-down { transform: rotate(180deg); }
 
 .conv-popover {
-  position: absolute; top: calc(100% + 6px); left: 0;
+  position: absolute; top: calc(100% + 6px); right: 0;
   min-width: 280px; max-width: 340px; z-index: 40;
   background: rgba(20,32,48,.96);
   backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
