@@ -109,16 +109,25 @@ async def diagnostic_session(websocket: WebSocket, device_slug: str) -> None:
     tier = websocket.query_params.get("tier", "fast").lower()
     if tier not in _VALID_TIERS:
         tier = "fast"
+    # Optional: scope the session to a specific repair_id. When set, the
+    # backend loads past messages from memory/{slug}/repairs/{repair_id}/
+    # messages.jsonl and replays them; every new turn appends. Without it,
+    # each WS open starts a fresh (unpersisted) conversation.
+    repair_id = websocket.query_params.get("repair") or None
 
     mode = os.environ.get("DIAGNOSTIC_MODE", "managed").lower()
     if mode == "direct":
         from api.agent.runtime_direct import run_diagnostic_session_direct
 
-        await run_diagnostic_session_direct(websocket, device_slug, tier=tier)
+        await run_diagnostic_session_direct(
+            websocket, device_slug, tier=tier, repair_id=repair_id
+        )
     else:
         from api.agent.runtime_managed import run_diagnostic_session_managed
 
-        await run_diagnostic_session_managed(websocket, device_slug, tier=tier)  # type: ignore[arg-type]
+        await run_diagnostic_session_managed(
+            websocket, device_slug, tier=tier, repair_id=repair_id  # type: ignore[arg-type]
+        )
 
 
 if WEB_DIR.is_dir():

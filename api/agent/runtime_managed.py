@@ -26,8 +26,10 @@ from typing import Any, Literal
 from anthropic import AsyncAnthropic
 from fastapi import WebSocket, WebSocketDisconnect
 
+from api.agent.dispatch_bv import dispatch_bv
 from api.agent.managed_ids import get_agent, load_managed_ids
 from api.agent.memory_stores import ensure_memory_store
+from api.agent.sanitize import sanitize_agent_text
 from api.agent.tools import (
     mb_get_component,
     mb_get_rules_for_symptoms,
@@ -35,6 +37,7 @@ from api.agent.tools import (
     mb_record_finding,
 )
 from api.config import get_settings
+from api.session.state import SessionState
 
 TierLiteral = Literal["fast", "normal", "deep"]
 DEFAULT_TIER: TierLiteral = "fast"
@@ -48,48 +51,51 @@ async def _dispatch_tool(
     device_slug: str,
     memory_root: Path,
     client: AsyncAnthropic,
+    session: SessionState,
     session_id: str | None = None,
 ) -> dict:
-    """Run one of the `mb_*` custom tools locally and return the raw result."""
+    """Run a custom tool locally and return the raw result.
+
+    Routes bv_* → dispatch_bv (synchronous), mb_* → their Python handlers.
+    The returned dict may contain a Pydantic `event` field — the caller is
+    responsible for emitting it on the WS and stripping it from the agent
+    tool_result.
+    """
+    if name.startswith("bv_"):
+        return dispatch_bv(session, name, payload)
     if name == "mb_get_component":
         return mb_get_component(
-            device_slug=device_slug,
-            refdes=payload.get("refdes", ""),
-            memory_root=memory_root,
+            device_slug=device_slug, refdes=payload.get("refdes", ""),
+            memory_root=memory_root, session=session,
         )
     if name == "mb_get_rules_for_symptoms":
         return mb_get_rules_for_symptoms(
-            device_slug=device_slug,
-            symptoms=payload.get("symptoms", []),
-            memory_root=memory_root,
-            max_results=payload.get("max_results", 5),
+            device_slug=device_slug, symptoms=payload.get("symptoms", []),
+            memory_root=memory_root, max_results=payload.get("max_results", 5),
         )
     if name == "mb_list_findings":
         return mb_list_findings(
-            device_slug=device_slug,
-            memory_root=memory_root,
+            device_slug=device_slug, memory_root=memory_root,
             limit=payload.get("limit", 20),
             filter_refdes=payload.get("filter_refdes"),
         )
     if name == "mb_record_finding":
         return await mb_record_finding(
-            client=client,
-            device_slug=device_slug,
-            refdes=payload.get("refdes", ""),
-            symptom=payload.get("symptom", ""),
+            client=client, device_slug=device_slug,
+            refdes=payload.get("refdes", ""), symptom=payload.get("symptom", ""),
             confirmed_cause=payload.get("confirmed_cause", ""),
-            memory_root=memory_root,
-            mechanism=payload.get("mechanism"),
-            notes=payload.get("notes"),
-            session_id=session_id,
+            memory_root=memory_root, mechanism=payload.get("mechanism"),
+            notes=payload.get("notes"), session_id=session_id,
         )
-    return {"error": f"unknown tool: {name}"}
+    logger.warning("unknown mb_* tool: %s", name)
+    return {"ok": False, "reason": "unknown-tool", "error": f"unknown tool: {name}"}
 
 
 async def run_diagnostic_session_managed(
     ws: WebSocket,
     device_slug: str,
     tier: TierLiteral = DEFAULT_TIER,
+    repair_id: str | None = None,
 ) -> None:
     """Open a Managed Agents session on the tier-scoped agent and relay it to `ws`.
 
@@ -97,6 +103,11 @@ async def run_diagnostic_session_managed(
     conversation. A new WS connection with a different tier = a fresh MA session
     on that tier's agent. No in-session swap: by design, tier choice is explicit
     and the user starts a new conversation when changing it.
+
+    `repair_id` is accepted for signature parity with runtime_direct but MA
+    sessions already persist conversation state natively server-side; when the
+    chat_history_backend flag flips to 'managed_agents', we'll map repair_id
+    to an MA session_id here and skip the JSONL layer entirely.
     """
     settings = get_settings()
     if not settings.anthropic_api_key:
@@ -117,6 +128,7 @@ async def run_diagnostic_session_managed(
     client = AsyncAnthropic(api_key=settings.anthropic_api_key)
     memory_root = Path(settings.memory_root)
     memory_store_id = await ensure_memory_store(client, device_slug)
+    session_state = SessionState.from_device(device_slug)
 
     # Build session params. `resources` is the current (2026-04-01) surface
     # for attaching memory stores. If the beta isn't enabled, ensure_memory_store
@@ -167,6 +179,7 @@ async def run_diagnostic_session_managed(
             "device_slug": device_slug,
             "tier": tier,
             "model": agent_info["model"],
+            "board_loaded": session_state.board is not None,
         }
     )
 
@@ -181,7 +194,8 @@ async def run_diagnostic_session_managed(
         )
         emit_task = asyncio.create_task(
             _forward_session_to_ws(
-                ws, client, session.id, device_slug, memory_root, events_by_id
+                ws, client, session.id, device_slug, memory_root, events_by_id,
+                session_state,
             ),
             name="session->ws",
         )
@@ -236,6 +250,7 @@ async def _forward_session_to_ws(
     device_slug: str,
     memory_root: Path,
     events_by_id: dict[str, Any],
+    session_state: SessionState,
 ) -> None:
     """Stream session events to the WS and dispatch custom tool calls."""
     # AsyncAnthropic: `.stream(...)` returns a coroutine resolving to an
@@ -250,12 +265,15 @@ async def _forward_session_to_ws(
             if etype == "agent.message":
                 for block in getattr(event, "content", None) or []:
                     if getattr(block, "type", None) == "text":
+                        clean, unknown = sanitize_agent_text(
+                            block.text, session_state.board
+                        )
+                        if unknown:
+                            logger.warning(
+                                "sanitizer wrapped unknown refdes: %s", unknown
+                            )
                         await ws.send_json(
-                            {
-                                "type": "message",
-                                "role": "assistant",
-                                "text": block.text,
-                            }
+                            {"type": "message", "role": "assistant", "text": clean}
                         )
 
             elif etype == "agent.thinking":
@@ -277,8 +295,6 @@ async def _forward_session_to_ws(
                 stop = getattr(event, "stop_reason", None)
                 stop_type = getattr(stop, "type", None) if stop is not None else None
                 if stop_type != "requires_action":
-                    # end_turn / retries_exhausted / etc. — just wait for the
-                    # next user turn. The stream stays alive for the session.
                     continue
                 event_ids = getattr(stop, "event_ids", None) or []
                 for eid in event_ids:
@@ -291,8 +307,14 @@ async def _forward_session_to_ws(
                     name = getattr(tool_event, "name", "")
                     payload = getattr(tool_event, "input", {}) or {}
                     result = await _dispatch_tool(
-                        name, payload, device_slug, memory_root, client, session_id
+                        name, payload, device_slug, memory_root, client,
+                        session_state, session_id,
                     )
+                    # Emit the WS event if the dispatch succeeded.
+                    bv_event = result.get("event")
+                    if result.get("ok") and bv_event is not None:
+                        await ws.send_json(bv_event.model_dump(by_alias=True))
+                    result_for_agent = {k: v for k, v in result.items() if k != "event"}
                     await client.beta.sessions.events.send(
                         session_id,
                         events=[
@@ -300,7 +322,7 @@ async def _forward_session_to_ws(
                                 "type": "user.custom_tool_result",
                                 "custom_tool_use_id": eid,
                                 "content": [
-                                    {"type": "text", "text": json.dumps(result)}
+                                    {"type": "text", "text": json.dumps(result_for_agent, default=str)}
                                 ],
                             }
                         ],

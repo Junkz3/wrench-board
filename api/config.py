@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Literal
+
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -105,6 +107,16 @@ class Settings(BaseSettings):
         description=(
             "Gate for Anthropic Managed Agents memory_stores integration. Off "
             "until the Research Preview grants our account access."
+        ),
+    )
+    chat_history_backend: Literal["jsonl", "managed_agents"] = Field(
+        default="jsonl",
+        description=(
+            "Where diagnostic chat history lives. 'jsonl' writes one line per "
+            "message event under memory/{slug}/repairs/{id}/messages.jsonl — "
+            "works today without any Anthropic feature gate. 'managed_agents' "
+            "will defer replay to native MA sessions when the preview lands "
+            "(same pattern as ma_memory_store_enabled)."
         ),
     )
 
