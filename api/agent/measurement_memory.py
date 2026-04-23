@@ -16,7 +16,6 @@ Public surface:
 
 from __future__ import annotations
 
-import json
 import logging
 from datetime import UTC, datetime
 from pathlib import Path
@@ -125,3 +124,183 @@ def auto_classify(
     # Unsupported combinations — we store the measurement but leave the
     # mode empty for the tech to decide manually.
     return None
+
+
+# ---------------------------------------------------------------------------
+# Journal helpers
+# ---------------------------------------------------------------------------
+
+
+def _journal_path(memory_root: Path, device_slug: str, repair_id: str) -> Path:
+    return (
+        memory_root / device_slug / "repairs" / repair_id / "measurements.jsonl"
+    )
+
+
+def append_measurement(
+    *,
+    memory_root: Path,
+    device_slug: str,
+    repair_id: str,
+    target: str,
+    value: float,
+    unit: str,
+    nominal: float | None = None,
+    note: str | None = None,
+    source: str = "agent",
+) -> MeasurementEvent:
+    """Append one MeasurementEvent to the journal, return it.
+
+    Auto-classify is computed synchronously and cached on the event so
+    replay and filtering don't need to re-run the rules.
+    """
+    mode = auto_classify(target=target, value=value, unit=unit, nominal=nominal, note=note)
+    ev = MeasurementEvent(
+        timestamp=datetime.now(UTC).isoformat().replace("+00:00", "Z"),
+        target=target,
+        value=value,
+        unit=unit,  # type: ignore[arg-type]
+        nominal=nominal,
+        note=note,
+        source=source,  # type: ignore[arg-type]
+        auto_classified_mode=mode,
+    )
+    path = _journal_path(memory_root, device_slug, repair_id)
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with path.open("a", encoding="utf-8") as f:
+            f.write(ev.model_dump_json() + "\n")
+    except OSError as exc:
+        logger.warning("append_measurement failed for %s / %s: %s", device_slug, repair_id, exc)
+    return ev
+
+
+def load_measurements(
+    *,
+    memory_root: Path,
+    device_slug: str,
+    repair_id: str,
+    target: str | None = None,
+    since: str | None = None,
+) -> list[MeasurementEvent]:
+    """Return the ordered list of MeasurementEvents, optionally filtered."""
+    path = _journal_path(memory_root, device_slug, repair_id)
+    if not path.exists():
+        return []
+    events: list[MeasurementEvent] = []
+    try:
+        for line in path.read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                ev = MeasurementEvent.model_validate_json(line)
+            except ValueError:
+                logger.warning("skipping malformed measurement line in %s", path)
+                continue
+            if target and ev.target != target:
+                continue
+            if since and ev.timestamp < since:
+                continue
+            events.append(ev)
+    except OSError as exc:
+        logger.warning("load_measurements failed for %s / %s: %s", device_slug, repair_id, exc)
+    return events
+
+
+def compare_measurements(
+    *,
+    memory_root: Path,
+    device_slug: str,
+    repair_id: str,
+    target: str,
+    before_ts: str | None = None,
+    after_ts: str | None = None,
+) -> dict[str, Any] | None:
+    """Return {before, after, delta, delta_percent} for a target's journal.
+
+    Without explicit timestamps, uses the first and last events for the
+    target. Returns None if fewer than 2 events match.
+    """
+    events = load_measurements(
+        memory_root=memory_root, device_slug=device_slug, repair_id=repair_id,
+        target=target,
+    )
+    if len(events) < 2:
+        return None
+    if before_ts:
+        candidates = [e for e in events if e.timestamp <= before_ts]
+        before = candidates[-1] if candidates else events[0]
+    else:
+        before = events[0]
+    if after_ts:
+        candidates = [e for e in events if e.timestamp >= after_ts]
+        after = candidates[0] if candidates else events[-1]
+    else:
+        after = events[-1]
+    if before.timestamp == after.timestamp:
+        return None
+    delta = after.value - before.value
+    delta_pct = None
+    if before.value:
+        delta_pct = round((delta / before.value) * 100, 2)
+    return {
+        "target": target,
+        "before": {"timestamp": before.timestamp, "value": before.value, "mode": before.auto_classified_mode, "note": before.note},
+        "after": {"timestamp": after.timestamp, "value": after.value, "mode": after.auto_classified_mode, "note": after.note},
+        "delta": round(delta, 6),
+        "delta_percent": delta_pct,
+    }
+
+
+def synthesise_observations(
+    *,
+    memory_root: Path,
+    device_slug: str,
+    repair_id: str,
+) -> Any:
+    """Walk the journal, keep the latest event per target, materialise
+    an `Observations` shape suitable for hypothesize().
+
+    Imports Observations / ObservedMetric lazily to avoid a circular
+    dependency with api.pipeline.schematic.
+    """
+    from api.pipeline.schematic.hypothesize import Observations, ObservedMetric
+
+    events = load_measurements(
+        memory_root=memory_root, device_slug=device_slug, repair_id=repair_id,
+    )
+    latest: dict[str, MeasurementEvent] = {}
+    for ev in events:
+        latest[ev.target] = ev
+
+    state_comps: dict[str, str] = {}
+    state_rails: dict[str, str] = {}
+    metrics_comps: dict[str, ObservedMetric] = {}
+    metrics_rails: dict[str, ObservedMetric] = {}
+
+    for target, ev in latest.items():
+        try:
+            kind, name = parse_target(target)
+        except ValueError:
+            continue
+        metric = ObservedMetric(
+            measured=ev.value,
+            unit=ev.unit,  # type: ignore[arg-type]
+            nominal=ev.nominal,
+        )
+        if kind == "comp":
+            if ev.auto_classified_mode in ("dead", "alive", "anomalous", "hot"):
+                state_comps[name] = ev.auto_classified_mode
+            metrics_comps[name] = metric
+        elif kind == "rail":
+            if ev.auto_classified_mode in ("dead", "alive", "shorted"):
+                state_rails[name] = ev.auto_classified_mode
+            metrics_rails[name] = metric
+        # pin-level: store nothing — pin measurements don't map to refdes modes.
+    return Observations(
+        state_comps=state_comps,
+        state_rails=state_rails,
+        metrics_comps=metrics_comps,
+        metrics_rails=metrics_rails,
+    )
