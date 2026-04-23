@@ -550,6 +550,40 @@ const POWER_PIN_ROLES = new Set([
 // them later in the same function.
 const ALWAYS_RL_TYPES_GLOBAL = new Set(["resistor", "inductor", "ferrite"]);
 
+// Phase 4 — kind-aware mode sets for the observation picker.
+// Keys match the backend ComponentKind values + "rail".
+const MODE_SETS = {
+  ic:         ["unknown", "alive", "dead", "anomalous", "hot"],
+  passive_r:  ["unknown", "alive", "open", "short"],
+  passive_c:  ["unknown", "alive", "open", "short"],
+  passive_d:  ["unknown", "alive", "open", "short"],
+  passive_fb: ["unknown", "alive", "open", "short"],
+  rail:       ["unknown", "alive", "dead", "shorted"],
+};
+
+const MODE_GLYPH = {
+  unknown:   "⚪",
+  alive:     "✅",
+  dead:      "❌",
+  anomalous: "⚠",
+  hot:       "🔥",
+  shorted:   "⚡",
+  open:      "⚪",
+  short:     "⚡",
+};
+
+// Human-readable labels per mode (French UI).
+const MODE_LABEL = {
+  unknown:   "inconnu",
+  alive:     "vivant",
+  dead:      "mort",
+  anomalous: "anomalous",
+  hot:       "chaud",
+  shorted:   "shorté",
+  open:      "ouvert",
+  short:     "court-circuit",
+};
+
 // A component "touches a power rail" if any of its pins has a known
 // power role (power_in/out, ground, switch_node, enable_in/out) or a
 // `net_label` that matches a compiled rail label. Used to decide whether
@@ -705,6 +739,7 @@ function buildModel(graph) {
     const n = {
       id: `comp:${refdes}`,
       kind: "component",
+      compKind: comp.kind || "ic",   // Phase 4: backend ComponentKind (ic|passive_r|passive_c|passive_d|passive_fb)
       refdes,
       type: comp.type,
       value: comp.value,
@@ -2494,9 +2529,12 @@ function updateInspector(node) {
   const obsKind = node.kind === "component" ? "comp" : node.kind === "rail" ? "rail" : null;
   const obsKey = node.kind === "component" ? node.refdes : node.kind === "rail" ? node.label : null;
   if (obsKind && obsKey) {
-    const modesForKind = obsKind === "rail"
-      ? [["unknown", "⚪ inconnu"], ["alive", "✅ vivant"], ["dead", "❌ mort"], ["anomalous", "⚠ anomalous"], ["shorted", "⚡ shorté"]]
-      : [["unknown", "⚪ inconnu"], ["alive", "✅ vivant"], ["dead", "❌ mort"], ["anomalous", "⚠ anomalous"], ["hot", "🔥 chaud"]];
+    // Phase 4: derive fine-grained picker kind from compKind (backend ComponentKind)
+    // for components, or "rail" for rails. Falls back to "ic" for pre-Phase-4 graphs.
+    const pickerKind = obsKind === "rail" ? "rail" : (node.compKind || "ic");
+    const modeList = MODE_SETS[pickerKind] || MODE_SETS.ic;
+    const modesForKind = modeList.map(m => [m, `${MODE_GLYPH[m] || ""} ${MODE_LABEL[m] || m}`]);
+
     const stateMap = obsKind === "rail"
       ? SimulationController.observations.state_rails
       : SimulationController.observations.state_comps;
@@ -2506,7 +2544,8 @@ function updateInspector(node) {
     row.className = "sim-obs-row";
     const picker = document.createElement("div");
     picker.className = "sim-mode-picker";
-    picker.setAttribute("data-kind", obsKind);
+    // Use pickerKind on data-kind so CSS can target passive variants.
+    picker.setAttribute("data-kind", pickerKind);
     for (const [mode, label] of modesForKind) {
       const btn = document.createElement("button");
       btn.type = "button";

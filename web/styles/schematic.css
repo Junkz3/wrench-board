@@ -640,6 +640,22 @@ body.sch-mode-railfocus .sch-boot-timeline{left:240px}
 .sim-mode-picker button.active[data-mode="shorted"]    { color: var(--amber);   border-color: var(--amber);   background: color-mix(in oklch, var(--amber) 20%, transparent); }
 .sim-mode-picker button.active[data-mode="unknown"]    { color: var(--text-2);  border-color: var(--text-3); }
 
+/* Phase 4 — passive mode picker tints. open (cyan) + short (amber). */
+.sim-mode-picker[data-kind^="passive"] button[data-mode="open"] {
+  color: var(--cyan);
+  border-color: color-mix(in oklch, var(--cyan) 40%, transparent);
+}
+.sim-mode-picker[data-kind^="passive"] button[data-mode="short"] {
+  color: var(--amber);
+  border-color: color-mix(in oklch, var(--amber) 40%, transparent);
+}
+.sim-mode-picker[data-kind^="passive"] button[data-mode="open"].active {
+  background: color-mix(in oklch, var(--cyan) 30%, var(--panel-2));
+}
+.sim-mode-picker[data-kind^="passive"] button[data-mode="short"].active {
+  background: color-mix(in oklch, var(--amber) 30%, var(--panel-2));
+}
+
 /* Metric input row — numeric entry with unit select + record button. */
 .sim-metric-row {
   display: flex; align-items: center; gap: 8px;
