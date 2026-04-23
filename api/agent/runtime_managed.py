@@ -34,6 +34,7 @@ from api.agent.chat_history import (
 from api.agent.dispatch_bv import dispatch_bv
 from api.agent.managed_ids import get_agent, load_managed_ids
 from api.agent.memory_stores import ensure_memory_store
+from api.agent.pricing import compute_turn_cost
 from api.agent.sanitize import sanitize_agent_text
 from api.agent.tools import (
     mb_expand_knowledge,
@@ -488,6 +489,23 @@ async def _forward_session_to_ws(
                 text = getattr(event, "text", "") or ""
                 if text:
                     await ws.send_json({"type": "thinking", "text": text})
+
+            elif etype == "span.model_request_end":
+                # MA attaches token usage to the span terminator. Pull it, price
+                # it using the tier's model, and surface a turn_cost event so
+                # the chat footer can display per-turn and running-total spend.
+                usage = getattr(event, "model_usage", None)
+                if usage is not None:
+                    cost = compute_turn_cost(
+                        getattr(usage, "model", None) or "",
+                        input_tokens=getattr(usage, "input_tokens", 0) or 0,
+                        output_tokens=getattr(usage, "output_tokens", 0) or 0,
+                        cache_read_input_tokens=getattr(usage, "cache_read_input_tokens", 0) or 0,
+                        cache_creation_input_tokens=getattr(
+                            usage, "cache_creation_input_tokens", 0
+                        ) or 0,
+                    )
+                    await ws.send_json({"type": "turn_cost", **cost})
 
             elif etype == "agent.custom_tool_use":
                 events_by_id[event.id] = event

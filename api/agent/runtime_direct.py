@@ -25,6 +25,7 @@ from api.agent.chat_history import (
 )
 from api.agent.dispatch_bv import dispatch_bv
 from api.agent.manifest import build_tools_manifest, render_system_prompt
+from api.agent.pricing import cost_from_response
 from api.agent.sanitize import sanitize_agent_text
 from api.agent.tools import (
     mb_expand_knowledge,
@@ -105,6 +106,12 @@ async def _run_agent_turn(
                 await ws.send_json(
                     {"type": "message", "role": "assistant", "text": clean}
                 )
+
+        # Token cost estimate for THIS API call — sent AFTER the text so the
+        # frontend can attach a "$" chip to the just-rendered assistant bubble
+        # and bump the running total in the panel footer.
+        cost = cost_from_response(model, response.usage)
+        await ws.send_json({"type": "turn_cost", **cost})
 
         assistant_msg = _normalize_message(
             {"role": "assistant", "content": response.content}
