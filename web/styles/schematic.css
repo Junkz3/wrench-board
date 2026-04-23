@@ -419,7 +419,8 @@ body.llm-open .sch-root{right:420px}
 }
 .sim-scrubber .sim-phase-label {
   color: var(--text);
-  min-width: 240px;
+  width: 280px;
+  flex: 0 0 280px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -430,9 +431,13 @@ body.llm-open .sch-root{right:420px}
   background: color-mix(in oklch, var(--amber) 18%, transparent);
   color: var(--amber);
   border: 1px solid var(--amber);
-  max-width: 320px;
+  width: 300px;
+  flex: 0 0 300px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  visibility: hidden;
 }
+.sim-scrubber .sim-blocked-overlay:not([hidden]) { visibility: visible; }
+.sim-scrubber .sim-blocked-overlay[hidden] { display: block; }
 .sim-scrubber[hidden] { display: none; }
