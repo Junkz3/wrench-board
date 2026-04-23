@@ -31,6 +31,8 @@ THRESHOLDS: dict[str, dict[str, float]] = {
     "anomalous": {"top1": 0.40, "top3": 0.60, "mrr": 0.55},
     "hot":       {"top1": 0.60, "top3": 0.85, "mrr": 0.70},
     "shorted":   {"top1": 0.15, "top3": 0.30, "mrr": 0.22},  # T0 fixpoint widened cascades → thresholds lowered; T13 will re-anchor after corpus regen.
+    "open":      {"top1": 0.40, "top3": 0.65, "mrr": 0.55},
+    "short":     {"top1": 0.55, "top3": 0.75, "mrr": 0.65},
 }
 P95_LATENCY_MS = 500.0
 
@@ -86,7 +88,7 @@ def _run_scenarios() -> list[dict]:
     return records
 
 
-@pytest.mark.parametrize("mode", ["dead", "anomalous", "hot", "shorted"])
+@pytest.mark.parametrize("mode", ["dead", "anomalous", "hot", "shorted", "open", "short"])
 def test_top1_per_mode(mode: str):
     records = [r for r in _run_scenarios() if r["mode"] == mode]
     if not records:
@@ -98,7 +100,7 @@ def test_top1_per_mode(mode: str):
     )
 
 
-@pytest.mark.parametrize("mode", ["dead", "anomalous", "hot", "shorted"])
+@pytest.mark.parametrize("mode", ["dead", "anomalous", "hot", "shorted", "open", "short"])
 def test_top3_per_mode(mode: str):
     records = [r for r in _run_scenarios() if r["mode"] == mode]
     if not records:
@@ -109,7 +111,7 @@ def test_top3_per_mode(mode: str):
     )
 
 
-@pytest.mark.parametrize("mode", ["dead", "anomalous", "hot", "shorted"])
+@pytest.mark.parametrize("mode", ["dead", "anomalous", "hot", "shorted", "open", "short"])
 def test_mrr_per_mode(mode: str):
     records = [r for r in _run_scenarios() if r["mode"] == mode]
     if not records:
