@@ -163,6 +163,30 @@ MB_TOOLS: list[dict] = [
     },
     {
         "type": "custom",
+        "name": "mb_hypothesize",
+        "description": (
+            "Propose des hypothèses de panne (refdes à tuer) qui expliquent un "
+            "symptôme observé par le tech. À appeler quand le tech décrit ce "
+            "qu'il VOIT sur la carte : composants froids/non-responsive, rails "
+            "mesurés morts, composants qui tournent, rails stables. Les 4 listes "
+            "sont optionnelles mais au moins une doit être non-vide. Les refdes "
+            "et rail labels doivent EXISTER dans le graph — le tool refuse les "
+            "inconnus avec closest_matches."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "dead_comps":  {"type": "array", "items": {"type": "string"}, "description": "Refdes observés morts."},
+                "alive_comps": {"type": "array", "items": {"type": "string"}, "description": "Refdes observés vivants (chauds, actifs)."},
+                "dead_rails":  {"type": "array", "items": {"type": "string"}, "description": "Rails mesurés à 0V ou absents (ex: '+3V3')."},
+                "alive_rails": {"type": "array", "items": {"type": "string"}, "description": "Rails mesurés stables (ex: '+5V')."},
+                "max_results": {"type": "integer", "default": 5, "minimum": 1, "maximum": 20},
+            },
+            "required": [],
+        },
+    },
+    {
+        "type": "custom",
         "name": "mb_expand_knowledge",
         "description": (
             "Grow this device's memory bank around a focus symptom area. "

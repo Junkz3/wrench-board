@@ -297,6 +297,17 @@ async def _dispatch_mb_tool(
             refdes=payload.get("refdes"),
             index=payload.get("index"),
         )
+    if name == "mb_hypothesize":
+        from api.tools.hypothesize import mb_hypothesize as _mb_hypothesize
+        return _mb_hypothesize(
+            device_slug=device_slug,
+            memory_root=memory_root,
+            dead_comps=payload.get("dead_comps", []),
+            alive_comps=payload.get("alive_comps", []),
+            dead_rails=payload.get("dead_rails", []),
+            alive_rails=payload.get("alive_rails", []),
+            max_results=payload.get("max_results", 5),
+        )
     if name == "mb_expand_knowledge":
         return await mb_expand_knowledge(
             client=client,

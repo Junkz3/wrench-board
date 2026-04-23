@@ -110,3 +110,17 @@ def test_mb_hypothesize_empty_observations_returns_empty(memory_root: Path, grap
     )
     assert result["found"] is True
     assert result["hypotheses"] == []
+
+
+def test_manifest_exposes_mb_hypothesize():
+    """Agent manifest must advertise the new tool so Claude knows to call it."""
+    from api.agent import manifest
+    from api.session.state import SessionState
+    names: list[str] = []
+    if hasattr(manifest, "TOOLS"):
+        names = [t["name"] for t in manifest.TOOLS]
+    elif hasattr(manifest, "build_tools_manifest"):
+        session = SessionState()
+        tools = manifest.build_tools_manifest(session=session)
+        names = [t["name"] for t in tools]
+    assert "mb_hypothesize" in names
