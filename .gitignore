@@ -113,3 +113,4 @@ data/
 downloads/
 board_assets/*.pdf
 !board_assets/.gitkeep
+memory/_profile/
