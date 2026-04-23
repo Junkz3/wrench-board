@@ -295,7 +295,7 @@ Create the file with all styles. Values follow the Memory Bank grammar (see `web
   border: 1px solid var(--border);
   border-radius: 6px;
   color: var(--text-2);
-  font-family: var(--sans);
+  font-family: inherit;
   font-size: 12px;
   cursor: pointer;
   transition: background .15s, color .15s, border-color .15s;
@@ -369,7 +369,7 @@ body.llm-open .rd-tiles { grid-template-columns: repeat(2, 1fr); }
   grid-template-columns: 1.4fr 1fr;
   gap: 16px;
 }
-body.llm-open .rd-body,
+body.llm-open .rd-body { grid-template-columns: 1fr; }
 @media (max-width: 960px) {
   .rd-body { grid-template-columns: 1fr; }
 }
@@ -432,7 +432,7 @@ body.llm-open .rd-body,
   text-align: left;
   cursor: pointer;
   color: var(--text);
-  font-family: var(--sans);
+  font-family: inherit;
   font-size: 13px;
   transition: background .15s, border-color .15s;
 }
@@ -1328,7 +1328,7 @@ Append to `web/styles/repair_dashboard.css`:
   border: 1px solid var(--cyan);
   border-radius: 999px;
   color: var(--text);
-  font-family: var(--sans);
+  font-family: inherit;
   font-size: 12px;
   cursor: pointer;
   transition: background .15s, border-color .15s, transform .15s;
