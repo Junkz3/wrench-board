@@ -2,14 +2,14 @@
 """Seed a device's Managed-Agents memory store from its on-disk knowledge pack.
 
 Called from the pipeline orchestrator right after an APPROVED verdict. The
-diagnostic conversation for this device can then read the canonical knowledge
-(registry, rules, dictionary, knowledge graph) natively via memory_search /
-memory_read instead of re-hydrating it from disk on every tool call.
+diagnostic conversation for this device can then consult the canonical
+knowledge (registry, rules, dictionary, knowledge graph) natively via the
+built-in memory tools instead of re-hydrating it from disk on every tool
+call.
 
-Feature-gated behind `settings.ma_memory_store_enabled` — off by default until
-Anthropic grants the memory_stores Research Preview to our workspace. Every
-error path degrades to a log warning: the pipeline must never fail because
-memory seeding failed.
+Feature-gated behind `settings.ma_memory_store_enabled`. Every error path
+degrades to a log warning: the pipeline must never fail because memory
+seeding failed.
 """
 
 from __future__ import annotations
@@ -19,7 +19,7 @@ from pathlib import Path
 
 from anthropic import AsyncAnthropic
 
-from api.agent.memory_stores import ensure_memory_store
+from api.agent.memory_stores import ensure_memory_store, upsert_memory
 from api.config import get_settings
 
 logger = logging.getLogger("microsolder.agent.memory_seed")
@@ -67,18 +67,6 @@ async def seed_memory_store_from_pack(
             status[path] = "skipped:no_store"
         return status
 
-    try:
-        memories_api = client.beta.memory_stores.memories  # type: ignore[attr-defined]
-    except AttributeError:
-        logger.warning(
-            "[MemorySeed] anthropic SDK has no beta.memory_stores.memories surface; "
-            "cannot seed slug=%s",
-            device_slug,
-        )
-        for path in status:
-            status[path] = "skipped:no_sdk_surface"
-        return status
-
     for file_name, memory_path in _SEED_FILES:
         on_disk = pack_dir / file_name
         if not on_disk.exists():
@@ -89,21 +77,15 @@ async def seed_memory_store_from_pack(
                 device_slug,
             )
             continue
-        try:
-            content = on_disk.read_text(encoding="utf-8")
-            await memories_api.create(
-                memory_store_id=store_id,
-                path=memory_path,
-                content=content,
-            )
-        except Exception as exc:  # noqa: BLE001 — beta surface, want single catch
-            logger.warning(
-                "[MemorySeed] create failed for slug=%s path=%s: %s",
-                device_slug,
-                memory_path,
-                exc,
-            )
-            status[memory_path] = f"error:{type(exc).__name__}"
+        content = on_disk.read_text(encoding="utf-8")
+        result = await upsert_memory(
+            client,
+            store_id=store_id,
+            path=memory_path,
+            content=content,
+        )
+        if result is None:
+            status[memory_path] = "error:upsert_failed"
             continue
         status[memory_path] = "seeded"
         logger.info(

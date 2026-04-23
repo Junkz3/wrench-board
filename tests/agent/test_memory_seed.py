@@ -3,13 +3,18 @@ after an APPROVED verdict.
 
 Every test monkeypatches `settings` via the config module so that the
 feature flag can be toggled independently of the dev environment.
+
+The seed call now goes through `upsert_memory` (shared helper in
+`api.agent.memory_stores`), which itself multi-plexes SDK / HTTP. Tests
+patch `upsert_memory` directly at the `memory_seed` module binding — the
+helper itself is exercised by tests on its own module.
 """
 
 from __future__ import annotations
 
 import json
 from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -39,13 +44,21 @@ async def test_seed_no_op_when_flag_disabled(pack_dir, monkeypatch):
     monkeypatch.setenv("MA_MEMORY_STORE_ENABLED", "false")
     client = MagicMock()
 
+    calls: list[dict] = []
+
+    async def fake_upsert(*_args, **kwargs):
+        calls.append(kwargs)
+        return "sha_ignored"
+
+    monkeypatch.setattr("api.agent.memory_seed.upsert_memory", fake_upsert)
+
     status = await seed_memory_store_from_pack(
         client=client, device_slug="demo-pi", pack_dir=pack_dir
     )
 
     assert all(v == "skipped:flag_disabled" for v in status.values())
-    # And importantly, no SDK surface was touched.
-    client.beta.memory_stores.memories.create.assert_not_called()
+    # Flag off = no upsert call reaches the wire, period.
+    assert calls == []
 
 
 async def test_seed_skipped_when_ensure_memory_store_returns_none(
@@ -54,7 +67,7 @@ async def test_seed_skipped_when_ensure_memory_store_returns_none(
     monkeypatch.setenv("MA_MEMORY_STORE_ENABLED", "true")
     monkeypatch.setenv("ANTHROPIC_API_KEY", "test-key")
 
-    # Force ensure_memory_store to return None (unsupported SDK / denied beta).
+    # Force ensure_memory_store to return None (SDK down, API denied, etc.).
     async def fake_ensure(_client, _slug):
         return None
 
@@ -76,10 +89,15 @@ async def test_seed_creates_one_memory_per_file(pack_dir, monkeypatch):
 
     monkeypatch.setattr("api.agent.memory_seed.ensure_memory_store", fake_ensure)
 
-    client = MagicMock()
-    create_mock = AsyncMock()
-    client.beta.memory_stores.memories.create = create_mock
+    upserts: list[dict] = []
 
+    async def fake_upsert(_client, *, store_id, path, content):
+        upserts.append({"store_id": store_id, "path": path, "bytes": len(content)})
+        return "sha_" + path
+
+    monkeypatch.setattr("api.agent.memory_seed.upsert_memory", fake_upsert)
+
+    client = MagicMock()
     status = await seed_memory_store_from_pack(
         client=client, device_slug="demo-pi", pack_dir=pack_dir
     )
@@ -90,14 +108,9 @@ async def test_seed_creates_one_memory_per_file(pack_dir, monkeypatch):
         "/knowledge/rules.json": "seeded",
         "/knowledge/dictionary.json": "seeded",
     }
-    assert create_mock.await_count == 4
-    paths_sent = [call.kwargs["path"] for call in create_mock.await_args_list]
-    assert set(paths_sent) == set(status.keys())
-    # All calls targeted the store returned by ensure_memory_store.
-    assert all(
-        call.kwargs["memory_store_id"] == "memstore_test123"
-        for call in create_mock.await_args_list
-    )
+    assert len(upserts) == 4
+    assert {u["path"] for u in upserts} == set(status.keys())
+    assert all(u["store_id"] == "memstore_test123" for u in upserts)
 
 
 async def test_seed_reports_missing_file(pack_dir, monkeypatch):
@@ -110,11 +123,13 @@ async def test_seed_reports_missing_file(pack_dir, monkeypatch):
     async def fake_ensure(_client, _slug):
         return "memstore_x"
 
+    async def fake_upsert(_client, **_kwargs):
+        return "ok"
+
     monkeypatch.setattr("api.agent.memory_seed.ensure_memory_store", fake_ensure)
+    monkeypatch.setattr("api.agent.memory_seed.upsert_memory", fake_upsert)
 
     client = MagicMock()
-    client.beta.memory_stores.memories.create = AsyncMock()
-
     status = await seed_memory_store_from_pack(
         client=client, device_slug="demo-pi", pack_dir=pack_dir
     )
@@ -122,7 +137,7 @@ async def test_seed_reports_missing_file(pack_dir, monkeypatch):
     assert status["/knowledge/registry.json"] == "seeded"
 
 
-async def test_seed_swallows_per_file_errors(pack_dir, monkeypatch):
+async def test_seed_records_per_file_upsert_failure(pack_dir, monkeypatch):
     """One file failing to upload must not abort the rest."""
     monkeypatch.setenv("MA_MEMORY_STORE_ENABLED", "true")
     monkeypatch.setenv("ANTHROPIC_API_KEY", "test-key")
@@ -134,16 +149,16 @@ async def test_seed_swallows_per_file_errors(pack_dir, monkeypatch):
 
     calls = 0
 
-    async def flaky_create(**_kwargs):
+    async def flaky_upsert(_client, **_kwargs):
         nonlocal calls
         calls += 1
         if calls == 2:
-            raise RuntimeError("transient beta 503")
-        return MagicMock()
+            return None  # mimic the shared helper's failure mode
+        return "sha_ok"
+
+    monkeypatch.setattr("api.agent.memory_seed.upsert_memory", flaky_upsert)
 
     client = MagicMock()
-    client.beta.memory_stores.memories.create = flaky_create
-
     status = await seed_memory_store_from_pack(
         client=client, device_slug="demo-pi", pack_dir=pack_dir
     )

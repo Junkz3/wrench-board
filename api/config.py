@@ -97,16 +97,16 @@ class Settings(BaseSettings):
     )
 
     # --- Managed Agents memory stores -----------------------------------------
-    # The memory_stores primitive is in Research Preview as of 2026-04. Once
-    # access is granted, flipping this flag wires the pipeline + diagnostic
-    # paths together: pipeline output is seeded into each device's store, and
-    # diagnostic sessions can write findings back. All call sites degrade
-    # gracefully when the flag is off (no SDK calls, no errors).
+    # Memory stores entered Anthropic's public beta on 2026-04-23. With the
+    # flag on (default), pipeline output is pre-seeded into each device's
+    # store and diagnostic sessions write findings back. Set to False in
+    # .env to fully bypass memory_stores (e.g. for offline dev or if the
+    # workspace loses access). All call sites degrade gracefully either way.
     ma_memory_store_enabled: bool = Field(
-        default=False,
+        default=True,
         description=(
-            "Gate for Anthropic Managed Agents memory_stores integration. Off "
-            "until the Research Preview grants our account access."
+            "Gate for Anthropic Managed Agents memory_stores integration. "
+            "On since public beta (2026-04-23); set False to disable."
         ),
     )
     chat_history_backend: Literal["jsonl", "managed_agents"] = Field(

@@ -7,7 +7,7 @@ Covers the JSON-first write-path (works without MA access), the MA mirror
 from __future__ import annotations
 
 from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -120,10 +120,15 @@ async def test_ma_mirror_called_when_flag_enabled(tmp_path: Path, monkeypatch):
 
     monkeypatch.setattr("api.agent.field_reports.ensure_memory_store", fake_ensure)
 
-    client = MagicMock()
-    create_mock = AsyncMock()
-    client.beta.memory_stores.memories.create = create_mock
+    upserts: list[dict] = []
 
+    async def fake_upsert(_client, *, store_id, path, content):
+        upserts.append({"store_id": store_id, "path": path, "content": content})
+        return "sha_ok"
+
+    monkeypatch.setattr("api.agent.field_reports.upsert_memory", fake_upsert)
+
+    client = MagicMock()
     status = await record_field_report(
         client=client,
         device_slug="demo-pi",
@@ -135,11 +140,10 @@ async def test_ma_mirror_called_when_flag_enabled(tmp_path: Path, monkeypatch):
 
     assert status["json_status"] == "written"
     assert status["ma_mirror_status"] == "mirrored"
-    create_mock.assert_awaited_once()
-    call_kwargs = create_mock.await_args.kwargs
-    assert call_kwargs["memory_store_id"] == "memstore_x"
-    assert call_kwargs["path"].startswith("/field_reports/")
-    assert "U7" in call_kwargs["content"]
+    assert len(upserts) == 1
+    assert upserts[0]["store_id"] == "memstore_x"
+    assert upserts[0]["path"].startswith("/field_reports/")
+    assert "U7" in upserts[0]["content"]
 
 
 async def test_ma_mirror_failure_does_not_block_json_write(
@@ -153,12 +157,12 @@ async def test_ma_mirror_failure_does_not_block_json_write(
 
     monkeypatch.setattr("api.agent.field_reports.ensure_memory_store", fake_ensure)
 
-    async def flaky_create(**_kwargs):
-        raise RuntimeError("beta denied")
+    async def failing_upsert(_client, **_kwargs):
+        return None  # matches the shared helper's failure contract
+
+    monkeypatch.setattr("api.agent.field_reports.upsert_memory", failing_upsert)
 
     client = MagicMock()
-    client.beta.memory_stores.memories.create = flaky_create
-
     status = await record_field_report(
         client=client,
         device_slug="demo-pi",

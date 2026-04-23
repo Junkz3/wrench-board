@@ -34,7 +34,7 @@ from typing import Any
 
 from anthropic import AsyncAnthropic
 
-from api.agent.memory_stores import ensure_memory_store
+from api.agent.memory_stores import ensure_memory_store, upsert_memory
 from api.config import get_settings
 
 logger = logging.getLogger("microsolder.agent.field_reports")
@@ -233,25 +233,19 @@ async def _mirror_to_managed_agents(
     if store_id is None:
         return "skipped:no_store"
 
-    try:
-        memories_api = client.beta.memory_stores.memories  # type: ignore[attr-defined]
-    except AttributeError:
-        return "skipped:no_sdk_surface"
-
-    try:
-        await memories_api.create(
-            memory_store_id=store_id,
-            path=f"/field_reports/{report_id}.md",
-            content=markdown,
-        )
-    except Exception as exc:  # noqa: BLE001 — beta surface
+    result = await upsert_memory(
+        client,
+        store_id=store_id,
+        path=f"/field_reports/{report_id}.md",
+        content=markdown,
+    )
+    if result is None:
         logger.warning(
-            "[FieldReport] MA mirror failed for slug=%s report_id=%s: %s",
+            "[FieldReport] MA mirror failed for slug=%s report_id=%s",
             device_slug,
             report_id,
-            exc,
         )
-        return f"error:{type(exc).__name__}"
+        return "error:upsert_failed"
 
     return "mirrored"
 
