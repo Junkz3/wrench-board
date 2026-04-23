@@ -80,7 +80,10 @@ def test_repairs_endpoint_persists_symptom_file(memory_root, client):
 
 
 def test_repairs_endpoint_skips_pipeline_when_pack_already_complete(memory_root, client):
-    """If the pack already has the 4 writer files, we skip the pipeline rebuild."""
+    """If the pack already has the 4 writer files, we skip the pipeline rebuild
+    but we STILL persist the repair record — every "nouvelle réparation" is
+    a distinct session, reopenable later from the library.
+    """
     slug_dir = memory_root / "demo-pi"
     slug_dir.mkdir()
     # Bare-minimum content that makes _summarize_pack flag the pack as "complete".
@@ -97,12 +100,67 @@ def test_repairs_endpoint_skips_pipeline_when_pack_already_complete(memory_root,
     assert res.status_code == 200
     body = res.json()
     assert body["pipeline_started"] is False
-    # The pipeline must not have been kicked off.
     m.assert_not_called()
-    # And we did NOT persist a repair file — re-opening an existing pack is
-    # not a real session, the user is just browsing.
-    assert body["repair_id"] == ""
-    assert not (slug_dir / "repairs").exists()
+    # Repair record IS persisted — two sessions on the same pack are two
+    # separate repairs with two separate contexts.
+    assert body["repair_id"]
+    repair_file = slug_dir / "repairs" / f"{body['repair_id']}.json"
+    assert repair_file.exists()
+    payload = json.loads(repair_file.read_text())
+    assert payload["status"] == "open"
+    assert payload["symptom"] == "pack already exists on disk"
+
+
+def test_list_repairs_returns_all_sessions_across_devices(memory_root, client):
+    """GET /pipeline/repairs should aggregate repair files across every pack,
+    sorted newest-first. Powers the home library view.
+    """
+    # Two different devices, three total repairs.
+    for slug, repairs in (
+        ("iphone-x-logic-board", [
+            {"repair_id": "rA1", "symptom": "no backlight", "created_at": "2026-04-20T10:00:00+00:00"},
+            {"repair_id": "rA2", "symptom": "not charging",  "created_at": "2026-04-22T15:00:00+00:00"},
+        ]),
+        ("mnt-reform-motherboard", [
+            {"repair_id": "rB1", "symptom": "LPC lockup", "created_at": "2026-04-21T09:00:00+00:00"},
+        ]),
+    ):
+        rdir = memory_root / slug / "repairs"
+        rdir.mkdir(parents=True, exist_ok=True)
+        for r in repairs:
+            (rdir / f"{r['repair_id']}.json").write_text(json.dumps({
+                **r,
+                "device_slug": slug,
+                "device_label": slug.replace("-", " "),
+                "status": "open",
+            }))
+
+    res = client.get("/pipeline/repairs")
+    assert res.status_code == 200
+    body = res.json()
+    assert len(body) == 3
+    # Newest first.
+    assert [r["repair_id"] for r in body] == ["rA2", "rB1", "rA1"]
+    assert all(r["status"] == "open" for r in body)
+
+
+def test_get_repair_by_id(memory_root, client):
+    (memory_root / "demo-pi" / "repairs").mkdir(parents=True)
+    (memory_root / "demo-pi" / "repairs" / "r123.json").write_text(json.dumps({
+        "repair_id": "r123",
+        "device_slug": "demo-pi",
+        "device_label": "Demo Pi",
+        "symptom": "won't boot",
+        "status": "in_progress",
+        "created_at": "2026-04-22T12:00:00+00:00",
+    }))
+    res = client.get("/pipeline/repairs/r123")
+    assert res.status_code == 200
+    assert res.json()["status"] == "in_progress"
+    assert res.json()["symptom"] == "won't boot"
+
+    res_404 = client.get("/pipeline/repairs/does-not-exist")
+    assert res_404.status_code == 404
 
 
 def test_repairs_endpoint_resolves_by_device_slug_when_provided(memory_root, client):

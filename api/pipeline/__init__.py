@@ -267,9 +267,10 @@ def _persist_repair(
 ) -> str:
     """Write the repair metadata to memory/{slug}/repairs/{repair_id}.json.
 
-    Returns the generated repair_id. The file gives the diagnostic conversation
-    a durable record of the client's original complaint even if the session
-    closes mid-flight.
+    Returns the generated repair_id. The file is the durable record of one
+    client intervention on this device — reopenable from the home library
+    so the technician can come back to any past session. `status` starts at
+    'open' and is updated as the session evolves.
     """
     repair_id = uuid.uuid4().hex[:12]
     repairs_dir = memory_root / slug / "repairs"
@@ -279,6 +280,7 @@ def _persist_repair(
         "device_slug": slug,
         "device_label": device_label,
         "symptom": symptom,
+        "status": "open",
         "created_at": datetime.now(UTC).isoformat(),
     }
     (repairs_dir / f"{repair_id}.json").write_text(
@@ -286,6 +288,79 @@ def _persist_repair(
         encoding="utf-8",
     )
     return repair_id
+
+
+class RepairSummary(BaseModel):
+    repair_id: str
+    device_slug: str
+    device_label: str
+    symptom: str
+    status: str
+    created_at: str
+
+
+@router.get("/repairs", response_model=list[RepairSummary])
+async def list_repairs() -> list[RepairSummary]:
+    """Return every repair ever created, across every device, newest first.
+
+    Powers the home library: each row is one client intervention the
+    technician can open, reopen, or finish. Status drives the visual
+    badge ('open' · 'in_progress' · 'closed').
+    """
+    settings = get_settings()
+    root = Path(settings.memory_root)
+    results: list[RepairSummary] = []
+    if not root.exists():
+        return results
+
+    for pack_dir in root.iterdir():
+        if not pack_dir.is_dir():
+            continue
+        repairs_dir = pack_dir / "repairs"
+        if not repairs_dir.exists():
+            continue
+        for path in repairs_dir.glob("*.json"):
+            try:
+                payload = json.loads(path.read_text())
+            except json.JSONDecodeError:
+                logger.warning("Skipping malformed repair file: %s", path)
+                continue
+            results.append(
+                RepairSummary(
+                    repair_id=payload.get("repair_id", path.stem),
+                    device_slug=payload.get("device_slug", pack_dir.name),
+                    device_label=payload.get("device_label", pack_dir.name),
+                    symptom=payload.get("symptom", ""),
+                    status=payload.get("status", "open"),
+                    created_at=payload.get("created_at", ""),
+                )
+            )
+    results.sort(key=lambda r: r.created_at, reverse=True)
+    return results
+
+
+@router.get("/repairs/{repair_id}", response_model=RepairSummary)
+async def get_repair(repair_id: str) -> RepairSummary:
+    """Return one repair's metadata — used to resume a session from its id."""
+    settings = get_settings()
+    root = Path(settings.memory_root)
+    if not root.exists():
+        raise HTTPException(status_code=404, detail=f"No repair {repair_id!r}")
+    for pack_dir in root.iterdir():
+        if not pack_dir.is_dir():
+            continue
+        candidate = pack_dir / "repairs" / f"{repair_id}.json"
+        if candidate.exists():
+            payload = json.loads(candidate.read_text())
+            return RepairSummary(
+                repair_id=payload.get("repair_id", repair_id),
+                device_slug=payload.get("device_slug", pack_dir.name),
+                device_label=payload.get("device_label", pack_dir.name),
+                symptom=payload.get("symptom", ""),
+                status=payload.get("status", "open"),
+                created_at=payload.get("created_at", ""),
+            )
+    raise HTTPException(status_code=404, detail=f"No repair {repair_id!r}")
 
 
 async def _run_pipeline_with_events(device_label: str, slug: str) -> None:
@@ -326,29 +401,29 @@ async def create_repair(request: RepairRequest) -> RepairResponse:
     slug = request.device_slug or _slugify(request.device_label)
     pack_dir = memory_root / slug
 
-    # Short-circuit: when the pack is already complete AND the client didn't
-    # ask for a rebuild, we skip BOTH the pipeline run AND the repair record.
-    # No session is actually starting — the user is just opening the pack —
-    # so we don't need to persist a repair UUID on disk. Saves us from
-    # accumulating junk files in memory/{slug}/repairs/ for every browse.
+    # Every "nouvelle réparation" IS a repair session — persist the record
+    # whether the pack is fresh or already on disk. Two repairs on the same
+    # iPhone X are two separate sessions with two separate contexts; both
+    # must be reopenable later from the library.
+    repair_id = _persist_repair(memory_root, slug, request.device_label, request.symptom)
+
     if _pack_is_complete(pack_dir) and not request.force_rebuild:
         logger.info(
-            "[API] /pipeline/repairs · pack already complete for slug=%r — opening existing pack",
+            "[API] /pipeline/repairs · pack already complete for slug=%r — repair=%s opens existing pack",
             slug,
+            repair_id,
         )
         return RepairResponse(
-            repair_id="",
+            repair_id=repair_id,
             device_slug=slug,
             device_label=request.device_label,
             pipeline_started=False,
         )
 
-    # Real session starting — persist the repair record.
-    repair_id = _persist_repair(memory_root, slug, request.device_label, request.symptom)
-
     if request.force_rebuild and _pack_is_complete(pack_dir):
         logger.info(
-            "[API] /pipeline/repairs · force_rebuild=True · regenerating pack for slug=%r",
+            "[API] /pipeline/repairs · force_rebuild=True · repair=%s regenerating pack for slug=%r",
+            repair_id,
             slug,
         )
 
