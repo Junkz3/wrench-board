@@ -371,11 +371,29 @@ async def run_diagnostic_session_managed(
     if reused_session_id:
         try:
             session = await client.beta.sessions.retrieve(reused_session_id)
-            resumed = True
-            logger.info(
-                "[Diag-MA] Resuming existing session=%s for repair=%s conv=%s",
-                reused_session_id, repair_id, resolved_conv_id,
-            )
+            # The session is retrievable even if it was bound to an agent that
+            # has since been archived (e.g. after a manifest refresh). In that
+            # case the agent running the session still has the OLD tool set
+            # and system prompt — the tech won't see profile_* nor the
+            # <technician_profile> block on this conversation. Detect the
+            # drift and treat it like a failed retrieve so the fallback path
+            # below kicks in: fresh session on the current agent + Haiku
+            # summary of what happened on the old one.
+            session_agent = getattr(session, "agent", None)
+            session_agent_id = getattr(session_agent, "id", None) if session_agent else None
+            if session_agent_id and session_agent_id != agent_info["id"]:
+                logger.info(
+                    "[Diag-MA] session=%s bound to stale agent=%s (current=%s) — "
+                    "forcing fresh session + recap",
+                    reused_session_id, session_agent_id, agent_info["id"],
+                )
+                session = None
+            else:
+                resumed = True
+                logger.info(
+                    "[Diag-MA] Resuming existing session=%s for repair=%s conv=%s",
+                    reused_session_id, repair_id, resolved_conv_id,
+                )
         except Exception as exc:  # noqa: BLE001
             logger.warning(
                 "[Diag-MA] could not resume session=%s (%s) — creating fresh",
