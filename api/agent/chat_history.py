@@ -460,7 +460,64 @@ def create_conversation(
         parents=True, exist_ok=True
     )
     _write_index(root, device_slug, repair_id, index)
+    # One-shot migration of the legacy per-repair `ma_sessions` dict into
+    # the first conversation's per-tier files. Pre-T1, MA session ids were
+    # stored under `memory/{slug}/repairs/{id}.json::ma_sessions[{tier}]`;
+    # after the refactor they live at `conversations/{conv}/ma_session_{tier}.json`.
+    # Without this hop, the first conv created on a legacy repair loses the
+    # real agent memory and the tech sees the model start from scratch.
+    if len(index) == 1:
+        _seed_legacy_ma_sessions(
+            root=root, device_slug=device_slug, repair_id=repair_id,
+            conv_id=conv_id,
+        )
     return conv_id
+
+
+def _seed_legacy_ma_sessions(
+    *, root: Path, device_slug: str, repair_id: str, conv_id: str
+) -> None:
+    """Copy `ma_sessions` dict from repair metadata into per-tier files.
+
+    Idempotent: if a `ma_session_{tier}.json` already exists for this conv,
+    it wins (never overwrite a deliberately-saved id). Swallows all errors —
+    this is best-effort backfill, not a hard precondition.
+    """
+    meta_path = _metadata_file(root, device_slug, repair_id)
+    if not meta_path.exists():
+        return
+    try:
+        meta = json.loads(meta_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return
+    legacy = meta.get("ma_sessions") or {}
+    if not isinstance(legacy, dict):
+        return
+    linked_at = meta.get("ma_session_linked_at") or datetime.now(UTC).isoformat()
+    for tier, session_id in legacy.items():
+        if not (isinstance(tier, str) and isinstance(session_id, str) and session_id):
+            continue
+        path = _ma_session_file(root, device_slug, repair_id, conv_id, tier)
+        if path.exists():
+            continue
+        try:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(
+                json.dumps(
+                    {"session_id": session_id, "tier": tier, "linked_at": linked_at},
+                    indent=2, ensure_ascii=False,
+                ) + "\n",
+                encoding="utf-8",
+            )
+            logger.info(
+                "[ChatHistory] seeded legacy MA session for repair=%s conv=%s tier=%s",
+                repair_id, conv_id, tier,
+            )
+        except OSError as exc:
+            logger.warning(
+                "[ChatHistory] _seed_legacy_ma_sessions failed for repair=%s tier=%s: %s",
+                repair_id, tier, exc,
+            )
 
 
 def ensure_conversation(
@@ -581,6 +638,9 @@ def _migrate_legacy(
         }
     ]
     _write_index(root, device_slug, repair_id, index)
+    _seed_legacy_ma_sessions(
+        root=root, device_slug=device_slug, repair_id=repair_id, conv_id=conv_id
+    )
     return conv_id
 
 
