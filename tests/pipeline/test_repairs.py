@@ -99,6 +99,72 @@ def test_repairs_endpoint_skips_pipeline_when_pack_already_complete(memory_root,
     assert body["pipeline_started"] is False
     # The pipeline must not have been kicked off.
     m.assert_not_called()
+    # And we did NOT persist a repair file — re-opening an existing pack is
+    # not a real session, the user is just browsing.
+    assert body["repair_id"] == ""
+    assert not (slug_dir / "repairs").exists()
+
+
+def test_repairs_endpoint_resolves_by_device_slug_when_provided(memory_root, client):
+    """When the client sends device_slug directly, the backend uses it — even
+    if the device_label slugifies to something different. Protects against
+    Registry-rewrite drift (label changes after the pack dir is named).
+    """
+    # Pack lives under 'iphone-x-logic-board' on disk, but the internal
+    # device_label has been rewritten to something that slugifies differently.
+    slug_dir = memory_root / "iphone-x-logic-board"
+    slug_dir.mkdir()
+    for name, body in (
+        ("registry.json", '{"schema_version":"1.0","device_label":"Apple iPhone X logic board","components":[],"signals":[]}'),
+        ("knowledge_graph.json", '{"schema_version":"1.0","nodes":[],"edges":[]}'),
+        ("rules.json", '{"schema_version":"1.0","rules":[]}'),
+        ("dictionary.json", '{"schema_version":"1.0","entries":[]}'),
+    ):
+        (slug_dir / name).write_text(body)
+
+    with patch("api.pipeline.generate_knowledge_pack", new=AsyncMock(side_effect=_fake_pipeline)) as m:
+        res = client.post(
+            "/pipeline/repairs",
+            json={
+                "device_label": "Apple iPhone X logic board",  # would slugify to apple-iphone-x-logic-board
+                "device_slug": "iphone-x-logic-board",         # but this wins
+                "symptom": "pack already exists on disk",
+            },
+        )
+    assert res.status_code == 200
+    body = res.json()
+    assert body["device_slug"] == "iphone-x-logic-board"
+    assert body["pipeline_started"] is False
+    m.assert_not_called()
+
+
+def test_repairs_endpoint_force_rebuild_persists_repair_and_fires_pipeline(memory_root, client):
+    """force_rebuild=true on an existing pack must run the pipeline AND write a repair file."""
+    slug_dir = memory_root / "demo-pi"
+    slug_dir.mkdir()
+    for name, body in (
+        ("registry.json", '{"schema_version":"1.0","device_label":"Demo Pi","components":[],"signals":[]}'),
+        ("knowledge_graph.json", '{"schema_version":"1.0","nodes":[],"edges":[]}'),
+        ("rules.json", '{"schema_version":"1.0","rules":[]}'),
+        ("dictionary.json", '{"schema_version":"1.0","entries":[]}'),
+    ):
+        (slug_dir / name).write_text(body)
+
+    with patch("api.pipeline.generate_knowledge_pack", new=AsyncMock(side_effect=_fake_pipeline)):
+        res = client.post(
+            "/pipeline/repairs",
+            json={
+                "device_label": "Demo Pi",
+                "symptom": "force rebuild even though pack exists",
+                "force_rebuild": True,
+            },
+        )
+    assert res.status_code == 200
+    body = res.json()
+    assert body["pipeline_started"] is True
+    assert body["repair_id"]  # non-empty
+    assert (slug_dir / "repairs").exists()
+    assert list((slug_dir / "repairs").glob("*.json"))
 
 
 def test_repairs_endpoint_rejects_short_input(memory_root, client):

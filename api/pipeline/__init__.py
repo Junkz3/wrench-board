@@ -217,10 +217,27 @@ class RepairRequest(BaseModel):
         max_length=200,
         description="Human-readable device identifier (e.g. 'MNT Reform motherboard').",
     )
+    device_slug: str | None = Field(
+        default=None,
+        description=(
+            "Canonical slug of an existing pack on disk. When provided, the "
+            "backend uses this directly instead of slugifying device_label — "
+            "avoids the drift case where the Registry Builder rewrote the label "
+            "after the pack's directory was already named from the initial slug."
+        ),
+    )
     symptom: str = Field(
         min_length=5,
         max_length=2000,
         description="Free-form description of what the client observes.",
+    )
+    force_rebuild: bool = Field(
+        default=False,
+        description=(
+            "When true, run the pipeline even if the pack is already complete on "
+            "disk. The existing files get overwritten as each phase writes out. "
+            "Use sparingly — a rebuild costs tokens."
+        ),
     )
 
 
@@ -303,21 +320,36 @@ async def create_repair(request: RepairRequest) -> RepairResponse:
     """
     settings = get_settings()
     memory_root = Path(settings.memory_root)
-    slug = _slugify(request.device_label)
+    # Prefer the explicit slug when the client picked an existing pack — this
+    # protects us from Registry-rewrite drift (the LLM can amend device_label
+    # after the pack's directory was named from the original call slug).
+    slug = request.device_slug or _slugify(request.device_label)
     pack_dir = memory_root / slug
 
-    repair_id = _persist_repair(memory_root, slug, request.device_label, request.symptom)
-
-    if _pack_is_complete(pack_dir):
+    # Short-circuit: when the pack is already complete AND the client didn't
+    # ask for a rebuild, we skip BOTH the pipeline run AND the repair record.
+    # No session is actually starting — the user is just opening the pack —
+    # so we don't need to persist a repair UUID on disk. Saves us from
+    # accumulating junk files in memory/{slug}/repairs/ for every browse.
+    if _pack_is_complete(pack_dir) and not request.force_rebuild:
         logger.info(
-            "[API] /pipeline/repairs · pack already complete for slug=%r — skipping rebuild",
+            "[API] /pipeline/repairs · pack already complete for slug=%r — opening existing pack",
             slug,
         )
         return RepairResponse(
-            repair_id=repair_id,
+            repair_id="",
             device_slug=slug,
             device_label=request.device_label,
             pipeline_started=False,
+        )
+
+    # Real session starting — persist the repair record.
+    repair_id = _persist_repair(memory_root, slug, request.device_label, request.symptom)
+
+    if request.force_rebuild and _pack_is_complete(pack_dir):
+        logger.info(
+            "[API] /pipeline/repairs · force_rebuild=True · regenerating pack for slug=%r",
+            slug,
         )
 
     logger.info("[API] /pipeline/repairs · firing pipeline for slug=%r", slug)
