@@ -250,3 +250,44 @@ body.llm-open .stub{right:420px}
 /* Replay dimming: whole log dims, not per-row. */
 .llm-log.replay .turn,
 .llm-log.replay .msg { opacity: .55; }
+
+.step .step-icon {
+  width: 12px; height: 12px; flex-shrink: 0;
+}
+.step.mb .step-icon { color: var(--cyan); }
+.step.bv .step-icon { color: var(--violet); }
+
+.step-expand {
+  background: none; border: 0; color: var(--text-3); cursor: pointer;
+  padding: 2px 4px; border-radius: 3px;
+  transition: color .15s, background .15s;
+  flex-shrink: 0;
+}
+.step-expand:hover { color: var(--text-2); background: var(--panel); }
+.step-expand .chevron { transition: transform .15s; display: block; }
+.step-expand[aria-expanded="true"] .chevron { transform: rotate(90deg); }
+
+.step-payload {
+  display: none;
+  grid-column: 1 / -1;
+  width: calc(100% - 4px);
+  margin: 6px 0 2px 0;
+  background: var(--panel);
+  border-left: 2px solid currentColor;
+  padding: 8px 10px;
+  border-radius: 4px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--text-2);
+  white-space: pre-wrap;
+  overflow-x: auto;
+  line-height: 1.4;
+}
+.step.mb .step-payload { border-left-color: var(--cyan); }
+.step.bv .step-payload { border-left-color: var(--violet); }
+.step.expanded .step-payload { display: block; }
+.step.expanded { flex-wrap: wrap; align-items: center; }
+
+.tool-name-raw {
+  font-family: var(--mono); font-size: 10.5px; color: var(--text-3);
+}

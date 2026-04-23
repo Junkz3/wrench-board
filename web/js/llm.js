@@ -28,6 +28,108 @@ let sessionTurns = 0;
 // (agent emitted two messages back-to-back without a user interjection).
 let currentTurn = null;
 
+// Family icons for tool-call steps. 12×12, stroke currentColor, per CLAUDE.md §icons.
+const ICON_MB =
+  '<svg class="step-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" ' +
+  'stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" ' +
+  'aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/>' +
+  '<circle cx="12" cy="12" r="3"/></svg>';
+const ICON_BV =
+  '<svg class="step-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" ' +
+  'stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" ' +
+  'aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/>' +
+  '<circle cx="12" cy="12" r="1.2" fill="currentColor"/></svg>';
+
+// French paraphrase + family icon for each known tool name. Each entry
+// is a function receiving the tool input object and returning
+// {icon, phraseHTML}. phraseHTML may embed a <span class="refdes"> or
+// <span class="net"> for typographic emphasis on the target; all user
+// input is passed through escapeHTML before interpolation.
+const TOOL_PHRASES = {
+  // --- MB (memory bank — perception / reading) ---
+  mb_get_component: (i) => ({
+    icon: ICON_MB,
+    phraseHTML: `Consultation de <span class="refdes">${escapeHTML(i?.refdes || "?")}</span>`,
+  }),
+  mb_get_rules_for_symptoms: (i) => {
+    const syms = Array.isArray(i?.symptoms) ? i.symptoms.join(", ") : (i?.symptoms || "");
+    return {
+      icon: ICON_MB,
+      phraseHTML: `Lecture des règles pour « ${escapeHTML(syms)} »`,
+    };
+  },
+  mb_list_findings: (i) => ({
+    icon: ICON_MB,
+    phraseHTML: `Revue des findings${i?.device ? ` pour <span class="refdes">${escapeHTML(i.device)}</span>` : ""}`,
+  }),
+  mb_record_finding: () => ({
+    icon: ICON_MB,
+    phraseHTML: `Enregistrement d'un finding`,
+  }),
+  mb_expand_knowledge: (i) => {
+    const scope = [i?.component, i?.symptom].filter(Boolean).join(" / ");
+    return {
+      icon: ICON_MB,
+      phraseHTML: `Extension du pack${scope ? ` — ${escapeHTML(scope)}` : ""}`,
+    };
+  },
+  mb_schematic_graph: () => ({
+    icon: ICON_MB,
+    phraseHTML: `Lecture du graphe schématique`,
+  }),
+
+  // --- BV (boardview — action) ---
+  bv_highlight_component: (i) => ({
+    icon: ICON_BV,
+    phraseHTML: `Mise en évidence de <span class="refdes">${escapeHTML(i?.refdes || "?")}</span>`,
+  }),
+  bv_focus_component: (i) => ({
+    icon: ICON_BV,
+    phraseHTML: `Focus sur <span class="refdes">${escapeHTML(i?.refdes || "?")}</span>`,
+  }),
+  bv_reset_view: () => ({ icon: ICON_BV, phraseHTML: `Réinitialisation de la vue` }),
+  bv_highlight_net: (i) => ({
+    icon: ICON_BV,
+    phraseHTML: `Highlight du net <span class="net">${escapeHTML(i?.net || "?")}</span>`,
+  }),
+  bv_flip_board: () => ({ icon: ICON_BV, phraseHTML: `Retournement du board` }),
+  bv_annotate: (i) => {
+    const tgt = i?.refdes ? `près de <span class="refdes">${escapeHTML(i.refdes)}</span>` :
+                (Number.isFinite(i?.x) && Number.isFinite(i?.y) ? `en (${i.x}, ${i.y})` : "");
+    return { icon: ICON_BV, phraseHTML: `Annotation ${tgt}` };
+  },
+  bv_filter_by_type: (i) => ({
+    icon: ICON_BV,
+    phraseHTML: `Filtrage par type — ${escapeHTML(i?.type || "?")}`,
+  }),
+  bv_draw_arrow: (i) => ({
+    icon: ICON_BV,
+    phraseHTML: `Flèche de <span class="refdes">${escapeHTML(i?.from || "?")}</span> ` +
+                `vers <span class="refdes">${escapeHTML(i?.to || "?")}</span>`,
+  }),
+  bv_measure_distance: (i) => ({
+    icon: ICON_BV,
+    phraseHTML: `Mesure entre <span class="refdes">${escapeHTML(i?.a || "?")}</span> ` +
+                `et <span class="refdes">${escapeHTML(i?.b || "?")}</span>`,
+  }),
+  bv_show_pin: (i) => ({
+    icon: ICON_BV,
+    phraseHTML: `Pin ${escapeHTML(String(i?.pin ?? "?"))} de <span class="refdes">${escapeHTML(i?.refdes || "?")}</span>`,
+  }),
+  bv_dim_unrelated: () => ({ icon: ICON_BV, phraseHTML: `Atténuation des éléments non liés` }),
+  bv_layer_visibility: (i) => ({
+    icon: ICON_BV,
+    phraseHTML: `Visibilité de la couche ${escapeHTML(i?.layer || "?")}`,
+  }),
+};
+
+function toolFallback(name) {
+  return {
+    icon: "",
+    phraseHTML: `<span class="tool-name-raw">${escapeHTML(name)}</span>`,
+  };
+}
+
 function fmtUsd(amount) {
   if (amount >= 1) return `$${amount.toFixed(2)}`;
   if (amount >= 0.01) return `$${amount.toFixed(3)}`;
@@ -135,6 +237,33 @@ function appendStep(turn, kind, phraseHTML) {
   rail.appendChild(step);
   el("llmLog").scrollTop = el("llmLog").scrollHeight;
   return step;
+}
+
+function addExpandToStep(step, payloadObj) {
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "step-expand";
+  btn.setAttribute("aria-expanded", "false");
+  btn.title = "Voir le payload";
+  btn.innerHTML =
+    '<svg class="chevron" width="10" height="10" viewBox="0 0 24 24" fill="none" ' +
+    'stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' +
+    '<polyline points="9 6 15 12 9 18"/></svg>';
+  step.appendChild(btn);
+
+  const pre = document.createElement("pre");
+  pre.className = "step-payload";
+  const hasResult = payloadObj && typeof payloadObj === "object" && "result" in payloadObj;
+  const body = hasResult
+    ? JSON.stringify(payloadObj, null, 2)
+    : JSON.stringify(payloadObj, null, 2) + "\n\n— result non rendu par le runtime";
+  pre.textContent = body;
+  step.appendChild(pre);
+
+  btn.addEventListener("click", () => {
+    const expanded = step.classList.toggle("expanded");
+    btn.setAttribute("aria-expanded", expanded ? "true" : "false");
+  });
 }
 
 // Append the assistant text into the current turn. Plain textContent for
@@ -301,10 +430,14 @@ function connect() {
         const name = payload.name || "?";
         const kind = name.startsWith("bv_") ? "bv" :
                      name.startsWith("mb_") ? "mb" : "mb";
-        const argsStr = safeJSON(payload.input);
-        appendStep(turn, kind,
-          `<span class="tool-name">${escapeHTML(name)}</span> ` +
-          `<span class="tool-args">${escapeHTML(argsStr)}</span>`);
+        const renderer = TOOL_PHRASES[name];
+        const { icon, phraseHTML } = renderer ? renderer(payload.input || {}) : toolFallback(name);
+        const step = appendStep(turn, kind, `${icon}${phraseHTML}`);
+        const payloadJSON = {
+          args: payload.input || {},
+          ...(payload.result != null ? { result: payload.result } : {}),
+        };
+        addExpandToStep(step, payloadJSON);
         break;
       }
       case "thinking": {
