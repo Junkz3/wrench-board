@@ -1,5 +1,5 @@
 /* ============ CANVAS ============ */
-.canvas{position:fixed;top:92px;left:52px;right:0;bottom:28px;background:var(--bg);overflow:hidden;cursor:grab}
+.canvas{position:fixed;top:92px;left:52px;right:0;bottom:0;background:var(--bg);overflow:hidden;cursor:grab}
 .canvas:active{cursor:grabbing}
 .canvas svg{width:100%;height:100%;display:block}
 .canvas.hidden{display:none}
@@ -134,3 +134,109 @@
 .segmented{display:flex;background:var(--bg-deep);border:1px solid var(--border);border-radius:5px;overflow:hidden}
 .segmented button{flex:1;border:0;background:transparent;color:var(--text-3);padding:5px 6px;font-size:11px;cursor:pointer;font-family:inherit}
 .segmented button.on{background:var(--panel-2);color:var(--text)}
+
+/* -------- Subsystem swimlanes --------
+   Horizontal bands behind the 4-column grid, keyed by node subsystem.
+   Rendered inside #layerBands, below every other graph element. */
+.band-bg {
+  fill: var(--panel-2);
+  fill-opacity: .35;
+  stroke: var(--border-soft);
+  stroke-width: 1;
+}
+
+.band-label {
+  fill: var(--text-3);
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: .4px;
+  text-transform: uppercase;
+  dominant-baseline: middle;
+  pointer-events: none;
+}
+
+/* connected_to edges are low-signal relative to causes/powers/resolves —
+   dim by default, bring back to full opacity only when a focused node's
+   neighborhood highlights them. */
+.link.connected_to { opacity: .25; }
+.link.connected_to.active-link { opacity: 1; }
+
+/* Collapsed-action ×N badge (rendered as a <text> inside the node group). */
+.collapse-badge {
+  fill: var(--violet);
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 9px;
+  font-weight: 600;
+  text-anchor: middle;
+  pointer-events: none;
+}
+
+/* ---- Bubble map refactor ---- */
+/* Subsystem bubble backdrop (replaces the horizontal .band-bg rect). */
+.bubble-bg {
+  fill: var(--panel-2);
+  fill-opacity: .18;
+  stroke: var(--border-soft);
+  stroke-width: 1;
+  pointer-events: none;
+}
+
+/* Edges hidden by default, shown only when a node is focused/hovered.
+   Overrides earlier `.link.connected_to { opacity: .25 }` so that rule
+   still applies when active. */
+.link { opacity: .04; transition: opacity .2s; }
+.link.active-link { opacity: 1; }
+.link.connected_to { opacity: .02; }
+.link.connected_to.active-link { opacity: .8; }
+
+/* Edge labels (the per-edge mechanism text) are too verbose in the bubble
+   view — they overlap each other the moment two edges to different
+   neighbours share a similar mechanism string. Kept in DOM so inspector
+   logic still sees them, but hidden from the canvas. Relation type is
+   already encoded by the edge's colour/style (see legend at bottom). */
+.link-label { display: none; }
+
+/* Particles on "powers" edges are too noisy in the bubble view — hide
+   them entirely. (The animation loop keeps running but with 0 opacity.) */
+.particle { opacity: 0 !important; }
+
+/* Labels hidden by default in the bubble map — the constellation view is
+   clean. Only the focused/selected node reveals its label. Neighbors stay
+   visually highlighted (colour/opacity) but their text stays hidden to
+   avoid the 5-10-labels-at-once overlap mess. The tooltip (#tooltip) is
+   the authoritative place for "read the full label of what I'm hovering". */
+.node-label { opacity: 0; transition: opacity .15s; }
+.node:hover .node-label,
+.node.focus .node-label,
+.node.selected .node-label { opacity: 1; }
+
+/* Legend panel — unified types + relations section. */
+.legend h4.legend-sub { margin-top: 12px; }
+.legend-row.type-row { gap: 8px; }
+.type-dot {
+  width: 10px; height: 10px; flex: 0 0 10px;
+  border-radius: 50%;
+  box-shadow: 0 0 6px currentColor;
+  opacity: .85;
+}
+.type-count {
+  margin-left: auto;
+  font-size: 10px;
+  color: var(--text-3);
+  background: rgba(255,255,255,.04);
+  padding: 1px 6px;
+  border-radius: 3px;
+  min-width: 20px;
+  text-align: center;
+}
+
+/* When a label does appear, give it a wider bg-coloured stroke halo so the
+   text doesn't blend into neighbours that happen to be behind it. Overrides
+   the default 3.5px stroke in the base .node-label rule above. */
+.node:hover .node-label,
+.node.focus .node-label,
+.node.selected .node-label {
+  stroke-width: 5px;
+  font-size: 12px;
+  font-weight: 600;
+}

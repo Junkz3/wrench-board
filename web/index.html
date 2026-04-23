@@ -360,6 +360,10 @@
         <div class="rd-badges" id="rdBadges"></div>
       </div>
       <div class="rd-head-right">
+        <button id="dashboardFixBtn" class="rd-fix-btn hidden" type="button"
+                title="Marque la repair comme résolue — Claude valide et enregistre les fixes">
+          ✓ Marquer fix
+        </button>
         <button type="button" class="rd-leave-btn" id="rdLeaveBtn" title="Quitter la session">
           <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
             <path d="M15 7l-5 5 5 5"/><path d="M20 4v16"/><path d="M4 12h11"/>
@@ -452,41 +456,9 @@
 <div class="canvas hidden" id="canvas">
   <div class="grid-bg"></div>
 
-  <!-- LOGICAL COLUMN BANDS: strict L→R reading flow
-       Actions → Composants → Nets → Symptômes -->
-  <div class="columns" id="columns">
-    <div class="col-band act">
-      <div class="col-head">
-        <div class="chip"><span class="dot"></span>① Actions</div>
-        <div class="num" id="cnt-act">0</div>
-        <div class="flow-arrow"></div>
-      </div>
-      <div class="col-sub">Réparations possibles</div>
-    </div>
-    <div class="col-band cmp">
-      <div class="col-head">
-        <div class="chip"><span class="dot"></span>② Composants</div>
-        <div class="num" id="cnt-cmp">0</div>
-        <div class="flow-arrow"></div>
-      </div>
-      <div class="col-sub">Puces suspectes</div>
-    </div>
-    <div class="col-band net">
-      <div class="col-head">
-        <div class="chip"><span class="dot"></span>③ Nets &amp; Alim.</div>
-        <div class="num" id="cnt-net">0</div>
-        <div class="flow-arrow"></div>
-      </div>
-      <div class="col-sub">Rails et signaux</div>
-    </div>
-    <div class="col-band sym">
-      <div class="col-head">
-        <div class="chip"><span class="dot"></span>④ Symptômes</div>
-        <div class="num" id="cnt-sym">0</div>
-      </div>
-      <div class="col-sub">Ce que le client observe</div>
-    </div>
-  </div>
+  <!-- Column header strip removed with the move to bubble-map layout.
+       Type identification now lives entirely in the Legend panel below. -->
+
 
   <svg id="graph">
     <defs>
@@ -500,6 +472,7 @@
       <filter id="glow-violet" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
     </defs>
     <g class="graph" id="graphRoot">
+      <g id="layerBands"></g>
       <g id="layerLinks"></g>
       <g id="layerParticles"></g>
       <g id="layerLinkLabels"></g>
@@ -507,9 +480,16 @@
     </g>
   </svg>
 
-  <!-- Relation legend -->
+  <!-- Unified legend: node types + edge relations. Counts populate from
+       graph.js via the #cnt-sym/#cnt-net/#cnt-cmp/#cnt-act IDs. -->
   <div class="legend">
-    <h4>Relations</h4>
+    <h4>Types</h4>
+    <div class="legend-row type-row"><span class="type-dot" style="background:var(--amber)"></span><b style="color:var(--amber);font-weight:500">Symptôme</b> — ce que le client observe<span class="type-count mono" id="cnt-sym">0</span></div>
+    <div class="legend-row type-row"><span class="type-dot" style="background:var(--emerald)"></span><b style="color:var(--emerald);font-weight:500">Net / Rail</b> — signal ou alim<span class="type-count mono" id="cnt-net">0</span></div>
+    <div class="legend-row type-row"><span class="type-dot" style="background:var(--cyan)"></span><b style="color:var(--cyan);font-weight:500">Composant</b> — puce, connecteur<span class="type-count mono" id="cnt-cmp">0</span></div>
+    <div class="legend-row type-row"><span class="type-dot" style="background:var(--violet)"></span><b style="color:var(--violet);font-weight:500">Action</b> — réparation possible<span class="type-count mono" id="cnt-act">0</span></div>
+
+    <h4 class="legend-sub">Relations</h4>
     <div class="legend-row"><span class="legend-line" style="border-color:oklch(0.70 0.15 70);border-style:dashed"></span> <b style="color:var(--amber);font-weight:500">provoque</b> — lien causal</div>
     <div class="legend-row"><span class="legend-line" style="border-color:oklch(0.70 0.13 155)"></span> <b style="color:var(--emerald);font-weight:500">alimente</b> — flux de puissance</div>
     <div class="legend-row"><span class="legend-line" style="border-color:#3a5680"></span> <b style="color:var(--text-2);font-weight:500">connecté à</b> — bus/masse</div>

@@ -44,8 +44,9 @@ const TYPE_FILL   = { component:"oklch(0.82 0.14 210 / 0.22)", symptom:"oklch(0.
 const TYPE_GLOW   = { component:"glow-cyan", symptom:"glow-amber", net:"glow-emerald", action:"glow-violet" };
 const TYPE_LABEL_FR = { component:"Composant", symptom:"Symptôme", net:"Net / Rail", action:"Action" };
 const REL_LABEL_FR  = { causes:"provoque", powers:"alimente", connected_to:"connecté à", resolves:"résout" };
-// Strict L→R narrative — must match the visible .col-band order in the HTML.
-const COL_ORDER = ["action","component","net","symptom"];
+// Strict L→R diagnostic narrative — must match the visible .col-band order
+// in the HTML. Reads problem-first: symptom → net → component → action.
+const COL_ORDER = ["symptom","net","component","action"];
 
 export function initGraphWithData(data) {
   DATA = data;
@@ -56,13 +57,22 @@ const canvasEl = document.getElementById("canvas");
 const W = () => canvasEl.clientWidth;
 const H = () => canvasEl.clientHeight;
 
-// populate counts
-["sym","cmp","net","act"].forEach((k,i)=>{
+// populate per-type counts in the legend panel (compact mono chips — no
+// " nœuds" suffix; the legend copy already makes the meaning clear).
+["sym","cmp","net","act"].forEach((k)=>{
   const map={sym:"symptom",cmp:"component",net:"net",act:"action"};
-  document.getElementById("cnt-"+k).textContent = DATA.nodes.filter(n=>n.type===map[k]).length + " nœuds";
+  const el = document.getElementById("cnt-"+k);
+  if (el) el.textContent = DATA.nodes.filter(n=>n.type===map[k]).length;
 });
-document.getElementById("counts").textContent = `${DATA.nodes.length} nœuds · ${DATA.edges.length} arêtes`;
-document.getElementById("avgConf").textContent = (DATA.nodes.reduce((a,n)=>a+n.confidence,0)/DATA.nodes.length).toFixed(2);
+// #counts / #avgConf used to live in a now-removed statusbar — guard so
+// the graph loader doesn't throw on pages without those elements.
+document.getElementById("counts")?.replaceChildren(document.createTextNode(
+  `${DATA.nodes.length} nœuds · ${DATA.edges.length} arêtes`
+));
+const avgConfEl = document.getElementById("avgConf");
+if (avgConfEl && DATA.nodes.length > 0) {
+  avgConfEl.textContent = (DATA.nodes.reduce((a,n)=>a+n.confidence,0)/DATA.nodes.length).toFixed(2);
+}
 
 function nodeSize(n){ return 18 + n.confidence*8; }
 
@@ -73,40 +83,122 @@ DATA.edges.forEach(e=>{
   (neighbors[e.target] ||= new Set()).add(e.source);
 });
 
-/* ---------- COLUMN LAYOUT ---------- */
-// Assign each node to a column (its type), then vertically sort by confidence desc.
-function columnIndex(type){ return COL_ORDER.indexOf(type); }
+/* ---------- BUBBLE MAP LAYOUT ----------
+   Every subsystem is a circular "bubble" arranged by force simulation.
+   Nodes are packed inside their bubble by d3.pack(), sized by confidence.
+   No columns, no rows — just zones. Edges are hidden by default (see CSS)
+   and surface only on hover/focus via the existing .active-link class. */
 
-function layoutNodes() {
-  const w = W(), h = H();
-  const pad = { top: 90, bottom: 40, sideL: 40, sideR: 40 };
-  const nCols = COL_ORDER.length;
-  const colW = (w - pad.sideL - pad.sideR) / nCols;
+// Fallback when the backend didn't send subsystems (older payload / empty graph).
+const SUBSYSTEMS = (Array.isArray(DATA.subsystems) && DATA.subsystems.length > 0)
+  ? DATA.subsystems
+  : [{ key: "unknown", label: "AUTRES", count: DATA.nodes.length }];
 
-  COL_ORDER.forEach((type, ci) => {
-    const arr = DATA.nodes.filter(n => n.type === type);
-    // sort: within a column, by confidence desc so "strongest" is at top
-    arr.sort((a,b) => b.confidence - a.confidence);
+// Pad how much space each node claims inside its bubble (d3.pack padding).
+const PACK_PADDING = 4;
+// Flat pack weight — every node claims the same slot inside its bubble.
+// Confidence is encoded via stroke/opacity at render time, not size.
+function nodeWeight() { return 1; }
+// Hard radius clamp on rendered nodes — stops a 1-node subsystem from
+// ballooning into a 60-px disk because pack filled the whole bubble.
+const NODE_R_MIN = 8;
+const NODE_R_MAX = 18;
 
-    const usableH = h - pad.top - pad.bottom;
-    const gap = usableH / (arr.length + 1);
-    arr.forEach((n, i) => {
-      n._tx = pad.sideL + colW*ci + colW/2;
-      n._ty = pad.top + gap * (i+1);
-    });
+// Compute the radius each subsystem bubble wants. Proportional to the
+// square root of its node count — fills the canvas non-linearly so one
+// huge subsystem doesn't dwarf the others.
+const bubbles = SUBSYSTEMS.map(s => {
+  const nodes = DATA.nodes.filter(n => n.subsystem === s.key);
+  if (nodes.length === 0) return null;
+  // k tunes the bubble "scale" relative to canvas — tune if canvas feels too sparse/crammed.
+  const k = 12;
+  const radius = Math.max(36, Math.sqrt(nodes.length) * k);
+  return { key: s.key, label: s.label, nodes, radius };
+}).filter(Boolean);
+
+// Pack nodes inside each bubble via d3.hierarchy + d3.pack, two levels
+// deep so nodes cluster by TYPE inside each subsystem (symptom /net/
+// component/action each form their own sub-cluster instead of mixing).
+// The intermediate "type group" objects carry a `children` key; d3.pack
+// treats them as containers whose size equals the sum of their children.
+for (const b of bubbles) {
+  const byType = new Map(COL_ORDER.map(t => [t, []]));
+  for (const n of b.nodes) {
+    if (byType.has(n.type)) byType.get(n.type).push(n);
+  }
+  const children = [...byType.entries()]
+    .filter(([, arr]) => arr.length > 0)
+    .map(([type, arr]) => ({ __type: type, children: arr }));
+  // sum() callback: internal nodes (have children) contribute 0, leaves
+  // (actual graph nodes, no children) contribute their weight. d3 adds
+  // children's values to get each group's total.
+  const root = d3.hierarchy({ children })
+    .sum(d => (d.children ? 0 : nodeWeight(d)));
+  const pack = d3.pack().size([b.radius * 2, b.radius * 2]).padding(PACK_PADDING);
+  pack(root);
+  b.leaves = root.leaves().map(leaf => ({
+    node: leaf.data,
+    relX: leaf.x - b.radius,
+    relY: leaf.y - b.radius,
+    r:    leaf.r,
+  }));
+}
+
+// Arrange bubbles on the canvas via a tiny force simulation — forceCenter
+// keeps the cluster centred, forceCollide prevents overlap.
+const W_fn = W, H_fn = H;   // alias to keep the sim declaration tight
+const bubbleSim = d3.forceSimulation(bubbles)
+  .force("center", d3.forceCenter(W_fn() / 2, H_fn() / 2))
+  .force("collide", d3.forceCollide(d => d.radius + 12).iterations(4))
+  .force("x", d3.forceX(W_fn() / 2).strength(0.04))
+  .force("y", d3.forceY(H_fn() / 2).strength(0.04))
+  .stop();
+// Seed bubble positions on a circle so the sim converges stably.
+{
+  const n = bubbles.length;
+  const cx = W_fn() / 2, cy = H_fn() / 2;
+  const seedR = Math.min(W_fn(), H_fn()) * 0.28;
+  bubbles.forEach((b, i) => {
+    const a = (i / Math.max(1, n)) * Math.PI * 2 - Math.PI / 2;
+    b.x = cx + Math.cos(a) * seedR;
+    b.y = cy + Math.sin(a) * seedR;
   });
 }
-layoutNodes();
+for (let i = 0; i < 200; i++) bubbleSim.tick();
+
+// Apply final positions to every node via the pre-computed pack offsets.
+for (const b of bubbles) {
+  for (const leaf of b.leaves) {
+    const n = leaf.node;
+    n._tx = b.x + leaf.relX;
+    n._ty = b.y + leaf.relY;
+    n._r  = leaf.r;  // actual pack-computed radius
+  }
+}
+// Sync for the D3 node-force sim.
 DATA.nodes.forEach(n => { n.x = n._tx; n.y = n._ty; });
+
+/* ---------- BUBBLE BACKDROPS ---------- */
+const bandLayer = d3.select("#layerBands");
+bandLayer.selectAll("*").remove();
+for (const b of bubbles) {
+  bandLayer.append("circle")
+    .attr("class", "bubble-bg")
+    .attr("cx", b.x).attr("cy", b.y).attr("r", b.radius);
+  bandLayer.append("text")
+    .attr("class", "band-label")
+    .attr("x", b.x).attr("y", b.y - b.radius - 10)
+    .attr("text-anchor", "middle")
+    .text(b.label);
+}
 
 /* ---------- FORCE SIM — gentle, mostly positional ---------- */
 const sim = d3.forceSimulation(DATA.nodes)
-  .force("link", d3.forceLink(DATA.edges).id(d=>d.id).distance(120).strength(0.02))
-  .force("collide", d3.forceCollide().radius(d => nodeSize(d)+28).strength(0.9))
-  .force("x", d3.forceX(d => d._tx).strength(0.8))
-  .force("y", d3.forceY(d => d._ty).strength(0.25))
-  .alphaDecay(0.08)
-  .velocityDecay(0.5);
+  .force("link", d3.forceLink(DATA.edges).id(d => d.id).distance(120).strength(0.01))
+  .force("x", d3.forceX(d => d._tx).strength(0.9))
+  .force("y", d3.forceY(d => d._ty).strength(0.9))
+  .alphaDecay(0.1)
+  .velocityDecay(0.6);
 
 /* ---------- LINKS ---------- */
 const linkSel = d3.select("#layerLinks").selectAll("path")
@@ -129,32 +221,6 @@ const linkLabelSel = d3.select("#layerLinkLabels").selectAll("text")
   .text(d => d.label);
 
 /* ---------- NODES ---------- */
-// icon factories
-function iconForComponent(id){ const c="var(--cyan)";
-  if (id.includes("ldo")||id.includes("charger")) return `<polygon points="-6,-5 6,-5 0,6" fill="none" stroke="${c}" stroke-width="1.4"/><line x1="-9" y1="-5" x2="-6" y2="-5" stroke="${c}" stroke-width="1.2"/><line x1="9" y1="-5" x2="6" y2="-5" stroke="${c}" stroke-width="1.2"/><line x1="0" y1="6" x2="0" y2="9" stroke="${c}" stroke-width="1.2"/>`;
-  if (id.includes("connector")||id.includes("flex")) return `<rect x="-7" y="-4" width="14" height="8" fill="none" stroke="${c}" stroke-width="1.3"/><line x1="-3" y1="-4" x2="-3" y2="4" stroke="${c}" stroke-width="1"/><line x1="0" y1="-4" x2="0" y2="4" stroke="${c}" stroke-width="1"/><line x1="3" y1="-4" x2="3" y2="4" stroke="${c}" stroke-width="1"/>`;
-  if (id.includes("eeprom")) return `<rect x="-5" y="-5" width="10" height="10" fill="none" stroke="${c}" stroke-width="1.4"/><circle cx="-3" cy="-3" r="1" fill="${c}"/><line x1="-8" y1="-2" x2="-5" y2="-2" stroke="${c}" stroke-width="1"/><line x1="-8" y1="2" x2="-5" y2="2" stroke="${c}" stroke-width="1"/><line x1="5" y1="-2" x2="8" y2="-2" stroke="${c}" stroke-width="1"/><line x1="5" y1="2" x2="8" y2="2" stroke="${c}" stroke-width="1"/>`;
-  return `<rect x="-7" y="-7" width="14" height="14" rx="1.5" fill="none" stroke="${c}" stroke-width="1.4"/><circle cx="-3.5" cy="-3.5" r="1.1" fill="${c}"/><circle cx="0" cy="-3.5" r="1.1" fill="${c}"/><circle cx="3.5" cy="-3.5" r="1.1" fill="${c}"/><circle cx="-3.5" cy="0" r="1.1" fill="${c}"/><circle cx="0" cy="0" r="1.1" fill="${c}"/><circle cx="3.5" cy="0" r="1.1" fill="${c}"/><circle cx="-3.5" cy="3.5" r="1.1" fill="${c}"/><circle cx="0" cy="3.5" r="1.1" fill="${c}"/><circle cx="3.5" cy="3.5" r="1.1" fill="${c}"/>`;
-}
-function iconForNet(id){ const c="var(--emerald)";
-  if (id.includes("i2s")||id.includes("bclk")) return `<polyline points="-9,3 -6,3 -6,-3 -3,-3 -3,3 0,3 0,-3 3,-3 3,3 6,3 6,-3 9,-3" fill="none" stroke="${c}" stroke-width="1.4"/>`;
-  if (id.includes("bias")) return `<line x1="-9" y1="-2" x2="9" y2="-2" stroke="${c}" stroke-width="1.6"/><line x1="-6" y1="3" x2="6" y2="3" stroke="${c}" stroke-width="1.4"/><line x1="-3" y1="6" x2="3" y2="6" stroke="${c}" stroke-width="1.2"/>`;
-  return `<path d="M -2 -8 L 4 -1 L 0 -1 L 2 8 L -4 1 L 0 1 Z" fill="${c}" fill-opacity="0.35" stroke="${c}" stroke-width="1.3" stroke-linejoin="round"/>`;
-}
-function iconForSymptom(id){ const c="var(--amber)";
-  if (id.includes("boot")) return `<path d="M -6 -2 A 6 6 0 1 1 -4 4" fill="none" stroke="${c}" stroke-width="1.5" stroke-linecap="round"/><polyline points="-7,-4 -6,-2 -4,-2" fill="none" stroke="${c}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>`;
-  if (id.includes("mic")) return `<rect x="-3" y="-7" width="6" height="9" rx="3" fill="none" stroke="${c}" stroke-width="1.4"/><path d="M -5 0 A 5 5 0 0 0 5 0" fill="none" stroke="${c}" stroke-width="1.3"/><line x1="-8" y1="-8" x2="8" y2="8" stroke="${c}" stroke-width="1.5" stroke-linecap="round"/>`;
-  if (id.includes("siri")) return `<path d="M -7 -5 L 7 -5 L 7 3 L 2 3 L 0 6 L -2 3 L -7 3 Z" fill="none" stroke="${c}" stroke-width="1.4" stroke-linejoin="round"/><circle cx="-3" cy="-1" r="0.9" fill="${c}"/><circle cx="0" cy="-1" r="0.9" fill="${c}"/><circle cx="3" cy="-1" r="0.9" fill="${c}"/>`;
-  if (id.includes("speaker")) return `<path d="M -6 -3 L -2 -3 L 2 -7 L 2 7 L -2 3 L -6 3 Z" fill="none" stroke="${c}" stroke-width="1.4" stroke-linejoin="round"/><line x1="5" y1="-5" x2="8" y2="5" stroke="${c}" stroke-width="1.4" stroke-linecap="round"/>`;
-  return `<polygon points="0,-7 7,6 -7,6" fill="none" stroke="${c}" stroke-width="1.4" stroke-linejoin="round"/><line x1="0" y1="-2" x2="0" y2="2" stroke="${c}" stroke-width="1.5" stroke-linecap="round"/><circle cx="0" cy="4" r="0.8" fill="${c}"/>`;
-}
-function iconForAction(id){ const c="var(--violet)";
-  if (id.includes("reflow")) return `<path d="M -7 4 Q -3 -6 0 0 Q 3 6 7 -4" fill="none" stroke="${c}" stroke-width="1.5" stroke-linecap="round"/><circle cx="-7" cy="6" r="1.2" fill="${c}"/><circle cx="7" cy="-6" r="1.2" fill="${c}"/>`;
-  if (id.includes("replace")) return `<path d="M -6 -5 L 6 -5 L 6 5 L -6 5 Z" fill="none" stroke="${c}" stroke-width="1.4"/><path d="M -4 -2 L -2 0 L 4 -6" fill="none" stroke="${c}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>`;
-  if (id.includes("clean")) return `<path d="M -5 -7 L 5 -7 L 4 5 L -4 5 Z" fill="none" stroke="${c}" stroke-width="1.4"/><line x1="-3" y1="-4" x2="3" y2="-4" stroke="${c}" stroke-width="1.1"/><path d="M -2 6 L -3 9 M 0 6 L 0 9 M 2 6 L 3 9" stroke="${c}" stroke-width="1.1" stroke-linecap="round"/>`;
-  return `<path d="M -5 5 L 5 -5 M -5 -5 L 5 5" stroke="${c}" stroke-width="1.6" stroke-linecap="round"/>`;
-}
-
 const nodeSel = d3.select("#layerNodes").selectAll("g.node")
   .data(DATA.nodes, d=>d.id)
   .join("g")
@@ -166,65 +232,48 @@ const nodeSel = d3.select("#layerNodes").selectAll("g.node")
 
 nodeSel.each(function(d){
   const g = d3.select(this);
-  const r = nodeSize(d);
-  const opacity = 0.55 + d.confidence * 0.45;
+  // Clamp rendered radius to keep sparse-bubble nodes from ballooning.
+  const rawR = d._r || nodeSize(d);
+  const r = Math.min(NODE_R_MAX, Math.max(NODE_R_MIN, rawR));
+  const opacity = 0.6 + d.confidence * 0.4;
 
-  g.append("circle").attr("class","conf-ring").attr("r", r+5).attr("fill","none")
-    .attr("stroke", TYPE_COLORS[d.type]).attr("stroke-opacity", d.confidence*0.35)
-    .attr("stroke-width", 1 + d.confidence*2).attr("filter", `url(#${TYPE_GLOW[d.type]})`);
+  g.append("circle").attr("class","conf-ring").attr("r", r+2).attr("fill","none")
+    .attr("stroke", TYPE_COLORS[d.type]).attr("stroke-opacity", d.confidence*0.3)
+    .attr("stroke-width", 1 + d.confidence*1.2).attr("filter", `url(#${TYPE_GLOW[d.type]})`);
 
-  if (d.type==="symptom") {
-    g.append("circle").attr("class","node-shape").attr("r", r)
-      .attr("fill", TYPE_FILL.symptom).attr("stroke", TYPE_COLORS.symptom).attr("stroke-opacity", opacity).attr("stroke-width",1.5);
-  } else if (d.type==="component") {
-    const s = r*1.9;
-    g.append("rect").attr("class","node-shape").attr("x",-s/2).attr("y",-s/2).attr("width",s).attr("height",s).attr("rx",4)
-      .attr("fill", TYPE_FILL.component).attr("stroke", TYPE_COLORS.component).attr("stroke-opacity", opacity).attr("stroke-width",1.5);
-  } else if (d.type==="net") {
-    const rr = r*1.2;
-    const pts = [];
-    for (let i=0;i<6;i++){ const a=(Math.PI/3)*i; pts.push([Math.cos(a)*rr,Math.sin(a)*rr].join(",")); }
-    g.append("polygon").attr("class","node-shape").attr("points", pts.join(" "))
-      .attr("fill", TYPE_FILL.net).attr("stroke", TYPE_COLORS.net).attr("stroke-opacity", opacity).attr("stroke-width",1.5);
-  } else { // action — diamond
-    const rr = r*1.25;
-    const pts = `0,${-rr} ${rr},0 0,${rr} ${-rr},0`;
-    g.append("polygon").attr("class","node-shape").attr("points", pts)
-      .attr("fill", TYPE_FILL.action).attr("stroke", TYPE_COLORS.action).attr("stroke-opacity", opacity).attr("stroke-width",1.5);
+  // Single circle per node — type encoded entirely by fill+stroke.
+  g.append("circle").attr("class","node-shape").attr("r", r)
+    .attr("fill", TYPE_FILL[d.type]).attr("stroke", TYPE_COLORS[d.type])
+    .attr("stroke-opacity", opacity).attr("stroke-width", 1.3);
+
+  // Labels stay off by default in the bubble view; CSS fades them in on
+  // hover/focus via the .node-label rule (see graph.css bubble block).
+  // Positioned ABOVE the node — the cursor tooltip sits below+right of the
+  // cursor, so putting the label on the opposite side keeps it visible.
+  const shortLabel = d.label.length > 22 ? d.label.slice(0, 20) + "…" : d.label;
+  g.append("text").attr("class","node-label").attr("dy", -(r + 6)).text(shortLabel);
+
+  if (d.type === "action" && d.meta && d.meta.count > 1) {
+    g.append("text")
+      .attr("class", "collapse-badge")
+      .attr("x", r + 3).attr("y", -r + 1)
+      .text("×" + d.meta.count);
   }
-
-  const iconHtml = d.type==="component" ? iconForComponent(d.id)
-                 : d.type==="net"       ? iconForNet(d.id)
-                 : d.type==="action"    ? iconForAction(d.id)
-                 :                        iconForSymptom(d.id);
-  const iconG = document.createElementNS("http://www.w3.org/2000/svg","g");
-  iconG.setAttribute("class","node-icon");
-  iconG.innerHTML = iconHtml;
-  this.appendChild(iconG);
-
-  g.append("text").attr("class","node-label").attr("dy", r + 16).text(d.label);
-  g.append("text").attr("class","node-sub").attr("dy", r + 28)
-    .text(TYPE_LABEL_FR[d.type].toLowerCase() + " · " + (d.confidence*100).toFixed(0) + "%");
 });
 
-/* ---------- Path: smart routing per relation ---------- */
+/* ---------- Path: curved bezier ---------- */
 function linkPath(d){
-  const sx=d.source.x, sy=d.source.y, tx=d.target.x, ty=d.target.y;
-  const dx=tx-sx, dy=ty-sy;
-  // gently-curved orthogonal for columnar flow
-  if (d.relation==="powers" || d.relation==="causes") {
-    // forward flow — S-curve via horizontal midpoint
-    const mx = (sx+tx)/2;
-    return `M${sx},${sy} C${mx},${sy} ${mx},${ty} ${tx},${ty}`;
-  }
-  if (d.relation==="resolves") {
-    // action (col 0) → symptom (col 3) — strictly L→R, use S-curve like causes/powers
-    const mx = (sx+tx)/2;
-    return `M${sx},${sy} C${mx},${sy} ${mx},${ty} ${tx},${ty}`;
-  }
-  // connected_to: slight curve
-  const dr = Math.sqrt(dx*dx+dy*dy)*2.2;
-  return `M${sx},${sy}A${dr},${dr} 0 0,1 ${tx},${ty}`;
+  const sx = d.source.x, sy = d.source.y, tx = d.target.x, ty = d.target.y;
+  // Curved bezier for every relation. Pack scatter means orthogonal routing
+  // is moot — a gentle curve that clears the source/target disks is enough.
+  const dx = tx - sx, dy = ty - sy;
+  const dist = Math.sqrt(dx * dx + dy * dy);
+  const curve = Math.min(80, dist * 0.35);
+  // Perpendicular offset for the control point.
+  const nx = -dy / (dist || 1), ny = dx / (dist || 1);
+  const cx = (sx + tx) / 2 + nx * curve;
+  const cy = (sy + ty) / 2 + ny * curve;
+  return `M${sx},${sy} Q${cx},${cy} ${tx},${ty}`;
 }
 
 sim.on("tick", () => {
@@ -239,8 +288,10 @@ sim.on("tick", () => {
 const zoom = d3.zoom().scaleExtent([0.3,3])
   .on("zoom", (e) => {
     gRoot.attr("transform", e.transform);
-    document.getElementById("zoomPct").textContent = Math.round(e.transform.k*100)+"%";
-    document.getElementById("zoomReadout").textContent = `zoom ${e.transform.k.toFixed(2)}×`;
+    const zp = document.getElementById("zoomPct");
+    if (zp) zp.textContent = Math.round(e.transform.k*100)+"%";
+    const zr = document.getElementById("zoomReadout");
+    if (zr) zr.textContent = `zoom ${e.transform.k.toFixed(2)}×`;
   });
 svg.call(zoom).on("dblclick.zoom", null);
 document.getElementById("zoomIn").onclick  = () => svg.transition().duration(200).call(zoom.scaleBy, 1.3);
@@ -335,6 +386,15 @@ function selectNode(d){
     const dd=document.createElement("dd"); dd.textContent=v;
     mg.appendChild(dt); mg.appendChild(dd);
   });
+
+  // When this node is a collapsed action, surface the list of merged rules.
+  if (d.type === "action" && d.meta && Array.isArray(d.meta.rule_ids)) {
+    const dt = document.createElement("dt"); dt.textContent = "rules";
+    const dd = document.createElement("dd");
+    dd.textContent = d.meta.rule_ids.join(", ");
+    mg.appendChild(dt); mg.appendChild(dd);
+    document.getElementById("metaSection").style.display = "";
+  }
 
   const related = DATA.edges.filter(e => e.source.id===d.id || e.target.id===d.id);
   document.getElementById("edgeCount").textContent = `· ${related.length}`;
@@ -490,15 +550,15 @@ window.addEventListener("message", e => {
 try { window.parent.postMessage({type:"__edit_mode_available"}, "*"); } catch(e){}
 
 /* ---------- RESIZE ---------- */
+// Bubble positions are absolute (pre-computed via bubbleSim + pack).
+// On resize, just nudge the sim so nodes re-clamp to their _tx/_ty targets.
 window.addEventListener("resize", () => {
-  layoutNodes();
-  sim.force("x", d3.forceX(d => d._tx).strength(0.8));
-  sim.force("y", d3.forceY(d => d._ty).strength(0.25));
-  sim.alpha(0.5).restart();
+  sim.alpha(0.3).restart();
 });
 
   sim.alpha(1).restart();
   for (let i=0;i<80;i++) sim.tick();
   linkSel.attr("d", linkPath);
   nodeSel.attr("transform", d => `translate(${d.x},${d.y})`);
+  fitToScreen();
 }
