@@ -1,4 +1,4 @@
-.PHONY: install run test lint format clean help
+.PHONY: install run test lint format clean help build-field-corpus
 
 PYTHON ?= python3
 VENV ?= .venv
@@ -27,6 +27,12 @@ install:
 
 run:
 	$(UVICORN) api.main:app --reload --host 0.0.0.0 --port $(PORT)
+
+# Rebuild the field-calibrated benchmark fixture from persisted data
+# (live outcome.json + legacy field_reports/*.md). Commit the fixture
+# after running so diffs show corpus drift.
+build-field-corpus:
+	$(PY) scripts/build_benchmark_corpus.py
 
 test:
 	$(PYTEST) tests/ -v

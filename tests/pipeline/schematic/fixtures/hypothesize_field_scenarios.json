@@ -1,0 +1,130 @@
+[
+  {
+    "id": "report-20260423T234259Z-u13",
+    "slug": "mnt-reform-motherboard",
+    "source": "field_report",
+    "observations": {
+      "state_comps": {},
+      "state_rails": {},
+      "metrics_comps": {},
+      "metrics_rails": {}
+    },
+    "ground_truth_kill": [
+      "U13"
+    ],
+    "ground_truth_modes": [
+      "dead"
+    ],
+    "rationales": [
+      "U13 buck converter dead (MP2458 internal failure)"
+    ],
+    "symptom": "no boot, no LED, no sign of life, +1V2 rail collapsed to 0.02V"
+  },
+  {
+    "id": "report-20260423T225755Z-u13",
+    "slug": "mnt-reform-motherboard",
+    "source": "field_report",
+    "observations": {
+      "state_comps": {},
+      "state_rails": {},
+      "metrics_comps": {},
+      "metrics_rails": {}
+    },
+    "ground_truth_kill": [
+      "U13"
+    ],
+    "ground_truth_modes": [
+      "dead"
+    ],
+    "rationales": [
+      "U13 buck converter dead (open circuit)"
+    ],
+    "symptom": "no boot, no LED, no sign of life, +1V2 rail dead"
+  },
+  {
+    "id": "report-20260423T233155Z-u13",
+    "slug": "mnt-reform-motherboard",
+    "source": "field_report",
+    "observations": {
+      "state_comps": {},
+      "state_rails": {},
+      "metrics_comps": {},
+      "metrics_rails": {}
+    },
+    "ground_truth_kill": [
+      "U13"
+    ],
+    "ground_truth_modes": [
+      "dead"
+    ],
+    "rationales": [
+      "U13 buck converter dead (open circuit)"
+    ],
+    "symptom": "no boot, no LED, no sign of life, +1V2 rail dead"
+  },
+  {
+    "id": "report-20260423T232448Z-u13",
+    "slug": "mnt-reform-motherboard",
+    "source": "field_report",
+    "observations": {
+      "state_comps": {},
+      "state_rails": {},
+      "metrics_comps": {},
+      "metrics_rails": {}
+    },
+    "ground_truth_kill": [
+      "U13"
+    ],
+    "ground_truth_modes": [
+      "dead"
+    ],
+    "rationales": [
+      "U13 buck converter dead (MP2458 or equivalent) \u2014 internal MOSFET or control circuit failure"
+    ],
+    "symptom": "no boot, no LED, no sign of life; +1V2 rail collapsed to 0.02V"
+  },
+  {
+    "id": "live-mnt-reform-motherboard-f2aaf6d98e7b",
+    "slug": "mnt-reform-motherboard",
+    "source": "live",
+    "observations": {
+      "state_comps": {},
+      "state_rails": {
+        "+1V2": "alive",
+        "+5V": "alive",
+        "+3V3": "alive"
+      },
+      "metrics_comps": {},
+      "metrics_rails": {
+        "+1V2": {
+          "measured": 1.19,
+          "unit": "V",
+          "nominal": 1.2,
+          "tolerance_percent": 10.0
+        },
+        "+5V": {
+          "measured": 5.01,
+          "unit": "V",
+          "nominal": 5.0,
+          "tolerance_percent": 10.0
+        },
+        "+3V3": {
+          "measured": 3.29,
+          "unit": "V",
+          "nominal": 3.3,
+          "tolerance_percent": 10.0
+        }
+      }
+    },
+    "ground_truth_kill": [
+      "U13"
+    ],
+    "ground_truth_modes": [
+      "dead"
+    ],
+    "rationales": [
+      "Voltage regulator (MP2458 buck converter) internal failure causing +1V2 rail collapse from 1.2V nominal to 0.02V. Replacement with new part restored +1V2 to 1.19V stable, board boots successfully."
+    ],
+    "validated_at": "2026-04-23T23:43:15.808513Z"
+  }
+]
