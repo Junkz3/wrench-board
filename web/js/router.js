@@ -68,7 +68,14 @@ function packMissingFiles(pack) {
 }
 
 function updateChrome(section, deviceSlug, pack) {
-  const meta = SECTION_META[section] || SECTION_META.home;
+  let meta = SECTION_META[section] || SECTION_META.home;
+  // Home's mode-pill reflects whether a session is active. Without a session,
+  // it reads "JOURNAL · Réparations" (the SECTION_META default). With a session,
+  // it reads "JOURNAL · Session" to signal we're on the dashboard, not the list.
+  const activeSession = currentSession();
+  if (section === "home" && activeSession) {
+    meta = { ...meta, mode: { ...meta.mode, sub: "Session" } };
+  }
 
   // Mode pill — static per-section, overridden on Graphe by pack state.
   let mode = meta.mode;
@@ -192,4 +199,42 @@ export function wireRouter() {
       window.location.hash = "#" + btn.dataset.section;
     });
   });
+}
+
+/**
+ * Return the currently active repair session, derived from URL query params.
+ * A session is defined by the SIMULTANEOUS presence of ?device= and ?repair=.
+ * Re-derived on every call — zero hidden state.
+ */
+export function currentSession() {
+  const params = new URLSearchParams(window.location.search);
+  const device = params.get("device");
+  const repair = params.get("repair");
+  if (device && repair) return { device, repair };
+  return null;
+}
+
+/**
+ * Quit the active session: strip ?device= + ?repair=, hash to #home, close
+ * chat panel, re-render the list. Called from the dashboard's Quitter button
+ * and the topbar session pill's [×].
+ */
+export async function leaveSession() {
+  const url = new URL(window.location.href);
+  url.searchParams.delete("device");
+  url.searchParams.delete("repair");
+  url.hash = "#home";
+  window.history.replaceState({}, "", url.toString());
+  // Close the chat panel if open. llmClose is a <button>; if the panel
+  // isn't mounted yet the optional chaining silently skips.
+  document.getElementById("llmClose")?.click();
+  // Refresh chrome (drops the pill) and swap to list mode.
+  navigate("home");
+  // Reload the list data. Dynamic import avoids a static circular dependency
+  // between router.js and home.js.
+  const { loadHomePacks, loadTaxonomy, loadRepairs, renderHome } = await import("./home.js");
+  const [packs, taxonomy, repairs] = await Promise.all([
+    loadHomePacks(), loadTaxonomy(), loadRepairs(),
+  ]);
+  renderHome(packs, taxonomy, repairs);
 }

@@ -664,7 +664,7 @@ function connect() {
   });
 }
 
-function openPanel() {
+export function openPanel() {
   el("llmPanel").classList.add("open");
   el("llmPanel").setAttribute("aria-hidden", "false");
   document.body.classList.add("llm-open");
@@ -787,7 +787,7 @@ function humanAgo(iso) {
   } catch { return "—"; }
 }
 
-function switchConv(convIdOrNew) {
+export function switchConv(convIdOrNew) {
   if (convIdOrNew === currentConvId) return;
   logSys(`→ changement de conversation : ${convIdOrNew}`);
   if (ws && ws.readyState <= 1) {

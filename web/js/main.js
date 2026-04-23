@@ -3,8 +3,8 @@
 // and a section-agnostic wiring block for the Tweaks panel + boardview
 // colour pickers.
 
-import { APP_VERSION, currentSection, navigate, wireRouter } from './router.js';
-import { loadHomePacks, loadTaxonomy, loadRepairs, renderHome, initNewRepairModal } from './home.js';
+import { APP_VERSION, currentSection, navigate, wireRouter, currentSession } from './router.js';
+import { loadHomePacks, loadTaxonomy, loadRepairs, renderHome, initNewRepairModal, renderRepairDashboard, hideRepairDashboard } from './home.js';
 import { loadGraphFromBackend, setEmptyState, initGraphWithData } from './graph.js';
 import { initMemoryBank, loadMemoryBank } from './memory_bank.js';
 import { initProfileSection } from './profile.js';
@@ -35,9 +35,14 @@ if (!window.Boardview) {
   const hash = window.location.hash;
   const params = new URLSearchParams(window.location.search);
   const slug = params.get("device");
+  const repairId = params.get("repair");
 
-  // Precedence: explicit hash > slug-implies-graphe > home default
-  const initial = hash ? currentSection() : (slug ? "graphe" : "home");
+  // Precedence: explicit hash > session-implies-home > slug-implies-graphe > home default
+  const initial = hash
+    ? currentSection()
+    : (slug && repairId ? "home"
+       : slug ? "graphe"
+       : "home");
   navigate(initial);
 
   if (initial === "graphe" && slug) {
@@ -49,8 +54,14 @@ if (!window.Boardview) {
       setEmptyState(true);
     }
   } else if (initial === "home") {
-    const [packs, taxonomy, repairs] = await Promise.all([loadHomePacks(), loadTaxonomy(), loadRepairs()]);
-    renderHome(packs, taxonomy, repairs);
+    const session = currentSession();
+    if (session) {
+      renderRepairDashboard(session);
+    } else {
+      hideRepairDashboard();
+      const [packs, taxonomy, repairs] = await Promise.all([loadHomePacks(), loadTaxonomy(), loadRepairs()]);
+      renderHome(packs, taxonomy, repairs);
+    }
   } else if (initial === "memory-bank") {
     loadMemoryBank();
   } else if (initial === "profile") {
@@ -64,8 +75,14 @@ if (!window.Boardview) {
     if (sec === "memory-bank") loadMemoryBank();
     else if (sec === "profile") initProfileSection();
     else if (sec === "home") {
-      const [packs, taxonomy, repairs] = await Promise.all([loadHomePacks(), loadTaxonomy(), loadRepairs()]);
-      renderHome(packs, taxonomy, repairs);
+      const session = currentSession();
+      if (session) {
+        renderRepairDashboard(session);
+      } else {
+        hideRepairDashboard();
+        const [packs, taxonomy, repairs] = await Promise.all([loadHomePacks(), loadTaxonomy(), loadRepairs()]);
+        renderHome(packs, taxonomy, repairs);
+      }
     }
   });
 })();

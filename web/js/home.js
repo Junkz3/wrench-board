@@ -8,6 +8,8 @@
 // runs first.
 
 import { openPipelineProgress } from './pipeline_progress.js';
+import { leaveSession } from './router.js';
+import { switchConv, openPanel } from './llm.js';
 
 export async function loadHomePacks() {
   try {
@@ -131,10 +133,10 @@ function repairCardHTML(repair, taxEntry) {
   const form = taxEntry?.form_factor
     ? `<span class="badge mono">${escapeHtml(taxEntry.form_factor)}</span>`
     : "";
-  // Href carries both the device slug (so graph view loads) and the repair
-  // id (so the diagnostic context can be resumed). The graph view ignores
-  // the repair param for now; the diagnostic UI will consume it.
-  const href = `?device=${encodeURIComponent(repair.device_slug)}&repair=${encodeURIComponent(repair.repair_id)}`;
+  // Explicit #home hash so the bootstrap/hashchange dispatch renders the
+  // dashboard (not the list) and not the graphe either. Query params are
+  // preserved across later intra-section navigation.
+  const href = `?device=${encodeURIComponent(repair.device_slug)}&repair=${encodeURIComponent(repair.repair_id)}#home`;
   return `
     <a class="home-card" href="${href}">
       <div class="repair-top">
@@ -219,6 +221,273 @@ export function renderHome(_packs, taxonomy, repairs = []) {
   container.innerHTML = brandNames
     .map(brand => brandBlockHTML(brand, byBrand.get(brand)))
     .join("");
+}
+
+// ───────────────────────────────────────────────────────────────
+// Repair dashboard — the focused "session hub" state of #home.
+// Activated when currentSession() returns non-null.
+// ───────────────────────────────────────────────────────────────
+
+export async function renderRepairDashboard(session) {
+  const { device: slug, repair: rid } = session;
+
+  // Toggle visibility: hide list states, show dashboard.
+  document.getElementById("homeSections")?.classList.add("hidden");
+  document.getElementById("homeEmpty")?.classList.add("hidden");
+  document.getElementById("repairDashboard")?.classList.remove("hidden");
+  // Also hide the list's H1 / CTA while in dashboard mode.
+  document.querySelector("#homeSection .home-head")?.classList.add("hidden");
+
+  // Fetch in parallel — list of Promise results, each tolerates failure.
+  const [repair, convs, pack, findings, taxonomy] = await Promise.all([
+    fetchJSON(`/pipeline/repairs/${encodeURIComponent(rid)}`, null),
+    fetchJSON(`/pipeline/repairs/${encodeURIComponent(rid)}/conversations`, { conversations: [] }),
+    fetchJSON(`/pipeline/packs/${encodeURIComponent(slug)}`, null),
+    fetchJSON(`/pipeline/packs/${encodeURIComponent(slug)}/findings`, []),
+    loadTaxonomy(),
+  ]);
+
+  const taxIndex = indexTaxonomyBySlug(taxonomy);
+  const taxEntry = taxIndex.get(slug) || null;
+
+  renderDashboardHeader(repair, taxEntry, slug, rid);
+  renderDashboardTiles(slug, rid, pack, taxEntry);
+  renderDashboardConvs(convs.conversations || [], rid);
+  renderDashboardFindings(findings, rid);
+  renderDashboardTimeline(repair, convs.conversations || [], findings, pack);
+  renderDashboardPack(pack, slug, rid);
+  wireDashboardHandlers();
+}
+
+export function hideRepairDashboard() {
+  document.getElementById("repairDashboard")?.classList.add("hidden");
+  document.getElementById("homeSections")?.classList.remove("hidden");
+  document.querySelector("#homeSection .home-head")?.classList.remove("hidden");
+}
+
+async function fetchJSON(url, fallback) {
+  try {
+    const res = await fetch(url);
+    if (!res.ok) return fallback;
+    return await res.json();
+  } catch (err) {
+    console.warn("[dashboard] fetch failed", url, err);
+    return fallback;
+  }
+}
+
+function renderDashboardHeader(repair, taxEntry, slug, rid) {
+  const slugEl = document.getElementById("rdSlug");
+  const deviceEl = document.getElementById("rdDevice");
+  const symptomEl = document.getElementById("rdSymptom");
+  const badgesEl = document.getElementById("rdBadges");
+  if (!slugEl || !deviceEl || !symptomEl || !badgesEl) return;
+
+  slugEl.textContent = slug;
+  deviceEl.textContent = taxEntry
+    ? deviceName(taxEntry, { includeBrand: true })
+    : (repair?.device_label || humanizeSlug(slug));
+  symptomEl.textContent = repair?.symptom || "—";
+
+  const created = repair?.created_at ? relativeTimeFr(repair.created_at) : "—";
+  const status = repair?.status || "open";
+  const form = taxEntry?.form_factor
+    ? `<span class="badge mono">${escapeHtml(taxEntry.form_factor)}</span>`
+    : "";
+  badgesEl.innerHTML =
+    `${statusBadgeHTML(status)}` +
+    `<span class="badge mono">${escapeHtml(rid.slice(0, 8))}</span>` +
+    form +
+    `<span class="rd-created">créée ${escapeHtml(created)}</span>`;
+}
+
+function renderDashboardTiles(slug, rid, pack, taxEntry) {
+  const qs = `?device=${encodeURIComponent(slug)}&repair=${encodeURIComponent(rid)}`;
+  const pcb = document.getElementById("rdTilePcb");
+  const graphe = document.getElementById("rdTileGraphe");
+  const schematic = document.getElementById("rdTileSchematic");
+  const memoryBank = document.getElementById("rdTileMemoryBank");
+  if (pcb) pcb.href = `${qs}#pcb`;
+  if (graphe) graphe.href = `${qs}#graphe`;
+  if (schematic) schematic.href = `${qs}#schematic`;
+  if (memoryBank) memoryBank.href = `${qs}#memory-bank`;
+
+  // Tile metas — static text when we don't have richer data. Keep mono and
+  // short so the tile stays scannable.
+  const pcbMeta = document.getElementById("rdTilePcbMeta");
+  if (pcbMeta) pcbMeta.textContent = taxEntry?.form_factor || "board";
+  const grapheMeta = document.getElementById("rdTileGrapheMeta");
+  if (grapheMeta) {
+    const complete = pack && pack.has_registry && pack.has_knowledge_graph
+      && pack.has_rules && pack.has_dictionary && pack.has_audit_verdict;
+    grapheMeta.textContent = complete ? "APPROUVÉ" : (pack ? "en construction" : "aucune mémoire");
+  }
+  const schematicMeta = document.getElementById("rdTileSchematicMeta");
+  if (schematicMeta) schematicMeta.textContent = pack?.has_schematic_graph ? "importé" : "non importé";
+  const mbMeta = document.getElementById("rdTileMemoryBankMeta");
+  if (mbMeta) mbMeta.textContent = pack?.has_rules ? "rules + findings" : "vide";
+}
+
+function renderDashboardConvs(conversations, rid) {
+  const body = document.getElementById("rdConvBody");
+  const count = document.getElementById("rdConvCount");
+  if (!body || !count) return;
+  count.textContent = String(conversations.length);
+  body.innerHTML = "";
+  if (conversations.length === 0) {
+    body.innerHTML = '<div class="rd-block-empty">Aucune conversation — démarre une discussion avec l\'agent.</div>';
+  } else {
+    for (const c of conversations) {
+      const row = document.createElement("button");
+      row.type = "button";
+      row.className = "rd-conv-row";
+      row.dataset.convId = c.id;
+      const tier = (c.tier || "fast").toLowerCase();
+      const title = escapeHtml((c.title || `Conversation ${c.id.slice(0, 6)}`).slice(0, 80));
+      const ago = c.last_turn_at ? relativeTimeFr(c.last_turn_at) : "—";
+      const cost = typeof c.cost_usd === "number" ? `$${c.cost_usd.toFixed(3)}` : "—";
+      row.innerHTML =
+        `<span class="rd-conv-tier t-${tier}">${tier.toUpperCase()}</span>` +
+        `<span class="rd-conv-title">${title}</span>` +
+        `<span class="rd-conv-meta">${c.turns || 0} turns · ${cost} · ${escapeHtml(ago)}</span>`;
+      row.addEventListener("click", () => {
+        openPanel();
+        switchConv(c.id);
+      });
+      body.appendChild(row);
+    }
+  }
+  const newBtn = document.createElement("button");
+  newBtn.type = "button";
+  newBtn.className = "rd-conv-new";
+  newBtn.textContent = "+ Nouvelle conversation";
+  newBtn.addEventListener("click", () => {
+    openPanel();
+    switchConv("new");
+  });
+  body.appendChild(newBtn);
+}
+
+function renderDashboardFindings(findings, currentRid) {
+  const body = document.getElementById("rdFindingsBody");
+  const count = document.getElementById("rdFindingsCount");
+  if (!body || !count) return;
+  count.textContent = String(findings.length);
+  if (findings.length === 0) {
+    body.innerHTML = '<div class="rd-block-empty">Aucun finding pour ce device. L\'agent en enregistre via <code>mb_record_finding</code> quand tu confirmes une panne.</div>';
+    return;
+  }
+  body.innerHTML = "";
+  const currentShort = currentRid.slice(0, 8);
+  for (const f of findings) {
+    const row = document.createElement("div");
+    row.className = "rd-finding-row";
+    const isCurrent = f.session_id && f.session_id.startsWith(currentShort);
+    const sessionChip = isCurrent
+      ? `<span class="rd-finding-session current">ce repair</span>`
+      : (f.session_id
+          ? `<span class="rd-finding-session">${escapeHtml(f.session_id.slice(0, 8))}</span>`
+          : `<span class="rd-finding-session">—</span>`);
+    const notes = f.notes
+      ? `<p class="rd-finding-notes">${escapeHtml(f.notes)}</p>`
+      : "";
+    row.innerHTML =
+      `<div class="rd-finding-top">` +
+        `<span class="rd-finding-refdes">${escapeHtml(f.refdes)}</span>` +
+        `<span class="rd-finding-symptom">${escapeHtml(f.symptom)}</span>` +
+        sessionChip +
+      `</div>` +
+      `<p class="rd-finding-cause">${escapeHtml(f.confirmed_cause || "—")}</p>` +
+      notes;
+    body.appendChild(row);
+  }
+}
+
+function renderDashboardTimeline(repair, conversations, findings, pack) {
+  const body = document.getElementById("rdTimelineBody");
+  if (!body) return;
+  const events = [];
+  if (repair?.created_at) {
+    events.push({ when: repair.created_at, label: "Session ouverte", kind: "cyan" });
+  }
+  for (const c of conversations) {
+    if (c.last_turn_at) {
+      events.push({
+        when: c.last_turn_at,
+        label: `Activité · ${(c.tier || "fast").toLowerCase()} · ${c.turns || 0} turns`,
+        kind: "emerald",
+      });
+    }
+  }
+  for (const f of findings) {
+    if (f.created_at) {
+      events.push({
+        when: f.created_at,
+        label: `Finding ${f.refdes || "?"} confirmé`,
+        kind: "violet",
+      });
+    }
+  }
+  if (pack?.audit_verdict) {
+    events.push({
+      when: repair?.created_at || new Date().toISOString(),
+      label: `Pack audité — ${pack.audit_verdict}`,
+      kind: pack.audit_verdict === "APPROVED" ? "emerald" : "amber",
+    });
+  }
+  events.sort((a, b) => (b.when || "").localeCompare(a.when || ""));
+  const MAX = 8;
+  const shown = events.slice(0, MAX);
+  body.innerHTML = shown.map(e => (
+    `<li class="rd-timeline-item">` +
+      `<span class="rd-timeline-node ${e.kind}"></span>` +
+      `<span class="rd-timeline-when">${escapeHtml(relativeTimeFr(e.when))}</span>` +
+      `<span class="rd-timeline-label">${escapeHtml(e.label)}</span>` +
+    `</li>`
+  )).join("");
+  if (events.length > MAX) {
+    body.innerHTML += `<li class="rd-timeline-item"><span class="rd-timeline-node"></span><span class="rd-timeline-label">+${events.length - MAX} plus anciens</span></li>`;
+  }
+  if (events.length === 0) {
+    body.innerHTML = '<li class="rd-block-empty">Aucune activité.</li>';
+  }
+}
+
+function renderDashboardPack(pack, slug, rid) {
+  const body = document.getElementById("rdPackBody");
+  if (!body) return;
+  if (!pack) {
+    body.innerHTML = '<div class="rd-block-empty">Aucun pack — la mémoire du device n\'est pas encore construite.</div>';
+    return;
+  }
+  const complete = pack.has_registry && pack.has_knowledge_graph
+    && pack.has_rules && pack.has_dictionary && pack.has_audit_verdict;
+  const statusLabel = complete ? "APPROUVÉ" : "en construction";
+  const statusClass = complete ? "ok" : "warn";
+  const arts = [
+    { key: "has_registry", label: "registry" },
+    { key: "has_knowledge_graph", label: "graph" },
+    { key: "has_rules", label: "rules" },
+    { key: "has_dictionary", label: "dictionary" },
+    { key: "has_audit_verdict", label: "audit" },
+  ];
+  const chips = arts.map(a => (
+    `<span class="rd-pack-artefact ${pack[a.key] ? "present" : ""}">${pack[a.key] ? "✓ " : "· "}${a.label}</span>`
+  )).join("");
+  body.innerHTML =
+    `<div class="rd-pack-status">` +
+      `<span class="rd-pack-status-label ${statusClass}">${statusLabel}</span>` +
+    `</div>` +
+    `<div class="rd-pack-artefacts">${chips}</div>`;
+}
+
+let _dashboardHandlersWired = false;
+function wireDashboardHandlers() {
+  if (_dashboardHandlersWired) return;
+  _dashboardHandlersWired = true;
+  document.getElementById("rdLeaveBtn")?.addEventListener("click", () => {
+    leaveSession();
+  });
 }
 
 /* ---------- NEW REPAIR MODAL ---------- */
