@@ -360,6 +360,55 @@ body.llm-open .sch-root{right:420px}
 .sch-empty-card h3{margin:6px 0 6px;font-size:15px;font-weight:600;color:var(--text)}
 .sch-empty-card p{margin:0 0 12px;font-size:12.5px;color:var(--text-2);line-height:1.55}
 .sch-empty-card code{display:block;font-family:var(--mono);font-size:11px;color:var(--emerald);padding:10px 12px;background:var(--bg-deep);border:1px solid var(--border);border-radius:6px;text-align:left;overflow-x:auto;white-space:pre;margin-top:4px}
+
+/* =========== RAIL SIDEBAR (mode=railfocus) =========== */
+/* Hidden by default — shown only when body.sch-mode-railfocus is active,
+   set by the JS mode toggle. Sits flush-left under the statsbar and runs
+   down to just above the boot timeline. */
+.sch-railbar{position:absolute;top:72px;left:0;bottom:148px;width:240px;background:linear-gradient(180deg,rgba(15,24,42,.96),rgba(12,19,36,.96));border-right:1px solid var(--border);display:none;flex-direction:column;z-index:4;backdrop-filter:blur(6px)}
+body.sch-mode-railfocus .sch-railbar{display:flex}
+body.sch-mode-railfocus .sch-canvas{left:240px}
+body.sch-mode-railfocus .sch-boot-timeline{left:240px}
+
+.sch-railbar-head{display:flex;align-items:baseline;justify-content:space-between;padding:10px 14px 8px;border-bottom:1px solid var(--border)}
+.sch-railbar-title{font-family:var(--mono);font-size:11px;letter-spacing:.5px;text-transform:uppercase;color:var(--text-3);font-weight:700}
+.sch-railbar-count{font-family:var(--mono);font-size:10px;color:var(--text-3)}
+.sch-railbar-list{flex:1;overflow-y:auto;overflow-x:hidden;padding:6px 0}
+.sch-railbar-list::-webkit-scrollbar{width:6px}
+.sch-railbar-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+/* Voltage-class group header inside the list */
+.sch-rail-group{padding:8px 14px 3px;font-family:var(--mono);font-size:9.5px;color:var(--text-3);letter-spacing:.5px;text-transform:uppercase;font-weight:600;border-top:1px solid var(--border-soft);margin-top:4px}
+.sch-rail-group:first-child{border-top:0;margin-top:0}
+
+/* Rail item row — compact, 2 lines */
+.sch-rail-item{display:grid;grid-template-columns:1fr auto;grid-template-rows:auto auto;gap:2px 8px;padding:7px 14px;cursor:pointer;border-left:2px solid transparent;transition:background .12s,border-color .12s}
+.sch-rail-item:hover{background:rgba(56,189,248,.06);border-left-color:rgba(56,189,248,.4)}
+.sch-rail-item.active{background:rgba(52,211,153,.08);border-left-color:var(--emerald)}
+.sch-rail-item.active .sch-rail-name{color:oklch(0.88 0.15 155)}
+.sch-rail-item.spof{border-left-color:oklch(0.75 0.17 25)}
+.sch-rail-item.spof.active{background:rgba(236,100,75,.08);border-left-color:oklch(0.78 0.17 25)}
+
+.sch-rail-name{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--text);grid-column:1;grid-row:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.sch-rail-voltage{font-family:var(--mono);font-size:10.5px;color:var(--emerald);grid-column:2;grid-row:1;font-weight:700;flex-shrink:0}
+.sch-rail-meta{grid-column:1 / span 2;grid-row:2;display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9.5px;color:var(--text-3);min-width:0;overflow:hidden}
+.sch-rail-meta .sch-rail-source{color:var(--cyan);font-weight:600;flex-shrink:0}
+.sch-rail-meta .sch-rail-source.external{color:var(--text-3);font-style:italic}
+.sch-rail-meta .sch-rail-consumers{color:var(--text-3);flex-shrink:0}
+.sch-rail-meta .sch-rail-spof{margin-left:auto;padding:1px 5px;border-radius:3px;font-weight:700;font-size:9px;background:rgba(236,100,75,.14);color:oklch(0.82 0.15 25);border:1px solid rgba(236,100,75,.3);flex-shrink:0}
+.sch-rail-meta .sch-rail-phase{padding:1px 5px;border-radius:3px;background:rgba(245,158,11,.10);color:var(--amber);border:1px solid rgba(245,158,11,.25);flex-shrink:0;font-size:9px;font-weight:600}
+
+/* =========== RAIL FOCUS LAYOUT (SVG) =========== */
+/* Dashed zone bands — upstream / source / rail / consumers.
+   Subtle, labelled, keeps the eye zoned without shouting. */
+.sch-rf-zoneband{fill:rgba(255,255,255,.012);stroke:rgba(255,255,255,.06);stroke-width:1;stroke-dasharray:6 6}
+.sch-rf-zonelabel{font-family:var(--mono);font-size:10px;fill:var(--text-3);letter-spacing:.5px;text-transform:uppercase;font-weight:600;pointer-events:none}
+.sch-rf-busline{stroke:var(--emerald);stroke-width:1.5;opacity:.45}
+.sch-rf-upstream-note{font-family:var(--mono);font-size:11px;fill:var(--text-3);font-style:italic;pointer-events:none}
+
+/* Empty canvas — shown in railfocus mode before a rail is picked */
+.sch-rf-empty{font-family:var(--mono);font-size:13px;fill:var(--text-3);text-anchor:middle;pointer-events:none;letter-spacing:.3px}
+.sch-rf-empty-hint{font-family:var(--mono);font-size:10.5px;fill:var(--text-3);text-anchor:middle;pointer-events:none;opacity:.7}
 .sch-empty-hint.hidden{display:none}
 
 /* =========== BEHAVIORAL SIMULATOR — sim-* state classes =========== */

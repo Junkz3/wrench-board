@@ -80,8 +80,110 @@
 <section class="stub hidden" data-section-stub="pcb">
   <div id="brdRoot" class="brd-root"></div>
 </section>
-<section class="stub hidden" data-section-stub="schematic">
-  <div class="stub-card"><h2>Schematic</h2><p>Viewer PDF + nets — à faire en V2.</p></div>
+<!-- ============ SCHEMATIC — electrical-graph viewer ============ -->
+<section class="sch-root hidden" data-section-stub="schematic" id="schematicSection">
+  <div class="sch-grid"></div>
+
+  <!-- rail sidebar (visible only in mode=railfocus) — populated by JS -->
+  <aside class="sch-railbar" id="schRailBar">
+    <header class="sch-railbar-head">
+      <span class="sch-railbar-title">Rails</span>
+      <span class="sch-railbar-count" id="schRailBarCount">—</span>
+    </header>
+    <div class="sch-railbar-list" id="schRailBarList"></div>
+  </aside>
+
+  <!-- stats / pill / toggle overlay -->
+  <div class="sch-statsbar">
+    <span class="sch-stat"><span class="k">Comps</span><span class="v" id="schStatComps">—</span></span>
+    <span class="sch-stat"><span class="k">Rails</span><span class="v" id="schStatRails">—</span></span>
+    <span class="sch-stat"><span class="k">Sources</span><span class="v" id="schStatRegs">—</span></span>
+    <span class="sch-stat"><span class="k">Phases</span><span class="v" id="schStatPhases">—</span></span>
+    <span class="sch-stat"><span class="k">Conf.</span><span class="v" id="schStatConf">—</span></span>
+    <span class="sch-stat"><span class="k">Pages</span><span class="v" id="schStatPages">—</span></span>
+    <span class="sch-stat-pill warn" id="schStatDegraded">dégradé</span>
+    <div class="sch-mode-toggle" role="radiogroup" aria-label="Mode d'affichage du graphe">
+      <button class="sch-mode-btn" data-sch-mode="railfocus" title="Focus rail : sidebar des rails, canvas affiche un seul rail à la fois (propre, pas de spaghetti)">Focus rail</button>
+      <button class="sch-mode-btn" data-sch-mode="powertree" title="Power-tree : tous les rails empilés avec leurs consumers">Power-tree</button>
+      <button class="sch-mode-btn" data-sch-mode="grid" title="Grille phase × tension : colonnes = phases de boot, lignes = niveaux de tension">Grille phase×V</button>
+    </div>
+    <button class="sch-toggle" id="schTogglePassives" title="Afficher les R/C/L de signal pur (non attachés à un rail power)">Passifs signal</button>
+    <button class="sch-toggle" id="schToggleSignals" title="Afficher les edges de signaux (enable, reset, clock, bus)">Signaux</button>
+    <button class="sch-toggle" id="schToggleAllPins" title="Afficher toutes les pins des ICs (pas juste power-relevantes)">Toutes pins</button>
+  </div>
+
+  <!-- filter input (top-right) -->
+  <div class="sch-filter">
+    <svg class="icon icon-sm" viewBox="0 0 24 24" width="14" height="14"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.6" fill="none"/><path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="1.6" fill="none"/></svg>
+    <input id="schFilterInput" placeholder="Rechercher (U7, +5V, C18…)" autocomplete="off" spellcheck="false"/>
+    <span class="sch-filter-status" id="schFilterStatus"></span>
+  </div>
+
+  <div class="sch-canvas" id="schCanvas">
+    <svg id="schGraph" data-zoom="mid">
+      <defs>
+        <marker id="sch-arrow-produces" viewBox="0 -5 10 10" refX="10" refY="0"
+                markerWidth="7" markerHeight="7" orient="auto">
+          <path d="M0,-4L8,0L0,4" fill="oklch(0.82 0.14 210)" opacity="0.85"/>
+        </marker>
+        <marker id="sch-arrow-powers" viewBox="0 -5 10 10" refX="10" refY="0"
+                markerWidth="8" markerHeight="8" orient="auto">
+          <path d="M0,-5L10,0L0,5" fill="oklch(0.78 0.15 155)" opacity="0.9"/>
+        </marker>
+        <marker id="sch-arrow-decouples" viewBox="0 -5 10 10" refX="10" refY="0"
+                markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M0,-4L8,0L0,4" fill="oklch(0.78 0.14 295)" opacity="0.8"/>
+        </marker>
+      </defs>
+      <g id="schZoomRoot">
+        <g id="schBucketHeads"></g>
+        <g id="schLayerLinks"></g>
+        <g id="schLayerNodes"></g>
+      </g>
+    </svg>
+  </div>
+
+  <!-- zoom / pan controls -->
+  <div class="sch-zoom">
+    <button class="sch-zoom-btn" id="schBtnZoomIn" title="Zoomer"><svg class="icon icon-sm" viewBox="0 0 24 24" width="14" height="14"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.6" fill="none"/><path d="M11 8v6M8 11h6M21 21l-4.3-4.3" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg></button>
+    <button class="sch-zoom-btn" id="schBtnZoomOut" title="Dézoomer"><svg class="icon icon-sm" viewBox="0 0 24 24" width="14" height="14"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.6" fill="none"/><path d="M8 11h6M21 21l-4.3-4.3" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg></button>
+    <div class="sch-zoom-sep"></div>
+    <button class="sch-zoom-btn" id="schBtnFit" title="Ajuster à l'écran"><svg class="icon icon-sm" viewBox="0 0 24 24" width="14" height="14"><path d="M4 8V4h4M16 4h4v4M4 16v4h4M16 20h4v-4" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg></button>
+    <div class="sch-zoom-label" id="schZoomLabel">× 1.00</div>
+  </div>
+
+  <!-- empty state (shown when no device / no schematic) -->
+  <div class="sch-empty" id="schEmptyState">
+    <div class="sch-empty-card">
+      <div class="glyph">
+        <svg class="icon" viewBox="0 0 24 24" width="24" height="24">
+          <path d="M4 4h16v16H4z" stroke="currentColor" stroke-width="1.6" fill="none"/>
+          <path d="M4 8h16M4 12h16M4 16h16" stroke="currentColor" stroke-width="1.6" fill="none"/>
+        </svg>
+      </div>
+      <h3 id="schEmptyTitle">Schematic</h3>
+      <p id="schEmptyDetail">Le graphe électrique apparaîtra ici dès qu'un schéma sera ingéré.</p>
+      <code id="schEmptyHint" class="hidden"></code>
+    </div>
+  </div>
+
+  <!-- boot timeline (bottom strip) -->
+  <div class="sch-boot-timeline" id="schBootTimeline"></div>
+
+  <!-- inspector (slides in on click) -->
+  <aside class="sch-inspector" id="schInspector">
+    <header class="sch-insp-head">
+      <button class="sch-insp-close" id="schInspClose" aria-label="Fermer">
+        <svg class="icon icon-sm" viewBox="0 0 24 24" width="14" height="14">
+          <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+      </button>
+      <span class="sch-type-badge" id="schInspType">RAIL</span>
+      <h2 id="schInspTitle">—</h2>
+      <div class="sub" id="schInspSub">—</div>
+    </header>
+    <div class="sch-insp-body" id="schInspBody"></div>
+  </aside>
 </section>
 <!-- ============ MEMORY BANK ============ -->
 <section class="memory-bank hidden" id="memoryBank">
@@ -418,23 +520,13 @@
   </div>
 </div>
 
-<!-- ============ STATUS BAR ============ -->
-<div class="statusbar">
-  <div class="group"><span class="status-dot"></span> agent en ligne</div>
-  <div class="group">modèle : msa-graph-v3</div>
-  <div class="group" id="counts">— nœuds · — arêtes</div>
-  <div class="group">confiance moy. <span id="avgConf">0.00</span></div>
-  <div class="spacer"></div>
-  <div class="group" id="zoomReadout">zoom 1.00×</div>
-</div>
-
 <!-- ============ LLM DIAGNOSTIC PANEL ============ -->
 <!-- Markup lives in web/llm_panel.html — injected at boot by web/js/llm.js.
      This isolates chat-panel edits from parallel work on index.html. -->
 <div id="llmRoot"></div>
 
 <script type="module" src="js/main.js"></script>
-<script type="module" src="/js/profile.js"></script>
 <script type="module" src="brd_viewer.js" defer></script>
+<script type="module" src="/js/profile.js"></script>
 </body>
 </html>

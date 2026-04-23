@@ -28,9 +28,12 @@ const STATE = {
   killswitch: false,         // when true, focus mode shows the full cascade
   showSignals: false,
   showAllPins: false,
-  // "powertree" (bus-rail stack, 1 axis) or "grid" (phase × voltage 2D).
-  // Persisted to localStorage so the user's choice sticks.
-  layoutMode: (typeof localStorage !== "undefined" && localStorage.getItem("schLayoutMode")) || "powertree",
+  // "railfocus" (default, one rail at a time), "powertree" (all rails stacked),
+  // "grid" (phase × voltage 2D). Persisted to localStorage so the user's
+  // choice sticks.
+  layoutMode: (typeof localStorage !== "undefined" && localStorage.getItem("schLayoutMode")) || "railfocus",
+  // In railfocus mode, which rail is currently shown in the canvas.
+  selectedRailId: (typeof localStorage !== "undefined" && localStorage.getItem("schSelectedRail")) || null,
 };
 
 /* ---------------------------------------------------------------------- *
@@ -1059,6 +1062,297 @@ function renderPowertreeHeads(model) {
 }
 
 /* ---------------------------------------------------------------------- *
+ * RAIL-FOCUS LAYOUT — show exactly ONE rail + its source + upstream feed +
+ * decoupling caps + direct consumers. Everything else is hidden. Zero long
+ * edges, zero overlap, scales to any rail count because we never render
+ * more than one rail's neighborhood at a time.
+ * ---------------------------------------------------------------------- */
+
+const RF_UPSTREAM_X = 160;
+const RF_SOURCE_X = 400;
+const RF_RAIL_X = 640;
+const RF_CONSUMERS_X = 820;
+const RF_CENTER_Y = 260;
+const RF_CONSUMER_COL_W = 90;
+const RF_CONSUMER_ROW_H = 48;
+const RF_CONSUMERS_PER_COL = 9;
+const RF_DECOUP_STEP_X = 22;
+
+function computeRailFocusLayout(model, railId) {
+  // Start hidden, then progressively reveal the rail's neighborhood.
+  for (const n of model.nodes) n._visible = false;
+  model.layoutMode = "railfocus";
+  model._rfRailId = null;
+  model._rfUpstreamId = null;
+  model._rfConsumerCount = 0;
+  model._rfDecouplingCount = 0;
+
+  const rail = railId ? model.nodeById.get(railId) : null;
+  if (!rail) {
+    model.bounds = { minX: 0, minY: 0, maxX: 1200, maxY: 560 };
+    return;
+  }
+
+  rail._visible = true;
+  rail._tx = RF_RAIL_X; rail._ty = RF_CENTER_Y;
+  rail.width = 140; rail.height = 54;
+  model._rfRailId = rail.id;
+
+  // Source IC — the regulator that produces this rail.
+  let source = null;
+  if (rail.source_refdes) {
+    source = model.nodeById.get(`comp:${rail.source_refdes}`);
+    if (source) {
+      source._visible = true;
+      source._tx = RF_SOURCE_X;
+      source._ty = RF_CENTER_Y;
+      source.width = 92;
+      source.height = Math.max(72, source.height || 48);
+    }
+  }
+
+  // Upstream rail — the rail that feeds the source's input pin.
+  let upstream = null;
+  if (source) {
+    const upE = model.edges.find(e => e.kind === "powers" && e.targetId === source.id);
+    if (upE) {
+      const cand = model.nodeById.get(upE.sourceId);
+      if (cand && cand.id !== rail.id && cand.kind === "rail") {
+        upstream = cand;
+        upstream._visible = true;
+        upstream._tx = RF_UPSTREAM_X;
+        upstream._ty = RF_CENTER_Y;
+        upstream.width = 110;
+        upstream.height = 44;
+        model._rfUpstreamId = upstream.id;
+      }
+    }
+  }
+
+  // Consumers — grid to the right of the rail, vertically centered on it.
+  const consumers = model.edges
+    .filter(e => e.kind === "powers" && e.sourceId === rail.id)
+    .map(e => model.nodeById.get(e.targetId))
+    .filter(Boolean);
+  consumers.sort((a, z) =>
+    (a.refdes || "").localeCompare(z.refdes || "", undefined, { numeric: true })
+  );
+  const nC = consumers.length;
+  consumers.forEach((c, i) => {
+    c._visible = true;
+    const col = Math.floor(i / RF_CONSUMERS_PER_COL);
+    const row = i % RF_CONSUMERS_PER_COL;
+    const colCount = Math.min(RF_CONSUMERS_PER_COL, nC - col * RF_CONSUMERS_PER_COL);
+    const colHeight = (colCount - 1) * RF_CONSUMER_ROW_H;
+    c._tx = RF_CONSUMERS_X + col * RF_CONSUMER_COL_W;
+    c._ty = RF_CENTER_Y - colHeight / 2 + row * RF_CONSUMER_ROW_H;
+    c.width = 64;
+    c.height = 34;
+    // In this mode the detailed pins aren't useful on consumers — keep the
+    // inspector for that. Clean rect + refdes is enough here.
+    c.showPins = false;
+  });
+  model._rfConsumerCount = nC;
+
+  // Decoupling caps — small, centered under the rail on a short strip.
+  const decouplings = model.edges
+    .filter(e => e.kind === "decouples" && e.targetId === rail.id)
+    .map(e => model.nodeById.get(e.sourceId))
+    .filter(Boolean);
+  decouplings.sort((a, z) =>
+    (a.refdes || "").localeCompare(z.refdes || "", undefined, { numeric: true })
+  );
+  const decoupY = RF_CENTER_Y + 70;
+  decouplings.forEach((d, i) => {
+    d._visible = true;
+    d._tx = RF_RAIL_X + (i - (decouplings.length - 1) / 2) * RF_DECOUP_STEP_X;
+    d._ty = decoupY;
+    d.width = 12;
+    d.height = 14;
+  });
+  model._rfDecouplingCount = decouplings.length;
+
+  // Commit positions for visible nodes; push the rest way off-canvas so the
+  // zoom/fit math doesn't see them.
+  for (const n of model.nodes) {
+    if (n._visible) { n.x = n._tx; n.y = n._ty; }
+    else { n.x = -1e5; n.y = -1e5; }
+  }
+
+  const visible = model.nodes.filter(n => n._visible);
+  if (visible.length === 0) {
+    model.bounds = { minX: 0, minY: 0, maxX: 1200, maxY: 560 };
+  } else {
+    const xs = visible.map(n => n.x);
+    const ys = visible.map(n => n.y);
+    model.bounds = {
+      minX: Math.min(...xs) - 140,
+      minY: Math.min(...ys) - 120,
+      maxX: Math.max(...xs) + 140,
+      maxY: Math.max(...ys) + 120,
+    };
+  }
+}
+
+function renderRailFocusHeads(model) {
+  const g = d3.select("#schBucketHeads");
+  g.selectAll("*").remove();
+
+  if (!model._rfRailId) {
+    g.append("text")
+      .attr("class", "sch-rf-empty")
+      .attr("x", 600).attr("y", 260)
+      .text("← Sélectionne un rail dans la liste");
+    g.append("text")
+      .attr("class", "sch-rf-empty-hint")
+      .attr("x", 600).attr("y", 288)
+      .text("Vue propre — un rail à la fois, zéro spaghetti.");
+    return;
+  }
+
+  const rail = model.nodeById.get(model._rfRailId);
+  const hasUpstream = Boolean(model._rfUpstreamId);
+  const hasSource = Boolean(rail.source_refdes);
+  const nC = model._rfConsumerCount;
+  const railY = rail.y;
+  const zoneTop = railY - 210;
+  const zoneBot = railY + 210;
+
+  const zones = [];
+  if (hasUpstream) zones.push({ x: RF_UPSTREAM_X - 90, w: 180, label: "AMONT" });
+  if (hasSource)   zones.push({ x: RF_SOURCE_X - 90, w: 180, label: "SOURCE" });
+  zones.push({ x: RF_RAIL_X - 80, w: 160, label: "RAIL" });
+  if (nC > 0) {
+    const nCols = Math.ceil(nC / RF_CONSUMERS_PER_COL);
+    zones.push({
+      x: RF_CONSUMERS_X - 40,
+      w: 80 + nCols * RF_CONSUMER_COL_W,
+      label: "CONSUMERS",
+    });
+  }
+  for (const z of zones) {
+    g.append("rect")
+      .attr("class", "sch-rf-zoneband")
+      .attr("x", z.x).attr("y", zoneTop)
+      .attr("width", z.w).attr("height", zoneBot - zoneTop)
+      .attr("rx", 8);
+    g.append("text")
+      .attr("class", "sch-rf-zonelabel")
+      .attr("x", z.x + z.w / 2).attr("y", zoneTop - 8)
+      .attr("text-anchor", "middle")
+      .text(z.label);
+  }
+
+  // Horizontal bus from the rail towards the consumer zone.
+  if (nC > 0) {
+    g.append("line")
+      .attr("class", "sch-rf-busline")
+      .attr("x1", rail.x + 70).attr("y1", railY)
+      .attr("x2", RF_CONSUMERS_X - 10).attr("y2", railY);
+  }
+
+  // "External supply" note when the rail has no producer on this board.
+  if (!hasSource) {
+    g.append("text")
+      .attr("class", "sch-rf-upstream-note")
+      .attr("x", RF_SOURCE_X).attr("y", railY + 4)
+      .attr("text-anchor", "middle")
+      .text("Alim externe");
+  }
+}
+
+function renderRailBar(model) {
+  const listEl = el("schRailBarList");
+  const countEl = el("schRailBarCount");
+  if (!listEl) return;
+  listEl.innerHTML = "";
+
+  const rails = model.nodes.filter(n => n.kind === "rail");
+  if (countEl) countEl.textContent = String(rails.length);
+
+  if (rails.length === 0) {
+    listEl.innerHTML = `<div class="muted" style="padding:20px 14px;font-size:11px;text-align:center">Aucun rail dans ce pack.</div>`;
+    return;
+  }
+
+  // Group by voltage class, in V_ROWS order (high → low tension).
+  const byGroup = new Map();
+  for (const r of rails) {
+    const gid = voltageRowFor(r.voltage_nominal);
+    if (!byGroup.has(gid)) byGroup.set(gid, []);
+    byGroup.get(gid).push(r);
+  }
+  for (const vrow of V_ROWS) {
+    const group = byGroup.get(vrow.id);
+    if (!group || group.length === 0) continue;
+    group.sort((a, z) => {
+      const va = a.voltage_nominal ?? -1;
+      const vz = z.voltage_nominal ?? -1;
+      if (vz !== va) return vz - va;
+      return (a.label || "").localeCompare(z.label || "");
+    });
+    const header = document.createElement("div");
+    header.className = "sch-rail-group";
+    header.textContent = vrow.label;
+    listEl.appendChild(header);
+    for (const rail of group) {
+      const item = document.createElement("div");
+      item.className = "sch-rail-item";
+      if (rail.isSpof) item.classList.add("spof");
+      if (rail.id === STATE.selectedRailId) item.classList.add("active");
+      item.dataset.railId = rail.id;
+
+      const consumerCount = (rail.consumers || []).length;
+      const voltageLbl = rail.voltage_nominal != null
+        ? `${rail.voltage_nominal} V`
+        : "—";
+      const sourceLbl = rail.source_refdes
+        ? `<span class="sch-rail-source">${escHtml(rail.source_refdes)}</span>`
+        : `<span class="sch-rail-source external">externe</span>`;
+      const phaseBadge = rail.phase != null
+        ? `<span class="sch-rail-phase">Φ${rail.phase}</span>`
+        : "";
+      const spofBadge = rail.isSpof
+        ? `<span class="sch-rail-spof">⚠ ${rail.impactPct}%</span>`
+        : "";
+
+      item.innerHTML = `
+        <div class="sch-rail-name">${escHtml(rail.label)}</div>
+        <div class="sch-rail-voltage">${voltageLbl}</div>
+        <div class="sch-rail-meta">
+          ${sourceLbl}
+          <span class="sch-rail-consumers">→ ${consumerCount}</span>
+          ${phaseBadge}
+          ${spofBadge}
+        </div>
+      `;
+      item.addEventListener("click", () => setSelectedRail(rail.id));
+      listEl.appendChild(item);
+    }
+  }
+}
+
+function setSelectedRail(railId) {
+  STATE.selectedRailId = railId || null;
+  try { localStorage.setItem("schSelectedRail", railId || ""); } catch (_) {}
+  if (!STATE.model || STATE.layoutMode !== "railfocus") return;
+  computeRailFocusLayout(STATE.model, STATE.selectedRailId);
+  renderRailFocusHeads(STATE.model);
+  renderNodes(STATE.model);
+  renderEdges(STATE.model);
+  document.querySelectorAll("#schRailBarList .sch-rail-item").forEach(it => {
+    it.classList.toggle("active", it.dataset.railId === STATE.selectedRailId);
+  });
+  if (STATE.zoom) fitToBounds(STATE.model);
+  if (STATE.selectedRailId) {
+    const n = STATE.model.nodeById.get(STATE.selectedRailId);
+    if (n) { STATE.selectedId = n.id; updateInspector(n); }
+  } else {
+    clearFocus();
+  }
+}
+
+/* ---------------------------------------------------------------------- *
  * KILL-SWITCH — BFS forward through produces + powers edges              *
  * ---------------------------------------------------------------------- */
 
@@ -1299,11 +1593,11 @@ function edgeAnchors(e, model) {
   if (!s || !t) return null;
   let sx = s.x, sy = s.y, tx = t.x, ty = t.y;
 
-  const isPowertree = model.layoutMode === "powertree";
-  // In power-tree mode, skip fine pin-level anchoring (nodes are small,
-  // layout is already clean) — anchor on the box edge facing the other
-  // endpoint so the line is short and unambiguous.
-  if (isPowertree) {
+  const isCleanLayout = model.layoutMode === "powertree" || model.layoutMode === "railfocus";
+  // In power-tree / rail-focus modes, skip fine pin-level anchoring (nodes
+  // are small, layout is already clean) — anchor on the box edge facing the
+  // other endpoint so the line is short and unambiguous.
+  if (isCleanLayout) {
     if (s.kind === "component") {
       const w = s.width || 40;
       sx = s.x + (t.x > s.x ? w / 2 : -w / 2);
@@ -1404,7 +1698,10 @@ function renderGridHeads(model) {
 function renderNodes(model) {
   const g = d3.select("#schLayerNodes");
   g.selectAll("*").remove();
-  const sel = g.selectAll("g.sch-node").data(model.nodes, d => d.id).join("g")
+  const nodesData = model.layoutMode === "railfocus"
+    ? model.nodes.filter(n => n._visible)
+    : model.nodes;
+  const sel = g.selectAll("g.sch-node").data(nodesData, d => d.id).join("g")
     .attr("class", d => `sch-node sch-node-${d.kind} role-${d.role || "rail"} ${d.missing ? "missing" : ""} ${d.populated === false ? "nostuff" : ""} ${d.isSpof ? "spof" : ""}`)
     .attr("transform", d => `translate(${d.x},${d.y})`)
     .attr("data-refdes", d => d.kind === "component" ? (d.refdes ?? null) : null)
@@ -1520,7 +1817,15 @@ function renderEdges(model) {
   // grid.
   // data-signal deferred: edges carry e.netLabel but the simulator's signals
   // state maps user-visible signal names; hook when signal-level sim is added.
-  g.selectAll("path").data(model.edges, d => d.id).join("path")
+  // In rail-focus mode we only draw edges between currently visible nodes.
+  const edgesData = model.layoutMode === "railfocus"
+    ? model.edges.filter(e => {
+        const s = model.nodeById.get(e.sourceId);
+        const t = model.nodeById.get(e.targetId);
+        return s && t && s._visible && t._visible;
+      })
+    : model.edges;
+  g.selectAll("path").data(edgesData, d => d.id).join("path")
     .attr("class", d => `sch-link sch-link-${d.kind}`)
     .attr("data-subkind", d => d.subkind || null)
     .attr("d", d => {
@@ -2204,7 +2509,23 @@ function fullRender(graph) {
   hideEmptyState();
   const model = buildModel(graph);
   STATE.model = model;
-  if (STATE.layoutMode === "powertree") {
+
+  // CSS reacts on the body class — it shows the rail sidebar and shifts the
+  // canvas 240px right in railfocus mode.
+  document.body.classList.toggle("sch-mode-railfocus", STATE.layoutMode === "railfocus");
+
+  if (STATE.layoutMode === "railfocus") {
+    renderRailBar(model);
+    // Drop a stale selection if the rail no longer exists in this pack.
+    let rid = STATE.selectedRailId;
+    if (rid && !model.nodeById.has(rid)) {
+      rid = null;
+      STATE.selectedRailId = null;
+      try { localStorage.removeItem("schSelectedRail"); } catch (_) {}
+    }
+    computeRailFocusLayout(model, rid);
+    renderRailFocusHeads(model);
+  } else if (STATE.layoutMode === "powertree") {
     computePowertreeLayout(model);
     renderPowertreeHeads(model);
   } else {
