@@ -1,12 +1,15 @@
 """Pipeline package — FastAPI router for the knowledge-generation factory.
 
 Exposes:
-    POST /pipeline/generate          — run the full pipeline (blocking).
-    POST /pipeline/repairs           — create a repair + fire-and-forget pipeline.
-    WS   /pipeline/progress/{slug}   — stream live pipeline progress events.
-    GET  /pipeline/packs             — list packs on disk.
-    GET  /pipeline/packs/{slug}      — pack metadata.
-    GET  /pipeline/packs/{slug}/full — every JSON artefact in one payload.
+    POST /pipeline/generate                       — run the full pipeline (blocking).
+    POST /pipeline/repairs                        — create a repair + fire-and-forget pipeline.
+    POST /pipeline/ingest-schematic               — fire-and-forget PDF → ElectricalGraph.
+    WS   /pipeline/progress/{slug}                — stream live pipeline progress events.
+    GET  /pipeline/packs                          — list packs on disk.
+    GET  /pipeline/packs/{slug}                   — pack metadata.
+    GET  /pipeline/packs/{slug}/full              — every JSON artefact in one payload.
+    GET  /pipeline/packs/{slug}/schematic         — compiled electrical graph.
+    GET  /pipeline/packs/{slug}/schematic/boot    — boot_sequence + power_rails subset.
 """
 
 from __future__ import annotations
@@ -14,11 +17,13 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import re
 import time
 import uuid
 from datetime import UTC, datetime
 from pathlib import Path
 
+from anthropic import AsyncAnthropic
 from fastapi import APIRouter, HTTPException, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel, Field
 
@@ -28,6 +33,7 @@ from api.pipeline.expansion import expand_pack
 from api.pipeline.graph_transform import pack_to_graph_payload
 from api.pipeline.orchestrator import _slugify, generate_knowledge_pack
 from api.pipeline.schemas import PipelineResult
+from api.pipeline.schematic.orchestrator import ingest_schematic
 
 logger = logging.getLogger("microsolder.pipeline.api")
 
@@ -55,6 +61,139 @@ async def generate(request: GenerateRequest) -> PipelineResult:
     except RuntimeError as exc:
         logger.exception("[API] Pipeline failed for device=%r", request.device_label)
         raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+
+# ======================================================================
+# Schematic ingestion — fire-and-forget PDF → ElectricalGraph
+# ======================================================================
+
+
+_SLUG_RE = re.compile(r"^[a-z0-9][a-z0-9._-]*$")
+
+
+class IngestSchematicRequest(BaseModel):
+    device_slug: str = Field(
+        min_length=1,
+        max_length=120,
+        description="Canonical slug of the device — no path separators, lowercase kebab-case.",
+    )
+    pdf_path: str = Field(
+        min_length=1,
+        description=(
+            "Filesystem path to the schematic PDF. Absolute or relative to the "
+            "server's working directory. Must exist and have a .pdf suffix."
+        ),
+    )
+    device_label: str | None = Field(
+        default=None,
+        description="Optional human-readable label threaded into the vision prompt.",
+    )
+
+
+class IngestSchematicResponse(BaseModel):
+    device_slug: str
+    pdf_path: str
+    started: bool
+
+
+def _validate_slug(slug: str) -> str:
+    """Reject inputs that aren't already canonical kebab-case slugs.
+
+    The GET routes happily slugify user input, but the ingestion POST needs
+    stricter guarantees: the slug becomes a directory name under memory_root
+    and a non-canonical value like "../evil" must never reach disk.
+    """
+    if not _SLUG_RE.fullmatch(slug):
+        raise HTTPException(
+            status_code=422,
+            detail=(
+                f"Invalid device_slug {slug!r} — must match "
+                "^[a-z0-9][a-z0-9._-]*$ (no path separators, lowercase)."
+            ),
+        )
+    return slug
+
+
+def _resolve_pdf_path(pdf_path: str) -> Path:
+    """Resolve + validate a PDF path received over HTTP.
+
+    Absolute paths are taken verbatim, relative paths are resolved against the
+    server's current working directory (where uvicorn was launched — the
+    `board_assets/` convention makes `board_assets/foo.pdf` the common shape).
+    Existence and .pdf suffix are enforced before we fire any background task,
+    so the caller never has to poll a task that was doomed from the start.
+    """
+    p = Path(pdf_path)
+    if not p.is_absolute():
+        p = (Path.cwd() / p).resolve()
+    else:
+        p = p.resolve()
+    if not p.exists():
+        raise HTTPException(status_code=404, detail=f"PDF not found: {pdf_path}")
+    if p.suffix.lower() != ".pdf":
+        raise HTTPException(
+            status_code=400,
+            detail=f"pdf_path must be a .pdf file (got suffix {p.suffix!r}).",
+        )
+    return p
+
+
+async def _run_schematic_in_background(
+    device_slug: str, pdf_path: Path, device_label: str | None
+) -> None:
+    """Background task: instantiate a client and run the ingestion.
+
+    Exceptions are logged and swallowed — the initial 202 has already been
+    sent, so there is no HTTP response to fail. A future iteration can wire
+    status onto the events bus the way the knowledge factory does.
+    """
+    t0 = time.monotonic()
+    client = AsyncAnthropic(api_key=get_settings().anthropic_api_key)
+    try:
+        await ingest_schematic(
+            device_slug=device_slug,
+            pdf_path=pdf_path,
+            client=client,
+            device_label=device_label,
+        )
+        logger.info(
+            "[API] schematic ingestion finished for slug=%r (%.1fs)",
+            device_slug,
+            time.monotonic() - t0,
+        )
+    except Exception:
+        logger.exception(
+            "[API] schematic ingestion failed for slug=%r", device_slug
+        )
+
+
+@router.post(
+    "/ingest-schematic",
+    response_model=IngestSchematicResponse,
+    status_code=202,
+)
+async def post_ingest_schematic(
+    request: IngestSchematicRequest,
+) -> IngestSchematicResponse:
+    """Kick off a schematic ingestion in the background and return 202.
+
+    Input validation is blocking (slug shape, PDF existence, .pdf suffix).
+    Ingestion wall-time is ~5 minutes for a dozen pages, so the caller polls
+    `GET /pipeline/packs/{slug}/schematic` until it returns 200.
+    """
+    slug = _validate_slug(request.device_slug)
+    pdf_path = _resolve_pdf_path(request.pdf_path)
+    logger.info(
+        "[API] /pipeline/ingest-schematic · slug=%r · pdf=%s", slug, pdf_path
+    )
+    asyncio.create_task(
+        _run_schematic_in_background(slug, pdf_path, request.device_label)
+    )
+    return IngestSchematicResponse(
+        device_slug=slug,
+        pdf_path=str(pdf_path),
+        started=True,
+    )
 
 
 class PackSummary(BaseModel):
@@ -525,6 +664,66 @@ async def get_pack_graph(device_slug: str) -> dict:
         rules=rules,
         dictionary=dictionary,
     )
+
+
+@router.get("/packs/{device_slug}/schematic")
+async def get_pack_schematic(device_slug: str) -> dict:
+    """Return the compiled electrical graph for this device.
+
+    404 when either the pack directory or `electrical_graph.json` is missing.
+    The payload matches `api.pipeline.schematic.schemas.ElectricalGraph` —
+    consumed by the Memory Bank UI for the D3 rail / boot-phase view.
+    """
+    settings = get_settings()
+    slug = _slugify(device_slug)
+    pack_dir = Path(settings.memory_root) / slug
+    if not pack_dir.exists():
+        raise HTTPException(status_code=404, detail=f"No pack for device_slug={slug!r}")
+    graph_path = pack_dir / "electrical_graph.json"
+    if not graph_path.exists():
+        raise HTTPException(
+            status_code=404,
+            detail=f"No schematic ingested yet for device_slug={slug!r}",
+        )
+    try:
+        return json.loads(graph_path.read_text())
+    except json.JSONDecodeError as exc:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Malformed electrical_graph.json for {slug!r}: {exc}",
+        ) from exc
+
+
+@router.get("/packs/{device_slug}/schematic/boot")
+async def get_pack_schematic_boot(device_slug: str) -> dict:
+    """Return just the boot sequence + power rails — the "light" subset.
+
+    The full `electrical_graph.json` can reach several hundred KB on real
+    boards (449 components, ~2k pins on MNT Reform). For the initial boot
+    timeline view the UI only needs rails and phases, so this route strips
+    the heavy `components` / `nets` / `typed_edges` arrays server-side.
+    """
+    settings = get_settings()
+    slug = _slugify(device_slug)
+    graph_path = Path(settings.memory_root) / slug / "electrical_graph.json"
+    if not graph_path.exists():
+        raise HTTPException(
+            status_code=404,
+            detail=f"No schematic ingested yet for device_slug={slug!r}",
+        )
+    try:
+        graph = json.loads(graph_path.read_text())
+    except json.JSONDecodeError as exc:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Malformed electrical_graph.json for {slug!r}: {exc}",
+        ) from exc
+    return {
+        "device_slug": graph.get("device_slug", slug),
+        "boot_sequence": graph.get("boot_sequence", []),
+        "power_rails": graph.get("power_rails", {}),
+        "quality": graph.get("quality"),
+    }
 
 
 __all__ = ["router"]
