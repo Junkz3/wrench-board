@@ -1,15 +1,13 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: Apache-2.0
-"""Auto-generate ground-truth scenarios for the reverse-diagnostic benchmark.
+"""Generate ground-truth scenarios for the reverse-diagnostic benchmark,
+covering all applicable failure modes per refdes.
 
-For each rail source + top-20-blast-radius component in the target device,
-simulate its death via the forward simulator, then sample 3 partial
-observations from the resulting cascade. Yields ~135 scenarios per device.
-
-Usage:
-    .venv/bin/python scripts/gen_hypothesize_benchmarks.py \\
-        --slug mnt-reform-motherboard \\
-        --out tests/pipeline/schematic/fixtures/hypothesize_scenarios.json
+For each refdes in the device, enumerate its applicable modes via
+_applicable_modes. For each mode, run _simulate_failure to produce the
+cascade, then sample 2-3 observation variants from the cascade (each
+variant picks a subset of the affected targets to present as
+observations, with ground_truth = {refdes, mode}).
 """
 
 from __future__ import annotations
@@ -19,14 +17,14 @@ import json
 import random
 from pathlib import Path
 
+from api.pipeline.schematic.hypothesize import (
+    _applicable_modes,
+    _simulate_failure,
+)
 from api.pipeline.schematic.schemas import AnalyzedBootSequence, ElectricalGraph
-from api.pipeline.schematic.simulator import SimulationEngine
 
 
-def pick_sample(
-    pool: set, k_min: int, k_max: int, rng: random.Random,
-) -> list[str]:
-    """Sample k items from pool, clamped between k_min and k_max."""
+def sample_subset(pool: set, k_min: int, k_max: int, rng: random.Random) -> list[str]:
     if not pool:
         return []
     k = rng.randint(min(k_min, len(pool)), min(k_max, len(pool)))
@@ -34,12 +32,6 @@ def pick_sample(
 
 
 def generate(slug: str, memory_root: Path, seed: int = 42) -> list[dict]:
-    """Generate scenario fixture for a device.
-
-    Iterates every rail source + top-20 cascade-size components, simulates
-    each as a ground-truth kill, then samples 3 partial-observation variants
-    (rails-only, comps-only, mixed) per kill.
-    """
     pack = memory_root / slug
     eg = ElectricalGraph.model_validate_json(
         (pack / "electrical_graph.json").read_text()
@@ -50,67 +42,81 @@ def generate(slug: str, memory_root: Path, seed: int = 42) -> list[dict]:
         if ab_path.exists() else None
     )
 
-    # Candidate kill set: every rail source + top-20 components by
-    # cascade-size (computed by killing each once).
-    rail_sources = {
-        r.source_refdes for r in eg.power_rails.values() if r.source_refdes
-    }
-    cascade_size: dict[str, int] = {}
-    for refdes in eg.components:
-        tl = SimulationEngine(eg, analyzed_boot=ab, killed_refdes=[refdes]).run()
-        cascade_size[refdes] = (
-            len(tl.cascade_dead_components) + len(tl.cascade_dead_rails)
-        )
-    top_blast = {
-        refdes for refdes, _ in sorted(
-            cascade_size.items(), key=lambda kv: -kv[1]
-        )[:20]
-    }
-    candidates = sorted(rail_sources | top_blast)
-
     rng = random.Random(seed)
-    all_rails = set(eg.power_rails.keys())
-    all_comps = set(eg.components.keys())
     scenarios: list[dict] = []
-    for refdes in candidates:
-        tl = SimulationEngine(eg, analyzed_boot=ab, killed_refdes=[refdes]).run()
-        dead_comps_full = set(tl.cascade_dead_components) | {refdes}
-        dead_rails_full = set(tl.cascade_dead_rails)
-        alive_comps_full = all_comps - dead_comps_full
-        alive_rails_full = all_rails - dead_rails_full
 
-        # Three variants per kill: rails-only, comps-only, mixed.
-        for variant in ("rails", "comps", "mixed"):
-            if variant == "rails":
-                dc, ac = [], []
-                dr = pick_sample(dead_rails_full, 1, 3, rng)
-                ar = pick_sample(alive_rails_full, 1, 3, rng)
-            elif variant == "comps":
-                dc = pick_sample(dead_comps_full - {refdes}, 2, 5, rng) + [refdes]
-                ac = pick_sample(alive_comps_full, 2, 4, rng)
-                dr, ar = [], []
-            else:
-                dc = pick_sample(dead_comps_full - {refdes}, 1, 3, rng) + [refdes]
-                ac = pick_sample(alive_comps_full, 1, 3, rng)
-                dr = pick_sample(dead_rails_full, 1, 2, rng)
-                ar = pick_sample(alive_rails_full, 1, 2, rng)
-            scenarios.append({
-                "id": f"{slug}-kill-{refdes}-{variant}",
-                "slug": slug,
-                "ground_truth_kill": [refdes],
-                "sample_strategy": variant,
-                "observations": {
-                    "dead_comps": sorted(set(dc)),
-                    "alive_comps": sorted(set(ac)),
-                    "dead_rails": sorted(set(dr)),
-                    "alive_rails": sorted(set(ar)),
-                },
-            })
+    # Cap per-mode scenario count so the corpus stays well balanced.
+    MAX_PER_MODE = 30
+
+    scenario_count_by_mode: dict[str, int] = {}
+    for refdes in sorted(eg.components):
+        for mode in _applicable_modes(eg, refdes):
+            count = scenario_count_by_mode.get(mode, 0)
+            if count >= MAX_PER_MODE:
+                continue
+            cascade = _simulate_failure(eg, ab, refdes, mode)
+            # Build the target pools for sampling.
+            affected_comps: set[str] = (
+                set(cascade["dead_comps"])
+                | set(cascade["anomalous_comps"])
+                | set(cascade["hot_comps"])
+            )
+            affected_rails: set[str] = (
+                set(cascade["dead_rails"]) | set(cascade["shorted_rails"])
+            )
+            # Skip degenerate cascades (nothing to observe).
+            if not affected_comps and not affected_rails:
+                continue
+
+            # 2 variants per (refdes, mode).
+            for variant in ("partial_comps", "partial_rails_plus_one_alive"):
+                if variant == "partial_comps":
+                    obs_comps = sample_subset(affected_comps, 1, 3, rng)
+                    obs_rails = sample_subset(affected_rails, 0, 1, rng)
+                else:
+                    obs_rails = sample_subset(affected_rails, 1, 2, rng)
+                    obs_comps = sample_subset(affected_comps, 1, 2, rng)
+                    # Plus one alive observation for corroboration.
+                    alive_candidates = set(eg.components) - affected_comps
+                    if alive_candidates:
+                        alive_refdes = rng.choice(sorted(alive_candidates))
+                        obs_comps.append(alive_refdes)
+
+                state_comps: dict[str, str] = {}
+                state_rails: dict[str, str] = {}
+                for c in obs_comps:
+                    if c in cascade["dead_comps"]:
+                        state_comps[c] = "dead"
+                    elif c in cascade["anomalous_comps"]:
+                        state_comps[c] = "anomalous"
+                    elif c in cascade["hot_comps"]:
+                        state_comps[c] = "hot"
+                    else:
+                        state_comps[c] = "alive"
+                for r in obs_rails:
+                    if r in cascade["shorted_rails"]:
+                        state_rails[r] = "shorted"
+                    elif r in cascade["dead_rails"]:
+                        state_rails[r] = "dead"
+                    else:
+                        state_rails[r] = "alive"
+
+                scenarios.append({
+                    "id": f"{slug}-{refdes}-{mode}-{variant}",
+                    "slug": slug,
+                    "ground_truth_kill": [refdes],
+                    "ground_truth_modes": [mode],
+                    "sample_strategy": variant,
+                    "observations": {
+                        "state_comps": state_comps,
+                        "state_rails": state_rails,
+                    },
+                })
+                scenario_count_by_mode[mode] = scenario_count_by_mode.get(mode, 0) + 1
     return scenarios
 
 
 def main() -> None:
-    """Parse args and generate fixture."""
     p = argparse.ArgumentParser()
     p.add_argument("--slug", required=True)
     p.add_argument(
@@ -125,7 +131,13 @@ def main() -> None:
     out = root / args.out
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(scenarios, indent=2))
+
+    by_mode: dict[str, int] = {}
+    for sc in scenarios:
+        by_mode[sc["ground_truth_modes"][0]] = by_mode.get(sc["ground_truth_modes"][0], 0) + 1
     print(f"wrote {len(scenarios)} scenarios to {out}")
+    for mode, n in sorted(by_mode.items()):
+        print(f"  {mode:10s}  {n}")
 
 
 if __name__ == "__main__":
