@@ -187,6 +187,30 @@ function logMessage(role, text, isReplay = false) {
   );
 }
 
+// Distinct card rendered when an expired MA session had to be recreated and
+// Haiku summarised the prior conversation for the fresh agent. Shows the
+// same block the new agent is seeing, so the tech knows what carried over.
+function renderResumeSummary(payload) {
+  const summary = payload?.summary || "";
+  const tokIn = payload?.tokens_in ?? "—";
+  const tokOut = payload?.tokens_out ?? "—";
+  let bodyHTML = escapeHTML(summary);
+  if (typeof window.marked !== "undefined" && typeof window.DOMPurify !== "undefined") {
+    try {
+      bodyHTML = window.DOMPurify.sanitize(window.marked.parse(summary));
+    } catch (e) { /* keep escaped fallback */ }
+  }
+  logRow(
+    "resume-summary",
+    `<header>
+       <span class="icon-dot"></span>
+       <span class="title">Reprise de session</span>
+       <span class="meta">résumé Haiku · ${tokIn}→${tokOut} tok</span>
+     </header>
+     <div class="body">${bodyHTML}</div>`,
+  );
+}
+
 function logSys(text, isErr = false) {
   logRow(isErr ? "sys err" : "sys", escapeHTML(text));
 }
@@ -572,6 +596,9 @@ function connect() {
         break;
       case "session_resumed":
         logSys("session reprise · historique et mémoire agent restaurés");
+        break;
+      case "session_resumed_summary":
+        renderResumeSummary(payload);
         break;
       case "message":
         if ((payload.role || "assistant") === "user") {

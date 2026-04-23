@@ -555,3 +555,47 @@ body.llm-open .stub{right:420px}
   border-color: rgba(192,132,252,.6);
   border-style: solid;
 }
+
+/* =========== Resume-summary card =========== */
+/* Rendered when a dead MA session was recreated and Haiku summarised the
+   prior conversation for the new agent. Carries the same text the new
+   agent just received, so the tech knows the transition happened and
+   what carried over. Token-chip is ghostly so it doesn't scream. */
+.resume-summary {
+  margin: 8px 6px 10px;
+  padding: 10px 12px;
+  background: linear-gradient(135deg, rgba(192,132,252,.06), rgba(34,211,238,.04));
+  border: 1px solid rgba(192,132,252,.35);
+  border-radius: 8px;
+  box-shadow: inset 0 0 0 1px rgba(192,132,252,.08);
+}
+.resume-summary header {
+  display: flex; align-items: center; gap: 8px;
+  padding-bottom: 8px; margin-bottom: 8px;
+  border-bottom: 1px dashed rgba(192,132,252,.25);
+}
+.resume-summary .icon-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--violet);
+  box-shadow: 0 0 6px var(--violet);
+}
+.resume-summary .title {
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: .4px;
+  text-transform: uppercase; color: var(--violet); font-weight: 500;
+}
+.resume-summary .meta {
+  margin-left: auto;
+  font-family: var(--mono); font-size: 9.5px; color: var(--text-3);
+  letter-spacing: .3px;
+}
+.resume-summary .body {
+  font-size: 12.5px; color: var(--text-2); line-height: 1.55;
+}
+.resume-summary .body p { margin: 0 0 6px; }
+.resume-summary .body p:last-child { margin-bottom: 0; }
+.resume-summary .body strong { color: var(--cyan); font-weight: 500; }
+.resume-summary .body em { color: var(--emerald); font-style: normal; }
+.resume-summary .body ul {
+  margin: 4px 0 6px; padding-left: 18px;
+}
+.resume-summary .body li { margin-bottom: 2px; }
