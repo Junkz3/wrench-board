@@ -538,3 +538,117 @@ def test_cascade_filter_open_identical_to_series_open():
     a = _cascade_filter_open(graph, fb)
     b = _cascade_series_open(graph, fb)
     assert a == b
+
+
+def _mnt_like_graph():
+    """A graph with: +3V3 source U1, decoupling C156 on U7 VCC, pull-up R11
+    on I2C_SDA, feedback divider R43 on +5V regulator U3."""
+    from api.pipeline.schematic.schemas import (
+        ComponentNode, ElectricalGraph, NetNode, PagePin, PowerRail,
+        SchematicQualityReport, TypedEdge,
+    )
+    return ElectricalGraph(
+        device_slug="mnt-like",
+        components={
+            "U1": ComponentNode(refdes="U1", type="ic", pins=[
+                PagePin(number="1", role="power_out", net_label="+3V3"),
+            ]),
+            "U7": ComponentNode(refdes="U7", type="ic", pins=[
+                PagePin(number="1", role="power_in", net_label="+3V3"),
+            ]),
+            "U3": ComponentNode(refdes="U3", type="ic", pins=[
+                PagePin(number="1", role="feedback_in", net_label="FB_5V"),
+                PagePin(number="2", role="power_out", net_label="+5V"),
+            ]),
+            "C156": ComponentNode(
+                refdes="C156", type="capacitor",
+                kind="passive_c", role="decoupling",
+                pins=[
+                    PagePin(number="1", role="unknown", net_label="+3V3"),
+                    PagePin(number="2", role="unknown", net_label="GND"),
+                ],
+            ),
+            "R43": ComponentNode(
+                refdes="R43", type="resistor",
+                kind="passive_r", role="feedback",
+                pins=[
+                    PagePin(number="1", role="unknown", net_label="+5V"),
+                    PagePin(number="2", role="unknown", net_label="FB_5V"),
+                ],
+            ),
+            "R11": ComponentNode(
+                refdes="R11", type="resistor",
+                kind="passive_r", role="pull_up",
+                pins=[
+                    PagePin(number="1", role="unknown", net_label="+3V3"),
+                    PagePin(number="2", role="unknown", net_label="I2C_SDA"),
+                ],
+            ),
+            "U9": ComponentNode(refdes="U9", type="ic", pins=[
+                PagePin(number="1", role="bus_pin", net_label="I2C_SDA"),
+            ]),
+        },
+        nets={
+            "+3V3":    NetNode(label="+3V3", is_power=True),
+            "+5V":     NetNode(label="+5V",  is_power=True),
+            "FB_5V":   NetNode(label="FB_5V"),
+            "I2C_SDA": NetNode(label="I2C_SDA"),
+            "GND":     NetNode(label="GND", is_global=True),
+        },
+        power_rails={
+            "+3V3": PowerRail(label="+3V3", source_refdes="U1", consumers=["U7"]),
+            "+5V":  PowerRail(label="+5V",  source_refdes="U3", consumers=[]),
+        },
+        typed_edges=[
+            TypedEdge(src="U7", dst="+3V3", kind="powers"),
+            TypedEdge(src="C156", dst="+3V3", kind="decouples"),
+            TypedEdge(src="FB_5V", dst="R43", kind="feedback_in"),
+            TypedEdge(src="U9", dst="I2C_SDA", kind="consumes_signal"),
+        ],
+        quality=SchematicQualityReport(total_pages=1, pages_parsed=1, confidence_global=1.0),
+    )
+
+
+def test_cascade_decoupling_short_kills_rail():
+    from api.pipeline.schematic.hypothesize import _cascade_decoupling_short
+    graph = _mnt_like_graph()
+    c = _cascade_decoupling_short(graph, graph.components["C156"])
+    assert "+3V3" in c["shorted_rails"]
+    assert "U1" in c["hot_comps"]
+    assert "U7" in c["dead_comps"]
+
+
+def test_cascade_decoupling_open_marks_upstream_ic_anomalous():
+    from api.pipeline.schematic.hypothesize import _cascade_decoupling_open
+    graph = _mnt_like_graph()
+    c = _cascade_decoupling_open(graph, graph.components["C156"])
+    assert c["anomalous_comps"] == frozenset({"U7"})
+
+
+def test_cascade_feedback_open_triggers_overvoltage():
+    from api.pipeline.schematic.hypothesize import _cascade_feedback_open_overvolt
+    graph = _mnt_like_graph()
+    c = _cascade_feedback_open_overvolt(graph, graph.components["R43"])
+    assert "+5V" in c["shorted_rails"]
+
+
+def test_cascade_pull_up_open_marks_signal_consumers_anomalous():
+    from api.pipeline.schematic.hypothesize import _cascade_pull_up_open
+    graph = _mnt_like_graph()
+    c = _cascade_pull_up_open(graph, graph.components["R11"])
+    assert "U9" in c["anomalous_comps"]
+
+
+def test_table_covers_all_resistor_and_capacitor_roles():
+    from api.pipeline.schematic.hypothesize import _PASSIVE_CASCADE_TABLE
+    # After T7, the table has all R + C entries.
+    for r_role in ("series", "feedback", "pull_up", "pull_down"):
+        for mode in ("open", "short"):
+            assert ("passive_r", r_role, mode) in _PASSIVE_CASCADE_TABLE, (
+                f"missing handler for passive_r/{r_role}/{mode}"
+            )
+    for c_role in ("decoupling", "bulk", "filter", "ac_coupling", "tank", "bypass"):
+        for mode in ("open", "short"):
+            assert ("passive_c", c_role, mode) in _PASSIVE_CASCADE_TABLE, (
+                f"missing handler for passive_c/{c_role}/{mode}"
+            )

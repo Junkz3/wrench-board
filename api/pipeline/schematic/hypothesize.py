@@ -571,12 +571,153 @@ def _cascade_feedback_open_overvolt(electrical: ElectricalGraph, passive: "_Comp
     return c
 
 
-# The dispatch table is filled in T7 (C), T8 (D/FB). For T6 we register
-# just the primitives so the three unit tests pass.
+def _cascade_feedback_short_undervolt(electrical: ElectricalGraph, passive: "_CompNode") -> dict:
+    """R feedback short → divider collapses → regulator shuts output → rail dead."""
+    rail = _find_regulated_rail_of_feedback(electrical, passive)
+    if rail is None:
+        return _empty_cascade()
+    return _simulate_rail_loss(electrical, rail)
+
+
+def _cascade_pull_up_open(electrical: ElectricalGraph, passive: "_CompNode") -> dict:
+    """Pull-up/pull-down open → signal floats → consumers anomalous."""
+    # Identify the signal net (the non-rail, non-GND pin).
+    sig_net: str | None = None
+    for pin in passive.pins:
+        n = pin.net_label
+        if not n or n in electrical.power_rails:
+            continue
+        up = n.upper()
+        if up in {"GND", "AGND", "DGND", "PGND"} or up.startswith("GND_"):
+            continue
+        sig_net = n
+        break
+    if sig_net is None:
+        return _empty_cascade()
+    anomalous: set[str] = set()
+    for edge in electrical.typed_edges:
+        if edge.kind in {"consumes_signal", "depends_on"} and edge.dst == sig_net:
+            if edge.src in electrical.components:
+                anomalous.add(edge.src)
+    c = _empty_cascade()
+    c["anomalous_comps"] = frozenset(anomalous)
+    return c
+
+
+def _cascade_pull_up_short(electrical: ElectricalGraph, passive: "_CompNode") -> dict:
+    """Pull-up short → rail shorted to signal (or bus stuck) → rail dead.
+    Using rail-loss primitive on the rail-side pin."""
+    for pin in passive.pins:
+        n = pin.net_label
+        if n and n in electrical.power_rails:
+            return _simulate_rail_loss(electrical, n)
+    return _empty_cascade()
+
+
+def _cascade_filter_cap_open(electrical: ElectricalGraph, passive: "_CompNode") -> dict:
+    """Filter cap open on a regulated rail → ripple → upstream IC anomalous.
+    Same topological signature as decoupling_open."""
+    return _cascade_decoupling_open(electrical, passive)
+
+
+def _cascade_signal_path_open(electrical: ElectricalGraph, passive: "_CompNode") -> dict:
+    """AC-coupling cap open → signal broken downstream of the cap → consumers
+    of the output net anomalous."""
+    nets = [p.net_label for p in passive.pins if p.net_label]
+    if len(nets) < 2:
+        return _empty_cascade()
+    # Pick the net with the most downstream consumers as the "output" side.
+    consumer_counts = {
+        n: sum(
+            1 for e in electrical.typed_edges
+            if e.kind in {"consumes_signal", "depends_on"} and e.dst == n
+        )
+        for n in nets
+    }
+    output = max(nets, key=lambda n: consumer_counts[n])
+    c = _empty_cascade()
+    consumers: set[str] = set()
+    for e in electrical.typed_edges:
+        if e.kind in {"consumes_signal", "depends_on"} and e.dst == output:
+            if e.src in electrical.components:
+                consumers.add(e.src)
+    c["anomalous_comps"] = frozenset(consumers)
+    return c
+
+
+def _cascade_signal_path_dc(electrical: ElectricalGraph, passive: "_CompNode") -> dict:
+    """AC-coupling cap short → DC offset propagates → downstream anomalous."""
+    return _cascade_signal_path_open(electrical, passive)
+
+
+def _cascade_tank_open(electrical: ElectricalGraph, passive: "_CompNode") -> dict:
+    """Tank cap open near oscillator → clock dead → clock consumers anomalous.
+    Tank has 1 pin on GND, 1 on the oscillator output. Treat oscillator as
+    anomalous."""
+    for pin in passive.pins:
+        n = pin.net_label
+        if not n:
+            continue
+        # Find an IC (oscillator) with clock_out on this net.
+        for ic in electrical.components.values():
+            if ic.kind != "ic":
+                continue
+            for p in ic.pins:
+                if p.role == "clock_out" and p.net_label == n:
+                    c = _empty_cascade()
+                    c["anomalous_comps"] = frozenset({ic.refdes})
+                    return c
+    return _empty_cascade()
+
+
+def _cascade_tank_short(electrical: ElectricalGraph, passive: "_CompNode") -> dict:
+    """Tank cap short → oscillator dead."""
+    # Same lookup as tank_open but tag oscillator dead instead of anomalous.
+    for pin in passive.pins:
+        n = pin.net_label
+        if not n:
+            continue
+        for ic in electrical.components.values():
+            if ic.kind != "ic":
+                continue
+            for p in ic.pins:
+                if p.role == "clock_out" and p.net_label == n:
+                    return _simulate_dead(electrical, None, [ic.refdes])
+    return _empty_cascade()
+
+
 _PASSIVE_CASCADE_TABLE: dict[tuple[str, str, str], CascadeFn] = {
-    ("passive_r",  "series", "open"):  _cascade_series_open,
+    # ========================= RESISTORS =========================
+    ("passive_r", "series",        "open"):  _cascade_series_open,
+    ("passive_r", "series",        "short"): _cascade_passive_alive,
+    ("passive_r", "feedback",      "open"):  _cascade_feedback_open_overvolt,
+    ("passive_r", "feedback",      "short"): _cascade_feedback_short_undervolt,
+    ("passive_r", "pull_up",       "open"):  _cascade_pull_up_open,
+    ("passive_r", "pull_up",       "short"): _cascade_pull_up_short,
+    ("passive_r", "pull_down",     "open"):  _cascade_pull_up_open,
+    ("passive_r", "pull_down",     "short"): _cascade_passive_alive,
+    ("passive_r", "current_sense", "open"):  _cascade_series_open,
+    ("passive_r", "current_sense", "short"): _cascade_passive_alive,
+    ("passive_r", "damping",       "open"):  _cascade_passive_alive,
+    ("passive_r", "damping",       "short"): _cascade_passive_alive,
+
+    # ========================= CAPACITORS ========================
+    ("passive_c", "decoupling",  "open"):  _cascade_decoupling_open,
+    ("passive_c", "decoupling",  "short"): _cascade_decoupling_short,
+    ("passive_c", "bulk",        "open"):  _cascade_decoupling_open,
+    ("passive_c", "bulk",        "short"): _cascade_decoupling_short,
+    ("passive_c", "filter",      "open"):  _cascade_filter_cap_open,
+    ("passive_c", "filter",      "short"): _cascade_decoupling_short,
+    ("passive_c", "ac_coupling", "open"):  _cascade_signal_path_open,
+    ("passive_c", "ac_coupling", "short"): _cascade_signal_path_dc,
+    ("passive_c", "tank",        "open"):  _cascade_tank_open,
+    ("passive_c", "tank",        "short"): _cascade_tank_short,
+    ("passive_c", "bypass",      "open"):  _cascade_decoupling_open,
+    ("passive_c", "bypass",      "short"): _cascade_decoupling_short,
+
+    # (ferrite + diode entries added in T8)
     ("passive_fb", "filter", "open"):  _cascade_filter_open,
-    # (rest added in T7/T8)
+    ("passive_fb", "filter", "short"): _cascade_passive_alive,
 }
 
 
