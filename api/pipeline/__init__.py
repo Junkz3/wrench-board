@@ -39,6 +39,7 @@ from api.pipeline.schematic.net_classifier import classify_nets
 from api.pipeline.schematic.orchestrator import ingest_schematic
 from api.pipeline.schematic.schemas import AnalyzedBootSequence, ElectricalGraph
 from api.pipeline.schematic.simulator import SimulationEngine
+from api.tools.hypothesize import mb_hypothesize as _mb_hypothesize_tool
 
 logger = logging.getLogger("microsolder.pipeline.api")
 
@@ -952,6 +953,47 @@ async def post_simulate(device_slug: str, request: SimulateRequest) -> dict:
         electrical, analyzed_boot=analyzed, killed_refdes=list(request.killed_refdes)
     ).run()
     return tl.model_dump()
+
+
+class HypothesizeRequest(BaseModel):
+    dead_comps: list[str] = Field(default_factory=list)
+    alive_comps: list[str] = Field(default_factory=list)
+    dead_rails: list[str] = Field(default_factory=list)
+    alive_rails: list[str] = Field(default_factory=list)
+    max_results: int = Field(default=5, ge=1, le=20)
+
+
+@router.post("/packs/{device_slug}/schematic/hypothesize")
+async def post_hypothesize(device_slug: str, request: HypothesizeRequest) -> dict:
+    """Rank candidate refdes-kills that explain the tech's observations.
+
+    Same contract as mb_hypothesize tool. 400 on unknown refdes / rail,
+    404 when no electrical_graph is on disk.
+    """
+    settings = get_settings()
+    slug = _slugify(device_slug)
+    result = _mb_hypothesize_tool(
+        device_slug=slug,
+        memory_root=Path(settings.memory_root),
+        dead_comps=request.dead_comps,
+        alive_comps=request.alive_comps,
+        dead_rails=request.dead_rails,
+        alive_rails=request.alive_rails,
+        max_results=request.max_results,
+    )
+    if not result.get("found"):
+        reason = result.get("reason", "unknown")
+        if reason == "no_schematic_graph":
+            raise HTTPException(
+                status_code=404,
+                detail=f"No schematic ingested yet for device_slug={slug!r}",
+            )
+        if reason in ("unknown_refdes", "unknown_rail"):
+            raise HTTPException(status_code=400, detail=result)
+        raise HTTPException(status_code=422, detail=result)
+    # Strip the `found` marker — it's only useful for the tool contract.
+    result.pop("found", None)
+    return result
 
 
 __all__ = ["router"]
