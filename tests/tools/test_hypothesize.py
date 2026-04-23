@@ -147,3 +147,26 @@ def test_mb_hypothesize_manifest_exposes_new_signature():
         tools = manifest.build_tools_manifest(session=None)
         names = [t["name"] for t in tools]
     assert "mb_hypothesize" in names
+    # Verify schema B properties are present.
+    if hasattr(manifest, "build_tools_manifest"):
+        tools = manifest.build_tools_manifest(session=None)
+    else:
+        tools = manifest.TOOLS
+    hyp = next(t for t in tools if t["name"] == "mb_hypothesize")
+    props = hyp["input_schema"]["properties"]
+    assert "state_comps" in props
+    assert "state_rails" in props
+    assert "metrics_comps" in props
+    assert "metrics_rails" in props
+    assert "repair_id" in props
+    # Verify the 6 new measurement/observation tools are registered.
+    new_tools = [
+        "mb_record_measurement",
+        "mb_list_measurements",
+        "mb_compare_measurements",
+        "mb_observations_from_measurements",
+        "mb_set_observation",
+        "mb_clear_observations",
+    ]
+    for tool_name in new_tools:
+        assert tool_name in names, f"{tool_name} not found in manifest"

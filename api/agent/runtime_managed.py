@@ -199,6 +199,7 @@ async def _dispatch_tool(
     client: AsyncAnthropic,
     session: SessionState,
     session_id: str | None = None,
+    repair_id: str | None = None,
 ) -> dict:
     """Run a custom tool locally and return the raw result.
 
@@ -264,11 +265,64 @@ async def _dispatch_tool(
         return _mb_hypothesize(
             device_slug=device_slug,
             memory_root=memory_root,
-            dead_comps=payload.get("dead_comps", []),
-            alive_comps=payload.get("alive_comps", []),
-            dead_rails=payload.get("dead_rails", []),
-            alive_rails=payload.get("alive_rails", []),
+            state_comps=payload.get("state_comps"),
+            state_rails=payload.get("state_rails"),
+            metrics_comps=payload.get("metrics_comps"),
+            metrics_rails=payload.get("metrics_rails"),
             max_results=payload.get("max_results", 5),
+            repair_id=repair_id if not any([
+                payload.get("state_comps"), payload.get("state_rails"),
+                payload.get("metrics_comps"), payload.get("metrics_rails"),
+            ]) else payload.get("repair_id"),
+        )
+    if name == "mb_record_measurement":
+        from api.tools.measurements import mb_record_measurement as _mb_rec
+        return _mb_rec(
+            device_slug=device_slug, repair_id=repair_id or "",
+            memory_root=memory_root,
+            target=payload.get("target", ""),
+            value=payload.get("value", 0.0),
+            unit=payload.get("unit", "V"),
+            nominal=payload.get("nominal"),
+            note=payload.get("note"),
+            source="agent",
+        )
+    if name == "mb_list_measurements":
+        from api.tools.measurements import mb_list_measurements as _mb_list
+        return _mb_list(
+            device_slug=device_slug, repair_id=repair_id or "",
+            memory_root=memory_root,
+            target=payload.get("target"),
+            since=payload.get("since"),
+        )
+    if name == "mb_compare_measurements":
+        from api.tools.measurements import mb_compare_measurements as _mb_cmp
+        return _mb_cmp(
+            device_slug=device_slug, repair_id=repair_id or "",
+            memory_root=memory_root,
+            target=payload.get("target", ""),
+            before_ts=payload.get("before_ts"),
+            after_ts=payload.get("after_ts"),
+        )
+    if name == "mb_observations_from_measurements":
+        from api.tools.measurements import mb_observations_from_measurements as _mb_syn
+        return _mb_syn(
+            device_slug=device_slug, repair_id=repair_id or "",
+            memory_root=memory_root,
+        )
+    if name == "mb_set_observation":
+        from api.tools.measurements import mb_set_observation as _mb_set
+        return _mb_set(
+            device_slug=device_slug, repair_id=repair_id or "",
+            memory_root=memory_root,
+            target=payload.get("target", ""),
+            mode=payload.get("mode", "unknown"),
+        )
+    if name == "mb_clear_observations":
+        from api.tools.measurements import mb_clear_observations as _mb_clr
+        return _mb_clr(
+            device_slug=device_slug, repair_id=repair_id or "",
+            memory_root=memory_root,
         )
     if name == "mb_expand_knowledge":
         return await mb_expand_knowledge(
@@ -522,6 +576,13 @@ async def run_diagnostic_session_managed(
     # name+input when `requires_action` arrives and only hands us event_ids.
     events_by_id: dict[str, Any] = {}
 
+    from api.tools.measurements import set_ws_emitter
+
+    def _emit(event: dict) -> None:
+        asyncio.create_task(ws.send_json(event))
+
+    set_ws_emitter(_emit)
+
     try:
         recv_task = asyncio.create_task(
             _forward_ws_to_session(
@@ -565,6 +626,7 @@ async def run_diagnostic_session_managed(
             )
         except Exception:  # noqa: BLE001 — best-effort
             pass
+        set_ws_emitter(None)
 
 
 async def _replay_ma_history_to_ws(
@@ -874,7 +936,7 @@ async def _forward_session_to_ws(
                     payload = getattr(tool_event, "input", {}) or {}
                     result = await _dispatch_tool(
                         name, payload, device_slug, memory_root, client,
-                        session_state, session_id,
+                        session_state, session_id, repair_id=repair_id,
                     )
                     # Emit the WS event if the dispatch succeeded.
                     bv_event = result.get("event")

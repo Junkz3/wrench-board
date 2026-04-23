@@ -165,25 +165,123 @@ MB_TOOLS: list[dict] = [
         "type": "custom",
         "name": "mb_hypothesize",
         "description": (
-            "Propose des hypothèses de panne (refdes à tuer) qui expliquent un "
-            "symptôme observé par le tech. À appeler quand le tech décrit ce "
-            "qu'il VOIT sur la carte : composants froids/non-responsive, rails "
-            "mesurés morts, composants qui tournent, rails stables. Les 4 listes "
-            "sont optionnelles mais au moins une doit être non-vide. Les refdes "
-            "et rail labels doivent EXISTER dans le graph — le tool refuse les "
-            "inconnus avec closest_matches."
+            "Propose des hypothèses (refdes, mode) qui expliquent les observations. "
+            "Modes supportés : dead (inerte), alive (fonctionne), anomalous (actif mais "
+            "output incorrect — IC DSI bridge, codec audio, sensor), hot (chauffe "
+            "anormalement), shorted (court vers GND — pour un rail). Passer au moins "
+            "une observation via state_comps/state_rails OU fournir repair_id pour "
+            "synthétiser depuis le journal de mesures."
         ),
         "input_schema": {
             "type": "object",
             "properties": {
-                "dead_comps":  {"type": "array", "items": {"type": "string"}, "description": "Refdes observés morts."},
-                "alive_comps": {"type": "array", "items": {"type": "string"}, "description": "Refdes observés vivants (chauds, actifs)."},
-                "dead_rails":  {"type": "array", "items": {"type": "string"}, "description": "Rails mesurés à 0V ou absents (ex: '+3V3')."},
-                "alive_rails": {"type": "array", "items": {"type": "string"}, "description": "Rails mesurés stables (ex: '+5V')."},
+                "state_comps": {
+                    "type": "object",
+                    "description": "Map refdes → mode. Modes: 'dead', 'alive', 'anomalous', 'hot'.",
+                    "additionalProperties": {
+                        "type": "string",
+                        "enum": ["dead", "alive", "anomalous", "hot"],
+                    },
+                },
+                "state_rails": {
+                    "type": "object",
+                    "description": "Map rail label → mode. Modes: 'dead', 'alive', 'shorted'.",
+                    "additionalProperties": {
+                        "type": "string",
+                        "enum": ["dead", "alive", "shorted"],
+                    },
+                },
+                "metrics_comps": {
+                    "type": "object",
+                    "description": "Optional numeric measurements on components, refdes → {measured, unit, nominal?}.",
+                    "additionalProperties": {"type": "object"},
+                },
+                "metrics_rails": {
+                    "type": "object",
+                    "description": "Optional numeric measurements on rails.",
+                    "additionalProperties": {"type": "object"},
+                },
                 "max_results": {"type": "integer", "default": 5, "minimum": 1, "maximum": 20},
+                "repair_id": {
+                    "type": "string",
+                    "description": "If set AND state/metrics dicts are empty, synthesise observations from the repair's measurement journal.",
+                },
             },
             "required": [],
         },
+    },
+    {
+        "type": "custom",
+        "name": "mb_record_measurement",
+        "description": (
+            "Enregistre une mesure électrique du tech dans le journal de la "
+            "repair session. Cible au format 'rail:<label>' | 'comp:<refdes>' | "
+            "'pin:<refdes>:<pin>'. Unit ∈ {V, A, W, °C, Ω, mV}. Si nominal est "
+            "fourni, le mode est auto-classifié (alive/anomalous/dead/shorted/hot)."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "target": {"type": "string"},
+                "value": {"type": "number"},
+                "unit": {"type": "string", "enum": ["V", "A", "W", "°C", "Ω", "mV"]},
+                "nominal": {"type": ["number", "null"]},
+                "note": {"type": ["string", "null"]},
+            },
+            "required": ["target", "value", "unit"],
+        },
+    },
+    {
+        "type": "custom",
+        "name": "mb_list_measurements",
+        "description": "Relit le journal de mesures de la repair session, filtré par target et/ou timestamp.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "target": {"type": ["string", "null"]},
+                "since": {"type": ["string", "null"]},
+            },
+            "required": [],
+        },
+    },
+    {
+        "type": "custom",
+        "name": "mb_compare_measurements",
+        "description": "Diff avant/après d'une cible donnée (mesure la plus ancienne vs la plus récente par défaut).",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "target": {"type": "string"},
+                "before_ts": {"type": ["string", "null"]},
+                "after_ts": {"type": ["string", "null"]},
+            },
+            "required": ["target"],
+        },
+    },
+    {
+        "type": "custom",
+        "name": "mb_observations_from_measurements",
+        "description": "Synthétise un payload Observations (state + metrics) depuis le journal de mesures — dernier événement par cible.",
+        "input_schema": {"type": "object", "properties": {}, "required": []},
+    },
+    {
+        "type": "custom",
+        "name": "mb_set_observation",
+        "description": "Force un mode d'observation pour une cible sans enregistrer de valeur (utile quand le tech dit 'U7 est mort' sans mesure). Émet l'event WS pour l'UI.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "target": {"type": "string"},
+                "mode": {"type": "string", "enum": ["dead", "alive", "anomalous", "hot", "shorted"]},
+            },
+            "required": ["target", "mode"],
+        },
+    },
+    {
+        "type": "custom",
+        "name": "mb_clear_observations",
+        "description": "Efface l'état visuel des observations côté UI (le journal est préservé).",
+        "input_schema": {"type": "object", "properties": {}, "required": []},
     },
     {
         "type": "custom",
