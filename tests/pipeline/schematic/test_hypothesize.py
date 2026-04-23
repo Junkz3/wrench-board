@@ -90,17 +90,6 @@ def test_hypothesis_shape_minimal():
     assert h.kill_modes == ["dead"]
 
 
-def test_hypothesize_stub_raises_not_implemented():
-    eg = ElectricalGraph(
-        device_slug="demo",
-        components={}, nets={}, power_rails={}, typed_edges=[],
-        boot_sequence=[], designer_notes=[], ambiguities=[],
-        quality=SchematicQualityReport(total_pages=0, pages_parsed=0),
-    )
-    with pytest.raises(NotImplementedError):
-        hypothesize(eg, observations=Observations())
-
-
 def _mini_graph() -> ElectricalGraph:
     return ElectricalGraph(
         device_slug="demo",
@@ -368,3 +357,62 @@ def test_score_over_predicted_not_penalised():
     assert metrics.fp_comps == 0
     assert ("U99", "dead") in diff.over_predicted
     assert score == 1.0
+
+
+def test_hypothesize_end_to_end_dead_recovery():
+    obs = Observations(
+        state_comps={"U12": "dead", "U19": "dead"},
+        state_rails={"+5V": "dead"},
+    )
+    result = hypothesize(
+        _mini_graph(), analyzed_boot=_mini_boot(), observations=obs,
+    )
+    assert len(result.hypotheses) >= 1
+    top = result.hypotheses[0]
+    assert top.kill_refdes == ["U7"]
+    assert top.kill_modes == ["dead"]
+    assert top.score > 0
+    assert top.narrative != ""
+    assert "U7" in top.narrative
+    assert "meurt" in top.narrative
+
+
+def test_hypothesize_end_to_end_anomalous_recovery():
+    g = _mini_graph_with_signal_edges()
+    obs = Observations(state_comps={"U17": "anomalous"})
+    result = hypothesize(
+        g, analyzed_boot=_mini_boot(), observations=obs,
+    )
+    # U10 OR U11 should be in the top (both can explain U17 anomalous).
+    top_refdes = {tuple(sorted(h.kill_refdes)) for h in result.hypotheses[:3]}
+    assert ("U10",) in top_refdes or ("U11",) in top_refdes
+
+
+def test_hypothesize_empty_obs_returns_empty():
+    r = hypothesize(_mini_graph(), observations=Observations())
+    assert r.hypotheses == []
+    assert r.pruning.single_candidates_tested == 0
+
+
+def test_hypothesize_narrative_cites_mode_and_metric():
+    obs = Observations(
+        state_rails={"+5V": "dead"},
+        metrics_rails={
+            "+5V": ObservedMetric(measured=0.02, unit="V", nominal=5.0),
+        },
+    )
+    r = hypothesize(
+        _mini_graph(), analyzed_boot=_mini_boot(), observations=obs,
+    )
+    top = r.hypotheses[0]
+    # Metric cited in the narrative.
+    assert "0.02" in top.narrative or "5.0" in top.narrative
+
+
+def test_hypothesize_respects_max_results():
+    obs = Observations(state_rails={"+5V": "dead", "+3V3": "dead"})
+    r = hypothesize(
+        _mini_graph(), analyzed_boot=_mini_boot(), observations=obs,
+        max_results=1,
+    )
+    assert len(r.hypotheses) == 1

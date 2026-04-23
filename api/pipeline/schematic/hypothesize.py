@@ -14,6 +14,7 @@ ElectricalGraph + SimulationEngine.
 
 from __future__ import annotations
 
+import time
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
@@ -39,6 +40,11 @@ MAX_PAIRS: int = 100                          # 2-fault pair cap (safety net, ra
 
 ComponentMode = Literal["dead", "alive", "anomalous", "hot"]
 RailMode = Literal["dead", "alive", "shorted"]
+# Failure modes that can be attributed to a component as the root-cause kill.
+# `alive` is omitted (a live component is not a failure). `shorted` is a rail
+# observation but it's produced by a shorted component pulling its input rail
+# to GND, so it's a legitimate component-level failure mode in this engine.
+FailureMode = Literal["dead", "anomalous", "hot", "shorted"]
 
 
 class ObservedMetric(BaseModel):
@@ -109,7 +115,7 @@ class Hypothesis(BaseModel):
 
     # parallel lists — kill_refdes[i] fails in mode kill_modes[i]
     kill_refdes: list[str]
-    kill_modes: list[ComponentMode]
+    kill_modes: list[FailureMode]
     score: float
     metrics: HypothesisMetrics
     diff: HypothesisDiff
@@ -389,6 +395,210 @@ def _score_candidate(
 # ---------------------------------------------------------------------------
 
 
+def _narrate(
+    kill_refdes: list[str],
+    kill_modes: list[str],
+    cascade: dict,
+    metrics: HypothesisMetrics,
+    diff: HypothesisDiff,
+    observations: Observations,
+) -> str:
+    """Deterministic FR narrative — no LLM."""
+    obs_total = len(observations.state_comps) + len(observations.state_rails)
+    tp = metrics.tp_comps + metrics.tp_rails
+    fp = metrics.fp_comps + metrics.fp_rails
+
+    # Pick a rails preview — shorted takes precedence visually.
+    shorted_preview = ", ".join(sorted(cascade["shorted_rails"])[:2])
+    dead_preview = ", ".join(sorted(cascade["dead_rails"])[:3]) or "aucun rail"
+    rails_preview = shorted_preview or dead_preview
+    dead_count = max(0, len(cascade["dead_comps"]) - len(kill_refdes))
+    anom_count = len(cascade["anomalous_comps"])
+
+    if len(kill_refdes) == 1:
+        verb = {
+            "dead": "meurt",
+            "anomalous": "dysfonctionne (output faux)",
+            "hot": "chauffe anormalement",
+            "shorted": "court vers GND",
+        }.get(kill_modes[0], "échoue")
+        head = f"Si {kill_refdes[0]} {verb} : {rails_preview}"
+        if dead_count > 0:
+            head += f" → {dead_count} composant(s) downstream morts"
+        if anom_count > 1:
+            head += f", {anom_count} composant(s) aval anormaux"
+        head += "."
+    else:
+        parts = [f"{r} ({m})" for r, m in zip(kill_refdes, kill_modes)]
+        head = (
+            f"Si {' ET '.join(parts)} échouent simultanément : "
+            f"{rails_preview} → {dead_count} composant(s) downstream morts."
+        )
+
+    coverage = f" Explique {tp}/{obs_total} observations, {fp} contradiction(s)."
+
+    # Cite up to 2 measurements.
+    metric_snippets: list[str] = []
+    for target, metric in list(observations.metrics_comps.items())[:2]:
+        unit = metric.unit
+        metric_snippets.append(f"{target} à {metric.measured}{unit}")
+    for target, metric in list(observations.metrics_rails.items())[:2]:
+        unit = metric.unit
+        metric_snippets.append(f"{target} à {metric.measured}{unit}")
+    metrics_tail = (
+        " Mesures : " + ", ".join(metric_snippets) + "."
+        if metric_snippets else ""
+    )
+
+    tail = ""
+    if diff.contradictions:
+        contras = ", ".join(f"{t} observé {o}, prédit {p}" for t, o, p in diff.contradictions[:3])
+        tail += f" Contredit : {contras}."
+    if diff.under_explained:
+        tail += f" Ne couvre pas : {', '.join(diff.under_explained[:4])}."
+
+    return head + coverage + metrics_tail + tail
+
+
+def _cascade_preview(cascade: dict) -> dict:
+    return {
+        "dead_rails": sorted(cascade["dead_rails"]),
+        "shorted_rails": sorted(cascade["shorted_rails"]),
+        "dead_comps_count": len(cascade["dead_comps"]),
+        "anomalous_count": len(cascade["anomalous_comps"]),
+        "hot_count": len(cascade["hot_comps"]),
+    }
+
+
+def _applicable_modes(
+    electrical: ElectricalGraph, refdes: str,
+) -> list[str]:
+    """Return the list of modes worth trying for a given refdes.
+
+    - `dead` always.
+    - `anomalous` if the refdes has at least one outgoing signal-typed edge.
+    - `hot` always (cheap, self-only).
+    - `shorted` if the refdes is listed as a consumer of any power rail.
+    """
+    modes = ["dead", "hot"]
+    has_signal = any(
+        e.src == refdes and e.kind in SIGNAL_EDGE_KINDS
+        for e in electrical.typed_edges
+    )
+    if has_signal:
+        modes.append("anomalous")
+    is_consumer = any(
+        refdes in (r.consumers or [])
+        for r in electrical.power_rails.values()
+    )
+    if is_consumer:
+        modes.append("shorted")
+    return modes
+
+
+def _relevant_to_observations(cascade: dict, obs: Observations) -> bool:
+    """Pruning gate — cascade touches at least one observation target."""
+    obs_comps = set(obs.state_comps)
+    obs_rails = set(obs.state_rails)
+    any_pred = (
+        cascade["dead_comps"] | cascade["anomalous_comps"] | cascade["hot_comps"]
+    )
+    any_rail = cascade["dead_rails"] | cascade["shorted_rails"]
+    if any_pred & obs_comps:
+        return True
+    if any_rail & obs_rails:
+        return True
+    return False
+
+
+def _enumerate_single_fault(
+    electrical: ElectricalGraph,
+    analyzed_boot: AnalyzedBootSequence | None,
+    observations: Observations,
+) -> tuple[
+    dict[tuple[str, str], dict],  # cascades by (refdes, mode)
+    list[tuple[str, str, float, HypothesisMetrics, HypothesisDiff]],  # ranked survivors
+]:
+    cascades_cache: dict[tuple[str, str], dict] = {}
+    ranked: list[tuple[str, str, float, HypothesisMetrics, HypothesisDiff]] = []
+    for refdes in electrical.components:
+        for mode in _applicable_modes(electrical, refdes):
+            cascade = _simulate_failure(electrical, analyzed_boot, refdes, mode)
+            cascades_cache[(refdes, mode)] = cascade
+            if not _relevant_to_observations(cascade, observations):
+                continue
+            score, metrics, diff = _score_candidate(cascade, observations)
+            ranked.append((refdes, mode, score, metrics, diff))
+    ranked.sort(key=lambda t: -t[2])
+    return cascades_cache, ranked
+
+
+def _enumerate_two_fault(
+    electrical: ElectricalGraph,
+    analyzed_boot: AnalyzedBootSequence | None,
+    observations: Observations,
+    cascades_cache: dict[tuple[str, str], dict],
+    single_ranked: list[tuple[str, str, float, HypothesisMetrics, HypothesisDiff]],
+) -> tuple[int, list[tuple[tuple[tuple[str, str], tuple[str, str]], float, HypothesisMetrics, HypothesisDiff, dict]]]:
+    """2-fault pass seeded by top-K single-fault survivors.
+
+    Each kill element is a (refdes, mode) pair. Pairs are deduplicated
+    as sorted tuples. Capped at MAX_PAIRS.
+    """
+    if not TWO_FAULT_ENABLED:
+        return 0, []
+
+    top_k = [(r, m) for r, m, *_ in single_ranked[:TOP_K_SINGLE]]
+    seen: set[tuple[tuple[str, str], tuple[str, str]]] = set()
+    pairs_tested = 0
+    ranked: list[tuple[tuple[tuple[str, str], tuple[str, str]], float, HypothesisMetrics, HypothesisDiff, dict]] = []
+
+    for (r1, m1) in top_k:
+        c1 = cascades_cache[(r1, m1)]
+        residual_comps = (
+            set(observations.state_comps) - (c1["dead_comps"] | c1["anomalous_comps"] | c1["hot_comps"])
+        )
+        residual_rails = (
+            set(observations.state_rails) - (c1["dead_rails"] | c1["shorted_rails"])
+        )
+        if not residual_comps and not residual_rails:
+            continue
+        for (r2, m2), c2 in cascades_cache.items():
+            if (r2, m2) == (r1, m1) or r2 == r1:
+                continue
+            key = tuple(sorted(((r1, m1), (r2, m2))))
+            if key in seen:
+                continue
+            # c2 must touch at least one residual target.
+            c2_all_comps = c2["dead_comps"] | c2["anomalous_comps"] | c2["hot_comps"]
+            c2_all_rails = c2["dead_rails"] | c2["shorted_rails"]
+            if not (c2_all_comps & residual_comps) and not (c2_all_rails & residual_rails):
+                continue
+            seen.add(key)
+            # Union cascades: we don't re-simulate the combined pair (the
+            # forward simulator doesn't compose modes cleanly). Take the
+            # element-wise union of buckets — this is an approximation but
+            # it's cheap and matches observation semantics.
+            combined = {
+                "dead_comps": c1["dead_comps"] | c2["dead_comps"],
+                "dead_rails": c1["dead_rails"] | c2["dead_rails"],
+                "shorted_rails": c1["shorted_rails"] | c2["shorted_rails"],
+                "anomalous_comps": c1["anomalous_comps"] | c2["anomalous_comps"],
+                "hot_comps": c1["hot_comps"] | c2["hot_comps"],
+                "final_verdict": c1.get("final_verdict") or c2.get("final_verdict") or "",
+                "blocked_at_phase": None,
+            }
+            pairs_tested += 1
+            score, metrics, diff = _score_candidate(combined, observations)
+            ranked.append((key, score, metrics, diff, combined))
+            if pairs_tested >= MAX_PAIRS:
+                break
+        if pairs_tested >= MAX_PAIRS:
+            break
+    ranked.sort(key=lambda t: -t[1])
+    return pairs_tested, ranked
+
+
 def hypothesize(
     electrical: ElectricalGraph,
     *,
@@ -396,4 +606,66 @@ def hypothesize(
     observations: Observations,
     max_results: int = MAX_RESULTS_DEFAULT,
 ) -> HypothesizeResult:
-    raise NotImplementedError  # lands in Task 6
+    """Rank candidate (refdes, mode) kills that explain `observations`."""
+    t0 = time.perf_counter()
+    if observations.is_empty():
+        return HypothesizeResult(
+            device_slug=electrical.device_slug,
+            observations_echo=observations,
+            hypotheses=[],
+            pruning=PruningStats(
+                single_candidates_tested=0,
+                two_fault_pairs_tested=0,
+                wall_ms=(time.perf_counter() - t0) * 1000,
+            ),
+        )
+
+    cascades_cache, single_ranked = _enumerate_single_fault(
+        electrical, analyzed_boot, observations,
+    )
+    pairs_tested, two_ranked = _enumerate_two_fault(
+        electrical, analyzed_boot, observations,
+        cascades_cache, single_ranked,
+    )
+
+    hypotheses: list[Hypothesis] = []
+    for refdes, mode, score, metrics, diff in single_ranked:
+        cascade = cascades_cache[(refdes, mode)]
+        hypotheses.append(Hypothesis(
+            kill_refdes=[refdes],
+            kill_modes=[mode],
+            score=score,
+            metrics=metrics,
+            diff=diff,
+            narrative=_narrate([refdes], [mode], cascade, metrics, diff, observations),
+            cascade_preview=_cascade_preview(cascade),
+        ))
+    for key, score, metrics, diff, combined in two_ranked:
+        (r1, m1), (r2, m2) = key
+        hypotheses.append(Hypothesis(
+            kill_refdes=[r1, r2],
+            kill_modes=[m1, m2],
+            score=score,
+            metrics=metrics,
+            diff=diff,
+            narrative=_narrate([r1, r2], [m1, m2], combined, metrics, diff, observations),
+            cascade_preview=_cascade_preview(combined),
+        ))
+
+    hypotheses.sort(key=lambda h: (
+        -h.score,
+        len(h.kill_refdes),
+        h.cascade_preview["dead_comps_count"] + h.cascade_preview["anomalous_count"],
+    ))
+    hypotheses = hypotheses[:max_results]
+
+    return HypothesizeResult(
+        device_slug=electrical.device_slug,
+        observations_echo=observations,
+        hypotheses=hypotheses,
+        pruning=PruningStats(
+            single_candidates_tested=len(cascades_cache),
+            two_fault_pairs_tested=pairs_tested,
+            wall_ms=(time.perf_counter() - t0) * 1000,
+        ),
+    )
