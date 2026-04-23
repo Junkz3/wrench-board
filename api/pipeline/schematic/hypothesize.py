@@ -40,6 +40,21 @@ TWO_FAULT_ENABLED: bool = True
 MAX_PAIRS: int = 100                          # 2-fault pair cap (safety net, rarely hit)
 
 # ---------------------------------------------------------------------------
+# Phase 4: visibility multiplier — dampens topologically weak passive cascades.
+# Key is (kind, role, mode). Missing entries default to 1.0 (no dampening).
+# Applied to `tp_comps` only; FP/FN weights are unchanged.
+# ---------------------------------------------------------------------------
+
+_SCORE_VISIBILITY: dict[tuple[str, str, str], float] = {
+    ("passive_c", "decoupling", "open"): 0.5,
+    ("passive_c", "bulk",       "open"): 0.5,
+    ("passive_c", "filter",     "open"): 0.5,
+    ("passive_r", "pull_up",    "open"): 0.5,
+    ("passive_r", "pull_down",  "open"): 0.5,
+    # shorts are visible at rail level → no multiplier.
+}
+
+# ---------------------------------------------------------------------------
 # Mode vocabulary — imported by tools, HTTP, tests, UI JSON.
 # ---------------------------------------------------------------------------
 
@@ -289,6 +304,19 @@ def _simulate_failure(
         c["final_verdict"] = downstream["final_verdict"]
         c["blocked_at_phase"] = downstream["blocked_at_phase"]
         return c
+    # Phase 4: passive modes.
+    if mode in {"open", "short"}:
+        comp = electrical.components.get(refdes)
+        if comp is None:
+            return _empty_cascade()
+        kind = getattr(comp, "kind", "ic")
+        role = getattr(comp, "role", None)
+        if kind == "ic" or role is None:
+            return _empty_cascade()
+        handler = _PASSIVE_CASCADE_TABLE.get((kind, role, mode))
+        if handler is None:
+            return _empty_cascade()
+        return handler(electrical, comp)
     raise ValueError(f"unknown failure mode: {mode!r}")
 
 
@@ -300,6 +328,8 @@ def _simulate_failure(
 def _score_candidate(
     cascade: dict,
     obs: Observations,
+    *,
+    tp_mult: float = 1.0,
 ) -> tuple[float, HypothesisMetrics, HypothesisDiff]:
     """Score a candidate cascade against observations.
 
@@ -384,7 +414,7 @@ def _score_candidate(
         fp_comps=fp_c, fp_rails=fp_r,
         fn_comps=fn_c, fn_rails=fn_r,
     )
-    tp = tp_c + tp_r
+    tp = (tp_c * tp_mult) + tp_r
     fp = fp_c + fp_r
     fn = fn_c + fn_r
     score = float(tp - fp_w * fp - fn_w * fn)
@@ -911,27 +941,44 @@ def _cascade_preview(cascade: dict) -> dict:
 def _applicable_modes(
     electrical: ElectricalGraph, refdes: str,
 ) -> list[str]:
-    """Return the list of modes worth trying for a given refdes.
+    """Return the list of modes worth simulating for a given refdes.
 
-    - `dead` always.
-    - `anomalous` if the refdes has at least one outgoing signal-typed edge.
-    - `hot` always (cheap, self-only).
-    - `shorted` if the refdes is listed as a consumer of any power rail.
-    """
-    modes = ["dead", "hot"]
-    has_signal = any(
-        e.src == refdes and e.kind in SIGNAL_EDGE_KINDS
-        for e in electrical.typed_edges
-    )
-    if has_signal:
-        modes.append("anomalous")
-    is_consumer = any(
-        refdes in (r.consumers or [])
-        for r in electrical.power_rails.values()
-    )
-    if is_consumer:
-        modes.append("shorted")
-    return modes
+    - ICs: `dead`, `hot` always; `anomalous` when the IC has an outgoing
+      signal edge; `shorted` when the IC is a rail consumer.
+    - Passives with a known role: `open` and/or `short` when the dispatch
+      table has a non-alive handler for the (kind, role, mode) triple.
+    - Passives without a role: no applicable mode (returns [])."""
+    comp = electrical.components.get(refdes)
+    if comp is None:
+        return []
+    kind = getattr(comp, "kind", "ic")
+    role = getattr(comp, "role", None)
+
+    if kind == "ic":
+        modes = ["dead", "hot"]
+        has_signal = any(
+            e.src == refdes and e.kind in SIGNAL_EDGE_KINDS
+            for e in electrical.typed_edges
+        )
+        if has_signal:
+            modes.append("anomalous")
+        is_consumer = any(
+            refdes in (r.consumers or [])
+            for r in electrical.power_rails.values()
+        )
+        if is_consumer:
+            modes.append("shorted")
+        return modes
+
+    # Passive.
+    if role is None:
+        return []
+    applicable: list[str] = []
+    for mode in ("open", "short"):
+        handler = _PASSIVE_CASCADE_TABLE.get((kind, role, mode))
+        if handler is not None and handler is not _cascade_passive_alive:
+            applicable.append(mode)
+    return applicable
 
 
 def _relevant_to_observations(cascade: dict, obs: Observations) -> bool:
@@ -960,12 +1007,18 @@ def _enumerate_single_fault(
     cascades_cache: dict[tuple[str, str], dict] = {}
     ranked: list[tuple[str, str, float, HypothesisMetrics, HypothesisDiff]] = []
     for refdes in electrical.components:
+        comp = electrical.components[refdes]
+        kind = getattr(comp, "kind", "ic")
+        role = getattr(comp, "role", None)
         for mode in _applicable_modes(electrical, refdes):
             cascade = _simulate_failure(electrical, analyzed_boot, refdes, mode)
             cascades_cache[(refdes, mode)] = cascade
             if not _relevant_to_observations(cascade, observations):
                 continue
-            score, metrics, diff = _score_candidate(cascade, observations)
+            tp_mult = _SCORE_VISIBILITY.get((kind, role, mode), 1.0) if role else 1.0
+            score, metrics, diff = _score_candidate(
+                cascade, observations, tp_mult=tp_mult,
+            )
             ranked.append((refdes, mode, score, metrics, diff))
     ranked.sort(key=lambda t: -t[2])
     return cascades_cache, ranked

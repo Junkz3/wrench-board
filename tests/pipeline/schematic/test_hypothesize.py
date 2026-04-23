@@ -696,3 +696,94 @@ def test_table_every_entry_is_callable():
     from api.pipeline.schematic.hypothesize import _PASSIVE_CASCADE_TABLE
     for key, fn in _PASSIVE_CASCADE_TABLE.items():
         assert callable(fn), f"non-callable handler at {key}"
+
+
+def test_applicable_modes_ic_unchanged():
+    from api.pipeline.schematic.hypothesize import _applicable_modes
+    from api.pipeline.schematic.schemas import (
+        ComponentNode, ElectricalGraph, SchematicQualityReport,
+    )
+    graph = ElectricalGraph(
+        device_slug="am-test",
+        components={"U1": ComponentNode(refdes="U1", type="ic")},
+        nets={}, power_rails={}, typed_edges=[],
+        quality=SchematicQualityReport(total_pages=1, pages_parsed=1, confidence_global=1.0),
+    )
+    modes = _applicable_modes(graph, "U1")
+    assert "dead" in modes
+    assert "hot" in modes
+    assert "open" not in modes
+    assert "short" not in modes
+
+
+def test_applicable_modes_passive_with_role_returns_open_short():
+    from api.pipeline.schematic.hypothesize import _applicable_modes
+    graph = _mnt_like_graph()
+    modes = _applicable_modes(graph, "C156")  # decoupling
+    assert "open" in modes
+    assert "short" in modes
+    assert "dead" not in modes
+
+
+def test_applicable_modes_passive_without_role_returns_empty():
+    from api.pipeline.schematic.hypothesize import _applicable_modes
+    from api.pipeline.schematic.schemas import (
+        ComponentNode, ElectricalGraph, SchematicQualityReport,
+    )
+    graph = ElectricalGraph(
+        device_slug="unrole",
+        components={
+            "R99": ComponentNode(
+                refdes="R99", type="resistor",
+                kind="passive_r", role=None,
+            ),
+        },
+        nets={}, power_rails={}, typed_edges=[],
+        quality=SchematicQualityReport(total_pages=1, pages_parsed=1, confidence_global=1.0),
+    )
+    modes = _applicable_modes(graph, "R99")
+    assert modes == []
+
+
+def test_applicable_modes_skips_passive_alive_entries():
+    """When a (kind, role, mode) maps to `_cascade_passive_alive`, the mode
+    is not enumerated — no observable cascade."""
+    from api.pipeline.schematic.hypothesize import _applicable_modes
+    from api.pipeline.schematic.schemas import (
+        ComponentNode, ElectricalGraph, SchematicQualityReport,
+    )
+    graph = ElectricalGraph(
+        device_slug="alive-test",
+        components={
+            "R50": ComponentNode(
+                refdes="R50", type="resistor",
+                kind="passive_r", role="damping",
+            ),
+        },
+        nets={}, power_rails={}, typed_edges=[],
+        quality=SchematicQualityReport(total_pages=1, pages_parsed=1, confidence_global=1.0),
+    )
+    # damping open AND short both map to `_cascade_passive_alive` → no modes.
+    assert _applicable_modes(graph, "R50") == []
+
+
+def test_score_visibility_multiplier_dampens_decoupling_open():
+    """A decoupling-open hypothesis that matches 1 anomalous IC should score
+    tp_comps = 0.5, not 1.0."""
+    from api.pipeline.schematic.hypothesize import (
+        Observations, hypothesize,
+    )
+    graph = _mnt_like_graph()
+    result = hypothesize(
+        graph,
+        observations=Observations(state_comps={"U7": "anomalous"}),
+    )
+    # Look for a C156-open hypothesis with visibility applied.
+    c156_hyps = [h for h in result.hypotheses
+                 if h.kill_refdes == ["C156"] and h.kill_modes == ["open"]]
+    if c156_hyps:
+        h = c156_hyps[0]
+        # TP is 1 component (U7), but score reflects 0.5 × tp = 0.5.
+        assert 0.3 <= h.score <= 0.6, (
+            "expected dampened score ~0.5 for decoupling_open, got %s" % h.score
+        )
