@@ -1,6 +1,5 @@
-# tests/tools/test_hypothesize.py
 # SPDX-License-Identifier: Apache-2.0
-"""Tests for the mb_hypothesize tool wrapper."""
+"""Tests for the mb_hypothesize tool wrapper (schema B)."""
 
 from __future__ import annotations
 
@@ -9,11 +8,7 @@ from pathlib import Path
 import pytest
 
 from api.pipeline.schematic.schemas import (
-    ComponentNode,
-    ElectricalGraph,
-    NetNode,
-    PagePin,
-    PowerRail,
+    ComponentNode, ElectricalGraph, NetNode, PagePin, PowerRail,
     SchematicQualityReport,
 )
 from api.tools.hypothesize import mb_hypothesize
@@ -62,21 +57,52 @@ def test_mb_hypothesize_happy_path(memory_root: Path, graph: ElectricalGraph):
     _write_graph(memory_root, graph)
     result = mb_hypothesize(
         device_slug=SLUG, memory_root=memory_root,
-        dead_rails=["+5V"], dead_comps=["U12"],
+        state_comps={"U12": "dead"},
+        state_rails={"+5V": "dead"},
     )
     assert result["found"] is True
     assert result["device_slug"] == SLUG
     assert len(result["hypotheses"]) >= 1
-    # U7 (source of +5V) should rank top.
     top = result["hypotheses"][0]
     assert top["kill_refdes"] == ["U7"]
+    assert top["kill_modes"] == ["dead"]
+
+
+def test_mb_hypothesize_accepts_metrics(memory_root: Path, graph: ElectricalGraph):
+    _write_graph(memory_root, graph)
+    result = mb_hypothesize(
+        device_slug=SLUG, memory_root=memory_root,
+        state_rails={"+5V": "dead"},
+        metrics_rails={"+5V": {"measured": 0.02, "unit": "V", "nominal": 5.0}},
+    )
+    assert result["found"] is True
+    top = result["hypotheses"][0]
+    # Measurement cited in the narrative.
+    assert "0.02" in top["narrative"] or "5.0" in top["narrative"]
+
+
+def test_mb_hypothesize_synthesise_from_repair_journal(
+    memory_root: Path, graph: ElectricalGraph,
+):
+    from api.agent.measurement_memory import append_measurement
+    _write_graph(memory_root, graph)
+    # Tech recorded one measurement in the journal → mb_hypothesize reads it.
+    append_measurement(
+        memory_root=memory_root, device_slug=SLUG, repair_id="r1",
+        target="rail:+5V", value=0.02, unit="V", nominal=5.0, source="ui",
+    )
+    result = mb_hypothesize(
+        device_slug=SLUG, memory_root=memory_root, repair_id="r1",
+    )
+    assert result["found"] is True
+    assert result["hypotheses"][0]["kill_refdes"] == ["U7"]
 
 
 def test_mb_hypothesize_unknown_refdes_rejected(memory_root: Path, graph: ElectricalGraph):
     _write_graph(memory_root, graph)
     result = mb_hypothesize(
         device_slug=SLUG, memory_root=memory_root,
-        dead_comps=["Z999"],
+        state_comps={"Z999": "dead"},
     )
     assert result["found"] is False
     assert result["reason"] == "unknown_refdes"
@@ -87,7 +113,7 @@ def test_mb_hypothesize_unknown_rail_rejected(memory_root: Path, graph: Electric
     _write_graph(memory_root, graph)
     result = mb_hypothesize(
         device_slug=SLUG, memory_root=memory_root,
-        dead_rails=["NOT_A_RAIL"],
+        state_rails={"NOT_A_RAIL": "dead"},
     )
     assert result["found"] is False
     assert result["reason"] == "unknown_rail"
@@ -97,13 +123,13 @@ def test_mb_hypothesize_unknown_rail_rejected(memory_root: Path, graph: Electric
 def test_mb_hypothesize_no_pack(memory_root: Path):
     result = mb_hypothesize(
         device_slug="nonexistent", memory_root=memory_root,
-        dead_rails=["+5V"],
+        state_rails={"+5V": "dead"},
     )
     assert result["found"] is False
     assert result["reason"] == "no_schematic_graph"
 
 
-def test_mb_hypothesize_empty_observations_returns_empty(memory_root: Path, graph: ElectricalGraph):
+def test_mb_hypothesize_empty_inputs(memory_root: Path, graph: ElectricalGraph):
     _write_graph(memory_root, graph)
     result = mb_hypothesize(
         device_slug=SLUG, memory_root=memory_root,
@@ -112,15 +138,12 @@ def test_mb_hypothesize_empty_observations_returns_empty(memory_root: Path, grap
     assert result["hypotheses"] == []
 
 
-def test_manifest_exposes_mb_hypothesize():
-    """Agent manifest must advertise the new tool so Claude knows to call it."""
+def test_mb_hypothesize_manifest_exposes_new_signature():
     from api.agent import manifest
-    from api.session.state import SessionState
     names: list[str] = []
     if hasattr(manifest, "TOOLS"):
         names = [t["name"] for t in manifest.TOOLS]
     elif hasattr(manifest, "build_tools_manifest"):
-        session = SessionState()
-        tools = manifest.build_tools_manifest(session=session)
+        tools = manifest.build_tools_manifest(session=None)
         names = [t["name"] for t in tools]
     assert "mb_hypothesize" in names
