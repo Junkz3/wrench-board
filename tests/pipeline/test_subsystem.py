@@ -105,7 +105,7 @@ def test_component_inherits_majority_from_nets():
     edges = [
         _e("c1", "powers", "n1"),
         _e("c1", "powers", "n2"),
-        _e("c1", "connected_to", "n3"),
+        _e("c1", "connects", "n3"),       # real schema relation (not "connected_to")
     ]
     assert classify_nodes(nodes, edges)["c1"] == "power"
 
@@ -146,7 +146,7 @@ def test_action_inherits_from_resolved_component_chain():
         _act("a1", "Replace U1"),
     ]
     edges = [
-        _e("c1", "connected_to", "n1"),  # U1 → display
+        _e("c1", "connects", "n1"),       # U1 → display (real schema relation)
         _e("c1", "causes", "s1"),         # U1 causes symptom
         _e("a1", "resolves", "s1"),       # action resolves symptom
     ]
@@ -202,3 +202,25 @@ def test_net_extra_power_and_display_aliases():
     ]
     result = classify_nodes(nodes, [])
     assert result == {"n1": "power", "n2": "power", "n3": "power", "n4": "display"}
+
+
+def test_component_classification_uses_real_schema_relations():
+    """Regression: the classifier must consume the relations literally emitted
+    by the Cartographe (schemas.KnowledgeEdge.relation). `connects` is the
+    generic net-adjacency relation and was previously ignored because the
+    classifier looked for `connected_to` — a string that never appears in
+    real packs."""
+    nodes = [
+        _cmp("c1", "U1"),
+        _net("n1", "VBAT"),
+        _net("n2", "V3P3"),
+        _net("n3", "HDMI_CLK"),
+    ]
+    edges = [
+        # All three net-adjacencies use real-schema relations (no "connected_to").
+        _e("c1", "connects", "n1"),
+        _e("c1", "decouples", "n2"),
+        _e("c1", "measured_at", "n3"),
+    ]
+    # 2 power nets (VBAT, V3P3) + 1 display (HDMI_CLK) → majority = power.
+    assert classify_nodes(nodes, edges)["c1"] == "power"

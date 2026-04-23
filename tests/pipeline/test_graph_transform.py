@@ -160,9 +160,9 @@ def test_subsystems_sorted_by_count_descending_unknown_last():
     from api.pipeline.graph_transform import pack_to_graph_payload
     reg = {"schema_version": "1.0", "device_label": "synth",
            "components": [], "signals": [
-               {"canonical_name": "VBAT",   "description": ""},
-               {"canonical_name": "VCC",    "description": ""},
-               {"canonical_name": "HDMI_X", "description": ""},
+               {"canonical_name": "VBAT"},
+               {"canonical_name": "VCC"},
+               {"canonical_name": "HDMI_X"},
            ]}
     kg = {"schema_version": "1.0", "nodes": [
         {"id": "n1", "kind": "net", "label": "VBAT"},

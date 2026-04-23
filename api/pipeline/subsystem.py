@@ -62,12 +62,19 @@ def classify_nodes(
             result[n["id"]] = _classify_text(n["label"])
 
     # Pass 2 — components: majority vote over the nets this component touches
-    # via `connected_to` / `powers` edges, either direction. Fallback to
-    # description/role regex. Fallback to UNKNOWN.
+    # via net-adjacency edges, either direction. Fallback to description/role
+    # regex. Fallback to UNKNOWN.
+    #
+    # Edge relations that indicate physical/electrical net adjacency from
+    # the schema (api/pipeline/schemas.py — KnowledgeEdge.relation). A
+    # capacitor that `decouples` a net is on that net; a probe that
+    # `measured_at` a net observes it; a generic `connects` is the
+    # Cartographe's default. `part_of` is structural (component-in-assembly)
+    # and is deliberately excluded — it does not imply net adjacency.
     comp_ids = {n["id"] for n in nodes if n["type"] == "component"}
     adj: dict[str, list[str]] = {cid: [] for cid in comp_ids}
     for e in edges:
-        if e["relation"] not in ("connected_to", "powers"):
+        if e["relation"] not in ("connects", "decouples", "measured_at", "powers"):
             continue
         if e["source"] in comp_ids and e["target"] in result:
             adj[e["source"]].append(result[e["target"]])

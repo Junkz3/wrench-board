@@ -49,8 +49,9 @@ def pack_to_graph_payload(
     """Merge the four pack files into a single {nodes, edges} payload.
 
     Returned shape matches what web/index.html's D3 layer expects:
-      node: {id, type, label, description, confidence, meta}
+      node: {id, type, label, description, confidence, meta, subsystem}
       edge: {source, target, relation, label, weight}
+      subsystems: list[{key, label, count}]  # sorted by count desc, unknown last
     """
     kg_nodes = knowledge_graph.get("nodes", [])
     kg_edges = knowledge_graph.get("edges", [])
