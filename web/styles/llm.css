@@ -130,18 +130,22 @@ body.llm-open .stub{right:420px}
 .llm-log .sys.err{color:oklch(0.72 0.20 25)}
 
 /* --- input --- */
+/* Buttons overlay the bottom-right corner of the textarea for a fused,
+   ChatGPT-like feel. Textarea reserves right-padding so typed text never
+   slides under the icons. */
 .llm-input{
-  display:flex;flex-direction:column;gap:10px;padding:12px 14px 14px;
+  position:relative;display:block;padding:12px 14px 14px;
   border-top:1px solid var(--border);
   background:var(--bg-2);
 }
 .llm-input textarea{
-  flex:1;width:100%;
+  display:block;width:100%;
   background:var(--panel);border:1px solid var(--border);color:var(--text);
-  border-radius:6px;padding:12px 14px;
+  border-radius:8px;
+  padding:12px 84px 12px 14px;   /* right pad reserves space for the two icon-btns */
   font-family:inherit;font-size:13px;line-height:1.5;
   outline:none;resize:none;
-  min-height:72px;max-height:200px;overflow-y:auto;
+  min-height:82px;max-height:220px;overflow-y:auto;
   transition:border-color .15s,box-shadow .15s;
 }
 .llm-input textarea:focus{
@@ -149,42 +153,47 @@ body.llm-open .stub{right:420px}
   box-shadow:0 0 0 3px rgba(56,189,248,.12);
 }
 .llm-input textarea::placeholder{color:var(--text-3)}
-.llm-input-actions{display:flex;gap:8px;justify-content:flex-end;align-items:center}
 
-/* Icon-only compact buttons (Stop + Envoyer). */
+/* Actions float inside the bottom-right corner of the textarea. */
+.llm-input-actions{
+  position:absolute;right:22px;bottom:22px;
+  display:flex;gap:6px;align-items:center;
+}
+
+/* Icon-only buttons (Stop + Envoyer). Compact, nested feel. */
 .llm-input .icon-btn{
-  width:34px;height:34px;padding:0;
+  width:30px;height:30px;padding:0;
   display:inline-flex;align-items:center;justify-content:center;
-  background:var(--panel);border:1px solid var(--border);border-radius:6px;
-  color:var(--text-2);cursor:pointer;
+  background:var(--bg-2);border:1px solid var(--border-soft);border-radius:6px;
+  color:var(--text-3);cursor:pointer;
   transition:background .15s,border-color .15s,color .15s,transform .1s;
 }
-.llm-input .icon-btn svg{width:16px;height:16px;display:block}
+.llm-input .icon-btn svg{width:15px;height:15px;display:block}
 .llm-input .icon-btn:hover{
   background:var(--panel-2);border-color:#2e4468;color:var(--text);
 }
-.llm-input .icon-btn:active{transform:scale(.95)}
+.llm-input .icon-btn:active{transform:scale(.94)}
 .llm-input .icon-btn:disabled{opacity:.35;cursor:not-allowed}
-.llm-input .icon-btn:disabled:hover{background:var(--panel);border-color:var(--border);color:var(--text-2)}
+.llm-input .icon-btn:disabled:hover{background:var(--bg-2);border-color:var(--border-soft);color:var(--text-3)}
 
 /* Stop — amber when active. */
 .llm-input .icon-btn.llm-stop:not(:disabled){
   color:var(--amber);
   border-color:rgba(245,158,11,.35);
-  background:rgba(245,158,11,.08);
+  background:rgba(245,158,11,.1);
 }
 .llm-input .icon-btn.llm-stop:not(:disabled):hover{
-  background:rgba(245,158,11,.18);border-color:rgba(245,158,11,.6);
+  background:rgba(245,158,11,.2);border-color:rgba(245,158,11,.65);
 }
 
 /* Envoyer — cyan when enabled, primary action. */
 .llm-input .icon-btn.llm-send:not(:disabled){
   color:var(--cyan);
-  border-color:rgba(56,189,248,.4);
-  background:rgba(56,189,248,.12);
+  border-color:rgba(56,189,248,.45);
+  background:rgba(56,189,248,.14);
 }
 .llm-input .icon-btn.llm-send:not(:disabled):hover{
-  background:rgba(56,189,248,.22);border-color:rgba(56,189,248,.65);
+  background:rgba(56,189,248,.24);border-color:rgba(56,189,248,.7);
 }
 
 /* topbar toggle — matches the existing .top-btn visually */
