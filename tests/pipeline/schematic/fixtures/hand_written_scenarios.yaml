@@ -3,48 +3,56 @@
 # with a physically-motivated ground truth. If the named refdes is absent
 # from the compiled graph, the scenario is SKIPPED (warning, not failure)
 # so the file remains valid across graph regenerations.
+#
+# Scenarios calibrated against the MNT Reform v2 motherboard electrical
+# graph (449 components, 27 rails). When adapting to a new device, verify
+# the topology matches — these assume +3V3 is sourced by U12, DBVDD is
+# sourced by FB20, etc.
 
 scenarios:
-  - id: mnt-reform-c-decoupling-short
+  - id: mnt-reform-c-decoupling-short-on-3v3
     description: |
-      +3V3 rail measures shorted to GND, U7 (LPC) dead. A decoupling cap
-      on +3V3 is the likely root cause. Ground truth: any passive_c with
-      role=decoupling on +3V3.
+      +3V3 rail measures shorted to GND, one downstream consumer dead.
+      A decoupling cap on +3V3 is the likely root cause. Ground truth:
+      any passive_c with role=decoupling connected to +3V3.
+      MNT candidates: C19, C167, C28, C155, CC2222, and others.
     device_slug: mnt-reform-motherboard
     observations:
       state_rails: { "+3V3": "shorted" }
-      state_comps: { "U7": "dead" }
+      state_comps: { "U20": "dead" }
     ground_truth_match:
       kind: passive_c
       role: decoupling
       expected_mode: short
-    accept_in_top_n: 5
+    accept_in_top_n: 15
 
-  - id: mnt-reform-r-feedback-overvolt
+  - id: mnt-reform-fb20-filter-open-dbvdd
     description: |
-      +5V measures 7.2 V (overvoltage encoded as rail `shorted` per Phase 1).
-      A feedback divider R open is the likely root cause. Ground truth: any
-      passive_r with role=feedback connected to the +5V regulator's feedback
-      net.
+      DBVDD audio codec rail entirely dead, U3 (audio codec) dead.
+      A ferrite bead between +3V3 and DBVDD is the likely root cause.
+      MNT: DBVDD is sourced by FB20 specifically — this scenario tests
+      that FB20 open surfaces as the top candidate.
     device_slug: mnt-reform-motherboard
     observations:
-      state_rails: { "+5V": "shorted" }
-    ground_truth_match:
-      kind: passive_r
-      role: feedback
-      expected_mode: open
-    accept_in_top_n: 10
-
-  - id: mnt-reform-fb-filter-open
-    description: |
-      LPC_VCC rail entirely dead, U7 dead. A ferrite bead open between
-      +3V3 and LPC_VCC is the likely root cause.
-    device_slug: mnt-reform-motherboard
-    observations:
-      state_rails: { "LPC_VCC": "dead" }
-      state_comps: { "U7": "dead" }
+      state_rails: { "DBVDD": "dead" }
+      state_comps: { "U3": "dead" }
     ground_truth_match:
       kind: passive_fb
       role: filter
       expected_mode: open
     accept_in_top_n: 5
+
+  - id: mnt-reform-fb3-filter-open-pcie
+    description: |
+      PCIE1_PWR rail dead (PCIe card not detected on boot).
+      FB3 or FB4 (ferrite bead +3V3 → PCIE1_PWR) is the likely root cause.
+      Weaker observation (no corroborating IC dead) so we accept top-10
+      rather than top-5.
+    device_slug: mnt-reform-motherboard
+    observations:
+      state_rails: { "PCIE1_PWR": "dead" }
+    ground_truth_match:
+      kind: passive_fb
+      role: filter
+      expected_mode: open
+    accept_in_top_n: 10

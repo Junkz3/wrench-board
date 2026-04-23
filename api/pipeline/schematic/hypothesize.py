@@ -446,21 +446,25 @@ def _find_downstream_rail(
     rail_labels = [n for n in nets if n in electrical.power_rails]
     if len(rail_labels) < 2:
         return None
-    # Downstream = the one whose source_refdes is null (no IC drives it)
-    # OR whose consumers list is non-empty.
-    candidates = []
+    # Primary — rail whose source IS this passive (compiler marks the
+    # passive as `source_refdes` on the downstream rail when it sees a
+    # `powers` edge from the passive). Unambiguous.
     for label in rail_labels:
-        rail = electrical.power_rails[label]
-        # A downstream-of-passive rail typically has source_refdes=None
-        # because the passive is the implicit source.
-        if rail.source_refdes is None:
-            candidates.append(label)
+        if electrical.power_rails[label].source_refdes == passive.refdes:
+            return label
+    # Secondary — rail with source_refdes null (passive-driven, source
+    # not annotated by the compiler).
+    candidates = [
+        label for label in rail_labels
+        if electrical.power_rails[label].source_refdes is None
+    ]
     if len(candidates) == 1:
         return candidates[0]
-    # Fall back: pick the rail with more consumers.
+    # Tertiary — pick the rail with FEWER consumers. The downstream
+    # rail of a series passive is typically more specific (fewer
+    # downstream loads) than the upstream bus rail.
     rail_labels.sort(
         key=lambda r: len(electrical.power_rails[r].consumers or []),
-        reverse=True,
     )
     return rail_labels[0]
 
