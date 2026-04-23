@@ -15,7 +15,12 @@ ElectricalGraph + SimulationEngine.
 from __future__ import annotations
 
 import time
-from typing import Literal
+from typing import TYPE_CHECKING, Callable, Literal
+
+if TYPE_CHECKING:
+    from api.pipeline.schematic.schemas import ComponentNode as _CompNode
+
+CascadeFn = Callable[["ElectricalGraph", "_CompNode"], dict]
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
@@ -389,6 +394,190 @@ def _score_candidate(
         over_predicted=over_predicted,
     )
     return score, metrics, diff
+
+
+# ---------------------------------------------------------------------------
+# Phase 4: passive cascade dispatch
+# ---------------------------------------------------------------------------
+
+
+def _find_downstream_rail(
+    electrical: ElectricalGraph, passive: "_CompNode",
+) -> str | None:
+    """Return the rail sourced on one side of a series passive (R/FB/D/C).
+
+    Heuristic: both pin nets must be power rails. The "downstream" rail
+    is the one with a consumer list (fed by nothing else) — the other is
+    the upstream source. Ambiguous returns None.
+    """
+    nets = [p.net_label for p in passive.pins if p.net_label]
+    if len(nets) < 2:
+        return None
+    rail_labels = [n for n in nets if n in electrical.power_rails]
+    if len(rail_labels) < 2:
+        return None
+    # Downstream = the one whose source_refdes is null (no IC drives it)
+    # OR whose consumers list is non-empty.
+    candidates = []
+    for label in rail_labels:
+        rail = electrical.power_rails[label]
+        # A downstream-of-passive rail typically has source_refdes=None
+        # because the passive is the implicit source.
+        if rail.source_refdes is None:
+            candidates.append(label)
+    if len(candidates) == 1:
+        return candidates[0]
+    # Fall back: pick the rail with more consumers.
+    rail_labels.sort(
+        key=lambda r: len(electrical.power_rails[r].consumers or []),
+        reverse=True,
+    )
+    return rail_labels[0]
+
+
+def _find_decoupled_rail(
+    electrical: ElectricalGraph, passive: "_CompNode",
+) -> str | None:
+    """A decoupling cap has one pin on a rail and one on GND. Return the rail."""
+    nets = [p.net_label for p in passive.pins if p.net_label]
+    for n in nets:
+        if n in electrical.power_rails:
+            return n
+    return None
+
+
+def _find_decoupled_ic(
+    electrical: ElectricalGraph, passive: "_CompNode",
+) -> str | None:
+    """The IC most likely decoupled by this cap — explicit `decouples` edge
+    target, or the first consumer IC on the decoupled rail."""
+    for edge in electrical.typed_edges:
+        if edge.kind == "decouples" and edge.src == passive.refdes:
+            if edge.dst in electrical.components:
+                return edge.dst
+        if edge.kind == "decouples" and edge.dst == passive.refdes:
+            if edge.src in electrical.components:
+                return edge.src
+    rail = _find_decoupled_rail(electrical, passive)
+    if rail is None:
+        return None
+    consumers = electrical.power_rails[rail].consumers or []
+    return consumers[0] if consumers else None
+
+
+def _find_regulated_rail_of_feedback(
+    electrical: ElectricalGraph, passive: "_CompNode",
+) -> str | None:
+    """Walk a `feedback_in` edge from the divider's signal pin back to the
+    regulator that drives the rail being regulated."""
+    # Find the non-GND, non-rail net — that's the feedback signal net.
+    fb_net: str | None = None
+    for pin in passive.pins:
+        n = pin.net_label
+        if not n:
+            continue
+        if n in electrical.power_rails:
+            continue
+        up = n.upper()
+        if up in {"GND", "AGND", "DGND", "PGND"}:
+            continue
+        fb_net = n
+        break
+    if fb_net is None:
+        return None
+    # Find the IC with a pin named `feedback_in` on `fb_net`; then find
+    # its power_out rail.
+    for ic in electrical.components.values():
+        if ic.kind != "ic":
+            continue
+        has_fb = any(p.role == "feedback_in" and p.net_label == fb_net for p in ic.pins)
+        if not has_fb:
+            continue
+        for p in ic.pins:
+            if p.role == "power_out" and p.net_label in electrical.power_rails:
+                return p.net_label
+    return None
+
+
+def _simulate_rail_loss(
+    electrical: ElectricalGraph, rail_label: str,
+) -> dict:
+    """Mark a rail dead and propagate through SimulationEngine by killing
+    its source. If the rail has no source (passive-driven rail), fall
+    back to a local cascade: the rail + every consumer of it dead."""
+    rail = electrical.power_rails.get(rail_label)
+    if rail is None:
+        return _empty_cascade()
+    if rail.source_refdes:
+        return _simulate_dead(electrical, None, [rail.source_refdes])
+    # Passive-driven rail — no upstream IC to kill. Build the cascade
+    # directly.
+    c = _empty_cascade()
+    c["dead_rails"] = frozenset({rail_label})
+    c["dead_comps"] = frozenset(rail.consumers or [])
+    return c
+
+
+# --- Cascade handlers (one per (kind, role, mode) family) ---
+
+def _cascade_passive_alive(electrical: ElectricalGraph, passive: "_CompNode") -> dict:
+    """Physically plausible but no observable cascade. Empty → pruned."""
+    return _empty_cascade()
+
+
+def _cascade_series_open(electrical: ElectricalGraph, passive: "_CompNode") -> dict:
+    downstream = _find_downstream_rail(electrical, passive)
+    if downstream is None:
+        return _empty_cascade()
+    return _simulate_rail_loss(electrical, downstream)
+
+
+def _cascade_filter_open(electrical: ElectricalGraph, passive: "_CompNode") -> dict:
+    # FB filter open is functionally identical to a series element open.
+    return _cascade_series_open(electrical, passive)
+
+
+def _cascade_decoupling_open(electrical: ElectricalGraph, passive: "_CompNode") -> dict:
+    ic = _find_decoupled_ic(electrical, passive)
+    if ic is None:
+        return _empty_cascade()
+    c = _empty_cascade()
+    c["anomalous_comps"] = frozenset({ic})
+    return c
+
+
+def _cascade_decoupling_short(electrical: ElectricalGraph, passive: "_CompNode") -> dict:
+    rail = _find_decoupled_rail(electrical, passive)
+    if rail is None:
+        return _empty_cascade()
+    source = electrical.power_rails[rail].source_refdes
+    downstream = _simulate_dead(electrical, None, [source]) if source else _empty_cascade()
+    c = _empty_cascade()
+    c["shorted_rails"] = frozenset({rail})
+    c["dead_rails"] = downstream["dead_rails"] - {rail}
+    c["dead_comps"] = downstream["dead_comps"]
+    c["hot_comps"] = frozenset({source}) if source else frozenset()
+    return c
+
+
+def _cascade_feedback_open_overvolt(electrical: ElectricalGraph, passive: "_CompNode") -> dict:
+    rail = _find_regulated_rail_of_feedback(electrical, passive)
+    if rail is None:
+        return _empty_cascade()
+    c = _empty_cascade()
+    c["shorted_rails"] = frozenset({rail})  # Phase 1 encoding for overvoltage
+    consumers = electrical.power_rails[rail].consumers or []
+    c["anomalous_comps"] = frozenset(consumers)
+    return c
+
+
+# The dispatch table is filled in T7 (C), T8 (D/FB). For T6 we register
+# just the primitives so the three unit tests pass.
+_PASSIVE_CASCADE_TABLE: dict[tuple[str, str, str], CascadeFn] = {
+    ("passive_r",  "series", "open"):  _cascade_series_open,
+    ("passive_fb", "filter", "open"):  _cascade_filter_open,
+    # (rest added in T7/T8)
+}
 
 
 # ---------------------------------------------------------------------------

@@ -467,3 +467,74 @@ def test_hypothesize_accepts_coherent_observations():
     hypothesize(graph, observations=Observations(
         state_comps={"U7": "dead", "C156": "short"},
     ))
+
+
+def _fb_graph():
+    """Simple graph: +3V3 → FB2 → LPC_VCC → U7."""
+    from api.pipeline.schematic.schemas import (
+        ComponentNode, ElectricalGraph, NetNode, PagePin, PowerRail,
+        SchematicQualityReport,
+    )
+    return ElectricalGraph(
+        device_slug="fb-test",
+        components={
+            "U1": ComponentNode(refdes="U1", type="ic", pins=[
+                PagePin(number="1", role="power_out", net_label="+3V3"),
+            ]),
+            "FB2": ComponentNode(
+                refdes="FB2", type="ferrite",
+                kind="passive_fb", role="filter",
+                pins=[
+                    PagePin(number="1", role="unknown", net_label="+3V3"),
+                    PagePin(number="2", role="unknown", net_label="LPC_VCC"),
+                ],
+            ),
+            "U7": ComponentNode(refdes="U7", type="ic", pins=[
+                PagePin(number="1", role="power_in", net_label="LPC_VCC"),
+            ]),
+        },
+        nets={
+            "+3V3":    NetNode(label="+3V3",    is_power=True),
+            "LPC_VCC": NetNode(label="LPC_VCC", is_power=True),
+        },
+        power_rails={
+            "+3V3":    PowerRail(label="+3V3",    source_refdes="U1", consumers=[]),
+            "LPC_VCC": PowerRail(label="LPC_VCC", source_refdes=None, consumers=["U7"]),
+        },
+        typed_edges=[],
+        quality=SchematicQualityReport(total_pages=1, pages_parsed=1, confidence_global=1.0),
+    )
+
+
+def test_cascade_series_open_kills_downstream_rail():
+    """A series R/D/FB open → downstream rail dead."""
+    from api.pipeline.schematic.hypothesize import _cascade_series_open
+    graph = _fb_graph()
+    fb = graph.components["FB2"]
+    result = _cascade_series_open(graph, fb)
+    assert "LPC_VCC" in result["dead_rails"]
+    # U7 is on that rail → dead by starvation.
+    assert "U7" in result["dead_comps"]
+
+
+def test_cascade_passive_alive_returns_empty():
+    from api.pipeline.schematic.hypothesize import _cascade_passive_alive
+    graph = _fb_graph()
+    result = _cascade_passive_alive(graph, graph.components["FB2"])
+    assert result["dead_comps"] == frozenset()
+    assert result["dead_rails"] == frozenset()
+    assert result["shorted_rails"] == frozenset()
+    assert result["anomalous_comps"] == frozenset()
+    assert result["hot_comps"] == frozenset()
+
+
+def test_cascade_filter_open_identical_to_series_open():
+    """FB filter open → same behavior as a series element open."""
+    from api.pipeline.schematic.hypothesize import (
+        _cascade_filter_open, _cascade_series_open,
+    )
+    graph = _fb_graph()
+    fb = graph.components["FB2"]
+    a = _cascade_filter_open(graph, fb)
+    b = _cascade_series_open(graph, fb)
+    assert a == b
