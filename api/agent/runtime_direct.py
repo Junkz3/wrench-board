@@ -308,10 +308,11 @@ async def _dispatch_mb_tool(
             metrics_comps=payload.get("metrics_comps"),
             metrics_rails=payload.get("metrics_rails"),
             max_results=payload.get("max_results", 5),
-            repair_id=session_id if not any([
-                payload.get("state_comps"), payload.get("state_rails"),
-                payload.get("metrics_comps"), payload.get("metrics_rails"),
-            ]) else payload.get("repair_id"),
+            # Always pass the session's repair_id — it scopes the
+            # diagnosis_log.jsonl hook (for field-corpus calibration) and
+            # is the fallback for journal-based synthesis when the agent
+            # didn't supply explicit state/metrics.
+            repair_id=payload.get("repair_id") or session_id,
         )
     if name == "mb_record_measurement":
         from api.tools.measurements import mb_record_measurement as _mb_rec
@@ -546,14 +547,13 @@ async def run_diagnostic_session_direct(
             # as ordinary messages. Synthesise a user-role prompt that asks
             # the agent to summarise fixes and call mb_validate_finding.
             if isinstance(incoming, dict) and incoming.get("type") == "validation.start":
-                trig_repair_id = incoming.get("repair_id") or repair_id or ""
                 user_text = (
-                    "[Action tech — Marquer fix] "
-                    f"L'utilisateur vient de confirmer que la repair {trig_repair_id} est résolue. "
-                    "Relis l'historique du chat + les mesures récentes, résume en une phrase "
-                    "les composants remplacés / réparés, puis appelle `mb_validate_finding` "
-                    "avec les `fixes` confirmés. Si ambigu, demande clarification au tech "
-                    "avant d'appeler l'outil."
+                    "J'ai fini cette réparation. Peux-tu résumer en une phrase "
+                    "quel(s) composant(s) j'ai réparé ou remplacé à partir de "
+                    "l'historique de notre discussion et des mesures prises, "
+                    "puis enregistrer le résultat avec l'outil "
+                    "`mb_validate_finding` ? Si tu as un doute sur un refdes ou "
+                    "un mode, demande-moi avant d'appeler l'outil."
                 )
                 if resolved_conv_id:
                     append_event(

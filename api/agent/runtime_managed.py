@@ -271,10 +271,11 @@ async def _dispatch_tool(
             metrics_comps=payload.get("metrics_comps"),
             metrics_rails=payload.get("metrics_rails"),
             max_results=payload.get("max_results", 5),
-            repair_id=repair_id if not any([
-                payload.get("state_comps"), payload.get("state_rails"),
-                payload.get("metrics_comps"), payload.get("metrics_rails"),
-            ]) else payload.get("repair_id"),
+            # Always pass the session's repair_id — it scopes the
+            # diagnosis_log.jsonl hook (for field-corpus calibration) and
+            # is the fallback for journal-based synthesis when the agent
+            # didn't supply explicit state/metrics.
+            repair_id=payload.get("repair_id") or repair_id,
         )
     if name == "mb_record_measurement":
         from api.tools.measurements import mb_record_measurement as _mb_rec
@@ -814,14 +815,13 @@ async def _forward_ws_to_session(
         # ordinary messages. Synthesise a user-role prompt that asks the agent
         # to summarise fixes and call mb_validate_finding.
         if payload.get("type") == "validation.start":
-            trig_repair_id = payload.get("repair_id") or repair_id or ""
             text = (
-                "[Action tech — Marquer fix] "
-                f"L'utilisateur vient de confirmer que la repair {trig_repair_id} est résolue. "
-                "Relis l'historique du chat + les mesures récentes, résume en une phrase "
-                "les composants remplacés / réparés, puis appelle `mb_validate_finding` "
-                "avec les `fixes` confirmés. Si ambigu, demande clarification au tech "
-                "avant d'appeler l'outil."
+                "J'ai fini cette réparation. Peux-tu résumer en une phrase "
+                "quel(s) composant(s) j'ai réparé ou remplacé à partir de "
+                "l'historique de notre discussion et des mesures prises, "
+                "puis enregistrer le résultat avec l'outil "
+                "`mb_validate_finding` ? Si tu as un doute sur un refdes ou "
+                "un mode, demande-moi avant d'appeler l'outil."
             )
             if repair_id and conv_id and device_slug and memory_root:
                 append_event(
@@ -894,6 +894,13 @@ async def _forward_session_to_ws(
     # context manager — otherwise we get `TypeError: 'coroutine' object
     # does not support the asynchronous context manager protocol`.
     stream_ctx = await client.beta.sessions.events.stream(session_id)
+    # Deduplicate tool-use responses. MA can re-emit `session.status_idle`
+    # with `stop_reason=requires_action` carrying the SAME event_ids after
+    # we've already sent their `user.custom_tool_result` — a naive re-dispatch
+    # then posts a duplicate response, which MA rejects with 400
+    # ("Invalid user.custom_tool_result event [...] waiting on responses to
+    # events [...]") and tears down the stream. Track ids we've answered.
+    responded_tool_ids: set[str] = set()
     async with stream_ctx as stream:
         async for event in stream:
             etype = getattr(event, "type", None)
@@ -963,9 +970,23 @@ async def _forward_session_to_ws(
                 stop = getattr(event, "stop_reason", None)
                 stop_type = getattr(stop, "type", None) if stop is not None else None
                 if stop_type != "requires_action":
+                    # Agent finished its tech-turn and is waiting for the
+                    # next user.message. Expose this as an explicit signal
+                    # for WS clients that need to know when it's safe to
+                    # send the next user input (bench scripts, automated
+                    # tests). UI chat clients can ignore it.
+                    await ws.send_json({
+                        "type": "turn_complete",
+                        "stop_reason": stop_type,
+                    })
                     continue
                 event_ids = getattr(stop, "event_ids", None) or []
                 for eid in event_ids:
+                    if eid in responded_tool_ids:
+                        # MA re-emitted a requires_action whose event_ids
+                        # include ones we already responded to. Skip —
+                        # responding twice yields HTTP 400.
+                        continue
                     tool_event = events_by_id.get(eid)
                     if tool_event is None:
                         logger.warning(
@@ -995,6 +1016,7 @@ async def _forward_session_to_ws(
                             }
                         ],
                     )
+                    responded_tool_ids.add(eid)
 
             elif etype == "session.status_terminated":
                 await ws.send_json({"type": "session_terminated"})
