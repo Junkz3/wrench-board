@@ -27,6 +27,22 @@
     <span class="dot"></span>
     <span id="llmStatusText">inactif</span>
     <span class="device-tag" id="llmDevice" style="display:none"></span>
+
+    <div class="conv-wrap">
+      <button class="conv-chip" id="llmConvChip" aria-haspopup="menu" aria-expanded="false" title="Conversations">
+        <span class="conv-label" id="llmConvLabel">CONV 1/1</span>
+        <svg class="chevron-down" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div class="conv-popover" id="llmConvPopover" role="menu" hidden>
+        <div class="conv-list" id="llmConvList"></div>
+        <div class="conv-popover-sep"></div>
+        <button class="conv-new" id="llmConvNew" type="button">
+          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+          Nouvelle conversation
+        </button>
+      </div>
+    </div>
+
     <span class="cost-total" id="llmCostTotal" style="display:none">$0.00</span>
   </div>
   <div class="llm-log" id="llmLog" aria-live="polite"></div>

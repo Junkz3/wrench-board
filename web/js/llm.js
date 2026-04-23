@@ -15,6 +15,14 @@
 
 let ws = null;
 let currentTier = "fast";
+// Multi-conversation state. `currentConvId` is captured from session_ready.
+// `conversationsCache` backs the popover render. `pendingConvParam` is the
+// ?conv value to use on the next connect() — "new" to force a fresh conv,
+// a concrete id to target an existing one, null to let the backend resolve
+// to the active conv.
+let currentConvId = null;
+let conversationsCache = [];
+let pendingConvParam = null;
 // Session cost accumulator — reset on each (re)connect. The backend emits
 // `turn_cost` after every agent inference turn; we attach a chip to the most
 // recent assistant message and bump the running total in the status bar.
@@ -443,11 +451,12 @@ function currentRepairId() {
   return new URLSearchParams(window.location.search).get("repair") || null;
 }
 
-function wsURL(slug, tier, repairId) {
+function wsURL(slug, tier, repairId, convParam) {
   const scheme = window.location.protocol === "https:" ? "wss" : "ws";
   const params = new URLSearchParams();
   if (tier) params.set("tier", tier);
   if (repairId) params.set("repair", repairId);
+  if (convParam) params.set("conv", convParam);
   const q = params.toString() ? `?${params.toString()}` : "";
   return `${scheme}://${window.location.host}/ws/diagnostic/${encodeURIComponent(slug)}${q}`;
 }
@@ -488,8 +497,10 @@ function connect() {
   sessionTurns = 0;
   lastTurnCostUsd = 0;
   currentTurn = null;
+  currentConvId = null;
   updateCostTotal();
-  const url = wsURL(slug, currentTier, repairId);
+  const url = wsURL(slug, currentTier, repairId, pendingConvParam);
+  pendingConvParam = null;  // consume after this connect
   statusTone("connecting", `connexion · ${slug} · ${currentTier}`);
 
   try {
@@ -535,6 +546,8 @@ function connect() {
         const sub = el("llmSubline");
         if (sub) sub.textContent = `${model} · ${mode}${rid}`;
         logSys(`session prête — ${mode} · ${model}${rid}`);
+        currentConvId = payload.conv_id || null;
+        loadConversations();
         break;
       }
       case "history_replay_start":
@@ -587,6 +600,8 @@ function connect() {
         sessionTurns += 1;
         updateCostTotal();
         if (currentTurn) appendTurnFoot(currentTurn, payload);
+        clearTimeout(window._llmConvRefreshT);
+        window._llmConvRefreshT = setTimeout(() => loadConversations(), 500);
         break;
       case "error":
         logSys(`erreur : ${payload.text}`, true);
@@ -639,6 +654,7 @@ function switchTier(newTier) {
     try { ws.close(); } catch (_) { /* ignore */ }
   }
   ws = null;
+  pendingConvParam = "new";  // new tier = new conversation
   connect();
 }
 
@@ -653,6 +669,107 @@ export function openLLMPanelIfRepairParam() {
     // llmInput, llmToggle, etc.) and the status bar has mounted.
     requestAnimationFrame(() => openPanel());
   }
+}
+
+// ============ Conversation switcher helpers ============
+
+async function loadConversations() {
+  const rid = currentRepairId();
+  if (!rid) { conversationsCache = []; renderConvItems(); return; }
+  try {
+    const res = await fetch(`/pipeline/repairs/${encodeURIComponent(rid)}/conversations`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    conversationsCache = Array.isArray(data.conversations) ? data.conversations : [];
+    renderConvItems();
+  } catch (err) {
+    console.warn("[llm] loadConversations failed", err);
+  }
+}
+
+function renderConvItems() {
+  const list = el("llmConvList");
+  const label = el("llmConvLabel");
+  if (!list || !label) return;
+  list.innerHTML = "";
+  if (conversationsCache.length === 0) {
+    label.textContent = "CONV 0/0";
+    return;
+  }
+  const activeIdx = Math.max(0, conversationsCache.findIndex(c => c.id === currentConvId));
+  label.textContent = `CONV ${activeIdx + 1}/${conversationsCache.length}`;
+  conversationsCache.forEach((c, idx) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "conv-item" + (c.id === currentConvId ? " active" : "");
+    btn.dataset.convId = c.id;
+    const tier = (c.tier || "fast").toLowerCase();
+    const title = escapeHTML((c.title || `Conversation ${idx + 1}`).slice(0, 80));
+    const cost = Number(c.cost_usd || 0);
+    const ago = c.last_turn_at ? humanAgo(c.last_turn_at) : "—";
+    btn.innerHTML =
+      `<span class="conv-item-head">` +
+        `<span class="conv-item-tier t-${tier}">${tier.toUpperCase()}</span>` +
+        `<span class="conv-item-title">${title}</span>` +
+      `</span>` +
+      `<span class="conv-item-meta">` +
+        `<span>${c.turns || 0} turn${(c.turns || 0) === 1 ? "" : "s"}</span>` +
+        `<span class="conv-item-sep">·</span>` +
+        `<span>${fmtUsd(cost)}</span>` +
+        `<span class="conv-item-sep">·</span>` +
+        `<span>${ago}</span>` +
+      `</span>`;
+    btn.addEventListener("click", () => {
+      if (c.id === currentConvId) { closeConvPopover(); return; }
+      switchConv(c.id);
+      closeConvPopover();
+    });
+    list.appendChild(btn);
+  });
+}
+
+function humanAgo(iso) {
+  try {
+    const then = new Date(iso).getTime();
+    const diff = Math.max(0, Date.now() - then) / 1000;
+    if (diff < 60) return `il y a ${Math.floor(diff)} s`;
+    if (diff < 3600) return `il y a ${Math.floor(diff / 60)} min`;
+    if (diff < 86400) return `il y a ${Math.floor(diff / 3600)} h`;
+    return `il y a ${Math.floor(diff / 86400)} j`;
+  } catch { return "—"; }
+}
+
+function switchConv(convIdOrNew) {
+  if (convIdOrNew === currentConvId) return;
+  logSys(`→ changement de conversation : ${convIdOrNew}`);
+  if (ws && ws.readyState <= 1) {
+    try { ws.close(); } catch (_) {}
+  }
+  ws = null;
+  // Route connect() to target the requested conv on reopen.
+  pendingConvParam = convIdOrNew;
+  connect();
+}
+
+function openConvPopover() {
+  const chip = el("llmConvChip");
+  const pop = el("llmConvPopover");
+  if (!chip || !pop) return;
+  loadConversations(); // refresh on open
+  pop.hidden = false;
+  chip.setAttribute("aria-expanded", "true");
+}
+function closeConvPopover() {
+  const chip = el("llmConvChip");
+  const pop = el("llmConvPopover");
+  if (!chip || !pop) return;
+  pop.hidden = true;
+  chip.setAttribute("aria-expanded", "false");
+}
+function toggleConvPopover() {
+  const pop = el("llmConvPopover");
+  if (!pop) return;
+  if (pop.hidden) openConvPopover(); else closeConvPopover();
 }
 
 // Fetch the chat panel fragment from web/llm_panel.html and inject it
@@ -719,6 +836,31 @@ export async function initLLMPanel() {
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && tierPopover && !tierPopover.hidden) {
       closeTierPopover();
+    }
+  });
+
+  // Conversation chip + popover.
+  const convChip = el("llmConvChip");
+  const convPopover = el("llmConvPopover");
+  const convNew = el("llmConvNew");
+  convChip?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    toggleConvPopover();
+  });
+  convNew?.addEventListener("click", () => {
+    switchConv("new");
+    closeConvPopover();
+  });
+  document.addEventListener("click", (e) => {
+    if (convPopover && !convPopover.hidden &&
+        !convPopover.contains(e.target) && e.target !== convChip &&
+        !convChip?.contains(e.target)) {
+      closeConvPopover();
+    }
+  }, true);
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && convPopover && !convPopover.hidden) {
+      closeConvPopover();
     }
   });
 

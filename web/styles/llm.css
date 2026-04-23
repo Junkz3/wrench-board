@@ -5,7 +5,7 @@
    machine payload (tool calls, IDs), Inter for prose. */
 
 .llm-panel{
-  position:fixed;top:48px;right:0;bottom:28px;width:420px;
+  position:fixed;top:48px;right:0;bottom:0;width:420px;
   background:linear-gradient(180deg,var(--bg-2),var(--bg));
   border-left:1px solid var(--border);
   display:none;flex-direction:column;z-index:24;
@@ -460,3 +460,98 @@ body.llm-open .stub{right:420px}
 .llm-log .cost-chip { display: none; }
 /* User row's label (e.g. "Toi") is redundant next to the cyan left border. */
 .llm-log .msg.user .role { display: none; }
+
+/* ============ Conversation chip + popover ============ */
+.conv-wrap { position: relative; display: inline-block; }
+
+.conv-chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 7px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all .15s;
+  font-family: var(--mono); font-size: 10px; letter-spacing: .4px;
+  color: var(--text-2);
+  text-transform: uppercase;
+}
+.conv-chip:hover { color: var(--text); border-color: #2e4468; }
+.conv-chip .chevron-down { transition: transform .15s; opacity: .7; }
+.conv-chip[aria-expanded="true"] .chevron-down { transform: rotate(180deg); }
+
+.conv-popover {
+  position: absolute; top: calc(100% + 6px); left: 0;
+  min-width: 280px; max-width: 340px; z-index: 40;
+  background: rgba(20,32,48,.96);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--border); border-radius: 7px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.35);
+  padding: 6px;
+  display: flex; flex-direction: column; gap: 2px;
+}
+.conv-popover[hidden] { display: none; }
+.conv-popover-sep {
+  height: 1px; background: var(--border-soft);
+  margin: 6px -2px 4px;
+}
+
+.conv-list { display: flex; flex-direction: column; gap: 2px; max-height: 300px; overflow-y: auto; }
+.conv-list::-webkit-scrollbar { width: 6px; }
+.conv-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+.conv-item {
+  display: flex; flex-direction: column; gap: 3px;
+  padding: 8px 10px;
+  background: transparent; border: 1px solid transparent;
+  border-left: 2px solid transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  text-align: left;
+  color: var(--text-2);
+  font-family: inherit;
+  transition: background .15s, border-color .15s;
+}
+.conv-item:hover { background: var(--panel-2); color: var(--text); }
+.conv-item.active {
+  background: rgba(192,132,252,.08);
+  border-left-color: var(--violet);
+  color: var(--text);
+}
+.conv-item-head {
+  display: flex; align-items: center; gap: 6px; min-width: 0;
+}
+.conv-item-tier {
+  font-family: var(--mono); font-size: 9px; letter-spacing: .4px;
+  text-transform: uppercase;
+  padding: 1px 5px; border-radius: 3px;
+  flex-shrink: 0;
+}
+.conv-item-tier.t-fast   { color: var(--emerald); background: rgba(52,211,153,.08); border: 1px solid rgba(52,211,153,.3); }
+.conv-item-tier.t-normal { color: var(--cyan);    background: rgba(56,189,248,.08); border: 1px solid rgba(56,189,248,.3); }
+.conv-item-tier.t-deep   { color: var(--violet);  background: rgba(192,132,252,.08); border: 1px solid rgba(192,132,252,.3); }
+
+.conv-item-title {
+  font-size: 12px; flex: 1;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.conv-item-meta {
+  font-family: var(--mono); font-size: 9.5px;
+  color: var(--text-3); letter-spacing: .3px;
+  display: flex; gap: 6px;
+}
+.conv-item-meta .conv-item-sep { opacity: .5; }
+
+.conv-new {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: transparent; border: 1px dashed rgba(192,132,252,.35);
+  padding: 7px 10px; border-radius: 5px;
+  cursor: pointer;
+  color: var(--violet); font-family: inherit; font-size: 12px;
+  transition: background .15s, border-color .15s;
+}
+.conv-new:hover {
+  background: rgba(192,132,252,.08);
+  border-color: rgba(192,132,252,.6);
+  border-style: solid;
+}
