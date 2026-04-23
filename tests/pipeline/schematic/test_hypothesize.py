@@ -6,16 +6,28 @@ from __future__ import annotations
 import pytest  # noqa: F401 — used by later parametrised tests
 
 from api.pipeline.schematic.hypothesize import (
+    PENALTY_WEIGHTS,
+    TOP_K_SINGLE,
     Hypothesis,
     HypothesisDiff,
     HypothesisMetrics,
     HypothesizeResult,
     Observations,
-    PENALTY_WEIGHTS,
     PruningStats,
-    TOP_K_SINGLE,
     _score_candidate,
     hypothesize,
+)
+from api.pipeline.schematic.schemas import (
+    AnalyzedBootPhase,
+    AnalyzedBootSequence,
+    AnalyzedBootTrigger,
+    BootPhase,
+    ComponentNode,
+    ElectricalGraph,
+    NetNode,
+    PagePin,
+    PowerRail,
+    SchematicQualityReport,
 )
 
 
@@ -179,19 +191,6 @@ def test_score_empty_observations_gives_zero():
 # ---------------------------------------------------------------------------
 # Task 3 — single-fault enumeration tests
 # ---------------------------------------------------------------------------
-
-from api.pipeline.schematic.schemas import (
-    AnalyzedBootPhase,
-    AnalyzedBootSequence,
-    AnalyzedBootTrigger,
-    BootPhase,
-    ComponentNode,
-    ElectricalGraph,
-    NetNode,
-    PagePin,
-    PowerRail,
-    SchematicQualityReport,
-)
 
 
 def _mini_graph() -> ElectricalGraph:
