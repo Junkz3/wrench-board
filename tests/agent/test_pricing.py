@@ -15,10 +15,10 @@ def test_haiku_simple_turn_cost():
 
 
 def test_opus_turn_cost_higher():
-    # Opus is 15× more expensive than Haiku on input, same 10k + 2k
-    # 10k * $15/MTok + 2k * $75/MTok = $0.15 + $0.15 = $0.30
+    # Opus 4.7 at $5 / $25 per MTok (the post-4.5 tier, not the legacy
+    # $15/$75 of Opus 4.1). 10k input + 2k output = $0.05 + $0.05 = $0.10
     cost = compute_turn_cost("claude-opus-4-7", input_tokens=10_000, output_tokens=2_000)
-    assert abs(cost["cost_usd"] - 0.30) < 1e-6
+    assert abs(cost["cost_usd"] - 0.10) < 1e-6
 
 
 def test_cache_read_cheaper_than_fresh_input():
