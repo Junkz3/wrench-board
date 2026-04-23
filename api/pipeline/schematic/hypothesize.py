@@ -233,7 +233,9 @@ def _simulate_failure(
         c["anomalous_comps"] = frozenset({refdes} | downstream)
         return c
     if mode == "hot":
-        raise NotImplementedError("hot lands in Task 4")
+        c = _empty_cascade()
+        c["hot_comps"] = frozenset({refdes})
+        return c
     if mode == "shorted":
         raise NotImplementedError("shorted lands in Task 5")
     raise ValueError(f"unknown failure mode: {mode!r}")

@@ -188,10 +188,9 @@ def test_simulate_failure_unknown_mode_raises():
         _simulate_failure(_mini_graph(), _mini_boot(), "U7", "bogus")
 
 
-def test_simulate_failure_anomalous_and_hot_pending():
-    for mode in ("hot", "shorted"):
-        with pytest.raises(NotImplementedError):
-            _simulate_failure(_mini_graph(), _mini_boot(), "U7", mode)
+def test_simulate_failure_shorted_pending():
+    with pytest.raises(NotImplementedError):
+        _simulate_failure(_mini_graph(), _mini_boot(), "U7", "shorted")
 
 
 from api.pipeline.schematic.hypothesize import _propagate_signal_downstream
@@ -262,3 +261,13 @@ def test_simulate_failure_anomalous_isolated_component():
     c = _simulate_failure(g, _mini_boot(), "U7", "anomalous")
     # U7 alone (no downstream signal) — only itself marked.
     assert c["anomalous_comps"] == frozenset({"U7"})
+
+
+def test_simulate_failure_hot_is_self_only():
+    g = _mini_graph()
+    c = _simulate_failure(g, _mini_boot(), "U7", "hot")
+    assert c["hot_comps"] == frozenset({"U7"})
+    assert c["dead_comps"] == frozenset()
+    assert c["dead_rails"] == frozenset()
+    assert c["anomalous_comps"] == frozenset()
+    assert c["shorted_rails"] == frozenset()
