@@ -281,6 +281,110 @@ def _simulate_failure(
 
 
 # ---------------------------------------------------------------------------
+# Scoring — mode-aware F1-style soft-penalty function
+# ---------------------------------------------------------------------------
+
+
+def _score_candidate(
+    cascade: dict,
+    obs: Observations,
+) -> tuple[float, HypothesisMetrics, HypothesisDiff]:
+    """Score a candidate cascade against observations.
+
+    Works off the 5-bucket cascade returned by _simulate_failure. Unlike
+    the v1 engine this one matches PER MODE:
+
+    - Each observation target has an expected mode.
+    - Each cascade bucket implies a predicted mode for some refdes/rail.
+    - TP = same mode observed AND predicted.
+    - FP = predicted non-alive but observed alive OR mode mismatch between
+           two non-alive modes.
+    - FN = observed non-alive but predicted alive (target not in any cascade
+           bucket).
+    - Over-predicted = predicted non-alive but no observation exists.
+    """
+    fp_w, fn_w = PENALTY_WEIGHTS
+
+    # Build per-target predicted mode maps.
+    predicted_comps: dict[str, str] = {}
+    for r in cascade["dead_comps"]:
+        predicted_comps[r] = "dead"
+    for r in cascade["anomalous_comps"]:
+        predicted_comps[r] = "anomalous"
+    for r in cascade["hot_comps"]:
+        # hot wins over anomalous if both (unusual, keep for safety)
+        predicted_comps[r] = "hot"
+    predicted_rails: dict[str, str] = {}
+    for rail in cascade["dead_rails"]:
+        predicted_rails[rail] = "dead"
+    for rail in cascade["shorted_rails"]:
+        predicted_rails[rail] = "shorted"  # shorted wins over dead
+
+    contradictions: list[tuple[str, str, str]] = []
+    under_explained: list[str] = []
+    tp_c = fp_c = fn_c = 0
+    tp_r = fp_r = fn_r = 0
+
+    # Components
+    for refdes, obs_mode in obs.state_comps.items():
+        pred_mode = predicted_comps.get(refdes, "alive")
+        if pred_mode == obs_mode:
+            tp_c += 1
+        elif obs_mode == "alive" and pred_mode != "alive":
+            fp_c += 1
+            contradictions.append((refdes, obs_mode, pred_mode))
+        elif obs_mode != "alive" and pred_mode == "alive":
+            fn_c += 1
+            under_explained.append(refdes)
+        else:
+            # Both non-alive, different modes — soft mismatch counted as FP.
+            fp_c += 1
+            contradictions.append((refdes, obs_mode, pred_mode))
+
+    # Rails
+    for rail, obs_mode in obs.state_rails.items():
+        pred_mode = predicted_rails.get(rail, "alive")
+        if pred_mode == obs_mode:
+            tp_r += 1
+        elif obs_mode == "alive" and pred_mode != "alive":
+            fp_r += 1
+            contradictions.append((rail, obs_mode, pred_mode))
+        elif obs_mode != "alive" and pred_mode == "alive":
+            fn_r += 1
+            under_explained.append(rail)
+        else:
+            fp_r += 1
+            contradictions.append((rail, obs_mode, pred_mode))
+
+    # Over-predicted: non-alive predicted for targets not in any observation.
+    observed_keys = set(obs.state_comps) | set(obs.state_rails)
+    over_predicted: list[tuple[str, str]] = []
+    for refdes, mode in predicted_comps.items():
+        if refdes not in observed_keys:
+            over_predicted.append((refdes, mode))
+    for rail, mode in predicted_rails.items():
+        if rail not in observed_keys:
+            over_predicted.append((rail, mode))
+    over_predicted.sort()
+
+    metrics = HypothesisMetrics(
+        tp_comps=tp_c, tp_rails=tp_r,
+        fp_comps=fp_c, fp_rails=fp_r,
+        fn_comps=fn_c, fn_rails=fn_r,
+    )
+    tp = tp_c + tp_r
+    fp = fp_c + fp_r
+    fn = fn_c + fn_r
+    score = float(tp - fp_w * fp - fn_w * fn)
+    diff = HypothesisDiff(
+        contradictions=sorted(contradictions),
+        under_explained=sorted(under_explained),
+        over_predicted=over_predicted,
+    )
+    return score, metrics, diff
+
+
+# ---------------------------------------------------------------------------
 # Public entry point
 # ---------------------------------------------------------------------------
 

@@ -290,3 +290,81 @@ def test_simulate_failure_shorted_orphan_consumer_returns_self_dead():
     assert c["dead_comps"] == frozenset({"U99"})
     assert c["shorted_rails"] == frozenset()
     assert c["hot_comps"] == frozenset()
+
+
+from api.pipeline.schematic.hypothesize import _score_candidate
+
+
+def test_score_perfect_match_dead():
+    obs = Observations(
+        state_comps={"U1": "dead", "U7": "alive"},
+        state_rails={"+3V3": "dead", "+5V": "alive"},
+    )
+    cascade = _empty_cascade()
+    cascade["dead_comps"] = frozenset({"U1"})
+    cascade["dead_rails"] = frozenset({"+3V3"})
+    score, metrics, diff = _score_candidate(cascade, obs)
+    # 2 dead match + 2 alive match = 4 TP, 0 FP, 0 FN
+    assert metrics.tp_comps == 2
+    assert metrics.tp_rails == 2
+    assert metrics.fp_comps == 0
+    assert metrics.fp_rails == 0
+    assert score == 4.0
+    assert diff.contradictions == []
+
+
+def test_score_contradiction_cross_mode_costs_10x():
+    # Tech observes U7 anomalous, hypothesis predicts U7 dead — soft mismatch.
+    obs = Observations(state_comps={"U7": "anomalous"})
+    cascade = _empty_cascade()
+    cascade["dead_comps"] = frozenset({"U7"})
+    score, metrics, diff = _score_candidate(cascade, obs)
+    assert metrics.fp_comps == 1
+    assert ("U7", "anomalous", "dead") in diff.contradictions
+    assert score == -10.0   # 0 TP - 10*1 FP - 0 FN
+
+
+def test_score_alive_observed_dead_predicted_is_fn():
+    obs = Observations(state_comps={"U7": "dead"})
+    cascade = _empty_cascade()  # predicts alive
+    score, metrics, diff = _score_candidate(cascade, obs)
+    assert metrics.fn_comps == 1
+    assert "U7" in diff.under_explained
+    assert score == -2.0
+
+
+def test_score_alive_observed_alive_predicted_is_tp():
+    obs = Observations(state_comps={"U7": "alive"})
+    cascade = _empty_cascade()  # predicts alive
+    score, metrics, diff = _score_candidate(cascade, obs)
+    assert metrics.tp_comps == 1
+    assert score == 1.0
+
+
+def test_score_shorted_rail_matches_predicted_shorted():
+    obs = Observations(state_rails={"+5V": "shorted"})
+    cascade = _empty_cascade()
+    cascade["shorted_rails"] = frozenset({"+5V"})
+    score, metrics, diff = _score_candidate(cascade, obs)
+    assert metrics.tp_rails == 1
+    assert score == 1.0
+    assert diff.contradictions == []
+
+
+def test_score_anomalous_rail_predicted_hot_comp_matches_hot_obs():
+    obs = Observations(state_comps={"Q17": "hot"})
+    cascade = _empty_cascade()
+    cascade["hot_comps"] = frozenset({"Q17"})
+    score, _, diff = _score_candidate(cascade, obs)
+    assert score == 1.0
+    assert diff.contradictions == []
+
+
+def test_score_over_predicted_not_penalised():
+    obs = Observations(state_comps={"U1": "dead"})
+    cascade = _empty_cascade()
+    cascade["dead_comps"] = frozenset({"U1", "U99"})  # U99 not in obs
+    score, metrics, diff = _score_candidate(cascade, obs)
+    assert metrics.fp_comps == 0
+    assert ("U99", "dead") in diff.over_predicted
+    assert score == 1.0
