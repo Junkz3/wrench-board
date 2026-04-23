@@ -103,13 +103,41 @@ mis à disposition :
 Le device en cours est fourni dans le premier message user (slug +
 display name), ainsi que le bloc <technician_profile> décrivant le tech.
 LIS ce bloc avant ta première réponse et adapte-toi à lui. Quand
-l'utilisateur décrit des symptômes, consulte d'abord mb_list_findings
-puis enchaîne mb_get_rules_for_symptoms.
+l'utilisateur décrit des symptômes, consulte d'abord l'historique de
+réparations (voir bloc MÉMOIRE ci-dessous) puis enchaîne
+mb_get_rules_for_symptoms.
 Si 0 résultat → **PROPOSE** mb_expand_knowledge (jamais autonome)
 et attends le go du tech. Quand il demande un composant par refdes,
 valide-le.
 Privilégie les causes à haute probabilité et les étapes de diagnostic
 concrètes (mesurer tel voltage sur tel test point).
+
+**MÉMOIRE — deux modes de fonctionnement, exclusifs**
+
+1. **Mode mount** : si MA a attaché un memory store à cette session,
+   il apparaît comme un répertoire `/mnt/memory/{nom_du_store}/` (MA
+   ajoute automatiquement une note au-dessus décrivant le mount).
+   Arborescence :
+     - `/mnt/memory/{store}/field_reports/*.md` : findings confirmés
+       sur les sessions antérieures du même device.
+   En mode mount :
+   - **Lecture historique** : utilise **uniquement** `grep` (pattern
+     refdes ou symptôme) ou `read` directement sur
+     `/mnt/memory/{store}/field_reports/`. **N'appelle JAMAIS
+     `mb_list_findings` dans ce mode** — le mount contient déjà tout
+     et le double lookup te coûte un tool call pour zéro info en plus.
+   - **Écriture** : appelle `mb_record_finding` comme d'habitude. Le
+     serveur écrit sur disque ET mirror automatiquement dans le mount
+     (le nouveau finding sera visible au prochain grep). **N'écris
+     PAS toi-même via `write`** — ce serait une deuxième copie
+     redondante.
+
+2. **Mode disk-only** : si aucun répertoire `/mnt/memory/…` n'est
+   listé dans le prompt, tu es sans mount. Utilise `mb_list_findings`
+   pour lire et `mb_record_finding` pour écrire, comme avant.
+
+Dans les deux modes, les règles du pack restent accessibles via
+`mb_get_rules_for_symptoms` (le mount n'est pas la source des règles).
 """
 
 # Anthropic Managed Agents cap tool descriptions at 1024 chars. Any tool in
@@ -134,7 +162,23 @@ def _ma_filter(tools: list[dict]) -> list[dict]:
     return out
 
 
-TOOLS = _ma_filter(MB_TOOLS + BV_TOOLS + PROFILE_TOOLS)
+# Memory stores are mounted as a directory under /mnt/memory/{store}/ inside
+# the session container; the agent reads and writes them with the standard
+# agent toolset (read / write / edit / grep). Without the toolset the mount
+# is inert. We enable just the filesystem subset; bash + web_* stay off
+# because nothing in the diagnostic workflow needs them and they broaden
+# the attack surface (prompt injection writing through bash, etc.).
+_AGENT_TOOLSET = {
+    "type": "agent_toolset_20260401",
+    "default_config": {"enabled": False},
+    "configs": [
+        {"name": "read", "enabled": True},
+        {"name": "write", "enabled": True},
+        {"name": "edit", "enabled": True},
+        {"name": "grep", "enabled": True},
+    ],
+}
+TOOLS = _ma_filter(MB_TOOLS + BV_TOOLS + PROFILE_TOOLS) + [_AGENT_TOOLSET]
 
 TIERS = {
     "fast":   {"model": "claude-haiku-4-5",  "name": "microsolder-coordinator-fast"},
