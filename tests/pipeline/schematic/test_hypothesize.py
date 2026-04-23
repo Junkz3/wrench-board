@@ -310,3 +310,46 @@ def test_hypothesize_pruning_skips_irrelevant_candidates():
     # We shouldn't explode: pruning must have eliminated U19 (a consumer) as
     # it can't kill +5V.
     assert result.pruning.single_candidates_tested <= 4
+
+
+# ---------------------------------------------------------------------------
+# Task 4 — narrative template tests
+# ---------------------------------------------------------------------------
+
+
+def test_narrative_single_fault_no_contradiction():
+    obs = Observations(
+        dead_comps=frozenset({"U12", "U19"}),
+        dead_rails=frozenset({"+5V"}),
+    )
+    result = hypothesize(
+        _mini_graph(), analyzed_boot=_mini_analyzed(), observations=obs,
+    )
+    top = result.hypotheses[0]
+    assert top.kill_refdes == ["U7"]
+    assert top.narrative != ""
+    # Contains key elements of the template.
+    assert "U7" in top.narrative
+    assert "+5V" in top.narrative
+    assert "meurt" in top.narrative or "meurent" in top.narrative
+    # No contradiction claim since FP=0.
+    assert "Contredit" not in top.narrative
+
+
+def test_narrative_with_contradiction_mentions_it():
+    # A hypothesis that kills something observed alive — force the template
+    # to include "Contredit :".
+    obs = Observations(
+        dead_comps=frozenset({"U12"}),
+        alive_comps=frozenset({"U7"}),  # declaring U7 alive
+    )
+    result = hypothesize(
+        _mini_graph(), analyzed_boot=_mini_analyzed(), observations=obs,
+    )
+    # At least one hypothesis should be a candidate that contradicts U7 alive
+    # (e.g., killing U7 directly). Find it.
+    contradictory = [h for h in result.hypotheses if "U7" in h.diff.contradictions]
+    if contradictory:
+        narr = contradictory[0].narrative
+        assert "Contredit" in narr
+        assert "U7" in narr

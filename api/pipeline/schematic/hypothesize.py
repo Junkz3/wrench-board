@@ -208,6 +208,46 @@ def _relevant_to_observations(
     return False
 
 
+def _narrate(
+    kill_refdes: list[str],
+    cascade: dict,
+    metrics: HypothesisMetrics,
+    diff: HypothesisDiff,
+    observations: Observations,
+) -> str:
+    """Deterministic FR narrative for one hypothesis. No LLM."""
+    obs_total = (
+        len(observations.dead_comps) + len(observations.alive_comps)
+        + len(observations.dead_rails) + len(observations.alive_rails)
+    )
+    tp = metrics.tp_comps + metrics.tp_rails
+    fp = metrics.fp_comps + metrics.fp_rails
+    dead_rails_preview = ", ".join(sorted(cascade["dead_rails"])[:3]) or "aucun rail"
+    dead_count = max(0, len(cascade["dead_comps"]) - len(kill_refdes))
+
+    if len(kill_refdes) == 1:
+        head = (
+            f"Si {kill_refdes[0]} meurt : {dead_rails_preview} jamais stable(s) "
+            f"→ {dead_count} composant(s) downstream morts."
+        )
+    else:
+        joined = " ET ".join(kill_refdes)
+        head = (
+            f"Si {joined} meurent simultanément : {dead_rails_preview} jamais "
+            f"stable(s) → {dead_count} composant(s) downstream morts."
+        )
+
+    coverage = f" Explique {tp}/{obs_total} observations, {fp} contradiction(s)."
+
+    tail = ""
+    if diff.contradictions:
+        tail += f" Contredit : {', '.join(diff.contradictions[:4])}."
+    if diff.under_explained:
+        tail += f" Ne couvre pas : {', '.join(diff.under_explained[:4])}."
+
+    return head + coverage + tail
+
+
 def _enumerate_single_fault(
     electrical: ElectricalGraph,
     analyzed_boot: AnalyzedBootSequence | None,
@@ -279,7 +319,13 @@ def hypothesize(
             score=score,
             metrics=metrics,
             diff=diff,
-            narrative="",  # filled in Task 4
+            narrative=_narrate(
+                kill_refdes=[refdes],
+                cascade=cascade,
+                metrics=metrics,
+                diff=diff,
+                observations=observations,
+            ),
             cascade_preview={
                 "dead_rails": sorted(cascade["dead_rails"]),
                 "dead_comps_count": len(cascade["dead_comps"]),
