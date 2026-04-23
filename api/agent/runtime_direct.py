@@ -36,6 +36,7 @@ from api.agent.tools import (
 )
 from api.config import get_settings
 from api.session.state import SessionState
+from api.tools.schematic import mb_schematic_graph
 
 
 def _normalize_message(msg: Any) -> dict[str, Any]:
@@ -266,6 +267,15 @@ async def _dispatch_mb_tool(
             mechanism=payload.get("mechanism"),
             notes=payload.get("notes"),
             session_id=session_id,
+        )
+    if name == "mb_schematic_graph":
+        return mb_schematic_graph(
+            device_slug=device_slug,
+            memory_root=memory_root,
+            query=payload.get("query", ""),
+            label=payload.get("label"),
+            refdes=payload.get("refdes"),
+            index=payload.get("index"),
         )
     if name == "mb_expand_knowledge":
         return await mb_expand_knowledge(

@@ -12,6 +12,9 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
+from api.config import get_settings
 from api.session.state import SessionState
 
 MB_TOOLS: list[dict] = [
@@ -80,6 +83,61 @@ MB_TOOLS: list[dict] = [
                 "notes": {"type": "string"},
             },
             "required": ["refdes", "symptom", "confirmed_cause"],
+        },
+    },
+    {
+        "type": "custom",
+        "name": "mb_schematic_graph",
+        "description": (
+            "Interrogate the compiled electrical graph for this device "
+            "(rails, source ICs, enable signals, consumers, boot sequence). "
+            "Deterministic disk read — no LLM cost, no side-effects. Use it "
+            "BEFORE speculating on power topology. Queries: "
+            "query='rail' with label (e.g. '+5V') returns source_refdes, "
+            "enable_net, consumers, decoupling, voltage_nominal, boot_phase, "
+            "pages; "
+            "query='component' with refdes returns type, value, pins, pages, "
+            "rails_produced, rails_consumed, populated, boot_phase; "
+            "query='downstream' with refdes returns the transitive "
+            "loss-of-power set if that component dies (rails_direct, "
+            "components_direct, rails_transitive, components_transitive); "
+            "query='boot_phase' with index returns that phase's rails and "
+            "components; "
+            "query='list_rails' returns a brief catalogue of every rail; "
+            "query='list_boot' returns a brief catalogue of boot phases. "
+            "Returns {found: false, reason: 'no_schematic_graph'} if the "
+            "schematic hasn't been ingested yet — don't retry, just proceed "
+            "without rail context."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "query": {
+                    "type": "string",
+                    "enum": [
+                        "rail",
+                        "component",
+                        "downstream",
+                        "boot_phase",
+                        "list_rails",
+                        "list_boot",
+                    ],
+                },
+                "label": {
+                    "type": "string",
+                    "description": "Rail label, e.g. '+5V', '+3V3', '24V_IN'. Required for query=rail.",
+                },
+                "refdes": {
+                    "type": "string",
+                    "description": "Component refdes, e.g. 'U7'. Required for query=component or query=downstream.",
+                },
+                "index": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "description": "1-based phase index. Required for query=boot_phase.",
+                },
+            },
+            "required": ["query"],
         },
     },
     {
@@ -266,6 +324,11 @@ def build_tools_manifest(session: SessionState) -> list[dict]:
     return manifest
 
 
+def _has_electrical_graph(device_slug: str) -> bool:
+    root = Path(get_settings().memory_root)
+    return (root / device_slug / "electrical_graph.json").exists()
+
+
 def render_system_prompt(session: SessionState, *, device_slug: str) -> str:
     """Build the system prompt for the DIRECT runtime only.
 
@@ -273,6 +336,11 @@ def render_system_prompt(session: SessionState, *, device_slug: str) -> str:
     and doesn't call this function.
     """
     boardview_status = "✅" if session.board is not None else "❌ (no board file loaded)"
+    schematic_status = (
+        "✅ (mb_schematic_graph)"
+        if _has_electrical_graph(device_slug)
+        else "❌ (not yet parsed)"
+    )
     return f"""\
 You are a calm, methodical board-level diagnostics assistant for a
 microsoldering technician. Tu tutoies, en français, direct et pédagogique.
@@ -283,7 +351,7 @@ Capabilities for this session:
   - memory bank ✅ (mb_get_component, mb_get_rules_for_symptoms,
     mb_list_findings, mb_record_finding, mb_expand_knowledge)
   - boardview {boardview_status}
-  - schematic ❌ (not yet parsed)
+  - schematic {schematic_status}
 
 RÈGLE ANTI-HALLUCINATION : tu NE mentionnes JAMAIS un refdes (U7, C29,
 J3100…) sans l'avoir validé via mb_get_component. Si le tool retourne

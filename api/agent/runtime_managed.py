@@ -45,6 +45,7 @@ from api.agent.tools import (
 )
 from api.config import get_settings
 from api.session.state import SessionState
+from api.tools.schematic import mb_schematic_graph
 
 TierLiteral = Literal["fast", "normal", "deep"]
 DEFAULT_TIER: TierLiteral = "fast"
@@ -93,6 +94,15 @@ async def _dispatch_tool(
             confirmed_cause=payload.get("confirmed_cause", ""),
             memory_root=memory_root, mechanism=payload.get("mechanism"),
             notes=payload.get("notes"), session_id=session_id,
+        )
+    if name == "mb_schematic_graph":
+        return mb_schematic_graph(
+            device_slug=device_slug,
+            memory_root=memory_root,
+            query=payload.get("query", ""),
+            label=payload.get("label"),
+            refdes=payload.get("refdes"),
+            index=payload.get("index"),
         )
     if name == "mb_expand_knowledge":
         return await mb_expand_knowledge(
