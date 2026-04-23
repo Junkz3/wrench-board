@@ -210,7 +210,11 @@ def pack_to_graph_payload(
     # share a label we keep the first as representative and merge rule_ids
     # onto its meta. Edges from discarded actions are remapped to the
     # representative, then deduped so the frontend sees each resolves edge
-    # once.
+    # once. The dedupe key is (source, target, relation) — if two merged
+    # rules contribute a resolves edge with the same endpoints but
+    # different `weight` (per-rule confidence), the first rule's weight
+    # wins. This is intentional: D3's force sim doesn't handle parallel
+    # edges and one weight per (action, symptom) is the right granularity.
     by_label: dict[str, list[dict[str, Any]]] = {}
     for n in nodes:
         if n["type"] == "action":
@@ -218,7 +222,7 @@ def pack_to_graph_payload(
 
     id_remap: dict[str, str] = {}
     discarded: set[str] = set()
-    for label, group in by_label.items():
+    for _label, group in by_label.items():
         if len(group) < 2:
             continue
         rep = group[0]
