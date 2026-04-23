@@ -190,3 +190,57 @@ def test_empty_pack_still_returns_subsystems_field():
         dictionary={"schema_version": "1.0", "entries": []},
     )
     assert payload == {"nodes": [], "edges": [], "subsystems": []}
+
+
+def test_duplicate_action_nodes_are_collapsed():
+    """Two rules targeting the same top-cause refdes → one merged action node
+    with meta.count=2, meta.rule_ids=[...], both rules' symptoms wired to it."""
+    reg = {"schema_version": "1.0", "device_label": "synth",
+           "components": [
+               {"canonical_name": "U5", "description": ""},
+           ], "signals": []}
+    kg = {"schema_version": "1.0", "nodes": [
+        {"id": "cmp_U5", "kind": "component", "label": "U5"},
+    ], "edges": []}
+    rules = {"schema_version": "1.0", "rules": [
+        {"id": "r1", "confidence": 0.8,
+         "symptoms": ["symptom alpha"],
+         "likely_causes": [{"refdes": "U5", "probability": 0.9,
+                            "mechanism": "die failure"}]},
+        {"id": "r2", "confidence": 0.7,
+         "symptoms": ["symptom beta"],
+         "likely_causes": [{"refdes": "U5", "probability": 0.8,
+                            "mechanism": "die damage"}]},
+    ]}
+    payload = pack_to_graph_payload(
+        registry=reg, knowledge_graph=kg, rules=rules,
+        dictionary={"schema_version": "1.0", "entries": []},
+    )
+
+    actions = [n for n in payload["nodes"] if n["type"] == "action"]
+    # Both rules synthesize the same label "Replace U5" → collapsed to one node.
+    assert len(actions) == 1
+    a = actions[0]
+    assert a["label"] == "Replace U5"
+    assert a["meta"]["count"] == 2
+    assert set(a["meta"]["rule_ids"]) == {"r1", "r2"}
+
+    # Both symptoms resolved by the single merged action.
+    resolves = [e for e in payload["edges"] if e["relation"] == "resolves"]
+    assert len(resolves) == 2
+    assert all(e["source"] == a["id"] for e in resolves)
+
+
+def test_single_rule_action_keeps_original_shape():
+    """A rule with a unique label MUST NOT gain count/rule_ids meta keys."""
+    payload = pack_to_graph_payload(
+        registry=_load("registry.json"),
+        knowledge_graph=_load("knowledge_graph.json"),
+        rules=_load("rules.json"),
+        dictionary=_load("dictionary.json"),
+    )
+    actions = [n for n in payload["nodes"] if n["type"] == "action"]
+    assert len(actions) == 1
+    assert "count" not in actions[0]["meta"]
+    assert "rule_ids" not in actions[0]["meta"]
+    assert actions[0]["meta"]["rule_id"] == "rule-demo-001"

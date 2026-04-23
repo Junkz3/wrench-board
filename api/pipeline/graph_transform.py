@@ -206,6 +206,45 @@ def pack_to_graph_payload(
                 }
             )
 
+    # 5b. Collapse duplicate action nodes by label. When two or more actions
+    # share a label we keep the first as representative and merge rule_ids
+    # onto its meta. Edges from discarded actions are remapped to the
+    # representative, then deduped so the frontend sees each resolves edge
+    # once.
+    by_label: dict[str, list[dict[str, Any]]] = {}
+    for n in nodes:
+        if n["type"] == "action":
+            by_label.setdefault(n["label"], []).append(n)
+
+    id_remap: dict[str, str] = {}
+    discarded: set[str] = set()
+    for label, group in by_label.items():
+        if len(group) < 2:
+            continue
+        rep = group[0]
+        rep["meta"]["count"] = len(group)
+        rep["meta"]["rule_ids"] = [a["meta"]["rule_id"] for a in group]
+        for a in group[1:]:
+            id_remap[a["id"]] = rep["id"]
+            discarded.add(a["id"])
+
+    if discarded:
+        nodes = [n for n in nodes if n["id"] not in discarded]
+        remapped_edges: list[dict[str, Any]] = []
+        seen: set[tuple[str, str, str]] = set()
+        for e in edges:
+            new_src = id_remap.get(e["source"], e["source"])
+            new_tgt = id_remap.get(e["target"], e["target"])
+            key = (new_src, new_tgt, e["relation"])
+            if key in seen:
+                continue
+            seen.add(key)
+            e2 = dict(e)
+            e2["source"] = new_src
+            e2["target"] = new_tgt
+            remapped_edges.append(e2)
+        edges = remapped_edges
+
     # 6. Classify every node into a subsystem bucket, attach to node.
     sub_by_id = classify_nodes(nodes, edges)
     for n in nodes:
