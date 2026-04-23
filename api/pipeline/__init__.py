@@ -41,6 +41,8 @@ from api.pipeline.schematic.orchestrator import ingest_schematic
 from api.pipeline.schematic.schemas import AnalyzedBootSequence, ElectricalGraph
 from api.pipeline.schematic.simulator import SimulationEngine
 from api.tools.hypothesize import mb_hypothesize as _mb_hypothesize_tool
+from api.tools.measurements import mb_list_measurements as _mb_list_measurements
+from api.tools.measurements import mb_record_measurement as _mb_record_measurement
 
 logger = logging.getLogger("microsolder.pipeline.api")
 
@@ -970,11 +972,12 @@ async def post_simulate(device_slug: str, request: SimulateRequest) -> dict:
 
 
 class HypothesizeRequest(BaseModel):
-    dead_comps: list[str] = Field(default_factory=list)
-    alive_comps: list[str] = Field(default_factory=list)
-    dead_rails: list[str] = Field(default_factory=list)
-    alive_rails: list[str] = Field(default_factory=list)
+    state_comps: dict[str, str] = Field(default_factory=dict)
+    state_rails: dict[str, str] = Field(default_factory=dict)
+    metrics_comps: dict[str, dict] = Field(default_factory=dict)
+    metrics_rails: dict[str, dict] = Field(default_factory=dict)
     max_results: int = Field(default=5, ge=1, le=20)
+    repair_id: str | None = None
 
 
 @router.post("/packs/{device_slug}/schematic/hypothesize")
@@ -989,25 +992,75 @@ async def post_hypothesize(device_slug: str, request: HypothesizeRequest) -> dic
     result = _mb_hypothesize_tool(
         device_slug=slug,
         memory_root=Path(settings.memory_root),
-        dead_comps=request.dead_comps,
-        alive_comps=request.alive_comps,
-        dead_rails=request.dead_rails,
-        alive_rails=request.alive_rails,
+        state_comps=request.state_comps or None,
+        state_rails=request.state_rails or None,
+        metrics_comps=request.metrics_comps or None,
+        metrics_rails=request.metrics_rails or None,
         max_results=request.max_results,
+        repair_id=request.repair_id,
     )
     if not result.get("found"):
         reason = result.get("reason", "unknown")
         if reason == "no_schematic_graph":
-            raise HTTPException(
-                status_code=404,
-                detail=f"No schematic ingested yet for device_slug={slug!r}",
-            )
+            raise HTTPException(status_code=404, detail=f"No schematic for {slug!r}")
         if reason in ("unknown_refdes", "unknown_rail"):
             raise HTTPException(status_code=400, detail=result)
         raise HTTPException(status_code=422, detail=result)
-    # Strip the `found` marker — it's only useful for the tool contract.
     result.pop("found", None)
     return result
+
+
+class MeasurementCreate(BaseModel):
+    target: str
+    value: float
+    unit: str
+    nominal: float | None = None
+    note: str | None = None
+
+
+@router.post(
+    "/packs/{device_slug}/repairs/{repair_id}/measurements",
+    status_code=201,
+)
+async def post_measurement(
+    device_slug: str, repair_id: str, body: MeasurementCreate,
+) -> dict:
+    """Append a measurement event to the repair journal and auto-classify it.
+
+    Returns `{recorded, auto_classified_mode, timestamp}`. 400 when the
+    target string fails parse (expected `rail:<name>` or `comp:<refdes>`).
+    WS emission is deliberately skipped here — the tech's direct UI clicks
+    are observed by the agent only when it polls the journal.
+    """
+    settings = get_settings()
+    result = _mb_record_measurement(
+        device_slug=_slugify(device_slug), repair_id=repair_id,
+        memory_root=Path(settings.memory_root),
+        target=body.target, value=body.value, unit=body.unit,
+        nominal=body.nominal, note=body.note, source="ui",
+    )
+    if not result.get("recorded"):
+        raise HTTPException(status_code=400, detail=result)
+    return result
+
+
+@router.get("/packs/{device_slug}/repairs/{repair_id}/measurements")
+async def get_measurements(
+    device_slug: str, repair_id: str,
+    target: str | None = None, since: str | None = None,
+) -> dict:
+    """Return the measurement journal for a repair, newest-first.
+
+    Optional `?target=rail:+3V3` and `?since=<ISO-ts>` query filters.
+    Always returns `{found, events}` — `events` is empty when the journal
+    has no matching entries.
+    """
+    settings = get_settings()
+    return _mb_list_measurements(
+        device_slug=_slugify(device_slug), repair_id=repair_id,
+        memory_root=Path(settings.memory_root),
+        target=target, since=since,
+    )
 
 
 __all__ = ["router"]

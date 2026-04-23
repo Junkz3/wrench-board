@@ -64,22 +64,35 @@ def client() -> TestClient:
     return TestClient(app)
 
 
-def test_hypothesize_happy(tmp_memory: Path, client: TestClient):
+def test_hypothesize_happy_schema_b(tmp_memory: Path, client: TestClient):
     r = client.post(
         f"/pipeline/packs/{SLUG}/schematic/hypothesize",
-        json={"dead_rails": ["+5V"], "dead_comps": ["U12"]},
+        json={"state_rails": {"+5V": "dead"}, "state_comps": {"U12": "dead"}},
     )
     assert r.status_code == 200, r.text
     payload = r.json()
     assert payload["device_slug"] == SLUG
-    assert len(payload["hypotheses"]) >= 1
     assert payload["hypotheses"][0]["kill_refdes"] == ["U7"]
+    assert payload["hypotheses"][0]["kill_modes"] == ["dead"]
+
+
+def test_hypothesize_accepts_metrics(tmp_memory: Path, client: TestClient):
+    r = client.post(
+        f"/pipeline/packs/{SLUG}/schematic/hypothesize",
+        json={
+            "state_rails": {"+5V": "dead"},
+            "metrics_rails": {"+5V": {"measured": 0.02, "unit": "V", "nominal": 5.0}},
+        },
+    )
+    assert r.status_code == 200
+    # Measurement cited.
+    assert "0.02" in r.text or "5.0" in r.text
 
 
 def test_hypothesize_unknown_refdes_400(tmp_memory: Path, client: TestClient):
     r = client.post(
         f"/pipeline/packs/{SLUG}/schematic/hypothesize",
-        json={"dead_comps": ["Z999"]},
+        json={"state_comps": {"Z999": "dead"}},
     )
     assert r.status_code == 400
     assert "Z999" in r.text
@@ -91,14 +104,14 @@ def test_hypothesize_no_graph_404(tmp_path: Path, monkeypatch, client: TestClien
     try:
         r = client.post(
             "/pipeline/packs/nothing-here/schematic/hypothesize",
-            json={"dead_rails": ["+5V"]},
+            json={"state_rails": {"+5V": "dead"}},
         )
         assert r.status_code == 404
     finally:
         monkeypatch.setattr(config_mod, "_settings", None)
 
 
-def test_hypothesize_empty_body(tmp_memory: Path, client: TestClient):
+def test_hypothesize_empty_body_returns_empty(tmp_memory: Path, client: TestClient):
     r = client.post(
         f"/pipeline/packs/{SLUG}/schematic/hypothesize",
         json={},
