@@ -146,6 +146,31 @@ class SimulationEngine:
         rails_stable: list[str],
         signals: dict[str, SignalState],
     ) -> None:
+        # First pass — auto-assert every enable_net driven by the analyzer's
+        # declared sequencer for rails entering this phase. The analyzer's
+        # `triggers_next` often describes phase boundaries semantically
+        # ("LPC wake") rather than listing every EN signal, so we fill the gap
+        # by propagating sequencer state to all enable signals referenced here.
+        sequencer = (
+            self.analyzed_boot.sequencer_refdes if self.analyzed_boot else None
+        )
+        for label in rails_stable:
+            rail = self.electrical.power_rails.get(label)
+            if rail is None or not rail.enable_net:
+                continue
+            if sequencer is None:
+                # No sequencer known → trust the analyzer: enable floats high.
+                signals[rail.enable_net] = "high"
+                continue
+            seq_state = components.get(sequencer)
+            if seq_state == "dead":
+                signals[rail.enable_net] = "low"
+            elif seq_state == "on":
+                signals[rail.enable_net] = "high"
+            # else: sequencer still "off" at this point — leave the signal
+            # untouched so downstream logic can evaluate it as floating.
+
+        # Second pass — actually decide rail state.
         for label in rails_stable:
             rail = self.electrical.power_rails.get(label)
             if rail is None:
@@ -155,15 +180,12 @@ class SimulationEngine:
             if rail.source_refdes and components.get(rail.source_refdes) == "dead":
                 rails[label] = "off"
                 continue
-            # Gated by an enable net that has not been asserted.
-            if rail.enable_net and signals.get(rail.enable_net, "floating") != "high":
-                # Phase 0 rails have no enable in practice; when the analyzer
-                # still lists one, treat it as satisfied implicitly when there
-                # is no source IC (external supply). Absence of the signal
-                # means the engine has no evidence the rail can start yet.
-                if rail.source_refdes is not None:
-                    rails[label] = "off"
-                    continue
+            # Gated enable with a POSITIVE low ⇒ rail off. Floating / unknown
+            # signals don't reject — the analyzer placed the rail in this
+            # phase on purpose; only deny when we have evidence to the contrary.
+            if rail.enable_net and signals.get(rail.enable_net) == "low":
+                rails[label] = "off"
+                continue
             rails[label] = "stable"
 
     def _activate_components(
@@ -199,7 +221,14 @@ class SimulationEngine:
             if driver is None:
                 signals[net_label] = "high"
                 continue
-            signals[net_label] = "high" if components.get(driver) == "on" else "low"
+            driver_state = components.get(driver)
+            if driver_state == "on":
+                signals[net_label] = "high"
+            elif driver_state == "dead":
+                signals[net_label] = "low"
+            # else: driver is "off" (passive not in phases, or not yet entered)
+            # — leave the signal absent/unchanged so the rail logic treats it
+            # as floating rather than positively "low".
 
     def _phase_blocked(
         self,

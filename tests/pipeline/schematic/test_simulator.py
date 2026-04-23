@@ -237,6 +237,51 @@ def test_run_is_deterministic_across_100_runs():
         assert again.model_dump() == first.model_dump()
 
 
+def test_run_stabilises_rail_with_enable_net_via_sequencer_auto_assert():
+    """Analyzer doesn't list every enable_net in triggers_next — the
+    engine must infer enable assertions from sequencer_refdes instead."""
+    graph = _mnt_like_graph()
+    # Remove the explicit trigger pairs so ONLY auto-assert via sequencer
+    # can stabilise enable-gated rails. The analyzer's triggers often omit
+    # specific EN signals (e.g. "power_button/LPC wake" replaces 5V_PWR_EN).
+    analyzed = AnalyzedBootSequence(
+        device_slug="demo",
+        phases=[
+            AnalyzedBootPhase(
+                index=0, name="Standby", kind="always-on",
+                rails_stable=["VIN", "LPC_VCC"],
+                components_entering=["U18"],
+                triggers_next=[],
+            ),
+            AnalyzedBootPhase(
+                index=1, name="Main rails", kind="sequenced",
+                rails_stable=["+5V"],
+                components_entering=["U7"],
+                triggers_next=[],
+            ),
+            AnalyzedBootPhase(
+                index=2, name="+3V3", kind="sequenced",
+                rails_stable=["+3V3"],
+                components_entering=["U12", "U19"],
+                triggers_next=[],
+            ),
+        ],
+        sequencer_refdes="U18",
+        global_confidence=0.9,
+        model_used="test",
+    )
+    tl = SimulationEngine(graph, analyzed_boot=analyzed).run()
+    assert tl.final_verdict == "completed"
+    last = tl.states[-1]
+    # Key assertion — +5V stabilises even though 5V_PWR_EN isn't in any
+    # triggers_next list. Auto-assert via sequencer_refdes=U18 handles it.
+    assert last.rails["+5V"] == "stable"
+    assert last.rails["+3V3"] == "stable"
+    # The auto-asserted enable signals are visible in state.
+    assert last.signals.get("5V_PWR_EN") == "high"
+    assert last.signals.get("3V3_PWR_EN") == "high"
+
+
 @pytest.mark.skipif(
     not (Path(__file__).resolve().parents[3]
          / "memory/mnt-reform-motherboard/electrical_graph.json").exists(),
