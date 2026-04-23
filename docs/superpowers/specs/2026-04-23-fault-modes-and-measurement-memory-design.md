@@ -108,8 +108,22 @@ Five layers, each with one responsibility:
      `compare_measurements()`, `synthesise_observations()`.
    - Auto-classify rules: central table mapping (value, nominal, unit) to a
      component or rail mode. Thresholds tunable, committed defaults based on
-     standard PSU tolerances (±10% → alive, 50-90% → anomalous, <50% → dead,
-     >110% → shorted/overvoltage, thermal >65°C → hot for ICs).
+     standard PSU tolerances:
+     - Rail voltage ±10% of nominal → `alive`
+     - Rail voltage 50–90% of nominal → `anomalous` (sagging / regulation loss)
+     - Rail voltage <50% of nominal AND non-zero → `anomalous` (heavy sag)
+     - Rail voltage ≈0 V (< 50 mV) → `dead` by default. Promoted to `shorted`
+       if a separate observation notes the upstream regulator / source drawing
+       current above its spec, or the tech explicitly passes `note="short"`.
+       Pure voltage alone cannot distinguish dead from shorted — the
+       distinction lives in current draw or upstream source stress.
+     - Rail voltage >110% of nominal → `overvoltage` (**new tag, not
+       `shorted`** — a short collapses the rail, an open feedback divider or
+       blown regulator drives it high). Overvoltage maps to `shorted` in the
+       `state_rails` dict for Phase 1 (same downstream effect: damaged
+       consumers, source stress) with a note flagged for Phase 5 to split it
+       into its own mode if needed.
+     - IC temperature >65 °C → `hot`. Threshold configurable per IC class.
 
 3. **Agent tools** (`api/tools/hypothesize.py` + new
    `api/tools/measurements.py`, ~250 LOC net delta)
@@ -117,8 +131,10 @@ Five layers, each with one responsibility:
      new schema B shapes).
    - New tools:
      - `mb_record_measurement(target, value, unit, nominal?, note?)` — append
-       to the repair's journal, emit WS event `observation.set` with the
-       auto-classified mode.
+       to the repair's journal, emit WS event `simulation.observation_set`
+       with the auto-classified mode (envelope subclasses a new `_SimEvent`
+       base in `api/tools/ws_events.py`, mirroring the existing `_BVEvent`
+       / `boardview.<verb>` pattern).
      - `mb_list_measurements(target?, since?)` — filtered read of the journal.
      - `mb_compare_measurements(target, before_ts, after_ts)` — explicit
        before/after diff with delta + delta_percent.
@@ -127,14 +143,16 @@ Five layers, each with one responsibility:
        payload that `mb_hypothesize` can consume directly.
      - `mb_set_observation(target, mode)` — direct state flip without a
        measurement (for when the tech already knows it's dead).
-     - `mb_clear_observations()` — wipe all state, emit WS `observation.clear`.
+     - `mb_clear_observations()` — wipe all state, emit WS `simulation.observation_clear`.
    - Total: 5 new tools + 1 extended. All added to manifest, dispatched in
      both `runtime_direct` and `runtime_managed`.
 
 4. **HTTP endpoint** (`api/pipeline/__init__.py` extension)
    - `POST /pipeline/packs/{slug}/schematic/hypothesize` — request body migrates
      from 4 lists to `{state_comps, state_rails, metrics_comps, metrics_rails}`.
-     **Breaking change** (no dual-support). All fixtures regenerated.
+     **Breaking change** (no dual-support). Sole caller is `web/js/schematic.js`
+     (grep: single `fetch(/pipeline/packs/.../hypothesize)` site), own codebase,
+     no external consumer to coordinate with. All fixtures regenerated.
    - No new endpoint for measurements — the frontend talks to the backend
      via the existing WS (agent tool) or a new lightweight HTTP route
      `POST /pipeline/packs/{slug}/repairs/{repair_id}/measurements` for
@@ -194,6 +212,17 @@ class Observations(BaseModel):
             raise ValueError(f"refdes appears as both component and rail: {overlap}")
         return self
 
+class HypothesisMetrics(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    # Unchanged from the reverse-diagnostic v1 spec — re-stated here so the
+    # shape is self-contained for the new reviewer.
+    tp_comps: int
+    tp_rails: int
+    fp_comps: int   # predicted anomalous/dead/hot but observed alive
+    fp_rails: int
+    fn_comps: int   # observed non-alive but predicted alive
+    fn_rails: int
+
 class HypothesisDiff(BaseModel):
     contradictions: list[tuple[str, str, str]] = Field(default_factory=list)
     # each tuple: (target, observed_mode, predicted_mode)
@@ -218,13 +247,24 @@ class Hypothesis(BaseModel):
 
 class MeasurementEvent(BaseModel):
     timestamp: str                       # ISO 8601 UTC
-    target: str                          # "rail:+3V3" | "pin:U7:3" | "comp:U7"
+    target: str                          # see Target string grammar below
     value: float
     unit: Literal["V", "A", "W", "°C", "Ω", "mV"]
     nominal: float | None = None
     note: str | None = None
     source: Literal["ui", "agent"]       # who wrote it
     auto_classified_mode: str | None     # e.g. "anomalous" — cache of classify rule result
+
+# Target string grammar
+#   target := "<kind>:<name>"
+#   kind   ∈ {"rail", "comp", "pin"}
+#   name   := anything after the first colon, for "rail" it's the rail label
+#            (e.g. "+3V3", "LPC_VCC"), for "comp" it's the refdes (e.g. "U7"),
+#            for "pin" it's "{refdes}:{pin_number}" (e.g. "U7:3").
+#   Parsing: split(":", 1) separates kind from name. For "pin", further
+#   split name on the first colon to get (refdes, pin_number).
+#   Refdes containing ":" are rejected at parse time. Verified against the
+#   MNT corpus: no refdes in board_assets/ contains a colon.
 
 class MeasurementJournal(BaseModel):
     repair_id: str
@@ -252,6 +292,12 @@ soft mismatch.
   (`dead_rails = ∅`). Consumers on power edges remain alive
   (`dead_comps = ∅`). Self-observation is implicit (the refdes is in its
   own anomalous set).
+  The kinds `powered_by`, `enables`, `decouples`, `filters`, and
+  `feedback_in` are **intentionally excluded** from the anomalous BFS:
+  `powered_by` / `enables` are power/control topology already handled by
+  the `dead` mode, and `decouples` / `filters` point to passives (Phase 4
+  scope). Kinds not matching the allow-set are skipped by simple set
+  membership — no special-casing needed.
 - `mode="hot"` → degenerate, `hot_comps = {refdes}` only, zero propagation.
   Useful as corroboration for multi-obs scenarios.
 - `mode="shorted"` → `refdes` is a consumer that shorts its input rail to
@@ -271,22 +317,27 @@ dead / anomalous / hot / shorted; rails only shorted), compute the cascade
 and keep if the cascade intersects any observation. Top-K single-mode
 candidates (K=20) seed the 2-fault pass.
 
-Candidate set multiplies by up to 4 in the worst case. Verified on MNT:
-current 449 candidates × 4 modes ≈ 1796 sims × ~0.5 ms each = ~900 ms —
-**breaches the 500 ms budget**. Mitigation:
+Candidate set would nominally multiply by up to 4 in the worst case
+(449 refdes × 4 modes ≈ 1796). In practice the per-mode **applicability
+gate** eliminates most of that multiplier before simulation even runs:
 
-1. **Per-mode pruning cutoff**: only candidates whose cascade has a chance
-   of touching the observation survive the single pass (already implemented,
-   stays). `hot` mode is self-only so it's 449 trivial micro-cascades
-   (<50 ms total).
-2. **Applicability gate**: a rail observation in `shorted` excludes candidate
-   pairs where `refdes` is not a consumer of that rail.
-3. **`anomalous` gate**: only run on ICs with at least one outgoing
-   signal edge in the typed graph.
+1. **`hot` mode** — applies to every IC but the cascade is a trivial
+   self-only frozenset; no propagation sim. ~449 × ~0.05 ms = ~25 ms.
+2. **`anomalous` mode** — only applies to ICs that have at least one
+   outgoing `produces_signal` / `clocks` / `depends_on` edge in
+   `typed_edges`. On the MNT graph that's roughly 40–60 ICs (verified
+   subset), not 449.
+3. **`shorted` mode** — only applies to refdes that are listed as
+   consumers of at least one rail in `electrical.power_rails`. On MNT
+   that's roughly 80 consumers, not 449.
+4. **Cascade-intersection pruning** (existing from v1) continues to keep
+   only candidates whose cascade touches an observed target.
 
-Expected post-pruning budget: ~250-400 ms on MNT. Acceptable with margin.
-If a real measurement shows breach, we cap the 2-fault pairs_tested to
-a constant `MAX_PAIRS = 100` and emit a warning.
+Effective multiplier is therefore ~2× over the single-mode baseline
+(449 dead + 25 ms hot + ~50 anomalous + ~80 shorted ≈ 600 sims). At the
+~0.5 ms/sim rate measured by `bench_hypothesize.py`, that's a **~300 ms
+p95** expected — within the 500 ms budget with margin. If a real run
+breaches, cap `MAX_PAIRS = 100` on the 2-fault pass and emit a warning.
 
 ### Scoring
 
@@ -400,10 +451,14 @@ def mb_clear_observations(
 ) -> dict[str, Any]: ...
 ```
 
-Each write-tool (`record`, `set`, `clear`) emits a WS `observation.set` or
-`observation.clear` event so the frontend stays in sync. The WS event
-envelope mirrors the `bv_*` pattern: `{"type": "observation.set", "target":
-..., "mode": ..., "measurement": {...} | null}`.
+Each write-tool (`record`, `set`, `clear`) emits a WS
+`simulation.observation_set` or `simulation.observation_clear` event so the
+frontend stays in sync. The envelope mirrors the existing `_BVEvent` /
+`boardview.<verb>` pattern — a new `_SimEvent(BaseModel)` base class with a
+`type: Literal[...]` discriminator, plus two concrete subclasses
+`SimulationObservationSet` and `SimulationObservationClear` colocated in
+`api/tools/ws_events.py`. Payload of `SimulationObservationSet`:
+`{type, target, mode, measurement: {measured, unit, nominal?, note?} | null}`.
 
 ## HTTP surface
 
@@ -506,9 +561,9 @@ card design, JetBrains Mono font, OKLCH amber/emerald for mode swatches.
 ```javascript
 ws.addEventListener("message", (e) => {
   const msg = JSON.parse(e.data);
-  if (msg.type === "observation.set") {
+  if (msg.type === "simulation.observation_set") {
     SimulationController.setObservation(msg.target, msg.mode, msg.measurement);
-  } else if (msg.type === "observation.clear") {
+  } else if (msg.type === "simulation.observation_clear") {
     SimulationController.clearObservations();
   }
   // ...existing handlers
@@ -593,8 +648,14 @@ weighted top-3.
 | `scripts/bench_hypothesize.py` | modify — report per-mode p95 | +40 LOC |
 | `scripts/tune_hypothesize_weights.py` | modify — weighted-aggregate accuracy | +40 LOC |
 
-Grand total: ~1900 LOC new/changed + ~700 LOC test/infra. Roughly the size
-of the reverse-diagnostic Phase 1 itself.
+Grand total: ~1900 LOC new/changed + ~700 LOC test/infra. Reviewer-adjusted
+estimate once the schema-B migration overhead on already-shipped fixtures,
+tests, narrative template, and endpoint is priced in: **~2400–2600 LOC
+realistic**, 20–25 tasks on the implementation plan (vs. v1's 16 tasks /
+~1800 LOC). 1.3–1.5× the size of the reverse-diagnostic Phase 1 because
+this one touches shapes of an already-shipped feature, regenerates
+fixtures, re-tunes penalty weights, AND introduces three new frontend
+interaction surfaces plus the WS mirror.
 
 ## Rollout plan (high level)
 
@@ -606,8 +667,11 @@ The implementation plan will split this into ~20 tasks. Structural arc:
 2. **Measurement memory** (tasks 6-9) — journal model, store module,
    auto-classify table, unit tests.
 3. **Agent tools** (tasks 10-13) — `measurements.py` wrappers, manifest
-   updates, dispatch in direct + managed (stash-dance for `runtime_direct.py`
-   if Alexis's WIP is still there), integration tests.
+   updates, dispatch in direct + managed. `runtime_direct.py` currently
+   has one uncommitted line of Alexis's WIP (`domain=payload.get("domain")`
+   in the `mb_schematic_graph` dispatch, well away from where the new
+   branches go). A trivial cherry-pick / stash check, not a real conflict
+   risk. Integration tests.
 4. **HTTP routes** (tasks 14-15) — measurements routes, hypothesize body
    migration, endpoint tests.
 5. **Frontend** (tasks 16-18) — contextual mode picker, metric input +
@@ -634,8 +698,20 @@ Each group lands in a single commit. Tests pass at every commit.
 
 ## Open questions
 
-None locked in this session. Each decision was validated turn-by-turn in the
-brainstorm.
+All resolved after the spec review pass. Two were surfaced and locked:
+
+- **Auto-classify of `shorted` rails from voltage alone** — impossible
+  purely from a voltage reading (a shorted rail and a dead rail both read
+  near-zero). Resolved: voltage ≈ 0 V classifies to `dead` by default;
+  promoted to `shorted` only when the tech adds a `note="short"`, a
+  concurrent measurement of the upstream source shows over-current stress,
+  or the chat agent hints at a short through context. Overvoltage (>110%)
+  is surfaced as a distinct `overvoltage` semantic but maps to `shorted`
+  in `state_rails` for Phase 1 — the two share downstream effects.
+- **WS event naming** — adopted the existing `boardview.<verb>` convention
+  with a new `simulation.<verb>` prefix (`simulation.observation_set` /
+  `simulation.observation_clear`) and a `_SimEvent` base class mirroring
+  `_BVEvent` in `api/tools/ws_events.py`.
 
 ## Dette backlog (out of scope entirely)
 
