@@ -12,6 +12,7 @@
 <link rel="stylesheet" href="styles/layout.css">
 <link rel="stylesheet" href="styles/graph.css">
 <link rel="stylesheet" href="styles/home.css">
+<link rel="stylesheet" href="styles/repair_dashboard.css">
 <link rel="stylesheet" href="styles/stub.css">
 <link rel="stylesheet" href="styles/modal.css">
 <link rel="stylesheet" href="styles/brd.css">
@@ -326,6 +327,103 @@
   <div class="home-empty hidden" id="homeEmpty">
     <h3>Aucune réparation en cours</h3>
     <p>Crée une nouvelle réparation pour que l'agent démarre son diagnostic.</p>
+  </div>
+
+  <!-- Repair dashboard — activated when ?device=&repair= both present. -->
+  <div class="hidden" id="repairDashboard">
+    <header class="rd-head">
+      <div class="rd-head-left">
+        <span class="rd-slug mono" id="rdSlug">—</span>
+        <h1 class="rd-device" id="rdDevice">—</h1>
+        <p class="rd-symptom" id="rdSymptom">—</p>
+        <div class="rd-badges" id="rdBadges"></div>
+      </div>
+      <div class="rd-head-right">
+        <button type="button" class="rd-leave-btn" id="rdLeaveBtn" title="Quitter la session">
+          <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M15 7l-5 5 5 5"/><path d="M20 4v16"/><path d="M4 12h11"/>
+          </svg>
+          <span>Quitter la session</span>
+        </button>
+      </div>
+    </header>
+
+    <section class="rd-tiles" id="rdTiles">
+      <a class="rd-tile" data-tool="pcb" id="rdTilePcb">
+        <div class="rd-tile-head">
+          <svg class="rd-tile-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 3v18M15 9v12M3 15h12"/></svg>
+          <span class="rd-tile-title">Boardview</span>
+        </div>
+        <p class="rd-tile-meta" id="rdTilePcbMeta">—</p>
+      </a>
+      <a class="rd-tile" data-tool="graphe" id="rdTileGraphe">
+        <div class="rd-tile-head">
+          <svg class="rd-tile-icon" viewBox="0 0 24 24"><circle cx="6" cy="6" r="2"/><circle cx="18" cy="6" r="2"/><circle cx="12" cy="18" r="2"/><path d="M7.5 7.5L11 16.5M16.5 7.5L13 16.5M8 6h8"/></svg>
+          <span class="rd-tile-title">Graphe</span>
+        </div>
+        <p class="rd-tile-meta" id="rdTileGrapheMeta">—</p>
+      </a>
+      <a class="rd-tile" data-tool="schematic" id="rdTileSchematic">
+        <div class="rd-tile-head">
+          <svg class="rd-tile-icon" viewBox="0 0 24 24"><path d="M4 12h3"/><path d="M7 10v4"/><path d="M9 10v4"/><path d="M9 12h3"/><path d="M15 10l2 2-2 2"/><path d="M17 12h3"/></svg>
+          <span class="rd-tile-title">Schematic</span>
+        </div>
+        <p class="rd-tile-meta" id="rdTileSchematicMeta">—</p>
+      </a>
+      <a class="rd-tile" data-tool="memory-bank" id="rdTileMemoryBank">
+        <div class="rd-tile-head">
+          <svg class="rd-tile-icon" viewBox="0 0 24 24"><path d="M4 5a2 2 0 012-2h12a2 2 0 012 2v14l-4-2-4 2-4-2-4 2z"/><path d="M12 3v16"/></svg>
+          <span class="rd-tile-title">Memory Bank</span>
+        </div>
+        <p class="rd-tile-meta" id="rdTileMemoryBankMeta">—</p>
+      </a>
+    </section>
+
+    <div class="rd-body">
+      <aside class="rd-col rd-col-primary">
+        <section class="rd-block" id="rdBlockConvs">
+          <header class="rd-block-head">
+            <span class="rd-block-tag">conversations</span>
+            <h2>Fils de diagnostic</h2>
+            <span class="rd-block-count" id="rdConvCount">—</span>
+          </header>
+          <div class="rd-block-body" id="rdConvBody">
+            <div class="rd-block-empty">Aucune conversation.</div>
+          </div>
+        </section>
+
+        <section class="rd-block" id="rdBlockFindings">
+          <header class="rd-block-head">
+            <span class="rd-block-tag">field_reports/</span>
+            <h2>Findings enregistrés</h2>
+            <span class="rd-block-count" id="rdFindingsCount">—</span>
+          </header>
+          <div class="rd-block-body" id="rdFindingsBody">
+            <div class="rd-block-empty">Aucun finding pour ce device. L'agent en enregistre via <code>mb_record_finding</code> quand tu confirmes une panne.</div>
+          </div>
+        </section>
+      </aside>
+
+      <aside class="rd-col rd-col-secondary">
+        <section class="rd-block" id="rdBlockTimeline">
+          <header class="rd-block-head">
+            <span class="rd-block-tag">activité</span>
+            <h2>Timeline</h2>
+          </header>
+          <ol class="rd-timeline" id="rdTimelineBody"></ol>
+        </section>
+
+        <section class="rd-block" id="rdBlockPack">
+          <header class="rd-block-head">
+            <span class="rd-block-tag">pack</span>
+            <h2>Mémoire du device</h2>
+          </header>
+          <div class="rd-block-body" id="rdPackBody">
+            <div class="rd-block-empty">—</div>
+          </div>
+        </section>
+      </aside>
+    </div>
   </div>
 </section>
 
