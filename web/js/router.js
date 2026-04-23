@@ -4,14 +4,13 @@
 
 export const APP_VERSION = "v0.5.0";
 
-export const SECTIONS = ["home", "pcb", "schematic", "graphe", "memory-bank", "agent", "profile", "aide"];
+export const SECTIONS = ["home", "pcb", "schematic", "graphe", "agent", "profile", "aide"];
 
 const SECTION_META = {
   home:          {crumb: "Journal des réparations", mode: {tag: "JOURNAL",  sub: "Réparations",            color: "cyan"}},
   pcb:           {crumb: "Boardview",                mode: {tag: "OUTIL",    sub: "Boardview",              color: "cyan"}},
-  schematic:     {crumb: "Schematic",                mode: {tag: "OUTIL",    sub: "Schematic",              color: "cyan"}},
-  graphe:        {crumb: "Graphe",                   mode: {tag: "ATTENTE",  sub: "Aucune mémoire chargée", color: "amber"}},
-  "memory-bank": {crumb: "Memory Bank",              mode: {tag: "JOURNAL",  sub: "Memory Bank",            color: "cyan"}},
+  schematic:     {crumb: "Schematic",                mode: {tag: "OUTIL",    sub: "Graphe électrique",      color: "emerald"}},
+  graphe:        {crumb: "Mémoire",                  mode: {tag: "ATTENTE",  sub: "Aucune mémoire chargée", color: "amber"}},
   agent:         {crumb: "Agent",                    mode: {tag: "AGENT",    sub: "Configuration",          color: "violet"}},
   profile:       {crumb: "Profil",                   mode: {tag: "PROFIL",   sub: "Technicien",             color: "cyan"}},
   aide:          {crumb: "Aide",                     mode: {tag: "AIDE",     sub: "Raccourcis",             color: "cyan"}},
@@ -112,7 +111,7 @@ function updateChrome(section, deviceSlug, pack) {
   // Breadcrumbs
   const crumbs = ["microsolder-agent"];
   if (section === "graphe" && deviceSlug) {
-    crumbs.push("Réparations", prettifySlug(deviceSlug), "Graphe");
+    crumbs.push("Réparations", prettifySlug(deviceSlug), "Mémoire");
   } else {
     crumbs.push(meta.crumb);
   }
@@ -181,8 +180,17 @@ export function navigate(section) {
   setActiveRail(section);
   // Hide all known section DOMs, show the target.
   document.getElementById("homeSection").classList.toggle("hidden", section !== "home");
-  document.getElementById("canvas").classList.toggle("hidden", section !== "graphe");
-  document.getElementById("memoryBank").classList.toggle("hidden", section !== "memory-bank");
+  // The "graphe" section is a merged Mémoire view — the visible child
+  // (canvas vs memoryBank) is driven by the view mode (graph|md).
+  // When leaving this section, hide both children so they don't leak
+  // into another route.
+  const inMemoire = section === "graphe";
+  if (!inMemoire) {
+    document.getElementById("canvas").classList.add("hidden");
+    document.getElementById("memoryBank").classList.add("hidden");
+  } else {
+    applyMemoireMode(currentViewMode());
+  }
   document.getElementById("profileSection").classList.toggle("hidden", section !== "profile");
   document.querySelectorAll("[data-section-stub]").forEach(el => {
     el.classList.toggle("hidden", el.dataset.sectionStub !== section);
@@ -214,6 +222,66 @@ export function wireRouter() {
       window.location.hash = "#" + btn.dataset.section;
     });
   });
+  // Toggle buttons: clicking sets the mode + re-applies. The actual
+  // memory-bank data fetch on first entry in md mode is handled by
+  // main.js (which owns loadMemoryBank).
+  document.querySelectorAll(".view-toggle-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const mode = btn.dataset.view;
+      applyMemoireMode(mode);
+      // On first entry into Brut mode, make sure the memory bank is
+      // populated — loadMemoryBank is idempotent.
+      if (mode === "md") {
+        import("./memory_bank.js").then(m => m.loadMemoryBank?.());
+      } else {
+        // Switching back to Visuel: the canvas just became visible with
+        // real dimensions. Trigger the graph load (idempotent via
+        // _graphLoadedSlug guard in main.js) so layoutNodes + fitToScreen
+        // see correct clientWidth/clientHeight. If we don't do this, a
+        // load attempted while canvas was hidden bails out without
+        // marking the slug mounted, and the view would stay empty.
+        window.__maybeLoadGraph?.();
+      }
+    });
+  });
+}
+
+/**
+ * Which memoire view is active, derived from the `view` query param.
+ * Defaults to "graph" when absent or invalid.
+ */
+export function currentViewMode() {
+  const v = new URLSearchParams(window.location.search).get("view");
+  return v === "md" ? "md" : "graph";
+}
+
+/**
+ * Apply the memoire view mode — toggle DOM visibility of canvas vs
+ * memoryBank, update the toggle-button active state, hide/show the
+ * graph-specific filter chips in the metabar, and update the URL's
+ * `view` param without reloading the page.
+ */
+export function applyMemoireMode(mode) {
+  mode = mode === "md" ? "md" : "graph";
+  document.getElementById("canvas").classList.toggle("hidden", mode !== "graph");
+  document.getElementById("memoryBank").classList.toggle("hidden", mode !== "md");
+  // Graph-specific filter chips + search live in .metabar .filters.
+  const filtersEl = document.querySelector(".metabar .filters");
+  if (filtersEl) filtersEl.classList.toggle("hidden", mode !== "graph");
+  document.querySelectorAll(".view-toggle-btn").forEach(btn => {
+    const on = btn.dataset.view === mode;
+    btn.classList.toggle("active", on);
+    btn.setAttribute("aria-pressed", on ? "true" : "false");
+  });
+  // Persist the choice in the URL without reloading — replaceState keeps
+  // history clean (toggling back and forth shouldn't pollute back-button).
+  const url = new URL(window.location.href);
+  if (mode === "md") {
+    url.searchParams.set("view", "md");
+  } else {
+    url.searchParams.delete("view");
+  }
+  window.history.replaceState({}, "", url.toString());
 }
 
 /**

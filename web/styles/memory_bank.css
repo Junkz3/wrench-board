@@ -3,8 +3,14 @@
    pack picker + audit verdict + search), scrollable body with 5 blocks:
    registry, knowledge graph, rules, dictionary, audit report. */
 
-.memory-bank{position:fixed;top:48px;left:52px;right:0;bottom:28px;overflow:auto;z-index:2;background:var(--bg)}
+/* top:92px = under both topbar (48px) and metabar (44px). The memory bank
+   now lives under the merged Mémoire section, which keeps the metabar
+   visible (for the Visuel|Brut view toggle), so we must leave room for it. */
+.memory-bank{position:fixed;top:92px;left:52px;right:0;bottom:0;overflow:auto;z-index:2;background:var(--bg)}
 .memory-bank.hidden{display:none}
+/* When the Agent chat panel is open, shrink the memory bank to leave room
+   for the 420px-wide llm-panel pinned on the right. */
+body.llm-open .memory-bank{right:420px}
 
 /* ---- Sticky header ---- */
 .mb-head{position:sticky;top:0;background:linear-gradient(180deg,var(--bg-2) 0%,var(--bg) 100%);border-bottom:1px solid var(--border);padding:20px 28px 14px;z-index:5}

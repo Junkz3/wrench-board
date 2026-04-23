@@ -3,13 +3,48 @@
 // and a section-agnostic wiring block for the Tweaks panel + boardview
 // colour pickers.
 
-import { APP_VERSION, currentSection, navigate, wireRouter, currentSession, leaveSession } from './router.js';
+import { APP_VERSION, currentSection, navigate, wireRouter, currentSession, leaveSession, applyMemoireMode, currentViewMode } from './router.js';
 import { loadHomePacks, loadTaxonomy, loadRepairs, renderHome, initNewRepairModal, renderRepairDashboard, hideRepairDashboard } from './home.js';
 import { loadGraphFromBackend, setEmptyState, initGraphWithData } from './graph.js';
 import { initMemoryBank, loadMemoryBank } from './memory_bank.js';
 import { initProfileSection } from './profile.js';
 import { initPipelineProgress } from './pipeline_progress.js';
 import { initLLMPanel, openLLMPanelIfRepairParam } from './llm.js';
+import { loadSchematic, closeSchematicInspector } from './schematic.js';
+
+// Tracks which device slug the graph has already been mounted for. Guards
+// against a second initGraphWithData() call on re-navigation to #graphe —
+// that function spins up a d3 force simulation and a requestAnimationFrame
+// loop, neither of which tear themselves down on re-entry.
+let _graphLoadedSlug = null;
+
+async function maybeLoadGraph() {
+  const slug = new URLSearchParams(window.location.search).get("device");
+  if (!slug) {
+    setEmptyState(true);
+    return;
+  }
+  if (slug === _graphLoadedSlug) return;  // already mounted for this slug
+  // If the canvas is currently hidden (e.g. user landed in Brut mode),
+  // clientWidth is 0 — layoutNodes + fitToScreen would compute nonsense
+  // positions that get burned in. Skip init without marking the slug
+  // as loaded so the next call (when canvas becomes visible) retries.
+  const canvasEl = document.getElementById("canvas");
+  if (!canvasEl || canvasEl.clientWidth === 0) return;
+  const fetched = await loadGraphFromBackend();
+  if (fetched && fetched.nodes && fetched.nodes.length > 0) {
+    setEmptyState(false);
+    initGraphWithData(fetched);
+    _graphLoadedSlug = slug;
+  } else {
+    setEmptyState(true);
+  }
+}
+
+// Expose on window so router.js can trigger a lazy load when the user
+// toggles from Brut back to Visuel — at that point the canvas becomes
+// visible with real dimensions and we want to mount the graph.
+window.__maybeLoadGraph = maybeLoadGraph;
 
 // Early stub: collect boardview.* events in __pending until brd_viewer
 // mounts and replaces this with the real implementation. Without this,
@@ -32,6 +67,14 @@ if (!window.Boardview) {
   await initLLMPanel();
   openLLMPanelIfRepairParam();
 
+  // Legacy redirect: #memory-bank is merged into #graphe with view=md.
+  if (window.location.hash === "#memory-bank") {
+    const url = new URL(window.location.href);
+    url.searchParams.set("view", "md");
+    url.hash = "#graphe";
+    window.history.replaceState({}, "", url.toString());
+  }
+
   const hash = window.location.hash;
   const params = new URLSearchParams(window.location.search);
   const slug = params.get("device");
@@ -45,14 +88,11 @@ if (!window.Boardview) {
        : "home");
   navigate(initial);
 
-  if (initial === "graphe" && slug) {
-    const fetched = await loadGraphFromBackend();
-    if (fetched && fetched.nodes && fetched.nodes.length > 0) {
-      setEmptyState(false);
-      initGraphWithData(fetched);
-    } else {
-      setEmptyState(true);
-    }
+  if (initial === "graphe") {
+    const mode = currentViewMode();
+    applyMemoireMode(mode);
+    await maybeLoadGraph();
+    if (mode === "md") loadMemoryBank();
   } else if (initial === "home") {
     const session = currentSession();
     if (session) {
@@ -62,18 +102,27 @@ if (!window.Boardview) {
       const [packs, taxonomy, repairs] = await Promise.all([loadHomePacks(), loadTaxonomy(), loadRepairs()]);
       renderHome(packs, taxonomy, repairs);
     }
-  } else if (initial === "memory-bank") {
-    loadMemoryBank();
+  } else if (initial === "schematic") {
+    loadSchematic();
   } else if (initial === "profile") {
     initProfileSection();
   }
+
+  // Schematic inspector close button — wired once, guarded against absence.
+  document.getElementById("schInspClose")?.addEventListener("click", closeSchematicInspector);
 
   // Sections that need their data refetched when the user navigates back to
   // them — the router only toggles DOM visibility, side-effects live here.
   window.addEventListener("hashchange", async () => {
     const sec = currentSection();
-    if (sec === "memory-bank") loadMemoryBank();
+    if (sec === "schematic") loadSchematic();
     else if (sec === "profile") initProfileSection();
+    else if (sec === "graphe") {
+      const mode = currentViewMode();
+      applyMemoireMode(mode);
+      maybeLoadGraph();
+      if (mode === "md") loadMemoryBank();
+    }
     else if (sec === "home") {
       const session = currentSession();
       if (session) {

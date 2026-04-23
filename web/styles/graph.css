@@ -240,3 +240,39 @@
   font-size: 12px;
   font-weight: 600;
 }
+
+/* -------- View-mode toggle (Visuel | Brut) --------
+   Lives in the metabar, swaps between #canvas (bubble map) and
+   #memoryBank (raw artefact browser) on the merged Mémoire section. */
+.view-toggle {
+  display: inline-flex;
+  gap: 0;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--panel);
+  margin-right: 12px;
+  align-self: center;
+}
+.view-toggle-btn {
+  font-family: inherit;
+  font-size: 11px;
+  letter-spacing: .3px;
+  color: var(--text-2);
+  background: transparent;
+  border: 0;
+  padding: 5px 12px;
+  cursor: pointer;
+  transition: background .12s, color .12s;
+}
+.view-toggle-btn:hover { color: var(--text); background: var(--panel-2); }
+.view-toggle-btn.active {
+  color: var(--text);
+  background: var(--panel-2);
+  box-shadow: inset 0 -2px 0 var(--cyan);
+}
+.view-toggle-btn + .view-toggle-btn { border-left: 1px solid var(--border); }
+
+/* Hide the metabar's .filters block when in Brut mode — the memory bank
+   owns its own search; having two search inputs stacked is confusing. */
+.metabar .filters.hidden { display: none; }

@@ -257,12 +257,14 @@ export async function renderRepairDashboard(session) {
   renderDashboardTimeline(repair, convs.conversations || [], findings, pack);
   renderDashboardPack(pack, slug, rid);
   wireDashboardHandlers();
+  wireFixButton(slug, rid);
 }
 
 export function hideRepairDashboard() {
   document.getElementById("repairDashboard")?.classList.add("hidden");
   document.getElementById("homeSections")?.classList.remove("hidden");
   document.querySelector("#homeSection .home-head")?.classList.remove("hidden");
+  document.getElementById("dashboardFixBtn")?.classList.add("hidden");
 }
 
 async function fetchJSON(url, fallback) {
@@ -310,7 +312,7 @@ function renderDashboardTiles(slug, rid, pack, taxEntry) {
   if (pcb) pcb.href = `${qs}#pcb`;
   if (graphe) graphe.href = `${qs}#graphe`;
   if (schematic) schematic.href = `${qs}#schematic`;
-  if (memoryBank) memoryBank.href = `${qs}#memory-bank`;
+  if (memoryBank) memoryBank.href = `${qs}&view=md#graphe`;
 
   // Tile metas — static text when we don't have richer data. Keep mono and
   // short so the tile stays scannable.
@@ -493,6 +495,40 @@ function wireDashboardHandlers() {
   document.getElementById("rdLeaveBtn")?.addEventListener("click", () => {
     leaveSession();
   });
+}
+
+function wireFixButton(slug, rid) {
+  const btn = document.getElementById("dashboardFixBtn");
+  if (!btn) return;
+  // Expose a reset hook so llm.js can clear the pending state when the
+  // validation flow fails (agent refuses, MA tool missing, error event).
+  const resetBtn = () => {
+    btn.disabled = false;
+    btn.textContent = "✓ Marquer fix";
+    btn.classList.remove("is-validated");
+    if (btn._fixTimeoutId) { clearTimeout(btn._fixTimeoutId); btn._fixTimeoutId = null; }
+  };
+  window.__resetDashboardFixBtn = resetBtn;
+  btn.classList.remove("hidden");
+  resetBtn();
+  btn.onclick = () => {
+    const ws = window.__diagnosticWS;
+    if (!ws || ws.readyState !== WebSocket.OPEN) {
+      btn.textContent = "Ouvre le chat d'abord";
+      setTimeout(() => { btn.textContent = "✓ Marquer fix"; }, 1800);
+      return;
+    }
+    ws.send(JSON.stringify({ type: "validation.start", repair_id: rid }));
+    btn.disabled = true;
+    btn.textContent = "… Claude valide";
+    // Safety timeout: if the agent never fires simulation.repair_validated
+    // (MA tool missing, refusal, error), reset after 25s so the button
+    // isn't permanently stuck.
+    btn._fixTimeoutId = setTimeout(() => {
+      btn.textContent = "Échec — réessaie";
+      setTimeout(resetBtn, 2200);
+    }, 25000);
+  };
 }
 
 /* ---------- NEW REPAIR MODAL ---------- */
