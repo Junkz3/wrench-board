@@ -138,6 +138,12 @@ body.llm-open .stub{right:420px}
 }
 .llm-input button:hover{background:rgba(56,189,248,.18);border-color:rgba(56,189,248,.5)}
 .llm-input button:disabled{opacity:.45;cursor:not-allowed}
+.llm-input button.llm-stop{
+  background:rgba(245,158,11,.08);color:var(--amber);border-color:rgba(245,158,11,.3);
+  padding:0 10px;
+}
+.llm-input button.llm-stop:hover{background:rgba(245,158,11,.16);border-color:rgba(245,158,11,.55)}
+.llm-input button.llm-stop:disabled{opacity:.35}
 
 /* topbar toggle — matches the existing .top-btn visually */
 .top-btn.llm-toggle.on{

@@ -124,6 +124,22 @@ function wsURL(slug, tier, repairId) {
 
 function setSendEnabled(enabled) {
   el("llmSend").disabled = !enabled;
+  el("llmStop").disabled = !enabled;
+}
+
+// Interrupt the live agent turn. The server translates this into an
+// official `user.interrupt` session event (see
+// https://platform.claude.com/docs/en/managed-agents/events-and-streaming).
+// MA guarantees the agent halts mid-execution; the session stays alive so
+// the tech can keep typing right after without reconnecting.
+function interruptAgent() {
+  if (!ws || ws.readyState !== WebSocket.OPEN) return;
+  logSys("interruption envoyée · l'agent s'arrête");
+  try {
+    ws.send(JSON.stringify({ type: "interrupt" }));
+  } catch (err) {
+    console.warn("interrupt send failed", err);
+  }
 }
 
 function connect() {
@@ -284,6 +300,7 @@ export function openLLMPanelIfRepairParam() {
 export function initLLMPanel() {
   el("llmToggle")?.addEventListener("click", togglePanel);
   el("llmClose")?.addEventListener("click", closePanel);
+  el("llmStop")?.addEventListener("click", interruptAgent);
 
   document.querySelectorAll(".llm-tier").forEach(btn => {
     btn.addEventListener("click", () => switchTier(btn.dataset.tier));
@@ -310,10 +327,16 @@ export function initLLMPanel() {
       togglePanel();
       return;
     }
-    // Escape closes when panel is focused
+    // Escape when panel focused: if the agent is live + connected, interrupt
+    // it first; second Escape closes the panel.
     if (e.key === "Escape" && document.body.classList.contains("llm-open")) {
       if (document.activeElement && el("llmPanel").contains(document.activeElement)) {
-        closePanel();
+        if (ws && ws.readyState === WebSocket.OPEN) {
+          e.preventDefault();
+          interruptAgent();
+        } else {
+          closePanel();
+        }
       }
     }
   });

@@ -448,6 +448,10 @@
   <div class="llm-log" id="llmLog" aria-live="polite"></div>
   <form class="llm-input" id="llmForm">
     <input id="llmInput" type="text" placeholder="Pose ta question à l'agent…" autocomplete="off" spellcheck="false" />
+    <button type="button" class="llm-stop" id="llmStop" title="Interrompre l'agent (Esc)" disabled>
+      <svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="1.5"/></svg>
+      Stop
+    </button>
     <button type="submit" id="llmSend" disabled>Envoyer</button>
   </form>
 </aside>
