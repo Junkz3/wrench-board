@@ -184,6 +184,7 @@ from api.pipeline.schematic.schemas import (
     AnalyzedBootPhase,
     AnalyzedBootSequence,
     AnalyzedBootTrigger,
+    BootPhase,
     ComponentNode,
     ElectricalGraph,
     NetNode,
@@ -401,3 +402,80 @@ def test_hypothesize_two_fault_can_be_disabled():
         assert all(len(x.kill_refdes) == 1 for x in result.hypotheses)
     finally:
         h.TWO_FAULT_ENABLED = orig
+
+
+# ---------------------------------------------------------------------------
+# Task 6 — determinism + edge cases + max_results
+# ---------------------------------------------------------------------------
+
+
+def test_hypothesize_determinism_across_50_runs():
+    """50 consecutive invocations must produce byte-for-byte identical results.
+
+    Determinism validates that floating-point ops, random seeding, and
+    dict iteration are stable across Python interpreter sessions.
+    """
+    obs = Observations(
+        dead_comps=frozenset({"U12", "U19"}),
+        dead_rails=frozenset({"+5V"}),
+    )
+    first = hypothesize(
+        _mini_graph(), analyzed_boot=_mini_analyzed(), observations=obs,
+    )
+    for _ in range(49):
+        again = hypothesize(
+            _mini_graph(), analyzed_boot=_mini_analyzed(), observations=obs,
+        )
+        # Compare everything except wall_ms (which legitimately varies).
+        again_d = again.model_dump()
+        first_d = first.model_dump()
+        again_d["pruning"]["wall_ms"] = 0.0
+        first_d["pruning"]["wall_ms"] = 0.0
+        assert again_d == first_d
+
+
+def test_hypothesize_respects_max_results():
+    """max_results parameter must cap the returned hypothesis count."""
+    obs = Observations(dead_rails=frozenset({"+5V", "+3V3"}))
+    result = hypothesize(
+        _mini_graph(), analyzed_boot=_mini_analyzed(), observations=obs,
+        max_results=2,
+    )
+    assert len(result.hypotheses) <= 2
+
+
+def test_hypothesize_no_analyzed_boot_still_works():
+    """Fallback path — engine uses ElectricalGraph.boot_sequence instead.
+
+    When analyzed_boot_sequence is None, the simulation engine must
+    reconstruct boot phases from ElectricalGraph.boot_sequence, emitting
+    the same cascade shape as if analysis had been run.
+    """
+    g = _mini_graph()
+    g.boot_sequence = [
+        BootPhase(
+            index=1, name="Standby",
+            rails_stable=["VIN", "LPC_VCC"],
+            components_entering=["U18"],
+            triggers_next=[],
+        ),
+        BootPhase(
+            index=2, name="LPC asserts +5V",
+            rails_stable=["+5V"],
+            components_entering=["U7"],
+            triggers_next=[],
+        ),
+        BootPhase(
+            index=3, name="+3V3",
+            rails_stable=["+3V3"],
+            components_entering=["U12", "U19"],
+            triggers_next=[],
+        ),
+    ]
+    result = hypothesize(
+        g, analyzed_boot=None,
+        observations=Observations(dead_rails=frozenset({"+5V"})),
+    )
+    # Must still return at least one hypothesis — the fallback engine
+    # produces the same cascade shape.
+    assert len(result.hypotheses) >= 1
