@@ -74,6 +74,21 @@ EdgeKind = str
 clocks · produces_signal · consumes_signal · decouples · filters · depends_on."""
 
 
+ComponentKind = Literal[
+    "ic",
+    "passive_r",
+    "passive_c",
+    "passive_d",
+    "passive_fb",
+]
+"""Kind of component in the electrical graph. `ic` is the Phase 1 default
+(active components: ICs, modules, transistors, connectors, LEDs, crystals,
+oscillators). Passive kinds (`passive_r`, `passive_c`, `passive_d`,
+`passive_fb`) are Phase 4 additions and are assigned by the passive role
+classifier during `compile_electrical_graph`. `passive_q` reserved for a
+future Phase 4.5 and intentionally not included."""
+
+
 PageKind = Literal[
     "cover",
     "schematic",
@@ -380,6 +395,12 @@ class ComponentNode(BaseModel):
 
     refdes: str
     type: ComponentType
+    kind: ComponentKind = "ic"          # Phase 4 addition — defaults to "ic" so
+                                         # every Phase 1 electrical_graph.json reloads
+                                         # untouched.
+    role: str | None = None              # Phase 4 addition — passive role per
+                                         # spec 2026-04-24 (§Data shapes). Free-form
+                                         # string, canonical values non-enforced.
     value: ComponentValue | None = None
     pages: list[int] = Field(default_factory=list)
     pins: list[PagePin] = Field(default_factory=list)
@@ -523,3 +544,175 @@ class ElectricalGraph(BaseModel):
     ambiguities: list[Ambiguity] = Field(default_factory=list)
     quality: SchematicQualityReport
     hierarchy: list[str] = Field(default_factory=list)
+
+
+# ======================================================================
+# Analyzed boot sequence — Opus post-pass that refines the compiler's
+# topological boot_sequence using designer_notes + enable edges.
+# ======================================================================
+
+
+class AnalyzedBootTrigger(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
+    net_label: str = Field(
+        description="Signal name that transitions at the end of the current phase "
+        "to unlock the next ('5V_PWR_EN' asserts, 'PG_3V3' goes high)."
+    )
+    from_refdes: str | None = Field(
+        default=None,
+        description="Refdes of the component driving this trigger (LPC, PMIC). "
+        "Null when the trigger comes from a passive (resistor divider, RC).",
+    )
+    rationale: str = Field(
+        description="One sentence explaining why this specific signal gates the next "
+        "phase. Must cite the evidence (designer note, enable edge).",
+    )
+
+
+class AnalyzedBootPhase(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
+    index: int = Field(
+        ge=0,
+        description="Phase index. 0 = always-on / standby. 1+ = sequenced.",
+    )
+    name: str = Field(
+        description="Short descriptive label ('Always-on standby', 'LPC asserts main rails')."
+    )
+    kind: str = Field(
+        description="Class of phase: 'always-on' (lives whenever power is physically "
+        "present) · 'sequenced' (gated by enable signal from the sequencer) · "
+        "'on-demand' (user / OS triggers the phase asynchronously — USB plug, PCIe boot).",
+    )
+    rails_stable: list[str] = Field(
+        default_factory=list,
+        description="Rails that are up and stable at the end of this phase.",
+    )
+    components_entering: list[str] = Field(
+        default_factory=list,
+        description="Refdes of components that become active during this phase.",
+    )
+    triggers_next: list[AnalyzedBootTrigger] = Field(
+        default_factory=list,
+        description="Signals asserted at the end of this phase that start the next. "
+        "Empty for the last phase.",
+    )
+    evidence: list[str] = Field(
+        default_factory=list,
+        description="Short quoted excerpts from designer notes and/or explicit enable "
+        "edges that justify this phase's placement. Cite specifically: 'designer "
+        "note p3 U7: \"Main system power converters, enabled by LPC\"' or "
+        "'edge: 5V_PWR_EN enables U7'.",
+    )
+    confidence: float = Field(
+        default=1.0,
+        ge=0.0,
+        le=1.0,
+        description="Self-reported confidence for this phase's placement.",
+    )
+
+
+class AnalyzedBootSequence(BaseModel):
+    """Opus-refined boot sequence — real ordering, not just topological.
+
+    Produced by `api.pipeline.schematic.boot_analyzer`. Persisted beside the
+    electrical_graph as `boot_sequence_analyzed.json`. When present, the
+    frontend and `mb_schematic_graph` prefer it over the compiler's
+    topological-only `boot_sequence`.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    schema_version: Literal["1.0"] = "1.0"
+    device_slug: str
+    phases: list[AnalyzedBootPhase]
+    sequencer_refdes: str | None = Field(
+        default=None,
+        description="Refdes of the component orchestrating the sequence — usually an "
+        "MCU (LPC, EC) or PMIC. Null when the board uses only passive sequencing "
+        "(RC delays, cascaded PG).",
+    )
+    global_confidence: float = Field(
+        default=1.0, ge=0.0, le=1.0,
+        description="Overall confidence in the entire sequence reconstruction.",
+    )
+    ambiguities: list[str] = Field(
+        default_factory=list,
+        description="Sentences describing what couldn't be resolved (e.g. 'Q3 "
+        "inrush-limiter timing relative to U2 charger start is unclear').",
+    )
+    model_used: str = Field(
+        description="Anthropic model id that produced this analysis.",
+    )
+
+
+# ======================================================================
+# Classified nets — Opus post-pass that tags every net with a functional
+# domain (hdmi, usb, power_seq, …) + a one-sentence description so the
+# agent / UI can answer "give me the HDMI-related components" in one call.
+# ======================================================================
+
+
+class ClassifiedNet(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
+    label: str = Field(description="Net label as it appears in the schematic.")
+    domain: str = Field(
+        description=(
+            "Functional domain this net belongs to. Preferred canonical values "
+            "(non-enforced): hdmi · usb · pcie · ethernet · audio · display · "
+            "storage · debug · power_seq · power_rail · clock · reset · "
+            "control (I2C/SPI/UART control) · ground · misc. Use 'misc' "
+            "sparingly — prefer a specific domain when any hint exists."
+        ),
+    )
+    description: str = Field(
+        default="",
+        description=(
+            "ONE SHORT SENTENCE describing what this net carries and its role. "
+            "Example: 'HDMI Hot Plug Detect — logic high when a monitor is "
+            "connected'. Keep under 140 chars."
+        ),
+    )
+    voltage_level: str | None = Field(
+        default=None,
+        description=(
+            "Expected electrical characteristic when healthy: '3V3 logic', "
+            "'differential ±500mV', 'rail 5V', 'open-drain pull-up'. Null if "
+            "unclear."
+        ),
+    )
+    confidence: float = Field(
+        default=1.0, ge=0.0, le=1.0,
+        description="Confidence in the domain assignment, 0..1.",
+    )
+
+
+class NetClassification(BaseModel):
+    """Opus-produced classification of every compiled net on the board.
+
+    Persisted alongside the electrical graph as `nets_classified.json`.
+    Consumed by `mb_schematic_graph(query='net_domain')` and the UI filter
+    so the tech can type 'hdmi' and see the relevant components light up.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    schema_version: Literal["1.0"] = "1.0"
+    device_slug: str
+    nets: dict[str, ClassifiedNet] = Field(
+        default_factory=dict,
+        description="Map of net label → classification. One entry per net.",
+    )
+    domain_summary: dict[str, int] = Field(
+        default_factory=dict,
+        description="Per-domain count of classified nets, useful for stats.",
+    )
+    ambiguities: list[str] = Field(
+        default_factory=list,
+        description="Sentences describing nets whose domain couldn't be decided.",
+    )
+    model_used: str = Field(
+        description="Anthropic model id that produced this classification.",
+    )

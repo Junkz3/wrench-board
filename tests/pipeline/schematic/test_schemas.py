@@ -296,3 +296,43 @@ def test_every_model_exposes_a_json_schema():
     )
     for cls in strict_classes:
         assert cls.model_json_schema().get("additionalProperties") is False
+
+
+def test_component_node_defaults_to_ic_kind_and_null_role():
+    """Phase 1 data on disk reloads unchanged — default kind="ic"."""
+    node = ComponentNode(refdes="U7", type="ic")
+    assert node.kind == "ic"
+    assert node.role is None
+
+
+def test_component_node_accepts_passive_kind():
+    node = ComponentNode(
+        refdes="C156", type="capacitor",
+        kind="passive_c", role="decoupling",
+    )
+    assert node.kind == "passive_c"
+    assert node.role == "decoupling"
+
+
+def test_component_node_rejects_unknown_kind():
+    with pytest.raises(ValidationError):
+        ComponentNode(refdes="Q5", type="transistor", kind="passive_q")
+
+
+def test_component_node_role_is_free_form_string():
+    """Role follows the PinRole pattern — free-form string, not enum."""
+    node = ComponentNode(
+        refdes="R42", type="resistor",
+        kind="passive_r", role="some_new_role_not_yet_canonical",
+    )
+    assert node.role == "some_new_role_not_yet_canonical"
+
+
+def test_component_node_round_trip_preserves_kind_and_role():
+    original = ComponentNode(
+        refdes="FB2", type="ferrite",
+        kind="passive_fb", role="filter",
+    )
+    restored = ComponentNode.model_validate(original.model_dump())
+    assert restored.kind == "passive_fb"
+    assert restored.role == "filter"
