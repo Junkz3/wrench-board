@@ -604,7 +604,7 @@ body.sch-mode-railfocus .sch-boot-timeline{left:240px}
 .sim-scrubber-toggle[hidden] { display: none; }
 
 /* ------------------------------------------------------------------ *
- * Reverse-diagnostic: 3-state observation toggles in the inspector   *
+ * Reverse-diagnostic: contextual mode picker + metric input row      *
  * ------------------------------------------------------------------ */
 .sim-obs-row {
   display: flex; align-items: center; gap: 8px;
@@ -615,25 +615,85 @@ body.sch-mode-railfocus .sch-boot-timeline{left:240px}
   font-size: 10.5px; color: var(--text-3);
   text-transform: uppercase; letter-spacing: .4px;
 }
-.sim-obs-row .sim-obs-label { flex: 0 0 100px; }
-.sim-obs-row button {
+.sim-obs-row .sim-obs-label { flex: 0 0 80px; }
+
+/* Contextual mode picker — one button per applicable mode. */
+.sim-mode-picker {
+  display: flex; gap: 6px; flex-wrap: wrap;
+  font-family: var(--mono);
+}
+.sim-mode-picker button {
   all: unset; cursor: pointer;
   padding: 3px 8px;
   border: 1px solid var(--border-soft);
   border-radius: 3px;
   color: var(--text-3);
+  font-size: 10.5px;
+  text-transform: uppercase; letter-spacing: .4px;
   transition: color .15s, border-color .15s, background .15s;
 }
-.sim-obs-row button:hover { color: var(--text); }
-.sim-obs-row button.active[data-obs="dead"]    { color: var(--amber);   border-color: var(--amber);   background: color-mix(in oklch, var(--amber) 12%, transparent); }
-.sim-obs-row button.active[data-obs="alive"]   { color: var(--emerald); border-color: var(--emerald); background: color-mix(in oklch, var(--emerald) 12%, transparent); }
-.sim-obs-row button.active[data-obs="unknown"] { color: var(--text-2);  border-color: var(--text-3); }
+.sim-mode-picker button:hover { color: var(--text); }
+.sim-mode-picker button.active[data-mode="dead"]       { color: var(--amber);   border-color: var(--amber);   background: color-mix(in oklch, var(--amber) 12%, transparent); }
+.sim-mode-picker button.active[data-mode="alive"]      { color: var(--emerald); border-color: var(--emerald); background: color-mix(in oklch, var(--emerald) 12%, transparent); }
+.sim-mode-picker button.active[data-mode="anomalous"]  { color: var(--violet);  border-color: var(--violet);  background: color-mix(in oklch, var(--violet) 12%, transparent); }
+.sim-mode-picker button.active[data-mode="hot"]        { color: var(--amber);   border-color: var(--amber);   background: color-mix(in oklch, var(--amber) 20%, transparent); box-shadow: 0 0 0 1px color-mix(in oklch, var(--amber) 40%, transparent); }
+.sim-mode-picker button.active[data-mode="shorted"]    { color: var(--amber);   border-color: var(--amber);   background: color-mix(in oklch, var(--amber) 20%, transparent); }
+.sim-mode-picker button.active[data-mode="unknown"]    { color: var(--text-2);  border-color: var(--text-3); }
 
-/* Node badges: amber border for observed-dead, emerald for observed-alive.
-   Applied on the group element; targets the .sch-shape child so it doesn't
-   recolour labels. */
-#schematicSection .obs-dead  .sch-shape { stroke: var(--amber);   stroke-width: 2.2px; filter: drop-shadow(0 0 3px color-mix(in oklch, var(--amber)   40%, transparent)); }
-#schematicSection .obs-alive .sch-shape { stroke: var(--emerald); stroke-width: 2.2px; filter: drop-shadow(0 0 3px color-mix(in oklch, var(--emerald) 40%, transparent)); }
+/* Metric input row — numeric entry with unit select + record button. */
+.sim-metric-row {
+  display: flex; align-items: center; gap: 8px;
+  margin: 8px 10px 0;
+  padding: 4px 0;
+  font-family: var(--mono);
+  font-size: 10.5px;
+}
+.sim-metric-row .sim-obs-label { flex: 0 0 80px; }
+.sim-metric-input {
+  width: 72px;
+  padding: 3px 6px;
+  background: var(--bg-2);
+  border: 1px solid var(--border-soft);
+  border-radius: 3px;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 11px;
+}
+.sim-metric-input:focus { outline: none; border-color: var(--cyan); }
+.sim-metric-unit {
+  padding: 3px 6px;
+  background: var(--bg-2);
+  border: 1px solid var(--border-soft);
+  border-radius: 3px;
+  color: var(--text-2);
+  font-size: 10.5px;
+  font-family: var(--mono);
+}
+.sim-metric-nominal { flex: 1; color: var(--text-3); }
+.sim-metric-record {
+  all: unset; cursor: pointer;
+  padding: 3px 8px;
+  border: 1px solid color-mix(in oklch, var(--cyan) 60%, transparent);
+  border-radius: 3px;
+  color: var(--cyan);
+  font-size: 10.5px;
+  text-transform: uppercase; letter-spacing: .4px;
+  transition: background .15s, border-color .15s;
+}
+.sim-metric-record:hover { background: color-mix(in oklch, var(--cyan) 12%, transparent); border-color: var(--cyan); }
+
+/* Node badges — one per mode. */
+#schematicSection .obs-dead .sch-shape       { stroke: var(--amber);   stroke-width: 2.2px; filter: drop-shadow(0 0 3px color-mix(in oklch, var(--amber)   40%, transparent)); }
+#schematicSection .obs-alive .sch-shape      { stroke: var(--emerald); stroke-width: 2.2px; filter: drop-shadow(0 0 3px color-mix(in oklch, var(--emerald) 40%, transparent)); }
+#schematicSection .obs-anomalous .sch-shape  { stroke: var(--violet);  stroke-width: 2.2px; filter: drop-shadow(0 0 3px color-mix(in oklch, var(--violet)  40%, transparent)); stroke-dasharray: 3 2; }
+#schematicSection .obs-hot .sch-shape        { stroke: var(--amber);   stroke-width: 2.6px; filter: drop-shadow(0 0 4px color-mix(in oklch, var(--amber)   60%, transparent)); }
+#schematicSection .obs-shorted .sch-shape    { stroke: var(--amber);   stroke-width: 2.6px; filter: drop-shadow(0 0 5px color-mix(in oklch, var(--amber)   60%, transparent)); stroke-dasharray: 2 2; }
+
+/* Hypothesis chips — one style per predicted mode. */
+.sim-hyp-chip--dead      { background: color-mix(in oklch, var(--amber)   14%, transparent); color: var(--amber);   border: 1px solid color-mix(in oklch, var(--amber)   40%, transparent); padding: 1px 6px; border-radius: 2px; }
+.sim-hyp-chip--anomalous { background: color-mix(in oklch, var(--violet)  14%, transparent); color: var(--violet);  border: 1px solid color-mix(in oklch, var(--violet)  40%, transparent); padding: 1px 6px; border-radius: 2px; }
+.sim-hyp-chip--hot       { background: color-mix(in oklch, var(--amber)   20%, transparent); color: var(--amber);   border: 1px solid color-mix(in oklch, var(--amber)   60%, transparent); padding: 1px 6px; border-radius: 2px; }
+.sim-hyp-chip--shorted   { background: color-mix(in oklch, var(--amber)   20%, transparent); color: var(--amber);   border: 1px solid var(--amber); padding: 1px 6px; border-radius: 2px; }
 
 /* ------------------------------------------------------------------ *
  * Reverse-diagnostic results panel — glass card overlay, right edge. *

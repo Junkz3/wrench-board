@@ -36,6 +36,37 @@ const STATE = {
   selectedRailId: (typeof localStorage !== "undefined" && localStorage.getItem("schSelectedRail")) || null,
 };
 
+// Infer the nominal voltage from a canonical rail label.
+// "+3V3" → 3.3, "+5V" → 5, "+1V8" → 1.8, "+12V" → 12. Unknown labels → null.
+function inferRailNominalV(label) {
+  if (typeof label !== "string") return null;
+  const m = label.match(/^\+?(\d+)V(\d+)?$/i);
+  if (!m) return null;
+  const whole = parseInt(m[1], 10);
+  if (!m[2]) return whole;
+  const frac = parseFloat(`0.${m[2]}`);
+  return whole + frac;
+}
+
+// Client-side mirror of api/agent/measurement_memory.py::auto_classify.
+// Keep thresholds in sync with the Python constants.
+function clientAutoClassify(kind, value, unit, nominal) {
+  if (kind === "rail" && (unit === "V" || unit === "mV")) {
+    if (nominal == null || nominal === "") return null;
+    const v = unit === "mV" ? value / 1000 : value;
+    const nom = unit === "mV" ? nominal / 1000 : nominal;
+    if (v < 0.05) return "dead";
+    const ratio = nom !== 0 ? v / nom : 0;
+    if (ratio > 1.10) return "shorted";
+    if (ratio >= 0.90) return "alive";
+    return "anomalous";
+  }
+  if (kind === "comp" && unit === "°C") {
+    return value >= 65 ? "hot" : "alive";
+  }
+  return null;
+}
+
 /* ---------------------------------------------------------------------- *
  * SIMULATION                                                             *
  * Drives the behavioral simulator UI: fetches a SimulationTimeline from  *
@@ -286,6 +317,55 @@ const SimulationController = {
     this._applyObservationClasses();
     document.querySelectorAll(".sim-hypotheses-panel").forEach(p => p.remove());
   },
+  // Fetch the repair's measurement journal and seed the local observation
+  // Maps with the latest event per target. Mirrors the Python side's
+  // synthesise_observations (latest-per-target wins, state lit only for
+  // valid mode literals). Silent no-op when no repair_id is in the URL.
+  async hydrateFromJournal(slug) {
+    const repairId = new URLSearchParams(location.search).get("repair")
+      || new URLSearchParams(location.hash.split("?")[1] || "").get("repair");
+    if (!slug || !repairId) return;
+    try {
+      const res = await fetch(
+        `/pipeline/packs/${encodeURIComponent(slug)}/repairs/${encodeURIComponent(repairId)}/measurements`,
+      );
+      if (!res.ok) return;
+      const payload = await res.json();
+      const events = payload.events || [];
+      // Keep the latest event per target (events are stored in insertion order).
+      const latest = new Map();
+      for (const ev of events) latest.set(ev.target, ev);
+      this.measurementHistory = events;  // full journal, used by T19 timeline
+      const COMP_MODES = new Set(["dead", "alive", "anomalous", "hot"]);
+      const RAIL_MODES = new Set(["dead", "alive", "shorted"]);
+      for (const [target, ev] of latest) {
+        const idx = target.indexOf(":");
+        if (idx <= 0) continue;
+        const kind = target.slice(0, idx);
+        const key = target.slice(idx + 1);
+        const mode = ev.auto_classified_mode;
+        const measurement = (ev.value != null) ? {
+          measured: ev.value, unit: ev.unit, nominal: ev.nominal,
+          note: ev.note, ts: ev.timestamp,
+        } : null;
+        if (kind === "comp") {
+          if (COMP_MODES.has(mode)) {
+            this.observations.state_comps.set(key, mode);
+          }
+          if (measurement) this.observations.metrics_comps.set(key, measurement);
+        } else if (kind === "rail") {
+          // Allow "anomalous" locally for UI; it's stripped / coerced at POST.
+          if (RAIL_MODES.has(mode) || mode === "anomalous") {
+            this.observations.state_rails.set(key, mode);
+          }
+          if (measurement) this.observations.metrics_rails.set(key, measurement);
+        }
+      }
+      this._applyObservationClasses();
+    } catch (err) {
+      console.warn("[hydrateFromJournal] failed", err);
+    }
+  },
   _applyObservationClasses() {
     document
       .querySelectorAll(".obs-dead, .obs-alive, .obs-anomalous, .obs-hot, .obs-shorted")
@@ -310,11 +390,31 @@ const SimulationController = {
     const totalObs = obs.state_comps.size + obs.state_rails.size
                    + obs.metrics_comps.size + obs.metrics_rails.size;
     if (totalObs === 0) return;
+    // Backend RailMode accepts only dead/alive/shorted. Phase 1 scoring
+    // doesn't model anomalous rails — we coerce sagging readings to "dead"
+    // so the buck upstream still scores as top candidate. The raw metric
+    // rides along in metrics_rails so the narrative cites the exact value.
+    const RAIL_MODES = new Set(["dead", "alive", "shorted"]);
+    const stateRailsOut = {};
+    for (const [k, v] of obs.state_rails) {
+      if (RAIL_MODES.has(v)) stateRailsOut[k] = v;
+      else if (v === "anomalous") stateRailsOut[k] = "dead";
+    }
+    // Backend ObservedMetric forbids extras (ts, note). Strip UI-only fields.
+    const stripMetric = (m) => {
+      const out = { measured: m.measured, unit: m.unit };
+      if (m.nominal != null) out.nominal = m.nominal;
+      return out;
+    };
+    const metricsCompsOut = {};
+    for (const [k, v] of obs.metrics_comps) metricsCompsOut[k] = stripMetric(v);
+    const metricsRailsOut = {};
+    for (const [k, v] of obs.metrics_rails) metricsRailsOut[k] = stripMetric(v);
     const body = {
       state_comps:   Object.fromEntries(obs.state_comps),
-      state_rails:   Object.fromEntries(obs.state_rails),
-      metrics_comps: Object.fromEntries(obs.metrics_comps),
-      metrics_rails: Object.fromEntries(obs.metrics_rails),
+      state_rails:   stateRailsOut,
+      metrics_comps: metricsCompsOut,
+      metrics_rails: metricsRailsOut,
       max_results: 5,
     };
     try {
@@ -323,14 +423,15 @@ const SimulationController = {
         { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) },
       );
       if (!res.ok) {
-        console.warn("[hypothesize] HTTP", res.status, await res.text());
+        const detail = await res.text();
+        console.error("[hypothesize] HTTP", res.status, detail);
         return;
       }
       const payload = await res.json();
       this.hypotheses = payload.hypotheses || [];
       this._renderHypothesesPanel();
     } catch (err) {
-      console.warn("[hypothesize] fetch error", err);
+      console.error("[hypothesize] fetch error", err);
     }
   },
 
@@ -2372,30 +2473,105 @@ function updateInspector(node) {
     `;
   }
 
-  // --- Observation toggles (reverse-diagnostic input) ---
-  // Appears on component and rail nodes. Sets the 3-state observation
-  // (dead / unknown / alive) feeding the hypothesize endpoint.
+  // --- Observation row (reverse-diagnostic input, contextual per node kind) ---
   const obsKind = node.kind === "component" ? "comp" : node.kind === "rail" ? "rail" : null;
-  const obsKey  = node.kind === "component" ? node.refdes : node.kind === "rail" ? node.label : null;
+  const obsKey = node.kind === "component" ? node.refdes : node.kind === "rail" ? node.label : null;
   if (obsKind && obsKey) {
-    const stateMap = obsKind === "comp" ? SimulationController.observations.state_comps : SimulationController.observations.state_rails;
-    const current  = stateMap.get(obsKey) || "unknown";
+    const modesForKind = obsKind === "rail"
+      ? [["unknown", "⚪ inconnu"], ["alive", "✅ vivant"], ["dead", "❌ mort"], ["anomalous", "⚠ anomalous"], ["shorted", "⚡ shorté"]]
+      : [["unknown", "⚪ inconnu"], ["alive", "✅ vivant"], ["dead", "❌ mort"], ["anomalous", "⚠ anomalous"], ["hot", "🔥 chaud"]];
+    const stateMap = obsKind === "rail"
+      ? SimulationController.observations.state_rails
+      : SimulationController.observations.state_comps;
+    const current = stateMap.get(obsKey) || "unknown";
 
     const row = document.createElement("div");
     row.className = "sim-obs-row";
-    row.innerHTML = `
-      <span class="sim-obs-label">Observation</span>
-      <button data-obs="dead"    class="${current === "dead"    ? "active" : ""}">❌ mort</button>
-      <button data-obs="unknown" class="${current === "unknown" ? "active" : ""}">⚪ inconnu</button>
-      <button data-obs="alive"   class="${current === "alive"   ? "active" : ""}">✅ vivant</button>
-    `;
-    row.addEventListener("click", (ev) => {
-      const next = ev.target?.dataset?.obs;
-      if (!next) return;
-      SimulationController.setObservation(obsKind, obsKey, next);
-      updateInspector(node);  // re-render to flip active state
-    });
+    const picker = document.createElement("div");
+    picker.className = "sim-mode-picker";
+    picker.setAttribute("data-kind", obsKind);
+    for (const [mode, label] of modesForKind) {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.dataset.mode = mode;
+      if (mode === current) btn.classList.add("active");
+      btn.textContent = label;
+      btn.addEventListener("click", () => {
+        SimulationController.setObservation(obsKind, obsKey, mode);
+        updateInspector(node);
+      });
+      picker.appendChild(btn);
+    }
+    row.innerHTML = `<span class="sim-obs-label">Observation</span>`;
+    row.appendChild(picker);
     body.appendChild(row);
+
+    // --- Metric input row ---
+    const unitForKind = obsKind === "rail" ? "V" : "°C";
+    const metricMap = obsKind === "rail"
+      ? SimulationController.observations.metrics_rails
+      : SimulationController.observations.metrics_comps;
+    const existingMetric = metricMap.get(obsKey);
+
+    const metricRow = document.createElement("div");
+    metricRow.className = "sim-metric-row";
+    // Infer nominal from the rail label if the tech hasn't recorded one yet.
+    const inferredNominal = obsKind === "rail" ? inferRailNominalV(obsKey) : null;
+    const nominalForDisplay = existingMetric?.nominal ?? inferredNominal;
+    metricRow.innerHTML = `
+      <span class="sim-obs-label">Mesuré</span>
+      <input type="number" class="sim-metric-input" step="0.01" value="${existingMetric?.measured ?? ""}">
+      <select class="sim-metric-unit">
+        ${["V", "mV", "A", "°C", "Ω", "W"].map(u =>
+          `<option value="${u}" ${u === (existingMetric?.unit || unitForKind) ? "selected" : ""}>${u}</option>`
+        ).join("")}
+      </select>
+      <span class="sim-metric-nominal">${nominalForDisplay != null ? `nominal: ${nominalForDisplay}${existingMetric?.unit || unitForKind}` : ""}</span>
+      <button type="button" class="sim-metric-record">Enregistrer</button>
+    `;
+    const inputEl = metricRow.querySelector(".sim-metric-input");
+    const unitEl = metricRow.querySelector(".sim-metric-unit");
+    const recordBtn = metricRow.querySelector(".sim-metric-record");
+    const doRecord = async () => {
+      const valueRaw = inputEl.value.trim();
+      if (valueRaw === "") return;
+      const value = parseFloat(valueRaw);
+      if (!Number.isFinite(value)) return;
+      const unit = unitEl.value;
+      const nominal = existingMetric?.nominal ?? inferredNominal;
+      // Client-side auto-classify mirror (same thresholds as Python side).
+      const mode = clientAutoClassify(obsKind, value, unit, nominal);
+      // Update local state immediately.
+      SimulationController.setObservation(obsKind, obsKey, mode || "unknown", {
+        measured: value, unit, nominal,
+      });
+      // POST to the journal if we have a repair_id.
+      const slug = STATE.slug;
+      const repairId = new URLSearchParams(location.search).get("repair")
+        || new URLSearchParams(location.hash.split("?")[1] || "").get("repair");
+      if (slug && repairId) {
+        try {
+          await fetch(
+            `/pipeline/packs/${encodeURIComponent(slug)}/repairs/${encodeURIComponent(repairId)}/measurements`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                target: `${obsKind === "comp" ? "comp" : "rail"}:${obsKey}`,
+                value, unit, nominal,
+              }),
+            },
+          );
+        } catch (err) {
+          console.warn("[measurements] POST failed", err);
+        }
+      }
+      updateInspector(node);
+    };
+    inputEl.addEventListener("keydown", ev => { if (ev.key === "Enter") doRecord(); });
+    inputEl.addEventListener("blur", doRecord);
+    recordBtn.addEventListener("click", doRecord);
+    body.appendChild(metricRow);
   }
 
   // --- Diagnostiquer / Réinitialiser buttons (reverse-diagnostic) ---
@@ -2772,6 +2948,9 @@ export async function loadSchematic() {
   if (STATE.graph && STATE.graph.boot_sequence?.length && Object.keys(STATE.graph.power_rails || {}).length) {
     SimulationController.refresh(STATE.slug);
   }
+  // Hydrate the observation state from the per-repair measurement journal so
+  // the tech's past readings persist across reloads.
+  await SimulationController.hydrateFromJournal(slug);
   wireControls();
 }
 
