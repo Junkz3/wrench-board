@@ -19,6 +19,7 @@ from api.board.router import router as board_router
 from api.config import get_settings
 from api.logging_setup import configure_logging
 from api.pipeline import router as pipeline_router
+from api.profile.router import router as profile_router
 
 logger = logging.getLogger("microsolder.main")
 
@@ -55,6 +56,7 @@ app.add_middleware(
 
 app.include_router(pipeline_router)
 app.include_router(board_router)
+app.include_router(profile_router)
 
 
 @app.get("/health")
