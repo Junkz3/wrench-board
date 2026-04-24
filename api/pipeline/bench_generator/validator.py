@@ -250,17 +250,23 @@ def check_rails_mentioned_in_quote(
 def check_cause_rail_connection(
     draft: ProposedScenarioDraft, graph: ElectricalGraph
 ) -> Rejection | None:
-    """V2b.3: if expected_dead_rails is non-empty, cause.refdes must be
-    topologically connected to at least one of them — either as its
-    source or as a listed decoupling cap.
+    """V2b.3: EVERY rail in expected_dead_rails must be topologically
+    connected to cause.refdes — either as its source or as a listed
+    decoupling cap. A single unreachable rail fails the scenario.
+
+    This is the real semantic check for cascade validity. Once V2b.1
+    has grounded the refdes (literal or via registry bridge) and V2b.3
+    has confirmed topology, V2b.2's rail-mentioned-in-quote requirement
+    would be redundant and actively harms legitimate cascades where the
+    forum quote doesn't name the rail label (almost always the case).
 
     Known limitation: series supply-chain elements (ferrite beads,
     damping resistors) that appear in the rail chain but aren't in
     `decoupling` will be rejected. This is a false-positive tradeoff
-    we accept to eliminate the far-more-common false-positive of the
+    accepted to eliminate the far-more-common false-positive of the
     LLM attaching an unrelated refdes to a generic rail mention.
-    Callers can always extend this check with a typed-edge walk once
-    the graph's edge semantics for supply chains is locked in.
+    Callers can extend this with a typed-edge walk once the graph's
+    edge semantics for supply chains is locked in.
     """
     if not draft.expected_dead_rails:
         return None
@@ -271,18 +277,19 @@ def check_cause_rail_connection(
             # Topology check already guards this; defer to V3.
             continue
         if rail.source_refdes == refdes:
-            return None
+            continue
         if refdes in (rail.decoupling or []):
-            return None
-    return Rejection(
-        local_id=draft.local_id,
-        motive="cause_not_connected_to_rail",
-        detail=(
-            f"cause.refdes={refdes!r} is neither source nor decoupling cap "
-            f"of any of {draft.expected_dead_rails}"
-        ),
-        original_draft=draft,
-    )
+            continue
+        return Rejection(
+            local_id=draft.local_id,
+            motive="cause_not_connected_to_rail",
+            detail=(
+                f"cause.refdes={refdes!r} is neither source nor decoupling cap "
+                f"of rail {rail_label!r} (expected_dead_rails={draft.expected_dead_rails})"
+            ),
+            original_draft=draft,
+        )
+    return None
 
 
 def check_topology(draft: ProposedScenarioDraft, graph: ElectricalGraph) -> Rejection | None:
@@ -392,10 +399,12 @@ def run_all(
         if rej is not None:
             rejected.append(rej)
             continue
-        rej = check_rails_mentioned_in_quote(draft, registry)  # V2b.2
-        if rej is not None:
-            rejected.append(rej)
-            continue
+        # V2b.2 (rail-mentioned-in-quote) is intentionally skipped. V2b.1
+        # grounds the refdes, V2b.3 enforces cause→rail topology, which
+        # together cover cascade validity. Requiring the rail label in the
+        # quote was over-strict for forum sources that never name rails
+        # (e.g. "the screen did not turn on" never says EDP_BL_VCC). See
+        # commit message for the audit that motivated removing it.
         rej = check_topology(draft, graph)  # V3
         if rej is not None:
             rejected.append(rej)

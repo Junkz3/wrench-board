@@ -1,0 +1,16 @@
+{
+  "device_slug": "mnt-reform-motherboard",
+  "run_date": "2026-04-24",
+  "run_timestamp": "2026-04-24T21:31:57+00:00",
+  "model": "claude-opus-4-7",
+  "n_proposed": 6,
+  "n_accepted": 4,
+  "n_rejected": 2,
+  "input_mtimes": {
+    "raw_research_dump.md": 1776898755.8658757,
+    "rules.json": 1776899169.0623677,
+    "registry.json": 1776899104.6179748,
+    "electrical_graph.json": 1777003029.2039912
+  },
+  "escalated_rejects": false
+}

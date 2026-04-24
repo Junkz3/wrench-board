@@ -1,0 +1,28 @@
+{
+  "score": 0.7282111522745904,
+  "self_mrr": 0.713685253790984,
+  "cascade_recall": 0.75,
+  "n_scenarios": 4,
+  "per_scenario": [
+    {
+      "scenario_id": "mnt-reform-motherboard-lpc-lockup-dead-708e5043",
+      "self_mrr_contribution": 0.0,
+      "cascade_recall": 1.0
+    },
+    {
+      "scenario_id": "mnt-reform-motherboard-d9-led-dead-local-4a297318",
+      "self_mrr_contribution": 0.0,
+      "cascade_recall": 0.0
+    },
+    {
+      "scenario_id": "mnt-reform-motherboard-lpc-spi-checksum-regulating-low-81d4080c",
+      "self_mrr_contribution": 0.0,
+      "cascade_recall": 1.0
+    },
+    {
+      "scenario_id": "mnt-reform-motherboard-j1-battery-connector-open-64c4bb8d",
+      "self_mrr_contribution": 0.0,
+      "cascade_recall": 1.0
+    }
+  ]
+}

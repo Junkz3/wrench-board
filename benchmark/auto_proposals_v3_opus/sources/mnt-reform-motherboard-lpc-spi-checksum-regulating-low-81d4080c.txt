@@ -1,0 +1,5 @@
+https://community.mnt.re/t/lpc-errors-flooding-the-kernel-log-fixed/4299
+
+---
+
+Kernel log flooded with `reform2_lpc spi1.0: lpc_command: checksum mismatch` errors; battery status unavailable. Likely cause: LPC SPI communication broken — often correlated with a concurrent USB port malfunction, possibly suggesting a power or ground integrity problem on the SPI bus. One USB port was not functioning properly; subsequently the kernel log filled at high speed with `reform2_lpc spi1.0: lpc_command: c/0 checksum mismatch: af expected, 0 received`.

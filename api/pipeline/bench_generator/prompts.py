@@ -58,11 +58,18 @@ be discarded downstream:
 3. TOPOLOGY. Every refdes (cause + expected_dead_components) and every
    rail name you emit must exist in the provided graph.
 
-4. RAIL BRIDGE. If a rail is named in the dump by a descriptive phrase
-   ("the 3.3V rail", "USB power") rather than its graph label, you may
-   cite the descriptive phrase IF the graph's rail label also appears
-   somewhere in source_quote (even in parentheses or an adjacent
-   sentence). If only the descriptive phrase exists, skip the rail.
+4. RAIL CASCADE FROM TOPOLOGY. When the scenario's cause.refdes is the
+   `source_refdes` of a rail (or listed in its `decoupling`), you SHOULD
+   include that rail in `expected_dead_rails` — the simulator models
+   this cascade and cascade_recall depends on it. The rail label does
+   NOT need to appear literally in source_quote; its electrical
+   connection in the graph is ground truth. For the required evidence
+   on `expected_dead_rails`, cite any span from the quote that
+   symptomatically relates to the rail's death (e.g. "screen did not
+   turn on" for a display-backlight rail; "board won't boot" for the
+   main logic supply). The reasoning should explain the topology:
+   "cause.refdes sources rail X per the graph; the symptom cited is
+   consistent with X being offline."
 
 5. PROVENANCE. source_url must be an http(s) URL from the dump. source_quote
    is verbatim from the dump (≥ 50 chars). If the dump is vague, emit

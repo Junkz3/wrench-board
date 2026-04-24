@@ -1,0 +1,5 @@
+https://community.mnt.re/t/bypassing-charge-board/2467
+
+---
+
+Charging board (battery/charge board) completely dead; machine will not charge or power on from batteries. Likely cause: Hardware failure on the separate charge board PCB. When the charge board is dead, other community posts describe connecting pins 2 and 3 on the J1 plug to bypass it temporarily and allow firmware reflashing while a replacement board is sourced.
