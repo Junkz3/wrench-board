@@ -1,0 +1,5 @@
+https://community.mnt.re/t/debugging-power-related-firmware/1657
+
+---
+
+It stopped working: it was not turning on, and when the power supply was connected (both USB-C PD 20 V and the enclosed 24 V adapter) the D9 LED was dark. Verify cell voltages individually; reflash LPC firmware via a second computer.

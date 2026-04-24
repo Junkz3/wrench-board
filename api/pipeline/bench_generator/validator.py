@@ -1,19 +1,23 @@
 # SPDX-License-Identifier: Apache-2.0
 """Stateless validation passes. Each check returns a `Rejection | None`.
 
-Passes V1-V5 per spec §4.4:
-  V1 — sanity (mode, url, quote length, required mode-specific fields)
-  V2 — grounding (evidence_span ⊂ source_quote, literally)
-  V3 — topology (refdes + rails exist in ElectricalGraph)
-  V4 — mode/kind pertinence (mirrors evaluator._is_pertinent inline)
-  V5 — dedup within run
+Passes V1-V5 per spec §4.4, extended with V2b semantic guardrails:
+  V1  — sanity (mode, url, quote length, required mode-specific fields)
+  V2  — grounding (evidence_span ⊂ source_quote, literally)
+  V2b — semantic grounding: refdes + rails must be mentioned in quote,
+        and cause.refdes must be topologically connected to its rails
+  V3  — topology (refdes + rails exist in ElectricalGraph)
+  V4  — mode/kind pertinence (mirrors evaluator._is_pertinent inline)
+  V5  — dedup within run
+
+V2b exists because V2's literal-span check proves no LLM invention but
+does NOT verify the span semantically justifies the field it anchors.
+A quote fragment "battery cell leaking" can be cited as evidence for
+`cause.refdes=J1` (a connector) — structurally valid but semantically
+wrong. V2b adds three orthogonal checks to close that gap.
 
 The module is a collection of pure functions. No network, no filesystem,
-no LLM. Tests are fast and deterministic.
-
-`run_all(drafts, graph)` composes V1-V5 and returns
-`(accepted: list[ProposedScenarioDraft], rejected: list[Rejection])`.
-This task adds V1 and V5 only; V2/V3/V4/run_all come in subsequent tasks.
+no LLM.
 """
 
 from __future__ import annotations
@@ -141,6 +145,74 @@ def check_grounding(draft: ProposedScenarioDraft) -> Rejection | None:
     return None
 
 
+def check_refdes_mentioned_in_quote(draft: ProposedScenarioDraft) -> Rejection | None:
+    """V2b.1: cause.refdes must appear literally (case-insensitive) in
+    source_quote. Prevents attaching any refdes to any quote."""
+    refdes = draft.cause.refdes
+    if refdes.lower() not in draft.source_quote.lower():
+        return Rejection(
+            local_id=draft.local_id,
+            motive="refdes_not_mentioned_in_quote",
+            detail=f"cause.refdes={refdes!r} absent from source_quote",
+            original_draft=draft,
+        )
+    return None
+
+
+def check_rails_mentioned_in_quote(draft: ProposedScenarioDraft) -> Rejection | None:
+    """V2b.2: every rail in expected_dead_rails must appear literally
+    (case-insensitive) in source_quote. Prevents attaching a specific
+    rail to a generic failure-mode quote."""
+    quote_lc = draft.source_quote.lower()
+    for rail in draft.expected_dead_rails:
+        if rail.lower() not in quote_lc:
+            return Rejection(
+                local_id=draft.local_id,
+                motive="rail_not_mentioned_in_quote",
+                detail=f"expected rail {rail!r} absent from source_quote",
+                original_draft=draft,
+            )
+    return None
+
+
+def check_cause_rail_connection(
+    draft: ProposedScenarioDraft, graph: ElectricalGraph
+) -> Rejection | None:
+    """V2b.3: if expected_dead_rails is non-empty, cause.refdes must be
+    topologically connected to at least one of them — either as its
+    source or as a listed decoupling cap.
+
+    Known limitation: series supply-chain elements (ferrite beads,
+    damping resistors) that appear in the rail chain but aren't in
+    `decoupling` will be rejected. This is a false-positive tradeoff
+    we accept to eliminate the far-more-common false-positive of the
+    LLM attaching an unrelated refdes to a generic rail mention.
+    Callers can always extend this check with a typed-edge walk once
+    the graph's edge semantics for supply chains is locked in.
+    """
+    if not draft.expected_dead_rails:
+        return None
+    refdes = draft.cause.refdes
+    for rail_label in draft.expected_dead_rails:
+        rail = graph.power_rails.get(rail_label)
+        if rail is None:
+            # Topology check already guards this; defer to V3.
+            continue
+        if rail.source_refdes == refdes:
+            return None
+        if refdes in (rail.decoupling or []):
+            return None
+    return Rejection(
+        local_id=draft.local_id,
+        motive="cause_not_connected_to_rail",
+        detail=(
+            f"cause.refdes={refdes!r} is neither source nor decoupling cap "
+            f"of any of {draft.expected_dead_rails}"
+        ),
+        original_draft=draft,
+    )
+
+
 def check_topology(draft: ProposedScenarioDraft, graph: ElectricalGraph) -> Rejection | None:
     """V3: every refdes and rail in the draft must exist in the graph."""
     if draft.cause.refdes not in graph.components:
@@ -224,26 +296,43 @@ def run_all(
     drafts: list[ProposedScenarioDraft],
     graph: ElectricalGraph,
 ) -> tuple[list[ProposedScenarioDraft], list[Rejection]]:
-    """V1 → V2 → V3 → V4 (per draft, short-circuit on first failure) then
-    V5 dedup over the survivors."""
+    """V1 → V2 → V2b.1/V2b.2 → V3 → V2b.3 → V4 (per draft, short-circuit
+    on first failure) then V5 dedup over the survivors.
+
+    V2b.1 and V2b.2 run before V3 since they don't need the graph.
+    V2b.3 runs after V3 since it needs the rail to exist in the graph."""
     survivors: list[ProposedScenarioDraft] = []
     rejected: list[Rejection] = []
     for draft in drafts:
-        for check in (check_sanity, check_grounding):
+        # Per-draft chain, short-circuit on first failure
+        pre_graph_checks = (
+            check_sanity,  # V1
+            check_grounding,  # V2
+            check_refdes_mentioned_in_quote,  # V2b.1
+            check_rails_mentioned_in_quote,  # V2b.2
+        )
+        failed = False
+        for check in pre_graph_checks:
             rej = check(draft)
             if rej is not None:
                 rejected.append(rej)
+                failed = True
                 break
-        else:
-            rej = check_topology(draft, graph)
-            if rej is not None:
-                rejected.append(rej)
-                continue
-            rej = check_pertinence(draft, graph)
-            if rej is not None:
-                rejected.append(rej)
-                continue
-            survivors.append(draft)
-    deduped, dup_rejects = check_duplicates(survivors)
+        if failed:
+            continue
+        rej = check_topology(draft, graph)  # V3
+        if rej is not None:
+            rejected.append(rej)
+            continue
+        rej = check_cause_rail_connection(draft, graph)  # V2b.3
+        if rej is not None:
+            rejected.append(rej)
+            continue
+        rej = check_pertinence(draft, graph)  # V4
+        if rej is not None:
+            rejected.append(rej)
+            continue
+        survivors.append(draft)
+    deduped, dup_rejects = check_duplicates(survivors)  # V5
     rejected.extend(dup_rejects)
     return deduped, rejected

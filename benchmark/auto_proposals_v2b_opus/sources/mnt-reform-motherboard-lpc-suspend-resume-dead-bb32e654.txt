@@ -1,0 +1,5 @@
+https://community.mnt.re/t/lpc-does-not-react-anymore/766
+
+---
+
+After a period of perfect suspend/resume cycles the LPC will not wake up the board; the LCD shows "Waking up LPC… 0%" and goes blank after a short time (~400 ms). Cold-cycling battery power resolves it temporarily.

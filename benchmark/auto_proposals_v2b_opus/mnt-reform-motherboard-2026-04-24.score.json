@@ -1,0 +1,63 @@
+{
+  "score": 0.791847515910954,
+  "self_mrr": 0.713685253790984,
+  "cascade_recall": 0.9090909090909091,
+  "n_scenarios": 11,
+  "per_scenario": [
+    {
+      "scenario_id": "mnt-reform-motherboard-lpc-suspend-resume-dead-bb32e654",
+      "self_mrr_contribution": 0.0,
+      "cascade_recall": 1.0
+    },
+    {
+      "scenario_id": "mnt-reform-motherboard-off-state-drain-lpc-leaky-0d876454",
+      "self_mrr_contribution": 0.0,
+      "cascade_recall": 1.0
+    },
+    {
+      "scenario_id": "mnt-reform-motherboard-cell-reverse-bat1-dead-bb5a2dc1",
+      "self_mrr_contribution": 0.0,
+      "cascade_recall": 0.0
+    },
+    {
+      "scenario_id": "mnt-reform-motherboard-d9-led-failure-silent-407b2919",
+      "self_mrr_contribution": 0.0,
+      "cascade_recall": 1.0
+    },
+    {
+      "scenario_id": "mnt-reform-motherboard-edp-dsi-cable-display-open-1eca3331",
+      "self_mrr_contribution": 0.0,
+      "cascade_recall": 1.0
+    },
+    {
+      "scenario_id": "mnt-reform-motherboard-lpc-vcc-decoupling-short-9f3e07e4",
+      "self_mrr_contribution": 0.0,
+      "cascade_recall": 1.0
+    },
+    {
+      "scenario_id": "mnt-reform-motherboard-usb-pwr-switch-dead-8b36fc34",
+      "self_mrr_contribution": 0.0,
+      "cascade_recall": 1.0
+    },
+    {
+      "scenario_id": "mnt-reform-motherboard-edp-bl-vcc-ferrite-open-48979abc",
+      "self_mrr_contribution": 0.0,
+      "cascade_recall": 1.0
+    },
+    {
+      "scenario_id": "mnt-reform-motherboard-3v3-regulator-dead-407b2919",
+      "self_mrr_contribution": 0.0,
+      "cascade_recall": 1.0
+    },
+    {
+      "scenario_id": "mnt-reform-motherboard-5v-regulator-dead-9f3e07e4",
+      "self_mrr_contribution": 0.0,
+      "cascade_recall": 1.0
+    },
+    {
+      "scenario_id": "mnt-reform-motherboard-pcie-power-dead-nvme-bb5a2dc1",
+      "self_mrr_contribution": 0.0,
+      "cascade_recall": 1.0
+    }
+  ]
+}

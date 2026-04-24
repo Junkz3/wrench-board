@@ -37,8 +37,9 @@ def build_parser() -> argparse.ArgumentParser:
         "--model",
         default=None,
         help=(
-            "Sonnet model id. Defaults to settings.anthropic_model_sonnet "
-            "(from .env) or 'claude-sonnet-4-6' if unset."
+            "Anthropic model id. Defaults to settings.anthropic_model_main "
+            "(Opus, from .env) or 'claude-opus-4-7' if unset. "
+            "Pass 'claude-sonnet-4-6' here for the cheaper Sonnet baseline."
         ),
     )
     p.add_argument(
@@ -72,7 +73,7 @@ async def main_async(argv: list[str]) -> int:
         format="%(asctime)s %(levelname)s %(name)s %(message)s",
     )
     settings = get_settings()
-    model = args.model or (getattr(settings, "anthropic_model_sonnet", None) or "claude-sonnet-4-6")
+    model = args.model or (getattr(settings, "anthropic_model_main", None) or "claude-opus-4-7")
     client = AsyncAnthropic(
         api_key=settings.anthropic_api_key,
         max_retries=5,

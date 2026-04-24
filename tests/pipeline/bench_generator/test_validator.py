@@ -7,9 +7,12 @@ from api.pipeline.bench_generator.schemas import (
     ProposedScenarioDraft,
 )
 from api.pipeline.bench_generator.validator import (
+    check_cause_rail_connection,
     check_duplicates,
     check_grounding,
     check_pertinence,
+    check_rails_mentioned_in_quote,
+    check_refdes_mentioned_in_quote,
     check_sanity,
     check_topology,
     run_all,
@@ -228,7 +231,9 @@ def test_run_all_partitions_mixed_batch(sample_draft, toy_graph):
 
     accepted, rejected = run_all([good, bad_topology], toy_graph)
     assert [d.local_id for d in accepted] == ["c19-short"]
-    assert [r.motive for r in rejected] == ["refdes_not_in_graph"]
+    # V2b.1 catches the refdes absent from quote BEFORE V3's graph check.
+    # "XZ999" is neither in the quote nor in the graph; the earlier check wins.
+    assert [r.motive for r in rejected] == ["refdes_not_mentioned_in_quote"]
 
 
 def test_run_all_short_circuits_per_draft(sample_draft, toy_graph):
@@ -246,3 +251,111 @@ def test_run_all_short_circuits_per_draft(sample_draft, toy_graph):
     assert accepted == []
     assert len(rejected) == 1
     assert rejected[0].motive == "evidence_span_not_literal"
+
+
+# V2b semantic guardrails
+
+
+def test_v2b_refdes_mentioned_accepts_when_present(sample_draft):
+    # sample_draft quote mentions "C19" explicitly
+    assert check_refdes_mentioned_in_quote(sample_draft) is None
+
+
+def test_v2b_refdes_mentioned_rejects_when_absent(sample_draft):
+    bad = sample_draft.model_copy(deep=True)
+    bad.cause = Cause(refdes="U7", mode="dead")
+    # quote talks about C19, not U7
+    rej = check_refdes_mentioned_in_quote(bad)
+    assert rej is not None
+    assert rej.motive == "refdes_not_mentioned_in_quote"
+
+
+def test_v2b_refdes_mentioned_is_case_insensitive(sample_draft):
+    # Build a quote with lowercase version of the refdes
+    q = "The c19 capacitor shorts and collapses the rail." + " padding." * 8
+    d = sample_draft.model_copy(deep=True)
+    d.source_quote = q
+    d.evidence = [
+        EvidenceSpan(
+            field="cause.refdes",
+            source_quote_substring="c19",
+            reasoning="lowercase mention",
+        ),
+        EvidenceSpan(
+            field="cause.mode",
+            source_quote_substring="shorts",
+            reasoning="mode",
+        ),
+        EvidenceSpan(
+            field="expected_dead_rails",
+            source_quote_substring="collapses the rail",
+            reasoning="rail death",
+        ),
+    ]
+    # Refdes mention is case-insensitive: 'C19' (upper) should still match 'c19' (lower)
+    assert check_refdes_mentioned_in_quote(d) is None
+
+
+def test_v2b_rails_mentioned_accepts_when_present(sample_draft):
+    # sample_draft quote contains "+3V3"
+    assert check_rails_mentioned_in_quote(sample_draft) is None
+
+
+def test_v2b_rails_mentioned_rejects_when_absent(sample_draft):
+    bad = sample_draft.model_copy(deep=True)
+    bad.expected_dead_rails = ["+5V"]  # +5V is not mentioned in the C19 quote
+    rej = check_rails_mentioned_in_quote(bad)
+    assert rej is not None
+    assert rej.motive == "rail_not_mentioned_in_quote"
+
+
+def test_v2b_rails_mentioned_empty_list_passes(sample_draft):
+    # Zero-cascade scenario: no rails expected, no check to do
+    d = sample_draft.model_copy(deep=True)
+    d.expected_dead_rails = []
+    # Drop the now-orphan evidence entry for expected_dead_rails; V2 would
+    # otherwise reject this draft for having evidence on an empty field.
+    d.evidence = [e for e in d.evidence if e.field != "expected_dead_rails"]
+    assert check_rails_mentioned_in_quote(d) is None
+
+
+def test_v2b_cause_rail_connection_accepts_source(sample_draft, toy_graph):
+    # C19 is in the decoupling list of +3V3 in toy_graph
+    assert check_cause_rail_connection(sample_draft, toy_graph) is None
+
+
+def test_v2b_cause_rail_connection_accepts_rail_source_ic(sample_draft, toy_graph):
+    # U13 is the source of +3V3. Pointing cause at U13 with expected +3V3 is OK.
+    d = sample_draft.model_copy(deep=True)
+    d.cause = Cause(refdes="U13", mode="dead")
+    assert check_cause_rail_connection(d, toy_graph) is None
+
+
+def test_v2b_cause_rail_connection_rejects_unrelated_refdes(sample_draft, toy_graph):
+    # U7 sources +5V, not +3V3. Draft claims U7 kills +3V3 — wrong topology.
+    d = sample_draft.model_copy(deep=True)
+    d.cause = Cause(refdes="U7", mode="dead")
+    # expected_dead_rails stays [+3V3] from sample_draft
+    rej = check_cause_rail_connection(d, toy_graph)
+    assert rej is not None
+    assert rej.motive == "cause_not_connected_to_rail"
+
+
+def test_v2b_cause_rail_connection_empty_rails_passes(sample_draft, toy_graph):
+    # No rails expected → no topology constraint
+    d = sample_draft.model_copy(deep=True)
+    d.expected_dead_rails = []
+    d.evidence = [e for e in d.evidence if e.field != "expected_dead_rails"]
+    assert check_cause_rail_connection(d, toy_graph) is None
+
+
+def test_run_all_applies_v2b_before_v3(sample_draft, toy_graph):
+    # Draft with unrelated refdes + rail that is valid in graph but not
+    # mentioned in quote should be rejected by V2b.2 (rail_not_mentioned)
+    # before reaching V3.
+    d = sample_draft.model_copy(deep=True)
+    d.expected_dead_rails = ["+5V"]  # +5V exists in graph but not in quote
+    accepted, rejected = run_all([d], toy_graph)
+    assert accepted == []
+    assert len(rejected) == 1
+    assert rejected[0].motive == "rail_not_mentioned_in_quote"

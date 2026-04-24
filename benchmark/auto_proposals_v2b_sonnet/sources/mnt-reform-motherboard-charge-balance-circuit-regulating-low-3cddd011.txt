@@ -1,0 +1,5 @@
+https://community.mnt.re/t/mnt-reform-r-2-motherboard-update-2021-04-19/177
+
+---
+
+A small hardware modification on the R-2 production motherboard improves charging/battery balancing, together with an LPC firmware update and a keyboard firmware update.

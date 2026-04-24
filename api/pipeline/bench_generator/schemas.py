@@ -122,6 +122,10 @@ RejectionMotive = Literal[
     "mode_not_pertinent",
     "duplicate_in_run",
     "opus_rescue_failed",
+    # V2b semantic guardrails — attribution must be grounded in the source
+    "refdes_not_mentioned_in_quote",
+    "rail_not_mentioned_in_quote",
+    "cause_not_connected_to_rail",
 ]
 
 

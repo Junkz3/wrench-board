@@ -1,0 +1,28 @@
+{
+  "score": 0.7282111522745904,
+  "self_mrr": 0.713685253790984,
+  "cascade_recall": 0.75,
+  "n_scenarios": 4,
+  "per_scenario": [
+    {
+      "scenario_id": "mnt-reform-motherboard-battery-cell-reverse-deep-discharge-bb5a2dc1",
+      "self_mrr_contribution": 0.0,
+      "cascade_recall": 0.0
+    },
+    {
+      "scenario_id": "mnt-reform-motherboard-microhdmi-port-detached-open-230cca3e",
+      "self_mrr_contribution": 0.0,
+      "cascade_recall": 1.0
+    },
+    {
+      "scenario_id": "mnt-reform-motherboard-usb-vbus-switch-dead-8b36fc34",
+      "self_mrr_contribution": 0.0,
+      "cascade_recall": 1.0
+    },
+    {
+      "scenario_id": "mnt-reform-motherboard-charge-balance-circuit-regulating-low-3cddd011",
+      "self_mrr_contribution": 0.0,
+      "cascade_recall": 1.0
+    }
+  ]
+}

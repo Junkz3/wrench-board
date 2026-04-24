@@ -1,0 +1,5 @@
+https://community.mnt.re/t/boot-failure-a311d-restoring-connection-to-encrypted-nvme/2511
+
+---
+
+One of the batteries may show "reverse voltage" while others are well below "critical". Measure each of the 8 cells individually with a DMM; use a 90 W charger and attempt to bring cells back to 3.4 V per cell.

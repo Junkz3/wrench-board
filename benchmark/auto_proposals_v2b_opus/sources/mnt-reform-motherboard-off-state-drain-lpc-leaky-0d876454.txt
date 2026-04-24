@@ -1,0 +1,5 @@
+https://community.mnt.re/t/mnt-reform-recommended-lpc-and-keyboard-firmware-update-to-fix-battery-drain-in-off-state/559
+
+---
+
+Firmware updates greatly reduce battery drain in "off" mode by making use of deep sleep modes on both the keyboard and the LPC controller. Check installed LPC and keyboard firmware versions before probing hardware.

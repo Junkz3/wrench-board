@@ -142,5 +142,7 @@ async def test_end_to_end_mixed_batch(pack_dir, toy_graph, sample_draft, tmp_pat
         .split("\n")
     ]
     motives = {r["motive"] for r in rejected}
-    assert "refdes_not_in_graph" in motives
+    # V2b.1 catches the unknown refdes before V3 — XZ999 isn't in the quote
+    # either, so refdes_not_mentioned_in_quote fires first.
+    assert "refdes_not_mentioned_in_quote" in motives
     assert "duplicate_in_run" in motives
