@@ -49,16 +49,29 @@ def write_seed_marker(
     store_id: str,
     seeded_files: dict[str, float],
 ) -> None:
-    """Write the marker. `seeded_files` maps filename → mtime-at-seed-time."""
+    """Write the marker. `seeded_files` maps filename → mtime-at-seed-time.
+
+    Merges with any existing `managed.json` so the `memory_store_id` +
+    `device_slug` keys written by `ensure_memory_store` survive a re-seed
+    — otherwise subsequent `ensure_memory_store` calls would recreate the
+    store and orphan the first one.
+    """
     pack_dir.mkdir(parents=True, exist_ok=True)
-    payload = {
+    path = pack_dir / MARKER_FILENAME
+    existing: dict = {}
+    if path.exists():
+        try:
+            loaded = json.loads(path.read_text(encoding="utf-8"))
+            if isinstance(loaded, dict):
+                existing = loaded
+        except (json.JSONDecodeError, OSError):
+            existing = {}
+    existing.update({
         "seeded_at": datetime.now(UTC).isoformat(),
         "store_id": store_id,
         "files": seeded_files,
-    }
-    (pack_dir / MARKER_FILENAME).write_text(
-        json.dumps(payload, indent=2), encoding="utf-8"
-    )
+    })
+    path.write_text(json.dumps(existing, indent=2), encoding="utf-8")
 
 
 # Files we push into the store and the memory path they land on. Path scheme
