@@ -447,17 +447,41 @@ def test_board_state_accepts_degraded_component():
 
 
 def test_failure_requires_value_ohms_for_leaky_short():
-    # Failure type accepts the new modes; validation of mode-specific
-    # required fields lives in the engine, not the type itself.
+    # Happy path — value_ohms supplied.
     f = Failure(refdes="C42", mode="leaky_short", value_ohms=200.0)
     assert f.mode == "leaky_short"
     assert f.value_ohms == 200.0
+
+
+def test_failure_leaky_short_requires_value_ohms():
+    """leaky_short without value_ohms must raise — the engine cannot
+    compute a voltage drop without a path resistance."""
+    from pydantic import ValidationError
+    with pytest.raises(ValidationError, match="value_ohms"):
+        Failure(refdes="C42", mode="leaky_short")
+
+
+def test_failure_regulating_low_requires_voltage_pct():
+    """regulating_low without voltage_pct must raise — the engine has
+    no defensible default for a regulator's degraded output level."""
+    from pydantic import ValidationError
+    with pytest.raises(ValidationError, match="voltage_pct"):
+        Failure(refdes="U7", mode="regulating_low")
 
 
 def test_rail_override_carries_state_and_voltage_pct():
     o = RailOverride(label="+5V", state="degraded", voltage_pct=0.94)
     assert o.state == "degraded"
     assert o.voltage_pct == 0.94
+
+
+def test_rail_override_degraded_requires_voltage_pct():
+    """RailOverride(state='degraded') without voltage_pct must raise —
+    'degraded' has no meaning without a level to compare against the
+    engine's TOLERANCE_OK / TOLERANCE_UVLO thresholds."""
+    from pydantic import ValidationError
+    with pytest.raises(ValidationError, match="voltage_pct"):
+        RailOverride(label="+5V", state="degraded")
 
 
 def test_engine_accepts_failures_argument(graph_minimal):

@@ -15,7 +15,7 @@ from __future__ import annotations
 
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from api.pipeline.schematic.schemas import AnalyzedBootSequence, ElectricalGraph
 
@@ -96,6 +96,22 @@ class Failure(BaseModel):
         description="Required for `regulating_low`. Output as fraction of nominal.",
     )
 
+    @model_validator(mode="after")
+    def _check_mode_specific_required(self) -> "Failure":
+        if self.mode == "leaky_short" and self.value_ohms is None:
+            raise ValueError(
+                "Failure(mode='leaky_short') requires value_ohms — "
+                "the engine cannot compute a voltage drop without a "
+                "path resistance."
+            )
+        if self.mode == "regulating_low" and self.voltage_pct is None:
+            raise ValueError(
+                "Failure(mode='regulating_low') requires voltage_pct — "
+                "no defensible default exists for a regulator's "
+                "degraded output level."
+            )
+        return self
+
 
 class RailOverride(BaseModel):
     """An observation supplied by the caller — forces a rail to a state."""
@@ -108,6 +124,16 @@ class RailOverride(BaseModel):
         default=None,
         description="Required when state is `degraded`.",
     )
+
+    @model_validator(mode="after")
+    def _check_state_specific_required(self) -> "RailOverride":
+        if self.state == "degraded" and self.voltage_pct is None:
+            raise ValueError(
+                "RailOverride(state='degraded') requires voltage_pct — "
+                "'degraded' is meaningless without a level to compare "
+                "against TOLERANCE_OK / TOLERANCE_UVLO."
+            )
+        return self
 
 
 class SimulationEngine:
