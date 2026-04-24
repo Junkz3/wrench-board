@@ -4,9 +4,10 @@ from __future__ import annotations
 
 import logging
 import os
+from collections import OrderedDict
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Literal
+from typing import Any, ClassVar, Literal
 
 from api.board.model import Board
 from api.board.parser.base import parser_for
@@ -45,6 +46,13 @@ class SessionState:
     )
     # R1: pack cache — keyed by device_slug, storing (max_mtime, pack_dict).
     pack_cache: dict[str, tuple[float, dict[str, Any]]] = field(default_factory=dict)
+    # R2: per-session LRU for mb_get_component results, keyed by (device_slug, refdes).
+    # Size cap kept small — sessions ask about the same ~dozen refdes repeatedly.
+    component_cache: OrderedDict[tuple[str, str], dict[str, Any]] = field(
+        default_factory=OrderedDict
+    )
+
+    COMPONENT_CACHE_MAX: ClassVar[int] = 64
 
     def invalidate_pack_cache(self, device_slug: str) -> None:
         """Drop the cached pack for `device_slug`. Called after mb_expand_knowledge."""
@@ -61,6 +69,7 @@ class SessionState:
         self.dim_unrelated = False
         self.filter_prefix = None
         self.layer_visibility = {"top": True, "bottom": True}
+        self.component_cache.clear()
 
     @classmethod
     def from_device(cls, device_slug: str) -> SessionState:

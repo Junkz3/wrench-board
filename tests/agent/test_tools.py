@@ -124,3 +124,30 @@ def test_pack_cache_hits_on_repeated_calls(tmp_path: Path, monkeypatch):
 
     mb_get_component(device_slug=slug, refdes="U1", memory_root=tmp_path, session=session)
     assert len(reads) == first_call_reads, "second call hit disk — cache did not work"
+
+
+def test_mb_get_component_lru_skips_pack_reload(tmp_path: Path, monkeypatch):
+    from api.session.state import SessionState
+    from api.agent.tools import mb_get_component
+
+    slug = "demo"
+    pack_dir = tmp_path / slug
+    pack_dir.mkdir()
+    (pack_dir / "registry.json").write_text('{"components": [{"canonical_name": "U5", "kind": "ic"}], "signals": []}')
+    (pack_dir / "dictionary.json").write_text('{"entries": [{"canonical_name": "U5", "role": "pmic"}]}')
+    (pack_dir / "rules.json").write_text('{"rules": []}')
+
+    session = SessionState()
+    calls: list[tuple[str, str]] = []
+    from api.agent import tools as tools_mod
+    orig_load_pack = tools_mod._load_pack
+    def spy(slug_arg, root, session=None):
+        calls.append((slug_arg, "pack"))
+        return orig_load_pack(slug_arg, root, session=session)
+    monkeypatch.setattr(tools_mod, "_load_pack", spy)
+
+    mb_get_component(device_slug=slug, refdes="U5", memory_root=tmp_path, session=session)
+    mb_get_component(device_slug=slug, refdes="U5", memory_root=tmp_path, session=session)
+
+    # R1 means the second call hits cached pack; R2 means it never invokes _load_pack at all.
+    assert len(calls) == 1, f"expected 1 _load_pack call, got {len(calls)}"

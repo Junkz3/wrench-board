@@ -74,6 +74,13 @@ def mb_get_component(
       - case 3: {found: true, canonical_name, memory_bank: null, board: {...}}
       - case 4: {found: false, closest_matches: [...]}  # no memory_bank/board keys
     """
+    cache_key = (device_slug, refdes)
+    if session is not None:
+        cached = session.component_cache.get(cache_key)
+        if cached is not None:
+            session.component_cache.move_to_end(cache_key)
+            return cached
+
     pack = _load_pack(device_slug, memory_root, session=session)
     reg_by_name = {c["canonical_name"]: c for c in pack["registry"].get("components", [])}
     dct_by_name = {e["canonical_name"]: e for e in pack["dictionary"].get("entries", [])}
@@ -117,20 +124,28 @@ def mb_get_component(
         if session is not None and session.board is not None:
             board_candidates = suggest_similar(session.board, refdes, k=5)
         merged = list(dict.fromkeys(mem_candidates + board_candidates))[:5]
-        return {
+        result: dict[str, Any] = {
             "found": False,
             "error": "not_found",
             "queried_refdes": refdes,
             "closest_matches": merged,
             "hint": f"No refdes {refdes!r} on device {device_slug!r}.",
         }
+    else:
+        result = {
+            "found": True,
+            "canonical_name": refdes,
+            "memory_bank": memory_section,
+            "board": board_section,
+        }
 
-    return {
-        "found": True,
-        "canonical_name": refdes,
-        "memory_bank": memory_section,
-        "board": board_section,
-    }
+    if session is not None:
+        session.component_cache[cache_key] = result
+        session.component_cache.move_to_end(cache_key)
+        while len(session.component_cache) > SessionState.COMPONENT_CACHE_MAX:
+            session.component_cache.popitem(last=False)
+
+    return result
 
 
 def mb_get_rules_for_symptoms(
