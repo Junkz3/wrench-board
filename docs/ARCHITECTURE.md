@@ -75,7 +75,7 @@ Plus **deux engines déterministes purs** (`simulator`, `hypothesize`) qui n'app
 |-------|--------|--------|------------|--------|
 | 1 Scout | `scout.py` | Sonnet | native `web_search` (non-forcé) | `raw_research_dump.md` |
 | 2 Registry | `registry.py` | Sonnet | `submit_registry` | `registry.json` |
-| 3 Writers ×3 | `writers.py` | Opus ×3 | `submit_knowledge_graph`, `submit_rules`, `submit_dictionary` | `knowledge_graph.json`, `rules.json`, `dictionary.json` |
+| 3 Writers ×3 | `writers.py` | Opus (Cartographe, Clinicien) + Sonnet (Lexicographe) | `submit_knowledge_graph`, `submit_rules`, `submit_dictionary` | `knowledge_graph.json`, `rules.json`, `dictionary.json` |
 | 4 Auditor | `auditor.py` | Opus | `submit_audit_verdict` | `audit_verdict.json` |
 
 ### Particularités non-évidentes
@@ -106,7 +106,7 @@ PDF
  ▼
 ┌──────────────────────────────────────┐
 │ 1. renderer.py                       │  pdftoppm (poppler) → PNG par page
-│    + pdfplumber scan detection       │  200 DPI, détection orientation
+│    + pdfplumber scan detection       │  DPI paramétrable, détection orientation
 └──────────────────────────────────────┘
  │
  ▼
@@ -157,8 +157,13 @@ PDF
 
 ### CLI
 
+`api.pipeline.schematic.cli` est un **outil de debug vision**, pas de pleine ingestion. Il prend `pdf` + `page` (1-based) positionnels et exécute Claude vision sur une seule page, ou re-classifie les passives d'un `electrical_graph.json` existant via `--classify-passives SLUG`. La pleine ingestion PDF → `ElectricalGraph` passe par `ingest_schematic()` invoqué depuis l'orchestrator (typiquement via upload sur `POST /pipeline/packs/{slug}/documents`).
+
 ```bash
-python -m api.pipeline.schematic.cli --pdf=board.pdf --slug=my-device
+# debug une page
+python -m api.pipeline.schematic.cli board.pdf 3 --model claude-opus-4-7
+# re-classifier les passives d'un pack existant
+python -m api.pipeline.schematic.cli --classify-passives my-device
 ```
 
 ---
@@ -269,6 +274,8 @@ Manifest : `api/agent/manifest.py`. Sélection dynamique via `build_tools_manife
 | BV (boardview control) | 12 | `api/tools/boardview.py` | `api/agent/dispatch_bv.py` |
 | Profile | 3 | `api/profile/tools.py` | `runtime_*._dispatch_tool()` |
 
+Total : **29 tools** déclarés dans `manifest.py` (vérifié par `grep -c '"name":'`).
+
 **État connu** : les handlers sont dispersés en 5 fichiers sans registry unique. Ajouter un tool oblige à éditer `manifest.py` + un fichier d'implémentation + les deux runtimes. Refactor planifié mais non prioritaire (cf. section *Dette architecturale*).
 
 ### Garde-fou anti-hallucination
@@ -291,6 +298,16 @@ memory/{slug}/repairs/{repair_id}/
 ```
 
 Le JSONL est appendé **systématiquement**, même en mode managed — c'est le mirror qui permet de reconstruire l'historique en cas d'expiration de la session MA (30 j TTL).
+
+### Bootstrap Managed Agents (prérequis mode `managed`)
+
+Avant la toute première WS en `DIAGNOSTIC_MODE=managed`, lancer une fois :
+
+```bash
+.venv/bin/python scripts/bootstrap_managed_agent.py
+```
+
+Le script crée l'environnement MA + 3 agents tier-scopés (Haiku/Sonnet/Opus) et écrit `managed_ids.json` à la racine (gitignored). Idempotent. Sans ce fichier, `runtime_managed.py::load_managed_ids()` lève et la WS renvoie une erreur au frontend — le mode `direct` (fallback) n'a **aucun** prérequis de bootstrap.
 
 ---
 
@@ -345,20 +362,44 @@ Source de vérité inter-modules. **Toujours regarder ce tableau** avant d'ajout
 
 ## Endpoints HTTP / WS
 
-### Pipeline (`api/pipeline/__init__.py`)
+Liste non-exhaustive — le source de vérité est `api/pipeline/__init__.py` (25+ routes), `api/board/router.py`, `api/profile/router.py`, `api/main.py`.
+
+### Pipeline — packs & lifecycle (`api/pipeline/__init__.py`)
 - `POST /pipeline/generate` — knowledge factory synchrone (30–120 s)
-- `POST /pipeline/repairs` — crée une repair + fire-and-forget pack gen si device nouveau
-- `WS /pipeline/progress/{slug}` — events live (phase_started, phase_progress, phase_completed)
 - `GET /pipeline/packs` — liste des packs + bitmask de présence
 - `GET /pipeline/packs/{slug}` — métadonnées d'un pack
 - `GET /pipeline/packs/{slug}/full` — bundle de tous les JSON (Memory Bank)
+- `GET /pipeline/packs/{slug}/findings` — field reports d'un device
+- `GET /pipeline/packs/{slug}/graph` — payload graphe synthétisé
+- `POST /pipeline/packs/{slug}/expand` — Scout + Clinicien focalisés (self-extend)
+- `GET /pipeline/packs/{slug}/documents` + upload endpoint — datasheets / schéma / boardview fournis par le tech
 - `GET /pipeline/taxonomy` — arbre brand > model > version (home)
+
+### Pipeline — schematic & engines
+- `GET /pipeline/packs/{slug}/schematic` — `electrical_graph.json` + meta
+- `GET /pipeline/packs/{slug}/schematic/pages` — raw vision pages
+- `GET /pipeline/packs/{slug}/schematic/boot` — boot sequence analyzed
+- `GET /pipeline/packs/{slug}/schematic/passives` — classification passives
+- `POST /pipeline/packs/{slug}/schematic/analyze-boot` (202) — lance `boot_analyzer` en arrière-plan
+- `POST /pipeline/packs/{slug}/schematic/classify-nets` (202) — lance le classifier nets
+- `POST /pipeline/packs/{slug}/schematic/simulate` — drives `SimulationEngine` (même shape que `mb_schematic_graph(query="simulate")`)
+- `POST /pipeline/packs/{slug}/schematic/hypothesize` — diagnostic inverse depuis observation
+
+### Pipeline — repairs & conversations
+- `POST /pipeline/repairs` — crée une repair + fire-and-forget pack gen si device nouveau
+- `GET /pipeline/repairs` — liste des repairs (home)
+- `GET /pipeline/repairs/{repair_id}` — métadonnées d'une repair
+- `GET /pipeline/repairs/{repair_id}/conversations` — liste des conversations
+- `GET /pipeline/packs/{slug}/repairs/{repair_id}/measurements` — journal de mesures
+
+### Pipeline — WebSocket progress
+- `WS /pipeline/progress/{slug}` — events live (phase_started, phase_progress, phase_completed)
 
 ### Board (`api/board/router.py`)
 - `POST /api/board/parse` — upload + parse via `parser_for(path)` → `Board` JSON
 
-### Schematic
-- `POST /schematic/simulate` — drives `SimulationEngine` (même shape que `mb_schematic_graph(query="simulate")`)
+### Profile (`api/profile/router.py`)
+- `GET /profile` — technician profile (catalog / skills)
 
 ### Diagnostic
 - `WS /ws/diagnostic/{slug}?tier=&repair=&conv=` — conversation live
@@ -388,7 +429,7 @@ Ne pas les résoudre « par hygiène » — chaque item a un arbitrage ROI que l
 
 | Zone | Description | Pourquoi on tolère |
 |------|-------------|--------------------|
-| **Tool registry dispersé** | 26 tools déclarés dans `manifest.py`, handlers en 5 fichiers, dispatch dupliqué dans les 2 runtimes | Refactor `tool_registry.py` planifié, ROI faible tant que le manifest est stable |
+| **Tool registry dispersé** | 29 tools déclarés dans `manifest.py`, handlers en 5 fichiers, dispatch dupliqué dans les 2 runtimes | Refactor `tool_registry.py` planifié, ROI faible tant que le manifest est stable |
 | **Boot sequence dual-path** | `compiler.boot_sequence` (topologique) vs `boot_analyzer.analyzed_boot_sequence` (Opus) | Analyzer optionnel, graceful fail documenté ; le simulator accepte les deux |
 | **WS events sans schema partagé** | Backend Pydantic (`api/tools/ws_events.py`), frontend lit `event.type` en string matching | Faible surface de changement, schema TypeScript généré coûte cher pour un bénéfice marginal |
 | **`memory/` contrats JSON non-versionnés** | Pas de migration framework quand une shape évolue | `pipeline/schemas.py` est contract-first ; les fichiers sont régénérables |
