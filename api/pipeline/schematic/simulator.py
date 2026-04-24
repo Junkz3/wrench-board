@@ -368,21 +368,6 @@ class SimulationEngine:
                         target_rail = label
                         break
                 if target_rail is None:
-                    # The cap isn't registered as decoupling any rail (e.g. a
-                    # coupling / filter / bulk cap outside the per-rail
-                    # `decoupling` list). Otherwise the leaky_short branch is
-                    # a silent no-op — every such (refdes, leaky_short) pair
-                    # produces an empty symptom fingerprint and ties with the
-                    # residual empty-fingerprint cluster in the self_MRR
-                    # oracle's Jaccard ranking. Mark the cap itself dead: a
-                    # leaking cap with no reachable rail to drag is, at a
-                    # set-level observability standpoint, indistinguishable
-                    # from "that part is gone" (shorted to chassis internally,
-                    # bulging, etc.), and the pair collapses into a 1-cluster
-                    # rather than drowning in the empty cluster. Mirrors the
-                    # regulating_low / open self-dead marks.
-                    if f.refdes in self.electrical.components:
-                        components[f.refdes] = "dead"
                     continue
                 # Voltage divider model: leak draws extra I = V_nom / R_leak;
                 # consumers also draw I_nom_total = N × per-consumer estimate.
