@@ -727,3 +727,93 @@ def test_list_boot_surfaces_analyzer_meta(memory_root, graph):
     assert r["analyzer_meta"]["model_used"] == "claude-opus-4-7"
     # The brief phases still carry kind + confidence when available.
     assert any("kind" in p for p in r["phases"])
+
+
+# ----------------------------------------------------------------------
+# query="simulate" — failures, rail_overrides, and session-backed
+# probe_route enrichment (axes 2 & 3).
+# ----------------------------------------------------------------------
+
+
+def test_simulate_query_accepts_failures_param(memory_root, graph):
+    _write_graph(memory_root, graph)
+    result = mb_schematic_graph(
+        device_slug=SLUG,
+        memory_root=memory_root,
+        query="simulate",
+        failures=[{"refdes": "U7", "mode": "regulating_low", "voltage_pct": 0.85}],
+    )
+    assert result["found"] is True
+    assert result["query"] == "simulate"
+
+
+def test_simulate_query_accepts_rail_overrides_param(memory_root, graph):
+    _write_graph(memory_root, graph)
+    result = mb_schematic_graph(
+        device_slug=SLUG,
+        memory_root=memory_root,
+        query="simulate",
+        rail_overrides=[{"label": "+5V", "state": "degraded", "voltage_pct": 0.85}],
+    )
+    assert result["found"] is True
+    # When +5V is degraded, the final_verdict should be 'degraded' or 'cascade',
+    # not 'completed'.
+    assert result["final_verdict"] in ("degraded", "cascade", "blocked")
+
+
+def test_simulate_query_with_session_board_returns_probe_route(
+    memory_root, graph
+):
+    _write_graph(memory_root, graph)
+    # Build a minimal SessionState with a Board that maps the graph's source IC.
+    from api.board.model import Board, Layer, Part, Point
+    from api.session.state import SessionState
+
+    source = next(
+        (r.source_refdes for r in graph.power_rails.values() if r.source_refdes),
+        None,
+    )
+    assert source is not None
+    board = Board(
+        board_id="test",
+        file_hash="deadbeef",
+        source_format="test_link",
+        outline=[],
+        parts=[
+            Part(
+                refdes=source,
+                layer=Layer.TOP,
+                is_smd=True,
+                bbox=(Point(x=0, y=0), Point(x=1000, y=1000)),
+                pin_refs=[],
+            )
+        ],
+        pins=[],
+        nets=[],
+        nails=[],
+    )
+    session = SessionState()
+    session.set_board(board)
+
+    result = mb_schematic_graph(
+        device_slug=SLUG,
+        memory_root=memory_root,
+        query="simulate",
+        killed_refdes=[source],
+        session=session,
+    )
+    assert result["found"] is True
+    assert "probe_route" in result
+    # Priority 1 should be the source IC.
+    assert any(p["refdes"] == source for p in result["probe_route"])
+
+
+def test_simulate_query_without_session_omits_probe_route(memory_root, graph):
+    _write_graph(memory_root, graph)
+    result = mb_schematic_graph(
+        device_slug=SLUG,
+        memory_root=memory_root,
+        query="simulate",
+    )
+    assert result["found"] is True
+    assert "probe_route" not in result

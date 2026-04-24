@@ -595,31 +595,76 @@ def _simulate_query(
     memory_root: Path,
     device_slug: str,
     killed_refdes: list[str] | None,
+    failures: list[dict] | None = None,
+    rail_overrides: list[dict] | None = None,
+    session: "SessionState | None" = None,
 ) -> dict[str, Any]:
     """Run the behavioral simulator and return a compact cascade summary.
 
-    Validates every refdes in killed_refdes against the on-disk graph — an
-    unknown refdes returns `{found: false, invalid_refdes, closest_matches}`
-    rather than silently treating it as a real fault. Mirrors the
+    Validates every refdes in killed_refdes + failures[*].refdes, and every
+    rail_overrides[*].label, against the on-disk graph — an unknown refdes
+    or rail returns `{found: false, ...}` with closest_matches. Mirrors the
     anti-hallucination guardrail of `mb_get_component`.
+
+    When `session` is provided AND `session.board` is populated, the
+    response is enriched with a `probe_route` (ranked ProbePoint list) and
+    an `unmapped_refdes` list via the schematic ↔ boardview bridge. Without
+    a session board, the response stays on the existing compact shape.
 
     NOTE: this query deliberately re-reads electrical_graph.json on every
     call — the simulator needs the Pydantic-typed ElectricalGraph object,
     not the cached raw dict. All other queries in mb_schematic_graph
     benefit from the per-session cache; simulate does not.
     """
-    killed = list(killed_refdes or [])
+    from api.pipeline.schematic.simulator import (
+        Failure,
+        RailOverride,
+    )
+
     components = graph_dict.get("components", {})
-    invalid = [r for r in killed if r not in components]
-    if invalid:
+    rails = graph_dict.get("power_rails", {})
+
+    killed = list(killed_refdes or [])
+    f_objs: list[Failure] = []
+    for raw in failures or []:
+        try:
+            f_objs.append(Failure(**raw))
+        except Exception as exc:  # noqa: BLE001
+            return {"found": False, "reason": "invalid_failure", "detail": str(exc)}
+    o_objs: list[RailOverride] = []
+    for raw in rail_overrides or []:
+        try:
+            o_objs.append(RailOverride(**raw))
+        except Exception as exc:  # noqa: BLE001
+            return {
+                "found": False,
+                "reason": "invalid_rail_override",
+                "detail": str(exc),
+            }
+
+    invalid_refdes = [
+        r for r in killed + [f.refdes for f in f_objs] if r not in components
+    ]
+    if invalid_refdes:
         return {
             "found": False,
             "reason": "unknown_refdes",
-            "invalid_refdes": invalid,
+            "invalid_refdes": invalid_refdes,
             "closest_matches": {
-                r: _closest_matches(list(components.keys()), r) for r in invalid
+                r: _closest_matches(list(components.keys()), r) for r in invalid_refdes
             },
         }
+    invalid_rails = [o.label for o in o_objs if o.label not in rails]
+    if invalid_rails:
+        return {
+            "found": False,
+            "reason": "unknown_rail",
+            "invalid_rails": invalid_rails,
+            "closest_matches": {
+                r: _closest_matches(list(rails.keys()), r) for r in invalid_rails
+            },
+        }
+
     # Re-validate from disk so we get the real Pydantic shapes the engine expects.
     pack = memory_root / device_slug
     try:
@@ -636,10 +681,14 @@ def _simulate_query(
         except ValueError:
             analyzed = None
     tl = SimulationEngine(
-        electrical, analyzed_boot=analyzed, killed_refdes=killed
+        electrical,
+        analyzed_boot=analyzed,
+        killed_refdes=killed,
+        failures=f_objs,
+        rail_overrides=o_objs,
     ).run()
     last_state = tl.states[-1] if tl.states else None
-    return {
+    payload: dict[str, Any] = {
         "found": True,
         "query": "simulate",
         "killed_refdes": tl.killed_refdes,
@@ -653,6 +702,15 @@ def _simulate_query(
         "cascade_dead_rails": tl.cascade_dead_rails,
     }
 
+    if session is not None and getattr(session, "board", None) is not None:
+        from api.agent.schematic_boardview_bridge import enrich
+
+        enriched = enrich(tl, session.board)
+        payload["probe_route"] = [p.model_dump() for p in enriched.probe_route]
+        payload["unmapped_refdes"] = enriched.unmapped_refdes
+
+    return payload
+
 
 def mb_schematic_graph(
     *,
@@ -664,6 +722,8 @@ def mb_schematic_graph(
     index: int | None = None,
     domain: str | None = None,
     killed_refdes: list[str] | None = None,
+    failures: list[dict] | None = None,
+    rail_overrides: list[dict] | None = None,
     session: "SessionState | None" = None,
 ) -> dict[str, Any]:
     """Deterministic read over `memory/{device_slug}/electrical_graph.json`.
@@ -703,7 +763,15 @@ def mb_schematic_graph(
     if query == "net_domain":
         return _net_domain_query(graph, domain)
     if query == "simulate":
-        return _simulate_query(graph, memory_root, device_slug, killed_refdes)
+        return _simulate_query(
+            graph,
+            memory_root,
+            device_slug,
+            killed_refdes,
+            failures=failures,
+            rail_overrides=rail_overrides,
+            session=session,
+        )
     return {
         "found": False,
         "reason": "invalid_query",
