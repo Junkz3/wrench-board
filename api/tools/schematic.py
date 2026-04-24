@@ -602,6 +602,11 @@ def _simulate_query(
     unknown refdes returns `{found: false, invalid_refdes, closest_matches}`
     rather than silently treating it as a real fault. Mirrors the
     anti-hallucination guardrail of `mb_get_component`.
+
+    NOTE: this query deliberately re-reads electrical_graph.json on every
+    call — the simulator needs the Pydantic-typed ElectricalGraph object,
+    not the cached raw dict. All other queries in mb_schematic_graph
+    benefit from the per-session cache; simulate does not.
     """
     killed = list(killed_refdes or [])
     components = graph_dict.get("components", {})

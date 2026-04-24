@@ -8,7 +8,7 @@ def test_schematic_graph_cache_hits(tmp_path: Path, monkeypatch):
     slug = "demo"
     pack = tmp_path / slug
     pack.mkdir()
-    graph = {"power_rails": {}, "boot_sequence": [], "components": []}
+    graph = {"power_rails": {}, "boot_sequence": [], "components": {}}
     (pack / "electrical_graph.json").write_text(json.dumps(graph))
 
     session = SessionState()
@@ -20,7 +20,9 @@ def test_schematic_graph_cache_hits(tmp_path: Path, monkeypatch):
         return orig(self, *args, **kwargs)
     monkeypatch.setattr(Path, "read_text", counting)
 
-    mb_schematic_graph(device_slug=slug, memory_root=tmp_path, query="list_rails", session=session)
-    mb_schematic_graph(device_slug=slug, memory_root=tmp_path, query="list_rails", session=session)
+    result1 = mb_schematic_graph(device_slug=slug, memory_root=tmp_path, query="list_rails", session=session)
+    result2 = mb_schematic_graph(device_slug=slug, memory_root=tmp_path, query="list_rails", session=session)
 
     assert len(reads) == 1, f"expected 1 disk read, got {len(reads)}"
+    assert result1 == result2, "cached result must match the first-call result"
+    assert "rails" in result1 or "count" in result1, f"unexpected result shape: {result1!r}"

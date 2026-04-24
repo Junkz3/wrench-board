@@ -55,7 +55,9 @@ class SessionState:
     COMPONENT_CACHE_MAX: ClassVar[int] = 64
     # R3: profile snapshot cache — mtime-checked on every lookup.
     profile_cache: tuple[float, dict[str, Any]] | None = None
-    # R4: electrical_graph.json cache (and analyzer overlay) keyed by device_slug.
+    # R4: electrical_graph.json cache (+ analyzer & net-domain overlays), keyed
+    # by device_slug. No explicit invalidator — the pipeline always rewrites the
+    # file, so mtime comparison catches every realistic mutation.
     schematic_graph_cache: dict[str, tuple[float, dict[str, Any]]] = field(default_factory=dict)
 
     def invalidate_pack_cache(self, device_slug: str) -> None:
