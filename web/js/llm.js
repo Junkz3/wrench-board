@@ -226,6 +226,139 @@ function escapeHTML(s) {
     .replaceAll("'", "&#39;");
 }
 
+// ============ Inline tool-call widgets (guided mode) ============
+//
+// In guided mode the main workbench is hidden behind the fullscreen chat.
+// When the agent calls a side-effecting tool (bv_*, mb_schematic_graph) we
+// drop a small "click-to-reveal" card into the chat that lets the user
+// surface the corresponding workbench section. The actual side effect (e.g.
+// bv_focus on the main #brdRoot) already happened via the existing WS
+// handler — the widget is just an affordance for the user to *see* it.
+
+const BV_TOOL_NAMES = new Set([
+  "bv_highlight_component", "bv_focus_component", "bv_highlight_net",
+  "bv_flip_board", "bv_annotate", "bv_filter_by_type", "bv_draw_arrow",
+  "bv_measure_distance", "bv_show_pin", "bv_dim_unrelated",
+  "bv_layer_visibility", "bv_reset_view",
+]);
+
+function summariseBvInput(input) {
+  if (!input || typeof input !== "object") return "";
+  const parts = [];
+  if (input.refdes) parts.push(input.refdes);
+  if (input.net) parts.push(`net ${input.net}`);
+  if (input.kind) parts.push(input.kind);
+  return parts.join(" · ");
+}
+
+function appendChatWidget(turn, { title, kind, summary, detailSection }) {
+  // Widget is a sibling of .turn-rail inside the turn — keeps grouping intact.
+  const wrap = document.createElement("div");
+  wrap.className = `chat-widget chat-widget-${kind}`;
+
+  const head = document.createElement("header");
+  head.className = "chat-widget-head";
+  const titleSpan = document.createElement("span");
+  titleSpan.className = "chat-widget-title";
+  titleSpan.textContent = title;
+  head.appendChild(titleSpan);
+
+  const detailBtn = document.createElement("button");
+  detailBtn.type = "button";
+  detailBtn.className = "chat-widget-detail";
+  detailBtn.textContent = "voir en détail →";
+  detailBtn.addEventListener("click", () => enterDetailView(detailSection));
+  head.appendChild(detailBtn);
+  wrap.appendChild(head);
+
+  const body = document.createElement("div");
+  body.className = "chat-widget-body placeholder";
+  body.textContent = summary || "(aucune cible)";
+  wrap.appendChild(body);
+
+  turn.appendChild(wrap);
+  const log = document.getElementById("llmLog");
+  if (log) log.scrollTop = log.scrollHeight;
+  return wrap;
+}
+
+// ============ Detail-view machinery ============
+//
+// Toggles body.detail-view + body.dataset.detailSection. Reveals the matching
+// .stub or .sch-root via CSS rules in guided.css. Adds a "← retour" button.
+
+const SECTION_STUB_MAP = {
+  pcb: '.stub[data-section-stub="pcb"]',
+  schematic: '.sch-root[data-section-stub="schematic"]',
+  graphe: '.stub[data-section-stub="graphe"]',
+  memory: '.stub[data-section-stub="graphe"]',  // memory bank merges into graphe view per existing routing
+};
+
+function enterDetailView(section) {
+  if (!section || !SECTION_STUB_MAP[section]) return;
+  if (!document.body.classList.contains("guided-mode")) return;
+
+  // Clear any previous .detail-target marker
+  document.querySelectorAll(".detail-target").forEach(el => el.classList.remove("detail-target"));
+
+  const target = document.querySelector(SECTION_STUB_MAP[section]);
+  if (!target) {
+    console.warn(`[detail-view] no DOM target for section "${section}"`);
+    return;
+  }
+  target.classList.remove("hidden");
+  target.classList.add("detail-target");
+
+  document.body.classList.add("detail-view");
+  document.body.dataset.detailSection = section;
+
+  // Inject the back button if not present.
+  let back = document.getElementById("detailBack");
+  if (!back) {
+    back = document.createElement("button");
+    back.id = "detailBack";
+    back.type = "button";
+    back.className = "detail-back";
+    back.innerHTML = `<svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg><span>retour conversation</span>`;
+    back.addEventListener("click", exitDetailView);
+    document.body.appendChild(back);
+  }
+
+  // Update active tab in topbar.
+  document.querySelectorAll(".tb-tab").forEach(t => {
+    t.classList.toggle("active", t.dataset.detail === section);
+  });
+}
+
+function exitDetailView() {
+  document.body.classList.remove("detail-view");
+  delete document.body.dataset.detailSection;
+  document.querySelectorAll(".detail-target").forEach(el => {
+    el.classList.remove("detail-target");
+    el.classList.add("hidden");  // restore the section's default-hidden state
+  });
+  document.querySelectorAll(".tb-tab").forEach(t => t.classList.remove("active"));
+}
+
+// Topbar tab clicks → enter detail view on the matched section.
+function wireTopbarTabsOnce() {
+  if (window.__guidedTabsWired) return;
+  window.__guidedTabsWired = true;
+  document.addEventListener("click", (ev) => {
+    const tab = ev.target.closest(".tb-tab");
+    if (!tab) return;
+    const section = tab.dataset.detail;
+    if (!section) return;
+    if (document.body.classList.contains("detail-view") &&
+        document.body.dataset.detailSection === section) {
+      exitDetailView();
+    } else {
+      enterDetailView(section);
+    }
+  });
+}
+wireTopbarTabsOnce();
+
 // Create a fresh turn-block container and append it to the log.
 function createTurn() {
   const log = el("llmLog");
@@ -665,6 +798,20 @@ function connect() {
           ...(payload.result != null ? { result: payload.result } : {}),
         };
         addExpandToStep(step, payloadJSON);
+
+        // Guided mode: pop a click-to-reveal widget for board / schematic tools.
+        if (document.body.classList.contains("guided-mode")) {
+          const input = payload.input || {};
+          if (BV_TOOL_NAMES.has(name)) {
+            appendChatWidget(turn, {
+              title: "Boardview",
+              kind: "board",
+              summary: summariseBvInput(input) || name,
+              detailSection: "pcb",
+            });
+          }
+          // Task 6.2 will hook mb_schematic_graph here.
+        }
         break;
       }
       case "thinking": {
