@@ -178,6 +178,90 @@ class Registry(BaseModel):
 
 
 # ======================================================================
+# PHASE 2.5 — Refdes Mapper (canonical_name → graph refdes attribution)
+# ======================================================================
+#
+# Runs only when an ElectricalGraph is loaded for the device. Output is
+# server-side-validated against three deterministic rules before persist:
+#   1. evidence_quote is a literal substring of the raw dump,
+#   2. for literal_refdes_in_quote: refdes appears literally in evidence_quote,
+#   3. for mpn_match_in_quote: graph.components[refdes].value.mpn appears
+#      literally in evidence_quote (MPN comes only from the graph — the
+#      LLM cannot invent it).
+# Failed attributions are dropped, not retried. An empty mapping is a
+# valid output. See docs/superpowers/specs/2026-04-25-refdes-mapper-agent.md.
+
+
+EvidenceKind = Literal[
+    "literal_refdes_in_quote",
+    "mpn_match_in_quote",
+]
+
+
+class RefdesAttribution(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    canonical_name: str = Field(
+        description=(
+            "Must match a `canonical_name` of a component in the registry "
+            "supplied to the Mapper. Otherwise the attribution is dropped."
+        ),
+    )
+    refdes: str = Field(
+        description=(
+            "Must exist in `graph.components`. Otherwise dropped. The mapper "
+            "MUST NOT invent a refdes that is not in the supplied graph."
+        ),
+    )
+    confidence: float = Field(
+        ge=0.0,
+        le=1.0,
+        description=(
+            "Subjective confidence in this attribution. Use ~0.95 for direct "
+            "literal refdes mentions, ~0.85 for MPN matches, lower as evidence "
+            "thins."
+        ),
+    )
+    evidence_kind: EvidenceKind = Field(
+        description=(
+            "How the attribution is justified. Closed enum — the only two "
+            "legitimate kinds are direct literal refdes mention OR MPN match. "
+            "Topology / rail-overlap / functional similarity are NOT valid."
+        ),
+    )
+    evidence_quote: str = Field(
+        min_length=30,
+        max_length=600,
+        description=(
+            "A literal substring of the raw research dump (≥30 chars) that "
+            "supports the attribution. For `literal_refdes_in_quote` the "
+            "refdes must appear in this quote (case-insensitive). For "
+            "`mpn_match_in_quote` the graph's MPN for this refdes must appear "
+            "in this quote (case-sensitive). Server validates both literally."
+        ),
+    )
+    reasoning: str = Field(
+        max_length=240,
+        description=(
+            "One sentence explaining why this canonical→refdes mapping holds. "
+            "E.g. 'dump quote mentions the LM2677 buck; graph U7.value.mpn is "
+            "LM2677SX-5'."
+        ),
+    )
+
+
+class RefdesMappings(BaseModel):
+    """Phase 2.5 output — typed canonical→refdes attributions, persisted as
+    `memory/{slug}/refdes_attributions.json`."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    schema_version: Literal["1.0"] = "1.0"
+    device_slug: str
+    attributions: list[RefdesAttribution] = Field(default_factory=list)
+
+
+# ======================================================================
 # PHASE 3 — Writer outputs
 # ======================================================================
 
