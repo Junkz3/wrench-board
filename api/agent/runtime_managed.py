@@ -56,6 +56,36 @@ DEFAULT_TIER: TierLiteral = "fast"
 
 logger = logging.getLogger("microsolder.agent.managed")
 
+
+class _SessionMirrors:
+    """Tracks fire-and-forget mirror tasks and awaits them on session close."""
+
+    def __init__(self) -> None:
+        self._pending: set[asyncio.Task] = set()
+
+    def spawn(self, coro) -> asyncio.Task:
+        task = asyncio.create_task(coro)
+        self._pending.add(task)
+        task.add_done_callback(self._pending.discard)
+        return task
+
+    async def wait_drain(self, timeout: float = 5.0) -> None:
+        if not self._pending:
+            return
+        try:
+            await asyncio.wait_for(
+                asyncio.gather(*self._pending, return_exceptions=True),
+                timeout=timeout,
+            )
+        except asyncio.TimeoutError:
+            logger.warning(
+                "[Diag-MA] %d mirror tasks still pending after %.1fs — cancelling",
+                len(self._pending), timeout,
+            )
+            for task in list(self._pending):
+                task.cancel()
+
+
 _SUMMARY_SYSTEM = (
     "You are a terse technical note-taker for a microsoldering diagnostic "
     "session. You receive a transcript of a prior conversation between a "
@@ -201,6 +231,7 @@ async def _dispatch_tool(
     session: SessionState,
     session_id: str | None = None,
     repair_id: str | None = None,
+    session_mirrors: _SessionMirrors | None = None,
 ) -> dict:
     """Run a custom tool locally and return the raw result.
 
@@ -349,8 +380,11 @@ async def _dispatch_tool(
         # MA memory store so future repair sessions can `memory_search` it.
         # Kept off the critical path — the tool's response to the agent
         # doesn't wait for the HTTP upsert to complete.
+        # session_mirrors ensures the task is awaited on WS close so a
+        # fast disconnect doesn't cancel it mid-flight.
         if result.get("validated") and repair_id:
-            asyncio.create_task(
+            mirrors = session_mirrors or _SessionMirrors()
+            mirrors.spawn(
                 mirror_outcome_to_memory(
                     client=client,
                     device_slug=device_slug,
@@ -407,6 +441,7 @@ async def run_diagnostic_session_managed(
         return
 
     client = AsyncAnthropic(api_key=settings.anthropic_api_key)
+    session_mirrors = _SessionMirrors()
     memory_root = Path(settings.memory_root)
     memory_store_id = await ensure_memory_store(client, device_slug)
     session_state = SessionState.from_device(device_slug)
@@ -635,6 +670,7 @@ async def run_diagnostic_session_managed(
                 ws, client, session.id, device_slug, memory_root, events_by_id,
                 session_state, agent_info["model"],
                 repair_id=repair_id, conv_id=resolved_conv_id,
+                session_mirrors=session_mirrors,
             ),
             name="session->ws",
         )
@@ -652,6 +688,9 @@ async def run_diagnostic_session_managed(
     except WebSocketDisconnect:
         logger.info("[Diag-MA] WS disconnected for device=%s", device_slug)
     finally:
+        # Drain pending mirror tasks before tearing down the session so a
+        # fast WS close doesn't cancel a mirror mid-flight (5 s max wait).
+        await session_mirrors.wait_drain(timeout=5.0)
         # DO NOT archive: we want this session reusable on the next reopen
         # so the tech picks up the conversation where they left off. MA
         # keeps idle sessions alive (checkpoint TTL ~30 days per the beta
@@ -906,6 +945,7 @@ async def _forward_session_to_ws(
     *,
     repair_id: str | None = None,
     conv_id: str | None = None,
+    session_mirrors: _SessionMirrors | None = None,
 ) -> None:
     """Stream session events to the WS and dispatch custom tool calls.
 
@@ -1036,6 +1076,7 @@ async def _forward_session_to_ws(
                     result = await _dispatch_tool(
                         name, payload, device_slug, memory_root, client,
                         session_state, session_id, repair_id=repair_id,
+                        session_mirrors=session_mirrors,
                     )
                     # Emit the WS event if the dispatch succeeded.
                     bv_event = result.get("event")

@@ -16,6 +16,7 @@ show up in the agent's cross-repair memory search for future sessions.
 
 from __future__ import annotations
 
+import asyncio
 import logging
 from collections.abc import Callable
 from datetime import UTC, datetime
@@ -157,23 +158,33 @@ async def mirror_outcome_to_memory(
     if store_id is None:
         return "skipped:no_store"
 
-    try:
-        result = await upsert_memory(
-            client,
-            store_id=store_id,
-            path=f"/outcomes/{repair_id}.json",
-            content=outcome.model_dump_json(indent=2),
-        )
-    except Exception as exc:  # noqa: BLE001
-        logger.warning(
-            "[ValidationMirror] upsert_memory failed for %s/%s: %s",
-            device_slug, repair_id, exc,
-        )
-        return "error:upsert_failed"
-    if result is not None:
-        logger.info(
-            "[ValidationMirror] seeded slug=%s /outcomes/%s.json (%d fixes)",
-            device_slug, repair_id, len(outcome.fixes),
-        )
-        return "seeded"
+    last_exc: Exception | None = None
+    delays = (0.5, 1.0, 2.0)
+    for attempt in range(len(delays)):
+        try:
+            result = await upsert_memory(
+                client,
+                store_id=store_id,
+                path=f"/outcomes/{repair_id}.json",
+                content=outcome.model_dump_json(indent=2),
+            )
+        except Exception as exc:  # noqa: BLE001
+            last_exc = exc
+            logger.warning(
+                "[ValidationMirror] upsert attempt %d/%d failed for %s/%s: %s",
+                attempt + 1, len(delays), device_slug, repair_id, exc,
+            )
+            await asyncio.sleep(delays[attempt])
+            continue
+        if result is not None:
+            logger.info(
+                "[ValidationMirror] mirrored %s/%s on attempt %d",
+                device_slug, repair_id, attempt + 1,
+            )
+            return "mirrored"
+        await asyncio.sleep(delays[attempt])
+    logger.warning(
+        "[ValidationMirror] giving up after %d attempts for %s/%s: %s",
+        len(delays), device_slug, repair_id, last_exc,
+    )
     return "error:upsert_failed"
