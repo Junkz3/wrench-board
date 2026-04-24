@@ -328,7 +328,8 @@ Entrypoint: `web/index.html` loads `web/js/main.js` which wires:
 
 - **Surfaces**, darkest → highest: `--bg-deep`, `--bg`, `--bg-2`, `--panel`, `--panel-2`
 - **Text**, primary → tertiary: `--text`, `--text-2`, `--text-3`
-- **Borders**: `--border` (hard line), `--border-soft` (inner divider)
+- **Borders**: `--border` (hard line), `--border-soft` (inner divider),
+  `--border-hover` (hover / focus edge)
 - **Semantic accents** (OKLCH — **locked to meaning, never repurpose**):
   - `--amber`   → **symptom** — what the client observes
   - `--cyan`    → **component** — refdes, chip, connector
@@ -337,7 +338,11 @@ Entrypoint: `web/index.html` loads `web/js/main.js` which wires:
 
   A new domain concept must map to one of these four families or introduce
   its own token — never reuse a semantic color for an unrelated affordance,
-  and never hard-code a hex color when a token exists.
+  and never hard-code a hex color when a token exists. Hex values outside
+  `tokens.css` are tolerated only for single-use decorative one-offs (brand
+  mark gradient stops, muted signal-link stroke, neutral edge stroke) with
+  a short inline comment explaining why; any color reused in two or more
+  places becomes a token first.
 
 ### Layout shell (all `position: fixed`)
 
@@ -398,8 +403,17 @@ Adding a section = append to `SECTIONS`, add a rail button with
 
 All UI icons are **inline SVG**, 16×16 (or 12×12 via `.icon-sm`), with
 `stroke="currentColor"`, `stroke-width="1.6"`, `stroke-linecap="round"`,
-`stroke-linejoin="round"`, `fill="none"`. No emoji, no icon font, no
-external icon library.
+`stroke-linejoin="round"`, `fill="none"`. No icon font, no external icon
+library. Chrome interactions (close buttons, rail buttons, action buttons)
+ship SVG.
+
+Inline Unicode indicators are accepted in dense diagnostic views where per
+instance SVG would balloon the render code without added clarity — SPOF
+`⚠` markers in the schematic canvas, `✅`/`❌`/`·`/`●` passive-state and
+criticality glyphs in the boot timeline, `✓` tick in a repair row or
+"Marquer fix" button. New indicators of this kind should piggy-back on
+that set rather than introduce new emoji; regular chrome icons still get
+SVG.
 
 ### Copy
 
@@ -412,8 +426,13 @@ English.
 
 - No Tailwind, utility-class framework, or component library (Radix,
   shadcn…). Vanilla HTML/CSS/JS — see Stack.
-- No `linear-gradient` beyond the two already wired (topbar, inspector
-  head) — flat surfaces + single accent borders carry the mood.
+- Linear gradients are reserved for five recurring design primitives:
+  glass panel backgrounds (modal, inspector, railbar, sch-inspector),
+  chrome head fades (topbar, rail, mb-head, pp-head, llm head), 2-color
+  data-viz fill bars (conf-fill, prob-fill, crit-fill), grid background
+  patterns (grid-bg, sch-grid), and the brand-mark icon. Don't introduce
+  a sixth category without flagging it in a spec or plan first — flat
+  surfaces with single accent borders carry the rest of the mood.
 - No scrollbars on `<body>` — the shell is `overflow: hidden` and each zone
   scrolls internally (thin 6 px `::-webkit-scrollbar` when needed).
 - Never hard-code the semantic four colors when the CSS variable exists;
