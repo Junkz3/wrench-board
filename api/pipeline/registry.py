@@ -6,12 +6,16 @@ Converts the Scout's raw Markdown dump into a canonical `Registry` JSON.
 from __future__ import annotations
 
 import logging
+from typing import TYPE_CHECKING
 
 from anthropic import AsyncAnthropic
 
 from api.pipeline.prompts import REGISTRY_SYSTEM, REGISTRY_USER_TEMPLATE
 from api.pipeline.schemas import Registry
 from api.pipeline.tool_call import call_with_forced_tool
+
+if TYPE_CHECKING:
+    from api.pipeline.telemetry.token_stats import PhaseTokenStats
 
 logger = logging.getLogger("microsolder.pipeline.registry")
 
@@ -38,6 +42,7 @@ async def run_registry_builder(
     model: str,
     device_label: str,
     raw_dump: str,
+    stats: PhaseTokenStats | None = None,
 ) -> Registry:
     """Execute Phase 2 — return a validated `Registry` Pydantic model."""
     logger.info("[Registry] Building canonical glossary for device=%r", device_label)
@@ -57,6 +62,7 @@ async def run_registry_builder(
         output_schema=Registry,
         max_attempts=2,
         log_label="Registry",
+        stats=stats,
     )
 
     logger.info(

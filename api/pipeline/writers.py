@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+from typing import TYPE_CHECKING
 
 from anthropic import AsyncAnthropic
 
@@ -31,6 +32,9 @@ from api.pipeline.prompts import (
 )
 from api.pipeline.schemas import Dictionary, KnowledgeGraph, Registry, RulesSet
 from api.pipeline.tool_call import call_with_forced_tool
+
+if TYPE_CHECKING:
+    from api.pipeline.telemetry.token_stats import PhaseTokenStats
 
 logger = logging.getLogger("microsolder.pipeline.writers")
 
@@ -114,6 +118,7 @@ async def _run_single_writer(
     forced_tool_name: str,
     output_schema,
     log_label: str,
+    stats: PhaseTokenStats | None = None,
 ):
     messages = _build_shared_user_messages(
         device_label=device_label,
@@ -131,6 +136,7 @@ async def _run_single_writer(
         output_schema=output_schema,
         max_attempts=2,
         log_label=log_label,
+        stats=stats,
     )
 
 
@@ -144,6 +150,7 @@ async def run_writers_parallel(
     raw_dump: str,
     registry: Registry,
     cache_warmup_seconds: float = 1.0,
+    writer_stats: dict[str, PhaseTokenStats] | None = None,
 ) -> tuple[KnowledgeGraph, RulesSet, Dictionary]:
     """Launch the 3 writers with a staggered start for cache warming.
 
@@ -176,6 +183,7 @@ async def run_writers_parallel(
             forced_tool_name=SUBMIT_KG_TOOL_NAME,
             output_schema=KnowledgeGraph,
             log_label="Cartographe",
+            stats=writer_stats.get("cartographe") if writer_stats else None,
         ),
         name="writer-cartographe",
     )
@@ -196,6 +204,7 @@ async def run_writers_parallel(
             forced_tool_name=SUBMIT_RULES_TOOL_NAME,
             output_schema=RulesSet,
             log_label="Clinicien",
+            stats=writer_stats.get("clinicien") if writer_stats else None,
         ),
         name="writer-clinicien",
     )
@@ -210,6 +219,7 @@ async def run_writers_parallel(
             forced_tool_name=SUBMIT_DICT_TOOL_NAME,
             output_schema=Dictionary,
             log_label="Lexicographe",
+            stats=writer_stats.get("lexicographe") if writer_stats else None,
         ),
         name="writer-lexicographe",
     )

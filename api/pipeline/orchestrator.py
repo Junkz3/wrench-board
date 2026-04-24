@@ -34,6 +34,7 @@ from api.pipeline.schemas import (
     RulesSet,
 )
 from api.pipeline.scout import run_scout
+from api.pipeline.telemetry.token_stats import PhaseTokenStats, write_token_stats
 from api.pipeline.writers import run_single_writer_revision, run_writers_parallel
 
 logger = logging.getLogger("microsolder.pipeline.orchestrator")
@@ -130,10 +131,13 @@ async def generate_knowledge_pack(
         "models": models_by_role,
     })
 
+    phase_stats: list[PhaseTokenStats] = []
+
     try:
         # -------- Phase 1 — Scout ------------------------------------------------
         t0 = time.monotonic()
         await emit({"type": "phase_started", "phase": "scout"})
+        scout_stats = PhaseTokenStats(phase="scout")
         raw_dump = await run_scout(
             client=client,
             model=models_by_role["scout"],
@@ -142,20 +146,27 @@ async def generate_knowledge_pack(
             min_components=settings.pipeline_scout_min_components,
             min_sources=settings.pipeline_scout_min_sources,
             max_retries=settings.pipeline_scout_max_retries,
+            stats=scout_stats,
         )
+        scout_stats.duration_s = time.monotonic() - t0
+        phase_stats.append(scout_stats)
         (pack_dir / "raw_research_dump.md").write_text(raw_dump, encoding="utf-8")
         logger.info("[Pipeline] Phase 1 complete · raw_research_dump.md written")
-        await emit({"type": "phase_finished", "phase": "scout", "elapsed_s": time.monotonic() - t0})
+        await emit({"type": "phase_finished", "phase": "scout", "elapsed_s": scout_stats.duration_s})
 
         # -------- Phase 2 — Registry --------------------------------------------
         t0 = time.monotonic()
         await emit({"type": "phase_started", "phase": "registry"})
+        registry_stats = PhaseTokenStats(phase="registry")
         registry = await run_registry_builder(
             client=client,
             model=models_by_role["registry"],
             device_label=device_label,
             raw_dump=raw_dump,
+            stats=registry_stats,
         )
+        registry_stats.duration_s = time.monotonic() - t0
+        phase_stats.append(registry_stats)
         (pack_dir / "registry.json").write_text(
             registry.model_dump_json(indent=2), encoding="utf-8"
         )
@@ -163,7 +174,7 @@ async def generate_knowledge_pack(
         await emit({
             "type": "phase_finished",
             "phase": "registry",
-            "elapsed_s": time.monotonic() - t0,
+            "elapsed_s": registry_stats.duration_s,
             "counts": {
                 "components": len(registry.components),
                 "signals": len(registry.signals),
@@ -174,6 +185,11 @@ async def generate_knowledge_pack(
         # -------- Phase 3 — Writers (parallel) ----------------------------------
         t0 = time.monotonic()
         await emit({"type": "phase_started", "phase": "writers"})
+        w_stats = {
+            "cartographe": PhaseTokenStats(phase="writer_cartographe"),
+            "clinicien": PhaseTokenStats(phase="writer_clinicien"),
+            "lexicographe": PhaseTokenStats(phase="writer_lexicographe"),
+        }
         kg, rules, dictionary = await run_writers_parallel(
             client=client,
             cartographe_model=models_by_role["cartographe"],
@@ -183,13 +199,18 @@ async def generate_knowledge_pack(
             raw_dump=raw_dump,
             registry=registry,
             cache_warmup_seconds=settings.pipeline_cache_warmup_seconds,
+            writer_stats=w_stats,
         )
+        writers_elapsed = time.monotonic() - t0
+        for ws in w_stats.values():
+            ws.duration_s = writers_elapsed
+            phase_stats.append(ws)
         _write_writer_outputs(pack_dir, kg, rules, dictionary)
         logger.info("[Pipeline] Phase 3 complete · 3 writer files written")
         await emit({
             "type": "phase_finished",
             "phase": "writers",
-            "elapsed_s": time.monotonic() - t0,
+            "elapsed_s": writers_elapsed,
             "counts": {
                 "nodes": len(kg.nodes),
                 "edges": len(kg.edges),
@@ -216,6 +237,8 @@ async def generate_knowledge_pack(
                 len(code_drift),
                 sorted({item.file for item in code_drift}),
             )
+            auditor_phase_name = "auditor" if rounds_used == 0 else f"auditor_rev_{rounds_used}"
+            auditor_stats = PhaseTokenStats(phase=auditor_phase_name)
             verdict = await run_auditor(
                 client=client,
                 model=models_by_role["auditor"],
@@ -225,7 +248,10 @@ async def generate_knowledge_pack(
                 rules=rules,
                 dictionary=dictionary,
                 precomputed_drift=code_drift,
+                stats=auditor_stats,
             )
+            auditor_stats.duration_s = time.monotonic() - t0
+            phase_stats.append(auditor_stats)
             (pack_dir / "audit_verdict.json").write_text(
                 verdict.model_dump_json(indent=2), encoding="utf-8"
             )
@@ -318,6 +344,12 @@ async def generate_knowledge_pack(
         )
         logger.info("[Pipeline] Memory-store seed status=%s", seed_status)
 
+        write_token_stats(pack_dir / "token_stats.json", phase_stats)
+        logger.info(
+            "[Pipeline] token_stats.json written · phases=%d",
+            len(phase_stats),
+        )
+
         await emit({
             "type": "pipeline_finished",
             "device_slug": slug,
@@ -327,18 +359,17 @@ async def generate_knowledge_pack(
             "memory_store_seed": seed_status,
         })
 
-        # NOTE: token totals are aggregated via the stdout logs of `call_with_forced_tool`
-        # and `run_scout`; wiring them into PipelineResult precisely will require threading
-        # a counter through each call site. V2 returns zeros for now — the logs are the
-        # source of truth for this hackathon run.
+        tokens_used_total = sum(s.input_tokens + s.output_tokens for s in phase_stats)
+        cache_read_tokens_total = sum(s.cache_read_input_tokens for s in phase_stats)
+        cache_write_tokens_total = sum(s.cache_creation_input_tokens for s in phase_stats)
         return PipelineResult(
             device_slug=slug,
             disk_path=str(pack_dir),
             verdict=verdict,
             revise_rounds_used=rounds_used,
-            tokens_used_total=0,
-            cache_read_tokens_total=0,
-            cache_write_tokens_total=0,
+            tokens_used_total=tokens_used_total,
+            cache_read_tokens_total=cache_read_tokens_total,
+            cache_write_tokens_total=cache_write_tokens_total,
         )
     except RuntimeError:
         raise

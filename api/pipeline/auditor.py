@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import json
 import logging
+from typing import TYPE_CHECKING
 
 from anthropic import AsyncAnthropic
 
@@ -23,6 +24,9 @@ from api.pipeline.schemas import (
     RulesSet,
 )
 from api.pipeline.tool_call import call_with_forced_tool
+
+if TYPE_CHECKING:
+    from api.pipeline.telemetry.token_stats import PhaseTokenStats
 
 logger = logging.getLogger("microsolder.pipeline.auditor")
 
@@ -48,6 +52,7 @@ async def run_auditor(
     rules: RulesSet,
     dictionary: Dictionary,
     precomputed_drift: list[DriftItem],
+    stats: PhaseTokenStats | None = None,
 ) -> AuditVerdict:
     """Execute Phase 4 — return a validated `AuditVerdict`.
 
@@ -83,6 +88,7 @@ async def run_auditor(
         output_schema=AuditVerdict,
         max_attempts=2,
         log_label="Auditor",
+        stats=stats,
     )
 
     logger.info(

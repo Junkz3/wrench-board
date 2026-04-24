@@ -10,10 +10,13 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import TypeVar
+from typing import TYPE_CHECKING, TypeVar
 
 from anthropic import AsyncAnthropic
 from pydantic import BaseModel, ValidationError
+
+if TYPE_CHECKING:
+    from api.pipeline.telemetry.token_stats import PhaseTokenStats
 
 T = TypeVar("T", bound=BaseModel)
 
@@ -32,6 +35,7 @@ async def call_with_forced_tool(
     max_attempts: int = 2,
     max_tokens: int = 16000,
     log_label: str = "tool_call",
+    stats: PhaseTokenStats | None = None,
 ) -> T:
     """Call the Messages API with `tool_choice` forced to `forced_tool_name`, validate.
 
@@ -95,6 +99,13 @@ async def call_with_forced_tool(
             cache_read,
             cache_write,
         )
+        if stats is not None:
+            stats.record(
+                input_tokens=response.usage.input_tokens,
+                output_tokens=response.usage.output_tokens,
+                cache_read=cache_read,
+                cache_write=cache_write,
+            )
         if cache_read > 0:
             logger.info("[Cache] Hit for %s (read=%d tokens)", log_label, cache_read)
 

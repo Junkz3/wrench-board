@@ -13,10 +13,14 @@ from __future__ import annotations
 import logging
 import re
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 from anthropic import AsyncAnthropic
 
 from api.pipeline.prompts import SCOUT_RETRY_SUFFIX, SCOUT_SYSTEM, SCOUT_USER_TEMPLATE
+
+if TYPE_CHECKING:
+    from api.pipeline.telemetry.token_stats import PhaseTokenStats
 
 logger = logging.getLogger("microsolder.pipeline.scout")
 
@@ -93,6 +97,7 @@ async def run_scout(
     min_components: int = 3,
     min_sources: int = 3,
     max_retries: int = 1,
+    stats: PhaseTokenStats | None = None,
 ) -> str:
     """Execute Phase 1 — return the raw research Markdown dump.
 
@@ -113,6 +118,7 @@ async def run_scout(
             device_label=device_label,
             max_continuations=max_continuations,
             attempt=attempt,
+            stats=stats,
         )
         last_dump = dump
         last_assessment = assess_dump(
@@ -155,6 +161,7 @@ async def _scout_once(
     device_label: str,
     max_continuations: int,
     attempt: int,
+    stats: PhaseTokenStats | None = None,
 ) -> str:
     """One end-to-end Scout run, including server-side `pause_turn` handling."""
     user_prompt = SCOUT_USER_TEMPLATE.format(device_label=device_label)
@@ -186,6 +193,13 @@ async def _scout_once(
 
         total_input += response.usage.input_tokens
         total_output += response.usage.output_tokens
+        if stats is not None:
+            stats.record(
+                input_tokens=response.usage.input_tokens,
+                output_tokens=response.usage.output_tokens,
+                cache_read=getattr(response.usage, "cache_read_input_tokens", 0) or 0,
+                cache_write=getattr(response.usage, "cache_creation_input_tokens", 0) or 0,
+            )
 
         if response.stop_reason == "pause_turn":
             logger.info("[Scout] pause_turn — extending conversation to continue")
