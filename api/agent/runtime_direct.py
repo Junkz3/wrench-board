@@ -193,6 +193,7 @@ async def _run_agent_turn(
                 result = await _dispatch_mb_tool(
                     block.name, block.input or {}, device_slug,
                     memory_root, client, session,
+                    session_id=repair_id,
                 )
             event = result.get("event")
             if result.get("ok") and event is not None:
@@ -564,8 +565,12 @@ async def run_diagnostic_session_direct(
 
             # Intercept validation trigger events before they reach the agent
             # as ordinary messages. Synthesise a user-role prompt that asks
-            # the agent to summarise fixes and call mb_validate_finding.
+            # the agent to summarise fixes and call mb_validate_finding. The
+            # trigger's JSONL record is the ONLY append for this turn — the
+            # normal user-append below is skipped when `is_trigger` is set.
+            is_trigger = False
             if isinstance(incoming, dict) and incoming.get("type") == "validation.start":
+                is_trigger = True
                 user_text = (
                     "J'ai fini cette réparation. Peux-tu résumer en une phrase "
                     "quel(s) composant(s) j'ai réparé ou remplacé à partir de "
@@ -611,7 +616,7 @@ async def run_diagnostic_session_direct(
 
             user_msg = {"role": "user", "content": user_text}
             messages.append(user_msg)
-            if resolved_conv_id:
+            if resolved_conv_id and not is_trigger:
                 append_event(
                     device_slug=device_slug, repair_id=repair_id,
                     conv_id=resolved_conv_id, event=user_msg,
