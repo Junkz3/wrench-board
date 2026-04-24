@@ -28,12 +28,14 @@ from api.board.model import Board
 from api.config import get_settings
 from api.pipeline.auditor import run_auditor
 from api.pipeline.drift import compute_drift
+from api.pipeline.mapper import run_mapper
 from api.pipeline.registry import run_registry_builder
 from api.pipeline.schemas import (
     AuditVerdict,
     Dictionary,
     KnowledgeGraph,
     PipelineResult,
+    RefdesMappings,
     Registry,
     RulesSet,
 )
@@ -239,6 +241,7 @@ async def generate_knowledge_pack(
     models_by_role = {
         "scout": model_sonnet,
         "registry": model_sonnet,
+        "mapper": model_sonnet,
         "cartographe": model_main,
         "clinicien": model_main,
         "lexicographe": model_sonnet,
@@ -335,6 +338,12 @@ async def generate_knowledge_pack(
 
     try:
         # -------- Phase 1 — Scout ------------------------------------------------
+        # Scout runs blind: no graph / board / datasheets in its prompt. The
+        # 2026-04-24 enrichment was reverted after URL-by-URL audit found 23/23
+        # fabricated refdes attributions when Scout was given the graph as
+        # context. The function→refdes bridge is now Phase 2.5 (Mapper) — a
+        # forced-tool agent with deterministic post-validation. See
+        # docs/superpowers/specs/2026-04-25-refdes-mapper-agent.md.
         t0 = time.monotonic()
         await emit({"type": "phase_started", "phase": "scout"})
         scout_stats = PhaseTokenStats(phase="scout")
@@ -342,9 +351,6 @@ async def generate_knowledge_pack(
             client=client,
             model=models_by_role["scout"],
             device_label=device_label,
-            graph=graph,
-            board=board,
-            datasheet_paths=datasheet_paths,
             min_symptoms=settings.pipeline_scout_min_symptoms,
             min_components=settings.pipeline_scout_min_components,
             min_sources=settings.pipeline_scout_min_sources,
@@ -361,12 +367,15 @@ async def generate_knowledge_pack(
         t0 = time.monotonic()
         await emit({"type": "phase_started", "phase": "registry"})
         registry_stats = PhaseTokenStats(phase="registry")
+        # Registry runs without the graph too — it focuses on canonical
+        # vocabulary extraction. The function→refdes bridge moves to Phase 2.5
+        # below. Legacy `refdes_candidates` field on RegistryComponent stays
+        # in the schema for back-compat with packs already on disk.
         registry = await run_registry_builder(
             client=client,
             model=models_by_role["registry"],
             device_label=device_label,
             raw_dump=raw_dump,
-            graph=graph,
             stats=registry_stats,
         )
         registry_stats.duration_s = time.monotonic() - t0
@@ -385,6 +394,57 @@ async def generate_knowledge_pack(
             },
             "taxonomy": registry.taxonomy.model_dump(),
         })
+
+        # -------- Phase 2.5 — Refdes Mapper (only when a graph is loaded) -------
+        # See docs/superpowers/specs/2026-04-25-refdes-mapper-agent.md.
+        # Maps registry canonical names → graph refdes via forced-tool +
+        # server-side validation. Failure is silent: mapper errors degrade to
+        # an empty mappings file, and bench-gen falls back to its rail-overlap
+        # heuristic. Skipped entirely when no graph is loaded.
+        mappings: RefdesMappings | None = None
+        if graph is not None:
+            t_map = time.monotonic()
+            await emit({"type": "phase_started", "phase": "mapper"})
+            mapper_stats = PhaseTokenStats(phase="mapper")
+            try:
+                mappings = await run_mapper(
+                    client=client,
+                    model=models_by_role["mapper"],
+                    device_label=device_label,
+                    device_slug=slug,
+                    raw_dump=raw_dump,
+                    registry=registry,
+                    graph=graph,
+                    stats=mapper_stats,
+                )
+                mapper_stats.duration_s = time.monotonic() - t_map
+                phase_stats.append(mapper_stats)
+                (pack_dir / "refdes_attributions.json").write_text(
+                    mappings.model_dump_json(indent=2),
+                    encoding="utf-8",
+                )
+                logger.info(
+                    "[Pipeline] Phase 2.5 complete · refdes_attributions.json written · n=%d",
+                    len(mappings.attributions),
+                )
+                await emit({
+                    "type": "phase_finished",
+                    "phase": "mapper",
+                    "elapsed_s": time.monotonic() - t_map,
+                    "counts": {"attributions": len(mappings.attributions)},
+                })
+            except Exception:  # noqa: BLE001 — non-fatal: bench-gen has a heuristic fallback
+                logger.exception(
+                    "[Pipeline] Phase 2.5 mapper failed — continuing without attributions"
+                )
+                # Persist an empty attributions file so downstream consumers
+                # observe "graph was present but mapper produced nothing"
+                # rather than "graph was absent".
+                empty = RefdesMappings(device_slug=slug, attributions=[])
+                (pack_dir / "refdes_attributions.json").write_text(
+                    empty.model_dump_json(indent=2),
+                    encoding="utf-8",
+                )
 
         # -------- Phase 3 — Writers (parallel) ----------------------------------
         t0 = time.monotonic()
