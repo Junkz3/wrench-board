@@ -150,8 +150,8 @@ body.no-metabar .sch-inspector{top:60px}
 .sch-pin.role-power_in .sch-pin-lead{stroke:oklch(0.78 0.15 155)}
 .sch-pin.role-power_out .sch-pin-dot,
 .sch-pin.role-switch_node .sch-pin-dot{fill:oklch(0.78 0.15 155)}
-.sch-pin.role-ground .sch-pin-dot{fill:#6e7d96;stroke:#6e7d96}
-.sch-pin.role-ground .sch-pin-lead{stroke:#6e7d96;opacity:.55}
+.sch-pin.role-ground .sch-pin-dot{fill:var(--text-3);stroke:var(--text-3)}
+.sch-pin.role-ground .sch-pin-lead{stroke:var(--text-3);opacity:.55}
 .sch-pin.role-enable_in .sch-pin-dot,
 .sch-pin.role-enable_out .sch-pin-dot{fill:oklch(0.82 0.16 75)}
 .sch-pin.role-enable_in .sch-pin-lead,
@@ -160,7 +160,7 @@ body.no-metabar .sch-inspector{top:60px}
 .sch-pin.role-reset_out .sch-pin-dot,
 .sch-pin.role-power_good_out .sch-pin-dot{fill:oklch(0.78 0.14 295)}
 .sch-pin.role-signal_in .sch-pin-dot,
-.sch-pin.role-signal_out .sch-pin-dot{fill:#6e7d96}
+.sch-pin.role-signal_out .sch-pin-dot{fill:var(--text-3)}
 .sch-pin-label{font-family:var(--mono);font-size:7.5px;fill:var(--text-3);pointer-events:none;paint-order:stroke;stroke:var(--bg);stroke-width:2px}
 .sch-pin-hidden{font-family:var(--mono);font-size:8px;fill:var(--text-3);pointer-events:none;font-weight:500}
 

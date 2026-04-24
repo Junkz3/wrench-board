@@ -1,7 +1,7 @@
 :root {
   --bg-deep:#07101f; --bg:#0a1120; --bg-2:#0f1a2e;
   --panel:#142030; --panel-2:#1a283d;
-  --border:#22324d; --border-soft:#1a2840;
+  --border:#22324d; --border-soft:#1a2840; --border-hover:#2e4468;
   --text:#e6edf7; --text-2:#a9b6cc; --text-3:#6e7d96;
   --mono:'JetBrains Mono', ui-monospace, monospace;
   --amber:   oklch(0.82 0.16 75);

@@ -20,7 +20,7 @@ body.llm-open .memory-bank{right:420px}
 .mb-pack-picker{display:flex;align-items:center;gap:8px;margin-left:auto}
 .mb-pack-picker label{font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--text-3);font-family:var(--mono)}
 .mb-pack-picker select{background:var(--panel);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:12px;padding:6px 10px;border-radius:6px;outline:none;cursor:pointer;min-width:200px;transition:border-color .15s}
-.mb-pack-picker select:hover{border-color:#2e4468;background:var(--panel-2)}
+.mb-pack-picker select:hover{border-color:var(--border-hover);background:var(--panel-2)}
 .mb-pack-picker select:focus{border-color:rgba(56,189,248,.45)}
 
 .mb-verdict-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
@@ -158,5 +158,5 @@ body.llm-open .memory-bank{right:420px}
 /* ---- Scrollbar ---- */
 .memory-bank::-webkit-scrollbar{width:6px}
 .memory-bank::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
-.memory-bank::-webkit-scrollbar-thumb:hover{background:#2e4468}
+.memory-bank::-webkit-scrollbar-thumb:hover{background:var(--border-hover)}
 .memory-bank::-webkit-scrollbar-track{background:transparent}

@@ -10,7 +10,7 @@
 .mode-pill .dot{width:6px;height:6px;border-radius:50%;background:var(--amber);box-shadow:0 0 8px var(--amber);animation:pulse 2.4s ease-in-out infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 .top-btn{background:var(--panel);border:1px solid var(--border);color:var(--text-2);padding:6px 10px;border-radius:6px;font-size:12px;font-family:inherit;display:inline-flex;align-items:center;gap:6px;cursor:pointer;transition:all .15s}
-.top-btn:hover{color:var(--text);border-color:#2e4468;background:var(--panel-2)}
+.top-btn:hover{color:var(--text);border-color:var(--border-hover);background:var(--panel-2)}
 
 /* ============ LEFT RAIL ============ */
 .rail{position:fixed;top:48px;bottom:0;left:0;width:52px;background:linear-gradient(180deg,var(--bg-2) 0%,var(--bg-deep) 100%);border-right:1px solid var(--border);display:flex;flex-direction:column;align-items:center;padding:12px 0;gap:6px;z-index:15}

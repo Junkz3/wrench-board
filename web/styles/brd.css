@@ -194,5 +194,5 @@ body[data-section="pcb"] .tweak-row.pcb-only{display:flex;flex-direction:column;
 .brd-color-row input[type="color"]::-webkit-color-swatch{border:0;border-radius:3px}
 /* Reset button — full-width, subtle but clearly clickable */
 .brd-color-reset{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:6px 10px;margin-top:4px;background:var(--bg-deep);color:var(--text-2);border:1px solid var(--border);border-radius:4px;font-family:var(--mono);font-size:10.5px;letter-spacing:.3px;cursor:pointer;transition:background .12s,color .12s,border-color .12s}
-.brd-color-reset:hover{background:var(--panel-2);color:var(--text);border-color:#2e4468}
+.brd-color-reset:hover{background:var(--panel-2);color:var(--text);border-color:var(--border-hover)}
 .brd-color-reset:active{transform:translateY(1px)}

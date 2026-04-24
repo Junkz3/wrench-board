@@ -58,7 +58,7 @@ body.llm-open .stub{right:420px}
   font-family:var(--mono);font-size:10px;letter-spacing:.4px;color:var(--text-2);
   text-transform:uppercase;
 }
-.llm-tier-chip:hover{color:var(--text);border-color:#2e4468}
+.llm-tier-chip:hover{color:var(--text);border-color:var(--border-hover)}
 .llm-tier-chip[data-tier="fast"]{color:var(--emerald);border-color:rgba(52,211,153,.35);background:rgba(52,211,153,.08)}
 .llm-tier-chip[data-tier="normal"]{color:var(--cyan);border-color:rgba(56,189,248,.35);background:rgba(56,189,248,.08)}
 .llm-tier-chip[data-tier="deep"]{color:var(--violet);border-color:rgba(192,132,252,.35);background:rgba(192,132,252,.08)}
@@ -170,7 +170,7 @@ body.llm-open .stub{right:420px}
 }
 .llm-input .icon-btn svg{width:15px;height:15px;display:block}
 .llm-input .icon-btn:hover{
-  background:var(--panel-2);border-color:#2e4468;color:var(--text);
+  background:var(--panel-2);border-color:var(--border-hover);color:var(--text);
 }
 .llm-input .icon-btn:active{transform:scale(.94)}
 .llm-input .icon-btn:disabled{opacity:.35;cursor:not-allowed}
@@ -476,7 +476,7 @@ body.llm-open .stub{right:420px}
   color: var(--text-2);
   text-transform: uppercase;
 }
-.conv-chip:hover { color: var(--text); border-color: #2e4468; }
+.conv-chip:hover { color: var(--text); border-color: var(--border-hover); }
 .conv-chip .chevron-down { transition: transform .15s; opacity: .7; }
 .conv-chip[aria-expanded="true"] .chevron-down { transform: rotate(180deg); }
 
