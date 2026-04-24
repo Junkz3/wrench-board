@@ -888,3 +888,58 @@ def test_hypothesize_result_exposes_discriminators_when_tied():
     )
     # At minimum the field exists and is a list.
     assert isinstance(result.discriminating_targets, list)
+
+
+# ---------------------------------------------------------------------------
+# Phase 4.5 — stuck_on / stuck_off mode vocabulary
+# ---------------------------------------------------------------------------
+
+
+def test_observation_accepts_stuck_on_on_rail():
+    """RailMode now includes stuck_on."""
+    from api.pipeline.schematic.hypothesize import Observations
+    obs = Observations(state_rails={"+3V3_USB": "stuck_on"})
+    assert obs.state_rails["+3V3_USB"] == "stuck_on"
+
+
+def test_observation_accepts_stuck_modes_on_passive_q():
+    """ComponentMode now includes stuck_on/stuck_off (used on Q targets)."""
+    from api.pipeline.schematic.hypothesize import Observations
+    obs = Observations(state_comps={"Q5": "stuck_on", "Q7": "stuck_off"})
+    assert obs.state_comps["Q5"] == "stuck_on"
+
+
+def test_validator_rejects_stuck_on_on_ic():
+    """IC + stuck_on is still invalid — stuck_on is a passive-Q mode."""
+    from api.pipeline.schematic.hypothesize import Observations, hypothesize
+    from api.pipeline.schematic.schemas import (
+        ComponentNode, ElectricalGraph, SchematicQualityReport,
+    )
+    graph = ElectricalGraph(
+        device_slug="coh-test",
+        components={"U5": ComponentNode(refdes="U5", type="ic", kind="ic")},
+        nets={}, power_rails={}, typed_edges=[],
+        quality=SchematicQualityReport(total_pages=1, pages_parsed=1, confidence_global=1.0),
+    )
+    with pytest.raises(ValueError, match="U5.*not a valid IC mode"):
+        hypothesize(graph, observations=Observations(state_comps={"U5": "stuck_on"}))
+
+
+def test_validator_accepts_stuck_on_on_passive_q():
+    from api.pipeline.schematic.hypothesize import Observations, hypothesize
+    from api.pipeline.schematic.schemas import (
+        ComponentNode, ElectricalGraph, SchematicQualityReport,
+    )
+    graph = ElectricalGraph(
+        device_slug="coh-test",
+        components={
+            "Q5": ComponentNode(
+                refdes="Q5", type="transistor",
+                kind="passive_q", role="load_switch",
+            ),
+        },
+        nets={}, power_rails={}, typed_edges=[],
+        quality=SchematicQualityReport(total_pages=1, pages_parsed=1, confidence_global=1.0),
+    )
+    # Should not raise — stuck_on is a passive mode.
+    hypothesize(graph, observations=Observations(state_comps={"Q5": "stuck_on"}))

@@ -61,21 +61,30 @@ _SCORE_VISIBILITY: dict[tuple[str, str, str], float] = {
 ComponentMode = Literal[
     "dead", "alive", "anomalous", "hot",
     "open", "short",
+    "stuck_on", "stuck_off",
 ]
-RailMode = Literal["dead", "alive", "shorted"]
+RailMode = Literal[
+    "dead", "alive",
+    "shorted",       # to GND OR overvolt (Phase 1 semantics)
+    "stuck_on",      # Phase 4.5 — rail alive when it should be off
+]
 
 # Failure modes that can be attributed to a component as the root-cause kill.
-# `alive` is omitted (a live component is not a failure). `shorted` is a rail
-# observation but it's produced by a shorted component pulling its input rail
-# to GND, so it's a legitimate component-level failure mode in this engine.
-# `open` / `short` are the Phase 4 additions for passives.
+# `alive` omitted (a live component is not a failure). `shorted` is rail-side
+# but produced by a component that shorts its input rail to GND. `open` /
+# `short` are passive Phase 4 modes. `stuck_on` / `stuck_off` are Phase 4.5 Q
+# modes — stuck_on = conducts permanently (rail stays on), stuck_off =
+# never conducts (rail stays off).
 FailureMode = Literal[
     "dead", "anomalous", "hot", "shorted",
     "open", "short",
+    "stuck_on", "stuck_off",
 ]
 
 _IC_MODES: frozenset[str] = frozenset({"dead", "alive", "anomalous", "hot"})
-_PASSIVE_MODES: frozenset[str] = frozenset({"open", "short", "alive"})
+_PASSIVE_MODES: frozenset[str] = frozenset(
+    {"open", "short", "alive", "stuck_on", "stuck_off"}
+)
 
 
 class ObservedMetric(BaseModel):
