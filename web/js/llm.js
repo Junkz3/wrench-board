@@ -242,6 +242,19 @@ const BV_TOOL_NAMES = new Set([
   "bv_layer_visibility", "bv_reset_view",
 ]);
 
+function summariseSchematicInput(input) {
+  const query = (input && input.query) || "info";
+  const titleMap = { simulate: "Simulateur", hypothesize: "Hypothèses" };
+  const summaryMap = {
+    simulate: "Simulation lancée — clique pour voir la timeline du boot.",
+    hypothesize: "Hypothèses générées — clique pour voir le classement des candidats.",
+  };
+  return {
+    title: titleMap[query] || "Schéma",
+    summary: summaryMap[query] || "Schéma disponible — clique pour ouvrir.",
+  };
+}
+
 function summariseBvInput(input) {
   if (!input || typeof input !== "object") return "";
   const parts = [];
@@ -810,7 +823,15 @@ function connect() {
               detailSection: "pcb",
             });
           }
-          // Task 6.2 will hook mb_schematic_graph here.
+          if (name === "mb_schematic_graph") {
+            const { title, summary } = summariseSchematicInput(input);
+            appendChatWidget(turn, {
+              title,
+              kind: "schematic",
+              summary,
+              detailSection: "schematic",
+            });
+          }
         }
         break;
       }
