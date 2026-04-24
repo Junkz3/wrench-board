@@ -226,7 +226,7 @@ async def phase_cache() -> PhaseResult:
 # ---------------------------------------------------------------------------
 
 
-async def phase_pipeline(slug_override: str | None = None) -> PhaseResult:
+async def phase_pipeline(slug_override: str | None = None, max_revise_rounds: int = 0) -> PhaseResult:
     """Run generate_knowledge_pack on a cheap label; assert token_stats.json."""
     _header("Phase 2: Pipeline token_stats.json (P3)")
 
@@ -257,7 +257,7 @@ async def phase_pipeline(slug_override: str | None = None) -> PhaseResult:
 
     print(f"  memory_root (temp): {tmp_root}")
     print(f"  device_label: {device_label!r}")
-    print(f"  max_revise_rounds: {settings.pipeline_max_revise_rounds}")
+    print(f"  max_revise_rounds: {max_revise_rounds}")
     print("  Running pipeline — this takes ~2-5 min and costs ~$0.30...")
 
     assertions: list[tuple[bool, str]] = []
@@ -266,7 +266,7 @@ async def phase_pipeline(slug_override: str | None = None) -> PhaseResult:
         result = await generate_knowledge_pack(
             device_label=device_label,
             memory_root=tmp_root,
-            max_revise_rounds=0,
+            max_revise_rounds=max_revise_rounds,
         )
     except RuntimeError as exc:
         ok, lbl = _check(False, f"generate_knowledge_pack raised: {exc}")
@@ -562,7 +562,7 @@ async def phase_session(slug_override: str | None = None) -> PhaseResult:
 # ---------------------------------------------------------------------------
 
 
-def print_dry_run(phase: str) -> None:
+def print_dry_run(phase: str, max_revise_rounds: int = 0) -> None:
     _header("Dry-run plan (no API calls will be made)")
     phases: list[tuple[str, str, float]] = []
 
@@ -574,11 +574,14 @@ def print_dry_run(phase: str) -> None:
             0.05,
         ))
     if phase in ("pipeline", "all"):
+        pipeline_desc = (
+            "Run generate_knowledge_pack('Test Device Pi Zero 1') in a tmpdir "
+            f"with max_revise_rounds={max_revise_rounds}. Assert token_stats.json written, "
+            ">= 4 phases, writers have cache_read > 0 (P3)."
+        )
         phases.append((
             "pipeline",
-            "Run generate_knowledge_pack('Test Device Pi Zero 1') in a tmpdir "
-            "with max_revise_rounds=0. Assert token_stats.json written, "
-            ">= 4 phases, writers have cache_read > 0 (P3).",
+            pipeline_desc,
             0.30,
         ))
     if phase in ("session", "all"):
@@ -621,6 +624,13 @@ async def _main() -> int:
         help="Override device slug for pipeline / session phases.",
     )
     parser.add_argument(
+        "--max-revise-rounds",
+        type=int,
+        default=0,
+        help="Auditor revise rounds for the pipeline phase (default 0 = cheapest; "
+             "use 1-2 to let the pipeline complete past NEEDS_REVISION verdicts).",
+    )
+    parser.add_argument(
         "--dry-run",
         action="store_true",
         help="Print the plan and expected costs without making API calls.",
@@ -628,7 +638,7 @@ async def _main() -> int:
     args = parser.parse_args()
 
     if args.dry_run:
-        print_dry_run(args.phase)
+        print_dry_run(args.phase, max_revise_rounds=args.max_revise_rounds)
         return 0
 
     # --- Preflight: API key --------------------------------------------------
@@ -651,7 +661,7 @@ async def _main() -> int:
         if args.phase in ("cache", "all"):
             results.append(await phase_cache())
         if args.phase in ("pipeline", "all"):
-            results.append(await phase_pipeline(args.slug))
+            results.append(await phase_pipeline(args.slug, max_revise_rounds=args.max_revise_rounds))
         if args.phase in ("session", "all"):
             results.append(await phase_session(args.slug))
     except KeyboardInterrupt:
