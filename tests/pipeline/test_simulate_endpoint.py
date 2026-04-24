@@ -113,3 +113,41 @@ def test_simulate_no_graph_returns_404(tmp_path: Path, monkeypatch, client: Test
         assert r.status_code == 404
     finally:
         monkeypatch.setattr(config_mod, "_settings", None)
+
+
+def test_simulate_endpoint_accepts_failures(tmp_memory: Path, client: TestClient):
+    r = client.post(
+        f"/pipeline/packs/{SLUG}/schematic/simulate",
+        json={
+            "failures": [
+                {"refdes": "U7", "mode": "regulating_low", "voltage_pct": 0.85}
+            ]
+        },
+    )
+    assert r.status_code == 200, r.text
+    payload = r.json()
+    assert payload["device_slug"] == SLUG
+
+
+def test_simulate_endpoint_accepts_rail_overrides(tmp_memory: Path, client: TestClient):
+    r = client.post(
+        f"/pipeline/packs/{SLUG}/schematic/simulate",
+        json={
+            "rail_overrides": [
+                {"label": "+5V", "state": "degraded", "voltage_pct": 0.85}
+            ]
+        },
+    )
+    assert r.status_code == 200, r.text
+    payload = r.json()
+    # Endpoint returns the raw timeline — probe_route never populated server-side.
+    assert "probe_route" not in payload
+
+
+def test_simulate_endpoint_rejects_invalid_failure(tmp_memory: Path, client: TestClient):
+    r = client.post(
+        f"/pipeline/packs/{SLUG}/schematic/simulate",
+        json={"failures": [{"refdes": "U7", "mode": "totally_made_up"}]},
+    )
+    # Pydantic 422 from FastAPI on invalid mode literal.
+    assert r.status_code == 422

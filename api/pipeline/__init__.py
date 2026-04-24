@@ -44,7 +44,11 @@ from api.pipeline.schematic.net_classifier import classify_nets
 from api.pipeline.schematic.orchestrator import ingest_schematic
 from api.pipeline.schematic.renderer import render_pages
 from api.pipeline.schematic.schemas import AnalyzedBootSequence, ElectricalGraph
-from api.pipeline.schematic.simulator import SimulationEngine
+from api.pipeline.schematic.simulator import (
+    Failure,
+    RailOverride,
+    SimulationEngine,
+)
 from api.tools.hypothesize import mb_hypothesize as _mb_hypothesize_tool
 from api.tools.measurements import mb_list_measurements as _mb_list_measurements
 from api.tools.measurements import mb_record_measurement as _mb_record_measurement
@@ -85,6 +89,8 @@ class GenerateRequest(BaseModel):
 
 class SimulateRequest(BaseModel):
     killed_refdes: list[str] = Field(default_factory=list)
+    failures: list[Failure] = Field(default_factory=list)
+    rail_overrides: list[RailOverride] = Field(default_factory=list)
 
 
 @router.post("/generate", response_model=PipelineResult)
@@ -1187,10 +1193,10 @@ async def get_schematic_passives(device_slug: str) -> list[dict]:
 async def post_simulate(device_slug: str, request: SimulateRequest) -> dict:
     """Run the behavioral simulator on the compiled electrical graph.
 
-    Synchronous (simulator completes in < 10ms on MNT-class boards), so
-    the response is the full SimulationTimeline inline. 400 when any
-    refdes in killed_refdes is unknown; 404 when no electrical_graph
-    exists for the slug.
+    Accepts killed_refdes (sugar), explicit failures (causes), and
+    rail_overrides (observations). Synchronous (< 10 ms on MNT-class
+    boards). HTTP context is stateless — no probe_route enrichment
+    here; clients that need a route go through the agent WS path.
     """
     settings = get_settings()
     slug = _slugify(device_slug)
@@ -1210,11 +1216,23 @@ async def post_simulate(device_slug: str, request: SimulateRequest) -> dict:
             detail=f"Malformed electrical_graph for {slug!r}: {exc}",
         ) from exc
 
-    invalid = [r for r in request.killed_refdes if r not in electrical.components]
+    invalid = [
+        r for r in list(request.killed_refdes) + [f.refdes for f in request.failures]
+        if r not in electrical.components
+    ]
     if invalid:
         raise HTTPException(
             status_code=400,
-            detail=f"Unknown refdes in killed_refdes: {invalid}",
+            detail=f"Unknown refdes: {invalid}",
+        )
+    invalid_rails = [
+        o.label for o in request.rail_overrides
+        if o.label not in electrical.power_rails
+    ]
+    if invalid_rails:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unknown rails: {invalid_rails}",
         )
 
     analyzed: AnalyzedBootSequence | None = None
@@ -1226,7 +1244,11 @@ async def post_simulate(device_slug: str, request: SimulateRequest) -> dict:
             analyzed = None
 
     tl = SimulationEngine(
-        electrical, analyzed_boot=analyzed, killed_refdes=list(request.killed_refdes)
+        electrical,
+        analyzed_boot=analyzed,
+        killed_refdes=list(request.killed_refdes),
+        failures=list(request.failures),
+        rail_overrides=list(request.rail_overrides),
     ).run()
     return tl.model_dump()
 
