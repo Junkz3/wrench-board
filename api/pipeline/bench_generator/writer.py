@@ -19,6 +19,7 @@ from pathlib import Path
 from api.pipeline.bench_generator.schemas import (
     ProposedScenario,
     Rejection,
+    ReliabilityCard,
     RunManifest,
 )
 from api.pipeline.schematic.evaluator import Scorecard
@@ -131,3 +132,11 @@ def write_source_archives(
             f"{s.source_quote}\n"
         )
         _atomic_write_text(archive_path, content)
+
+
+def write_reliability_card(*, memory_dir: Path, card: ReliabilityCard) -> None:
+    """Write memory/{slug}/simulator_reliability.json for runtime consumption."""
+    _atomic_write_text(
+        memory_dir / "simulator_reliability.json",
+        json.dumps(card.model_dump(), indent=2),
+    )

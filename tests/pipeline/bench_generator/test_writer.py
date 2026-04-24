@@ -107,9 +107,11 @@ def test_atomic_replace_no_stale_temp(tmp_path: Path):
     assert tmp_left == []
 
 
+from api.pipeline.bench_generator.schemas import ReliabilityCard
 from api.pipeline.bench_generator.writer import (
     update_latest_json,
     write_source_archives,
+    write_reliability_card,
 )
 
 
@@ -152,3 +154,24 @@ def test_write_source_archives_one_file_per_scenario(tmp_path: Path):
     assert (archive_dir / "toy-s1.txt").read_text().startswith(
         accepted[0].source_url
     )
+
+
+def test_write_reliability_card(tmp_path: Path):
+    memory_dir = tmp_path / "memory" / "toy-board"
+    memory_dir.mkdir(parents=True)
+    card = ReliabilityCard(
+        device_slug="toy-board",
+        score=0.78,
+        self_mrr=0.82,
+        cascade_recall=0.72,
+        n_scenarios=5,
+        generated_at="2026-04-24T21:00:00Z",
+        source_run_date="2026-04-24",
+        notes=["Based on auto-generated scenarios, not human-validated."],
+    )
+    write_reliability_card(memory_dir=memory_dir, card=card)
+    out = memory_dir / "simulator_reliability.json"
+    assert out.exists()
+    d = json.loads(out.read_text())
+    assert d["score"] == 0.78
+    assert d["device_slug"] == "toy-board"
