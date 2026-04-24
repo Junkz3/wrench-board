@@ -32,6 +32,36 @@ Tu es un agent Opus autonome qui améliore le pipeline de diagnostic électroniq
 
 Si une amélioration nécessite de toucher un fichier read-only : **tu n'élargis pas la surface**. Tu logs `out-of-scope` dans `evolve/results.tsv` et tu quittes la session. L'humain reverra au matin.
 
+### Cas spécial : `evaluator.py` est l'oracle
+
+`api/pipeline/schematic/evaluator.py` n'est pas juste read-only par convenance — c'est **l'oracle** du système. Le score qu'il calcule est le seul juge fiable du progrès, et il DOIT rester figé sinon Goodhart's Law (« si la mesure devient la cible, elle cesse d'être une bonne mesure »). Tu n'as PAS le droit de le modifier, même indirectement (ex : changer le format des données qu'il consomme pour qu'il les voit différemment).
+
+**Mais** — si en travaillant tu identifies un VRAI bug ou une vraie limitation dans `evaluator.py` (ex : `_MODES_FOR_KIND` sample des modes absurdes, métrique Jaccard ignore les valeurs continues, pondération mal calibrée), tu as un canal pour signaler :
+
+1. **NE PAS éditer** `evaluator.py`
+2. **Écrire ta proposition** dans `evolve/proposals/evaluator-$(date -u +%Y-%m-%d-%H%M).md` au format :
+   ```markdown
+   # Proposition de modification evaluator.py
+   ## Bug observé
+   [1-3 phrases : ce qui est faux]
+   ## Diff suggéré
+   ```python
+   # Avant : ...
+   # Après : ...
+   ```
+   ## Justification
+   [Pourquoi ce changement n'est PAS du gaming — quelle réalité physique il capture mieux]
+   ## Impact estimé
+   [Si appliqué, score bougerait de combien et pourquoi]
+   ```
+3. **Logger** dans `results.tsv` avec status `propose-evaluator-fix` (pas `keep`, pas `discard`) :
+   ```
+   <ts>	<baseline_commit>	0.000000	0.000000	0.000000	propose-evaluator-fix	<résumé une ligne>
+   ```
+4. **Quitter** la session (exit 0). L'humain lit la proposition au matin et applique manuellement si OK.
+
+Cette voie te donne la VOIX sur l'oracle sans les MAINS — tu signales, l'humain tranche.
+
 ## Setup (vérifications obligatoires au début de CHAQUE session)
 
 Avant toute analyse ou édition, vérifier l'environnement :
@@ -247,7 +277,7 @@ timestamp	commit	score	self_mrr	cascade_recall	status	description
 - `timestamp` : ISO 8601 UTC, ex `2026-04-25T03:14:22Z`
 - `commit` : SHA court 7 chars. Pour `discard`/`crash`/`out-of-scope`, c'est le SHA baseline (puisque l'édit a été reset ou pas faite)
 - `score`, `self_mrr`, `cascade_recall` : floats à 6 décimales (`%.6f`). Pour `crash`/`out-of-scope` → `0.000000`
-- `status` ∈ `keep` | `discard` | `crash` | `out-of-scope` | `skip-no-idea` | `baseline`
+- `status` ∈ `keep` | `discard` | `crash` | `out-of-scope` | `skip-no-idea` | `baseline` | `propose-evaluator-fix` | `review-checkpoint`
 - `description` : texte court (< 200 chars, no tab, no newline). Pour crash → inclure extrait stderr.
 
 ## Rules dures

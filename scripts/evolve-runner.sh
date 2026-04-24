@@ -74,5 +74,39 @@ while true; do
   echo "=== EVOLVE EXIT $(date) (exit=$CLAUDE_EXIT) ===" >> "$LOGFILE"
   rm -f "$LOCKFILE"
 
+  # --- Auto-review every N consecutive keeps ---
+  # Counts keep lines since last review-checkpoint marker in results.tsv.
+  # When threshold met, dispatches a fresh claude -p subagent that audits the
+  # last N evolve commits, writes a markdown report under evolve/reviews/,
+  # and appends a review-checkpoint row to results.tsv to reset the counter.
+  REVIEW_THRESHOLD="${EVOLVE_REVIEW_EVERY:-3}"
+  KEEPS_SINCE_REVIEW=$(awk -F'\t' '
+    NR == 1 { next }
+    $6 == "review-checkpoint" { c = 0; next }
+    $6 == "keep" { c++ }
+    END { print c+0 }
+  ' evolve/results.tsv)
+
+  if [ "$KEEPS_SINCE_REVIEW" -ge "$REVIEW_THRESHOLD" ]; then
+    REVIEW_TS=$(date -u +%Y-%m-%d-%H%M)
+    REVIEW_FILE="evolve/reviews/${REVIEW_TS}-auto.md"
+    SHAS=$(awk -F'\t' '$6=="keep" {print $2}' evolve/results.tsv | tail -n "$REVIEW_THRESHOLD" | tr '\n' ' ')
+
+    echo "" >> "$LOGFILE"
+    echo "=== AUTO-REVIEW $(date) — last $REVIEW_THRESHOLD keeps: $SHAS ===" >> "$LOGFILE"
+
+    REVIEW_PROMPT="You are auditing the last ${REVIEW_THRESHOLD} commits produced by the evolve agent on branch evolve/. SHAs to review: ${SHAS}. For EACH commit: read the diff (\`git show <sha> -- api/pipeline/schematic/\`), classify as one of (✅ Vrai fix | ⚠️ Convention défendable | ❌ Gaming / score-hack), justify with a 1-line physical-realism check (does the change reflect a real failure mode on a real MNT Reform component?), and recommend keep/annotate/revert. Watch especially for 'self-dead on silent' patterns where a component is marked dead just to break Jaccard tie clusters in evaluator.py without any cascade effect — that's gaming. Write your report to ${REVIEW_FILE} in French markdown with sections: Résumé exécutif (2-3 lignes), one section per commit, Recommandations globales. After writing, append exactly one line to evolve/results.tsv (TSV format, LC_NUMERIC=C printf '%s\\t-\\t0.000000\\t0.000000\\t0.000000\\treview-checkpoint\\t<one line summary>\\n'). Do NOT modify any code. Do NOT touch evolve/state.json. Exit when done."
+
+    claude -p \
+      --dangerously-skip-permissions \
+      --max-turns 30 \
+      --output-format stream-json \
+      --verbose \
+      "$REVIEW_PROMPT" >> "$LOGFILE" 2>&1
+    REVIEW_EXIT=$?
+
+    echo "=== AUTO-REVIEW EXIT $(date) (exit=$REVIEW_EXIT) ===" >> "$LOGFILE"
+  fi
+
   sleep "$INTERVAL"
 done
