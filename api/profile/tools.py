@@ -46,7 +46,10 @@ def _skills_summary(profile) -> dict[str, list[dict[str, Any]]]:
 def profile_get(session: "SessionState | None" = None) -> dict[str, Any]:
     from api.profile.store import profile_path
     path = profile_path()
-    mtime = path.stat().st_mtime if path.exists() else 0.0
+    try:
+        mtime = path.stat().st_mtime
+    except FileNotFoundError:
+        mtime = 0.0
 
     if session is not None and session.profile_cache is not None:
         cached_mtime, cached_data = session.profile_cache

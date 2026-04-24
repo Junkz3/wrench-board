@@ -92,7 +92,7 @@ def test_profile_track_skill_happy_path_promotes(memroot: Path):
     assert out["promoted"] is True
 
 
-def test_profile_get_caches_within_session(tmp_path: Path, monkeypatch):
+def test_profile_get_caches_within_session(memroot: Path, monkeypatch):
     """Second profile_get on the same session must not re-read disk."""
     from api.session.state import SessionState
     from api.profile import tools as profile_tools
