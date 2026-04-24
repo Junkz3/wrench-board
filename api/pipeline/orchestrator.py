@@ -347,12 +347,6 @@ async def generate_knowledge_pack(
         )
         logger.info("[Pipeline] Memory-store seed status=%s", seed_status)
 
-        write_token_stats(pack_dir / "token_stats.json", phase_stats)
-        logger.info(
-            "[Pipeline] token_stats.json written · phases=%d",
-            len(phase_stats),
-        )
-
         await emit({
             "type": "pipeline_finished",
             "device_slug": slug,
@@ -380,6 +374,18 @@ async def generate_knowledge_pack(
         logger.exception("[Pipeline] Unexpected failure")
         await emit({"type": "pipeline_failed", "status": "ERROR", "error": str(exc)})
         raise
+    finally:
+        # Always persist telemetry — even on failure, so prior-phase tokens
+        # aren't lost and the failure can be diagnosed post-mortem.
+        try:
+            if phase_stats:
+                write_token_stats(pack_dir / "token_stats.json", phase_stats)
+                logger.info(
+                    "[Pipeline] token_stats.json written · phases=%d",
+                    len(phase_stats),
+                )
+        except Exception as exc:  # noqa: BLE001
+            logger.warning("[Pipeline] Failed to write token_stats.json: %s", exc)
 
 
 def _wrap_on_event(on_event: OnEvent | None) -> OnEvent:

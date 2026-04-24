@@ -231,3 +231,75 @@ async def test_pipeline_runs_without_on_event(tmp_path, dummy_registry, dummy_ou
             memory_root=tmp_path,
         )
     assert result.verdict.overall_status == "APPROVED"
+
+
+async def test_pipeline_writes_token_stats_even_on_failure(
+    tmp_path, dummy_registry, dummy_outputs
+):
+    """token_stats.json must be persisted even when the pipeline raises RuntimeError.
+
+    This is critical for post-mortem diagnostics — if Phase 4 (REJECTED / max
+    revise rounds) fails, we still need to preserve the tokens spent on
+    Phases 1-3.
+    """
+    kg, rules, dictionary = dummy_outputs
+    rejected = AuditVerdict(
+        overall_status="REJECTED",
+        consistency_score=0.0,
+        files_to_rewrite=[],
+        drift_report=[],
+        revision_brief="hopeless",
+    )
+
+    def mock_scout_with_stats(*args, **kwargs):
+        """Capture stats by appending to the stats kwarg."""
+        stats = kwargs.get("stats")
+        if stats:
+            stats.input_tokens = 100
+            stats.output_tokens = 50
+            stats.cache_read_input_tokens = 0
+            stats.cache_creation_input_tokens = 0
+        return "# dump"
+
+    def mock_registry_with_stats(*args, **kwargs):
+        stats = kwargs.get("stats")
+        if stats:
+            stats.input_tokens = 200
+            stats.output_tokens = 150
+            stats.cache_read_input_tokens = 10
+            stats.cache_creation_input_tokens = 0
+        return dummy_registry
+
+    with (
+        patch(
+            "api.pipeline.orchestrator.run_scout",
+            new=AsyncMock(side_effect=mock_scout_with_stats),
+        ),
+        patch(
+            "api.pipeline.orchestrator.run_registry_builder",
+            new=AsyncMock(side_effect=mock_registry_with_stats),
+        ),
+        patch(
+            "api.pipeline.orchestrator.run_writers_parallel",
+            new=AsyncMock(return_value=(kg, rules, dictionary)),
+        ),
+        patch(
+            "api.pipeline.orchestrator.run_auditor",
+            new=AsyncMock(return_value=rejected),
+        ),
+    ):
+        with pytest.raises(RuntimeError, match="auditor rejected"):
+            await orchestrator.generate_knowledge_pack(
+                "Demo",
+                client=object(),
+                memory_root=tmp_path,
+            )
+
+    # token_stats.json must exist even though the pipeline raised
+    stats_path = tmp_path / "demo" / "token_stats.json"
+    assert stats_path.exists(), "token_stats.json must be written even on failure"
+
+    # Verify the content contains at least the stats we accumulated
+    stats_content = stats_path.read_text()
+    assert "scout" in stats_content
+    assert "registry" in stats_content
