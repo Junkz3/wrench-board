@@ -3114,6 +3114,74 @@ function wireControls() {
       if (STATE.graph) fullRender(STATE.graph);
     });
   });
+  // Rail sidebar local search — filtre client-side sur le nom du rail.
+  // Marque la substring qui match en cyan, cache les rails qui ne matchent
+  // pas, puis masque les headers de groupe devenus vides. Idempotent.
+  const railSearchInput = el("schRailSearchInput");
+  if (railSearchInput && railSearchInput.dataset.schWired !== "1") {
+    railSearchInput.dataset.schWired = "1";
+    let railSearchDebounce = null;
+    railSearchInput.addEventListener("input", (ev) => {
+      clearTimeout(railSearchDebounce);
+      const q = ev.target.value.trim().toUpperCase();
+      railSearchDebounce = setTimeout(() => runRailSearch(q), 120);
+    });
+    railSearchInput.addEventListener("keydown", (ev) => {
+      if (ev.key === "Escape") {
+        clearTimeout(railSearchDebounce);
+        ev.target.value = "";
+        runRailSearch("");
+      }
+    });
+  }
+}
+
+/* Rail sidebar search — filters the rail list in-place and hides any
+ * voltage group that ends up with zero matching children. Operates on the
+ * already-rendered DOM (renderRailBar writes the items, this toggles
+ * visibility), so no re-render is needed. */
+function runRailSearch(query) {
+  const list = el("schRailBarList");
+  if (!list) return;
+  const items = list.querySelectorAll(".sch-rail-item");
+  items.forEach(item => {
+    const nameEl = item.querySelector(".sch-rail-name");
+    if (!nameEl) return;
+    const raw = nameEl.dataset.rawLabel ?? nameEl.textContent;
+    if (!nameEl.dataset.rawLabel) nameEl.dataset.rawLabel = raw;
+    if (!query) {
+      nameEl.textContent = raw;
+      item.classList.remove("sch-hidden");
+      return;
+    }
+    const idx = raw.toUpperCase().indexOf(query);
+    if (idx === -1) {
+      nameEl.textContent = raw;
+      item.classList.add("sch-hidden");
+      return;
+    }
+    item.classList.remove("sch-hidden");
+    nameEl.textContent = "";
+    nameEl.appendChild(document.createTextNode(raw.slice(0, idx)));
+    const mark = document.createElement("mark");
+    mark.textContent = raw.slice(idx, idx + query.length);
+    nameEl.appendChild(mark);
+    nameEl.appendChild(document.createTextNode(raw.slice(idx + query.length)));
+  });
+  // Hide voltage group headers whose following items are all hidden.
+  const groups = list.querySelectorAll(".sch-rail-group");
+  groups.forEach(g => {
+    let any = false;
+    let next = g.nextElementSibling;
+    while (next && !next.classList.contains("sch-rail-group")) {
+      if (next.classList.contains("sch-rail-item") && !next.classList.contains("sch-hidden")) {
+        any = true;
+        break;
+      }
+      next = next.nextElementSibling;
+    }
+    g.classList.toggle("sch-hidden", !any);
+  });
 }
 
 /* ---------------------------------------------------------------------- *

@@ -157,10 +157,16 @@
       <span class="sch-railbar-title">Rails</span>
       <span class="sch-railbar-count" id="schRailBarCount">—</span>
     </header>
+    <!-- local search — filtre client-side sur le nom du rail (+3V3, USB…) -->
+    <div class="sch-railbar-search">
+      <svg class="icon icon-sm" viewBox="0 0 24 24" width="12" height="12"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.6" fill="none"/><path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="1.6" fill="none"/></svg>
+      <input id="schRailSearchInput" placeholder="Filtrer (+3V3, USB…)" autocomplete="off" spellcheck="false"/>
+    </div>
     <div class="sch-railbar-list" id="schRailBarList"></div>
   </aside>
 
-  <!-- stats / pill / toggle overlay -->
+  <!-- Top-left zone — read-only stats capsule. Ne déborde plus sur le
+       centre où se trouve le switch Graphe/PDF. -->
   <div class="sch-statsbar">
     <span class="sch-stat"><span class="k">Comps</span><span class="v" id="schStatComps">—</span></span>
     <span class="sch-stat"><span class="k">Rails</span><span class="v" id="schStatRails">—</span></span>
@@ -169,11 +175,18 @@
     <span class="sch-stat"><span class="k">Conf.</span><span class="v" id="schStatConf">—</span></span>
     <span class="sch-stat"><span class="k">Pages</span><span class="v" id="schStatPages">—</span></span>
     <span class="sch-stat-pill warn" id="schStatDegraded">dégradé</span>
+  </div>
+
+  <!-- Second row (only in Graphe surface) — mode selector + passive
+       toggles, centered under the surface toggle. Dedicated z-index so
+       it never overlaps the Graphe/PDF switch. -->
+  <div class="sch-toolbar-below">
     <div class="sch-mode-toggle" role="radiogroup" aria-label="Mode d'affichage du graphe">
       <button class="sch-mode-btn" data-sch-mode="railfocus" title="Focus rail : sidebar des rails, canvas affiche un seul rail à la fois (propre, pas de spaghetti)">Focus rail</button>
       <button class="sch-mode-btn" data-sch-mode="powertree" title="Power-tree : tous les rails empilés avec leurs consumers">Power-tree</button>
       <button class="sch-mode-btn" data-sch-mode="grid" title="Grille phase × tension : colonnes = phases de boot, lignes = niveaux de tension">Grille phase×V</button>
     </div>
+    <div class="sch-toolbar-sep"></div>
     <button class="sch-toggle" id="schTogglePassives" title="Afficher les R/C/L de signal pur (non attachés à un rail power)">Passifs signal</button>
     <button class="sch-toggle" id="schToggleSignals" title="Afficher les edges de signaux (enable, reset, clock, bus)">Signaux</button>
     <button class="sch-toggle" id="schToggleAllPins" title="Afficher toutes les pins des ICs (pas juste power-relevantes)">Toutes pins</button>

@@ -284,7 +284,10 @@ body.llm-open .sch-root{right:420px}
 .sch-node:hover .sch-shape{filter:brightness(1.25)}
 
 /* =========== STATS + CONTROLS BAR =========== */
-.sch-statsbar{position:absolute;top:16px;left:16px;display:flex;gap:8px;z-index:5;flex-wrap:wrap;max-width:calc(100% - 200px)}
+/* Top-left zone — stats only. Max-width coupe bien avant le centre où
+   se trouve le switch Graphe/PDF (sch-surface-toggle), donc la stats
+   bar ne déborde jamais dessus. */
+.sch-statsbar{position:absolute;top:16px;left:16px;display:flex;gap:8px;z-index:5;flex-wrap:wrap;max-width:calc(50% - 140px)}
 .sch-stat{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:20px;background:rgba(10,17,32,.92);border:1px solid var(--border);backdrop-filter:blur(6px);font-family:var(--mono);font-size:10.5px;letter-spacing:.3px;color:var(--text-2)}
 .sch-stat .k{color:var(--text-3);text-transform:uppercase}
 .sch-stat .v{color:var(--text);font-weight:600}
@@ -296,6 +299,50 @@ body.llm-open .sch-root{right:420px}
 .sch-toggle:hover{color:var(--text);border-color:var(--border-soft)}
 .sch-toggle.on{background:rgba(52,211,153,.14);color:var(--emerald);border-color:rgba(52,211,153,.35)}
 
+/* Deuxième ligne d'outils — centrée sous le switch Graphe/PDF, regroupe
+   le sélecteur de mode (Focus rail / Power-tree / Grille) + les toggles
+   passifs (Passifs signal / Signaux / Toutes pins). Masquée quand la
+   surface est PDF (via .sch-root.surface-pdf .sch-toolbar-below). */
+.sch-toolbar-below{
+  position:absolute;
+  top:54px;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:5;
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:4px;
+  background:rgba(10,17,32,.86);
+  border:1px solid var(--border);
+  border-radius:22px;
+  backdrop-filter:blur(10px);
+  box-shadow:0 4px 14px rgba(0,0,0,.3);
+  max-width:calc(100% - 32px);
+  flex-wrap:wrap;
+  justify-content:center;
+}
+.sch-toolbar-sep{
+  width:1px;
+  height:18px;
+  background:var(--border);
+  margin:0 4px;
+}
+/* Les composants qu'on rembobine dans .sch-toolbar-below avaient leurs
+   propres backgrounds + borders — on les neutralise ici pour éviter la
+   double-capsule et obtenir une barre visuellement homogène. */
+.sch-toolbar-below .sch-mode-toggle{
+  background:transparent;
+  border:0;
+  backdrop-filter:none;
+}
+.sch-toolbar-below .sch-toggle{
+  background:transparent;
+  backdrop-filter:none;
+}
+.sch-toolbar-below .sch-toggle:hover{
+  background:rgba(56,189,248,.08);
+}
 /* Segmented layout-mode selector (Power-tree / Grille phase×V) */
 .sch-mode-toggle{display:inline-flex;background:rgba(10,17,32,.92);border:1px solid var(--border);border-radius:20px;overflow:hidden;backdrop-filter:blur(6px)}
 .sch-mode-btn{padding:5px 12px;background:transparent;border:0;color:var(--text-3);font-family:var(--mono);font-size:10.5px;letter-spacing:.3px;text-transform:uppercase;cursor:pointer;transition:all .15s;border-right:1px solid var(--border)}
@@ -370,38 +417,71 @@ body.llm-open .sch-root{right:420px}
 /* Hidden by default — shown only when body.sch-mode-railfocus is active,
    set by the JS mode toggle. Sits flush-left under the statsbar and runs
    down to just above the boot timeline. */
-.sch-railbar{position:absolute;top:72px;left:0;bottom:148px;width:240px;background:linear-gradient(180deg,rgba(15,24,42,.96),rgba(12,19,36,.96));border-right:1px solid var(--border);display:none;flex-direction:column;z-index:4;backdrop-filter:blur(6px)}
+/* Rail sidebar — occupe toute la colonne gauche en mode Focus-rail.
+   La barre va de top à bottom de la section schématique ; les overlays
+   flottants (statsbar / toolbar-below) sont décalés vers la droite en
+   mode railfocus pour ne pas couvrir la sidebar. */
+.sch-railbar{position:absolute;top:0;left:0;bottom:0;width:260px;background:linear-gradient(180deg,rgba(15,24,42,.98),rgba(12,19,36,.98));border-right:1px solid var(--border);display:none;flex-direction:column;z-index:4;backdrop-filter:blur(6px)}
 body.sch-mode-railfocus .sch-railbar{display:flex}
-body.sch-mode-railfocus .sch-canvas{left:240px}
-body.sch-mode-railfocus .sch-boot-timeline{left:240px}
+body.sch-mode-railfocus .sch-canvas{left:260px}
+body.sch-mode-railfocus .sch-boot-timeline{left:260px}
+/* En mode Focus-rail, la sidebar occupe les 260 premiers pixels — on
+   décale les overlays flottants pour qu'ils vivent dans la zone visible
+   (à droite de la sidebar) sans la couvrir. Le +130px correspond à la
+   moitié de la largeur de la sidebar, ce qui re-centre le switch et la
+   toolbar au milieu de la zone visible (entre 260 et la droite). */
+body.sch-mode-railfocus .sch-statsbar{left:276px;max-width:calc(50% - 230px)}
+body.sch-mode-railfocus .sch-surface-toggle{left:calc(50% + 130px)}
+body.sch-mode-railfocus .sch-toolbar-below{left:calc(50% + 130px)}
 
-.sch-railbar-head{display:flex;align-items:baseline;justify-content:space-between;padding:10px 14px 8px;border-bottom:1px solid var(--border)}
-.sch-railbar-title{font-family:var(--mono);font-size:11px;letter-spacing:.5px;text-transform:uppercase;color:var(--text-3);font-weight:700}
-.sch-railbar-count{font-family:var(--mono);font-size:10px;color:var(--text-3)}
+.sch-railbar-head{display:flex;align-items:baseline;justify-content:space-between;padding:18px 16px 12px;border-bottom:1px solid var(--border)}
+.sch-railbar-title{font-family:var(--mono);font-size:11.5px;letter-spacing:.6px;text-transform:uppercase;color:var(--text-2);font-weight:700}
+.sch-railbar-count{font-family:var(--mono);font-size:10.5px;color:var(--text-3)}
+
+/* Search input inside the rail sidebar — filtre le nom des rails.
+   Même esthétique que .sch-filter mais intégré à la sidebar. */
+.sch-railbar-search{display:flex;align-items:center;gap:6px;padding:8px 12px;border-bottom:1px solid var(--border-soft);background:rgba(10,17,32,.45);color:var(--text-3)}
+.sch-railbar-search input{flex:1;min-width:0;background:transparent;border:0;color:var(--text);font-family:var(--mono);font-size:11px;padding:3px 4px;outline:none}
+.sch-railbar-search input::placeholder{color:var(--text-3)}
+.sch-railbar-search:focus-within{color:var(--cyan);background:rgba(56,189,248,.05)}
+
 .sch-railbar-list{flex:1;overflow-y:auto;overflow-x:hidden;padding:6px 0}
 .sch-railbar-list::-webkit-scrollbar{width:6px}
 .sch-railbar-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
 
 /* Voltage-class group header inside the list */
-.sch-rail-group{padding:8px 14px 3px;font-family:var(--mono);font-size:9.5px;color:var(--text-3);letter-spacing:.5px;text-transform:uppercase;font-weight:600;border-top:1px solid var(--border-soft);margin-top:4px}
-.sch-rail-group:first-child{border-top:0;margin-top:0}
+/* Header sticky pour chaque bucket de tension — ≥12V, 5-11V, 3V3, 1V8-2V5…
+   Reste visible quand l'utilisateur scrolle dans la liste. */
+.sch-rail-group{position:sticky;top:0;z-index:2;padding:10px 16px 4px;font-family:var(--mono);font-size:10px;color:var(--text-3);letter-spacing:.6px;text-transform:uppercase;font-weight:700;background:linear-gradient(180deg,rgba(15,24,42,1) 60%,rgba(15,24,42,0));margin-top:6px}
+.sch-rail-group:first-child{margin-top:0}
 
 /* Rail item row — compact, 2 lines */
-.sch-rail-item{display:grid;grid-template-columns:1fr auto;grid-template-rows:auto auto;gap:2px 8px;padding:7px 14px;cursor:pointer;border-left:2px solid transparent;transition:background .12s,border-color .12s}
-.sch-rail-item:hover{background:rgba(56,189,248,.06);border-left-color:rgba(56,189,248,.4)}
-.sch-rail-item.active{background:rgba(52,211,153,.08);border-left-color:var(--emerald)}
-.sch-rail-item.active .sch-rail-name{color:oklch(0.88 0.15 155)}
+/* Rail item — plus d'air + active state en cyan (component color) pour
+   bien contraster avec le SPOF badge qui reste en rouge (semantic alert). */
+.sch-rail-item{display:grid;grid-template-columns:1fr auto;grid-template-rows:auto auto;gap:3px 10px;padding:10px 16px;cursor:pointer;border-left:2px solid transparent;transition:background .12s,border-color .12s,box-shadow .12s;margin:0 6px;border-radius:4px}
+.sch-rail-item:hover{background:rgba(56,189,248,.06);border-left-color:rgba(56,189,248,.35)}
+.sch-rail-item.active{background:rgba(56,189,248,.12);border-left-color:var(--cyan);box-shadow:inset 0 0 0 1px rgba(56,189,248,.25)}
+.sch-rail-item.active .sch-rail-name{color:var(--cyan)}
+.sch-rail-item.active .sch-rail-voltage{color:var(--cyan)}
 .sch-rail-item.spof{border-left-color:oklch(0.75 0.17 25)}
-.sch-rail-item.spof.active{background:rgba(236,100,75,.08);border-left-color:oklch(0.78 0.17 25)}
+.sch-rail-item.spof.active{background:rgba(236,100,75,.10);border-left-color:oklch(0.78 0.17 25);box-shadow:inset 0 0 0 1px rgba(236,100,75,.3)}
+/* Hidden state used by the local search filter — on garde le node dans
+   le DOM (pour preserve l'état active) mais on le retire du flow. */
+.sch-rail-item.sch-hidden{display:none}
+.sch-rail-group.sch-hidden{display:none}
 
 .sch-rail-name{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--text);grid-column:1;grid-row:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
-.sch-rail-voltage{font-family:var(--mono);font-size:10.5px;color:var(--emerald);grid-column:2;grid-row:1;font-weight:700;flex-shrink:0}
+.sch-rail-voltage{font-family:var(--mono);font-size:11px;color:var(--emerald);grid-column:2;grid-row:1;font-weight:700;flex-shrink:0}
 .sch-rail-meta{grid-column:1 / span 2;grid-row:2;display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9.5px;color:var(--text-3);min-width:0;overflow:hidden}
 .sch-rail-meta .sch-rail-source{color:var(--cyan);font-weight:600;flex-shrink:0}
 .sch-rail-meta .sch-rail-source.external{color:var(--text-3);font-style:italic}
 .sch-rail-meta .sch-rail-consumers{color:var(--text-3);flex-shrink:0}
 .sch-rail-meta .sch-rail-spof{margin-left:auto;padding:1px 5px;border-radius:3px;font-weight:700;font-size:9px;background:rgba(236,100,75,.14);color:oklch(0.82 0.15 25);border:1px solid rgba(236,100,75,.3);flex-shrink:0}
 .sch-rail-meta .sch-rail-phase{padding:1px 5px;border-radius:3px;background:rgba(245,158,11,.10);color:var(--amber);border:1px solid rgba(245,158,11,.25);flex-shrink:0;font-size:9px;font-weight:600}
+
+/* Search match highlight — quand le filtre est actif, le substring qui
+   match est soulignés en cyan pour confirmer visuellement le critère. */
+.sch-rail-name mark{background:transparent;color:var(--cyan);padding:0;font-weight:800;text-decoration:underline;text-decoration-color:rgba(56,189,248,.5);text-underline-offset:2px}
 
 /* =========== RAIL FOCUS LAYOUT (SVG) =========== */
 /* Dashed zone bands — upstream / source / rail / consumers.
@@ -1105,6 +1185,7 @@ body.sch-mode-railfocus .sch-boot-timeline{left:240px}
 .sch-root.surface-pdf .sch-pdf-view{display:block}
 .sch-root.surface-pdf .sch-canvas,
 .sch-root.surface-pdf .sch-statsbar,
+.sch-root.surface-pdf .sch-toolbar-below,
 .sch-root.surface-pdf .sch-filter,
 .sch-root.surface-pdf .sch-zoom,
 .sch-root.surface-pdf .sch-railbar,
