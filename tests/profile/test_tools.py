@@ -90,3 +90,22 @@ def test_profile_track_skill_happy_path_promotes(memroot: Path):
     assert out["status_before"] == "practiced"
     assert out["status_after"] == "mastered"
     assert out["promoted"] is True
+
+
+def test_profile_get_caches_within_session(tmp_path: Path, monkeypatch):
+    """Second profile_get on the same session must not re-read disk."""
+    from api.session.state import SessionState
+    from api.profile import tools as profile_tools
+
+    calls: list[str] = []
+    orig = profile_tools.load_profile
+    def spy():
+        calls.append("load")
+        return orig()
+    monkeypatch.setattr(profile_tools, "load_profile", spy)
+
+    session = SessionState()
+    profile_tools.profile_get(session=session)
+    profile_tools.profile_get(session=session)
+
+    assert len(calls) == 1, f"expected 1 load, got {len(calls)}"

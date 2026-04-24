@@ -172,7 +172,7 @@ async def _run_agent_turn(
             if block.name.startswith("bv_"):
                 result = dispatch_bv(session, block.name, block.input or {})
             elif block.name.startswith("profile_"):
-                result = _dispatch_profile_tool(block.name, block.input or {})
+                result = _dispatch_profile_tool(block.name, block.input or {}, session=session)
             else:
                 result = await _dispatch_mb_tool(
                     block.name, block.input or {}, device_slug,
@@ -387,7 +387,7 @@ async def _dispatch_mb_tool(
     return {"ok": False, "reason": "unknown-tool"}
 
 
-def _dispatch_profile_tool(name: str, payload: dict) -> dict:
+def _dispatch_profile_tool(name: str, payload: dict, session=None) -> dict:
     """Run one of the profile_* technician-profile tools."""
     from api.profile.tools import (
         profile_check_skills,
@@ -395,7 +395,7 @@ def _dispatch_profile_tool(name: str, payload: dict) -> dict:
         profile_track_skill,
     )
     if name == "profile_get":
-        return profile_get()
+        return profile_get(session=session)
     if name == "profile_check_skills":
         return profile_check_skills(payload.get("candidate_skills", []))
     if name == "profile_track_skill":

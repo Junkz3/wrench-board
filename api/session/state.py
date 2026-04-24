@@ -53,6 +53,8 @@ class SessionState:
     )
 
     COMPONENT_CACHE_MAX: ClassVar[int] = 64
+    # R3: profile snapshot cache — mtime-checked on every lookup.
+    profile_cache: tuple[float, dict[str, Any]] | None = None
 
     def invalidate_pack_cache(self, device_slug: str) -> None:
         """Drop the cached pack AND all derived component results for `device_slug`.

@@ -13,12 +13,15 @@ Three tools:
 
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from api.profile.catalog import SKILLS_CATALOG, SkillId, ToolId
 from api.profile.derive import effective_verbosity, global_level, skill_status
 from api.profile.model import SkillEvidence
 from api.profile.store import bump_skill, load_profile
+
+if TYPE_CHECKING:
+    from api.session.state import SessionState
 
 EVIDENCE_MIN_CHARS = 20
 
@@ -40,9 +43,18 @@ def _skills_summary(profile) -> dict[str, list[dict[str, Any]]]:
     return out
 
 
-def profile_get() -> dict[str, Any]:
+def profile_get(session: "SessionState | None" = None) -> dict[str, Any]:
+    from api.profile.store import profile_path
+    path = profile_path()
+    mtime = path.stat().st_mtime if path.exists() else 0.0
+
+    if session is not None and session.profile_cache is not None:
+        cached_mtime, cached_data = session.profile_cache
+        if cached_mtime >= mtime:
+            return cached_data
+
     profile = load_profile()
-    return {
+    data = {
         "identity": {
             "name": profile.identity.name,
             "avatar": profile.identity.avatar,
@@ -59,6 +71,9 @@ def profile_get() -> dict[str, Any]:
         ],
         "skills_summary": _skills_summary(profile),
     }
+    if session is not None:
+        session.profile_cache = (mtime, data)
+    return data
 
 
 def profile_check_skills(candidate_skills: list[str]) -> dict[str, Any]:

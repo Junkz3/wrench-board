@@ -216,7 +216,7 @@ async def _dispatch_tool(
             profile_track_skill,
         )
         if name == "profile_get":
-            return profile_get()
+            return profile_get(session=session)
         if name == "profile_check_skills":
             return profile_check_skills(payload.get("candidate_skills", []))
         if name == "profile_track_skill":

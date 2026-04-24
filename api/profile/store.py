@@ -26,6 +26,11 @@ def _profile_path() -> Path:
     return root / _PROFILE_SUBDIR / _PROFILE_FILENAME
 
 
+def profile_path() -> Path:
+    """Public accessor for the profile file path (used by mtime-based caches)."""
+    return _profile_path()
+
+
 def load_profile() -> TechnicianProfile:
     path = _profile_path()
     if not path.exists():
