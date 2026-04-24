@@ -305,25 +305,11 @@ class SimulationEngine:
 
             if f.mode == "regulating_low":
                 pct = f.voltage_pct if f.voltage_pct is not None else 0.85
-                touched_any_rail = False
                 for label, rail in self.electrical.power_rails.items():
                     if rail.source_refdes == f.refdes:
                         rails[label] = "degraded"
                         rail_voltage[label] = pct
                         touched_rails.add(label)
-                        touched_any_rail = True
-                # If this IC sources no rail, `regulating_low` is otherwise
-                # a silent no-op — every such (refdes, regulating_low) pair
-                # produces an empty symptom fingerprint and ties with every
-                # other non-source regulating_low in the self_MRR oracle's
-                # Jaccard ranking (121-way tie on this board). Mark the IC
-                # dead instead: a regulator that can't hold its output is
-                # effectively offline from a set-level observability
-                # standpoint, and the pair now collapses into a 2-tie with
-                # its own `dead` sibling (rank 2 alphabetically → MRR 0.5)
-                # rather than drowning in the empty cluster.
-                if not touched_any_rail and f.refdes in self.electrical.components:
-                    components[f.refdes] = "dead"
                 continue
 
             if f.mode == "shorted":
