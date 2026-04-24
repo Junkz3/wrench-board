@@ -418,6 +418,9 @@ async def _dispatch_tool(
             refdes=payload.get("refdes"),
             index=payload.get("index"),
             domain=payload.get("domain"),
+            killed_refdes=payload.get("killed_refdes"),
+            failures=payload.get("failures"),
+            rail_overrides=payload.get("rail_overrides"),
             session=session,
         )
     if name == "mb_hypothesize":
