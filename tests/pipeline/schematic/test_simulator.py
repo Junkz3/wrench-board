@@ -551,3 +551,72 @@ def test_run_with_degraded_rail_returns_degraded_verdict(graph_with_phase):
     )
     timeline = engine.run()
     assert timeline.final_verdict == "degraded"
+
+
+@pytest.fixture
+def graph_with_decoupling(graph_with_phase) -> ElectricalGraph:
+    """graph_with_phase + a decoupling cap C42 on +5V."""
+    graph_with_phase.components["C42"] = ComponentNode(
+        refdes="C42",
+        type="capacitor",
+        kind="passive_c",
+        role="decoupling",
+        pins=[
+            PagePin(number="1", role="terminal", net_label="+5V"),
+            PagePin(number="2", role="ground", net_label="GND"),
+        ],
+    )
+    graph_with_phase.power_rails["+5V"].decoupling = ["C42"]
+    return graph_with_phase
+
+
+@pytest.fixture
+def graph_with_series_r(graph_with_phase) -> ElectricalGraph:
+    """graph_with_phase + a series R5 between +5V and U12.power_in."""
+    graph_with_phase.components["R5"] = ComponentNode(
+        refdes="R5",
+        type="resistor",
+        kind="passive_r",
+        role="series",
+        pins=[
+            PagePin(number="1", role="terminal", net_label="+5V"),
+            PagePin(number="2", role="terminal", net_label="+5V_FILT"),
+        ],
+    )
+    # Re-wire U12 to consume +5V_FILT instead.
+    graph_with_phase.components["U12"].pins = [
+        PagePin(number="1", role="power_in", net_label="+5V_FILT")
+    ]
+    return graph_with_phase
+
+
+def test_failure_leaky_short_on_decoupling_cap_degrades_rail(graph_with_decoupling):
+    """A leaky_short on a decoupling cap drives the decoupled rail to degraded."""
+    engine = SimulationEngine(
+        graph_with_decoupling,
+        failures=[Failure(refdes="C42", mode="leaky_short", value_ohms=200.0)],
+    )
+    final = engine.run().states[-1]
+    assert final.rails.get("+5V") == "degraded"
+    assert final.rail_voltage_pct.get("+5V", 1.0) < 1.0
+
+
+def test_failure_regulating_low_drops_sourced_rails(graph_with_phase):
+    """regulating_low on the source IC sets all sourced rails to voltage_pct."""
+    engine = SimulationEngine(
+        graph_with_phase,
+        failures=[Failure(refdes="U7", mode="regulating_low", voltage_pct=0.85)],
+    )
+    final = engine.run().states[-1]
+    assert final.rails.get("+5V") == "degraded"
+    assert final.rail_voltage_pct.get("+5V") == 0.85
+
+
+def test_failure_open_on_series_resistor_kills_consumer(graph_with_series_r):
+    """open on a series resistor cuts the path → IC dead."""
+    engine = SimulationEngine(
+        graph_with_series_r,
+        failures=[Failure(refdes="R5", mode="open")],
+    )
+    final = engine.run().states[-1]
+    assert final.components.get("U12") == "dead"

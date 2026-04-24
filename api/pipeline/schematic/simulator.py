@@ -31,6 +31,11 @@ FinalVerdict = Literal["completed", "blocked", "cascade", "degraded"]
 TOLERANCE_OK = 0.9
 TOLERANCE_UVLO = 0.5
 
+# Estimated nominal current draw per consumer when computing leaky_short
+# voltage drop. Chosen for order-of-magnitude correctness — tests pin
+# behaviour, not the exact curve. Override per-rail later if needed.
+LEAKY_SHORT_PER_CONSUMER_MA = 50.0
+
 
 class BoardState(BaseModel):
     """Snapshot of the board at the end of one phase."""
@@ -168,12 +173,16 @@ class SimulationEngine:
         for refdes in self.electrical.components:
             components[refdes] = "dead" if refdes in self.killed else "off"
 
-        # Apply rail_overrides BEFORE the phase walk so they take effect from Φ0.
         rail_voltage: dict[str, float] = {}
+        # Apply causes first; then observations override anything.
+        failure_locked = self._apply_failures_at_init(rails, rail_voltage, components)
         for ovr in self.rail_overrides:
             rails[ovr.label] = ovr.state
             if ovr.voltage_pct is not None:
                 rail_voltage[ovr.label] = ovr.voltage_pct
+        # Lock rails touched by failures so the phase walk doesn't overwrite
+        # them. Combined with the override-locked set built in __init__.
+        self._locked_rails: frozenset[str] = self._overridden_rails | failure_locked
 
         states: list[BoardState] = []
         phases = self._phases()
@@ -240,6 +249,94 @@ class SimulationEngine:
     # ------------------------------------------------------------------
     # Private transitions
     # ------------------------------------------------------------------
+    def _apply_failures_at_init(
+        self,
+        rails: dict[str, RailState],
+        rail_voltage: dict[str, float],
+        components: dict[str, ComponentState],
+    ) -> frozenset[str]:
+        """Mutate initial state from each Failure. Order:
+        dead/open/regulating_low/shorted/leaky_short — last writer wins
+        on the same rail, but failures rarely overlap in practice.
+
+        Returns the set of rails this pass touched, so the caller can lock
+        them against the phase walk's `_stabilise_rails` rewrites.
+        """
+        touched_rails: set[str] = set()
+        for f in self.failures:
+            if f.mode == "dead":
+                components[f.refdes] = "dead"
+                continue
+
+            if f.mode == "regulating_low":
+                pct = f.voltage_pct if f.voltage_pct is not None else 0.85
+                for label, rail in self.electrical.power_rails.items():
+                    if rail.source_refdes == f.refdes:
+                        rails[label] = "degraded"
+                        rail_voltage[label] = pct
+                        touched_rails.add(label)
+                continue
+
+            if f.mode == "shorted":
+                comp = self.electrical.components.get(f.refdes)
+                if comp is None:
+                    continue
+                # Find the rail this component touches (through any pin).
+                touched = {
+                    pin.net_label for pin in comp.pins if pin.net_label
+                    and pin.net_label in self.electrical.power_rails
+                    and pin.net_label.upper() not in {"GND", "VSS", "0V"}
+                }
+                for label in touched:
+                    rails[label] = "shorted"
+                    rail_voltage[label] = 0.0
+                    touched_rails.add(label)
+                continue
+
+            if f.mode == "leaky_short":
+                comp = self.electrical.components.get(f.refdes)
+                if comp is None or f.value_ohms is None:
+                    continue
+                # The cap decouples a rail — find which.
+                target_rail: str | None = None
+                for label, rail in self.electrical.power_rails.items():
+                    if f.refdes in rail.decoupling:
+                        target_rail = label
+                        break
+                if target_rail is None:
+                    continue
+                # Voltage divider model: leak draws extra I = V_nom / R_leak;
+                # consumers also draw I_nom_total = N × per-consumer estimate.
+                # Without a source resistance we approximate the resulting
+                # voltage as V_nom × (R_leak / (R_leak + R_eff_consumers)),
+                # where R_eff_consumers ≈ V_nom / I_nom_total.
+                rail = self.electrical.power_rails[target_rail]
+                v_nom = rail.voltage_nominal or 5.0
+                n_consumers = max(1, len(rail.consumers))
+                i_nom_a = (LEAKY_SHORT_PER_CONSUMER_MA * n_consumers) / 1000.0
+                r_eff = v_nom / i_nom_a
+                v_drop_pct = f.value_ohms / (f.value_ohms + r_eff)
+                rails[target_rail] = "degraded"
+                rail_voltage[target_rail] = max(0.0, min(1.0, v_drop_pct))
+                touched_rails.add(target_rail)
+                continue
+
+            if f.mode == "open":
+                comp = self.electrical.components.get(f.refdes)
+                if comp is None:
+                    continue
+                # An open passive in series cuts power to anything reachable
+                # from its non-source terminal. Brute-force: find every IC
+                # whose power_in lands on a net touched by this passive.
+                touched_nets = {pin.net_label for pin in comp.pins if pin.net_label}
+                for refdes, c in self.electrical.components.items():
+                    ins = {p.net_label for p in c.pins if p.role == "power_in" and p.net_label}
+                    if ins & touched_nets:
+                        components[refdes] = "dead"
+                continue
+
+        return frozenset(touched_rails)
+
     def _stabilise_rails(
         self,
         rails: dict[str, RailState],
@@ -273,9 +370,9 @@ class SimulationEngine:
 
         # Second pass — actually decide rail state.
         for label in rails_stable:
-            # Honour caller-supplied observations — locked rails are not
-            # rewritten by the phase walk.
-            if label in self._overridden_rails:
+            # Honour caller-supplied observations and failure-driven states —
+            # locked rails are not rewritten by the phase walk.
+            if label in self._locked_rails:
                 continue
             rail = self.electrical.power_rails.get(label)
             if rail is None:
@@ -303,6 +400,11 @@ class SimulationEngine:
         for refdes in comps_entering:
             if refdes in self.killed:
                 components[refdes] = "dead"
+                continue
+            # A failure already marked this component dead (e.g. an `open`
+            # on a series passive cut its supply path). Keep it dead — the
+            # phase walk doesn't resurrect it.
+            if components.get(refdes) == "dead":
                 continue
             comp = self.electrical.components.get(refdes)
             if comp is None:
