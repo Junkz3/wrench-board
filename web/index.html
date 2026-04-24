@@ -28,6 +28,41 @@
 </head>
 <body>
 
+<!-- Landing hero — visible only when body has class .show-landing -->
+<div id="landing-overlay" class="landing" hidden>
+  <div class="landing-bg" aria-hidden="true"></div>
+  <main class="landing-hero">
+    <div class="landing-mark">
+      <svg viewBox="0 0 24 24" width="32" height="32" stroke="currentColor"
+           stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M13 2L3 14h7l-1 8 11-13h-7z" fill="currentColor" stroke="none"/>
+      </svg>
+      <span>microsolder</span>
+    </div>
+    <h1 class="landing-title">Ton assistant de réparation hardware.</h1>
+    <p class="landing-sub">Décris ce qui ne marche pas — je m'occupe du diagnostic.</p>
+    <form class="landing-form" id="landingForm" autocomplete="off">
+      <input class="landing-input" id="landingInput" type="text"
+             placeholder="ex. mon Framework ne s'allume plus"
+             aria-label="Décris ton problème"
+             maxlength="400" required />
+      <button class="landing-submit" type="submit" id="landingSubmit">
+        Diagnostiquer
+        <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor"
+             stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 12h14M13 5l7 7-7 7"/>
+        </svg>
+      </button>
+    </form>
+    <div class="landing-chips" id="landingChips">
+      <button type="button" class="landing-chip" data-text="MNT Reform — pas de boot, écran noir">MNT Reform — pas de boot</button>
+      <button type="button" class="landing-chip" data-text="iPhone 11 ne charge plus">iPhone 11 — pas de charge</button>
+      <button type="button" class="landing-chip" data-text="Framework laptop écran noir au démarrage">Framework — écran noir</button>
+    </div>
+    <div class="landing-status" id="landingStatus" aria-live="polite"></div>
+  </main>
+</div>
+
 <!-- ============ TOP BAR ============ -->
 <div class="topbar">
   <div class="brand">
