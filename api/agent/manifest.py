@@ -165,17 +165,22 @@ MB_TOOLS: list[dict] = [
         "type": "custom",
         "name": "mb_hypothesize",
         "description": (
-            "Propose des hypothèses (refdes, mode) qui expliquent les observations. "
-            "Modes IC (actifs) : dead (inerte), alive (fonctionne), anomalous (actif "
-            "mais output incorrect — IC DSI bridge, codec audio, sensor), hot (chauffe "
-            "anormalement). Modes PASSIVES (R/C/D/FB) : open (circuit coupé, typique "
-            "ferrite brûlée ou R cassée), short (court plaque-à-plaque pour un cap, "
-            "wire pour R). Modes RAILS : dead, alive, shorted (court vers GND ou "
-            "overvoltage). Passer au moins une observation via state_comps/state_rails "
-            "OU fournir repair_id pour synthétiser depuis le journal. La réponse "
-            "contient `discriminating_targets` (list[str]) : quand les top-N candidats "
-            "sont à égalité de score, ce sont les refdes/rails dont la mesure "
-            "suivante partitionne le mieux les suspects — à suggérer au tech."
+            "Propose des hypothèses (refdes, mode) qui expliquent les "
+            "observations. Modes IC (actifs) : dead (inerte), alive "
+            "(fonctionne), anomalous (actif mais output incorrect — IC "
+            "DSI bridge, codec audio, sensor), hot (chauffe anormalement). "
+            "Modes PASSIVES (R/C/D/FB) : open (circuit coupé, typique "
+            "ferrite brûlée ou R cassée), short (court plaque-à-plaque "
+            "pour un cap, wire pour R). Modes Q (MOSFET/BJT) : open / "
+            "short (physique), stuck_on / stuck_off (comportemental : "
+            "conduit permanent / ne conduit jamais). Modes RAILS : dead, "
+            "alive, shorted, stuck_on (rail alimenté quand devrait être "
+            "off). Passer au moins une observation via state_comps / "
+            "state_rails OU fournir repair_id pour synthétiser depuis le "
+            "journal. La réponse contient `discriminating_targets` "
+            "(list[str]) : quand les top-N candidats sont à égalité de "
+            "score, ce sont les refdes/rails dont la mesure suivante "
+            "partitionne le mieux les suspects — à suggérer au tech."
         ),
         "input_schema": {
             "type": "object",
@@ -183,21 +188,33 @@ MB_TOOLS: list[dict] = [
                 "state_comps": {
                     "type": "object",
                     "description": (
-                        "Map refdes → mode. Pour un IC : 'dead', 'alive', 'anomalous', "
-                        "'hot'. Pour un passive (R/C/D/FB) : 'open', 'short', 'alive'. "
-                        "Le moteur rejette un IC en mode passive (et vice-versa)."
+                        "Map refdes → mode. Pour un IC : 'dead', 'alive', "
+                        "'anomalous', 'hot'. Pour un passive (R/C/D/FB) : "
+                        "'open', 'short', 'alive'. Pour un passive_q "
+                        "(MOSFET/BJT) : 'open', 'short', 'stuck_on', "
+                        "'stuck_off', 'alive'. Le moteur rejette un IC en "
+                        "mode passive (et vice-versa)."
                     ),
                     "additionalProperties": {
                         "type": "string",
-                        "enum": ["dead", "alive", "anomalous", "hot", "open", "short"],
+                        "enum": [
+                            "dead", "alive", "anomalous", "hot",
+                            "open", "short",
+                            "stuck_on", "stuck_off",
+                        ],
                     },
                 },
                 "state_rails": {
                     "type": "object",
-                    "description": "Map rail label → mode. Modes: 'dead', 'alive', 'shorted'.",
+                    "description": (
+                        "Map rail label → mode. Modes : 'dead' (0V), "
+                        "'alive' (nominal), 'shorted' (court vers GND ou "
+                        "overvolt), 'stuck_on' (alimenté quand devrait "
+                        "être off — load switch claqué downstream)."
+                    ),
                     "additionalProperties": {
                         "type": "string",
-                        "enum": ["dead", "alive", "shorted"],
+                        "enum": ["dead", "alive", "shorted", "stuck_on"],
                     },
                 },
                 "metrics_comps": {
@@ -675,6 +692,25 @@ Modes passives (Phase 4) :
 Le scoring passive a un multiplicateur 0.5× par design sur les cascades
 topologiquement faibles (decoupling/bulk/filter open, pull_up/down
 open). Un score 0.5 sur une passive = candidat LÉGITIME, pas faible.
+
+Modes Q (Phase 4.5) :
+  - `open` ou `stuck_off` sur un Q = canal cassé (ne conduit jamais).
+    Sur un load_switch = rail downstream dead.
+    Sur un inrush_limiter = rail jamais up.
+  - `short` ou `stuck_on` sur un Q = canal collé (conduit permanent).
+    Sur un load_switch = rail downstream toujours alimenté, même en
+    veille (typique panne standby-current).
+    Sur un level_shifter = bus stuck à un niveau logique.
+  - `stuck_on` sur un rail = observation directe : « +3V3_USB à 3.3V
+    en veille alors qu'il devrait être off ». Engine propose un Q
+    stuck_on upstream comme suspect.
+
+Le vocabulaire open/short et stuck_on/stuck_off se recoupe sur les Q :
+les deux pairs désignent la même cascade (open/stuck_off = canal
+cassé, short/stuck_on = canal collé). Utilise le mot qui matche
+l'observation du tech : s'il a fait un ohmmètre D-S et trouvé 0Ω,
+dis « short ». S'il a observé le rail toujours on en veille, dis
+« stuck_on ». L'engine les traite équivalents.
 
 MESURE-CIBLE — jamais « mesure U1 » vague.
 Quand tu suggères une mesure (discriminateur ou validation top-1), tu
