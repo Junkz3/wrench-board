@@ -38,7 +38,6 @@ from api.pipeline.expansion import expand_pack
 from api.pipeline.graph_transform import pack_to_graph_payload
 from api.pipeline.orchestrator import _slugify, generate_knowledge_pack
 from api.pipeline.schemas import PipelineResult
-from api.pipeline.schematic.boot_analyzer import analyze_boot_sequence
 from api.pipeline.schematic.grounding import extract_grounding
 from api.pipeline.schematic.net_classifier import classify_nets
 from api.pipeline.schematic.orchestrator import ingest_schematic
@@ -1011,6 +1010,7 @@ async def get_pack_schematic(device_slug: str) -> dict:
 
 async def _run_boot_analyzer_in_background(device_slug: str, pack_dir: Path) -> None:
     """Background task — load the electrical graph, run Opus, persist analyzer output."""
+    from api.pipeline.schematic.boot_analyzer import analyze_boot_sequence  # lazy: module is optional WIP on evolve
     t0 = time.monotonic()
     graph_path = pack_dir / "electrical_graph.json"
     try:

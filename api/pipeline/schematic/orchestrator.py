@@ -30,7 +30,6 @@ from pathlib import Path
 from anthropic import AsyncAnthropic
 
 from api.config import get_settings
-from api.pipeline.schematic.boot_analyzer import analyze_boot_sequence
 from api.pipeline.schematic.compiler import compile_electrical_graph
 from api.pipeline.schematic.grounding import (
     extract_grounding,
@@ -309,6 +308,7 @@ def _upgrade_rails_from_classification(
 
 async def _run_boot_analyzer(electrical, client, output_dir: Path) -> bool:
     """Run the Opus boot analyzer and persist. Returns True on success."""
+    from api.pipeline.schematic.boot_analyzer import analyze_boot_sequence  # lazy: module is optional WIP on evolve
     try:
         analyzed = await analyze_boot_sequence(electrical, client=client)
         (output_dir / "boot_sequence_analyzed.json").write_text(
