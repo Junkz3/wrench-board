@@ -75,3 +75,81 @@ def test_kicad_parser_rejects_invalid_path(tmp_path):
     bad.write_text("this is not a kicad file")
     with pytest.raises(KicadSubprocessError):
         KicadPcbParser().parse_file(bad)
+
+
+# --- Broader fixture coverage ------------------------------------------------
+# The MNT Reform motherboard is a real, open-hardware board (CERN-OHL-S-2.0,
+# cf. board_assets/ATTRIBUTIONS.md). These tests lock in the rest of the
+# parser's contract beyond bbox/metadata/pad shape.
+
+
+def test_kicad_parser_extracts_board_outline():
+    _skip_if_fixture_missing()
+    board = KicadPcbParser().parse_file(KICAD_FIXTURE)
+    assert board.outline, "board outline should be populated"
+    assert len(board.outline) >= 4, (
+        f"outline polygon needs at least 4 points; got {len(board.outline)}"
+    )
+
+
+def test_kicad_parser_extracts_nets_including_power_and_ground():
+    _skip_if_fixture_missing()
+    board = KicadPcbParser().parse_file(KICAD_FIXTURE)
+    assert len(board.nets) > 100, f"expected many nets on a motherboard; got {len(board.nets)}"
+    # At least one ground and one power rail should be flagged — the parser
+    # classifies by name, so this also guards against a regex regression.
+    grounds = [n for n in board.nets if n.is_ground]
+    powers = [n for n in board.nets if n.is_power]
+    assert grounds, "expected at least one ground net flagged"
+    assert powers, "expected at least one power/rail net flagged"
+
+
+def test_kicad_parser_part_and_net_indexes_are_queryable():
+    _skip_if_fixture_missing()
+    board = KicadPcbParser().parse_file(KICAD_FIXTURE)
+    # Part lookup via the O(1) index built in model_post_init.
+    u1 = board.part_by_refdes("U1")
+    assert u1 is not None
+    assert u1.refdes == "U1"
+    assert board.part_by_refdes("DOES_NOT_EXIST") is None
+    # Net lookup by name — pick a net known to exist on this board by reading
+    # it from the parse output itself (avoids hardcoding net names that could
+    # drift as the KiCad source evolves upstream).
+    some_net_name = board.nets[0].name
+    assert board.net_by_name(some_net_name) is not None
+    assert board.net_by_name("__absent_net__") is None
+
+
+def test_kicad_parser_assigns_layer_to_every_part():
+    """Every part must carry a Layer value — no missing / null layer. The MNT
+    Reform motherboard happens to be single-sided (all Layer.TOP), so we only
+    assert TOP is present; we still verify there's no garbage layer bit set."""
+    _skip_if_fixture_missing()
+    board = KicadPcbParser().parse_file(KICAD_FIXTURE)
+    from api.board.model import Layer
+    layers = {p.layer for p in board.parts}
+    assert Layer.TOP in layers, "expected at least one top-side part"
+    # Any emitted layer must be one of the enum values — no stray bits.
+    for layer in layers:
+        assert layer in (Layer.TOP, Layer.BOTTOM, Layer.BOTH), f"unexpected layer {layer!r}"
+
+
+def test_kicad_parser_pins_reference_existing_parts():
+    """Referential integrity: every pin.part_refdes must resolve to a Part.
+    Catches a parser regression that would emit orphan pins."""
+    _skip_if_fixture_missing()
+    board = KicadPcbParser().parse_file(KICAD_FIXTURE)
+    known_refdes = {p.refdes for p in board.parts}
+    orphans = [p for p in board.pins if p.part_refdes not in known_refdes]
+    assert not orphans, (
+        f"{len(orphans)} pins reference unknown parts "
+        f"(first 3: {[(p.part_refdes, p.index) for p in orphans[:3]]})"
+    )
+
+
+def test_kicad_parser_emits_source_format_and_file_hash():
+    _skip_if_fixture_missing()
+    board = KicadPcbParser().parse_file(KICAD_FIXTURE)
+    assert board.source_format == "kicad_pcb"
+    assert board.file_hash.startswith("sha256:")
+    assert len(board.file_hash) == len("sha256:") + 64
