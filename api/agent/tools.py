@@ -37,7 +37,9 @@ def _load_pack(
     try:
         max_mtime = max(p.stat().st_mtime for p in paths)
     except FileNotFoundError:
-        # Propagate the original read error so callers fail the same way.
+        # Caching requires stat() to succeed on all three files. When any is
+        # missing, fall through to direct reads so the caller receives the
+        # canonical FileNotFoundError from the missing file's read_text.
         return {
             "registry": json.loads(paths[0].read_text()),
             "dictionary": json.loads(paths[1].read_text()),
