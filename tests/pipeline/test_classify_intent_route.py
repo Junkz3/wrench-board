@@ -34,9 +34,14 @@ def test_classify_intent_rejects_empty_text():
 
 
 def test_classify_intent_returns_503_on_anthropic_failure():
-    async def raise_runtime(*_a, **_k):
-        raise RuntimeError("anthropic down")
+    from anthropic import APIConnectionError
 
-    with patch("api.pipeline.classify_intent", new=raise_runtime):
+    async def raise_anthropic(*_a, **_k):
+        # APIConnectionError requires a `request` kwarg in the SDK constructor.
+        # We use a minimal MagicMock so the test stays self-contained.
+        from unittest.mock import MagicMock
+        raise APIConnectionError(request=MagicMock())
+
+    with patch("api.pipeline.classify_intent", new=raise_anthropic):
         res = client.post("/pipeline/classify-intent", json={"text": "rien"})
     assert res.status_code == 503

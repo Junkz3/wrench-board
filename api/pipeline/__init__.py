@@ -26,7 +26,7 @@ import uuid
 from datetime import UTC, datetime
 from pathlib import Path
 
-from anthropic import AsyncAnthropic
+from anthropic import APIConnectionError, APIError, APITimeoutError, AsyncAnthropic
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
@@ -1509,6 +1509,7 @@ async def get_measurements(
 
 
 class ClassifyIntentRequest(BaseModel):
+    # pattern requires at least one non-whitespace char — rejects blank/whitespace-only input as 422
     text: str = Field(min_length=1, max_length=400, pattern=r"\S")
 
 
@@ -1521,7 +1522,7 @@ async def classify_intent_route(payload: ClassifyIntentRequest) -> IntentClassif
     client_anth = AsyncAnthropic(api_key=settings.anthropic_api_key, max_retries=settings.anthropic_max_retries)
     try:
         return await classify_intent(payload.text.strip(), client=client_anth)
-    except Exception as exc:  # network / Anthropic
+    except (APIError, APIConnectionError, APITimeoutError, asyncio.TimeoutError) as exc:
         raise HTTPException(status_code=503, detail=f"intent classifier failed: {exc}") from exc
 
 
