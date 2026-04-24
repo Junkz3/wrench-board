@@ -1229,7 +1229,7 @@ function mountCanvas(containerEl, board) {
 
   // ResizeObserver — keeps canvas sharp on window resize. Also flushes any
   // focus request that was deferred while the canvas was hidden (e.g. a
-  // chat-chip click on refdes while the user was on #agent) — once the
+  // chat-chip click on refdes while the user was on #home) — once the
   // canvas gains dimensions here, the pan math finally has real numbers.
   const ro = new ResizeObserver(() => {
     if (pendingFocus && _computeFocusPan(pendingFocus.bbox, pendingFocus.zoom)) {
@@ -1325,7 +1325,7 @@ window.initBoardview = initBoardview;
       if (_computeFocusPan(bbox, zoom)) {
         pendingFocus = null;
       } else {
-        // Canvas hidden (e.g. user is on #agent / #graphe) — defer the pan
+        // Canvas hidden (e.g. user is on #home / #graphe) — defer the pan
         // until the ResizeObserver sees non-zero dimensions on section show.
         pendingFocus = { bbox, zoom };
       }

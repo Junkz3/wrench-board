@@ -4,16 +4,14 @@
 
 export const APP_VERSION = "v0.5.0";
 
-export const SECTIONS = ["home", "pcb", "schematic", "graphe", "agent", "profile", "aide"];
+export const SECTIONS = ["home", "pcb", "schematic", "graphe", "profile"];
 
 const SECTION_META = {
   home:          {crumb: "Journal des réparations", mode: {tag: "JOURNAL",  sub: "Réparations",            color: "cyan"}},
   pcb:           {crumb: "Boardview",                mode: {tag: "OUTIL",    sub: "Boardview",              color: "cyan"}},
   schematic:     {crumb: "Schematic",                mode: {tag: "OUTIL",    sub: "Graphe électrique",      color: "emerald"}},
   graphe:        {crumb: "Mémoire",                  mode: {tag: "ATTENTE",  sub: "Aucune mémoire chargée", color: "amber"}},
-  agent:         {crumb: "Agent",                    mode: {tag: "AGENT",    sub: "Configuration",          color: "violet"}},
   profile:       {crumb: "Profil",                   mode: {tag: "PROFIL",   sub: "Technicien",             color: "cyan"}},
-  aide:          {crumb: "Aide",                     mode: {tag: "AIDE",     sub: "Raccourcis",             color: "cyan"}},
 };
 
 export function prettifySlug(slug) {
