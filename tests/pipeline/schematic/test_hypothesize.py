@@ -985,3 +985,71 @@ def test_cascade_preview_exposes_always_on_count():
     cascade["always_on_rails"] = frozenset({"+3V3_USB", "USB_VBUS"})
     preview = _cascade_preview(cascade)
     assert set(preview["always_on_rails"]) == {"+3V3_USB", "USB_VBUS"}
+
+
+def test_applicable_modes_passive_q_returns_four_modes():
+    """Q with a known role gets all 4 modes (open/short/stuck_on/stuck_off)
+    — but only those whose handler is not passive_alive. Depends on T7
+    cascade table entries; this test will fail until T7 lands.
+    """
+    from api.pipeline.schematic.hypothesize import _applicable_modes
+    from api.pipeline.schematic.schemas import (
+        ComponentNode, ElectricalGraph, NetNode, PagePin, PowerRail,
+        SchematicQualityReport,
+    )
+    graph = ElectricalGraph(
+        device_slug="q-test",
+        components={
+            "Q5": ComponentNode(
+                refdes="Q5", type="transistor",
+                kind="passive_q", role="load_switch",
+                pins=[
+                    PagePin(number="1", role="unknown", net_label="+5V"),
+                    PagePin(number="2", role="unknown", net_label="+3V3_USB"),
+                    PagePin(number="3", role="unknown", net_label="EN_USB"),
+                ],
+            ),
+        },
+        nets={"+5V": NetNode(label="+5V", is_power=True),
+              "+3V3_USB": NetNode(label="+3V3_USB", is_power=True),
+              "EN_USB": NetNode(label="EN_USB")},
+        power_rails={"+5V": PowerRail(label="+5V"),
+                     "+3V3_USB": PowerRail(label="+3V3_USB")},
+        typed_edges=[],
+        quality=SchematicQualityReport(total_pages=1, pages_parsed=1, confidence_global=1.0),
+    )
+    modes = _applicable_modes(graph, "Q5")
+    # load_switch has handlers for all 4 modes per T7 table.
+    assert set(modes) == {"open", "short", "stuck_on", "stuck_off"}
+
+
+def test_applicable_modes_passive_q_inrush_skips_alive_handlers():
+    """inrush_limiter role has short/stuck_on → passive_alive → filtered out.
+    Depends on T7; will fail until T7 table lands."""
+    from api.pipeline.schematic.hypothesize import _applicable_modes
+    from api.pipeline.schematic.schemas import (
+        ComponentNode, ElectricalGraph, NetNode, PagePin, PowerRail,
+        SchematicQualityReport,
+    )
+    graph = ElectricalGraph(
+        device_slug="q-inrush-test",
+        components={
+            "Q1": ComponentNode(
+                refdes="Q1", type="transistor",
+                kind="passive_q", role="inrush_limiter",
+                pins=[PagePin(number="1", role="unknown", net_label="VIN"),
+                      PagePin(number="2", role="unknown", net_label="VIN_BUCK"),
+                      PagePin(number="3", role="unknown", net_label="SOFT_START")],
+            ),
+        },
+        nets={"VIN": NetNode(label="VIN", is_power=True),
+              "VIN_BUCK": NetNode(label="VIN_BUCK", is_power=True),
+              "SOFT_START": NetNode(label="SOFT_START")},
+        power_rails={"VIN": PowerRail(label="VIN"),
+                     "VIN_BUCK": PowerRail(label="VIN_BUCK")},
+        typed_edges=[],
+        quality=SchematicQualityReport(total_pages=1, pages_parsed=1, confidence_global=1.0),
+    )
+    modes = _applicable_modes(graph, "Q1")
+    # inrush_limiter has open + stuck_off active, short + stuck_on → passive_alive.
+    assert set(modes) == {"open", "stuck_off"}

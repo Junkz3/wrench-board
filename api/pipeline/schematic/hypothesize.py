@@ -1053,11 +1053,15 @@ def _applicable_modes(
             modes.append("shorted")
         return modes
 
-    # Passive.
+    # Passive. R/C/D/FB have {open, short}. passive_q has all 4 modes.
     if role is None:
         return []
+    if kind == "passive_q":
+        candidate_modes = ("open", "short", "stuck_on", "stuck_off")
+    else:
+        candidate_modes = ("open", "short")
     applicable: list[str] = []
-    for mode in ("open", "short"):
+    for mode in candidate_modes:
         handler = _PASSIVE_CASCADE_TABLE.get((kind, role, mode))
         if handler is not None and handler is not _cascade_passive_alive:
             applicable.append(mode)
