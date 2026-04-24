@@ -9,6 +9,7 @@ half-written files on crash.
 
 from __future__ import annotations
 
+import fcntl
 import json
 import logging
 import os
@@ -77,3 +78,56 @@ def write_per_run_files(
         "(n_accepted=%d, n_rejected=%d)",
         slug, run_date, len(accepted), len(rejected),
     )
+
+
+def update_latest_json(
+    *,
+    latest_path: Path,
+    slug: str,
+    scorecard: Scorecard,
+    run_date: str,
+) -> None:
+    """Merge this run's score into the aggregate _latest.json under an
+    fcntl advisory lock so concurrent runs don't clobber each other."""
+    latest_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(latest_path, "a+", encoding="utf-8") as fh:
+        fcntl.flock(fh.fileno(), fcntl.LOCK_EX)
+        try:
+            fh.seek(0)
+            raw = fh.read()
+            try:
+                current = json.loads(raw) if raw.strip() else {}
+            except json.JSONDecodeError:
+                logger.warning(
+                    "[writer] _latest.json unreadable — starting fresh",
+                )
+                current = {}
+            current[slug] = {
+                "score": scorecard.score,
+                "self_mrr": scorecard.self_mrr,
+                "cascade_recall": scorecard.cascade_recall,
+                "n_scenarios": scorecard.n_scenarios,
+                "run_date": run_date,
+            }
+            fh.seek(0)
+            fh.truncate()
+            fh.write(json.dumps(current, indent=2))
+        finally:
+            fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
+
+
+def write_source_archives(
+    *,
+    archive_dir: Path,
+    scenarios: list[ProposedScenario],
+) -> None:
+    """One text file per accepted scenario. Overwritten on re-run."""
+    archive_dir.mkdir(parents=True, exist_ok=True)
+    for s in scenarios:
+        archive_path = archive_dir / f"{s.id}.txt"
+        content = (
+            f"{s.source_url}\n\n"
+            f"---\n\n"
+            f"{s.source_quote}\n"
+        )
+        _atomic_write_text(archive_path, content)

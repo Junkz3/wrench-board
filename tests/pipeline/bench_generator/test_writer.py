@@ -105,3 +105,50 @@ def test_atomic_replace_no_stale_temp(tmp_path: Path):
     # No leftover .tmp files
     tmp_left = list(out.glob("*.tmp"))
     assert tmp_left == []
+
+
+from api.pipeline.bench_generator.writer import (
+    update_latest_json,
+    write_source_archives,
+)
+
+
+def test_update_latest_merges_new_slug(tmp_path: Path):
+    latest = tmp_path / "_latest.json"
+    latest.write_text(
+        json.dumps({
+            "other-board": {"score": 0.5, "self_mrr": 0.5,
+                            "cascade_recall": 0.5, "n_scenarios": 3,
+                            "run_date": "2026-04-23"},
+        }),
+        encoding="utf-8",
+    )
+    update_latest_json(
+        latest_path=latest, slug="toy-board",
+        scorecard=_scorecard(), run_date="2026-04-24",
+    )
+    d = json.loads(latest.read_text())
+    assert "toy-board" in d
+    assert "other-board" in d
+    assert d["toy-board"]["score"] == 0.7
+
+
+def test_update_latest_creates_fresh_file(tmp_path: Path):
+    latest = tmp_path / "_latest.json"
+    update_latest_json(
+        latest_path=latest, slug="toy-board",
+        scorecard=_scorecard(), run_date="2026-04-24",
+    )
+    d = json.loads(latest.read_text())
+    assert list(d.keys()) == ["toy-board"]
+
+
+def test_write_source_archives_one_file_per_scenario(tmp_path: Path):
+    archive_dir = tmp_path / "sources"
+    accepted = [_scenario(1), _scenario(2)]
+    write_source_archives(archive_dir=archive_dir, scenarios=accepted)
+    assert (archive_dir / "toy-s1.txt").exists()
+    assert (archive_dir / "toy-s2.txt").exists()
+    assert (archive_dir / "toy-s1.txt").read_text().startswith(
+        accepted[0].source_url
+    )
