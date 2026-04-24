@@ -14,6 +14,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from api.agent.reliability import load_reliability_line
 from api.config import get_settings
 from api.profile.prompt import render_technician_block
 from api.profile.store import load_profile
@@ -634,12 +635,18 @@ def render_system_prompt(session: SessionState, *, device_slug: str) -> str:
         else "❌ (not yet parsed)"
     )
     technician_block = render_technician_block(load_profile())
+    reliability_line = load_reliability_line(device_slug)
+    reliability_block = (
+        f"\n{reliability_line}\n"
+        if reliability_line
+        else ""
+    )
     return f"""\
 You are a calm, methodical board-level diagnostics assistant for a
 microsoldering technician. Tu tutoies, en français, direct et pédagogique.
 
 Device courant : {device_slug}.
-
+{reliability_block}
 {technician_block}
 
 Capabilities for this session:
