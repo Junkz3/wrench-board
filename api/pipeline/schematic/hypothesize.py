@@ -196,6 +196,7 @@ def _empty_cascade() -> dict:
         "dead_comps": frozenset(),
         "dead_rails": frozenset(),
         "shorted_rails": frozenset(),
+        "always_on_rails": frozenset(),   # Phase 4.5 — Q stuck_on cascades
         "anomalous_comps": frozenset(),
         "hot_comps": frozenset(),
         "final_verdict": "",
@@ -376,6 +377,8 @@ def _score_candidate(
         predicted_rails[rail] = "dead"
     for rail in cascade["shorted_rails"]:
         predicted_rails[rail] = "shorted"  # shorted wins over dead
+    for rail in cascade["always_on_rails"]:
+        predicted_rails[rail] = "stuck_on"  # Phase 4.5 — disjoint from shorted
 
     contradictions: list[tuple[str, str, str]] = []
     under_explained: list[str] = []
@@ -951,6 +954,7 @@ def _cascade_preview(cascade: dict) -> dict:
     return {
         "dead_rails": sorted(cascade["dead_rails"]),
         "shorted_rails": sorted(cascade["shorted_rails"]),
+        "always_on_rails": sorted(cascade["always_on_rails"]),  # Phase 4.5 — Q stuck_on
         "dead_comps_count": len(cascade["dead_comps"]),
         "anomalous_count": len(cascade["anomalous_comps"]),
         "hot_count": len(cascade["hot_comps"]),
@@ -992,6 +996,7 @@ def _compute_discriminators(
         # Rails from cascade_preview
         predicted.update(h.cascade_preview.get("dead_rails", []) or [])
         predicted.update(h.cascade_preview.get("shorted_rails", []) or [])
+        predicted.update(h.cascade_preview.get("always_on_rails", []) or [])  # Phase 4.5
         # Also include the kill_refdes themselves — if H1 kills U1 and H2
         # kills U7, measuring U1 (is it dead/alive?) discriminates H1 vs H2.
         predicted.update(h.kill_refdes)
@@ -1066,7 +1071,9 @@ def _relevant_to_observations(cascade: dict, obs: Observations) -> bool:
     any_pred = (
         cascade["dead_comps"] | cascade["anomalous_comps"] | cascade["hot_comps"]
     )
-    any_rail = cascade["dead_rails"] | cascade["shorted_rails"]
+    any_rail = (
+        cascade["dead_rails"] | cascade["shorted_rails"] | cascade["always_on_rails"]
+    )
     if any_pred & obs_comps:
         return True
     if any_rail & obs_rails:
@@ -1128,7 +1135,8 @@ def _enumerate_two_fault(
             set(observations.state_comps) - (c1["dead_comps"] | c1["anomalous_comps"] | c1["hot_comps"])
         )
         residual_rails = (
-            set(observations.state_rails) - (c1["dead_rails"] | c1["shorted_rails"])
+            set(observations.state_rails)
+            - (c1["dead_rails"] | c1["shorted_rails"] | c1["always_on_rails"])
         )
         if not residual_comps and not residual_rails:
             continue
@@ -1140,7 +1148,7 @@ def _enumerate_two_fault(
                 continue
             # c2 must touch at least one residual target.
             c2_all_comps = c2["dead_comps"] | c2["anomalous_comps"] | c2["hot_comps"]
-            c2_all_rails = c2["dead_rails"] | c2["shorted_rails"]
+            c2_all_rails = c2["dead_rails"] | c2["shorted_rails"] | c2["always_on_rails"]
             if not (c2_all_comps & residual_comps) and not (c2_all_rails & residual_rails):
                 continue
             seen.add(key)
@@ -1152,6 +1160,7 @@ def _enumerate_two_fault(
                 "dead_comps": c1["dead_comps"] | c2["dead_comps"],
                 "dead_rails": c1["dead_rails"] | c2["dead_rails"],
                 "shorted_rails": c1["shorted_rails"] | c2["shorted_rails"],
+                "always_on_rails": c1["always_on_rails"] | c2["always_on_rails"],  # Phase 4.5
                 "anomalous_comps": c1["anomalous_comps"] | c2["anomalous_comps"],
                 "hot_comps": c1["hot_comps"] | c2["hot_comps"],
                 "final_verdict": c1.get("final_verdict") or c2.get("final_verdict") or "",

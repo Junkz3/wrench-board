@@ -943,3 +943,45 @@ def test_validator_accepts_stuck_on_on_passive_q():
     )
     # Should not raise — stuck_on is a passive mode.
     hypothesize(graph, observations=Observations(state_comps={"Q5": "stuck_on"}))
+
+
+def test_scoring_matches_stuck_on_rail_against_always_on_cascade():
+    """A cascade with always_on_rails={'+3V3_USB'} should score TP against
+    an observation state_rails={'+3V3_USB': 'stuck_on'}."""
+    from api.pipeline.schematic.hypothesize import (
+        _empty_cascade, _score_candidate, Observations,
+    )
+    cascade = _empty_cascade()
+    cascade["always_on_rails"] = frozenset({"+3V3_USB"})
+    obs = Observations(state_rails={"+3V3_USB": "stuck_on"})
+    score, metrics, _diff = _score_candidate(cascade, obs)
+    # 1 rail TP, 0 FP, 0 FN → positive score.
+    assert metrics.tp_rails == 1
+    assert metrics.fp_rails == 0
+    assert metrics.fn_rails == 0
+    assert score > 0
+
+
+def test_scoring_stuck_on_disjoint_from_shorted():
+    """A cascade with only shorted_rails does NOT TP-match a stuck_on
+    observation (and vice versa). The two are disjoint by design."""
+    from api.pipeline.schematic.hypothesize import (
+        _empty_cascade, _score_candidate, Observations,
+    )
+    shorted_cascade = _empty_cascade()
+    shorted_cascade["shorted_rails"] = frozenset({"+5V"})
+    obs = Observations(state_rails={"+5V": "stuck_on"})
+    _score, metrics, _ = _score_candidate(shorted_cascade, obs)
+    # Mismatch: observed stuck_on, predicted shorted → FP (contradiction),
+    # not TP.
+    assert metrics.tp_rails == 0
+    assert metrics.fp_rails == 1
+
+
+def test_cascade_preview_exposes_always_on_count():
+    """Hypothesis.cascade_preview should carry always_on_rails list."""
+    from api.pipeline.schematic.hypothesize import _empty_cascade, _cascade_preview
+    cascade = _empty_cascade()
+    cascade["always_on_rails"] = frozenset({"+3V3_USB", "USB_VBUS"})
+    preview = _cascade_preview(cascade)
+    assert set(preview["always_on_rails"]) == {"+3V3_USB", "USB_VBUS"}
