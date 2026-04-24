@@ -450,17 +450,34 @@ class SimulationEngine:
                                 downstream_nets = {candidate}
                                 break
 
+                killed_any = False
                 if upstream is not None:
                     for refdes, c in self.electrical.components.items():
                         ins = {p.net_label for p in c.pins if p.role == "power_in" and p.net_label}
                         if ins & downstream_nets:
                             components[refdes] = "dead"
+                            killed_any = True
 
                 if kill_downstream_rail is not None:
                     rails[kill_downstream_rail] = "off"
                     rail_voltage[kill_downstream_rail] = 0.0
                     touched_rails.add(kill_downstream_rail)
                     self._forced_dead_rails.add(kill_downstream_rail)
+                    killed_any = True
+
+                # If the open touched no cascade path (no downstream consumer
+                # killed, no sourced rail forced dead), it is otherwise a
+                # silent no-op — every such (refdes, open) pair produces an
+                # empty symptom fingerprint and ties with the residual
+                # empty-fingerprint cluster in the self_MRR oracle's Jaccard
+                # ranking. Mark the passive itself dead: a cracked / lifted
+                # series passive with no reachable consumer is indistinguishable
+                # from "that part is gone" at a set-level observability
+                # standpoint, and the pair now collapses into a 1-cluster
+                # (unique dead_components={f.refdes}) rather than drowning in
+                # the empty cluster. Mirrors the regulating_low self-dead mark.
+                if not killed_any and f.refdes in self.electrical.components:
+                    components[f.refdes] = "dead"
                 continue
 
         return frozenset(touched_rails)
