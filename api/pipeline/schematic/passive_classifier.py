@@ -19,7 +19,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from collections import Counter
+import re
 
 from anthropic import AsyncAnthropic
 from pydantic import BaseModel, ConfigDict, Field
@@ -219,12 +219,20 @@ def _classify_ferrite(
 _EN_NET_TOKENS = ("EN", "_PWR_EN", "POWER", "_CTRL", "SOFT_START")
 _VIN_NET_TOKENS = ("VIN", "BAT", "+12V", "+24V")
 
+# Phase 4.6 — strict enum pattern for BMS cell / pack rails.
+# Matches: BAT, BAT\d+, BAT\d+FUSED/PROT/OUT/..., VBAT, CHGBAT, CELL\d+
+# Rejects: CR1220 (coin cell), arbitrary alphanumerics, underscored variants.
+_BAT_FAMILY_PATTERN = re.compile(
+    r"^(?:BAT|VBAT|CHGBAT|BATTERY|CELL)\d*(?:FUSED|PROT|RAW|OUT|PACK|CHG|IN)?$"
+)
+
 
 def _classify_transistor(
     graph: ElectricalGraph, comp: ComponentNode,
 ) -> tuple[str | None, float]:
-    """Return (role, confidence) for a transistor. Heuristic covers four
-    roles: flyback_switch, load_switch, level_shifter, inrush_limiter. Falls
+    """Return (role, confidence) for a transistor. Heuristic covers six
+    roles: flyback_switch, load_switch, level_shifter, inrush_limiter,
+    cell_protection, cell_balancer. Falls
     back to None when topology doesn't narrow it down — Opus pass fills the
     holes."""
     nets = _pin_nets(comp)
@@ -264,6 +272,30 @@ def _classify_transistor(
                 )
                 if has_return:
                     return "flyback_switch", 0.7
+
+    # ---- Rule 0.5 (Phase 4.6): cell_protection — ≥2 distinct BAT-family
+    # pin-nets, no GND. Placed before the 3-pin guard because a real
+    # cell_protection may expose only 2 labelled pins (gate unlabelled).
+    # Placed before inrush_limiter (Rule 1) because the inrush rule fires
+    # on any VIN/BAT-substring rail name — without this priority Q5
+    # mis-classifies as inrush_limiter.
+    unique_nets = set(nets)
+    bat_nets = {n for n in unique_nets if _BAT_FAMILY_PATTERN.match(n)}
+    gnd_here = any(_is_ground_net(n) for n in nets)
+    if len(bat_nets) >= 2 and not gnd_here:
+        return "cell_protection", 0.75
+
+    # ---- Rule 0.6 (Phase 4.6): cell_balancer — exactly one BAT-family
+    # label repeated on ≥2 pins (the vision pass merges the bleed
+    # resistor in series with the Q, producing identical S and D labels).
+    # All remaining labelled pins must also be on that BAT net — a
+    # foreign control / EN net means it's not a passive balancer.
+    if len(bat_nets) == 1:
+        the_bat = next(iter(bat_nets))
+        if nets.count(the_bat) >= 2:
+            foreign = [n for n in unique_nets if n != the_bat]
+            if not foreign:
+                return "cell_balancer", 0.65
 
     if len(nets) < 3:
         # Only 2 pins (unusual — most transistors are 3+); bail.
@@ -388,7 +420,7 @@ class PassiveAssignment(BaseModel):
             "pull_down · current_sense · damping. passive_c: decoupling · bulk · "
             "filter · ac_coupling · tank · bypass. passive_d: flyback · rectifier · "
             "esd · reverse_protection · signal_clamp. passive_fb: filter. passive_q: "
-            "load_switch · level_shifter · inrush_limiter · flyback_switch. Use null "
+            "load_switch · level_shifter · inrush_limiter · flyback_switch · cell_protection · cell_balancer. Use null "
             "when topology + notes genuinely don't narrow it down — never guess."
         ),
     )
@@ -487,6 +519,20 @@ Canonical roles (use exactly these strings, or null if genuinely undecidable):
                          PHASE) + GND/PVIN. 4 per MNT-class board (2 bucks × 2
                          Qs). Failure: channel open → output rail dead;
                          D-S short → continuous current, input rail stressed.
+    - cell_protection — Q in series with a battery cell or pack output
+                         (source = cell-side BAT net, drain = fused /
+                         pack-output BAT net). Gate controlled by the
+                         BMS IC to disconnect on fault (over-discharge,
+                         over-current, over-temp). Failure: channel
+                         open → pack rail dead; D-S short → no fault
+                         protection (silent).
+    - cell_balancer   — Q + bleed resistor across a cell tap, gated by
+                         the BMS to drain excess charge during balance
+                         cycles. Pin pattern looks like S and D share
+                         the same cell-tap net (the balance resistor
+                         merges in extraction). Failure: stuck_on →
+                         continuously drains that cell; open → balance
+                         cycle silent, cells drift.
 
 Use the input context for each passive:
   - `refdes`      — identifier, kept verbatim

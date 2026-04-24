@@ -705,6 +705,15 @@ Modes Q (Phase 4.5) :
     `open` = SMPS ne commute plus → rail downstream dead ; `short` /
     `stuck_on` = D-S collé = courant continu à travers l'inductance → rail
     d'entrée PVIN stressé et source chaude.
+  - Sur un cell_protection (Q série d'une cellule / pack, pins sur
+    BATn / BATnFUSED) : `open` / `stuck_off` = cellule déconnectée →
+    rail fused côté pack dead ; `short` / `stuck_on` = plus de
+    protection (observable uniquement sur surcharge / déséquilibre
+    cellule, pas direct sur un rail).
+  - Sur un cell_balancer (Q + R de balance passive, pins sur BATn
+    répétés) : modes non observables depuis un rail. Utile comme
+    cible physique d'inspection quand une cellule drift seule dans
+    la télémétrie BMS.
   - `stuck_on` sur un rail = observation directe : « +3V3_USB à 3.3V
     en veille alors qu'il devrait être off ». Engine propose un Q
     stuck_on upstream comme suspect.

@@ -15,17 +15,18 @@ ElectricalGraph + SimulationEngine.
 from __future__ import annotations
 
 import time
-from typing import TYPE_CHECKING, Callable, Literal
-
-if TYPE_CHECKING:
-    from api.pipeline.schematic.schemas import ComponentNode as _CompNode
-
-CascadeFn = Callable[["ElectricalGraph", "_CompNode"], dict]
+from collections.abc import Callable
+from typing import TYPE_CHECKING, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from api.pipeline.schematic.schemas import AnalyzedBootSequence, ElectricalGraph
 from api.pipeline.schematic.simulator import SimulationEngine
+
+if TYPE_CHECKING:
+    from api.pipeline.schematic.schemas import ComponentNode as _CompNode
+
+CascadeFn = Callable[["ElectricalGraph", "_CompNode"], dict]
 
 # ---------------------------------------------------------------------------
 # Tunable constants — exported so tests and scripts can override without
@@ -472,8 +473,49 @@ def _score_candidate(
 # ---------------------------------------------------------------------------
 
 
+# Phase 4.6 — suffixes that unambiguously mark the protected-side rail
+# on a cell_protection Q. BMS nomenclature varies across vendors; this
+# covers MNT Reform (BAT1FUSED) and common alternatives.
+_CELL_PROT_DOWNSTREAM_SUFFIXES = ("FUSED", "PROT", "OUT", "PACK")
+
+
+def _find_cell_protection_downstream(
+    electrical: ElectricalGraph, q: _CompNode,
+) -> str | None:
+    """Return the protected-side BAT-family rail for a cell_protection Q.
+
+    Heuristic, in priority order:
+
+    1. Collect the Q's BAT-family rail pins (registered in
+       `electrical.power_rails`).
+    2. If fewer than two distinct rails: None — insufficient topology.
+    3. If exactly one of them carries a `FUSED|PROT|OUT|PACK` suffix:
+       return that one — asymmetric naming unambiguously marks the
+       protected side.
+    4. Fallback to `_find_downstream_rail` (source_refdes / consumer-
+       count heuristic).
+
+    Uses `_BAT_FAMILY_PATTERN` from `passive_classifier`.
+    """
+    from api.pipeline.schematic.passive_classifier import _BAT_FAMILY_PATTERN
+    pin_rails = [
+        p.net_label for p in q.pins
+        if p.net_label and p.net_label in electrical.power_rails
+    ]
+    bat_rails = sorted({r for r in pin_rails if _BAT_FAMILY_PATTERN.match(r)})
+    if len(bat_rails) < 2:
+        return None
+    suffixed = [
+        r for r in bat_rails
+        if any(r.endswith(s) for s in _CELL_PROT_DOWNSTREAM_SUFFIXES)
+    ]
+    if len(suffixed) == 1:
+        return suffixed[0]
+    return _find_downstream_rail(electrical, q)
+
+
 def _find_downstream_rail(
-    electrical: ElectricalGraph, passive: "_CompNode",
+    electrical: ElectricalGraph, passive: _CompNode,
 ) -> str | None:
     """Return the rail sourced on one side of a series passive (R/FB/D/C).
 
@@ -511,7 +553,7 @@ def _find_downstream_rail(
 
 
 def _find_decoupled_rail(
-    electrical: ElectricalGraph, passive: "_CompNode",
+    electrical: ElectricalGraph, passive: _CompNode,
 ) -> str | None:
     """A decoupling cap has one pin on a rail and one on GND. Return the rail."""
     nets = [p.net_label for p in passive.pins if p.net_label]
@@ -522,7 +564,7 @@ def _find_decoupled_rail(
 
 
 def _find_decoupled_ic(
-    electrical: ElectricalGraph, passive: "_CompNode",
+    electrical: ElectricalGraph, passive: _CompNode,
 ) -> str | None:
     """The IC most likely decoupled by this cap — explicit `decouples` edge
     target, or the first consumer IC on the decoupled rail."""
@@ -541,7 +583,7 @@ def _find_decoupled_ic(
 
 
 def _find_regulated_rail_of_feedback(
-    electrical: ElectricalGraph, passive: "_CompNode",
+    electrical: ElectricalGraph, passive: _CompNode,
 ) -> str | None:
     """Walk a `feedback_in` edge from the divider's signal pin back to the
     regulator that drives the rail being regulated."""
@@ -595,24 +637,24 @@ def _simulate_rail_loss(
 
 # --- Cascade handlers (one per (kind, role, mode) family) ---
 
-def _cascade_passive_alive(electrical: ElectricalGraph, passive: "_CompNode") -> dict:
+def _cascade_passive_alive(electrical: ElectricalGraph, passive: _CompNode) -> dict:
     """Physically plausible but no observable cascade. Empty → pruned."""
     return _empty_cascade()
 
 
-def _cascade_series_open(electrical: ElectricalGraph, passive: "_CompNode") -> dict:
+def _cascade_series_open(electrical: ElectricalGraph, passive: _CompNode) -> dict:
     downstream = _find_downstream_rail(electrical, passive)
     if downstream is None:
         return _empty_cascade()
     return _simulate_rail_loss(electrical, downstream)
 
 
-def _cascade_filter_open(electrical: ElectricalGraph, passive: "_CompNode") -> dict:
+def _cascade_filter_open(electrical: ElectricalGraph, passive: _CompNode) -> dict:
     # FB filter open is functionally identical to a series element open.
     return _cascade_series_open(electrical, passive)
 
 
-def _cascade_decoupling_open(electrical: ElectricalGraph, passive: "_CompNode") -> dict:
+def _cascade_decoupling_open(electrical: ElectricalGraph, passive: _CompNode) -> dict:
     ic = _find_decoupled_ic(electrical, passive)
     if ic is None:
         return _empty_cascade()
@@ -621,7 +663,7 @@ def _cascade_decoupling_open(electrical: ElectricalGraph, passive: "_CompNode") 
     return c
 
 
-def _cascade_decoupling_short(electrical: ElectricalGraph, passive: "_CompNode") -> dict:
+def _cascade_decoupling_short(electrical: ElectricalGraph, passive: _CompNode) -> dict:
     rail = _find_decoupled_rail(electrical, passive)
     if rail is None:
         return _empty_cascade()
@@ -635,7 +677,7 @@ def _cascade_decoupling_short(electrical: ElectricalGraph, passive: "_CompNode")
     return c
 
 
-def _cascade_feedback_open_overvolt(electrical: ElectricalGraph, passive: "_CompNode") -> dict:
+def _cascade_feedback_open_overvolt(electrical: ElectricalGraph, passive: _CompNode) -> dict:
     rail = _find_regulated_rail_of_feedback(electrical, passive)
     if rail is None:
         return _empty_cascade()
@@ -646,7 +688,7 @@ def _cascade_feedback_open_overvolt(electrical: ElectricalGraph, passive: "_Comp
     return c
 
 
-def _cascade_feedback_short_undervolt(electrical: ElectricalGraph, passive: "_CompNode") -> dict:
+def _cascade_feedback_short_undervolt(electrical: ElectricalGraph, passive: _CompNode) -> dict:
     """R feedback short → divider collapses → regulator shuts output → rail dead."""
     rail = _find_regulated_rail_of_feedback(electrical, passive)
     if rail is None:
@@ -654,7 +696,7 @@ def _cascade_feedback_short_undervolt(electrical: ElectricalGraph, passive: "_Co
     return _simulate_rail_loss(electrical, rail)
 
 
-def _cascade_pull_up_open(electrical: ElectricalGraph, passive: "_CompNode") -> dict:
+def _cascade_pull_up_open(electrical: ElectricalGraph, passive: _CompNode) -> dict:
     """Pull-up/pull-down open → signal floats → consumers anomalous."""
     # Identify the signal net (the non-rail, non-GND pin).
     sig_net: str | None = None
@@ -679,7 +721,7 @@ def _cascade_pull_up_open(electrical: ElectricalGraph, passive: "_CompNode") -> 
     return c
 
 
-def _cascade_pull_up_short(electrical: ElectricalGraph, passive: "_CompNode") -> dict:
+def _cascade_pull_up_short(electrical: ElectricalGraph, passive: _CompNode) -> dict:
     """Pull-up short → rail shorted to signal (or bus stuck) → rail dead.
     Using rail-loss primitive on the rail-side pin."""
     for pin in passive.pins:
@@ -689,13 +731,13 @@ def _cascade_pull_up_short(electrical: ElectricalGraph, passive: "_CompNode") ->
     return _empty_cascade()
 
 
-def _cascade_filter_cap_open(electrical: ElectricalGraph, passive: "_CompNode") -> dict:
+def _cascade_filter_cap_open(electrical: ElectricalGraph, passive: _CompNode) -> dict:
     """Filter cap open on a regulated rail → ripple → upstream IC anomalous.
     Same topological signature as decoupling_open."""
     return _cascade_decoupling_open(electrical, passive)
 
 
-def _cascade_signal_path_open(electrical: ElectricalGraph, passive: "_CompNode") -> dict:
+def _cascade_signal_path_open(electrical: ElectricalGraph, passive: _CompNode) -> dict:
     """AC-coupling cap open → signal broken downstream of the cap → consumers
     of the output net anomalous."""
     nets = [p.net_label for p in passive.pins if p.net_label]
@@ -720,12 +762,12 @@ def _cascade_signal_path_open(electrical: ElectricalGraph, passive: "_CompNode")
     return c
 
 
-def _cascade_signal_path_dc(electrical: ElectricalGraph, passive: "_CompNode") -> dict:
+def _cascade_signal_path_dc(electrical: ElectricalGraph, passive: _CompNode) -> dict:
     """AC-coupling cap short → DC offset propagates → downstream anomalous."""
     return _cascade_signal_path_open(electrical, passive)
 
 
-def _cascade_tank_open(electrical: ElectricalGraph, passive: "_CompNode") -> dict:
+def _cascade_tank_open(electrical: ElectricalGraph, passive: _CompNode) -> dict:
     """Tank cap open near oscillator → clock dead → clock consumers anomalous.
     Tank has 1 pin on GND, 1 on the oscillator output. Treat oscillator as
     anomalous."""
@@ -745,7 +787,7 @@ def _cascade_tank_open(electrical: ElectricalGraph, passive: "_CompNode") -> dic
     return _empty_cascade()
 
 
-def _cascade_tank_short(electrical: ElectricalGraph, passive: "_CompNode") -> dict:
+def _cascade_tank_short(electrical: ElectricalGraph, passive: _CompNode) -> dict:
     """Tank cap short → oscillator dead."""
     # Same lookup as tank_open but tag oscillator dead instead of anomalous.
     for pin in passive.pins:
@@ -993,6 +1035,22 @@ def _cascade_q_flyback_switch_short(
     return c
 
 
+def _cascade_q_cell_protection_dead(
+    electrical: ElectricalGraph, q,
+) -> dict:
+    """Cell-protection series FET open / stuck_off → protected-side rail
+    loses power. Consumers of that rail become dead.
+
+    Upstream cell tap stays alive (it's still electrically connected to
+    its cell). Uses the suffix-aware downstream helper so we pick the
+    protected side even when the compiler didn't annotate a source_refdes
+    on the rail (common on BMS Qs where vision misses the `powers` edge)."""
+    downstream = _find_cell_protection_downstream(electrical, q)
+    if downstream is None:
+        return _empty_cascade()
+    return _simulate_rail_loss(electrical, downstream)
+
+
 _PASSIVE_CASCADE_TABLE: dict[tuple[str, str, str], CascadeFn] = {
     # ========================= RESISTORS =========================
     ("passive_r", "series",        "open"):  _cascade_series_open,
@@ -1058,6 +1116,16 @@ _PASSIVE_CASCADE_TABLE: dict[tuple[str, str, str], CascadeFn] = {
     ("passive_q", "flyback_switch", "short"):     _cascade_q_flyback_switch_short,
     ("passive_q", "flyback_switch", "stuck_on"):  _cascade_q_flyback_switch_short,
     ("passive_q", "flyback_switch", "stuck_off"): _cascade_q_flyback_switch_dead,
+
+    ("passive_q", "cell_protection", "open"):      _cascade_q_cell_protection_dead,
+    ("passive_q", "cell_protection", "short"):     _cascade_passive_alive,
+    ("passive_q", "cell_protection", "stuck_on"):  _cascade_passive_alive,
+    ("passive_q", "cell_protection", "stuck_off"): _cascade_q_cell_protection_dead,
+
+    ("passive_q", "cell_balancer",   "open"):      _cascade_passive_alive,
+    ("passive_q", "cell_balancer",   "short"):     _cascade_passive_alive,
+    ("passive_q", "cell_balancer",   "stuck_on"):  _cascade_passive_alive,
+    ("passive_q", "cell_balancer",   "stuck_off"): _cascade_passive_alive,
 }
 
 
@@ -1202,7 +1270,7 @@ def _compute_discriminators(
     return [t for _, _, t in candidates[:max_results]]
 
 
-_GRAPH_MEMOS: dict[tuple[int, str], "_GraphMemo"] = {}
+_GRAPH_MEMOS: dict[tuple[int, str], _GraphMemo] = {}
 
 
 class _GraphMemo:

@@ -414,7 +414,9 @@ def test_hypothesize_rejects_ic_observation_with_passive_mode():
     """state_comps[U7] = "open" is meaningless — U7 is an IC."""
     from api.pipeline.schematic.hypothesize import Observations, hypothesize
     from api.pipeline.schematic.schemas import (
-        ComponentNode, ElectricalGraph, SchematicQualityReport,
+        ComponentNode,
+        ElectricalGraph,
+        SchematicQualityReport,
     )
     graph = ElectricalGraph(
         device_slug="coh-test",
@@ -429,7 +431,9 @@ def test_hypothesize_rejects_ic_observation_with_passive_mode():
 def test_hypothesize_rejects_passive_observation_with_ic_mode():
     from api.pipeline.schematic.hypothesize import Observations, hypothesize
     from api.pipeline.schematic.schemas import (
-        ComponentNode, ElectricalGraph, SchematicQualityReport,
+        ComponentNode,
+        ElectricalGraph,
+        SchematicQualityReport,
     )
     graph = ElectricalGraph(
         device_slug="coh-test",
@@ -449,7 +453,9 @@ def test_hypothesize_rejects_passive_observation_with_ic_mode():
 def test_hypothesize_accepts_coherent_observations():
     from api.pipeline.schematic.hypothesize import Observations, hypothesize
     from api.pipeline.schematic.schemas import (
-        ComponentNode, ElectricalGraph, SchematicQualityReport,
+        ComponentNode,
+        ElectricalGraph,
+        SchematicQualityReport,
     )
     graph = ElectricalGraph(
         device_slug="coh-test",
@@ -472,7 +478,11 @@ def test_hypothesize_accepts_coherent_observations():
 def _fb_graph():
     """Simple graph: +3V3 → FB2 → LPC_VCC → U7."""
     from api.pipeline.schematic.schemas import (
-        ComponentNode, ElectricalGraph, NetNode, PagePin, PowerRail,
+        ComponentNode,
+        ElectricalGraph,
+        NetNode,
+        PagePin,
+        PowerRail,
         SchematicQualityReport,
     )
     return ElectricalGraph(
@@ -531,7 +541,8 @@ def test_cascade_passive_alive_returns_empty():
 def test_cascade_filter_open_identical_to_series_open():
     """FB filter open → same behavior as a series element open."""
     from api.pipeline.schematic.hypothesize import (
-        _cascade_filter_open, _cascade_series_open,
+        _cascade_filter_open,
+        _cascade_series_open,
     )
     graph = _fb_graph()
     fb = graph.components["FB2"]
@@ -544,8 +555,13 @@ def _mnt_like_graph():
     """A graph with: +3V3 source U1, decoupling C156 on U7 VCC, pull-up R11
     on I2C_SDA, feedback divider R43 on +5V regulator U3."""
     from api.pipeline.schematic.schemas import (
-        ComponentNode, ElectricalGraph, NetNode, PagePin, PowerRail,
-        SchematicQualityReport, TypedEdge,
+        ComponentNode,
+        ElectricalGraph,
+        NetNode,
+        PagePin,
+        PowerRail,
+        SchematicQualityReport,
+        TypedEdge,
     )
     return ElectricalGraph(
         device_slug="mnt-like",
@@ -657,7 +673,11 @@ def test_table_covers_all_resistor_and_capacitor_roles():
 def test_cascade_rectifier_short_shorts_input_rail():
     from api.pipeline.schematic.hypothesize import _cascade_rectifier_short
     from api.pipeline.schematic.schemas import (
-        ComponentNode, ElectricalGraph, NetNode, PagePin, PowerRail,
+        ComponentNode,
+        ElectricalGraph,
+        NetNode,
+        PagePin,
+        PowerRail,
         SchematicQualityReport,
     )
     graph = ElectricalGraph(
@@ -701,7 +721,9 @@ def test_table_every_entry_is_callable():
 def test_applicable_modes_ic_unchanged():
     from api.pipeline.schematic.hypothesize import _applicable_modes
     from api.pipeline.schematic.schemas import (
-        ComponentNode, ElectricalGraph, SchematicQualityReport,
+        ComponentNode,
+        ElectricalGraph,
+        SchematicQualityReport,
     )
     graph = ElectricalGraph(
         device_slug="am-test",
@@ -728,7 +750,9 @@ def test_applicable_modes_passive_with_role_returns_open_short():
 def test_applicable_modes_passive_without_role_returns_empty():
     from api.pipeline.schematic.hypothesize import _applicable_modes
     from api.pipeline.schematic.schemas import (
-        ComponentNode, ElectricalGraph, SchematicQualityReport,
+        ComponentNode,
+        ElectricalGraph,
+        SchematicQualityReport,
     )
     graph = ElectricalGraph(
         device_slug="unrole",
@@ -750,7 +774,9 @@ def test_applicable_modes_skips_passive_alive_entries():
     is not enumerated — no observable cascade."""
     from api.pipeline.schematic.hypothesize import _applicable_modes
     from api.pipeline.schematic.schemas import (
-        ComponentNode, ElectricalGraph, SchematicQualityReport,
+        ComponentNode,
+        ElectricalGraph,
+        SchematicQualityReport,
     )
     graph = ElectricalGraph(
         device_slug="alive-test",
@@ -771,7 +797,8 @@ def test_score_visibility_multiplier_dampens_decoupling_open():
     """A decoupling-open hypothesis that matches 1 anomalous IC should score
     tp_comps = 0.5, not 1.0."""
     from api.pipeline.schematic.hypothesize import (
-        Observations, hypothesize,
+        Observations,
+        hypothesize,
     )
     graph = _mnt_like_graph()
     result = hypothesize(
@@ -785,7 +812,7 @@ def test_score_visibility_multiplier_dampens_decoupling_open():
         h = c156_hyps[0]
         # TP is 1 component (U7), but score reflects 0.5 × tp = 0.5.
         assert 0.3 <= h.score <= 0.6, (
-            "expected dampened score ~0.5 for decoupling_open, got %s" % h.score
+            f"expected dampened score ~0.5 for decoupling_open, got {h.score}"
         )
 
 
@@ -797,7 +824,10 @@ def test_score_visibility_multiplier_dampens_decoupling_open():
 def test_discriminators_empty_when_scores_well_separated():
     """When top-1 clearly beats top-2, no discriminator needed."""
     from api.pipeline.schematic.hypothesize import (
-        Hypothesis, HypothesisDiff, HypothesisMetrics, _compute_discriminators,
+        Hypothesis,
+        HypothesisDiff,
+        HypothesisMetrics,
+        _compute_discriminators,
     )
     hyps = [
         Hypothesis(
@@ -824,7 +854,10 @@ def test_discriminators_empty_when_scores_well_separated():
 def test_discriminators_fired_when_top_n_tied():
     """5 hypotheses tied → return targets that partition them."""
     from api.pipeline.schematic.hypothesize import (
-        Hypothesis, HypothesisDiff, HypothesisMetrics, _compute_discriminators,
+        Hypothesis,
+        HypothesisDiff,
+        HypothesisMetrics,
+        _compute_discriminators,
     )
     def _hyp(refdes, mode, dead_rails):
         return Hypothesis(
@@ -857,7 +890,10 @@ def test_discriminators_mixed_rail_and_component_candidates():
     """kill_refdes entries are also discriminators (measuring the component
     itself can partition hypotheses)."""
     from api.pipeline.schematic.hypothesize import (
-        Hypothesis, HypothesisDiff, HypothesisMetrics, _compute_discriminators,
+        Hypothesis,
+        HypothesisDiff,
+        HypothesisMetrics,
+        _compute_discriminators,
     )
     def _hyp(refdes):
         return Hypothesis(
@@ -913,7 +949,9 @@ def test_validator_rejects_stuck_on_on_ic():
     """IC + stuck_on is still invalid — stuck_on is a passive-Q mode."""
     from api.pipeline.schematic.hypothesize import Observations, hypothesize
     from api.pipeline.schematic.schemas import (
-        ComponentNode, ElectricalGraph, SchematicQualityReport,
+        ComponentNode,
+        ElectricalGraph,
+        SchematicQualityReport,
     )
     graph = ElectricalGraph(
         device_slug="coh-test",
@@ -928,7 +966,9 @@ def test_validator_rejects_stuck_on_on_ic():
 def test_validator_accepts_stuck_on_on_passive_q():
     from api.pipeline.schematic.hypothesize import Observations, hypothesize
     from api.pipeline.schematic.schemas import (
-        ComponentNode, ElectricalGraph, SchematicQualityReport,
+        ComponentNode,
+        ElectricalGraph,
+        SchematicQualityReport,
     )
     graph = ElectricalGraph(
         device_slug="coh-test",
@@ -949,7 +989,9 @@ def test_scoring_matches_stuck_on_rail_against_always_on_cascade():
     """A cascade with always_on_rails={'+3V3_USB'} should score TP against
     an observation state_rails={'+3V3_USB': 'stuck_on'}."""
     from api.pipeline.schematic.hypothesize import (
-        _empty_cascade, _score_candidate, Observations,
+        Observations,
+        _empty_cascade,
+        _score_candidate,
     )
     cascade = _empty_cascade()
     cascade["always_on_rails"] = frozenset({"+3V3_USB"})
@@ -966,7 +1008,9 @@ def test_scoring_stuck_on_disjoint_from_shorted():
     """A cascade with only shorted_rails does NOT TP-match a stuck_on
     observation (and vice versa). The two are disjoint by design."""
     from api.pipeline.schematic.hypothesize import (
-        _empty_cascade, _score_candidate, Observations,
+        Observations,
+        _empty_cascade,
+        _score_candidate,
     )
     shorted_cascade = _empty_cascade()
     shorted_cascade["shorted_rails"] = frozenset({"+5V"})
@@ -980,7 +1024,7 @@ def test_scoring_stuck_on_disjoint_from_shorted():
 
 def test_cascade_preview_exposes_always_on_count():
     """Hypothesis.cascade_preview should carry always_on_rails list."""
-    from api.pipeline.schematic.hypothesize import _empty_cascade, _cascade_preview
+    from api.pipeline.schematic.hypothesize import _cascade_preview, _empty_cascade
     cascade = _empty_cascade()
     cascade["always_on_rails"] = frozenset({"+3V3_USB", "USB_VBUS"})
     preview = _cascade_preview(cascade)
@@ -994,7 +1038,11 @@ def test_applicable_modes_passive_q_returns_four_modes():
     """
     from api.pipeline.schematic.hypothesize import _applicable_modes
     from api.pipeline.schematic.schemas import (
-        ComponentNode, ElectricalGraph, NetNode, PagePin, PowerRail,
+        ComponentNode,
+        ElectricalGraph,
+        NetNode,
+        PagePin,
+        PowerRail,
         SchematicQualityReport,
     )
     graph = ElectricalGraph(
@@ -1028,7 +1076,11 @@ def test_applicable_modes_passive_q_inrush_skips_alive_handlers():
     Depends on T7; will fail until T7 table lands."""
     from api.pipeline.schematic.hypothesize import _applicable_modes
     from api.pipeline.schematic.schemas import (
-        ComponentNode, ElectricalGraph, NetNode, PagePin, PowerRail,
+        ComponentNode,
+        ElectricalGraph,
+        NetNode,
+        PagePin,
+        PowerRail,
         SchematicQualityReport,
     )
     graph = ElectricalGraph(
@@ -1063,7 +1115,11 @@ def test_applicable_modes_passive_q_inrush_skips_alive_handlers():
 def _q_load_switch_graph():
     """+5V → Q5 (load_switch, EN=EN_USB) → +3V3_USB → U20 consumer."""
     from api.pipeline.schematic.schemas import (
-        ComponentNode, ElectricalGraph, NetNode, PagePin, PowerRail,
+        ComponentNode,
+        ElectricalGraph,
+        NetNode,
+        PagePin,
+        PowerRail,
         SchematicQualityReport,
     )
     return ElectricalGraph(
@@ -1117,8 +1173,13 @@ def test_cascade_q_shifter_broken_anomalous_downstream():
     """Level shifter open → signal consumer anomalous."""
     from api.pipeline.schematic.hypothesize import _cascade_q_shifter_signal_broken
     from api.pipeline.schematic.schemas import (
-        ComponentNode, ElectricalGraph, NetNode, PagePin, PowerRail,
-        SchematicQualityReport, TypedEdge,
+        ComponentNode,
+        ElectricalGraph,
+        NetNode,
+        PagePin,
+        PowerRail,
+        SchematicQualityReport,
+        TypedEdge,
     )
     graph = ElectricalGraph(
         device_slug="q-shifter",
@@ -1237,3 +1298,67 @@ def test_table_covers_flyback_switch_all_modes():
     from api.pipeline.schematic.hypothesize import _PASSIVE_CASCADE_TABLE
     for mode in ("open", "short", "stuck_on", "stuck_off"):
         assert ("passive_q", "flyback_switch", mode) in _PASSIVE_CASCADE_TABLE
+
+
+def _q_cell_protection_graph():
+    """Minimal graph: Q5 is a cell_protection series FET between BAT1
+    (cell tap, upstream) and BAT1FUSED (protected output, downstream).
+    U_BMS consumes BAT1FUSED."""
+    from api.pipeline.schematic.schemas import (
+        ComponentNode,
+        ElectricalGraph,
+        NetNode,
+        PagePin,
+        PowerRail,
+        SchematicQualityReport,
+    )
+    return ElectricalGraph(
+        device_slug="q-cell-prot",
+        components={
+            "Q5": ComponentNode(
+                refdes="Q5", type="transistor",
+                kind="passive_q", role="cell_protection",
+                pins=[
+                    PagePin(number="1", role="signal_in", net_label=None),
+                    PagePin(number="2", role="signal_in", net_label="BAT1FUSED"),
+                    PagePin(number="3", role="signal_out", net_label="BAT1"),
+                ],
+            ),
+            "U_BMS": ComponentNode(refdes="U_BMS", type="ic", pins=[
+                PagePin(number="1", role="power_in", net_label="BAT1FUSED"),
+            ]),
+        },
+        nets={
+            "BAT1": NetNode(label="BAT1", is_power=True),
+            "BAT1FUSED": NetNode(label="BAT1FUSED", is_power=True),
+        },
+        power_rails={
+            "BAT1": PowerRail(label="BAT1", consumers=["Q5"]),
+            "BAT1FUSED": PowerRail(
+                label="BAT1FUSED", source_refdes=None, consumers=["U_BMS"],
+            ),
+        },
+        typed_edges=[],
+        quality=SchematicQualityReport(total_pages=1, pages_parsed=1, confidence_global=1.0),
+    )
+
+
+def test_cascade_q_cell_protection_dead_kills_fused_rail():
+    """cell_protection open → downstream fused rail dead → consumers dead."""
+    from api.pipeline.schematic.hypothesize import _cascade_q_cell_protection_dead
+    graph = _q_cell_protection_graph()
+    c = _cascade_q_cell_protection_dead(graph, graph.components["Q5"])
+    assert "BAT1FUSED" in c["dead_rails"]
+    assert "BAT1" not in c["dead_rails"]   # upstream cell tap stays alive
+    assert "U_BMS" in c["dead_comps"]
+
+
+def test_table_covers_cell_protection_and_cell_balancer_all_modes():
+    """Phase 4.6: every (kind, role, mode) triple for the two new roles
+    must dispatch somewhere — no silent fall-throughs."""
+    from api.pipeline.schematic.hypothesize import _PASSIVE_CASCADE_TABLE
+    for role in ("cell_protection", "cell_balancer"):
+        for mode in ("open", "short", "stuck_on", "stuck_off"):
+            assert ("passive_q", role, mode) in _PASSIVE_CASCADE_TABLE, (
+                f"missing dispatch for passive_q / {role} / {mode}"
+            )

@@ -14,8 +14,13 @@ from api.pipeline.schematic.passive_classifier import (
     classify_passives_heuristic,
 )
 from api.pipeline.schematic.schemas import (
-    ComponentNode, ElectricalGraph, NetNode, PagePin, PowerRail,
-    SchematicQualityReport, TypedEdge,
+    ComponentNode,
+    ElectricalGraph,
+    NetNode,
+    PagePin,
+    PowerRail,
+    SchematicQualityReport,
+    TypedEdge,
 )
 
 
@@ -371,3 +376,124 @@ def test_transistor_flyback_switch_wins_over_load_switch():
     # Even though we have 2 rails + EN-labelled net (load_switch signature),
     # the SW node presence wins — this is a flyback switch.
     assert role == "flyback_switch"
+
+
+# --------- Q BMS roles (Phase 4.6) ---------
+
+def test_transistor_cell_protection_heuristic():
+    """Q with 2 distinct BAT-family nets, no GND pin = cell_protection."""
+    graph = _graph_with_rails("BAT1", "BAT1FUSED")
+    q = ComponentNode(
+        refdes="Q5", type="transistor",
+        pins=[
+            PagePin(number="1", role="signal_in", net_label=None),
+            PagePin(number="2", role="signal_in", net_label="BAT1FUSED"),
+            PagePin(number="3", role="signal_out", net_label="BAT1"),
+        ],
+    )
+    graph.components["Q5"] = q
+    kind, role, conf = classify_passive_refdes(graph, q)
+    assert kind == "passive_q"
+    assert role == "cell_protection"
+    assert conf == 0.75
+
+
+def test_transistor_cell_protection_rejects_with_gnd():
+    """Q with BAT+BAT+GND pattern falls through — grounded Qs aren't series-protection."""
+    graph = _graph_with_rails("BAT1", "BAT1FUSED")
+    graph.nets["GND"] = NetNode(label="GND", is_power=True, is_global=True)
+    q = ComponentNode(
+        refdes="Q5", type="transistor",
+        pins=[
+            PagePin(number="1", role="signal_in", net_label="GND"),
+            PagePin(number="2", role="signal_in", net_label="BAT1FUSED"),
+            PagePin(number="3", role="signal_out", net_label="BAT1"),
+        ],
+    )
+    graph.components["Q5"] = q
+    _kind, role, _ = classify_passive_refdes(graph, q)
+    assert role != "cell_protection"
+
+
+def test_transistor_cell_balancer_heuristic():
+    """Q with exactly one BAT-family net repeated on 2+ pins = cell_balancer
+    (vision-merged bleed resistor artefact)."""
+    graph = _graph_with_rails("BAT2")
+    q = ComponentNode(
+        refdes="Q6", type="transistor",
+        pins=[
+            PagePin(number="1", role="signal_in", net_label=None),
+            PagePin(number="2", role="signal_in", net_label="BAT2"),
+            PagePin(number="3", role="signal_out", net_label="BAT2"),
+        ],
+    )
+    graph.components["Q6"] = q
+    _kind, role, conf = classify_passive_refdes(graph, q)
+    assert role == "cell_balancer"
+    assert conf == 0.65
+
+
+def test_transistor_cell_balancer_rejects_foreign_net():
+    """Q with BAT+BAT+EN falls through — a foreign control net means it's not a pure balancer."""
+    graph = _graph_with_rails("BAT2")
+    graph.nets["EN_BMS"] = NetNode(label="EN_BMS")
+    q = ComponentNode(
+        refdes="Q6", type="transistor",
+        pins=[
+            PagePin(number="1", role="signal_in", net_label="EN_BMS"),
+            PagePin(number="2", role="signal_in", net_label="BAT2"),
+            PagePin(number="3", role="signal_out", net_label="BAT2"),
+        ],
+    )
+    graph.components["Q6"] = q
+    _kind, role, _ = classify_passive_refdes(graph, q)
+    assert role != "cell_balancer"
+
+
+def test_cell_protection_priority_over_inrush_limiter():
+    """Q with 2 BAT-family rails must resolve to cell_protection, NOT inrush_limiter.
+    The inrush rule fires on any VIN/BAT-substring rail — without priority, Q5 would
+    mis-classify because its rails both carry 'BAT'."""
+    graph = _graph_with_rails("BAT", "BATFUSED")
+    graph.components["U_BMS"] = ComponentNode(
+        refdes="U_BMS", type="ic",
+        pins=[PagePin(number="1", role="power_in", net_label="BATFUSED")],
+    )
+    graph.power_rails["BATFUSED"].consumers = ["U_BMS"]
+    q = ComponentNode(
+        refdes="Q5", type="transistor",
+        pins=[
+            PagePin(number="1", role="signal_in", net_label=None),
+            PagePin(number="2", role="signal_in", net_label="BAT"),
+            PagePin(number="3", role="signal_out", net_label="BATFUSED"),
+        ],
+    )
+    graph.components["Q5"] = q
+    _kind, role, _ = classify_passive_refdes(graph, q)
+    assert role == "cell_protection"
+
+
+@pytest.mark.parametrize("label,should_match", [
+    # Accepted
+    ("BAT",         True),
+    ("BAT1",        True),
+    ("BAT8",        True),
+    ("BAT1FUSED",   True),
+    ("BAT_PROT",    False),  # underscore prefix disallowed — regex has optional suffix without underscore
+    ("VBAT",        True),
+    ("VBAT1",       True),
+    ("CHGBAT",      True),
+    ("CELL1",       True),
+    ("BATPACK",     True),
+    # Rejected
+    ("CR1220",      False),  # coin cell RTC, not pack
+    ("PVIN",        False),
+    ("VIN",         False),
+    ("BATRANDOM",   False),  # suffix not in allowlist
+    ("+3V3",        False),
+    ("GND",         False),
+])
+def test_bat_family_pattern_coverage(label, should_match):
+    from api.pipeline.schematic.passive_classifier import _BAT_FAMILY_PATTERN
+    matched = _BAT_FAMILY_PATTERN.match(label) is not None
+    assert matched is should_match, f"{label!r} match={matched} expected={should_match}"

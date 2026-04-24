@@ -88,3 +88,36 @@ scenarios:
       role: inrush_limiter
       expected_mode: open
     accept_in_top_n: 10
+
+  - id: mnt-reform-q-cell-protection-open-bat1fused
+    description: |
+      BAT1FUSED rail measures dead while the raw BAT1 cell tap reads
+      nominal cell voltage (~3.7V). The series cell_protection FET
+      between cell 1 and its fused output has gone open-channel
+      (over-current trip latched, or channel burned from an inrush
+      event). Ground truth: any passive_q with role=cell_protection
+      whose downstream rail is BAT1FUSED.
+    device_slug: mnt-reform-motherboard
+    observations:
+      state_rails: { "BAT1FUSED": "dead" }
+    ground_truth_match:
+      kind: passive_q
+      role: cell_protection
+      expected_mode: open
+    accept_in_top_n: 5
+
+  - id: mnt-reform-q-cell-protection-stuck-off-bat1fused
+    description: |
+      Same observable rail-dead symptom as the open variant, but the
+      failure is described as stuck_off in the tech's vocabulary
+      («le FET ne passe plus, gate drive OK mais canal mort»). The
+      engine treats open and stuck_off as the same cascade — this
+      scenario pins the stuck_off branch of the dispatch table.
+    device_slug: mnt-reform-motherboard
+    observations:
+      state_rails: { "BAT1FUSED": "dead" }
+    ground_truth_match:
+      kind: passive_q
+      role: cell_protection
+      expected_mode: stuck_off
+    accept_in_top_n: 5
