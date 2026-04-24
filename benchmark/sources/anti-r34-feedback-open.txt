@@ -1,0 +1,1 @@
+An open feedback resistor on a switching regulator's FB divider causes the regulator output to swing toward its maximum voltage (loss of regulation), but the feedback resistor itself does not become 'dead' as a component — its failure presents as rail overvolt or oscillation, not as a missing part.

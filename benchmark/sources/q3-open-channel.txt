@@ -1,0 +1,1 @@
+SI7461DP P-channel MOSFET load switch. An open-channel failure (gate oxide rupture or channel burnout) leaves the drain disconnected from the source — the downstream PVIN rail collapses while VIN upstream remains nominal. Mirror failure of the shorted-D-S case (covered separately).

@@ -1,0 +1,1 @@
+An open-circuit pull-up resistor leaves its tied signal in a high-impedance state; the signal floats and may glitch but no rail collapses and the resistor itself is not 'dead' in the diagnostic sense — the failure is local to that one signal.

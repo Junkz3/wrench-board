@@ -60,6 +60,25 @@ Current message "Rail X never stabilised" for a shorted rail reads oddly — it 
 
 ---
 
+## ANTI-PATTERNS — interdits explicites (l'agent NE DOIT PAS faire ça)
+
+### ❌ Self-dead conventions
+
+**Règle :** un composant ne doit JAMAIS être marqué `dead` dans `_apply_failures_at_init` quand sa branche de failure ne produit aucun effet observable downstream (rail dead, consumer dead, signal cascade).
+
+**Pourquoi :** marquer self-dead casse les ties dans le ranking Jaccard de `evaluator.py` et fait monter `self_MRR` artificiellement, mais fabrique de l'information non-physique. Concrètement :
+- Un IC qui n'est PAS source d'un rail n'a PAS de mode `regulating_low` réaliste
+- Un cap hors `decoupling` list ne devient PAS dead quand il leak
+- Une R pull-up / current-sense / feedback ne devient PAS dead quand elle s'ouvre
+
+**Pollution downstream :** `cascade_dead_components` est consommé par hypothesize.py, mb_schematic_graph(query=simulate), et l'UI Boardview. Marquer un composant dead → hallucination diagnostique propagée jusqu'au technicien.
+
+**Si tu identifies que tu as besoin d'un effet observable pour casser un tie cluster** → c'est un bug de l'évaluateur (sampling absurde dans `_MODES_FOR_KIND`), pas du simulateur. Utilise le canal `propose-evaluator-fix` (cf. SKILL §Cas spécial).
+
+**Précédent :** commits e09dd47, f33d2da, 7b821cf (reverted 2026-04-24 après code review automatique). Trois patterns identiques pour les modes regulating_low, open, leaky_short. Tous gaming, tous reverted.
+
 ## RESOLVED (evolve agent: move items here as "keep" commits land them)
 
-*(none yet — fresh bench)*
+- **P1 #1 (passive_fb open disambiguation)** — résolu par `e29f3f3`, garde-fou pin la sémantique
+- **P1 #2 (load_switch shorted = stuck-on)** — résolu par `a673123`, filtré par role
+- **P1 #3 (transitive cascade U7)** — résolu par `a83cb1a`, ordre des passes corrigé

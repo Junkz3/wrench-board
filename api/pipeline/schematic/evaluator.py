@@ -51,6 +51,8 @@ def compute_self_mrr(graph: ElectricalGraph, *, max_per_kind: int = DEFAULT_MAX_
     for kind, refdes_list in by_kind.items():
         for refdes in refdes_list[:max_per_kind]:
             for mode in _MODES_FOR_KIND.get(kind, ("dead",)):
+                if not _is_pertinent(graph, refdes, kind, mode):
+                    continue
                 candidates.append((refdes, mode))
     if not candidates:
         return 0.0
@@ -144,7 +146,9 @@ def compute_score(graph: ElectricalGraph, scenarios: list[dict]) -> Scorecard:
 # ----------------------------------------------------------------------
 
 # Modes considered per kind during self_mrr sampling. Kept short — adding
-# more modes increases evaluation time linearly.
+# more modes increases evaluation time linearly. Pertinence is filtered
+# per-pair via `_is_pertinent` (see below) — having a mode listed here is
+# necessary but not sufficient.
 _MODES_FOR_KIND: dict[str, tuple[str, ...]] = {
     "ic": ("dead", "regulating_low"),
     "passive_c": ("leaky_short",),
@@ -153,6 +157,47 @@ _MODES_FOR_KIND: dict[str, tuple[str, ...]] = {
     "passive_fb": ("open",),
     "passive_q": ("dead",),
 }
+
+
+# Roles where an `open` mode produces a real cascade (vs. silent no-op).
+# Pull-ups, pull-downs, current-sense, feedback resistors don't kill anything
+# physically meaningful when they open — sampling them adds tie clusters
+# without diagnostic value, which would tempt the evolve agent into
+# fabricating self-dead conventions to break the ties.
+_PASSIVE_R_ROLES_WITH_REAL_OPEN_CASCADE: frozenset[str] = frozenset({
+    "series",
+    "damping",
+    "inrush_limiter",
+})
+
+
+def _is_pertinent(graph: ElectricalGraph, refdes: str, kind: str, mode: str) -> bool:
+    """Skip (refdes, mode) pairs that are physically nonsensical.
+
+    `regulating_low` only applies to ICs that source at least one rail.
+    `leaky_short` on a cap only applies if the cap is in some rail's
+    `decoupling` list. `open` on a passive_r only applies for the roles
+    that produce a real downstream cascade.
+
+    This filtering closes the score-hack backdoor where the simulator was
+    pushed to mark untouched components as dead just to break Jaccard tie
+    clusters of meaningless (refdes, mode) samples.
+    """
+    if kind == "ic" and mode == "regulating_low":
+        return any(
+            rail.source_refdes == refdes for rail in graph.power_rails.values()
+        )
+    if kind == "passive_c" and mode == "leaky_short":
+        return any(
+            refdes in (rail.decoupling or []) for rail in graph.power_rails.values()
+        )
+    if kind == "passive_r" and mode == "open":
+        comp = graph.components.get(refdes)
+        if comp is None:
+            return False
+        role = (comp.role or "").lower()
+        return role in _PASSIVE_R_ROLES_WITH_REAL_OPEN_CASCADE
+    return True
 
 
 def _make_failure(refdes: str, mode: str) -> Failure:
