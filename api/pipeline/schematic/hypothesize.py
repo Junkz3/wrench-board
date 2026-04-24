@@ -320,8 +320,8 @@ def _simulate_failure(
         c["final_verdict"] = downstream["final_verdict"]
         c["blocked_at_phase"] = downstream["blocked_at_phase"]
         return c
-    # Phase 4: passive modes.
-    if mode in {"open", "short"}:
+    # Phase 4 passive + Phase 4.5 Q modes.
+    if mode in {"open", "short", "stuck_on", "stuck_off"}:
         comp = electrical.components.get(refdes)
         if comp is None:
             return _empty_cascade()
@@ -833,6 +833,77 @@ def _cascade_signal_to_ground(electrical: ElectricalGraph, passive) -> dict:
     return c
 
 
+# ---------------------------------------------------------------------------
+# Phase 4.5 — Q transistor cascade handlers
+# ---------------------------------------------------------------------------
+
+
+def _is_ground_net_label(label: str | None) -> bool:
+    if not label:
+        return False
+    up = label.upper()
+    return up in {"GND", "AGND", "DGND", "PGND"} or up.startswith("GND_")
+
+
+def _cascade_q_load_dead(electrical: ElectricalGraph, q) -> dict:
+    """Load switch open or stuck_off → downstream rail dead + consumers dead."""
+    downstream = _find_downstream_rail(electrical, q)
+    if downstream is None:
+        return _empty_cascade()
+    return _simulate_rail_loss(electrical, downstream)
+
+
+def _cascade_q_load_stuck_on(electrical: ElectricalGraph, q) -> dict:
+    """Load switch short / stuck_on → downstream rail permanently on.
+    Consumers become anomalous (active when they should be off in standby)."""
+    downstream = _find_downstream_rail(electrical, q)
+    if downstream is None:
+        return _empty_cascade()
+    c = _empty_cascade()
+    c["always_on_rails"] = frozenset({downstream})
+    consumers = electrical.power_rails[downstream].consumers or []
+    # Consumers are anomalous: they're being powered when the sequencer
+    # expected them off. Exclude the Q itself if it appears in consumers.
+    c["anomalous_comps"] = frozenset(r for r in consumers if r != q.refdes)
+    return c
+
+
+def _cascade_q_shifter_signal_broken(
+    electrical: ElectricalGraph, q,
+) -> dict:
+    """Level shifter open / stuck_off → signal not propagating → consumers
+    anomalous. Treats both signal nets as potentially affected."""
+    nets = [p.net_label for p in q.pins if p.net_label]
+    sig_nets = [
+        n for n in nets
+        if n not in electrical.power_rails and not _is_ground_net_label(n)
+    ]
+    anomalous: set[str] = set()
+    for edge in electrical.typed_edges:
+        if edge.kind in {"consumes_signal", "depends_on"} and edge.dst in sig_nets:
+            if edge.src in electrical.components:
+                anomalous.add(edge.src)
+    c = _empty_cascade()
+    c["anomalous_comps"] = frozenset(anomalous)
+    return c
+
+
+def _cascade_q_shifter_signal_stuck(
+    electrical: ElectricalGraph, q,
+) -> dict:
+    """Level shifter short / stuck_on → signal stuck at one rail level →
+    consumers anomalous. Cascade topologically identical to _broken; the
+    distinction is in the narrative/mode, not the cascade bucket."""
+    return _cascade_q_shifter_signal_broken(electrical, q)
+
+
+def _cascade_q_inrush_rail_dead(
+    electrical: ElectricalGraph, q,
+) -> dict:
+    """Inrush limiter open / stuck_off → downstream regulator never powers up."""
+    return _cascade_q_load_dead(electrical, q)
+
+
 _PASSIVE_CASCADE_TABLE: dict[tuple[str, str, str], CascadeFn] = {
     # ========================= RESISTORS =========================
     ("passive_r", "series",        "open"):  _cascade_series_open,
@@ -877,6 +948,22 @@ _PASSIVE_CASCADE_TABLE: dict[tuple[str, str, str], CascadeFn] = {
     ("passive_d", "reverse_protection","short"): _cascade_passive_alive,
     ("passive_d", "signal_clamp",      "open"):  _cascade_passive_alive,
     ("passive_d", "signal_clamp",      "short"): _cascade_signal_to_ground,
+
+    # ========================= TRANSISTORS (Phase 4.5) ===========================
+    ("passive_q", "load_switch",    "open"):      _cascade_q_load_dead,
+    ("passive_q", "load_switch",    "short"):     _cascade_q_load_stuck_on,
+    ("passive_q", "load_switch",    "stuck_on"):  _cascade_q_load_stuck_on,
+    ("passive_q", "load_switch",    "stuck_off"): _cascade_q_load_dead,
+
+    ("passive_q", "level_shifter",  "open"):      _cascade_q_shifter_signal_broken,
+    ("passive_q", "level_shifter",  "short"):     _cascade_q_shifter_signal_stuck,
+    ("passive_q", "level_shifter",  "stuck_on"):  _cascade_q_shifter_signal_stuck,
+    ("passive_q", "level_shifter",  "stuck_off"): _cascade_q_shifter_signal_broken,
+
+    ("passive_q", "inrush_limiter", "open"):      _cascade_q_inrush_rail_dead,
+    ("passive_q", "inrush_limiter", "short"):     _cascade_passive_alive,
+    ("passive_q", "inrush_limiter", "stuck_on"):  _cascade_passive_alive,
+    ("passive_q", "inrush_limiter", "stuck_off"): _cascade_q_inrush_rail_dead,
 }
 
 

@@ -1053,3 +1053,114 @@ def test_applicable_modes_passive_q_inrush_skips_alive_handlers():
     modes = _applicable_modes(graph, "Q1")
     # inrush_limiter has open + stuck_off active, short + stuck_on → passive_alive.
     assert set(modes) == {"open", "stuck_off"}
+
+
+# ---------------------------------------------------------------------------
+# Phase 4.5 T7 — Q cascade handlers + dispatch table
+# ---------------------------------------------------------------------------
+
+
+def _q_load_switch_graph():
+    """+5V → Q5 (load_switch, EN=EN_USB) → +3V3_USB → U20 consumer."""
+    from api.pipeline.schematic.schemas import (
+        ComponentNode, ElectricalGraph, NetNode, PagePin, PowerRail,
+        SchematicQualityReport,
+    )
+    return ElectricalGraph(
+        device_slug="q-load",
+        components={
+            "Q5": ComponentNode(
+                refdes="Q5", type="transistor",
+                kind="passive_q", role="load_switch",
+                pins=[
+                    PagePin(number="1", role="unknown", net_label="+5V"),
+                    PagePin(number="2", role="unknown", net_label="+3V3_USB"),
+                    PagePin(number="3", role="unknown", net_label="EN_USB"),
+                ],
+            ),
+            "U20": ComponentNode(refdes="U20", type="ic", pins=[
+                PagePin(number="1", role="power_in", net_label="+3V3_USB"),
+            ]),
+        },
+        nets={"+5V": NetNode(label="+5V", is_power=True),
+              "+3V3_USB": NetNode(label="+3V3_USB", is_power=True),
+              "EN_USB": NetNode(label="EN_USB")},
+        power_rails={
+            "+5V": PowerRail(label="+5V", source_refdes="U12", consumers=["Q5"]),
+            "+3V3_USB": PowerRail(
+                label="+3V3_USB", source_refdes="Q5", consumers=["U20"],
+            ),
+        },
+        typed_edges=[],
+        quality=SchematicQualityReport(total_pages=1, pages_parsed=1, confidence_global=1.0),
+    )
+
+
+def test_cascade_q_load_stuck_on_marks_downstream_always_on():
+    from api.pipeline.schematic.hypothesize import _cascade_q_load_stuck_on
+    graph = _q_load_switch_graph()
+    c = _cascade_q_load_stuck_on(graph, graph.components["Q5"])
+    assert "+3V3_USB" in c["always_on_rails"]
+    # Consumers (U20) become anomalous — active when they should be off.
+    assert "U20" in c["anomalous_comps"]
+
+
+def test_cascade_q_load_dead_kills_downstream_rail():
+    from api.pipeline.schematic.hypothesize import _cascade_q_load_dead
+    graph = _q_load_switch_graph()
+    c = _cascade_q_load_dead(graph, graph.components["Q5"])
+    assert "+3V3_USB" in c["dead_rails"]
+    assert "U20" in c["dead_comps"]
+
+
+def test_cascade_q_shifter_broken_anomalous_downstream():
+    """Level shifter open → signal consumer anomalous."""
+    from api.pipeline.schematic.hypothesize import _cascade_q_shifter_signal_broken
+    from api.pipeline.schematic.schemas import (
+        ComponentNode, ElectricalGraph, NetNode, PagePin, PowerRail,
+        SchematicQualityReport, TypedEdge,
+    )
+    graph = ElectricalGraph(
+        device_slug="q-shifter",
+        components={
+            "Q2": ComponentNode(
+                refdes="Q2", type="transistor",
+                kind="passive_q", role="level_shifter",
+                pins=[
+                    PagePin(number="1", role="unknown", net_label="I2C_3V3_SDA"),
+                    PagePin(number="2", role="unknown", net_label="I2C_1V8_SDA"),
+                    PagePin(number="3", role="unknown", net_label="+3V3"),
+                ],
+            ),
+            "U30": ComponentNode(refdes="U30", type="ic", pins=[
+                PagePin(number="1", role="bus_pin", net_label="I2C_1V8_SDA"),
+            ]),
+        },
+        nets={"I2C_3V3_SDA": NetNode(label="I2C_3V3_SDA"),
+              "I2C_1V8_SDA": NetNode(label="I2C_1V8_SDA"),
+              "+3V3": NetNode(label="+3V3", is_power=True)},
+        power_rails={"+3V3": PowerRail(label="+3V3")},
+        typed_edges=[TypedEdge(src="U30", dst="I2C_1V8_SDA", kind="consumes_signal")],
+        quality=SchematicQualityReport(total_pages=1, pages_parsed=1, confidence_global=1.0),
+    )
+    c = _cascade_q_shifter_signal_broken(graph, graph.components["Q2"])
+    assert "U30" in c["anomalous_comps"]
+
+
+def test_table_covers_every_q_role_mode_combo():
+    """Phase 4.5 cascade table must have an entry for every (passive_q,
+    role, mode) combination."""
+    from api.pipeline.schematic.hypothesize import _PASSIVE_CASCADE_TABLE
+    for role in ("load_switch", "level_shifter", "inrush_limiter"):
+        for mode in ("open", "short", "stuck_on", "stuck_off"):
+            assert ("passive_q", role, mode) in _PASSIVE_CASCADE_TABLE, (
+                f"missing handler for passive_q/{role}/{mode}"
+            )
+
+
+def test_simulate_failure_dispatches_q_stuck_on():
+    """_simulate_failure with mode=stuck_on routes Q through the dispatch table."""
+    from api.pipeline.schematic.hypothesize import _simulate_failure
+    graph = _q_load_switch_graph()
+    cascade = _simulate_failure(graph, None, "Q5", "stuck_on")
+    assert "+3V3_USB" in cascade["always_on_rails"]
