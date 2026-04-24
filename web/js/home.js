@@ -10,6 +10,7 @@
 import { openPipelineProgress } from './pipeline_progress.js';
 import { leaveSession } from './router.js';
 import { switchConv, openPanel } from './llm.js';
+import { ICON_CHECK } from './icons.js';
 
 export async function loadHomePacks() {
   try {
@@ -476,7 +477,7 @@ function renderDashboardPack(pack, slug, rid) {
   const rows = arts.map(a => {
     const on = !!pack[a.key];
     return `<li class="rd-pack-row ${on ? "on" : "off"}">` +
-      `<span class="rd-pack-tick" aria-hidden="true">${on ? "✓" : "·"}</span>` +
+      `<span class="rd-pack-tick" aria-hidden="true">${on ? ICON_CHECK : "·"}</span>` +
       `<span class="rd-pack-label">${a.label}</span>` +
     `</li>`;
   }).join("");
@@ -504,7 +505,7 @@ function wireFixButton(slug, rid) {
   // validation flow fails (agent refuses, MA tool missing, error event).
   const resetBtn = () => {
     btn.disabled = false;
-    btn.textContent = "✓ Marquer fix";
+    btn.innerHTML = ICON_CHECK + " Marquer fix";
     btn.classList.remove("is-validated");
     if (btn._fixTimeoutId) { clearTimeout(btn._fixTimeoutId); btn._fixTimeoutId = null; }
   };
@@ -515,7 +516,7 @@ function wireFixButton(slug, rid) {
     const ws = window.__diagnosticWS;
     if (!ws || ws.readyState !== WebSocket.OPEN) {
       btn.textContent = "Ouvre le chat d'abord";
-      setTimeout(() => { btn.textContent = "✓ Marquer fix"; }, 1800);
+      setTimeout(() => { btn.innerHTML = ICON_CHECK + " Marquer fix"; }, 1800);
       return;
     }
     ws.send(JSON.stringify({ type: "validation.start", repair_id: rid }));

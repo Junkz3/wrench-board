@@ -1,3 +1,18 @@
+import {
+  ICON_CHECK,
+  ICON_CIRCLE,
+  ICON_CHECK_CIRCLE,
+  ICON_X_CIRCLE,
+  ICON_WARNING,
+  ICON_FLAME,
+  ICON_BOLT,
+  ICON_LOCK,
+  ICON_BAN,
+  ICON_DIAMOND,
+  ICON_DOT_FILLED,
+  appendD3Warning,
+} from './icons.js';
+
 // Schematic section V5 — Power Diagnostic Dashboard.
 //
 // Not a KiCad replica — a view that answers questions the PDF cannot:
@@ -571,16 +586,16 @@ const MODE_SETS = {
 };
 
 const MODE_GLYPH = {
-  unknown:   "⚪",
-  alive:     "✅",
-  dead:      "❌",
-  anomalous: "⚠",
-  hot:       "🔥",
-  shorted:   "⚡",
-  open:      "⚪",
-  short:     "⚡",
-  stuck_on:  "🔒",
-  stuck_off: "🚫",
+  unknown:   ICON_CIRCLE,
+  alive:     ICON_CHECK_CIRCLE,
+  dead:      ICON_X_CIRCLE,
+  anomalous: ICON_WARNING,
+  hot:       ICON_FLAME,
+  shorted:   ICON_BOLT,
+  open:      ICON_CIRCLE,
+  short:     ICON_BOLT,
+  stuck_on:  ICON_LOCK,
+  stuck_off: ICON_BAN,
 };
 
 // Human-readable labels per mode (French UI).
@@ -1613,7 +1628,7 @@ function renderRailBar(model) {
         ? `<span class="sch-rail-phase">Φ${rail.phase}</span>`
         : "";
       const spofBadge = rail.isSpof
-        ? `<span class="sch-rail-spof">⚠ ${rail.impactPct}%</span>`
+        ? `<span class="sch-rail-spof">${ICON_WARNING} ${rail.impactPct}%</span>`
         : "";
 
       item.innerHTML = `
@@ -2175,7 +2190,7 @@ function renderBootTimeline(model) {
   const conf = model.analyzerMeta?.global_confidence;
   headBar.innerHTML = `
     <span class="sch-boot-src ${isAnalyzed ? 'analyzer' : 'compiler'}">
-      ${isAnalyzed ? '✓ Vérifié Opus' : '◆ Déduit topologique'}
+      ${isAnalyzed ? `${ICON_CHECK} Vérifié Opus` : `${ICON_DIAMOND} Déduit topologique`}
     </span>
     ${isAnalyzed && seq ? `<span class="sch-boot-seq">séquenceur: <span class="mono">${escHtml(seq)}</span></span>` : ''}
     ${isAnalyzed && conf != null ? `<span class="sch-boot-conf">confiance: <span class="mono">${conf.toFixed(2)}</span></span>` : ''}
@@ -2212,7 +2227,7 @@ function renderBootTimeline(model) {
       <div class="sch-boot-crit">
         <div class="sch-boot-crit-bar"><div class="sch-boot-crit-fill crit-${critLevel}" style="width:${critFill}%"></div></div>
         <div class="sch-boot-crit-lbl">
-          <span class="sch-boot-crit-icon">${critLevel === "hi" ? "⚠" : critLevel === "mid" ? "●" : "·"}</span>
+          <span class="sch-boot-crit-icon">${critLevel === "hi" ? ICON_WARNING : critLevel === "mid" ? ICON_DOT_FILLED : "·"}</span>
           SPOF : <span class="mono clickable" data-refdes="${escHtml(top.refdes || top.label)}">${escHtml(top.refdes || top.label)}</span>
           · <strong>${phaseMaxPct}%</strong> du board
         </div>
@@ -2228,7 +2243,7 @@ function renderBootTimeline(model) {
         ${confBadge}
       </div>
       ${top ? `<div class="sch-boot-spof crit-${critLevel}">
-        <span class="sch-boot-spof-icon">${critLevel === 'hi' ? '⚠' : critLevel === 'mid' ? '●' : '·'}</span>
+        <span class="sch-boot-spof-icon">${critLevel === 'hi' ? ICON_WARNING : critLevel === 'mid' ? ICON_DOT_FILLED : "·"}</span>
         <span class="sch-boot-spof-label">SPOF</span>
         <span class="mono clickable sch-boot-spof-ref" data-refdes="${escHtml(top.refdes || top.label)}">${escHtml(top.refdes || top.label)}</span>
         <span class="sch-boot-spof-pct">${phaseMaxPct}%</span>
@@ -2403,7 +2418,7 @@ function updateInspector(node) {
 
   const critBlock = node.blastRadius != null ? `
       <section class="sch-insp-section sch-criticality ${node.isSpof ? 'spof' : ''}">
-        <h3>${node.isSpof ? '⚠ Single-Point-Of-Failure' : 'Criticité (blast radius)'}</h3>
+        <h3>${node.isSpof ? `${ICON_WARNING} Single-Point-Of-Failure` : 'Criticité (blast radius)'}</h3>
         <div class="sch-crit-row">
           <div class="sch-crit-bar">
             <div class="sch-crit-fill" style="width:${(node.criticality * 100).toFixed(0)}%"></div>
@@ -2457,7 +2472,7 @@ function updateInspector(node) {
           <div class="sch-chips">${node.decoupling.map(c => `<span class="mono chip violet clickable" data-id="comp:${escHtml(c)}">${escHtml(c)}</span>`).join("")}</div>`}
       </section>
       <section class="sch-insp-section">
-        <h3>⚡ Cascade si ce rail tombe (${casDead.length} dépendants)</h3>
+        <h3>${ICON_BOLT} Cascade si ce rail tombe (${casDead.length} dépendants)</h3>
         ${casDead.length === 0 ? "<div class='muted'>Aucun downstream.</div>" : `
           <div class="sch-chips">${casDead.slice(0, 40).map(id => {
             const n = STATE.model.nodeById.get(id);
@@ -2510,7 +2525,7 @@ function updateInspector(node) {
         <div class="sch-chips">${decouplesRails.map(r => `<span class="mono chip violet clickable" data-id="rail:${escHtml(r)}">${escHtml(r)}</span>`).join("")}</div>
       </section>` : ""}
       <section class="sch-insp-section">
-        <h3>⚡ Cascade si ${node.refdes} meurt (${casDead.length} dépendants)</h3>
+        <h3>${ICON_BOLT} Cascade si ${node.refdes} meurt (${casDead.length} dépendants)</h3>
         ${casDead.length === 0 ? "<div class='muted'>Aucun downstream identifié.</div>" : `
           <div class="sch-chips">${casDead.slice(0, 40).map(id => {
             const n = STATE.model.nodeById.get(id);
@@ -2564,7 +2579,7 @@ function updateInspector(node) {
       btn.type = "button";
       btn.dataset.mode = mode;
       if (mode === current) btn.classList.add("active");
-      btn.textContent = label;
+      btn.innerHTML = label;
       btn.addEventListener("click", () => {
         SimulationController.setObservation(obsKind, obsKey, mode);
         updateInspector(node);

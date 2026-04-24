@@ -27,6 +27,8 @@ let pendingConvParam = null;
 // `turn_cost` after every agent inference turn; we attach a chip to the most
 // recent assistant message and bump the running total in the status bar.
 let sessionCostUsd = 0;
+import { ICON_CHECK } from './icons.js';
+
 let sessionTurns = 0;
 let lastTurnCostUsd = 0;
 
@@ -603,7 +605,7 @@ function connect() {
           // Clear any pending safety timeout from the dashboard-side.
           if (btn._fixTimeoutId) { clearTimeout(btn._fixTimeoutId); btn._fixTimeoutId = null; }
           const n = payload.fixes_count || 1;
-          btn.textContent = `✓ Validé (${n} fix${n > 1 ? "es" : ""})`;
+          btn.innerHTML = ICON_CHECK + ` Validé (${n} fix${n > 1 ? "es" : ""})`;
           btn.classList.add("is-validated");
           btn.disabled = true;
         }

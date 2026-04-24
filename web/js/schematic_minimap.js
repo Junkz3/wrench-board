@@ -16,6 +16,8 @@
 // Data source: `/pipeline/packs/{slug}/schematic` — the compiled
 // ElectricalGraph, cached in-module after the first fetch.
 
+import { ICON_WARNING } from './icons.js';
+
 let schematicCache = null;       // { slug, data }
 let fetchInFlight = null;        // { slug, promise }
 let wiredUI = false;
@@ -399,7 +401,10 @@ function renderComponent(relations) {
 
   if (producedRailWithMost >= 3) {
     const spofRow = mkEl("div", { class: "bv-mm-row" });
-    spofRow.appendChild(mkEl("span", { class: "bv-mm-spof" }, `⚠ alimente ${producedRailWithMost} consumer${producedRailWithMost > 1 ? "s" : ""}`));
+    spofRow.appendChild(mkEl("span", {
+      class: "bv-mm-spof",
+      html: `${ICON_WARNING} alimente ${producedRailWithMost} consumer${producedRailWithMost > 1 ? "s" : ""}`,
+    }));
     body.appendChild(spofRow);
   }
 
