@@ -419,13 +419,23 @@ class SimulationEngine:
                 # (pull_up/pull_down, feedback, damping don't cut the
                 # signal the same way — a pull_up that opens may still
                 # float high if another driver asserts).
+                #
+                # The "enable net" is the union of `rail.enable_net` AND
+                # any net on an `enable_in` pin of `rail.source_refdes`.
+                # Both fields declare the same thing (the net the regulator
+                # reads to turn on), but graph compilation occasionally
+                # populates only one — +3V3.enable_net is None even though
+                # U12.SHDN carries 3V3_PWR_EN, and VOUT.enable_net='R3' is
+                # a refdes leak while U2.SHDN carries CHG_INTVCC. Unioning
+                # closes that asymmetry without broadening the semantics.
                 if (
                     (comp.role or "").lower() == "series"
                     and comp.kind == "passive_r"
                     and touched_nets
                 ):
                     for rail_label, rail_obj in self.electrical.power_rails.items():
-                        if rail_obj.enable_net and rail_obj.enable_net in touched_nets:
+                        enable_nets = self._rail_enable_nets(rail_obj)
+                        if enable_nets & touched_nets:
                             rails[rail_label] = "off"
                             rail_voltage[rail_label] = 0.0
                             touched_rails.add(rail_label)
@@ -523,6 +533,26 @@ class SimulationEngine:
                 continue
 
         return frozenset(touched_rails)
+
+    def _rail_enable_nets(self, rail) -> set[str]:
+        """Nets that functionally enable this rail: the explicit
+        `rail.enable_net` AND any `enable_in` pin of `rail.source_refdes`.
+
+        Both are semantic duplicates — the regulator reads this net to
+        decide whether to turn on — but the graph compiler sometimes
+        populates only one side (compile-time gap, not a physical
+        distinction). Caller unions the result into an EN-membership
+        test; no effect when both fields agree.
+        """
+        ens: set[str] = set()
+        if rail.enable_net:
+            ens.add(rail.enable_net)
+        src = rail.source_refdes
+        if src and src in self.electrical.components:
+            for p in self.electrical.components[src].pins:
+                if p.role == "enable_in" and p.net_label:
+                    ens.add(p.net_label)
+        return ens
 
     def _is_unique_passive_supply(self, passive_refdes: str, no_src_rail: str) -> bool:
         """True iff `passive_refdes` is the *only* passive whose two touched
