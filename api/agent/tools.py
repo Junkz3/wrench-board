@@ -23,13 +23,40 @@ from api.board.validator import suggest_similar
 from api.session.state import SessionState
 
 
-def _load_pack(slug: str, memory_root: Path) -> dict[str, Any]:
+def _load_pack(
+    slug: str,
+    memory_root: Path,
+    session: SessionState | None = None,
+) -> dict[str, Any]:
     pack_dir = memory_root / slug
-    return {
-        "registry": json.loads((pack_dir / "registry.json").read_text()),
-        "dictionary": json.loads((pack_dir / "dictionary.json").read_text()),
-        "rules": json.loads((pack_dir / "rules.json").read_text()),
+    paths = (
+        pack_dir / "registry.json",
+        pack_dir / "dictionary.json",
+        pack_dir / "rules.json",
+    )
+    try:
+        max_mtime = max(p.stat().st_mtime for p in paths)
+    except FileNotFoundError:
+        # Propagate the original read error so callers fail the same way.
+        return {
+            "registry": json.loads(paths[0].read_text()),
+            "dictionary": json.loads(paths[1].read_text()),
+            "rules": json.loads(paths[2].read_text()),
+        }
+
+    if session is not None:
+        cached = session.pack_cache.get(slug)
+        if cached is not None and cached[0] >= max_mtime:
+            return cached[1]
+
+    pack = {
+        "registry": json.loads(paths[0].read_text()),
+        "dictionary": json.loads(paths[1].read_text()),
+        "rules": json.loads(paths[2].read_text()),
     }
+    if session is not None:
+        session.pack_cache[slug] = (max_mtime, pack)
+    return pack
 
 
 def mb_get_component(
@@ -47,7 +74,7 @@ def mb_get_component(
       - case 3: {found: true, canonical_name, memory_bank: null, board: {...}}
       - case 4: {found: false, closest_matches: [...]}  # no memory_bank/board keys
     """
-    pack = _load_pack(device_slug, memory_root)
+    pack = _load_pack(device_slug, memory_root, session=session)
     reg_by_name = {c["canonical_name"]: c for c in pack["registry"].get("components", [])}
     dct_by_name = {e["canonical_name"]: e for e in pack["dictionary"].get("entries", [])}
 
@@ -112,9 +139,10 @@ def mb_get_rules_for_symptoms(
     symptoms: list[str],
     memory_root: Path,
     max_results: int = 5,
+    session: SessionState | None = None,
 ) -> dict[str, Any]:
     """Return rules whose symptoms overlap the query, ranked by overlap + confidence."""
-    pack = _load_pack(device_slug, memory_root)
+    pack = _load_pack(device_slug, memory_root, session=session)
     qset = {s.lower() for s in symptoms}
     matches: list[dict[str, Any]] = []
     for rule in pack["rules"].get("rules", []):
@@ -202,6 +230,7 @@ async def mb_expand_knowledge(
     focus_symptoms: list[str],
     focus_refdes: list[str] | None = None,
     memory_root: Path | None = None,
+    session: SessionState | None = None,
 ) -> dict[str, Any]:
     """Grow the pack's memory bank around a focus symptom area.
 
@@ -223,6 +252,8 @@ async def mb_expand_knowledge(
             memory_root=memory_root,
         )
         summary["ok"] = True
+        if session is not None:
+            session.invalidate_pack_cache(device_slug)
         return summary
     except Exception as exc:  # noqa: BLE001 — defensive: never crash the session
         return {

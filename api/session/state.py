@@ -43,6 +43,12 @@ class SessionState:
     layer_visibility: dict[Side, bool] = field(
         default_factory=lambda: {"top": True, "bottom": True}
     )
+    # R1: pack cache — keyed by device_slug, storing (max_mtime, pack_dict).
+    pack_cache: dict[str, tuple[float, dict[str, Any]]] = field(default_factory=dict)
+
+    def invalidate_pack_cache(self, device_slug: str) -> None:
+        """Drop the cached pack for `device_slug`. Called after mb_expand_knowledge."""
+        self.pack_cache.pop(device_slug, None)
 
     def set_board(self, board: Board) -> None:
         """Load a new board and reset all view state."""

@@ -236,6 +236,7 @@ async def _dispatch_tool(
         return mb_get_rules_for_symptoms(
             device_slug=device_slug, symptoms=payload.get("symptoms", []),
             memory_root=memory_root, max_results=payload.get("max_results", 5),
+            session=session,
         )
     if name == "mb_list_findings":
         return mb_list_findings(
@@ -363,6 +364,7 @@ async def _dispatch_tool(
             focus_symptoms=payload.get("focus_symptoms", []),
             focus_refdes=payload.get("focus_refdes", []),
             memory_root=memory_root,
+            session=session,
         )
     logger.warning("unknown mb_* tool: %s", name)
     return {"ok": False, "reason": "unknown-tool", "error": f"unknown tool: {name}"}
