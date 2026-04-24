@@ -51,9 +51,13 @@ and a stateful **diagnostic conversation** runs the live repair session.
 - **Agent:** `anthropic ~= 0.96.0` — tier-selectable at WS-open time:
   `deep` = Opus (`claude-opus-4-7`), `normal` = Sonnet, `fast` = Haiku
   (`claude-haiku-4-5`). The pipeline distributes Sonnet/Opus per sub-agent.
-- **Frontend:** Vanilla HTML + CSS + JS (no build step, no bundler), D3.js
-  v7 via CDN, Inter + JetBrains Mono fonts. No Tailwind, no Alpine, no
-  component library.
+- **Frontend:** Vanilla HTML + CSS + JS (no build step, no bundler). All
+  external assets come from permissively-licensed CDNs: D3.js v7
+  (`d3js.org`), marked and DOMPurify (`cdn.jsdelivr.net`, both MIT) for
+  safe Markdown rendering in the chat panel, and Inter + JetBrains Mono
+  fonts (`fonts.googleapis.com`). No Tailwind, no Alpine, no component
+  library. Any new CDN dependency must be permissively licensed and land
+  in `web/index.html` with no transitive package-manager step.
 
 ## Commands
 
