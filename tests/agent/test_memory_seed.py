@@ -242,11 +242,13 @@ def test_stale_files_partial_drift(tmp_path: Path):
         p = pack / name
         p.write_text("{}")
         files[name] = p.stat().st_mtime
+    # Back-date the marker's rules.json entry by 1 s so the rewrite below is
+    # guaranteed to produce a strictly-newer stat mtime, regardless of the
+    # filesystem's mtime resolution. Deterministic; no wallclock wait.
+    files["rules.json"] = files["rules.json"] - 1.0
     write_seed_marker(pack_dir=pack, store_id="memstore_x", seeded_files=files)
 
     # Simulate a later pipeline write to rules.json only.
-    import time
-    time.sleep(0.01)
     (pack / "rules.json").write_text('{"rules": []}')
     assert stale_files_for_pack(pack) == ["rules.json"]
 
@@ -306,8 +308,12 @@ async def test_seed_only_files_preserves_prior_marker_entries(tmp_path: Path, mo
     for name, _ in ms_mod._SEED_FILES:
         (pack / name).write_text("{}")
 
-    # Pre-populate a marker with mtimes for ALL four files.
+    # Pre-populate a marker with mtimes for ALL four files, but back-date
+    # rules.json by 1 s so the rewrite below lands at a strictly-newer mtime
+    # without relying on filesystem timing. The other three entries stay at
+    # "now" — the test's point is that partial re-seed preserves them.
     prior_mtimes = {name: (pack / name).stat().st_mtime for name, _ in ms_mod._SEED_FILES}
+    prior_mtimes["rules.json"] = prior_mtimes["rules.json"] - 1.0
     ms_mod.write_seed_marker(
         pack_dir=pack,
         store_id="memstore_xyz",
@@ -326,9 +332,8 @@ async def test_seed_only_files_preserves_prior_marker_entries(tmp_path: Path, mo
         return {"id": "mem_1"}
     monkeypatch.setattr(ms_mod, "upsert_memory", fake_upsert)
 
-    # Touch rules.json so its mtime advances, then partial-reseed only that file.
-    import time
-    time.sleep(0.01)
+    # Partial re-seed of rules.json only — its current stat mtime is newer
+    # than the (back-dated) marker entry, so the merge path triggers.
     (pack / "rules.json").write_text('{"rules": [{"id": "new"}]}')
 
     await ms_mod.seed_memory_store_from_pack(
