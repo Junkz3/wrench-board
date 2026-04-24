@@ -80,7 +80,11 @@ function updateChrome(section, deviceSlug, pack) {
     if (!deviceSlug) {
       mode = {tag: "ATTENTE", sub: "Aucune réparation en cours", color: "amber"};
     } else if (isPackComplete(pack)) {
-      mode = {tag: "MÉMOIRE", sub: "Graphe de connaissances", color: "cyan"};
+      mode = {
+        tag: "MÉMOIRE",
+        sub: document.body.classList.contains("guided-mode") ? "Ce que je sais" : "Graphe de connaissances",
+        color: "cyan",
+      };
     } else if (pack) {
       mode = {tag: "CONSTRUCTION", sub: "Mémoire en cours", color: "amber"};
     } else {

@@ -305,4 +305,15 @@ body.guided-mode.detail-view .llm-panel {
   display: none;
 }
 body.guided-mode.detail-view .detail-back { display: inline-flex; align-items: center; gap: 6px; }
+
+/* ============ Mode-conditional copy ============ */
+
+/* Expert is the default; guided-only is hidden unless guided-mode is active. */
+.guided-only { display: none; }
+body.guided-mode .guided-only { display: inline; }
+body.guided-mode .expert-only { display: none; }
+/* Block-level variants for headings */
+.guided-only-block { display: none; }
+body.guided-mode .guided-only-block { display: block; }
+body.guided-mode .expert-only-block { display: none; }
 .detail-back:hover { border-color: var(--cyan); }

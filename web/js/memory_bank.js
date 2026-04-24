@@ -130,7 +130,7 @@ function renderVerdict() {
 function renderDeviceLabel() {
   const h1 = el("mbDeviceLabel");
   if (!STATE.pack) {
-    h1.textContent = "Memory Bank";
+    h1.textContent = document.body.classList.contains("guided-mode") ? "Fiche appareil" : "Memory Bank";
     return;
   }
   // Prefer a clean `{brand} {model}` from taxonomy; append the form_factor as
@@ -142,7 +142,8 @@ function renderDeviceLabel() {
     ? nameParts.join(" ")
     : (STATE.pack.device_label || STATE.currentSlug);
   const form = tax.form_factor ? ` <span style="font-family:var(--mono);font-size:10.5px;color:var(--text-3);letter-spacing:.3px;text-transform:uppercase;margin-left:8px;padding:1px 7px;border:1px solid var(--border-soft);border-radius:10px">${escHtml(tax.form_factor)}</span>` : "";
-  h1.innerHTML = `Memory Bank <span class="sub" style="color:var(--text-3);font-weight:400;font-size:14px;margin-left:10px">· ${escHtml(deviceName)}</span>${form}`;
+  const _mbLabel = document.body.classList.contains("guided-mode") ? "Fiche appareil" : "Memory Bank";
+  h1.innerHTML = `${_mbLabel} <span class="sub" style="color:var(--text-3);font-weight:400;font-size:14px;margin-left:10px">· ${escHtml(deviceName)}</span>${form}`;
 }
 
 /* ---------- blocks rendering ---------- */
