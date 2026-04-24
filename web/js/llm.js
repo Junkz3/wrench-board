@@ -773,41 +773,79 @@ async function loadConversations() {
 function renderConvItems() {
   const list = el("llmConvList");
   const label = el("llmConvLabel");
-  if (!list || !label) return;
-  list.innerHTML = "";
+  const guidedList = document.getElementById("gConvList");
+  // No render targets at all → nothing to do.
+  if (!list && !guidedList) return;
+
+  if (list) list.innerHTML = "";
+  if (guidedList) guidedList.innerHTML = "";
+
   if (conversationsCache.length === 0) {
-    label.textContent = "CONV 0/0";
+    if (label) label.textContent = "CONV 0/0";
+    if (guidedList) {
+      const empty = document.createElement("div");
+      empty.className = "g-empty";
+      empty.style.cssText = "font-size:11px;color:var(--text-3);padding:6px";
+      empty.textContent = "Aucune conversation pour ce repair.";
+      guidedList.appendChild(empty);
+    }
     return;
   }
+
   const activeIdx = Math.max(0, conversationsCache.findIndex(c => c.id === currentConvId));
-  label.textContent = `CONV ${activeIdx + 1}/${conversationsCache.length}`;
+  if (label) label.textContent = `CONV ${activeIdx + 1}/${conversationsCache.length}`;
+
   conversationsCache.forEach((c, idx) => {
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = "conv-item" + (c.id === currentConvId ? " active" : "");
-    btn.dataset.convId = c.id;
     const tier = (c.tier || "fast").toLowerCase();
-    const title = escapeHTML((c.title || `Conversation ${idx + 1}`).slice(0, 80));
+    const titleRaw = (c.title || `Conversation ${idx + 1}`).slice(0, 80);
+    const title = escapeHTML(titleRaw);
     const cost = Number(c.cost_usd || 0);
     const ago = c.last_turn_at ? humanAgo(c.last_turn_at) : "—";
-    btn.innerHTML =
-      `<span class="conv-item-head">` +
-        `<span class="conv-item-tier t-${tier}">${tier.toUpperCase()}</span>` +
-        `<span class="conv-item-title">${title}</span>` +
-      `</span>` +
-      `<span class="conv-item-meta">` +
-        `<span>${c.turns || 0} turn${(c.turns || 0) === 1 ? "" : "s"}</span>` +
-        `<span class="conv-item-sep">·</span>` +
-        `<span>${fmtUsd(cost)}</span>` +
-        `<span class="conv-item-sep">·</span>` +
-        `<span>${ago}</span>` +
-      `</span>`;
-    btn.addEventListener("click", () => {
-      if (c.id === currentConvId) { closeConvPopover(); return; }
-      switchConv(c.id);
-      closeConvPopover();
-    });
-    list.appendChild(btn);
+
+    // Popover variant (expert mode)
+    if (list) {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "conv-item" + (c.id === currentConvId ? " active" : "");
+      btn.dataset.convId = c.id;
+      btn.innerHTML =
+        `<span class="conv-item-head">` +
+          `<span class="conv-item-tier t-${tier}">${tier.toUpperCase()}</span>` +
+          `<span class="conv-item-title">${title}</span>` +
+        `</span>` +
+        `<span class="conv-item-meta">` +
+          `<span>${c.turns || 0} turn${(c.turns || 0) === 1 ? "" : "s"}</span>` +
+          `<span class="conv-item-sep">·</span>` +
+          `<span>${fmtUsd(cost)}</span>` +
+          `<span class="conv-item-sep">·</span>` +
+          `<span>${ago}</span>` +
+        `</span>`;
+      btn.addEventListener("click", () => {
+        if (c.id === currentConvId) { closeConvPopover(); return; }
+        switchConv(c.id);
+        closeConvPopover();
+      });
+      list.appendChild(btn);
+    }
+
+    // Guided sidebar variant — minimal, two lines, textContent-safe.
+    if (guidedList) {
+      const gbtn = document.createElement("button");
+      gbtn.type = "button";
+      gbtn.className = "g-conv-item-btn" + (c.id === currentConvId ? " active" : "");
+      const titleSpan = document.createElement("span");
+      titleSpan.textContent = titleRaw;
+      const metaSpan = document.createElement("span");
+      metaSpan.className = "g-conv-item-meta";
+      metaSpan.textContent = `${tier} · ${c.turns || 0} t · ${ago}`;
+      gbtn.appendChild(titleSpan);
+      gbtn.appendChild(metaSpan);
+      gbtn.addEventListener("click", () => {
+        if (c.id === currentConvId) return;
+        switchConv(c.id);
+      });
+      guidedList.appendChild(gbtn);
+    }
   });
 }
 
