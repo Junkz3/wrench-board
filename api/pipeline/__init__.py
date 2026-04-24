@@ -38,8 +38,10 @@ from api.pipeline.graph_transform import pack_to_graph_payload
 from api.pipeline.orchestrator import _slugify, generate_knowledge_pack
 from api.pipeline.schemas import PipelineResult
 from api.pipeline.schematic.boot_analyzer import analyze_boot_sequence
+from api.pipeline.schematic.grounding import extract_grounding
 from api.pipeline.schematic.net_classifier import classify_nets
 from api.pipeline.schematic.orchestrator import ingest_schematic
+from api.pipeline.schematic.renderer import render_pages
 from api.pipeline.schematic.schemas import AnalyzedBootSequence, ElectricalGraph
 from api.pipeline.schematic.simulator import SimulationEngine
 from api.tools.hypothesize import mb_hypothesize as _mb_hypothesize_tool
@@ -722,7 +724,7 @@ async def get_pack_graph(device_slug: str) -> dict:
     )
 
 
-@router.get("/packs/{device_slug}/schematic.pdf")
+@router.api_route("/packs/{device_slug}/schematic.pdf", methods=["GET", "HEAD"])
 async def get_pack_schematic_pdf(device_slug: str) -> FileResponse:
     """Serve the source schematic PDF for this device.
 
@@ -750,6 +752,167 @@ async def get_pack_schematic_pdf(device_slug: str) -> FileResponse:
     raise HTTPException(
         status_code=404,
         detail=f"No schematic PDF on disk for device_slug={slug!r}",
+    )
+
+
+def _find_schematic_pdf(slug: str, memory_root: Path) -> Path | None:
+    """Return the source PDF for a slug, or None if neither location has it."""
+    for candidate in (
+        memory_root / slug / "schematic.pdf",
+        Path.cwd() / "board_assets" / f"{slug}.pdf",
+    ):
+        if candidate.exists() and candidate.is_file():
+            return candidate
+    return None
+
+
+def _list_page_pngs(pages_dir: Path) -> list[Path]:
+    """Return every rendered page PNG sorted by page number, [] when missing."""
+    if not pages_dir.exists():
+        return []
+    return sorted(
+        pages_dir.glob("page-*.png"),
+        key=lambda p: int(p.stem.rsplit("-", 1)[1]),
+    )
+
+
+def _render_and_extract_pages(pdf_path: Path, pages_dir: Path, dpi: int = 150) -> None:
+    """Rasterise the PDF to PNGs + persist refdes anchors per page.
+
+    Idempotent: safe to call on a pages_dir that already contains page JSONs
+    — the PNGs are simply re-written. Extracts grounding per page to emit
+    `page-NN.anchors.json` next to the PNG (same layout as the orchestrator).
+    """
+    pages_dir.mkdir(parents=True, exist_ok=True)
+    rendered = render_pages(pdf_path, pages_dir, dpi=dpi)
+    for rp in rendered:
+        try:
+            g = extract_grounding(pdf_path, rp.page_number)
+        except Exception:
+            logger.exception(
+                "grounding failed on page %d of %s — skipping anchors",
+                rp.page_number, pdf_path,
+            )
+            continue
+        payload = {
+            "page": g.page,
+            "page_width_pt": g.page_width,
+            "page_height_pt": g.page_height,
+            "anchors": [
+                {"refdes": rd, "x0": x0, "top": top, "x1": x1, "bottom": bot}
+                for (rd, x0, top, x1, bot) in g.refdes_anchors
+            ],
+        }
+        (pages_dir / f"page-{rp.page_number:02d}.anchors.json").write_text(
+            json.dumps(payload, indent=2)
+        )
+
+
+async def _ensure_pages_rendered(slug: str, memory_root: Path) -> Path | None:
+    """Lazy-render PNGs + anchors for a slug if they aren't on disk yet.
+
+    Returns the pages directory on success, None when no source PDF can be
+    found. The rasterisation is pushed to a thread so the event loop isn't
+    blocked while `pdftoppm` runs (~1s/page at 150 DPI).
+    """
+    pages_dir = memory_root / slug / "schematic_pages"
+    if _list_page_pngs(pages_dir):
+        return pages_dir
+    pdf_path = _find_schematic_pdf(slug, memory_root)
+    if pdf_path is None:
+        return None
+    logger.info("[API] lazy-rendering schematic pages for slug=%s", slug)
+    await asyncio.to_thread(_render_and_extract_pages, pdf_path, pages_dir)
+    return pages_dir
+
+
+@router.get("/packs/{device_slug}/schematic/pages")
+async def get_pack_schematic_pages(device_slug: str) -> dict:
+    """Return the page index for the in-app PDF viewer.
+
+    Payload shape:
+    ```
+    {
+      "device_slug": "<slug>",
+      "count": <int>,
+      "pages": [
+        {
+          "n": 1,
+          "url": "/pipeline/packs/<slug>/schematic/pages/1.png",
+          "width_pt":  <float>,
+          "height_pt": <float>,
+          "anchors":   [{"refdes": "U13", "x0":..,"top":..,"x1":..,"bottom":..}, ...]
+        }, ...
+      ]
+    }
+    ```
+    PNGs are lazy-rendered on first call when the pack has never been
+    ingested but a PDF source exists (either persisted or in board_assets).
+    404 when no PDF can be found anywhere.
+    """
+    settings = get_settings()
+    slug = _slugify(device_slug)
+    memory_root = Path(settings.memory_root)
+    pages_dir = await _ensure_pages_rendered(slug, memory_root)
+    if pages_dir is None:
+        raise HTTPException(
+            status_code=404,
+            detail=f"No schematic PDF on disk for device_slug={slug!r}",
+        )
+    pngs = _list_page_pngs(pages_dir)
+    if not pngs:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Rendered no pages for device_slug={slug!r}",
+        )
+    pages: list[dict] = []
+    for png in pngs:
+        n = int(png.stem.rsplit("-", 1)[1])
+        anchors_file = pages_dir / f"page-{n:02d}.anchors.json"
+        anchors_payload = _read_optional_json(anchors_file) or {}
+        pages.append({
+            "n": n,
+            "url": f"/pipeline/packs/{slug}/schematic/pages/{n}.png",
+            "width_pt": anchors_payload.get("page_width_pt", 0.0),
+            "height_pt": anchors_payload.get("page_height_pt", 0.0),
+            "anchors": anchors_payload.get("anchors", []),
+        })
+    return {"device_slug": slug, "count": len(pages), "pages": pages}
+
+
+@router.api_route(
+    "/packs/{device_slug}/schematic/pages/{page_n}.png",
+    methods=["GET", "HEAD"],
+)
+async def get_pack_schematic_page_png(device_slug: str, page_n: int) -> FileResponse:
+    """Serve one rasterised page as PNG.
+
+    `page_n` is the 1-based page number; filename on disk is zero-padded to
+    match pdftoppm's output (`page-01.png`). Lazy-renders the full pack if
+    the PNGs aren't on disk yet.
+    """
+    settings = get_settings()
+    slug = _slugify(device_slug)
+    memory_root = Path(settings.memory_root)
+    pages_dir = await _ensure_pages_rendered(slug, memory_root)
+    if pages_dir is None:
+        raise HTTPException(
+            status_code=404,
+            detail=f"No schematic PDF on disk for device_slug={slug!r}",
+        )
+    # pdftoppm pads to max(2, len(str(page_count))) digits — scan rather than
+    # guess, so we don't have to know the total page count here.
+    candidates = [
+        pages_dir / f"page-{page_n:02d}.png",
+        pages_dir / f"page-{page_n:03d}.png",
+        pages_dir / f"page-{page_n}.png",
+    ]
+    for path in candidates:
+        if path.exists():
+            return FileResponse(path, media_type="image/png")
+    raise HTTPException(
+        status_code=404,
+        detail=f"Page {page_n} not found for device_slug={slug!r}",
     )
 
 

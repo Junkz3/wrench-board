@@ -14,7 +14,7 @@ grounding (invented rails, misread MPNs, hallucinated pin numbers).
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 import pdfplumber
@@ -49,6 +49,17 @@ class PageGrounding:
     sheet_title: str | None
     wire_count: int
     rect_count: int
+    # PDF page dimensions in points (1 pt = 1/72 inch). The web viewer uses
+    # these to scale pdfplumber-native bboxes onto the rasterised PNG.
+    page_width: float = 0.0
+    page_height: float = 0.0
+    # Every refdes occurrence on the page, with its pdfplumber bbox in points
+    # (x0, top, x1, bottom). A refdes can repeat — symbol + netlist + note —
+    # so this is a flat list, not a dict. The viewer overlays one highlight
+    # rectangle per entry when the user searches for that refdes.
+    refdes_anchors: list[tuple[str, float, float, float, float]] = field(
+        default_factory=list
+    )
 
 
 def extract_grounding(pdf_path: Path, page_number: int) -> PageGrounding:
@@ -62,6 +73,8 @@ def extract_grounding(pdf_path: Path, page_number: int) -> PageGrounding:
         words = page.extract_words(x_tolerance=2, y_tolerance=2)
         wire_count = len(page.lines)
         rect_count = len(page.rects)
+        page_width = float(page.width)
+        page_height = float(page.height)
 
     tokens = [w["text"] for w in words]
 
@@ -79,6 +92,22 @@ def extract_grounding(pdf_path: Path, page_number: int) -> PageGrounding:
     tokens = split_tokens
 
     refdes = sorted({t for t in tokens if _REFDES_RE.match(t)})
+    # Preserve the full bbox of every refdes occurrence for the PDF viewer's
+    # highlight overlay. pdfplumber coordinates use a top-left origin in
+    # points, matching the rasterised PNG once scaled by page_width /
+    # page_height. Token-split candidates (the '+' splitter above) are
+    # retained — a refdes never contains '+' so the split can't break one.
+    refdes_anchors: list[tuple[str, float, float, float, float]] = [
+        (
+            w["text"],
+            float(w["x0"]),
+            float(w["top"]),
+            float(w["x1"]),
+            float(w["bottom"]),
+        )
+        for w in words
+        if _REFDES_RE.match(w["text"])
+    ]
     # A net label is an uppercase / digit-prefixed token with at least one
     # letter, that's not a refdes, that's substantive (≥3 chars), and isn't
     # an obvious resistor-shorthand value (e.g. '581R', '85R').
@@ -145,6 +174,9 @@ def extract_grounding(pdf_path: Path, page_number: int) -> PageGrounding:
         sheet_title=sheet_title,
         wire_count=wire_count,
         rect_count=rect_count,
+        page_width=page_width,
+        page_height=page_height,
+        refdes_anchors=refdes_anchors,
     )
 
 
