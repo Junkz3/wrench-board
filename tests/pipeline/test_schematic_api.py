@@ -11,6 +11,8 @@ Three endpoints under test:
 from __future__ import annotations
 
 import json
+import sys
+import types
 from pathlib import Path
 from unittest.mock import AsyncMock, patch
 
@@ -339,11 +341,14 @@ def test_post_analyze_boot_kicks_off_background_task(memory_root, client):
         "phases": [], "sequencer_refdes": None, "global_confidence": 0.5,
     })()
 
-    with patch(
-        "api.pipeline.analyze_boot_sequence",
-        new=AsyncMock(return_value=fake_analyzed),
-    ) as fake:
-        res = client.post(f"/pipeline/packs/{slug}/schematic/analyze-boot")
+    # boot_analyzer is an optional WIP module that may not exist on this branch.
+    # Inject a stub into sys.modules so that the lazy import inside the try block
+    # resolves, and patch.object can intercept the call.
+    stub_mod = types.ModuleType("api.pipeline.schematic.boot_analyzer")
+    stub_mod.analyze_boot_sequence = AsyncMock(return_value=fake_analyzed)  # type: ignore[attr-defined]
+    with patch.dict(sys.modules, {"api.pipeline.schematic.boot_analyzer": stub_mod}):
+        with patch.object(stub_mod, "analyze_boot_sequence", new=AsyncMock(return_value=fake_analyzed)) as fake:
+            res = client.post(f"/pipeline/packs/{slug}/schematic/analyze-boot")
 
     assert res.status_code == 202
     body = res.json()

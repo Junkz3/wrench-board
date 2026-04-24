@@ -38,7 +38,6 @@ from api.pipeline.expansion import expand_pack
 from api.pipeline.graph_transform import pack_to_graph_payload
 from api.pipeline.orchestrator import _slugify, generate_knowledge_pack
 from api.pipeline.schemas import PipelineResult
-from api.pipeline.schematic.boot_analyzer import analyze_boot_sequence
 from api.pipeline.schematic.grounding import extract_grounding
 from api.pipeline.schematic.net_classifier import classify_nets
 from api.pipeline.schematic.orchestrator import ingest_schematic
@@ -1021,6 +1020,7 @@ async def _run_boot_analyzer_in_background(device_slug: str, pack_dir: Path) -> 
     _s = get_settings()
     client = AsyncAnthropic(api_key=_s.anthropic_api_key, max_retries=_s.anthropic_max_retries)
     try:
+        from api.pipeline.schematic.boot_analyzer import analyze_boot_sequence  # lazy: module is optional WIP on evolve
         analyzed = await analyze_boot_sequence(graph, client=client)
         (pack_dir / "boot_sequence_analyzed.json").write_text(analyzed.model_dump_json(indent=2))
         logger.info(
