@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0
 """Phase 3 — 3 Writers running in parallel with a shared, cached prefix.
 
 The 3 writers (Cartographe / Clinicien / Lexicographe) share:

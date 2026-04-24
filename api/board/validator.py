@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0
 """Anti-hallucination guardrail — every refdes the agent mentions passes here.
 
 Pure functions over an already-parsed `Board`. No I/O, no mutation. If a

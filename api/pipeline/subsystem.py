@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0
 """Classify knowledge-graph nodes into a functional subsystem bucket.
 
 Pure-function, deterministic, zero LLM. Used by graph_transform to attach a

@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0
 """Pydantic V2 schemas for the schematic ingestion pipeline.
 
 Three compilation levels, each a full artefact on disk:

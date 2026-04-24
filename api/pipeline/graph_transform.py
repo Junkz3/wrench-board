@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0
 """Transform on-disk pack files (V2 schema) into the graph payload
 expected by web/index.html (frontend design v3).
 

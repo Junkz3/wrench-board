@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: Apache-2.0
 """Extract KiCad .kicad_pcb data as JSON for consumption by the microsolder-agent
 Python parser. Runs under system Python 3 with pcbnew (installed with KiCad).
 

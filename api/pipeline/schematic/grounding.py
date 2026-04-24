@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0
 """pdfplumber-based grounding dump for the vision prompt.
 
 On native-vector PDFs (KiCad, Altium, Cadence exports) pdfplumber extracts

@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0
 """Tool handlers for the boardview panel — invoked by the agent via tool-use."""
 
 from __future__ import annotations

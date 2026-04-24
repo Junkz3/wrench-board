@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0
 """OpenBoardView .brd (Test_Link) parser — written from scratch.
 
 Reference for the format : the OpenBoardView project documents the .brd

@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0
 """Shared helper — run an Anthropic request with a forced tool and Pydantic validation.
 
 If the model returns a tool output that doesn't validate against the schema, we retry

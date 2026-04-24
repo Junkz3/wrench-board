@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0
 """Tiny synchronous pub/sub for board-level events (e.g. board:loaded)."""
 
 from __future__ import annotations

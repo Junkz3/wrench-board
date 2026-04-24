@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0
 """Factory for stub parsers awaiting implementation.
 
 Each concrete boardview format lives in its own file under `api/board/parser/`

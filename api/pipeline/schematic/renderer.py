@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0
 """PDF → per-page PNG renderer + lightweight metadata.
 
 Uses poppler's `pdftoppm` CLI (already installed on any machine that runs the

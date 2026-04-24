@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0
 """Phase 2 — Registry Builder. Forced-tool output, Pydantic-validated.
 
 Converts the Scout's raw Markdown dump into a canonical `Registry` JSON.

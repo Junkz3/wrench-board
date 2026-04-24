@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0
 """Parser for KiCad .kicad_pcb native PCB files.
 
 Shells out to system Python 3 with pcbnew (installed with KiCad; NOT a

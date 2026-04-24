@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0
 """Stub parser for HONHAN BoardViewer .bdv files.
 
 Not yet implemented. See the roadmap:

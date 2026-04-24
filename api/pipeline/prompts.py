@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0
 """System prompts for each sub-agent in the pipeline.
 
 Kept in one file so prompt drift between phases is easy to audit in a single diff.

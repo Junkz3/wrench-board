@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0
 """Per-session state for the boardview panel."""
 
 from __future__ import annotations

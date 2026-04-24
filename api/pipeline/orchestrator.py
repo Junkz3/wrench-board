@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0
 """Pipeline orchestrator — enchaînement complet Phase 1 → 2 → 3 → 4 (+ revise loop).
 
 Persists all intermediate artefacts under `memory/{device_slug}/` on disk:

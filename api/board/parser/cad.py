@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0
 """Stub parser for generic .cad boardview files (BoardViewer 2.1.0.8 umbrella).
 
 Not yet implemented. See the roadmap:

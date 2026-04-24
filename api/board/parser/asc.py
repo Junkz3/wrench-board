@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0
 """Stub parser for ASUS TSICT .asc boardview files.
 
 Not yet implemented. See the roadmap:

@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0
 """Board data model — Pydantic v2 types for Point, Layer, Pin, Part, Net, Nail, and Board. Board carries private refdes/net indexes built in model_post_init ; see part_by_refdes() and net_by_name()."""
 
 from __future__ import annotations

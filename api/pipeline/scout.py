@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0
 """Phase 1 — Scout. Autonomous web research using the native Claude web_search tool.
 
 Output: a single Markdown document (the "raw research dump"). No JSON, no structured form.

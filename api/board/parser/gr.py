@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0
 """Stub parser for BoardView R5.0 .gr files.
 
 Not yet implemented. See the roadmap:

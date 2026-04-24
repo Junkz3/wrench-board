@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0
 """Stub parser for PCB Repair Tool .fz boardview files.
 
 Not yet implemented. See the roadmap for when/why to promote to DONE:

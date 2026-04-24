@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0
 """Stub parser for Tebo IctView .tvw files (versions 3.0, 4.0).
 
 Not yet implemented. See the roadmap:

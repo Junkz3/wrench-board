@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0
 """Board parsers — one implementation per file format.
 
 Importing this package guarantees that every available concrete parser has

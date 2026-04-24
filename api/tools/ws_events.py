@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0
 """WebSocket event envelopes for the boardview panel (backend → frontend).
 
 All events have a `type` field of the form "boardview.<verb>".

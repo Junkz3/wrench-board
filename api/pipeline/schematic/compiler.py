@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0
 """Compiler — SchematicGraph → ElectricalGraph.
 
 Derives the final interrogeable artefact:

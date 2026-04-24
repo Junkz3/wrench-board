@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0
 """Pydantic V2 schemas for the knowledge generation pipeline.
 
 Every structured output of Phases 2–4 is declared here. These classes double as:

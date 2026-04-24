@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0
 """Per-page Claude Opus vision call — RenderedPage → SchematicPageGraph.
 
 Forced tool use with the full SchematicPageGraph schema as `input_schema`.

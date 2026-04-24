@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0
 """Stub parser for Unisoft ProntoPLACE .f2b files (Place5 converter).
 
 Not yet implemented. See the roadmap:

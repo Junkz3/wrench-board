@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0
 """Abstract base and format dispatch for board file parsers."""
 
 from __future__ import annotations

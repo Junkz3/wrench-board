@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0
 """Targeted pack expansion — grow an existing device's memory bank in place.
 
 When the diagnostic agent calls `mb_get_rules_for_symptoms` and comes back
