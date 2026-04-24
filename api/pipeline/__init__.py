@@ -167,7 +167,8 @@ async def _run_schematic_in_background(
     status onto the events bus the way the knowledge factory does.
     """
     t0 = time.monotonic()
-    client = AsyncAnthropic(api_key=get_settings().anthropic_api_key)
+    _s = get_settings()
+    client = AsyncAnthropic(api_key=_s.anthropic_api_key, max_retries=_s.anthropic_max_retries)
     try:
         await ingest_schematic(
             device_slug=device_slug,
@@ -995,7 +996,8 @@ async def _run_boot_analyzer_in_background(device_slug: str, pack_dir: Path) -> 
             "[API] analyze-boot: failed to load electrical_graph for %s", device_slug
         )
         return
-    client = AsyncAnthropic(api_key=get_settings().anthropic_api_key)
+    _s = get_settings()
+    client = AsyncAnthropic(api_key=_s.anthropic_api_key, max_retries=_s.anthropic_max_retries)
     try:
         analyzed = await analyze_boot_sequence(graph, client=client)
         (pack_dir / "boot_sequence_analyzed.json").write_text(
@@ -1047,7 +1049,8 @@ async def _run_net_classifier_in_background(device_slug: str, pack_dir: Path) ->
             "[API] classify-nets: failed to load electrical_graph for %s", device_slug
         )
         return
-    client = AsyncAnthropic(api_key=get_settings().anthropic_api_key)
+    _s = get_settings()
+    client = AsyncAnthropic(api_key=_s.anthropic_api_key, max_retries=_s.anthropic_max_retries)
     try:
         classification = await classify_nets(graph, client=client)
         (pack_dir / "nets_classified.json").write_text(

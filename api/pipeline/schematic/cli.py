@@ -84,7 +84,7 @@ async def _run(
             "on" if grounding_enabled else "off",
         )
 
-        client = AsyncAnthropic(api_key=settings.anthropic_api_key)
+        client = AsyncAnthropic(api_key=settings.anthropic_api_key, max_retries=settings.anthropic_max_retries)
         graph = await extract_page(
             client=client,
             model=model,

@@ -435,7 +435,7 @@ async def run_diagnostic_session_direct(
         await ws.close()
         return
 
-    client = AsyncAnthropic(api_key=settings.anthropic_api_key)
+    client = AsyncAnthropic(api_key=settings.anthropic_api_key, max_retries=settings.anthropic_max_retries)
     memory_root = Path(settings.memory_root)
     session = SessionState.from_device(device_slug)
     tier_to_model = {

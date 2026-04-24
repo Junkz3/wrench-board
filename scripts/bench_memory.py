@@ -661,7 +661,7 @@ async def main() -> None:
 
     logging.basicConfig(level=logging.WARNING)
     settings = get_settings()
-    client = AsyncAnthropic(api_key=settings.anthropic_api_key)
+    client = AsyncAnthropic(api_key=settings.anthropic_api_key, max_retries=settings.anthropic_max_retries)
 
     ids = load_managed_ids()
     agent_info = dict(get_agent(ids, "fast"))

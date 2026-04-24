@@ -494,7 +494,7 @@ async def run_diagnostic_session_managed(
         await ws.close()
         return
 
-    client = AsyncAnthropic(api_key=settings.anthropic_api_key)
+    client = AsyncAnthropic(api_key=settings.anthropic_api_key, max_retries=settings.anthropic_max_retries)
     session_mirrors = _SessionMirrors()
     memory_root = Path(settings.memory_root)
     memory_store_id = await ensure_memory_store(client, device_slug)

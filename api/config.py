@@ -120,6 +120,20 @@ class Settings(BaseSettings):
         ),
     )
 
+    # --- Anthropic client resilience ------------------------------------------
+    # Default SDK max_retries (2) tolerates ~6s of backoff before bubbling.
+    # Real overload incidents last 30s–2min; 5 retries gives ~62s of
+    # exponential-backoff tolerance (2+4+8+16+32s) before propagating the error.
+    # Override via ANTHROPIC_MAX_RETRIES in .env if needed.
+    anthropic_max_retries: int = Field(
+        default=5,
+        ge=0,
+        description=(
+            "Anthropic SDK retry count for transient 5xx / 529 overload responses. "
+            "Raised from the SDK default of 2 to survive short overload windows."
+        ),
+    )
+
 
 _settings: Settings | None = None
 
