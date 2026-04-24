@@ -293,12 +293,27 @@ MB_TOOLS: list[dict] = [
     {
         "type": "custom",
         "name": "mb_set_observation",
-        "description": "Force un mode d'observation pour une cible sans enregistrer de valeur (utile quand le tech dit 'U7 est mort' sans mesure). Émet l'event WS pour l'UI.",
+        "description": (
+            "Force un mode d'observation pour une cible sans enregistrer "
+            "de valeur (utile quand le tech dit 'U7 est mort' sans "
+            "mesure). Émet l'event WS pour l'UI. "
+            "Modes par kind : rail ∈ {dead, alive, shorted, stuck_on}. "
+            "IC ∈ {dead, alive, anomalous, hot}. Passif (R/C/D/FB) ∈ "
+            "{open, short, alive}. Passif_q (MOSFET/BJT) ∈ {open, short, "
+            "stuck_on, stuck_off, alive}. Le serveur refuse un mode "
+            "incohérent avec le kind de la cible."
+        ),
         "input_schema": {
             "type": "object",
             "properties": {
                 "target": {"type": "string"},
-                "mode": {"type": "string", "enum": ["dead", "alive", "anomalous", "hot", "shorted"]},
+                "mode": {
+                    "type": "string",
+                    "enum": [
+                        "dead", "alive", "anomalous", "hot", "shorted",
+                        "stuck_on", "stuck_off", "open", "short",
+                    ],
+                },
             },
             "required": ["target", "mode"],
         },

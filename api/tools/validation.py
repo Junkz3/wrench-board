@@ -19,6 +19,7 @@ from __future__ import annotations
 import asyncio
 import logging
 from collections.abc import Callable
+from contextvars import ContextVar
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -27,19 +28,23 @@ from api.agent.validation import RepairOutcome, ValidatedFix, load_outcome, writ
 
 logger = logging.getLogger("microsolder.tools.validation")
 
-# Pluggable WS emitter — set by the runtime at session open.
-_ws_emitter: Callable[[dict[str, Any]], None] | None = None
+# Per-async-context emitter — each WS session sets its own; concurrent
+# sessions never cross-talk. See api/tools/measurements.py for the same
+# pattern and rationale.
+_ws_emitter: ContextVar[Callable[[dict[str, Any]], None] | None] = ContextVar(
+    "microsolder_validation_ws_emitter", default=None,
+)
 
 
 def set_ws_emitter(emitter: Callable[[dict[str, Any]], None] | None) -> None:
-    global _ws_emitter
-    _ws_emitter = emitter
+    _ws_emitter.set(emitter)
 
 
 def _emit(event: dict[str, Any]) -> None:
-    if _ws_emitter is not None:
+    emitter = _ws_emitter.get()
+    if emitter is not None:
         try:
-            _ws_emitter(event)
+            emitter(event)
         except Exception:   # noqa: BLE001 — best-effort broadcast
             pass
 
