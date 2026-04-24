@@ -105,7 +105,16 @@ def compute_cascade_recall(
             len(predicted_comps & expected_comps) / len(expected_comps) if expected_comps else None
         )
         parts = [r for r in (rec_rails, rec_comps) if r is not None]
-        recall = sum(parts) / len(parts) if parts else 0.0
+        # Scenarios with empty expected sets (degraded-only cases: leaky_short,
+        # regulating_low above UVLO, etc.) test that the simulator does NOT
+        # over-predict a cascade. If the predicted cascade is also empty, the
+        # simulator got it right → recall = 1.0. If it over-predicted, penalise.
+        if parts:
+            recall = sum(parts) / len(parts)
+        elif not predicted_rails and not predicted_comps:
+            recall = 1.0  # correct "no cascade" prediction
+        else:
+            recall = 0.0  # false-positive cascade
         breakdown.append(
             ScenarioResult(
                 scenario_id=s["id"],
