@@ -145,3 +145,60 @@ def test_v3_rejects_unknown_component(sample_draft, toy_graph):
     assert rej is not None
     assert rej.motive == "component_not_in_graph"
     assert "U_HIDDEN" in rej.detail
+
+
+from api.pipeline.bench_generator.validator import check_pertinence
+
+
+def test_v4_accepts_ic_dead(sample_draft, toy_graph):
+    """dead is pertinent for any IC regardless of rail-sourcing."""
+    d = sample_draft.model_copy(deep=True)
+    d.cause = Cause(refdes="U1", mode="dead")  # U1 = cpu, sources no rail
+    rej = check_pertinence(d, toy_graph)
+    assert rej is None
+
+
+def test_v4_rejects_regulating_low_on_non_source_ic(sample_draft, toy_graph):
+    """U1 is a CPU — doesn't source any rail. regulating_low is nonsense."""
+    d = sample_draft.model_copy(deep=True)
+    d.cause = Cause(refdes="U1", mode="regulating_low", voltage_pct=0.85)
+    rej = check_pertinence(d, toy_graph)
+    assert rej is not None
+    assert rej.motive == "mode_not_pertinent"
+
+
+def test_v4_accepts_regulating_low_on_source_ic(sample_draft, toy_graph):
+    """U7 is the +5V source — regulating_low is meaningful."""
+    d = sample_draft.model_copy(deep=True)
+    d.cause = Cause(refdes="U7", mode="regulating_low", voltage_pct=0.85)
+    rej = check_pertinence(d, toy_graph)
+    assert rej is None
+
+
+def test_v4_rejects_leaky_short_on_non_decoupling_cap(sample_draft, toy_graph):
+    """Add a cap that is NOT in any rail's decoupling list."""
+    from api.pipeline.schematic.schemas import ComponentNode
+    toy_graph.components["C99"] = ComponentNode(
+        refdes="C99", type="capacitor", kind="passive_c", role="decoupling",
+    )
+    d = sample_draft.model_copy(deep=True)
+    d.cause = Cause(refdes="C99", mode="leaky_short", value_ohms=200.0)
+    rej = check_pertinence(d, toy_graph)
+    assert rej is not None
+    assert rej.motive == "mode_not_pertinent"
+
+
+def test_v4_rejects_open_on_pullup_r(sample_draft, toy_graph):
+    """role='pullup' is not in the open-cascading roles set."""
+    d = sample_draft.model_copy(deep=True)
+    d.cause = Cause(refdes="R100", mode="open")  # role = pullup
+    rej = check_pertinence(d, toy_graph)
+    assert rej is not None
+    assert rej.motive == "mode_not_pertinent"
+
+
+def test_v4_accepts_open_on_series_r(sample_draft, toy_graph):
+    d = sample_draft.model_copy(deep=True)
+    d.cause = Cause(refdes="R200", mode="open")  # role = series
+    rej = check_pertinence(d, toy_graph)
+    assert rej is None
