@@ -4,13 +4,12 @@
 // the CDN <script> in index.html).
 
 /* =========================================================
-   GRAPH DATA — loaded at runtime from the backend.
-   TODO: wire to `GET /pipeline/packs/{slug}/graph` once that
-   endpoint exists. For now the graph starts empty and the UI
-   shows an empty-state card inviting the user to run the
-   pipeline. Shape must match the Pydantic v2 contract
-   (component | symptom | net | action) + typed relations
-   (causes | powers | connected_to | resolves).
+   GRAPH DATA — loaded at runtime from GET /pipeline/packs/{slug}/graph.
+   Starts empty until loadGraphFromBackend() resolves; the UI shows an
+   empty-state card inviting the user to run the pipeline when no pack
+   exists for the current slug. Shape matches the Pydantic v2 contract:
+   nodes (component | symptom | net | action) + typed edges (causes |
+   powers | connected_to | resolves).
    ========================================================= */
 let DATA = { nodes: [], edges: [] };
 
