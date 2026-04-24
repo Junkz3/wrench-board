@@ -15,7 +15,8 @@ help:
 	@echo ""
 	@echo "  make install   Create .venv and install dependencies (incl. dev)"
 	@echo "  make run       Start uvicorn in dev mode on port $(PORT) with --reload"
-	@echo "  make test      Run pytest"
+	@echo "  make test      Run pytest (fast subset, skips slow benchmarks)"
+	@echo "  make test-all  Run all pytest tests (incl. slow accuracy benchmarks)"
 	@echo "  make lint      Run ruff check"
 	@echo "  make format    Run ruff format"
 	@echo "  make clean     Remove caches (keeps .venv)"
@@ -35,6 +36,9 @@ build-field-corpus:
 	$(PY) scripts/build_benchmark_corpus.py
 
 test:
+	$(PYTEST) tests/ -v -m "not slow"
+
+test-all:
 	$(PYTEST) tests/ -v
 
 lint:

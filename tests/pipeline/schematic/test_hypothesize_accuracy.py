@@ -10,6 +10,8 @@ from pathlib import Path
 
 import pytest
 
+pytestmark = pytest.mark.slow
+
 from api.pipeline.schematic.hypothesize import Observations, hypothesize
 from api.pipeline.schematic.schemas import AnalyzedBootSequence, ElectricalGraph
 

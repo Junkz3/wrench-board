@@ -86,3 +86,6 @@ asyncio_mode = "auto"
 filterwarnings = [
     "ignore::DeprecationWarning",
 ]
+markers = [
+    "slow: accuracy or perf benchmarks that take >30s (skipped by default in `make test`, included in `make test-all`)",
+]
