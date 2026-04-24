@@ -14,7 +14,11 @@ from typing import TYPE_CHECKING
 
 from anthropic import AsyncAnthropic
 
-from api.pipeline.prompts import AUDITOR_SYSTEM, AUDITOR_USER_TEMPLATE
+from api.pipeline.prompts import (
+    AUDITOR_SYSTEM,
+    AUDITOR_USER_CONTEXT_TEMPLATE,
+    AUDITOR_USER_DIRECTIVE_TEMPLATE,
+)
 from api.pipeline.schemas import (
     AuditVerdict,
     Dictionary,
@@ -52,6 +56,7 @@ async def run_auditor(
     rules: RulesSet,
     dictionary: Dictionary,
     precomputed_drift: list[DriftItem],
+    revision_brief: str = "",
     stats: PhaseTokenStats | None = None,
 ) -> AuditVerdict:
     """Execute Phase 4 — return a validated `AuditVerdict`.
@@ -69,7 +74,7 @@ async def run_auditor(
         [item.model_dump() for item in precomputed_drift], indent=2
     )
 
-    user_prompt = AUDITOR_USER_TEMPLATE.format(
+    context_text = AUDITOR_USER_CONTEXT_TEMPLATE.format(
         device_label=device_label,
         precomputed_drift_json=precomputed_drift_json,
         registry_json=registry.model_dump_json(indent=2),
@@ -77,12 +82,35 @@ async def run_auditor(
         rules_json=rules.model_dump_json(indent=2),
         dictionary_json=dictionary.model_dump_json(indent=2),
     )
+    revision_block = ""
+    if revision_brief:
+        revision_block = f"# Revision brief\n{revision_brief}\n\n"
+    directive_text = AUDITOR_USER_DIRECTIVE_TEMPLATE.format(
+        revision_brief_block=revision_block,
+    )
+
+    messages = [
+        {
+            "role": "user",
+            "content": [
+                {
+                    "type": "text",
+                    "text": context_text,
+                    "cache_control": {"type": "ephemeral"},
+                },
+                {
+                    "type": "text",
+                    "text": directive_text,
+                },
+            ],
+        }
+    ]
 
     verdict = await call_with_forced_tool(
         client=client,
         model=model,
         system=AUDITOR_SYSTEM,
-        messages=[{"role": "user", "content": user_prompt}],
+        messages=messages,
         tools=[_submit_audit_tool()],
         forced_tool_name=SUBMIT_AUDIT_TOOL_NAME,
         output_schema=AuditVerdict,

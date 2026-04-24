@@ -428,7 +428,7 @@ Output policy:
 """
 
 
-AUDITOR_USER_TEMPLATE = """\
+AUDITOR_USER_CONTEXT_TEMPLATE = """\
 Audit the following knowledge pack for device: {device_label}
 
 # Pre-computed vocabulary drift (code-level set diff — GROUND TRUTH)
@@ -455,8 +455,10 @@ Audit the following knowledge pack for device: {device_label}
 ```json
 {dictionary_json}
 ```
+"""
 
-Include every pre-computed drift entry verbatim in your `drift_report`, add your
+AUDITOR_USER_DIRECTIVE_TEMPLATE = """\
+{revision_brief_block}Include every pre-computed drift entry verbatim in your `drift_report`, add your
 own cross-file coherence and plausibility findings, and submit your verdict via
 `submit_audit_verdict`. No other output.
 """
