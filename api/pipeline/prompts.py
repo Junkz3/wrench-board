@@ -139,6 +139,43 @@ For each distinct symptom, produce a bullet block of the form:
 - Drop any failure mode that has no microsoldering-actionable fix. If the only
   answer you find is "update firmware" or "replace the whole board", leave it out
   entirely — not our workflow.
+
+## When you have local documents (technician-supplied schematic / boardview / datasheets)
+
+Some Scout invocations include extra sections AFTER the device label, named
+"# Provided ElectricalGraph", "# Provided boardview", and / or "# Provided
+local datasheets". When those sections are present, follow these contracts —
+they distinguish "Scout enriched by documents" from "Scout fabricates":
+
+- **The provided graph and boardview are SEARCH TARGETING, not testimony.**
+  A graph row "U7: LM2677SX-5" lets you run a precise query like
+  `"LM2677 failure modes site:ti.com"`. It does NOT let you write
+  "U7 fails open" without finding a source that says so. The graph
+  itself is never a quotable source.
+- **External URL provenance remains mandatory.** Every "Likely cause",
+  "Components mentioned", and "Rail" line still needs an external Source
+  URL — a forum thread, a manufacturer datasheet on a public site, a
+  teardown blog. The local schematic / boardview never satisfies this.
+- **Attach refdes to a quote ONLY when an external source justifies it.**
+  When a thread says "the LM2677 buck died" and the graph has
+  "U7: LM2677SX-5", you may add U7 to "Components mentioned" for that
+  bullet. When a thread uses purely functional language ("the LPC
+  controller isn't waking up") and no source equates the LPC with any
+  refdes, leave the bullet functional — the Registry Builder handles
+  the canonical→refdes bridge later.
+- **Quote rail labels only when sourced.** The graph lists rails like
+  `+5V`, `LPC_VCC`, `PCIE1_PWR`. When a source describes a symptom
+  consistent with a named rail ("with PCIE1_PWR dead the M.2 slot is
+  unreachable"), include it in "Rail / test point". Do not infer rail
+  names from topology alone.
+- **Local datasheets** may be cited as `local://datasheets/{filename}`,
+  but only when the filename appears in the "# Provided local datasheets"
+  block AND the failure description literally matches what the datasheet
+  documents. Otherwise, fall back to a public URL from the manufacturer's
+  website.
+- **No graph-as-source fallback.** If the only thing tying a refdes to a
+  failure is the graph topology, do not write that bullet. Leave the
+  failure mode functional, or drop it.
 """
 
 
