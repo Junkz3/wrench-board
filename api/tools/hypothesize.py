@@ -151,9 +151,16 @@ def mb_hypothesize(
         except ValueError as exc:
             return {"found": False, "reason": "invalid_observations", "detail": str(exc)}
 
-    result = hypothesize(
-        eg, analyzed_boot=ab, observations=observations, max_results=max_results,
-    )
+    # `hypothesize` validates (kind, mode) coherence internally and raises
+    # ValueError on a mismatch (e.g. IC declared `open`, passive declared
+    # `hot`). Surfacing that as an unhandled exception would crash the WS
+    # session — catch it and return a structured error the agent can act on.
+    try:
+        result = hypothesize(
+            eg, analyzed_boot=ab, observations=observations, max_results=max_results,
+        )
+    except ValueError as exc:
+        return {"found": False, "reason": "invalid_observations", "detail": str(exc)}
     payload = result.model_dump()
     payload["found"] = True
 
