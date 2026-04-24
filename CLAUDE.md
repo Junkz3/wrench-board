@@ -85,6 +85,11 @@ The API key is loaded from `.env` (copy `.env.example`). Tests do not require
 `ANTHROPIC_API_KEY` — `api/config.py` defaults it to empty and only the
 runtime code paths raise if it's missing.
 
+**Test markers.** `make test` runs `-m "not slow"`. Any test that hits the
+Anthropic API, ingests a real schematic, or acts as an accuracy gate must be
+tagged `@pytest.mark.slow` so it only runs in `make test-all`. New tests
+default to fast (no marker) and should stay under a second.
+
 Bootstrapping Managed Agents (one-off, before the first `/ws/diagnostic`
 session in `managed` mode):
 
@@ -103,11 +108,17 @@ api/
   config.py          Pydantic-settings Settings loaded from .env (cached)
   logging_setup.py   Single stdout handler, idempotent
   pipeline/          Knowledge factory — Scout → Registry → Writers(×3) → Auditor
-    schematic/       PDF schematic → page vision → merge → ElectricalGraph
+    schematic/       PDF schematic → page vision → merge → ElectricalGraph,
+                     plus simulator + hypothesize (deterministic engines)
+    bench_generator/ Auto-generates simulator scenarios from a knowledge pack,
+                     writes memory/{slug}/simulator_reliability.json
   board/             Boardview domain: model, parser registry (13 formats),
                      validator, /api/board/parse router, WS event envelopes
   agent/             Diagnostic runtime — managed (default) + direct fallback,
-                     tool manifest (MB + BV), sanitizer, chat history, memory
+                     tool manifest (MB + BV), sanitizer, chat history, memory,
+                     reliability-line injector (from simulator_reliability.json)
+  profile/           Technician profile — catalog/derive/model/prompt/router/
+                     store/tools; backs memory/_profile/technician.json
   session/           Per-session state (board, highlights, annotations)
   tools/             boardview.py — bv_* side-effect functions; ws_events.py
   vision/            Stub — reserved for image helpers
@@ -141,7 +152,12 @@ memory/{device_slug}/
   dictionary.json          # Lexicographe output (glossary)
   audit_verdict.json       # Auditor verdict (APPROVED / NEEDS_REVISION / REJECTED)
   schematic_pages/         # optional: page_NNN.json from schematic sub-pipeline
+  schematic_graph.json     # optional: post-merge, pre-compile
+  nets_classified.json     # optional: net classifier output (power/logic/connector)
+  passive_classification_llm.json  # optional: passive role classifier (R/C/L/Q)
   electrical_graph.json    # optional: compiled ElectricalGraph
+  boot_sequence_analyzed.json      # optional: Opus-refined boot sequence
+  simulator_reliability.json       # optional: bench-generator reliability score
   repairs/{repair_id}/
     messages.jsonl         # chat history, one JSON-line per turn
     findings.json          # cross-session field reports for this repair
@@ -213,6 +229,77 @@ Artefacts: `memory/{slug}/schematic_pages/page_NNN.json`, then
 `python -m api.pipeline.schematic.cli --pdf=… --slug=…`. All data shapes
 live in `api/pipeline/schematic/schemas.py`.
 
+### Deterministic engines — simulator + hypothesize
+
+Two pure-sync modules sit alongside the schematic sub-pipeline. Neither calls
+an LLM at runtime; both operate on the compiled `ElectricalGraph`.
+
+- **`simulator.py`** (`SimulationEngine`) — event-driven behavioral simulator
+  that advances phase-by-phase over the analyzed boot sequence (or the
+  compiler fallback), takes a list of failures (refdes + mode) plus optional
+  rail overrides, and emits a `SimulationTimeline` with dead rails, dead
+  components, signal states, and the cause of blocking per phase. Exposed to
+  the agent via `mb_schematic_graph(query="simulate", failures=…,
+  rail_overrides=…)` and to the UI via `POST /schematic/simulate`.
+- **`hypothesize.py`** — reverse-diagnostic: takes a partial observation
+  (dead/alive components and rails) and enumerates refdes-kill candidates
+  that explain it, single-fault exhaustive + 2-fault pruned (seeded from
+  top-K single survivors, paired only with components whose cascade
+  intersects the residual unexplained observations). F1 soft-penalty
+  scoring. Returns top-N with structured diff + deterministic French
+  narrative. Depends on `SimulationEngine`; no IO, no LLM.
+
+These two are the distinctive engines of the product. Keep them pure and
+sync — the `microsolder-evolve` skill (below) relies on fast, deterministic
+re-runs to score variants.
+
+### Bench auto-generator (`api/pipeline/bench_generator/`)
+
+Reads a knowledge pack and generates simulator scenarios (cause →
+expected cascade) via one Sonnet extractor pass with an Opus rescue for
+span + topology rejects. Five validator passes gate the output: V1 sanity,
+V2 grounding (evidence span must be literal pack substring), V3 topology
+(refdes + rails must exist in the `ElectricalGraph`), V4 pertinence
+(mirrors `evaluator._is_pertinent`), V5 dedup. Writes
+`memory/{slug}/simulator_reliability.json` (aggregate score + per-scenario
+breakdown) plus per-run artefacts under `benchmark/auto_proposals/`.
+
+The `simulator_reliability.json` file is consumed by `agent/reliability.py`,
+which injects a one-liner into both diagnostic runtimes' system prompts so
+the agent can explicitly signal when its causal engine is weak on the loaded
+device. Do not skip writing this file — the prompt path gracefully degrades
+but the agent loses self-awareness of its own accuracy.
+
+CLI: `scripts/generate_bench_from_pack.py --slug=…`. Frozen human oracle
+lives separately at `benchmark/scenarios.jsonl` (17 scenarios, validated
+by hand, provenance contract per `benchmark/README.md`). Never merge
+auto-generated scenarios into the frozen oracle.
+
+### Self-modifying subsystems — `microsolder-evolve`
+
+The repo ships a local Claude Code skill (`microsolder-evolve`) that runs
+an autonomous nightly loop modifying `api/pipeline/schematic/simulator.py`
+or `api/pipeline/schematic/hypothesize.py`, scoring via
+`scripts/eval_simulator.py`, and either keeping the change (commit prefixed
+`evolve:`) or reverting via `git`. The skill is authorised to commit
+without user intervention inside these two files; its commits are visible
+in `git log` under the `evolve:` prefix and often include a parenthesised
+score delta.
+
+Implications for any agent working here:
+- **Do not refactor `simulator.py` or `hypothesize.py` for style alone.**
+  The evolve loop treats both files as an optimization surface; cosmetic
+  churn there conflicts with its ability to measure before/after deltas.
+  Functional changes are fine; drive-by cleanup is not.
+- `evolve:` commits intermixed with `feat:` / `fix:` commits in the log
+  are expected and normal. Reverts of `evolve:` commits are also normal
+  (anti-pattern detection). Do not assume a `Revert "evolve: …"` is a
+  bug — the loop itself reverts regressions.
+- The scoring oracle (`benchmark/scenarios.jsonl`) is **read-only for the
+  evolve agent**; a human curates it. The evaluator (`evaluator.py`) is
+  likewise off-limits to the loop to close the score-gaming backdoor
+  (see commit `4d0c9ba`).
+
 ### HTTP + WebSocket surface
 
 Pipeline (`api/pipeline/__init__.py`):
@@ -229,6 +316,10 @@ Pipeline (`api/pipeline/__init__.py`):
 
 Board:
 - `POST /api/board/parse` — upload + parse via `parser_for(path)` → `Board` JSON
+
+Schematic:
+- `POST /schematic/simulate` — drives `SimulationEngine` with `failures` +
+  `rail_overrides`; same payload shape as `mb_schematic_graph(query="simulate")`
 
 Diagnostic:
 - `WS   /ws/diagnostic/{device_slug}?tier={fast|normal|deep}&repair={id}`
