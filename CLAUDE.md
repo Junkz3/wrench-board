@@ -17,8 +17,20 @@ and a stateful **diagnostic conversation** runs the live repair session.
 2. **Apache 2.0** is the license for all code in this repo.
 3. **Permissive dependencies only** (MIT, Apache 2.0, BSD). Never pull in
    GPL, AGPL, or LGPL packages.
-4. **Open hardware only.** No proprietary schematics or boardviews — no
-   Apple, Samsung, ZXW, WUXINJI content.
+4. **Open hardware only *in the repo*.** No proprietary schematics or
+   boardviews committed to this repository — no Apple, Samsung, ZXW or
+   WUXINJI content in `board_assets/`, `web/boards/`, test fixtures, or
+   any other tracked path. **Runtime is a separate matter.** The product
+   is a pro microsoldering workbench, so the technician must be able to
+   run a diagnostic on *any* device at runtime. Knowledge packs built by
+   the pipeline (LLM-driven research under `memory/{slug}/*.json`) are
+   unrestricted by device brand — iPhone, Galaxy, ThinkPad, Framework,
+   whatever hits the bench. The technician may also upload their own
+   schematic PDF or boardview and those land under `memory/{slug}/` so
+   subsequent repairs on the same device reuse the pack + schematic +
+   boardview automatically. What stays out of this repo is proprietary
+   *source* material — not the technician's runtime workflow. The entire
+   `memory/` tree (except `.gitkeep`) is gitignored for this reason.
 5. **No hallucinated component IDs.** Defense in depth, two layers.
    (1) Tool discipline: every refdes the agent surfaces must originate from
    a tool lookup (`mb_get_component` for memory bank + board aggregation, or

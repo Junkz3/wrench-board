@@ -113,4 +113,6 @@ data/
 downloads/
 board_assets/*.pdf
 !board_assets/.gitkeep
-memory/_profile/
+# Runtime data — technician's working data, never committed (any device, any brand)
+memory/*
+!memory/.gitkeep
