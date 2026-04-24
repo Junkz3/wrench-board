@@ -31,6 +31,30 @@ from api.pipeline.schematic.simulator import (
 )
 
 
+@pytest.fixture
+def graph_minimal() -> ElectricalGraph:
+    return ElectricalGraph(
+        device_slug="test-min",
+        components={
+            "U7": ComponentNode(refdes="U7", type="ic"),
+            "U12": ComponentNode(refdes="U12", type="ic"),
+        },
+        nets={
+            "VIN": NetNode(label="VIN", is_power=True, is_global=True),
+            "+5V": NetNode(label="+5V", is_power=True, is_global=True),
+        },
+        power_rails={
+            "VIN": PowerRail(label="VIN", consumers=["U7"]),
+            "+5V": PowerRail(label="+5V", source_refdes="U7", consumers=["U12"]),
+        },
+        typed_edges=[],
+        boot_sequence=[],
+        designer_notes=[],
+        ambiguities=[],
+        quality=SchematicQualityReport(total_pages=1, pages_parsed=1),
+    )
+
+
 def test_board_state_shape_minimal():
     state = BoardState(
         phase_index=0,
@@ -434,3 +458,32 @@ def test_rail_override_carries_state_and_voltage_pct():
     o = RailOverride(label="+5V", state="degraded", voltage_pct=0.94)
     assert o.state == "degraded"
     assert o.voltage_pct == 0.94
+
+
+def test_engine_accepts_failures_argument(graph_minimal):
+    """Engine accepts a list of Failure objects without crashing."""
+    engine = SimulationEngine(
+        graph_minimal,
+        failures=[Failure(refdes="U7", mode="dead")],
+    )
+    timeline = engine.run()
+    assert "U7" in timeline.killed_refdes  # killed via Failure(mode="dead")
+
+
+def test_engine_accepts_rail_overrides_argument(graph_minimal):
+    """Engine accepts a list of RailOverride objects without crashing."""
+    engine = SimulationEngine(
+        graph_minimal,
+        rail_overrides=[RailOverride(label="+5V", state="stable")],
+    )
+    timeline = engine.run()
+    # Override forces +5V stable regardless of source state.
+    final_state = timeline.states[-1]
+    assert final_state.rails.get("+5V") == "stable"
+
+
+def test_engine_killed_refdes_remains_backward_compat(graph_minimal):
+    """Existing killed_refdes API still works identically."""
+    engine = SimulationEngine(graph_minimal, killed_refdes=["U7"])
+    timeline = engine.run()
+    assert "U7" in timeline.killed_refdes

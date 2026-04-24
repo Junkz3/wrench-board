@@ -107,10 +107,19 @@ class SimulationEngine:
         *,
         analyzed_boot: AnalyzedBootSequence | None = None,
         killed_refdes: list[str] | None = None,
+        failures: list[Failure] | None = None,
+        rail_overrides: list[RailOverride] | None = None,
     ) -> None:
         self.electrical = electrical
         self.analyzed_boot = analyzed_boot
-        self.killed: frozenset[str] = frozenset(killed_refdes or ())
+        # killed_refdes is sugar for Failure(mode="dead").
+        synth_failures = [Failure(refdes=r, mode="dead") for r in (killed_refdes or [])]
+        self.failures: list[Failure] = list(failures or []) + synth_failures
+        self.rail_overrides: list[RailOverride] = list(rail_overrides or [])
+        # Derived view used by the existing cascade pass.
+        self.killed: frozenset[str] = frozenset(
+            f.refdes for f in self.failures if f.mode == "dead"
+        )
 
     # ------------------------------------------------------------------
     # Phase source — prefer analyzer (phases + triggers carry `from_refdes`),
