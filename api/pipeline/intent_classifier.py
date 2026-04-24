@@ -34,6 +34,9 @@ class IntentClassification(BaseModel):
 
 _TOOL_NAME = "report_intent"
 
+# Note: `pack_exists` is intentionally absent from the tool schema —
+# the model has no way to know what's on disk; we backfill it from
+# `_list_known_packs()` after the call to prevent hallucinated existence.
 _TOOL_SCHEMA = {
     "name": _TOOL_NAME,
     "description": "Report the user's diagnostic intent: symptoms + 0..3 candidate devices ranked by confidence.",
@@ -89,8 +92,7 @@ def _list_known_packs() -> list[tuple[str, str]]:
     return out
 
 
-def _build_system_prompt() -> str:
-    packs = _list_known_packs()
+def _build_system_prompt_from_packs(packs: list[tuple[str, str]]) -> str:
     if packs:
         catalog = "\n".join(f"- `{slug}` — {label}" for slug, label in packs)
     else:
@@ -107,6 +109,10 @@ def _build_system_prompt() -> str:
     )
 
 
+def _build_system_prompt() -> str:
+    return _build_system_prompt_from_packs(_list_known_packs())
+
+
 async def classify_intent(text: str, *, client: AsyncAnthropic) -> IntentClassification:
     """Run a Haiku one-shot forced-tool classifier.
 
@@ -114,11 +120,12 @@ async def classify_intent(text: str, *, client: AsyncAnthropic) -> IntentClassif
     can pass in a mock). Side effects: none on disk; only an Anthropic API call.
     """
     settings = get_settings()
+    packs = _list_known_packs()
     response = await client.messages.create(
         model=settings.anthropic_model_fast,
         max_tokens=512,
         system=[
-            {"type": "text", "text": _build_system_prompt(), "cache_control": {"type": "ephemeral"}}
+            {"type": "text", "text": _build_system_prompt_from_packs(packs), "cache_control": {"type": "ephemeral"}}
         ],
         messages=[{"role": "user", "content": text}],
         tools=[_TOOL_SCHEMA],
@@ -136,7 +143,7 @@ async def classify_intent(text: str, *, client: AsyncAnthropic) -> IntentClassif
     raw_candidates = payload.get("candidates") or []
     raw_candidates = sorted(raw_candidates, key=lambda c: c.get("confidence", 0.0), reverse=True)[:3]
 
-    known_slugs = {slug for slug, _ in _list_known_packs()}
+    known_slugs = {slug for slug, _ in packs}
     cleaned: list[IntentCandidate] = []
     for c in raw_candidates:
         slug = (c.get("slug") or "").strip()

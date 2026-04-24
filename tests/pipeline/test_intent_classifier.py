@@ -109,3 +109,21 @@ async def test_classify_intent_truncates_to_three(tmp_path: Path):
     # sorted desc by confidence
     confs = [c.confidence for c in result.candidates]
     assert confs == sorted(confs, reverse=True)
+
+
+@pytest.mark.asyncio
+async def test_classify_intent_no_tool_use_returns_empty(tmp_path: Path):
+    """If the model refuses the forced tool (returns end_turn / text only), we get an empty classification."""
+    fake_client = MagicMock()
+    text_block = MagicMock()
+    text_block.type = "text"
+    resp = MagicMock()
+    resp.content = [text_block]
+    resp.stop_reason = "end_turn"
+    fake_client.messages.create = AsyncMock(return_value=resp)
+
+    with patch("api.pipeline.intent_classifier._get_memory_root", return_value=tmp_path):
+        result = await classify_intent("anything", client=fake_client)
+
+    assert result.symptoms == ""
+    assert result.candidates == []
