@@ -70,6 +70,7 @@ cat evolve/state.json
 tail -20 evolve/results.tsv
 LATEST_REPORT=$(ls -t evolve/reports/ 2>/dev/null | head -1)
 [ -n "$LATEST_REPORT" ] && cat "evolve/reports/$LATEST_REPORT"
+cat benchmark/weaknesses.md  # priority-ranked list of known gaps (READ-ONLY)
 ```
 
 Tu dois en sortir avec :
@@ -77,6 +78,7 @@ Tu dois en sortir avec :
 - `last_5_statuses` (pour décider si exploration mode)
 - Liste des hypothèses récemment testées (pour ne pas répéter)
 - Le `per_scenario` du dernier eval réussi (pour identifier les scénarios qui ratent)
+- Les items P1 de `benchmark/weaknesses.md` — priorités explicites avec pointeurs fichier/fonction. **Préfère un item P1 non-résolu à une exploration ad-hoc** tant qu'il en reste. Quand une mutation `keep` résout un item P1, mentionne-le en description dans `results.tsv` (ex: `resolves P1: passive_fb open rail death`) — l'humain déplacera l'item en RESOLVED.
 
 ### Step 2 — Analyse
 
