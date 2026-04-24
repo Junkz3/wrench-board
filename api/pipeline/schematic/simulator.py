@@ -159,6 +159,11 @@ class SimulationEngine:
         # Rails locked by an explicit observation — _stabilise_rails leaves
         # these alone so the override holds across phase iteration.
         self._overridden_rails: frozenset[str] = frozenset(o.label for o in self.rail_overrides)
+        # Rails forced dead by a failure whose topology cannot be recovered
+        # from the final rail state alone (e.g. an opened filter bead whose
+        # downstream rail is sourced *by* the bead). Populated by
+        # `_apply_failures_at_init`, unioned into `dead_rails` in `_cascade`.
+        self._forced_dead_rails: set[str] = set()
 
     # ------------------------------------------------------------------
     # Phase source — prefer analyzer (phases + triggers carry `from_refdes`),
@@ -359,26 +364,76 @@ class SimulationEngine:
                     continue
                 # An open passive in series cuts power to consumers on the
                 # DOWNSTREAM side only — upstream consumers still see the
-                # supply rail. Identify which of the two touched nets is
-                # upstream by looking for a registered `power_rail` whose
-                # source is either an IC (`source_refdes` set) or an
-                # external supply (`source_refdes is None` — the always-on
-                # baseline applied in `run()`). The OTHER net's consumers
-                # are the downstream casualties.
+                # supply rail. Identify the downstream side, then kill its
+                # consumers. When the downstream side is itself a named
+                # rail whose declared source IS this passive (e.g. a
+                # filter bead on the output side producing DBVDD), the
+                # rail itself is also dead — no upstream path left.
                 touched_nets = {pin.net_label for pin in comp.pins if pin.net_label}
-                upstream_candidates = {n for n in touched_nets if n in self.electrical.power_rails}
-                if len(upstream_candidates) == 1:
-                    upstream = next(iter(upstream_candidates))
+                rail_touched = {n for n in touched_nets if n in self.electrical.power_rails}
+
+                upstream: str | None = None
+                downstream_nets: set[str] = set()
+                kill_downstream_rail: str | None = None
+
+                if len(rail_touched) == 1:
+                    # Classic case: one side is a named rail (upstream);
+                    # the other side is an internal net.
+                    upstream = next(iter(rail_touched))
                     downstream_nets = touched_nets - {upstream}
+                elif len(rail_touched) == 2:
+                    # Both sides are named rails. Disambiguate via
+                    # `source_refdes`:
+                    #   (a) If one rail is sourced *by this passive*, it's
+                    #       the downstream side — the bead is literally
+                    #       the source of that rail. Kill its consumers
+                    #       AND mark the rail itself dead.
+                    #   (b) If one rail is sourced by an IC whose own
+                    #       power_in sits on the other touched net, the
+                    #       sourced rail is the downstream side (the
+                    #       bead feeds that IC's input). Kill consumers
+                    #       of the sourced rail; leave the rail itself
+                    #       stable — its source IC may still regulate
+                    #       from the unaffected upstream, and the
+                    #       _cascade pass will pick it up if not.
+                    # Otherwise ambiguous → under-kill.
+                    sourced_by_me = {
+                        n for n in rail_touched
+                        if self.electrical.power_rails[n].source_refdes == f.refdes
+                    }
+                    if len(sourced_by_me) == 1:
+                        downstream = next(iter(sourced_by_me))
+                        upstream = next(iter(rail_touched - sourced_by_me))
+                        downstream_nets = {downstream}
+                        kill_downstream_rail = downstream
+                    else:
+                        for candidate in rail_touched:
+                            other = next(iter(rail_touched - {candidate}))
+                            cand_rail = self.electrical.power_rails[candidate]
+                            src = cand_rail.source_refdes
+                            if src is None or src not in self.electrical.components:
+                                continue
+                            src_ins = {
+                                p.net_label
+                                for p in self.electrical.components[src].pins
+                                if p.role == "power_in" and p.net_label
+                            }
+                            if other in src_ins:
+                                upstream = other
+                                downstream_nets = {candidate}
+                                break
+
+                if upstream is not None:
                     for refdes, c in self.electrical.components.items():
                         ins = {p.net_label for p in c.pins if p.role == "power_in" and p.net_label}
                         if ins & downstream_nets:
                             components[refdes] = "dead"
-                # Ambiguous topology (both touched nets are registered
-                # power rails, or neither is) — under-kill rather than
-                # over-kill. A foundation simulator should never fabricate
-                # a dead set; downstream agents/operators can refine via
-                # explicit `Failure(mode="dead")` on the affected IC.
+
+                if kill_downstream_rail is not None:
+                    rails[kill_downstream_rail] = "off"
+                    rail_voltage[kill_downstream_rail] = 0.0
+                    touched_rails.add(kill_downstream_rail)
+                    self._forced_dead_rails.add(kill_downstream_rail)
                 continue
 
         return frozenset(touched_rails)
@@ -589,8 +644,11 @@ class SimulationEngine:
         # Step 3 — dead rails: source dead, OR rail itself is shorted, OR
         # degraded with explicit voltage under the UVLO threshold (consumers
         # can't run on it). A degraded rail without a voltage entry is
-        # treated as "near nominal" and not UVLO-cascaded.
-        dead_rails: set[str] = set()
+        # treated as "near nominal" and not UVLO-cascaded. We also seed
+        # with `_forced_dead_rails` — rails whose death is known from
+        # failure topology but invisible in the final state enum
+        # (e.g. a rail sourced by an opened filter bead).
+        dead_rails: set[str] = set(self._forced_dead_rails)
         for label, rail in self.electrical.power_rails.items():
             final_state = rails.get(label)
             if final_state == "stable":
