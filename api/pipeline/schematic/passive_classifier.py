@@ -243,7 +243,10 @@ def _classify_transistor(
             up = n.upper()
             if any(tok in up for tok in _VIN_NET_TOKENS):
                 # The OTHER rail should feed a consumer.
-                other = next(r for r in rail_nets if r != n)
+                candidates = [r for r in rail_nets if r != n]
+                if not candidates:
+                    continue
+                other = candidates[0]
                 rail = graph.power_rails.get(other)
                 if rail and rail.consumers:
                     return "inrush_limiter", 0.6
