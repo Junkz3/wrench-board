@@ -407,6 +407,30 @@ class SimulationEngine:
                 touched_nets = {pin.net_label for pin in comp.pins if pin.net_label}
                 rail_touched = {n for n in touched_nets if n in self.electrical.power_rails}
 
+                # Enable-net cut: a passive_r role=series sitting on an
+                # enable_net of a rail, when opened, severs the EN signal
+                # path to the regulator. The regulator never turns on, so
+                # the rail never comes up. Same forcing pattern as case (c)
+                # below — we mark the rail dead up front and lock it.
+                # Physically equivalent to the rail's source IC dying,
+                # minus the IC itself (it's still powered, just never
+                # asserted). Role guard restricts to the one passive_r
+                # role that unambiguously breaks the signal path on open
+                # (pull_up/pull_down, feedback, damping don't cut the
+                # signal the same way — a pull_up that opens may still
+                # float high if another driver asserts).
+                if (
+                    (comp.role or "").lower() == "series"
+                    and comp.kind == "passive_r"
+                    and touched_nets
+                ):
+                    for rail_label, rail_obj in self.electrical.power_rails.items():
+                        if rail_obj.enable_net and rail_obj.enable_net in touched_nets:
+                            rails[rail_label] = "off"
+                            rail_voltage[rail_label] = 0.0
+                            touched_rails.add(rail_label)
+                            self._forced_dead_rails.add(rail_label)
+
                 upstream: str | None = None
                 downstream_nets: set[str] = set()
                 kill_downstream_rail: str | None = None
