@@ -1,0 +1,18 @@
+{
+  "score": 0.4282111522745904,
+  "self_mrr": 0.713685253790984,
+  "cascade_recall": 0.0,
+  "n_scenarios": 2,
+  "per_scenario": [
+    {
+      "scenario_id": "mnt-reform-motherboard-reform-u14-open-002-e06b4a4e",
+      "self_mrr_contribution": 0.0,
+      "cascade_recall": 0.0
+    },
+    {
+      "scenario_id": "mnt-reform-motherboard-reform-u14-shorted-003-5713a1b9",
+      "self_mrr_contribution": 0.0,
+      "cascade_recall": 0.0
+    }
+  ]
+}

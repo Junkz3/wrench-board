@@ -1,0 +1,5 @@
+https://mntre.com/documentation/reform-handbook/advanced.html
+
+---
+
+Always-on 3.3V regulator U14 failed or its output is shorted, starving the LPC11U24 (U18) of its supply rail LPC_VCC. Measure J22 pin 15 for 3.3 V; if absent, probe U14 output in diode-mode for short
