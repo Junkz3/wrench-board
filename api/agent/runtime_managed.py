@@ -740,11 +740,21 @@ async def run_diagnostic_session_managed(
         )
         for task in pending:
             task.cancel()
-        # Surface exceptions from the completed task to the logger.
+        # Surface exceptions from the completed task to the logger. A WS close
+        # (code 1000 normal, 1012 service restart) raised inside a forwarder task
+        # is expected — log it as INFO, not ERROR with a stacktrace.
         for task in done:
-            if task.exception() is not None:
+            exc = task.exception()
+            if exc is None:
+                continue
+            if isinstance(exc, WebSocketDisconnect):
+                logger.info(
+                    "[Diag-MA] task %s finished on WS disconnect code=%s",
+                    task.get_name(), getattr(exc, "code", "?"),
+                )
+            else:
                 logger.exception(
-                    "[Diag-MA] task %s raised", task.get_name(), exc_info=task.exception()
+                    "[Diag-MA] task %s raised", task.get_name(), exc_info=exc,
                 )
     except WebSocketDisconnect:
         logger.info("[Diag-MA] WS disconnected for device=%s", device_slug)
