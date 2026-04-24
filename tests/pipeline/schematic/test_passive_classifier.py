@@ -331,3 +331,43 @@ def test_heuristic_emits_passive_q_entry_in_whole_graph_pass():
     result = classify_passives_heuristic(graph)
     assert "Q5" in result
     assert result["Q5"][0] == "passive_q"
+
+
+def test_transistor_flyback_switch_heuristic():
+    """Q with pin on SW switching node + GND/PVIN = flyback_switch."""
+    graph = _graph_with_rails("PVIN")
+    graph.nets["SW1"] = NetNode(label="SW1")
+    graph.nets["PGND"] = NetNode(label="PGND")
+    q = ComponentNode(
+        refdes="Q1", type="transistor",
+        pins=[
+            PagePin(number="1", role="unknown", net_label="SW1"),
+            PagePin(number="2", role="unknown", net_label="PGND"),
+            PagePin(number="3", role="unknown", net_label="GATE_Q1"),
+        ],
+    )
+    graph.components["Q1"] = q
+    graph.nets["GATE_Q1"] = NetNode(label="GATE_Q1")
+    _kind, role, _ = classify_passive_refdes(graph, q)
+    assert role == "flyback_switch"
+
+
+def test_transistor_flyback_switch_wins_over_load_switch():
+    """When both patterns match, flyback_switch takes priority (it's the more
+    specific topology — SW node is a strong signal)."""
+    graph = _graph_with_rails("PVIN", "VOUT")
+    graph.nets["SW1"] = NetNode(label="SW1")
+    graph.nets["EN_SMPS"] = NetNode(label="EN_SMPS")
+    q = ComponentNode(
+        refdes="Q15", type="transistor",
+        pins=[
+            PagePin(number="1", role="unknown", net_label="PVIN"),
+            PagePin(number="2", role="unknown", net_label="SW1"),
+            PagePin(number="3", role="unknown", net_label="EN_SMPS"),
+        ],
+    )
+    graph.components["Q15"] = q
+    _kind, role, _ = classify_passive_refdes(graph, q)
+    # Even though we have 2 rails + EN-labelled net (load_switch signature),
+    # the SW node presence wins — this is a flyback switch.
+    assert role == "flyback_switch"

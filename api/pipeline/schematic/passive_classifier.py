@@ -223,13 +223,52 @@ _VIN_NET_TOKENS = ("VIN", "BAT", "+12V", "+24V")
 def _classify_transistor(
     graph: ElectricalGraph, comp: ComponentNode,
 ) -> tuple[str | None, float]:
-    """Return (role, confidence) for a transistor. Heuristic covers three
-    roles: load_switch, level_shifter, inrush_limiter. Falls back to None
-    when topology doesn't narrow it down — Opus pass fills the holes."""
+    """Return (role, confidence) for a transistor. Heuristic covers four
+    roles: flyback_switch, load_switch, level_shifter, inrush_limiter. Falls
+    back to None when topology doesn't narrow it down — Opus pass fills the
+    holes."""
     nets = _pin_nets(comp)
+
+    # ---- Rule 0 (highest priority): flyback_switch — Q with a pin on a
+    # switching node (SW / LX / PHASE) + ground or input rail pin.
+    # Checked before the 3-pin guard because SMPS switches in some board
+    # databases export 4 physical pins but only 2 carry net labels (SW +
+    # GND/PVIN); the other 2 are exposed pads that the extractor leaves
+    # unlabelled. Needs only 2 labelled nets to fire.
+    if len(nets) >= 2:
+        switching_tokens = ("SW", "LX", "PHASE")
+        for n in nets:
+            up = n.upper()
+            # Match SW followed by end-of-string, digit, or underscore
+            # (avoids false positives on random nets containing "sw").
+            is_sw = any(
+                up == tok or (up.startswith(tok) and (
+                    len(up) == len(tok)
+                    or up[len(tok)].isdigit()
+                    or up[len(tok)] == "_"
+                ))
+                for tok in switching_tokens
+            )
+            if is_sw:
+                # Need another pin on GND or a known power rail.
+                # Also accept nets whose label name is a recognisable input
+                # rail token (PVIN, VIN, +12V, BAT…) even when the graph
+                # hasn't promoted them to power_rails yet — common on boards
+                # where the extractor doesn't mark intermediate pre-reg nodes.
+                _vin_tokens = ("VIN", "PVIN", "+12V", "+24V", "BAT", "VBAT")
+                has_return = any(
+                    _is_ground_net(o)
+                    or _is_power_rail(graph, o)
+                    or any(tok in o.upper() for tok in _vin_tokens)
+                    for o in nets if o != n
+                )
+                if has_return:
+                    return "flyback_switch", 0.7
+
     if len(nets) < 3:
         # Only 2 pins (unusual — most transistors are 3+); bail.
         return None, 0.0
+
     rail_nets = [n for n in nets if n in graph.power_rails]
     gnd_nets = [n for n in nets if _is_ground_net(n)]
     nonrail_nonGND = [n for n in nets if n not in rail_nets and n not in gnd_nets]
@@ -349,7 +388,7 @@ class PassiveAssignment(BaseModel):
             "pull_down · current_sense · damping. passive_c: decoupling · bulk · "
             "filter · ac_coupling · tank · bypass. passive_d: flyback · rectifier · "
             "esd · reverse_protection · signal_clamp. passive_fb: filter. passive_q: "
-            "load_switch · level_shifter · inrush_limiter. Use null "
+            "load_switch · level_shifter · inrush_limiter · flyback_switch. Use null "
             "when topology + notes genuinely don't narrow it down — never guess."
         ),
     )
@@ -444,6 +483,10 @@ Canonical roles (use exactly these strings, or null if genuinely undecidable):
     - inrush_limiter  — Q in series with a power input, gate controlled by
                          an RC delay for soft-start. Classic on laptop VIN paths.
                          Failure: channel open → main rail never powers up.
+    - flyback_switch  — Q in a buck/boost SMPS, pin on switching node (SW, LX,
+                         PHASE) + GND/PVIN. 4 per MNT-class board (2 bucks × 2
+                         Qs). Failure: channel open → output rail dead;
+                         D-S short → continuous current, input rail stressed.
 
 Use the input context for each passive:
   - `refdes`      — identifier, kept verbatim

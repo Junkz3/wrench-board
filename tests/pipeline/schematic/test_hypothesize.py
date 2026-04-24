@@ -1164,3 +1164,76 @@ def test_simulate_failure_dispatches_q_stuck_on():
     graph = _q_load_switch_graph()
     cascade = _simulate_failure(graph, None, "Q5", "stuck_on")
     assert "+3V3_USB" in cascade["always_on_rails"]
+
+
+# ---------------------------------------------------------------------------
+# Phase 4.5.1 — flyback_switch cascade tests
+# ---------------------------------------------------------------------------
+
+
+def _flyback_graph():
+    """Minimal SMPS graph: PVIN → Q1(flyback) with SW1 → L1 → +3V3 → U_CONSUMER."""
+    return ElectricalGraph(
+        device_slug="flyback-test",
+        components={
+            "Q1": ComponentNode(
+                refdes="Q1", type="transistor",
+                kind="passive_q", role="flyback_switch",
+                pins=[
+                    PagePin(number="1", role="unknown", net_label="PVIN"),
+                    PagePin(number="2", role="unknown", net_label="SW1"),
+                    PagePin(number="3", role="unknown", net_label="GATE_Q1"),
+                ],
+            ),
+            "L1": ComponentNode(
+                refdes="L1", type="inductor",
+                pins=[
+                    PagePin(number="1", role="unknown", net_label="SW1"),
+                    PagePin(number="2", role="unknown", net_label="+3V3"),
+                ],
+            ),
+            "U_CONSUMER": ComponentNode(
+                refdes="U_CONSUMER", type="ic",
+                pins=[PagePin(number="1", role="power_in", net_label="+3V3")],
+            ),
+            "U_SRC": ComponentNode(
+                refdes="U_SRC", type="ic",
+                pins=[PagePin(number="1", role="power_out", net_label="PVIN")],
+            ),
+        },
+        nets={"PVIN": NetNode(label="PVIN", is_power=True),
+              "SW1": NetNode(label="SW1"),
+              "+3V3": NetNode(label="+3V3", is_power=True),
+              "GATE_Q1": NetNode(label="GATE_Q1")},
+        power_rails={
+            "PVIN": PowerRail(label="PVIN", source_refdes="U_SRC", consumers=["Q1"]),
+            "+3V3": PowerRail(label="+3V3", source_refdes=None, consumers=["U_CONSUMER"]),
+        },
+        typed_edges=[],
+        quality=SchematicQualityReport(total_pages=1, pages_parsed=1, confidence_global=1.0),
+    )
+
+
+def test_cascade_q_flyback_switch_dead_kills_output_rail():
+    from api.pipeline.schematic.hypothesize import _cascade_q_flyback_switch_dead
+    graph = _flyback_graph()
+    c = _cascade_q_flyback_switch_dead(graph, graph.components["Q1"])
+    # +3V3 is downstream of SW1 via L1 → should die.
+    assert "+3V3" in c["dead_rails"]
+    assert "U_CONSUMER" in c["dead_comps"]
+
+
+def test_cascade_q_flyback_switch_short_stresses_input_rail():
+    from api.pipeline.schematic.hypothesize import _cascade_q_flyback_switch_short
+    graph = _flyback_graph()
+    c = _cascade_q_flyback_switch_short(graph, graph.components["Q1"])
+    # PVIN is the input rail — stressed (shorted semantics).
+    assert "PVIN" in c["shorted_rails"]
+    # U_SRC is the source of PVIN → hot.
+    assert "U_SRC" in c["hot_comps"]
+
+
+def test_table_covers_flyback_switch_all_modes():
+    from api.pipeline.schematic.hypothesize import _PASSIVE_CASCADE_TABLE
+    for mode in ("open", "short", "stuck_on", "stuck_off"):
+        assert ("passive_q", "flyback_switch", mode) in _PASSIVE_CASCADE_TABLE

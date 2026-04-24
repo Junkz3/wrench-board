@@ -904,6 +904,72 @@ def _cascade_q_inrush_rail_dead(
     return _cascade_q_load_dead(electrical, q)
 
 
+def _cascade_q_flyback_switch_dead(
+    electrical: ElectricalGraph, q,
+) -> dict:
+    """Flyback switch open / stuck_off → SMPS doesn't switch → output rail
+    dead. Finds the output rail by inspecting the inductor that spans the
+    Q's SW node; the inductor's other pin is the output rail."""
+    nets = [p.net_label for p in q.pins if p.net_label]
+    # Identify the SW net — where we also find an inductor pin.
+    for sw_net in nets:
+        for other in electrical.components.values():
+            if other.refdes == q.refdes or other.type != "inductor":
+                continue
+            other_nets = [p.net_label for p in other.pins if p.net_label]
+            if sw_net not in other_nets:
+                continue
+            # The inductor's OTHER pin is the output rail (or a net that
+            # might be promoted to rail).
+            for out in other_nets:
+                if out == sw_net:
+                    continue
+                if out in electrical.power_rails:
+                    return _simulate_rail_loss(electrical, out)
+    # Fallback — if no inductor found, mark any downstream rail dead.
+    downstream = _find_downstream_rail(electrical, q)
+    if downstream is not None:
+        return _simulate_rail_loss(electrical, downstream)
+    return _empty_cascade()
+
+
+def _cascade_q_flyback_switch_short(
+    electrical: ElectricalGraph, q,
+) -> dict:
+    """Flyback D-S short / stuck_on → continuous current through inductor →
+    input rail (PVIN / VIN) stressed, source IC hot, downstream of source
+    dead."""
+    nets = [p.net_label for p in q.pins if p.net_label]
+    # Find the input rail (PVIN / VIN / +12V / BAT — the SOURCE-side rail).
+    input_rail: str | None = None
+    for n in nets:
+        if n not in electrical.power_rails:
+            continue
+        up = n.upper()
+        if any(tok in up for tok in ("VIN", "PVIN", "+12V", "BAT")):
+            input_rail = n
+            break
+    if input_rail is None:
+        # Fall back to any rail pin as the source.
+        for n in nets:
+            if n in electrical.power_rails:
+                input_rail = n
+                break
+    if input_rail is None:
+        return _empty_cascade()
+    source = electrical.power_rails[input_rail].source_refdes
+    downstream = (
+        _simulate_dead(electrical, None, [source])
+        if source else _empty_cascade()
+    )
+    c = _empty_cascade()
+    c["shorted_rails"] = frozenset({input_rail})
+    c["dead_rails"] = downstream["dead_rails"] - {input_rail}
+    c["dead_comps"] = downstream["dead_comps"]
+    c["hot_comps"] = frozenset({source}) if source else frozenset()
+    return c
+
+
 _PASSIVE_CASCADE_TABLE: dict[tuple[str, str, str], CascadeFn] = {
     # ========================= RESISTORS =========================
     ("passive_r", "series",        "open"):  _cascade_series_open,
@@ -964,6 +1030,11 @@ _PASSIVE_CASCADE_TABLE: dict[tuple[str, str, str], CascadeFn] = {
     ("passive_q", "inrush_limiter", "short"):     _cascade_passive_alive,
     ("passive_q", "inrush_limiter", "stuck_on"):  _cascade_passive_alive,
     ("passive_q", "inrush_limiter", "stuck_off"): _cascade_q_inrush_rail_dead,
+
+    ("passive_q", "flyback_switch", "open"):      _cascade_q_flyback_switch_dead,
+    ("passive_q", "flyback_switch", "short"):     _cascade_q_flyback_switch_short,
+    ("passive_q", "flyback_switch", "stuck_on"):  _cascade_q_flyback_switch_short,
+    ("passive_q", "flyback_switch", "stuck_off"): _cascade_q_flyback_switch_dead,
 }
 
 

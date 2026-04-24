@@ -2695,6 +2695,82 @@
     }
   },
   {
+    "id": "mnt-reform-motherboard-Q1-stuck_off-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "Q1"
+    ],
+    "ground_truth_modes": [
+      "stuck_off"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "U2": "dead"
+      },
+      "state_rails": {
+        "VOUT": "dead"
+      }
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-Q1-stuck_off-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "Q1"
+    ],
+    "ground_truth_modes": [
+      "stuck_off"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "R22": "alive"
+      },
+      "state_rails": {
+        "VOUT": "dead"
+      }
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-Q2-stuck_off-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "Q2"
+    ],
+    "ground_truth_modes": [
+      "stuck_off"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "U2": "dead"
+      },
+      "state_rails": {
+        "VOUT": "dead"
+      }
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-Q2-stuck_off-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "Q2"
+    ],
+    "ground_truth_modes": [
+      "stuck_off"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "U27": "alive"
+      },
+      "state_rails": {
+        "VOUT": "dead"
+      }
+    }
+  },
+  {
     "id": "mnt-reform-motherboard-Q3-stuck_off-partial_comps",
     "slug": "mnt-reform-motherboard",
     "ground_truth_kill": [
@@ -2705,10 +2781,10 @@
     ],
     "sample_strategy": "partial_comps",
     "observations": {
-      "state_comps": {},
-      "state_rails": {
-        "VIN": "dead"
-      }
+      "state_comps": {
+        "F1": "dead"
+      },
+      "state_rails": {}
     }
   },
   {
@@ -2723,8 +2799,7 @@
     "sample_strategy": "partial_rails_plus_one_alive",
     "observations": {
       "state_comps": {
-        "F1": "dead",
-        "R23": "alive"
+        "C75": "alive"
       },
       "state_rails": {
         "VIN": "dead"
@@ -2761,7 +2836,7 @@
     "observations": {
       "state_comps": {
         "SW3": "anomalous",
-        "C31": "alive"
+        "C170": "alive"
       },
       "state_rails": {}
     }
@@ -2778,8 +2853,7 @@
     "sample_strategy": "partial_comps",
     "observations": {
       "state_comps": {
-        "SW6": "anomalous",
-        "U1": "anomalous"
+        "SW6": "anomalous"
       },
       "state_rails": {}
     }
@@ -2796,8 +2870,9 @@
     "sample_strategy": "partial_rails_plus_one_alive",
     "observations": {
       "state_comps": {
+        "SW6": "anomalous",
         "U1": "anomalous",
-        "R80": "alive"
+        "C128": "alive"
       },
       "state_rails": {}
     }
@@ -2832,7 +2907,7 @@
     "observations": {
       "state_comps": {
         "U1": "anomalous",
-        "C14": "alive"
+        "H8": "alive"
       },
       "state_rails": {}
     }
@@ -2848,9 +2923,7 @@
     ],
     "sample_strategy": "partial_comps",
     "observations": {
-      "state_comps": {
-        "U7": "dead"
-      },
+      "state_comps": {},
       "state_rails": {
         "+5V": "shorted"
       }
@@ -2868,7 +2941,8 @@
     "sample_strategy": "partial_rails_plus_one_alive",
     "observations": {
       "state_comps": {
-        "H15": "alive"
+        "D12": "dead",
+        "D18": "alive"
       },
       "state_rails": {
         "+5V": "shorted"
@@ -2905,7 +2979,7 @@
     "observations": {
       "state_comps": {
         "U10": "anomalous",
-        "H3": "alive"
+        "C65": "alive"
       },
       "state_rails": {}
     }
@@ -2940,7 +3014,7 @@
     "observations": {
       "state_comps": {
         "U10": "dead",
-        "L8": "alive"
+        "C166": "alive"
       },
       "state_rails": {
         "VCC": "shorted"
@@ -2977,7 +3051,7 @@
     "observations": {
       "state_comps": {
         "U11": "anomalous",
-        "U3": "alive"
+        "R180": "alive"
       },
       "state_rails": {}
     }
@@ -2994,11 +3068,9 @@
     "sample_strategy": "partial_comps",
     "observations": {
       "state_comps": {
-        "U19": "dead"
+        "U11": "dead"
       },
-      "state_rails": {
-        "+1V5": "shorted"
-      }
+      "state_rails": {}
     }
   },
   {
@@ -3013,8 +3085,7 @@
     "sample_strategy": "partial_rails_plus_one_alive",
     "observations": {
       "state_comps": {
-        "U11": "dead",
-        "F2": "alive"
+        "J9": "alive"
       },
       "state_rails": {
         "+1V5": "shorted"
@@ -3033,7 +3104,9 @@
     "sample_strategy": "partial_comps",
     "observations": {
       "state_comps": {},
-      "state_rails": {}
+      "state_rails": {
+        "+3V3": "shorted"
+      }
     }
   },
   {
@@ -3048,7 +3121,7 @@
     "sample_strategy": "partial_rails_plus_one_alive",
     "observations": {
       "state_comps": {
-        "R21": "alive"
+        "C122": "alive"
       },
       "state_rails": {
         "+3V3": "shorted"
@@ -3085,7 +3158,7 @@
     "observations": {
       "state_comps": {
         "U13": "anomalous",
-        "C120": "alive"
+        "R75": "alive"
       },
       "state_rails": {}
     }
@@ -3101,10 +3174,7 @@
     ],
     "sample_strategy": "partial_comps",
     "observations": {
-      "state_comps": {
-        "D12": "dead",
-        "U1": "dead"
-      },
+      "state_comps": {},
       "state_rails": {}
     }
   },
@@ -3120,8 +3190,7 @@
     "sample_strategy": "partial_rails_plus_one_alive",
     "observations": {
       "state_comps": {
-        "U1": "dead",
-        "R8": "alive"
+        "PP11": "alive"
       },
       "state_rails": {
         "+5V": "shorted"
@@ -3158,7 +3227,7 @@
     "observations": {
       "state_comps": {
         "U17": "anomalous",
-        "C106": "alive"
+        "R80": "alive"
       },
       "state_rails": {}
     }
@@ -3193,7 +3262,7 @@
     "observations": {
       "state_comps": {
         "U18": "anomalous",
-        "R90": "alive"
+        "D19": "alive"
       },
       "state_rails": {}
     }
@@ -3228,7 +3297,7 @@
     "observations": {
       "state_comps": {
         "U19": "anomalous",
-        "U22": "alive"
+        "H2": "alive"
       },
       "state_rails": {}
     }

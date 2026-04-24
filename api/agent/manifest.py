@@ -701,6 +701,10 @@ Modes Q (Phase 4.5) :
     Sur un load_switch = rail downstream toujours alimenté, même en
     veille (typique panne standby-current).
     Sur un level_shifter = bus stuck à un niveau logique.
+  - Sur un flyback_switch (Q principal d'un buck/boost SMPS, pin sur SW1/SW2) :
+    `open` = SMPS ne commute plus → rail downstream dead ; `short` /
+    `stuck_on` = D-S collé = courant continu à travers l'inductance → rail
+    d'entrée PVIN stressé et source chaude.
   - `stuck_on` sur un rail = observation directe : « +3V3_USB à 3.3V
     en veille alors qu'il devrait être off ». Engine propose un Q
     stuck_on upstream comme suspect.
