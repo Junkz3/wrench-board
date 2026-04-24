@@ -69,6 +69,9 @@ _SEED_FILES = (
     ("knowledge_graph.json", "/knowledge/knowledge_graph.json"),
     ("rules.json", "/knowledge/rules.json"),
     ("dictionary.json", "/knowledge/dictionary.json"),
+    ("electrical_graph.json", "/knowledge/electrical_graph.json"),
+    ("boot_sequence_analyzed.json", "/knowledge/boot_sequence_analyzed.json"),
+    ("nets_classified.json", "/knowledge/nets_classified.json"),
 )
 
 

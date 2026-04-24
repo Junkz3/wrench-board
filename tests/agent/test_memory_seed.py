@@ -30,6 +30,9 @@ def pack_dir(tmp_path: Path) -> Path:
     (d / "knowledge_graph.json").write_text(json.dumps({"nodes": []}))
     (d / "rules.json").write_text(json.dumps({"rules": []}))
     (d / "dictionary.json").write_text(json.dumps({"entries": []}))
+    (d / "electrical_graph.json").write_text(json.dumps({"components": {}, "power_rails": {}}))
+    (d / "boot_sequence_analyzed.json").write_text(json.dumps({"phases": []}))
+    (d / "nets_classified.json").write_text(json.dumps({"nets": {}}))
     return d
 
 
@@ -107,8 +110,11 @@ async def test_seed_creates_one_memory_per_file(pack_dir, monkeypatch):
         "/knowledge/knowledge_graph.json": "seeded",
         "/knowledge/rules.json": "seeded",
         "/knowledge/dictionary.json": "seeded",
+        "/knowledge/electrical_graph.json": "seeded",
+        "/knowledge/boot_sequence_analyzed.json": "seeded",
+        "/knowledge/nets_classified.json": "seeded",
     }
-    assert len(upserts) == 4
+    assert len(upserts) == 7
     assert {u["path"] for u in upserts} == set(status.keys())
     assert all(u["store_id"] == "memstore_test123" for u in upserts)
 
@@ -162,7 +168,8 @@ async def test_seed_records_per_file_upsert_failure(pack_dir, monkeypatch):
     status = await seed_memory_store_from_pack(
         client=client, device_slug="demo-pi", pack_dir=pack_dir
     )
-    assert sum(1 for v in status.values() if v == "seeded") == 3
+    # 1 file fails out of len(_SEED_FILES); the rest are seeded.
+    assert sum(1 for v in status.values() if v == "seeded") == len(_SEED_FILES) - 1
     assert sum(1 for v in status.values() if v.startswith("error:")) == 1
 
 
