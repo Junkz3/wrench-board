@@ -220,18 +220,21 @@ async def extract_page(
         tools=[_submit_page_tool()],
         forced_tool_name=SUBMIT_PAGE_TOOL_NAME,
         output_schema=SchematicPageGraph,
-        # Bumped 48000 → 60000 after diagnosing token-budget exhaustion as
-        # the see-saw root cause on dense pages. mnt-reform p2 baseline
-        # output was ~38.5k tokens (~80% of the old 48k cap), leaving little
-        # headroom for added prompt instructions. When the agent enriched
-        # the prompt (indexed-sibling sweep, edges completeness, role
-        # taxonomy), output approached/exceeded the cap on dense pages →
-        # tail fields (pin roles, late-page nets) got truncated → metrics
-        # on those fields cratered. The "intrinsic attention competition"
-        # diagnosis logged in session 15 was wrong; bumping max_tokens by
-        # ~25% gives headroom for richer extractions without the truncation
-        # tax. Opus 4.7 supports up to 64k output tokens.
-        max_tokens=60000,
+        # Token budget: 64k total = up to 24k thinking + ~40k visible output.
+        # mnt-reform p2 baseline visible output was ~38.5k tokens; with 64k
+        # cap and 24k thinking budget, the actual visible budget is ~40k —
+        # fits p2 with ~1.5k margin. If p2 starts truncating again, dial
+        # thinking_budget back to 16k to free 8k more visible budget.
+        max_tokens=64000,
+        # Extended thinking: model reasons before emitting the structured
+        # tool_call, breaking the "instruction adherence collapse" pattern
+        # observed when ANY prompt change made the model deprioritize the
+        # user-instruction reactive sweep on p11 nets (sessions 14-19, all
+        # caused p11 nets 0.957 → 0.6). Thinking is incompatible with
+        # forced tool_choice; tool_call.py auto-switches to tool_choice="any"
+        # when this is set (with only one tool defined, the effect is
+        # identical to forced).
+        thinking_budget=24000,
         log_label=f"page_vision:page_{rendered.page_number}",
     )
 

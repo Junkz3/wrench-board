@@ -37,6 +37,7 @@ async def call_with_forced_tool(
     max_tokens: int = 16000,
     log_label: str = "tool_call",
     stats: PhaseTokenStats | None = None,
+    thinking_budget: int | None = None,
 ) -> T:
     """Call the Messages API with `tool_choice` forced to `forced_tool_name`, validate.
 
@@ -63,25 +64,40 @@ async def call_with_forced_tool(
             else:
                 effective_system = system + retry_suffix
 
-        # NOTE — Anthropic rejects `thinking` when `tool_choice` forces a tool
-        # (HTTP 400: "Thinking may not be enabled when tool_choice forces tool
-        # use."). Forced structured output is deterministic by design; thinking
-        # wouldn't help anyway.
-        # Stream the response. For small max_tokens a plain `messages.create`
-        # would work, but once we allow >=~16k output the SDK refuses the
-        # non-streaming path with "Streaming is required for operations that
-        # may take longer than 10 minutes." Streaming handles both regimes,
-        # and the final Message object exposes `.content` / `.usage` exactly
-        # like the non-streaming one, so the rest of this function is
-        # indifferent to how the bytes arrived.
-        async with client.messages.stream(
+        # tool_choice rules:
+        #   - Default: `{"type": "tool", "name": forced_tool_name}` — fully
+        #     forced. Anthropic rejects `thinking` in this mode (HTTP 400:
+        #     "Thinking may not be enabled when tool_choice forces tool use.").
+        #   - When `thinking_budget` is set: switch to `{"type": "any"}` —
+        #     model must call SOME tool. With only one tool defined (our case),
+        #     the effect is identical to forced, but the API allows extended
+        #     thinking. Per Anthropic's Claude 4.x compatibility matrix.
+        #
+        # Streaming required for max_tokens >= ~16k (SDK refuses non-stream
+        # otherwise with "operations that may take longer than 10 minutes").
+        # The final Message object exposes `.content` / `.usage` exactly like
+        # the non-streaming one, so the rest of this function is indifferent
+        # to how the bytes arrived.
+        if thinking_budget is not None:
+            tool_choice_param: dict = {"type": "any"}
+        else:
+            tool_choice_param = {"type": "tool", "name": forced_tool_name}
+
+        stream_kwargs: dict = dict(
             model=model,
             max_tokens=max_tokens,
             system=effective_system,
             messages=messages,
             tools=tools,
-            tool_choice={"type": "tool", "name": forced_tool_name},
-        ) as stream:
+            tool_choice=tool_choice_param,
+        )
+        if thinking_budget is not None:
+            stream_kwargs["thinking"] = {
+                "type": "enabled",
+                "budget_tokens": thinking_budget,
+            }
+
+        async with client.messages.stream(**stream_kwargs) as stream:
             response = await stream.get_final_message()
 
         tool_use = next(
