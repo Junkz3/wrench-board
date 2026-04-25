@@ -258,6 +258,7 @@ def _derive_power_rails(
     _promote_ic_owning_switch_node_over_inductor(rails, graph)
     _recognize_buck_self_sense_outputs(rails, graph)
     _propagate_sources_through_rail_aliases(rails, graph)
+    _propagate_sources_through_consumer_topology(rails, graph)
     _augment_sources_from_external_connectors(rails, graph)
     rail_alias_map = _coalesce_rails_via_shared_cap_pins(rails, graph)
 
@@ -727,6 +728,91 @@ def _propagate_sources_through_rail_aliases(
                 if src_rail.source_type:
                     dst_rail.source_type = src_rail.source_type
                 changed = True
+
+
+# ----------------------------------------------------------------------
+# Consumer-topology source inference
+# ----------------------------------------------------------------------
+
+
+def _propagate_sources_through_consumer_topology(
+    rails: dict[str, PowerRail], graph: SchematicGraph
+) -> None:
+    """Infer a missing rail source from the lone consumer's other supplies.
+
+    On modern boards a single chip — SoC, baseband, camera-module bus front-end —
+    is fed by *one* upstream PMU. The chip pin-list page enumerates 10–15
+    die-side `power_in` pins (`VDD_CPU`, `VDDQL_DDR<n>`, `VDDIO18_GRP<n>` …)
+    but the LLM rarely captures the producer-side `powers` edge for every
+    one of them; the producer is implied by the conventional fanout from the
+    same PMU instance. The existing rail-alias propagation
+    (`_propagate_sources_through_rail_aliases`) catches die-side rails where
+    the LLM did capture an explicit `powers` edge between two rail labels;
+    this pass is the consumer-side topology fallback for the rest.
+
+    Heuristic, per unsourced rail R:
+      1. R must have exactly ONE consumer C — multi-consumer rails could mix
+         domains (e.g. a 1.8 V I/O rail spanning the SoC and a discrete IC may
+         not share a PMU).
+      2. Gather the family F = sourced rails that C also consumes.
+      3. F must be ≥ 3 large (noise filter against accidental 1- or 2-rail
+         families, common when only a handful of supplies were captured).
+      4. F must agree unanimously on a single source S — any disagreement
+         (e.g. two PMUs feeding different banks of the same chip) bails.
+      5. S must NOT equal C — a regulator never self-sources, and rules out
+         the pathological case where C produces one of its own die-side
+         rails (covered separately by the buck-self-sense pass).
+      6. S must exist in `graph.components` — defense in depth against an
+         upstream pass that left a stale source string. (In practice every
+         family entry was source-set by an earlier pass that already
+         enforces this invariant; we re-check to keep the pass independent.)
+
+    Side properties preserved:
+      - `voltage_nominal` untouched (no I3/I6 risk).
+      - `consumers` untouched (no I4 risk; the final scrub still runs).
+      - `decoupling` untouched.
+      - `enable_net` untouched.
+
+    Cycle (I1) safety: setting source=S on a rail consumed by C only adds
+    `depends_on(C, S)` edges. The board-level invariant — PMU never depends
+    on chips it powers — already holds in the captured graph (else the
+    existing producer-pin / rail-alias passes would have triggered I1). We
+    do not introduce a new dependency direction; we only thicken existing
+    edges.
+
+    No-op on schematics where every chip already has unanimous source
+    coverage (mnt-reform-motherboard) or where families never reach size 3
+    (small boards with one IC).
+    """
+    rail_list = list(rails.values())
+
+    # Pre-index: for each chip, the list of source_refdes it already gets.
+    consumer_to_sourced_supplies: dict[str, list[str]] = {}
+    for r in rail_list:
+        if r.source_refdes is None:
+            continue
+        for cons in r.consumers:
+            consumer_to_sourced_supplies.setdefault(cons, []).append(r.source_refdes)
+
+    for r in rail_list:
+        if r.source_refdes is not None:
+            continue
+        if len(r.consumers) != 1:
+            continue
+        cons = r.consumers[0]
+        family = consumer_to_sourced_supplies.get(cons, [])
+        if len(family) < 3:
+            continue
+        unique_sources = set(family)
+        if len(unique_sources) != 1:
+            continue
+        source = next(iter(unique_sources))
+        if source == cons:
+            continue
+        if source not in graph.components:
+            continue
+        r.source_refdes = source
+        r.source_type = _infer_source_type(graph, source)
 
 
 # ----------------------------------------------------------------------
