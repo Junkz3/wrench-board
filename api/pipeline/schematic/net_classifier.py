@@ -42,8 +42,8 @@ _BATCH_SIZE = 100
 
 # We use Sonnet by default for classification — the reasoning needed here
 # (domain tagging + one-sentence description) doesn't justify Opus's cost.
-# Callers can override with model= to use anything.
-_DEFAULT_CLASSIFIER_MODEL = "claude-sonnet-4-6"
+# Callers can override with model= to use anything. The default is read
+# lazily from settings.anthropic_model_sonnet at call time.
 
 logger = logging.getLogger("microsolder.pipeline.schematic.net_classifier")
 
@@ -321,7 +321,8 @@ async def classify_nets_llm(
     wall-clock is dominated by the slowest batch (~30s on MNT sized boards
     vs 3+ min for a single mega-call).
     """
-    model = model or _DEFAULT_CLASSIFIER_MODEL
+    from api.config import get_settings
+    model = model or get_settings().anthropic_model_sonnet
     all_labels = sorted(graph.nets.keys())
     batches = [all_labels[i:i + _BATCH_SIZE] for i in range(0, len(all_labels), _BATCH_SIZE)]
     logger.info(

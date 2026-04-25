@@ -49,15 +49,19 @@ def load_managed_ids() -> ManagedIds:
             "agents": data["agents"],
         }
 
-    # Legacy single-agent file — synthesize a deep-tier entry.
+    # Legacy single-agent file — synthesize a deep-tier entry. The model
+    # name is metadata only (the real model is bound at agent creation
+    # server-side); we surface settings.anthropic_model_main so the local
+    # echo stays in sync with the configured deep-tier choice.
     if "agent_id" in data:
+        from api.config import get_settings
         return {
             "environment_id": data["environment_id"],
             "agents": {
                 "deep": {
                     "id": data["agent_id"],
                     "version": data["agent_version"],
-                    "model": "claude-opus-4-7",
+                    "model": get_settings().anthropic_model_main,
                     "legacy": True,
                 }
             },

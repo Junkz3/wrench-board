@@ -398,7 +398,6 @@ def classify_passives_heuristic(
 
 _BATCH_SIZE = 150  # see spec — larger than net_classifier's 100, passives
                     # carry less context per entry so batches can be deeper
-_DEFAULT_CLASSIFIER_MODEL = "claude-sonnet-4-6"
 
 SUBMIT_PASSIVE_TOOL_NAME = "submit_passive_classification"
 
@@ -676,7 +675,8 @@ async def classify_passives_llm(
     On any exception during the LLM fanout, logs a warning and returns
     the heuristic baseline alone — never raises on transient errors.
     """
-    model = model or _DEFAULT_CLASSIFIER_MODEL
+    from api.config import get_settings
+    model = model or get_settings().anthropic_model_sonnet
     heuristic = classify_passives_heuristic(graph)
 
     # Select the passives the heuristic couldn't role.

@@ -126,12 +126,15 @@ async def generate_from_pack(
     latest_path: Path,
     run_date: str,
     escalate_rejects: bool = False,
-    opus_model: str = "claude-opus-4-7",
+    opus_model: str | None = None,
 ) -> dict:
     """Run the end-to-end bench generation. Returns a summary dict.
 
     Never raises on an empty-scenarios outcome (valid result for sparse
     packs); does raise BenchGeneratorPreconditionError on missing inputs."""
+    if opus_model is None:
+        from api.config import get_settings
+        opus_model = get_settings().anthropic_model_main
     pack_dir = memory_root / device_slug
     raw_dump, rules_json, registry_json, graph, attributions = _load_pack(pack_dir)
 
