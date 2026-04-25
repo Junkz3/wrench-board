@@ -35,12 +35,12 @@ dependencies = [
     "uvicorn[standard] ~= 0.45.0",
     "pydantic ~= 2.13.0",
     "pydantic-settings ~= 2.14.0",
-    "anthropic ~= 0.96.0",
+    "anthropic ~= 0.97.0",
     "pdfplumber ~= 0.11.0",
     "python-dotenv ~= 1.2.0",
     "httpx ~= 0.28.0",
     "python-multipart ~= 0.0.20",
-    "websockets ~= 13.1.0",
+    "websockets >= 13.1, < 17.0",
 ]
 
 [project.optional-dependencies]

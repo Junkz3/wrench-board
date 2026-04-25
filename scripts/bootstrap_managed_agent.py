@@ -7,14 +7,20 @@ Creates **three tier-scoped agents** that differ only by `model`:
     normal  — claude-sonnet-4-6 (balanced)
     deep    — claude-opus-4-7   (deep reasoning)
 
-All three share the **same** system prompt and the **same** 16 tools
-(4 `mb_*` + 12 `bv_*` sourced from `api/agent/manifest`). No escalation /
-handoff tool — tier selection is a user-driven choice surfaced in the
-frontend (segmented control in the LLM panel).
+All three share the **same** system prompt and the **same** tools
+(`mb_*` + `bv_*` + `profile_*` sourced from `api/agent/manifest`). No
+escalation / handoff tool — tier selection is a user-driven choice
+surfaced in the frontend (segmented control in the LLM panel).
 
-When Research Preview access (callable_agents + memory_stores) lands,
-this bootstrap will be updated so the `normal` agent declares the other
-two as `callable_agents` — at that point the orchestration becomes native.
+Managed-Agents memory_stores have landed and are mounted per-device at
+session create (see `api/agent/memory_stores.py`). The Research Preview
+multi-agent surface (`callable_agents` + `agent_toolset_20260401`) is
+not yet exposed as a named param by the Python SDK (tested against
+anthropic 0.97.0: the Anthropic API itself accepts the payload via
+`extra_body`, so the only blocker is the SDK surface + request-access
+approval). When it lands natively, this bootstrap can be updated so
+the `normal` agent declares the other two as `callable_agents` — the
+orchestration then becomes native rather than frontend-routed.
 
 On-disk format (`managed_ids.json`, gitignored):
 

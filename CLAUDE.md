@@ -48,7 +48,7 @@ and a stateful **diagnostic conversation** runs the live repair session.
 
 - **Backend:** Python 3.11+, FastAPI (~0.136), uvicorn, Pydantic v2,
   WebSocket (native), pdfplumber, pytest + pytest-asyncio
-- **Agent:** `anthropic ~= 0.96.0` — tier-selectable at WS-open time:
+- **Agent:** `anthropic ~= 0.97.0` — tier-selectable at WS-open time:
   `deep` = Opus (`claude-opus-4-7`), `normal` = Sonnet, `fast` = Haiku
   (`claude-haiku-4-5`). The pipeline distributes Sonnet/Opus per sub-agent.
 - **Frontend:** Vanilla HTML + CSS + JS (no build step, no bundler). All
