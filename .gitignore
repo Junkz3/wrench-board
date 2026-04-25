@@ -128,3 +128,8 @@ evolve/reports/*
 # Vendored CDN assets pulled by `make pin-cdn` (D3, marked, DOMPurify).
 # Regenerated on demand; not tracked.
 web/vendor/*.js
+
+# --- Local-only notes (gap analyses, prompts ad-hoc, working memos) ---
+# Use docs/notes/local/ for any markdown that should NOT land in the repo
+# history. Tracked architecture/design notes go directly in docs/notes/.
+docs/notes/local/
