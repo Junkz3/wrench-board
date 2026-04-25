@@ -36,6 +36,12 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     logger.info(
         "main model=%s fast model=%s", settings.anthropic_model_main, settings.anthropic_model_fast
     )
+    if not settings.anthropic_api_key:
+        logger.warning(
+            "ANTHROPIC_API_KEY is empty — pipeline + diagnostic WS will reject "
+            "every request until it's set in .env. Pure-data endpoints "
+            "(/health, /pipeline/packs read, board parsing) keep working."
+        )
     yield
     logger.info("microsolder-agent shutting down")
 

@@ -475,7 +475,11 @@ async def run_diagnostic_session_direct(
     settings = get_settings()
     if not settings.anthropic_api_key:
         await ws.accept()
-        await ws.send_json({"type": "error", "text": "ANTHROPIC_API_KEY not set"})
+        await ws.send_json({
+            "type": "error",
+            "code": "missing_api_key",
+            "text": "ANTHROPIC_API_KEY absente — configure-la dans .env puis relance le serveur.",
+        })
         await ws.close()
         return
 
