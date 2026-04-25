@@ -116,6 +116,7 @@ For each distinct symptom, produce a bullet block of the form:
   - **Rail / test point:** <e.g. 'PP1V1 at L5210' or 'VCC_MAIN at C3257' — omit if none>
   - **Repair type:** <one of: short-hunt · rail-probe · IC-replace · IC-reflow · pad-repair · trace-repair · jumper · cold-joint-reflow>
   - **Rework hint:** <one line: "hot air 400°C, pre-heat 150°C" or "diode-mode on C3257 should read >0.3 OL">
+  - **Resolution:** <one of: hardware_fix_verified | hardware_ruled_out | ambiguous>
   - **Source:** <URL>
 
 ## Components mentioned by the community
@@ -139,6 +140,33 @@ For each distinct symptom, produce a bullet block of the form:
 - Drop any failure mode that has no microsoldering-actionable fix. If the only
   answer you find is "update firmware" or "replace the whole board", leave it out
   entirely — not our workflow.
+
+## Resolution categorisation (REQUIRED on every bullet)
+
+Each "Known failure mode" bullet ends with a `**Resolution:**` tag that
+captures how the cited source thread or page concluded the diagnosis.
+Three values, pick exactly one:
+
+- **hardware_fix_verified** — A tech replaced, reflowed, or repaired a
+  specific component and confirmed the symptom disappeared. The
+  scenario stands on its own as a known-good repair.
+- **hardware_ruled_out** — The tech probed and explicitly ruled out
+  hardware (e.g. "all rails good", "LPC commands work", "no shorts
+  found"); resolution turned out to be firmware / software / config.
+  **DO NOT drop these cases** — a microsoldering tech at the bench
+  still needs to walk the hardware diagnostic flow before concluding
+  software, so this entry is the *differential diagnostic* the prior
+  user ruled out. The Likely cause you list is a hypothesis to verify,
+  not a verified fix.
+- **ambiguous** — The thread did not reach a clear hardware-vs-software
+  conclusion. Retain when the symptom and likely-cause are well
+  documented even without a verified outcome.
+
+If the source is purely a software-fix story (e.g. "update firmware
+v1.2 fixed it") with no hardware diagnostic flow at all, drop the
+bullet entirely (existing rule above). Resolution exists for cases
+where hardware diagnostics WERE attempted, regardless of the final
+outcome.
 
 ## When you have local documents (technician-supplied schematic / boardview / datasheets)
 

@@ -158,3 +158,27 @@ def test_enriched_blocks_appear_before_retry_suffix() -> None:
     assert out.endswith(SCOUT_RETRY_SUFFIX)
     assert "# Provided ElectricalGraph" in out
     assert out.index("# Provided ElectricalGraph") < out.index(SCOUT_RETRY_SUFFIX)
+
+
+# --- Resolution field on Scout output bullets -----------------------------
+
+
+def test_scout_system_requires_resolution_field_on_bullets() -> None:
+    """SCOUT_SYSTEM must mandate a Resolution tag in the bullet shape so
+    the dump distinguishes verified hardware fixes, ruled-out hardware
+    cases (firmware-was-the-fix), and ambiguous outcomes. Bench-gen and
+    the diagnostic agent rely on the dump-level signal to avoid plastering
+    a hardware cause onto a thread whose actual resolution was software."""
+    from api.pipeline.prompts import SCOUT_SYSTEM
+
+    # Field appears in the bullet template.
+    assert "**Resolution:**" in SCOUT_SYSTEM
+
+    # All three legitimate values are listed.
+    assert "hardware_fix_verified" in SCOUT_SYSTEM
+    assert "hardware_ruled_out" in SCOUT_SYSTEM
+    assert "ambiguous" in SCOUT_SYSTEM
+
+    # Explicit anti-drop rule for hardware_ruled_out — those bullets are
+    # the differential-diagnostic backbone of the bench corpus.
+    assert "DO NOT drop" in SCOUT_SYSTEM
