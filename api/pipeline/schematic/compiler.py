@@ -789,8 +789,27 @@ def _alias_nets_from_power_pin_names(
 
     The added entry is a real NetNode — `connects` is inherited from the
     underlying physical net so downstream consumers (UI, diagnostic agent)
-    can walk it. We never alias if the pin's `net_label` is missing, so
-    no alias ever points to an empty connects list.
+    can walk it.
+
+    Two materialization paths, attempted in order per pin:
+
+    1. **Aliased path** (default, original behaviour). When
+       `pin.net_label` resolves to an existing `graph.nets` entry, the new
+       NetNode inherits its `connects` / `pages` / `is_global` — the
+       die-side name and the package-side name share one physical wire.
+
+    2. **Solitary die-side path** (additive). When `pin.name == pin.net_label`
+       and that label is NOT in `graph.nets`, the merger has dropped the
+       net because only one component pin in the captured schematic carries
+       it (single-pin nets aren't materialized as NetNodes during
+       `merge_pages`). On Apple SoC pin-list pages this is the dominant
+       pattern for the analog auxiliary supplies (`VDD18_TSADC_*`,
+       `VDD18_EFUSE*`, `VDD_FIXED_PLL_DDR<n>`) — each die-side rail enters
+       the SoC on a single pin from a PMU on a separate (often un-captured)
+       page. The label is real and the diagnostic agent / UI / eval should
+       see it. Synthesize a minimal NetNode anchored on the only known pin;
+       pages/is_global default conservatively because the underlying wire
+       was never materialized.
 
     Ground-family names (VSS / AVSS / DVSS) are excluded by the regex.
     Power rails are NOT touched — `eg.power_rails` keeps its original keys
@@ -810,15 +829,22 @@ def _alias_nets_from_power_pin_names(
             if not net_label:
                 continue
             underlying = graph.nets.get(net_label)
-            if underlying is None:
-                continue
-            aliases[name] = NetNode(
-                label=name,
-                is_power=True,
-                is_global=underlying.is_global,
-                pages=list(underlying.pages),
-                connects=list(underlying.connects),
-            )
+            if underlying is not None:
+                aliases[name] = NetNode(
+                    label=name,
+                    is_power=True,
+                    is_global=underlying.is_global,
+                    pages=list(underlying.pages),
+                    connects=list(underlying.connects),
+                )
+            elif net_label == name:
+                aliases[name] = NetNode(
+                    label=name,
+                    is_power=True,
+                    is_global=False,
+                    pages=[],
+                    connects=[f"{component.refdes}.{pin.number}"],
+                )
     return aliases
 
 
