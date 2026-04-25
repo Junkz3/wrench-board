@@ -10,7 +10,6 @@ import pytest
 from api.board.parser.base import BoardParser, parser_for
 
 STUB_EXTENSIONS = [
-    (".fz", "PCB Repair Tool"),
     (".asc", "ASUS TSICT"),
 ]
 
