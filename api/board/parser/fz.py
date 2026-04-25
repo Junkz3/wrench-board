@@ -1,30 +1,29 @@
 # SPDX-License-Identifier: Apache-2.0
-"""ASUS PCB Repair Tool .fz parser — written from scratch.
+"""`.fz` boardview parser — written from scratch.
 
-`.fz` files ship a Test_Link-shape ASCII payload wrapped in an XOR
-stream cipher seeded by a 44 × 32-bit key that ASUS distributes
-separately. Without the key the file cannot be decoded — this is the
-same situation every open-source reader (OpenBoardView, FlexBV) runs
-into. We do two things:
+Two real-world flavours of `.fz` exist in the repair community and
+this parser dispatches between them:
 
-1. Expose a clean descrambling structure: a 16-byte sliding cleartext
-   window feeds a keystream byte via the first four window bytes mixed
-   with the rotating 44-word key schedule. The operation is symmetric
-   (encrypt == decrypt with the same key).
-2. When no key is configured, raise `MissingFZKeyError` with a clear
-   explanation. Users who have a legitimate key pass it via the
-   `MICROSOLDER_FZ_KEY` environment variable (space-separated 32-bit
-   ints, decimal or hex) or directly via `FZParser(key=tuple_of_44)`.
+1. **FZ-zlib** (most common in the field — Quanta, ASRock, ASUS Prime,
+   Gigabyte, MSI). 4-byte LE int32 size header followed by a zlib
+   stream that decompresses to a pipe-delimited (`!`) section format
+   with `A!schema` / `S!data` rows. Implemented in `_fz_zlib.py`,
+   verified against a real Quanta BKL boardview. No key required.
 
-The exact keystream derivation used by ASUS is not publicly specified.
-This implementation provides the structure and a symmetric cipher that
-round-trips cleanly on synthetic data. Real ASUS `.fz` files will
-decode correctly only when the shipped ASUS key schedule matches this
-keystream derivation — in practice that requires the same
-reverse-engineered algorithm used by the community decoder the user
-already trusts. This code is written from scratch against the public
-structural description (see OpenBoardView issue #10 discussion); no
-code was copied.
+2. **FZ-xor** (ASUS PCB Repair Tool original). Test_Link-shape ASCII
+   payload wrapped in a 16-byte sliding-window XOR cipher seeded by
+   a 44×32-bit ASUS-shipped key. Implementation here exposes a
+   symmetric cipher structure; real files require the matching
+   ASUS key derivation. Falls back to `MissingFZKeyError` when no
+   key is configured.
+
+Dispatch: peek the first 6 bytes — if bytes 4-5 carry a zlib magic
+(`78 9c` / `78 da` / `78 01`) we route to FZ-zlib (no key needed).
+Otherwise we route to FZ-xor (key required).
+
+Written from scratch against public format descriptions and direct
+inspection of a real Quanta boardview. No code copied from any
+external codebase.
 """
 
 from __future__ import annotations
@@ -33,6 +32,7 @@ import os
 
 from api.board.model import Board
 from api.board.parser._ascii_boardview import DialectMarkers, parse_test_link_shape
+from api.board.parser._fz_zlib import looks_like_fz_zlib, parse_fz_zlib
 from api.board.parser.base import BoardParser, MissingFZKeyError, register
 
 _ENV_KEY = "MICROSOLDER_FZ_KEY"
@@ -109,10 +109,17 @@ class FZParser(BoardParser):
         self.key = key
 
     def parse(self, raw: bytes, *, file_hash: str, board_id: str) -> Board:
+        # Variant dispatch: zlib-flavoured `.fz` files don't need a key.
+        if looks_like_fz_zlib(raw):
+            return parse_fz_zlib(
+                raw, file_hash=file_hash, board_id=board_id, source_format="fz"
+            )
+        # Otherwise fall through to the XOR-cipher path (ASUS PCB Repair Tool).
         if self.key is None:
             raise MissingFZKeyError(
-                f"fz: no decryption key configured. Set {_ENV_KEY} "
-                f"(44 space-separated 32-bit ints) or pass key=... to FZParser()."
+                f"fz: no zlib magic at offset 4 and no XOR decryption key "
+                f"configured. Set {_ENV_KEY} (44 space-separated 32-bit ints) "
+                f"or pass key=... to FZParser()."
             )
         plain = _decrypt(raw, self.key).decode("utf-8", errors="replace")
         return parse_test_link_shape(

@@ -22,6 +22,8 @@ from api.board.parser._ascii_boardview import (
     looks_like_binary,
     parse_test_link_shape,
 )
+from api.board.parser._fz_zlib import looks_like_fz_zlib, parse_fz_zlib
+from api.board.parser._gencad import looks_like_gencad, parse_gencad
 from api.board.parser.base import BoardParser, ObfuscatedFileError, register
 from api.board.parser.brd2 import BRD2Parser
 
@@ -39,7 +41,20 @@ class CADParser(BoardParser):
     extensions = (".cad",)
 
     def parse(self, raw: bytes, *, file_hash: str, board_id: str) -> Board:
+        # Variant dispatch — `.cad` is an umbrella in the wild:
+        # 1. FZ-zlib container (zlib magic at offset 4).
+        # 2. GenCAD 1.4 ASCII (`$HEADER` / `GENCAD` markers).
+        # 3. BRD2 ASCII (`BRDOUT:` marker).
+        # 4. Test_Link-shape ASCII (legacy fallback).
+        if looks_like_fz_zlib(raw):
+            return parse_fz_zlib(
+                raw, file_hash=file_hash, board_id=board_id, source_format="cad"
+            )
         text = raw.decode("utf-8", errors="replace")
+        if looks_like_gencad(text):
+            return parse_gencad(
+                text, file_hash=file_hash, board_id=board_id, source_format="cad"
+            )
         if "BRDOUT:" in text[:1024]:
             board = BRD2Parser().parse(raw, file_hash=file_hash, board_id=board_id)
             return board.model_copy(update={"source_format": "cad"})
@@ -47,7 +62,7 @@ class CADParser(BoardParser):
             raise ObfuscatedFileError(
                 "cad: this file looks like a binary BoardViewer container "
                 "(non-printable byte ratio > 30%). Current parser supports "
-                "BRD2 (sniffed via BRDOUT:) and Test_Link-shape ASCII only."
+                "FZ-zlib, GenCAD 1.4, BRD2, and Test_Link-shape ASCII."
             )
         return parse_test_link_shape(
             text,
