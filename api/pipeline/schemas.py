@@ -262,6 +262,61 @@ class RefdesMappings(BaseModel):
 
 
 # ======================================================================
+# Symptom coverage checker — Haiku classifier that decides whether a
+# newly-reported repair symptom is already covered by an existing rule
+# in the device pack. When it is (confidence ≥ threshold), the pipeline
+# skips the expand-pack round-trip and the UI can surface the matched
+# rule immediately instead of waiting on an LLM call.
+# ======================================================================
+
+
+class CoverageCheck(BaseModel):
+    """Output of `api.pipeline.coverage.check_symptom_coverage`.
+
+    Emitted via a forced-tool Haiku call — the classifier reads the
+    technician's new symptom and the `rules.json` symptoms, returns a
+    typed verdict. Failed / empty / no-rules pack returns a default
+    `covered=False, confidence=0.0` result so the caller can treat it
+    as "not covered, proceed with expand"."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    schema_version: Literal["1.0"] = "1.0"
+    covered: bool = Field(
+        description=(
+            "True iff the new symptom effectively duplicates or narrows "
+            "an existing rule's symptom — paraphrases count. False when "
+            "the new symptom describes a distinct failure mode the pack "
+            "has never captured."
+        ),
+    )
+    matched_rule_id: str | None = Field(
+        default=None,
+        description=(
+            "Stable id of the best-matching existing rule, e.g. "
+            "'rule-tristar-no-charge-001'. Set only when covered=True "
+            "AND confidence ≥ 0.7 — otherwise null."
+        ),
+    )
+    confidence: float = Field(
+        ge=0.0,
+        le=1.0,
+        description=(
+            "0.0 for unrelated, 0.5-0.7 for partial overlap, 0.7-0.9 for "
+            "paraphrase, 0.9+ for exact / near-exact match."
+        ),
+    )
+    reason: str = Field(
+        description=(
+            "One sentence explaining the match or its absence — e.g. "
+            "'matches rule-tristar-001, both describe no-charge on adapter "
+            "connect'. Surface to the technician in the UI."
+        ),
+        max_length=400,
+    )
+
+
+# ======================================================================
 # PHASE 3 — Writer outputs
 # ======================================================================
 

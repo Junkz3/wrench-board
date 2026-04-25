@@ -79,36 +79,48 @@ def test_repairs_endpoint_persists_symptom_file(memory_root, client):
     assert "created_at" in data
 
 
-def test_repairs_endpoint_skips_pipeline_when_pack_already_complete(memory_root, client):
-    """If the pack already has the 4 writer files, we skip the pipeline rebuild
-    but we STILL persist the repair record — every "nouvelle réparation" is
-    a distinct session, reopenable later from the library.
-    """
+def test_repairs_endpoint_empty_rules_pack_fires_expand(memory_root, client):
+    """Pack complete but rules.json is empty → coverage classifier short-
+    circuits to covered=False (no LLM call) and create_repair fires an
+    expand_pack round rather than skipping. The full pipeline is NOT
+    called. The repair record is persisted either way."""
     slug_dir = memory_root / "demo-pi"
     slug_dir.mkdir()
-    # Bare-minimum content that makes _summarize_pack flag the pack as "complete".
     (slug_dir / "registry.json").write_text('{"schema_version":"1.0","device_label":"Demo Pi","components":[],"signals":[]}')
     (slug_dir / "knowledge_graph.json").write_text('{"schema_version":"1.0","nodes":[],"edges":[]}')
     (slug_dir / "rules.json").write_text('{"schema_version":"1.0","rules":[]}')
     (slug_dir / "dictionary.json").write_text('{"schema_version":"1.0","entries":[]}')
 
-    with patch("api.pipeline.generate_knowledge_pack", new=AsyncMock(side_effect=_fake_pipeline)) as m:
+    with patch(
+        "api.pipeline.generate_knowledge_pack", new=AsyncMock(side_effect=_fake_pipeline)
+    ) as m_pipeline, patch(
+        "api.pipeline.expand_pack",
+        new=AsyncMock(return_value={"new_rules_count": 1, "new_components_count": 0, "total_rules_after": 1}),
+    ) as m_expand:
         res = client.post(
             "/pipeline/repairs",
-            json={"device_label": "Demo Pi", "symptom": "pack already exists on disk"},
+            json={"device_label": "Demo Pi", "symptom": "no 3V3 rail, device won't power on"},
         )
     assert res.status_code == 200
     body = res.json()
-    assert body["pipeline_started"] is False
-    m.assert_not_called()
-    # Repair record IS persisted — two sessions on the same pack are two
-    # separate repairs with two separate contexts.
+    assert body["pipeline_started"] is True
+    assert body["pipeline_kind"] == "expand"
+    assert body["matched_rule_id"] is None
+    m_pipeline.assert_not_called()
+    # expand_pack was fired in background — allow the task to run.
+    import asyncio
+
+    loop = asyncio.get_event_loop()
+    # Give the created_task a tick to execute.
+    loop.run_until_complete(asyncio.sleep(0.05))
+    m_expand.assert_called_once()
+    # Repair record persisted regardless.
     assert body["repair_id"]
     repair_file = slug_dir / "repairs" / f"{body['repair_id']}.json"
     assert repair_file.exists()
     payload = json.loads(repair_file.read_text())
     assert payload["status"] == "open"
-    assert payload["symptom"] == "pack already exists on disk"
+    assert payload["symptom"] == "no 3V3 rail, device won't power on"
 
 
 def test_list_repairs_returns_all_sessions_across_devices(memory_root, client):
@@ -180,7 +192,12 @@ def test_repairs_endpoint_resolves_by_device_slug_when_provided(memory_root, cli
     ):
         (slug_dir / name).write_text(body)
 
-    with patch("api.pipeline.generate_knowledge_pack", new=AsyncMock(side_effect=_fake_pipeline)) as m:
+    with patch(
+        "api.pipeline.generate_knowledge_pack", new=AsyncMock(side_effect=_fake_pipeline)
+    ) as m_pipeline, patch(
+        "api.pipeline.expand_pack",
+        new=AsyncMock(return_value={"new_rules_count": 0, "new_components_count": 0, "total_rules_after": 0}),
+    ):
         res = client.post(
             "/pipeline/repairs",
             json={
@@ -192,8 +209,9 @@ def test_repairs_endpoint_resolves_by_device_slug_when_provided(memory_root, cli
     assert res.status_code == 200
     body = res.json()
     assert body["device_slug"] == "iphone-x-logic-board"
-    assert body["pipeline_started"] is False
-    m.assert_not_called()
+    # Pack complete + empty rules → expand fires (not the full pipeline).
+    assert body["pipeline_kind"] == "expand"
+    m_pipeline.assert_not_called()
 
 
 def test_repairs_endpoint_force_rebuild_persists_repair_and_fires_pipeline(memory_root, client):
@@ -223,6 +241,118 @@ def test_repairs_endpoint_force_rebuild_persists_repair_and_fires_pipeline(memor
     assert body["repair_id"]  # non-empty
     assert (slug_dir / "repairs").exists()
     assert list((slug_dir / "repairs").glob("*.json"))
+
+
+def test_repairs_branch_full_when_pack_absent(memory_root, client):
+    """Pack missing on disk → Branch 1: full pipeline fires with focus_symptom."""
+    captured_kwargs: dict = {}
+
+    async def _capture_pipeline(device_label, *, on_event=None, focus_symptom=None, **_):
+        captured_kwargs["device_label"] = device_label
+        captured_kwargs["focus_symptom"] = focus_symptom
+
+    with patch(
+        "api.pipeline.generate_knowledge_pack",
+        new=AsyncMock(side_effect=_capture_pipeline),
+    ):
+        res = client.post(
+            "/pipeline/repairs",
+            json={"device_label": "Brand New Device", "symptom": "screen is dark on power-on"},
+        )
+    # Give the background task a tick to run.
+    import asyncio
+
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(asyncio.sleep(0.05))
+
+    assert res.status_code == 200
+    body = res.json()
+    assert body["pipeline_started"] is True
+    assert body["pipeline_kind"] == "full"
+    assert body["matched_rule_id"] is None
+    assert captured_kwargs["focus_symptom"] == "screen is dark on power-on"
+
+
+def test_repairs_branch_expand_when_pack_complete_and_symptom_uncovered(memory_root, client):
+    """Pack complete + coverage classifier says NOT covered → Branch 3: expand."""
+    slug_dir = memory_root / "demo-pi"
+    slug_dir.mkdir()
+    (slug_dir / "registry.json").write_text('{"schema_version":"1.0","device_label":"Demo Pi","components":[],"signals":[]}')
+    (slug_dir / "knowledge_graph.json").write_text('{"schema_version":"1.0","nodes":[],"edges":[]}')
+    (slug_dir / "rules.json").write_text(
+        '{"schema_version":"1.0","rules":[{"id":"rule-charge-001","symptoms":["no charge"],"likely_causes":[{"refdes":"U1","probability":0.9,"mechanism":"x"}],"confidence":0.8}]}'
+    )
+    (slug_dir / "dictionary.json").write_text('{"schema_version":"1.0","entries":[]}')
+
+    from api.pipeline.schemas import CoverageCheck
+
+    async def _uncovered(**_kwargs):
+        return CoverageCheck(
+            covered=False, matched_rule_id=None, confidence=0.2,
+            reason="distinct failure mode",
+        )
+
+    with patch(
+        "api.pipeline.coverage.check_symptom_coverage", new=AsyncMock(side_effect=_uncovered)
+    ), patch(
+        "api.pipeline.expand_pack",
+        new=AsyncMock(return_value={"new_rules_count": 1, "new_components_count": 0, "total_rules_after": 2}),
+    ) as m_expand:
+        res = client.post(
+            "/pipeline/repairs",
+            json={"device_label": "Demo Pi", "symptom": "USB port delivers no 5V"},
+        )
+    import asyncio
+
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(asyncio.sleep(0.05))
+
+    body = res.json()
+    assert body["pipeline_kind"] == "expand"
+    assert body["pipeline_started"] is True
+    assert body["matched_rule_id"] is None
+    assert body["coverage_reason"] == "distinct failure mode"
+    m_expand.assert_called_once()
+
+
+def test_repairs_branch_none_when_symptom_already_covered(memory_root, client):
+    """Pack complete + coverage classifier says covered with confidence≥0.7
+    AND matched_rule_id set → Branch 2: skip, return matched rule."""
+    slug_dir = memory_root / "demo-pi"
+    slug_dir.mkdir()
+    (slug_dir / "registry.json").write_text('{"schema_version":"1.0","device_label":"Demo Pi","components":[],"signals":[]}')
+    (slug_dir / "knowledge_graph.json").write_text('{"schema_version":"1.0","nodes":[],"edges":[]}')
+    (slug_dir / "rules.json").write_text(
+        '{"schema_version":"1.0","rules":[{"id":"rule-charge-001","symptoms":["no charge"],"likely_causes":[{"refdes":"U1","probability":0.9,"mechanism":"x"}],"confidence":0.8}]}'
+    )
+    (slug_dir / "dictionary.json").write_text('{"schema_version":"1.0","entries":[]}')
+
+    from api.pipeline.schemas import CoverageCheck
+
+    async def _covered(**_kwargs):
+        return CoverageCheck(
+            covered=True, matched_rule_id="rule-charge-001", confidence=0.92,
+            reason="paraphrase of existing rule-charge-001",
+        )
+
+    with patch(
+        "api.pipeline.coverage.check_symptom_coverage", new=AsyncMock(side_effect=_covered)
+    ), patch(
+        "api.pipeline.expand_pack", new=AsyncMock()
+    ) as m_expand, patch(
+        "api.pipeline.generate_knowledge_pack", new=AsyncMock(side_effect=_fake_pipeline)
+    ) as m_pipeline:
+        res = client.post(
+            "/pipeline/repairs",
+            json={"device_label": "Demo Pi", "symptom": "iPhone won't take a charge"},
+        )
+    body = res.json()
+    assert body["pipeline_kind"] == "none"
+    assert body["pipeline_started"] is False
+    assert body["matched_rule_id"] == "rule-charge-001"
+    assert "paraphrase" in body["coverage_reason"]
+    m_expand.assert_not_called()
+    m_pipeline.assert_not_called()
 
 
 def test_repairs_endpoint_rejects_short_input(memory_root, client):

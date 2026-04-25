@@ -25,6 +25,7 @@ import time
 import uuid
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import Literal
 
 from anthropic import APIConnectionError, APIError, APITimeoutError, AsyncAnthropic
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile, WebSocket, WebSocketDisconnect
@@ -443,6 +444,33 @@ class RepairResponse(BaseModel):
         description="True when a background pipeline run was kicked off — False when "
         "the pack is already complete on disk and no rebuild is needed."
     )
+    pipeline_kind: Literal["full", "expand", "none"] = Field(
+        default="none",
+        description=(
+            "What the backend decided to run given the pack state and the symptom: "
+            "'full' = complete pipeline (Scout→Registry→Writers→Audit) with the "
+            "symptom threaded to Scout as a priority target; 'expand' = targeted "
+            "Scout+Clinicien round on the symptom only (pack already existed); "
+            "'none' = no LLM work kicked off because the symptom is already "
+            "covered by an existing rule."
+        ),
+    )
+    matched_rule_id: str | None = Field(
+        default=None,
+        description=(
+            "When the coverage classifier found an existing rule that already "
+            "covers this symptom, its id is returned here so the UI can surface "
+            "the known diagnostic flow immediately instead of waiting on an "
+            "expand round-trip."
+        ),
+    )
+    coverage_reason: str | None = Field(
+        default=None,
+        description=(
+            "One-sentence explanation from the coverage classifier — set alongside "
+            "`matched_rule_id` when the symptom is already covered, otherwise null."
+        ),
+    )
 
 
 def _pack_is_complete(pack_dir: Path) -> bool:
@@ -583,7 +611,11 @@ def list_repair_conversations(repair_id: str) -> dict:
     }
 
 
-async def _run_pipeline_with_events(device_label: str, slug: str) -> None:
+async def _run_pipeline_with_events(
+    device_label: str,
+    slug: str,
+    focus_symptom: str | None = None,
+) -> None:
     """Background task: run the pipeline, relaying its events on the bus.
 
     On every `phase_finished` event we also spawn a fire-and-forget narration
@@ -591,6 +623,9 @@ async def _run_pipeline_with_events(device_label: str, slug: str) -> None:
     `phase_narration` event so the landing UI can render a human-readable
     sentence next to the progress dot. Narration failures are silent; the
     pipeline never blocks waiting for them.
+
+    `focus_symptom`, when supplied, is threaded to Scout so the technician's
+    reason-for-opening-the-repair is prioritised in the web_search rounds.
     """
     t0 = time.monotonic()
 
@@ -631,6 +666,7 @@ async def _run_pipeline_with_events(device_label: str, slug: str) -> None:
         await generate_knowledge_pack(
             device_label,
             on_event=_on_event,
+            focus_symptom=focus_symptom,
         )
     except Exception as exc:
         logger.exception("[API] background pipeline failed for slug=%r", slug)
@@ -642,6 +678,123 @@ async def _run_pipeline_with_events(device_label: str, slug: str) -> None:
                 "error": str(exc),
                 "elapsed_s": time.monotonic() - t0,
             },
+        )
+
+
+async def _run_expand_with_events(slug: str, symptom: str) -> None:
+    """Background task: run expand_pack with event-bus relaying.
+
+    Kicked off by `create_repair` when the pack already exists and the
+    coverage classifier decided the new symptom is NOT covered by an
+    existing rule.
+
+    We emit events in two shapes simultaneously on the WS bus:
+
+    1. **Generic `pipeline_*` events** — same types the landing UI
+       listens for on a full pipeline run (`pipeline_started`,
+       `phase_started/finished` on a synthetic "expand" phase,
+       `pipeline_finished/failed`). Each carries `kind: "expand"` so
+       consumers that care can branch; consumers that don't can treat
+       the flow identically to a full run. This keeps the landing
+       timeline + auto-redirect working without frontend changes.
+    2. **Specific `expand_*` events** — in addition, so a future UI
+       that wants to render expand differently has a distinct stream.
+    """
+    t0 = time.monotonic()
+    # Compat: landing.js / pipeline_progress.js listen for pipeline_started.
+    await events.publish(
+        slug,
+        {"type": "pipeline_started", "kind": "expand", "device_slug": slug, "symptom": symptom},
+    )
+    await events.publish(slug, {"type": "phase_started", "phase": "expand"})
+    # Specific flavour (optional consumers).
+    await events.publish(slug, {"type": "expand_started", "symptom": symptom})
+    try:
+        summary = await expand_pack(
+            device_slug=slug,
+            focus_symptoms=[symptom],
+        )
+        elapsed = time.monotonic() - t0
+        counts = {
+            "new_rules_count": summary.get("new_rules_count", 0),
+            "new_components_count": summary.get("new_components_count", 0),
+            "total_rules_after": summary.get("total_rules_after", 0),
+        }
+        await events.publish(
+            slug,
+            {"type": "phase_finished", "phase": "expand", "elapsed_s": elapsed, "counts": counts},
+        )
+        await events.publish(slug, {"type": "expand_finished", "elapsed_s": elapsed, **counts})
+        # Compat: triggers landing goToWorkspace redirect.
+        await events.publish(
+            slug,
+            {
+                "type": "pipeline_finished",
+                "kind": "expand",
+                "device_slug": slug,
+                "status": "APPROVED",
+                "elapsed_s": elapsed,
+                **counts,
+            },
+        )
+    except Exception as exc:  # noqa: BLE001 — bus delivery must not crash
+        logger.exception("[API] expand_pack failed for slug=%r", slug)
+        elapsed = time.monotonic() - t0
+        await events.publish(slug, {"type": "expand_failed", "error": str(exc), "elapsed_s": elapsed})
+        # Compat: landing_failed branch.
+        await events.publish(
+            slug,
+            {
+                "type": "pipeline_failed",
+                "kind": "expand",
+                "status": "ERROR",
+                "error": str(exc),
+                "elapsed_s": elapsed,
+            },
+        )
+
+
+async def _maybe_check_coverage(
+    slug: str,
+    symptom: str,
+    memory_root: Path,
+) -> "CoverageCheck":  # noqa: F821 — forward-only type ref
+    """Call the Haiku coverage classifier; on any failure, fall back to
+    an uncovered verdict so the expand-pack path still fires.
+
+    Lazy-imports `check_symptom_coverage` to avoid a module-load cycle:
+    coverage → schemas → api.pipeline (this module)."""
+    from api.pipeline.coverage import check_symptom_coverage
+    from api.pipeline.schemas import CoverageCheck
+
+    settings = get_settings()
+    if not settings.anthropic_api_key:
+        return CoverageCheck(
+            covered=False,
+            matched_rule_id=None,
+            confidence=0.0,
+            reason="no Anthropic API key configured — treating as uncovered",
+        )
+    client = AsyncAnthropic(api_key=settings.anthropic_api_key, max_retries=settings.anthropic_max_retries)
+    try:
+        return await check_symptom_coverage(
+            client=client,
+            model=settings.anthropic_model_fast,
+            device_slug=slug,
+            symptom=symptom,
+            memory_root=memory_root,
+        )
+    except Exception as exc:  # noqa: BLE001 — failure falls through to expand
+        logger.warning(
+            "[API] coverage check failed for slug=%r (%s); treating as uncovered",
+            slug,
+            exc,
+        )
+        return CoverageCheck(
+            covered=False,
+            matched_rule_id=None,
+            confidence=0.0,
+            reason=f"coverage classifier error: {exc}",
         )
 
 
@@ -668,34 +821,76 @@ async def create_repair(request: RepairRequest) -> RepairResponse:
     # must be reopenable later from the library.
     repair_id = _persist_repair(memory_root, slug, request.device_label, request.symptom)
 
-    if _pack_is_complete(pack_dir) and not request.force_rebuild:
+    pack_complete = _pack_is_complete(pack_dir)
+
+    # Branch 1 — pack missing (or force_rebuild): fire the full pipeline
+    # with the symptom threaded to Scout as a priority target.
+    if not pack_complete or request.force_rebuild:
+        if request.force_rebuild and pack_complete:
+            logger.info(
+                "[API] /pipeline/repairs · force_rebuild=True · repair=%s regenerating pack for slug=%r",
+                repair_id,
+                slug,
+            )
         logger.info(
-            "[API] /pipeline/repairs · pack already complete for slug=%r — repair=%s opens existing pack",
+            "[API] /pipeline/repairs · firing full pipeline for slug=%r · focus_symptom=yes",
             slug,
-            repair_id,
+        )
+        asyncio.create_task(
+            _run_pipeline_with_events(
+                request.device_label, slug, focus_symptom=request.symptom
+            )
+        )
+        return RepairResponse(
+            repair_id=repair_id,
+            device_slug=slug,
+            device_label=request.device_label,
+            pipeline_started=True,
+            pipeline_kind="full",
+        )
+
+    # Pack complete — compare the symptom against existing rules before
+    # spending tokens on an expand round-trip.
+    coverage = await _maybe_check_coverage(slug, request.symptom, memory_root)
+
+    # Branch 2 — symptom already covered by an existing rule: skip LLM
+    # work entirely and return the matched_rule_id so the UI can surface
+    # the known diagnostic flow immediately.
+    if (
+        coverage.covered
+        and coverage.confidence >= 0.7
+        and coverage.matched_rule_id is not None
+    ):
+        logger.info(
+            "[API] /pipeline/repairs · symptom covered by %s (confidence=%.2f) — no LLM run",
+            coverage.matched_rule_id,
+            coverage.confidence,
         )
         return RepairResponse(
             repair_id=repair_id,
             device_slug=slug,
             device_label=request.device_label,
             pipeline_started=False,
+            pipeline_kind="none",
+            matched_rule_id=coverage.matched_rule_id,
+            coverage_reason=coverage.reason,
         )
 
-    if request.force_rebuild and _pack_is_complete(pack_dir):
-        logger.info(
-            "[API] /pipeline/repairs · force_rebuild=True · repair=%s regenerating pack for slug=%r",
-            repair_id,
-            slug,
-        )
-
-    logger.info("[API] /pipeline/repairs · firing pipeline for slug=%r", slug)
-    # Fire-and-forget. Errors land on the progress WS as pipeline_failed.
-    asyncio.create_task(_run_pipeline_with_events(request.device_label, slug))
+    # Branch 3 — pack complete but symptom uncovered: fire a targeted
+    # expand_pack that grows the existing pack with Scout + Clinicien on
+    # the symptom alone (much cheaper than the full pipeline).
+    logger.info(
+        "[API] /pipeline/repairs · pack complete for slug=%r; symptom uncovered — firing expand",
+        slug,
+    )
+    asyncio.create_task(_run_expand_with_events(slug, request.symptom))
     return RepairResponse(
         repair_id=repair_id,
         device_slug=slug,
         device_label=request.device_label,
         pipeline_started=True,
+        pipeline_kind="expand",
+        coverage_reason=coverage.reason,
     )
 
 

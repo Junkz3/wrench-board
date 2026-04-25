@@ -1,0 +1,19 @@
+BoardView R5.0
+var_data: 4 2 6 1
+Format:
+0 0
+2000 0
+2000 1000
+0 1000
+Components:
+U1 5 4
+R1 5 6
+Pins:
+100 100 -99 1 +5V
+200 100 -99 1 GND
+300 100 -99 1 CLK
+400 100 -99 1 DATA
+500 100 1 2 +5V
+600 100 -99 2 GND
+TestPoints:
+1 500 100 1 +5V

@@ -163,6 +163,68 @@ def test_enriched_blocks_appear_before_retry_suffix() -> None:
 # --- Resolution field on Scout output bullets -----------------------------
 
 
+# --- focus_symptom targeting ----------------------------------------------
+
+
+def test_focus_symptom_none_preserves_legacy_identity() -> None:
+    """focus_symptom=None + no other extras → byte-identical to legacy."""
+    actual = _build_user_prompt(
+        device_label="iPhone X",
+        attempt=0,
+        graph=None,
+        board=None,
+        datasheet_paths=None,
+        focus_symptom=None,
+    )
+    assert actual == _legacy_prompt("iPhone X", attempt=0)
+
+
+def test_focus_symptom_added_as_priority_block() -> None:
+    out = _build_user_prompt(
+        device_label="iPhone X",
+        attempt=0,
+        graph=None,
+        board=None,
+        datasheet_paths=None,
+        focus_symptom="No backlight when USB-C connected, LCD dark but touch responds",
+    )
+    assert SCOUT_USER_TEMPLATE.format(device_label="iPhone X") in out
+    assert "# Priority symptom from the technician" in out
+    assert "No backlight when USB-C connected" in out
+    # The directive tells Scout to spend 3-4 queries on the symptom
+    assert "3-4 of your web_search queries" in out
+
+
+def test_focus_symptom_ordered_before_graph_when_both_provided() -> None:
+    """Priority symptom appears before provided-graph block so Scout reads
+    the tech's concern first, then the targeting data."""
+    out = _build_user_prompt(
+        device_label="demo",
+        attempt=0,
+        graph=_tiny_graph(),
+        board=None,
+        datasheet_paths=None,
+        focus_symptom="no audio output on headphone jack",
+    )
+    idx_focus = out.index("# Priority symptom from the technician")
+    idx_graph = out.index("# Provided ElectricalGraph")
+    assert idx_focus < idx_graph
+
+
+def test_focus_symptom_with_retry_suffix_preserves_ordering() -> None:
+    """Retry suffix stays at the very end; focus block is before it."""
+    out = _build_user_prompt(
+        device_label="demo",
+        attempt=1,
+        graph=None,
+        board=None,
+        datasheet_paths=None,
+        focus_symptom="no audio output",
+    )
+    assert out.endswith(SCOUT_RETRY_SUFFIX)
+    assert out.index("# Priority symptom") < out.index(SCOUT_RETRY_SUFFIX)
+
+
 def test_scout_system_requires_resolution_field_on_bullets() -> None:
     """SCOUT_SYSTEM must mandate a Resolution tag in the bullet shape so
     the dump distinguishes verified hardware fixes, ruled-out hardware

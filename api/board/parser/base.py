@@ -26,6 +26,16 @@ class ObfuscatedFileError(InvalidBoardFile):
     """Raised on OBV-signature obfuscated files — we refuse to decode."""
 
 
+class MissingFZKeyError(InvalidBoardFile):
+    """Raised when a .fz file is uploaded without a decryption key configured.
+
+    ASUS .fz files are XOR-scrambled with a per-vendor 44×32-bit key
+    that ships separately from the file. Set `MICROSOLDER_FZ_KEY` in
+    the environment (space-separated decimal or hex integers), or
+    pass the key to `FZParser(key=...)` directly.
+    """
+
+
 class MalformedHeaderError(InvalidBoardFile):
     """Raised when a known block (e.g. `Parts:`, `Pins:`) is present but malformed."""
 

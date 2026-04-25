@@ -13,6 +13,7 @@ from api.board.parser.base import (
     BoardParserError,
     InvalidBoardFile,
     MalformedHeaderError,
+    MissingFZKeyError,
     ObfuscatedFileError,
     PinPartMismatchError,
     UnsupportedFormatError,
@@ -92,6 +93,13 @@ async def parse_board(file: UploadFile = File(...)) -> dict:  # noqa: B008
             raise HTTPException(
                 status_code=415,
                 detail={"detail": "unsupported-format", "message": str(e)},
+            ) from e
+        except MissingFZKeyError as e:
+            # Specific 422 so the frontend can prompt the tech for a key
+            # rather than dumping a generic invalid-board message.
+            raise HTTPException(
+                status_code=422,
+                detail={"detail": "fz-key-missing", "message": str(e)},
             ) from e
         except ObfuscatedFileError as e:
             raise HTTPException(

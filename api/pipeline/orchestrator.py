@@ -209,6 +209,7 @@ async def generate_knowledge_pack(
     max_revise_rounds: int | None = None,
     on_event: OnEvent | None = None,
     uploaded_documents_dir: Path | None = None,
+    focus_symptom: str | None = None,
 ) -> PipelineResult:
     """Run the full pipeline for one device.
 
@@ -351,6 +352,7 @@ async def generate_knowledge_pack(
             client=client,
             model=models_by_role["scout"],
             device_label=device_label,
+            focus_symptom=focus_symptom,
             min_symptoms=settings.pipeline_scout_min_symptoms,
             min_components=settings.pipeline_scout_min_components,
             min_sources=settings.pipeline_scout_min_sources,

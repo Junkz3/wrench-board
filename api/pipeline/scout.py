@@ -99,6 +99,7 @@ async def run_scout(
     graph: ElectricalGraph | None = None,
     board: Board | None = None,
     datasheet_paths: list[Path] | None = None,
+    focus_symptom: str | None = None,
     max_continuations: int = 3,
     min_symptoms: int = 3,
     min_components: int = 3,
@@ -119,13 +120,19 @@ async def run_scout(
     the user message that Scout uses to seed MPN-targeted queries and to
     attach refdes to its quotes when an external source supports them.
     The anti-hallucination contracts live in SCOUT_SYSTEM, not here.
+
+    `focus_symptom`, when supplied, tells Scout to allocate 3-4 of its
+    web_search queries specifically to that symptom so the technician's
+    reason-for-repair is covered on the very first pack generation
+    rather than requiring a follow-up expand pass.
     """
     logger.info(
-        "[Scout] Starting research for device=%r · graph=%s · board=%s · datasheets=%d",
+        "[Scout] Starting research for device=%r · graph=%s · board=%s · datasheets=%d · focus_symptom=%s",
         device_label,
         "yes" if graph is not None else "no",
         "yes" if board is not None else "no",
         len(datasheet_paths or []),
+        "yes" if focus_symptom else "no",
     )
 
     last_dump: str | None = None
@@ -139,6 +146,7 @@ async def run_scout(
             graph=graph,
             board=board,
             datasheet_paths=datasheet_paths,
+            focus_symptom=focus_symptom,
             max_continuations=max_continuations,
             attempt=attempt,
             stats=stats,
@@ -239,6 +247,26 @@ def _build_datasheets_block(datasheet_paths: list[Path]) -> str:
     return "\n".join(lines)
 
 
+def _build_focus_symptom_block(symptom: str) -> str:
+    """Render the technician-supplied focus symptom as a Scout directive.
+
+    Instructs Scout to allocate 3-4 queries specifically to this symptom
+    so the repair's reason-for-bench is covered on the initial pack
+    generation rather than falling out to a follow-up expand pass."""
+    return (
+        "# Priority symptom from the technician\n"
+        "\n"
+        f"> {symptom.strip()}\n"
+        "\n"
+        "Allocate 3-4 of your web_search queries specifically to this symptom — "
+        "combine it with the device name, with suspected refdes or MPN family, "
+        "and with rework technique keywords. This symptom is the reason the "
+        "tech opened the repair session; make sure your dump covers it as a "
+        "named bullet under 'Known failure modes' (with a Resolution tag). "
+        "The remaining queries may cover the device more broadly."
+    )
+
+
 def _build_user_prompt(
     *,
     device_label: str,
@@ -246,15 +274,18 @@ def _build_user_prompt(
     graph: ElectricalGraph | None,
     board: Board | None,
     datasheet_paths: list[Path] | None,
+    focus_symptom: str | None = None,
 ) -> str:
     """Assemble the Scout user message.
 
-    When all three optional inputs are absent / empty, returns exactly the
+    When all optional inputs are absent / empty, returns exactly the
     legacy `SCOUT_USER_TEMPLATE.format(...)` (+ retry suffix), so the
     no-documents path is byte-for-byte identical to today's pipeline."""
     user_prompt = SCOUT_USER_TEMPLATE.format(device_label=device_label)
 
     extra_blocks: list[str] = []
+    if focus_symptom:
+        extra_blocks.append(_build_focus_symptom_block(focus_symptom))
     if graph is not None:
         extra_blocks.append(_build_graph_summary(graph))
     if board is not None:
@@ -279,6 +310,7 @@ async def _scout_once(
     graph: ElectricalGraph | None,
     board: Board | None,
     datasheet_paths: list[Path] | None,
+    focus_symptom: str | None,
     max_continuations: int,
     attempt: int,
     stats: PhaseTokenStats | None = None,
@@ -290,6 +322,7 @@ async def _scout_once(
         graph=graph,
         board=board,
         datasheet_paths=datasheet_paths,
+        focus_symptom=focus_symptom,
     )
 
     messages: list[dict] = [{"role": "user", "content": user_prompt}]

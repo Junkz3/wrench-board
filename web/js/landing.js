@@ -155,12 +155,41 @@ async function onSubmit(ev) {
     const slug = repair.device_slug;
     if (!rid || !slug) throw new Error("réponse invalide du serveur");
 
+    // Three response shapes, three UX flows.
+    // Branch 2 — symptom already covered by a known rule: no LLM work,
+    // fast redirect to workspace.
     if (!repair.pipeline_started) {
-      setStatus(`Je connais déjà ${repair.device_label}. J'ouvre le diagnostic…`, STATUS_NEUTRAL);
+      if (repair.matched_rule_id) {
+        setStatus(
+          `Je connais déjà ce cas (${repair.matched_rule_id}). J'ouvre le diagnostic…`,
+          STATUS_NEUTRAL,
+        );
+      } else {
+        setStatus(
+          `Je connais déjà ${repair.device_label}. J'ouvre le diagnostic…`,
+          STATUS_NEUTRAL,
+        );
+      }
       goToWorkspace(rid, slug);
       return;
     }
 
+    // Branch 3 — pack exists but the symptom is new: targeted enrich
+    // (~3 min). Show a simplified "enrichment" timeline rather than the
+    // full 5-phase pipeline layout.
+    if (repair.pipeline_kind === "expand") {
+      setStatus(
+        `Je connais ${repair.device_label}. J'ajoute ton symptôme spécifique (~3 min).`,
+        STATUS_NEUTRAL,
+      );
+      showTimeline();
+      setTimelineTitle(`Enrichissement ciblé · ${repair.device_label}`);
+      setExpandMode();
+      subscribeToProgress(slug, rid);
+      return;
+    }
+
+    // Branch 1 — full pipeline on a fresh device (~5-10 min).
     setStatus("Nouveau pour moi — je construis la fiche en arrière-plan. Tu peux regarder.", STATUS_NEUTRAL);
     showTimeline();
     setTimelineTitle(`Construction de la fiche · ${repair.device_label}`);
@@ -211,12 +240,16 @@ function handleProgressEvent(ev, slug, repairId) {
       break;
     case "phase_started": {
       const phase = ev.phase;
-      if (PHASE_ORDER.includes(phase)) setPhaseState(phase, "running");
+      if (PHASE_ORDER.includes(phase) || phase === "expand") {
+        setPhaseState(phase, "running");
+      }
       break;
     }
     case "phase_finished": {
       const phase = ev.phase;
-      if (PHASE_ORDER.includes(phase)) setPhaseState(phase, "done");
+      if (PHASE_ORDER.includes(phase) || phase === "expand") {
+        setPhaseState(phase, "done");
+      }
       break;
     }
     case "phase_narration": {
@@ -249,11 +282,44 @@ function handleProgressEvent(ev, slug, repairId) {
   }
 }
 
+function setExpandMode() {
+  // Collapse the 5-phase pipeline timeline into a single "enrichment"
+  // row — the expand path runs a targeted Scout + Registry rebuild +
+  // Clinicien and doesn't traverse Mapper / Writers / Auditor. Showing
+  // 5 pending dots that never advance (because phase events carry
+  // phase: "expand" which isn't in PHASE_ORDER) looks broken.
+  const tl = document.getElementById("landingTimeline");
+  if (!tl) return;
+  tl.classList.add("landing-timeline-expand");
+  const phases = tl.querySelectorAll(".landing-phase");
+  phases.forEach((el, i) => {
+    if (i === 0) {
+      // Repurpose the first row as the single "expand" marker.
+      el.dataset.phase = "expand";
+      el.classList.remove("is-done", "is-failed");
+      el.classList.add("is-running");
+      const label = el.querySelector(".landing-phase-label");
+      if (label) label.textContent = "Recherche ciblée sur ton symptôme";
+      const narr = el.querySelector(".landing-phase-narration");
+      if (narr) narr.textContent = "";
+    } else {
+      // Hide the other phase rows in expand mode.
+      el.hidden = true;
+    }
+  });
+}
+
+
 function goToWorkspace(repairId, slug) {
+  // Land the tech on the graph view (loads graph + memory bank + opens
+  // the LLM chat panel via openLLMPanelIfRepairParam) rather than the
+  // home / repair_dashboard which only surfaces findings + timeline.
+  // The dashboard remains reachable via the left rail #home button.
   const url = new URL(location.href);
   url.searchParams.set("repair", repairId);
   url.searchParams.set("device", slug);
   url.searchParams.delete("landing");
+  url.hash = "#graphe";
   location.href = url.toString();
 }
 

@@ -8,6 +8,34 @@ Format per item: **[Pn] refdes/mode — short diagnosis** · *file:line pointer 
 
 ---
 
+## INVARIANTS — universal properties the simulator MUST satisfy
+
+The 10 invariants below are enforced by `tests/pipeline/schematic/test_simulator_invariants.py` and run in `make test` (≈1.3 s wall). Every keep-commit MUST pass them. CI rejects regressions automatically — no human review needed to catch a gaming pattern that violates any of these.
+
+Spec: `docs/superpowers/specs/2026-04-25-simulator-invariants-design.md`
+
+| ID | Property | Catches |
+|----|----------|---------|
+| INV-1 | `cascade_dead_*` is always a subset of the graph | Hallucinated refdes / rail labels |
+| INV-2 | `failures=[]` produces empty cascade | Spurious deaths from baseline |
+| INV-3 | Every cascade death has a physical cause (kill / dead rail / shorted source / open-passive downstream) | The gaming pattern that produced commits e09dd47 / f33d2da / 7b821cf — the OR-chain in `_justifies_death()` is the formal anti-gaming contract |
+| INV-4 | Killing a rail's source IC → rail enters `cascade_dead_rails` | Broken transitivity in `_cascade` step 3 |
+| INV-5 | Dead rail → its consumers die (unless they have a live alternate `power_in`) | Broken transitivity in `_cascade` step 4 |
+| INV-6 | Determinism on the failure path | Non-determinism corrupting evolve scoring |
+| INV-7 | Sourceless rails (external inputs: VIN, USB, battery) immune to internal IC kills | Over-prediction on external-input failures |
+| INV-8 | Round-trip: `hypothesize(simulate(refdes, mode))` returns `(refdes, mode)` in top-5 — measured on observable pairs only, ≥80% recall, ≤75% silent ratio | Asymmetry between simulator and hypothesize physics |
+| INV-9 | Non-empty cascade → verdict ∈ {cascade, blocked, degraded} (never "completed") | UI/data drift |
+| INV-10 | `hypothesize(empty_observation)` returns no positive-score hypotheses | Fabrication of suspicion from no evidence |
+
+If an invariant fails on a future change, the path is:
+1. Verify the invariant property is the right physical law (vs. mistakenly encoded).
+2. If the property is right → it's a bug; file here as a P-level entry, do NOT silently weaken the test.
+3. If the property is overstated → relax it via human edit to the spec + test, document why in the test docstring.
+
+The evolve agent CANNOT modify the invariant file. Only humans update it. This is the closure of the score-gaming backdoor, complementing the hand-curated `benchmark/scenarios.jsonl` and the human-only control of `evaluator.py`.
+
+---
+
 ## P1 — High-impact gaps (move the needle on cascade_recall or self_mrr)
 
 ### Open on passive_fb filter — downstream rail not marked dead
