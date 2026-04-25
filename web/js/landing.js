@@ -68,7 +68,7 @@ function startEtaTicker() {
   if (window.__landingEtaTimer) clearInterval(window.__landingEtaTimer);
   const tick = () => {
     const elapsed = Math.max(0, (Date.now() - pipelineStartedAt) / 1000);
-    eta.textContent = `${elapsed.toFixed(0)}s`;
+    eta.textContent = `Écoulé · ${elapsed.toFixed(0)}s`;
   };
   tick();
   window.__landingEtaTimer = setInterval(tick, 250);
@@ -236,7 +236,7 @@ function handleProgressEvent(ev, slug, repairId) {
     case "subscribed":
       break;
     case "pipeline_started":
-      setStatus(`Pipeline démarré sur ${ev.device_slug || slug}.`, STATUS_LOADING);
+      setStatus(`Pipeline démarré sur ${ev.device_label || ev.device_slug || slug}.`, STATUS_LOADING);
       break;
     case "phase_started": {
       const phase = ev.phase;
@@ -262,7 +262,9 @@ function handleProgressEvent(ev, slug, repairId) {
       setTimelineTitle(`Fiche prête · ${ev.status || ""}`);
       setStatus("C'est prêt. J'ouvre le diagnostic…", STATUS_NEUTRAL);
       stopEtaTicker();
-      setTimeout(() => goToWorkspace(repairId, slug), 1200);
+      // 2500 ms grace gives the audit phase narration (Haiku ~800-1600 ms)
+      // time to land on the WS bus and render before we navigate away.
+      setTimeout(() => goToWorkspace(repairId, slug), 2500);
       break;
     }
     case "pipeline_failed": {
