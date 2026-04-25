@@ -560,6 +560,28 @@ class SimulationEngine:
                     rail_voltage[kill_downstream_rail] = 0.0
                     touched_rails.add(kill_downstream_rail)
                     self._forced_dead_rails.add(kill_downstream_rail)
+                # Mark the failed open passive itself as degraded — mirrors
+                # 85899c6's leaky-cap pattern. An open resistor / ferrite is
+                # mechanically broken (cracked solder joint, blown fusible,
+                # cracked element), which is an abnormal physical state. The
+                # current code captures the cascade (downstream consumers /
+                # rail) but leaves the failed passive at the pre-seed "off",
+                # an asymmetry between the cause and its surface in the
+                # timeline. NOT a self-dead pattern: we use the existing
+                # `"degraded"` enum, not `"dead"` (which would feed
+                # effective_dead and break ties via the dead_components
+                # symptom — that's the gaming pattern that anti-pattern
+                # rule explicitly forbids). `_cascade` step 1 reads
+                # `state == "dead"` only, so this assignment is invisible
+                # to the cascade aggregation. Likewise invisible to the
+                # current evaluator's symptom projection (no
+                # degraded_components axis). Pairs with the
+                # propose-evaluator-fix in evolve/proposals/
+                # evaluator-2026-04-25-0500.md — when that proposal lands,
+                # the R10/R11/R160 empty-fingerprint cluster (currently
+                # 1.17 RR loss / 136 candidates) breaks via per-passive
+                # unique degraded_components fingerprint.
+                components[f.refdes] = "degraded"
                 continue
 
         return frozenset(touched_rails)
