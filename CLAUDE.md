@@ -605,6 +605,17 @@ commit 21de00b). The diagnostic runtime picks the model from the `tier`
 query param at WS open: `fast` / `normal` / `deep`. Changing tier in the
 frontend reconnects the WS (explicit new conversation).
 
+**Schematic vision pipeline = Opus 4.7 only — do not migrate to Sonnet.**
+`page_vision.extract_page` defaults to `settings.anthropic_model_main`
+(Opus 4.7) on purpose. Sonnet 4.6 was tested empirically on iPhone X
+schematic page 4 (2026-04-25): identical capacitor/IC/net coverage but
+**3 OCR hallucinations on rail names** (`PP9V8_SOC_FIXED_S1` instead of
+`PP0V8_SOC_FIXED_S1`, etc.) — silent corruption of the power tree, not
+detectable by the simulator invariants. Opus 4.7 had zero hallucinations
+on the same page. Full methodology + reproduction script:
+`docs/notes/2026-04-25-vision-model-opus-vs-sonnet.md`. Re-test only when
+a new vision-capable model lands (Sonnet 4.7+ or improved Haiku).
+
 ## Specs and plans — read before structural work
 
 Current:
