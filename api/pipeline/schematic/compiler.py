@@ -247,6 +247,7 @@ def _derive_power_rails(graph: SchematicGraph) -> dict[str, PowerRail]:
     _augment_sources_from_producer_pins(rails, graph)
     _propagate_sources_through_passive_bridges(rails, graph)
     _promote_ic_owning_switch_node_over_inductor(rails, graph)
+    _recognize_buck_self_sense_outputs(rails, graph)
     _propagate_sources_through_rail_aliases(rails, graph)
     _augment_sources_from_external_connectors(rails, graph)
 
@@ -468,6 +469,127 @@ def _promote_ic_owning_switch_node_over_inductor(
         rail = rails[label]
         rail.source_refdes = ic
         rail.source_type = _infer_source_type(graph, ic)
+
+
+# ----------------------------------------------------------------------
+# PMU buck-output self-sense recognition
+# ----------------------------------------------------------------------
+
+# Pin-name pattern for a switching regulator's regulated-rail self-sense
+# input. Apple Tigris (D2422), Qualcomm PM660-class PMICs, MediaTek MT63xx
+# and most SoC PMUs share this convention: the chip's integrated buck cell
+# drives an LX switch node out to the external L+C filter, and the
+# filtered output comes BACK INTO the chip on a `VDD_BUCK<n>*` pin (a
+# `V`-prefixed alternative — `VVDD_BUCK<n>` — appears on Samsung S2MPS
+# PMICs). At that pin the IC senses the regulated voltage to close the
+# control loop. Vision tags the pin as `power_in` because at the bond
+# wire the node receives the post-inductor voltage, even though the IC
+# itself is the rail's only producer.
+#
+# Anchored at start of pin name with `\d+` enforcing a numeric index
+# (single, double, or triple digits). Ground-family names (VSS / AVSS)
+# are not at risk — they don't carry `_BUCK<n>` substrings.
+_BUCK_SELF_SENSE_PIN = re.compile(r"^V?VDD_BUCK\d+")
+
+
+def _recognize_buck_self_sense_outputs(
+    rails: dict[str, PowerRail], graph: SchematicGraph
+) -> None:
+    """Attribute PMU buck-output rails sensed back through chip pins.
+
+    PMU ICs route their integrated buck regulator output through an
+    external L+C filter and BACK INTO the chip on a self-sense pin
+    matching `^V?VDD_BUCK\\d+` (role `power_in`). When the external
+    filter inductor lives on the SAME page as the PMU pin list, the
+    existing `_promote_ic_owning_switch_node_over_inductor` pass picks
+    it up via the inductor bridge. When the inductor is on a separate
+    schematic page that wasn't captured (common on Apple's segregated
+    "power tree" pages — the regulator IC pin list is on one page,
+    the buck output filters on another), the rail stays unsourced
+    despite physically being a known IC output.
+
+    This pass closes that gap with four conservative gates:
+
+      1. Rail R is currently unsourced — additive only, never overrides.
+      2. R's pin connections include exactly one IC X plus only passives
+         (cap / resistor / inductor / ferrite / diode). A buck rail
+         shared between a primary and secondary PMU (e.g. iPhone X
+         `VDD_BUCK9` connecting both Tigris and the camera PMU) is
+         genuinely ambiguous about which side produces vs. consumes,
+         so we leave it unsourced.
+      3. IC X has at least one `switch_node`-role pin — proves IC X is
+         a switching regulator, not a consumer SoC. Without this gate,
+         a consumer SoC like Apple A11 (U1000) with `VDD_CPU` /
+         `VDD_GPU` `power_in` pins on its rails would be mis-attributed
+         as the rails' producer.
+      4. IC X's pin connecting to R has role `power_in` and pin.name
+         matches `_BUCK_SELF_SENSE_PIN` — the universal SoC PMU buck
+         self-sense convention.
+
+    Pure no-op on schematics that don't use this convention (mnt-reform
+    KiCad-style boards, MAX*/LTC* point regulators with `VOUT` / `OUT`
+    pin names instead). Empirically verified: zero `VDD_BUCK*` pins on
+    mnt-reform-motherboard.
+
+    Runs AFTER `_promote_ic_owning_switch_node_over_inductor` so the
+    inductor-bridge path is preferred when both paths are available
+    (cleaner topology — explicit external filter wins over a self-sense
+    fallback). Runs BEFORE `_propagate_sources_through_rail_aliases` so
+    any `VDD_BUCK<n>` rail that aliases to a die-side rail (none observed
+    today, but conventions evolve) inherits the corrected source.
+    """
+    sw_ics: set[str] = set()
+    for ref, comp in graph.components.items():
+        if comp.type != "ic":
+            continue
+        for pin in comp.pins:
+            if pin.role == "switch_node":
+                sw_ics.add(ref)
+                break
+    if not sw_ics:
+        return
+
+    for label, rail in rails.items():
+        if rail.source_refdes is not None:
+            continue
+        net = graph.nets.get(label)
+        if net is None:
+            continue
+
+        # Walk the rail's connections: enforce single-IC + all-passives.
+        ic_refs: set[str] = set()
+        bail = False
+        for ref_pin in net.connects:
+            if "." not in ref_pin:
+                continue
+            ref = ref_pin.split(".", 1)[0]
+            comp = graph.components.get(ref)
+            if comp is None:
+                continue
+            if comp.type == "ic":
+                ic_refs.add(ref)
+            elif comp.type not in _PASSIVE_TYPES:
+                # Non-passive non-IC (connector / transistor / module /
+                # oscillator / led) — not a clean self-sense topology.
+                bail = True
+                break
+        if bail or len(ic_refs) != 1:
+            continue
+        (ic_ref,) = ic_refs
+        if ic_ref not in sw_ics:
+            continue
+
+        ic = graph.components[ic_ref]
+        for pin in ic.pins:
+            if pin.net_label != label:
+                continue
+            if pin.role != "power_in":
+                continue
+            if not pin.name or not _BUCK_SELF_SENSE_PIN.match(pin.name):
+                continue
+            rail.source_refdes = ic_ref
+            rail.source_type = _infer_source_type(graph, ic_ref)
+            break
 
 
 def _propagate_sources_through_rail_aliases(
