@@ -9,9 +9,13 @@ in the evolve loop.
 Spec: docs/superpowers/specs/2026-04-25-simulator-invariants-design.md
 Plan: docs/superpowers/plans/2026-04-25-simulator-invariants.md
 
-The whole module skips if `memory/mnt-reform-motherboard/electrical_graph.json`
-is absent (fresh clone, no pack ingested yet). When the device is on disk,
-all 10 invariants must pass.
+Device discovery: the suite auto-discovers every device under `memory/`
+that has an `electrical_graph.json` and runs the 10 invariants against
+each. The whole module skips when no device pack is on disk (fresh clone,
+no schematic ingested yet).
+
+Add a new device → ingest its schematic → invariants run automatically
+on the next pytest invocation. No edit needed.
 """
 
 from __future__ import annotations
@@ -31,14 +35,32 @@ from api.pipeline.schematic.simulator import (
     SimulationEngine,
 )
 
-_GRAPH_PATH = Path("memory/mnt-reform-motherboard/electrical_graph.json")
+_MEMORY_ROOT = Path("memory")
 _SAMPLE_SEED = 42
 _RECALL_THRESHOLD = 0.80  # INV-8
 
-if not _GRAPH_PATH.exists():
+
+def _discover_devices() -> list[str]:
+    """Return slugs of every device with a compiled `electrical_graph.json`.
+
+    Sorted for deterministic test IDs across runs.
+    """
+    if not _MEMORY_ROOT.exists():
+        return []
+    return sorted(
+        d.name
+        for d in _MEMORY_ROOT.iterdir()
+        if d.is_dir() and (d / "electrical_graph.json").exists()
+    )
+
+
+_DEVICES = _discover_devices()
+if not _DEVICES:
     pytest.skip(
-        f"electrical graph missing at {_GRAPH_PATH} — invariants suite needs the "
-        "mnt-reform-motherboard pack ingested. Run schematic ingest, then re-run.",
+        "no electrical_graph.json found under memory/ — invariants suite "
+        "needs at least one device pack ingested. Run schematic ingest "
+        "(see api/pipeline/schematic/orchestrator.ingest_schematic), then "
+        "re-run pytest.",
         allow_module_level=True,
     )
 
@@ -123,13 +145,23 @@ def _is_pertinent(graph: ElectricalGraph, refdes: str, kind: str, mode: str) -> 
 
 
 # ---------------------------------------------------------------------------
-# Fixture — load the 700 KB graph once per session, not per test.
+# Device-parametrised fixtures.
+#
+# `device_slug` is the param axis: every test that depends on `graph` (and
+# therefore on `device_slug`) is automatically multiplied by the number of
+# devices on disk. New device → ingest → tests scale automatically.
 # ---------------------------------------------------------------------------
 
 
+@pytest.fixture(scope="module", params=_DEVICES, ids=_DEVICES)
+def device_slug(request) -> str:
+    return request.param
+
+
 @pytest.fixture(scope="module")
-def graph() -> ElectricalGraph:
-    return ElectricalGraph.model_validate_json(_GRAPH_PATH.read_text())
+def graph(device_slug: str) -> ElectricalGraph:
+    path = _MEMORY_ROOT / device_slug / "electrical_graph.json"
+    return ElectricalGraph.model_validate_json(path.read_text())
 
 
 @pytest.fixture(scope="module")
@@ -188,11 +220,6 @@ def _justifies_death(
     #     state. Covers the open-passive branch where the simulator marks
     #     downstream consumers dead because their power_in net (which may
     #     be an internal net, not a registered power_rail) was severed.
-    #     A net is "live" iff it is a power_rail in {stable, degraded with
-    #     voltage ≥ TOLERANCE_UVLO}. Internal nets that aren't power_rails
-    #     count as non-live (they were the cut downstream of the open).
-    #     If every power_in path is non-live AND the component has at least
-    #     one power_in pin, the death is physical — no power means dead.
     if pwr and last_state is not None:
         live_pwr: list[str] = []
         for n in pwr:
@@ -206,15 +233,12 @@ def _justifies_death(
                     live_pwr.append(n)
         if not live_pwr:
             return True, f"every power_in non-live (pins on {sorted(pwr)})"
-    # (f) open-passive downstream — if a failure is `mode='open'` on a
-    #     passive, the simulator's case (b) handler may mark consumers of
-    #     the passive's downstream side dead even when the downstream rail
-    #     itself stays "stable" (the source IC is presumed to keep
+    # (f) open-passive downstream — the simulator's case (b) handler in
+    #     _apply_failures_at_init may mark consumers dead even when the
+    #     downstream rail itself stays "stable" (source IC presumed to keep
     #     regulating from the unaffected upstream — conservative over-kill,
-    #     not gaming). Justify the death iff the dead component has a
-    #     power_in pin on a net the opened passive touches. This is a
-    #     topology-bound clause: it ONLY accepts deaths whose power_in
-    #     intersects the open-passive's pin set, never blanket deaths.
+    #     not gaming). Justify only if the dead component has a power_in pin
+    #     on a net the opened passive touches. Topology-bound; never blanket.
     for f in failures:
         if f.mode != "open":
             continue
@@ -298,7 +322,9 @@ def test_inv2_empty_failures_empty_cascade(graph: ElectricalGraph):
 
 # Hand-picked refdes that exercise the open / shorted / regulating_low
 # branches across kinds. Mix of historically-relevant cases (the reverted
-# self-dead patches all touched these) and benchmark-oracle cases.
+# self-dead patches all touched these) and benchmark-oracle cases. Only
+# applied when the device contains the named refdes — irrelevant on other
+# devices, silently dropped.
 _INV3_HAND_FAILURES: list[tuple[str, str]] = [
     ("U7", "dead"),
     ("U7", "regulating_low"),
@@ -320,7 +346,7 @@ def test_inv3_every_cascade_death_has_physical_cause(graph: ElectricalGraph, sam
         if pair in seen:
             continue
         if pair[0] not in graph.components:
-            continue  # hand picks may miss on a different graph
+            continue  # hand picks may miss on a different device
         seen.add(pair)
         pairs_to_test.append(pair)
 
@@ -346,26 +372,29 @@ def test_inv3_every_cascade_death_has_physical_cause(graph: ElectricalGraph, sam
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.parametrize(
-    "rail_label",
-    sorted(
-        label
-        for label, rail in ElectricalGraph.model_validate_json(
-            _GRAPH_PATH.read_text()
-        ).power_rails.items()
-        if rail.source_refdes is not None
-    ),
-)
-def test_inv4_source_death_implies_rail_death(graph: ElectricalGraph, rail_label: str):
-    rail = graph.power_rails[rail_label]
-    src = rail.source_refdes
-    assert src is not None  # parametrize filter ensures this
-    if src not in graph.components:
-        pytest.skip(f"source {src} of {rail_label} not in graph.components")
-    tl = SimulationEngine(graph, failures=[Failure(refdes=src, mode="dead")]).run()
-    assert rail_label in tl.cascade_dead_rails, (
-        f"killed source={src} of rail={rail_label} but rail not in "
-        f"cascade_dead_rails (got {tl.cascade_dead_rails})"
+def test_inv4_source_death_implies_rail_death(graph: ElectricalGraph):
+    sourced_rails = sorted(
+        label for label, rail in graph.power_rails.items() if rail.source_refdes is not None
+    )
+    if not sourced_rails:
+        pytest.skip("no sourced rails in this graph")
+    violations: list[str] = []
+    skipped: list[str] = []
+    for rail_label in sourced_rails:
+        rail = graph.power_rails[rail_label]
+        src = rail.source_refdes
+        assert src is not None
+        if src not in graph.components:
+            skipped.append(f"{rail_label} (source {src} not in graph)")
+            continue
+        tl = SimulationEngine(graph, failures=[Failure(refdes=src, mode="dead")]).run()
+        if rail_label not in tl.cascade_dead_rails:
+            violations.append(
+                f"killed source={src} of rail={rail_label} → not in cascade_dead_rails"
+            )
+    assert not violations, (
+        f"{len(violations)} sourced rails not picked up after source kill "
+        f"(first 5: {violations[:5]})"
     )
 
 
@@ -374,44 +403,40 @@ def test_inv4_source_death_implies_rail_death(graph: ElectricalGraph, rail_label
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.parametrize(
-    "rail_label",
-    sorted(
-        label
-        for label, rail in ElectricalGraph.model_validate_json(
-            _GRAPH_PATH.read_text()
-        ).power_rails.items()
-        if rail.source_refdes is not None and rail.consumers
-    ),
-)
-def test_inv5_dead_rail_implies_dead_consumers(graph: ElectricalGraph, rail_label: str):
-    rail = graph.power_rails[rail_label]
-    src = rail.source_refdes
-    assert src is not None and rail.consumers
-    if src not in graph.components:
-        pytest.skip(f"source {src} of {rail_label} not in graph.components")
-    tl = SimulationEngine(graph, failures=[Failure(refdes=src, mode="dead")]).run()
-    dead_rails = set(tl.cascade_dead_rails)
-    dead_comps = set(tl.cascade_dead_components)
-    if rail_label not in dead_rails:
-        pytest.skip(f"rail {rail_label} not in cascade — covered by INV-4")
-    survivors: list[tuple[str, list[str]]] = []
-    for consumer in rail.consumers:
-        if consumer not in graph.components:
-            continue
-        if consumer in dead_comps:
-            continue
-        # Exempt consumers with at least one live alternate power_in.
-        ins = _power_in_nets(graph, consumer)
-        alt_live = [
-            n for n in ins if n != rail_label and n in graph.power_rails and n not in dead_rails
-        ]
-        if not alt_live:
-            survivors.append((consumer, sorted(ins)))
-    assert not survivors, (
-        f"rail {rail_label} dead but {len(survivors)} consumers alive without "
-        f"live alternate supply: {survivors[:5]}"
-    )
+def test_inv5_dead_rail_implies_dead_consumers(graph: ElectricalGraph):
+    candidates = [
+        (label, rail)
+        for label, rail in graph.power_rails.items()
+        if rail.source_refdes is not None
+        and rail.consumers
+        and rail.source_refdes in graph.components
+    ]
+    if not candidates:
+        pytest.skip("no sourced rails with consumers in this graph")
+    violations: list[str] = []
+    for rail_label, rail in candidates:
+        src = rail.source_refdes
+        tl = SimulationEngine(graph, failures=[Failure(refdes=src, mode="dead")]).run()
+        dead_rails = set(tl.cascade_dead_rails)
+        dead_comps = set(tl.cascade_dead_components)
+        if rail_label not in dead_rails:
+            continue  # covered by INV-4 (rail itself didn't die)
+        survivors: list[tuple[str, list[str]]] = []
+        for consumer in rail.consumers:
+            if consumer not in graph.components or consumer in dead_comps:
+                continue
+            ins = _power_in_nets(graph, consumer)
+            alt_live = [
+                n for n in ins if n != rail_label and n in graph.power_rails and n not in dead_rails
+            ]
+            if not alt_live:
+                survivors.append((consumer, sorted(ins)))
+        if survivors:
+            violations.append(
+                f"rail {rail_label}: {len(survivors)} consumers alive without live "
+                f"alternate supply (first 3: {survivors[:3]})"
+            )
+    assert not violations, "\n".join(violations[:5])
 
 
 # ---------------------------------------------------------------------------
@@ -420,6 +445,8 @@ def test_inv5_dead_rail_implies_dead_consumers(graph: ElectricalGraph, rail_labe
 
 
 def test_inv6_determinism(graph: ElectricalGraph, all_pertinent_pairs):
+    if not all_pertinent_pairs:
+        pytest.skip("no pertinent pairs to sample")
     rng = random.Random(_SAMPLE_SEED + 1)
     sample = rng.sample(all_pertinent_pairs, k=min(10, len(all_pertinent_pairs)))
     for refdes, mode in sample:
@@ -441,33 +468,31 @@ def test_inv6_determinism(graph: ElectricalGraph, all_pertinent_pairs):
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.parametrize(
-    "rail_label",
-    sorted(
-        label
-        for label, rail in ElectricalGraph.model_validate_json(
-            _GRAPH_PATH.read_text()
-        ).power_rails.items()
-        if rail.source_refdes is None
-    ),
-)
-def test_inv7_sourceless_rail_immune(graph: ElectricalGraph, rail_label: str):
-    # 5 ICs deterministically, none on this rail's consumers.
-    ics_off_rail = [
-        r
-        for r, c in sorted(graph.components.items())
-        if (c.kind or "ic") == "ic" and r not in graph.power_rails[rail_label].consumers
-    ]
-    rng = random.Random(_SAMPLE_SEED + 2 + hash(rail_label) % 1000)
-    sample = rng.sample(ics_off_rail, k=min(5, len(ics_off_rail)))
-    violations: list[str] = []
-    for ic in sample:
-        tl = SimulationEngine(graph, failures=[Failure(refdes=ic, mode="dead")]).run()
-        if rail_label in tl.cascade_dead_rails:
-            violations.append(ic)
-    assert not violations, (
-        f"sourceless rail {rail_label} entered cascade after killing internal IC(s): {violations}"
+def test_inv7_sourceless_rail_immune(graph: ElectricalGraph):
+    sourceless = sorted(
+        label for label, rail in graph.power_rails.items() if rail.source_refdes is None
     )
+    if not sourceless:
+        pytest.skip("no sourceless rails in this graph (everything has a source)")
+    violations: list[str] = []
+    for rail_label in sourceless:
+        ics_off_rail = [
+            r
+            for r, c in sorted(graph.components.items())
+            if (c.kind or "ic") == "ic" and r not in graph.power_rails[rail_label].consumers
+        ]
+        if not ics_off_rail:
+            continue
+        rng = random.Random(_SAMPLE_SEED + 2 + hash(rail_label) % 1000)
+        sample = rng.sample(ics_off_rail, k=min(5, len(ics_off_rail)))
+        offenders: list[str] = []
+        for ic in sample:
+            tl = SimulationEngine(graph, failures=[Failure(refdes=ic, mode="dead")]).run()
+            if rail_label in tl.cascade_dead_rails:
+                offenders.append(ic)
+        if offenders:
+            violations.append(f"sourceless {rail_label} entered cascade after killing {offenders}")
+    assert not violations, "\n".join(violations[:5])
 
 
 # ---------------------------------------------------------------------------
@@ -477,14 +502,13 @@ def test_inv7_sourceless_rail_immune(graph: ElectricalGraph, rail_label: str):
 
 def test_inv8_round_trip_top5_recall(graph: ElectricalGraph, all_pertinent_pairs):
     """Recall is measured over OBSERVABLE pairs only — pairs whose simulation
-    produces an empty cascade (e.g. open on a passive with no consumers, or
-    regulating_low on an IC sourcing rails that all stay above UVLO) cannot
-    be round-tripped by definition: hypothesize has no signal to work with.
+    produces an empty cascade cannot be round-tripped by definition.
 
     A separate assertion guards the silent ratio — too many silent pairs
-    means the simulator is too quiet on the bulk of pertinent failures,
-    which is itself a useful invariant signal.
+    means the simulator is too quiet on the bulk of pertinent failures.
     """
+    if not all_pertinent_pairs:
+        pytest.skip("no pertinent pairs to sample")
     rng = random.Random(_SAMPLE_SEED + 3)
     sample = rng.sample(all_pertinent_pairs, k=min(30, len(all_pertinent_pairs)))
     silent: list[str] = []
@@ -500,10 +524,6 @@ def test_inv8_round_trip_top5_recall(graph: ElectricalGraph, all_pertinent_pairs
         tested += 1
         result = hypothesize(graph, observations=obs, max_results=5)
         top5 = [(h.kill_refdes[0], h.kill_modes[0]) for h in result.hypotheses[:5] if h.kill_refdes]
-        # Mode equivalence: simulator's "shorted" / "open" / "leaky_short" /
-        # "regulating_low" / "dead" map to hypothesize's FailureMode
-        # vocabulary mostly 1:1; ICs may surface as "dead" or "anomalous";
-        # passive_c leaky_short maps to "short" in hypothesize's enum.
         mode_aliases = {mode}
         if mode in ("regulating_low", "dead"):
             mode_aliases |= {"dead", "anomalous"}
@@ -516,9 +536,6 @@ def test_inv8_round_trip_top5_recall(graph: ElectricalGraph, all_pertinent_pairs
             misses.append(f"{refdes}/{mode} → top5={top5[:3]}{'…' if len(top5) > 3 else ''}")
     recall = hits / tested if tested else 0.0
     silent_ratio = len(silent) / len(sample)
-    # Two-part assertion: recall on observable pairs, plus ceiling on
-    # silent ratio. A high silent ratio surfaces a coverage gap rather
-    # than a recall problem — both are worth knowing.
     assert recall >= _RECALL_THRESHOLD, (
         f"round-trip recall {recall:.2f} on {tested} observable pairs "
         f"(< threshold {_RECALL_THRESHOLD}); {len(misses)} misses "
