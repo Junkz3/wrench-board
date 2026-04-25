@@ -619,8 +619,11 @@ PROTOCOL_TOOLS: list[dict] = [
             "type (numeric/boolean/observation/ack), un target refdes, une "
             "instruction et un rationale. Appelle ce tool seulement après "
             "avoir matché une règle (confidence ≥ 0.6) ou identifié ≥ 2 "
-            "likely_causes. UNE protocol active à la fois — réémettre en "
-            "remplace la précédente. Cap : 12 steps."
+            "likely_causes. Déclencheur typique : quand le tech, suspect "
+            "déjà identifié, demande « comment je trouve / localise / "
+            "teste / chasse », émets le protocole de chasse (3-6 steps) "
+            "plutôt que d'expliquer en prose. UNE protocol active à la "
+            "fois — réémettre en remplace la précédente. Cap : 12 steps."
         ),
         "input_schema": {
             "type": "object",
