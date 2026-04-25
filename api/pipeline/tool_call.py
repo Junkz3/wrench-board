@@ -64,22 +64,21 @@ async def call_with_forced_tool(
             else:
                 effective_system = system + retry_suffix
 
-        # tool_choice rules:
+        # tool_choice rules with thinking:
         #   - Default: `{"type": "tool", "name": forced_tool_name}` — fully
-        #     forced. Anthropic rejects `thinking` in this mode (HTTP 400:
-        #     "Thinking may not be enabled when tool_choice forces tool use.").
-        #   - When `thinking_budget` is set: switch to `{"type": "any"}` —
-        #     model must call SOME tool. With only one tool defined (our case),
-        #     the effect is identical to forced, but the API allows extended
-        #     thinking. Per Anthropic's Claude 4.x compatibility matrix.
+        #     forced. Compatible with deterministic structured output.
+        #   - When `thinking_budget` is set: ONLY `{"type": "auto"}` works.
+        #     Anthropic rejects thinking + (`tool` | `any`) — both treated as
+        #     "forces tool use". With "auto" the model decides whether to
+        #     call a tool; the system prompt explicitly tells the model to
+        #     always emit a tool call (see page_vision SYSTEM_PROMPT). The
+        #     parser falls through to retry with a system suffix if the
+        #     model returns text instead of the tool_use block.
         #
         # Streaming required for max_tokens >= ~16k (SDK refuses non-stream
         # otherwise with "operations that may take longer than 10 minutes").
-        # The final Message object exposes `.content` / `.usage` exactly like
-        # the non-streaming one, so the rest of this function is indifferent
-        # to how the bytes arrived.
         if thinking_budget is not None:
-            tool_choice_param: dict = {"type": "any"}
+            tool_choice_param: dict = {"type": "auto"}
         else:
             tool_choice_param = {"type": "tool", "name": forced_tool_name}
 
