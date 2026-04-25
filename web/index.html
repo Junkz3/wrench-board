@@ -41,25 +41,47 @@
       <span>microsolder</span>
     </div>
     <h1 class="landing-title">Ton assistant de réparation hardware.</h1>
-    <p class="landing-sub">Décris ce qui ne marche pas — je m'occupe du diagnostic.</p>
-    <form class="landing-form" id="landingForm" autocomplete="off">
-      <input class="landing-input" id="landingInput" type="text"
-             placeholder="ex. mon Framework ne s'allume plus"
-             aria-label="Décris ton problème"
+    <p class="landing-sub">Donne-moi ton appareil et le symptôme — je construis la connaissance et j'ouvre le diagnostic.</p>
+
+    <form class="landing-form landing-form--stack" id="landingForm" autocomplete="off">
+      <input class="landing-input" id="landingDevice" type="text"
+             placeholder="Appareil (ex. MNT Reform motherboard, iPhone 11, Framework 13)"
+             aria-label="Quel appareil"
+             maxlength="200" required />
+      <input class="landing-input" id="landingSymptom" type="text"
+             placeholder="Symptôme (ex. ne s'allume plus, pas de charge, écran noir)"
+             aria-label="Quel est le symptôme"
              maxlength="400" required />
       <button class="landing-submit" type="submit" id="landingSubmit">
-        Diagnostiquer
+        Lancer le diagnostic
         <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor"
              stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
           <path d="M5 12h14M13 5l7 7-7 7"/>
         </svg>
       </button>
     </form>
+
     <div class="landing-chips" id="landingChips">
-      <button type="button" class="landing-chip" data-text="MNT Reform — pas de boot, écran noir">MNT Reform — pas de boot</button>
-      <button type="button" class="landing-chip" data-text="iPhone 11 ne charge plus">iPhone 11 — pas de charge</button>
-      <button type="button" class="landing-chip" data-text="Framework laptop écran noir au démarrage">Framework — écran noir</button>
+      <button type="button" class="landing-chip" data-device="MNT Reform motherboard" data-symptom="pas de boot, écran noir">MNT Reform — pas de boot</button>
+      <button type="button" class="landing-chip" data-device="iPhone 11" data-symptom="ne charge plus">iPhone 11 — pas de charge</button>
+      <button type="button" class="landing-chip" data-device="Framework laptop" data-symptom="écran noir au démarrage">Framework — écran noir</button>
     </div>
+
+    <!-- Live pipeline timeline — populated by landing.js once submit fires. -->
+    <section class="landing-timeline" id="landingTimeline" hidden aria-live="polite">
+      <header class="landing-timeline-head">
+        <span class="landing-timeline-title" id="landingTimelineTitle">Construction de la fiche…</span>
+        <span class="landing-timeline-eta" id="landingTimelineEta"></span>
+      </header>
+      <ol class="landing-phase-list" id="landingPhaseList">
+        <li class="landing-phase" data-phase="scout"><span class="landing-phase-dot"></span><span class="landing-phase-label">Scout · recherche web</span><div class="landing-phase-narration"></div></li>
+        <li class="landing-phase" data-phase="registry"><span class="landing-phase-dot"></span><span class="landing-phase-label">Registry · vocabulaire canonique</span><div class="landing-phase-narration"></div></li>
+        <li class="landing-phase" data-phase="mapper" hidden><span class="landing-phase-dot"></span><span class="landing-phase-label">Mapper · refdes ↔ graphe</span><div class="landing-phase-narration"></div></li>
+        <li class="landing-phase" data-phase="writers"><span class="landing-phase-dot"></span><span class="landing-phase-label">Writers · graphe + règles + glossaire</span><div class="landing-phase-narration"></div></li>
+        <li class="landing-phase" data-phase="audit"><span class="landing-phase-dot"></span><span class="landing-phase-label">Auditor · validation</span><div class="landing-phase-narration"></div></li>
+      </ol>
+    </section>
+
     <div class="landing-status" id="landingStatus" aria-live="polite"></div>
   </main>
 </div>

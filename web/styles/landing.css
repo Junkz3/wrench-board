@@ -73,6 +73,16 @@
   margin-bottom: 16px;
 }
 
+/* Stack variant — two text inputs above the submit button. */
+.landing-form--stack {
+  flex-direction: column;
+  align-items: stretch;
+}
+.landing-form--stack .landing-submit {
+  align-self: flex-end;
+  padding: 12px 20px;
+}
+
 .landing-input {
   flex: 1;
   background: var(--panel);
@@ -146,3 +156,133 @@
 }
 
 .landing-status.error { color: #f87171; }
+
+/* ============ Pipeline timeline (revealed after submit) ============ */
+
+.landing-timeline {
+  margin-top: 24px;
+  padding: 16px 18px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  text-align: left;
+  animation: landing-rise .25s cubic-bezier(.2, .8, .2, 1);
+}
+
+.landing-timeline[hidden] { display: none; }
+
+.landing-timeline-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 14px;
+  font-size: 12px;
+  color: var(--text-2);
+}
+
+.landing-timeline-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--text-3);
+}
+
+.landing-timeline-eta {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--cyan);
+}
+
+.landing-phase-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  position: relative;
+}
+
+/* Vertical thread connecting all dots */
+.landing-phase-list::before {
+  content: "";
+  position: absolute;
+  left: 5px;
+  top: 6px;
+  bottom: 6px;
+  width: 1px;
+  background: var(--border-soft);
+}
+
+.landing-phase {
+  position: relative;
+  padding-left: 22px;
+  font-size: 13px;
+  color: var(--text-3);
+  transition: color .2s;
+}
+
+.landing-phase[hidden] { display: none; }
+
+.landing-phase-dot {
+  position: absolute;
+  left: 0;
+  top: 5px;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--bg-deep);
+  border: 2px solid var(--border-soft);
+  transition: border-color .2s, background .2s, box-shadow .2s;
+}
+
+.landing-phase-label {
+  font-weight: 500;
+}
+
+.landing-phase-narration {
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--text-2);
+  line-height: 1.55;
+  min-height: 0;
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height .35s cubic-bezier(.2,.8,.2,1), opacity .25s ease-out, margin-top .2s;
+}
+
+.landing-phase.has-narration .landing-phase-narration {
+  max-height: 200px;
+  opacity: 1;
+  margin-top: 6px;
+}
+
+/* In-progress: dot pulses cyan */
+.landing-phase.is-running { color: var(--text-2); }
+.landing-phase.is-running .landing-phase-dot {
+  border-color: var(--cyan);
+  background: var(--cyan);
+  box-shadow: 0 0 0 4px rgba(125, 211, 252, 0.10);
+  animation: landing-pulse 1.4s ease-in-out infinite;
+}
+
+/* Done: dot solid cyan, no pulse */
+.landing-phase.is-done { color: var(--text); }
+.landing-phase.is-done .landing-phase-dot {
+  border-color: var(--cyan);
+  background: var(--cyan);
+}
+
+/* Failed: dot red */
+.landing-phase.is-failed .landing-phase-dot {
+  border-color: #f87171;
+  background: #f87171;
+}
+.landing-phase.is-failed { color: #f87171; }
+
+@keyframes landing-pulse {
+  0%, 100% { box-shadow: 0 0 0 4px rgba(125, 211, 252, 0.10); }
+  50%      { box-shadow: 0 0 0 8px rgba(125, 211, 252, 0.04); }
+}
