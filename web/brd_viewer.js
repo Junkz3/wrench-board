@@ -47,11 +47,13 @@ const state = {
     arrows: new Map(),        // id → {from: [x,y], to: [x,y]}  — mils coords
     net: null,                // agent-highlighted net name or null
     filter: null,             // agent-filter refdes prefix or null
+    highlightPulseAt: null,   // performance.now() ts of latest highlight/focus event — drives halo+badge
   },
 };
 
 const RATNEST_MAX_PINS = 50;  // skip drawing fly-lines for huge nets (GND has ~500)
 const PIN_HIT_TOLERANCE_PX = 4;  // extra margin around the pad rect for easier clicks at low zoom
+const AGENT_PULSE_DURATION_MS = 3200;  // halo decays over this window; AGENT badge over 60% of it
 
 // ---------- Net colour configuration ----------
 // Default hex per category; override-able at runtime via window.setBoardviewNetColor,
@@ -556,6 +558,119 @@ function draw() {
       ctx.restore();
     }
     ctx.lineWidth = 1;
+  }
+
+  // Agent action pulse + persistent marker. Two-phase render:
+  //   - 0..AGENT_PULSE_DURATION_MS: beefy pulsing halo (4 rings, sin modulation) +
+  //     AGENT badge. Schedules continuous redraws.
+  //   - after pulse: discreet single ring + faint fill stays as long as the refdes
+  //     is in state.agent.highlights, so the tech still knows what the agent picked.
+  if (state.agent.highlights.size > 0) {
+    const now = performance.now();
+    const pulseElapsed = state.agent.highlightPulseAt ? now - state.agent.highlightPulseAt : Infinity;
+    const pulseProgress = pulseElapsed / AGENT_PULSE_DURATION_MS;
+    const pulsing = pulseProgress < 1;
+    const cyan = cssVar('--cyan') || '#38bdf8';
+
+    let intensity = 0;
+    if (pulsing) {
+      const envelope = 1 - pulseProgress;
+      // Slower oscillation than the original 0.008 — at 0.005 we get ~2.5 wave
+      // crests over the 3.2 s envelope instead of feeling rushed.
+      const wave = 0.55 + 0.45 * Math.sin(now * 0.005);
+      intensity = envelope * wave;
+    }
+    const labelAlpha = pulsing ? Math.max(0, 1 - pulseElapsed / (AGENT_PULSE_DURATION_MS * 0.6)) : 0;
+
+    for (const refdes of state.agent.highlights) {
+      const part = state.partByRefdes?.get(refdes);
+      if (!part) continue;
+      if (part.layer !== LAYER_BOTH) {
+        if (activeSide === LAYER_TOP    && part.layer !== LAYER_TOP)    continue;
+        if (activeSide === LAYER_BOTTOM && part.layer !== LAYER_BOTTOM) continue;
+      }
+      const bbox = state.partBodyBboxes?.get(refdes) || part.bbox;
+      if (!bbox || bbox.length < 2) continue;
+      const a = milsToScreen(bbox[0].x, bbox[0].y, boardW);
+      const b = milsToScreen(bbox[1].x, bbox[1].y, boardW);
+      const rx = Math.min(a.x, b.x);
+      const ry = Math.min(a.y, b.y);
+      const rw = Math.abs(b.x - a.x);
+      const rh = Math.abs(b.y - a.y);
+
+      ctx.save();
+
+      // Corner radius capped to ¼ of the smaller side so tiny components
+      // (passives, 0402…) still get a visibly rounded outline without
+      // collapsing to a circle.
+      const cr = Math.max(0, Math.min(3, rw / 4, rh / 4));
+
+      if (pulsing) {
+        ctx.globalAlpha = intensity * 0.42;
+        ctx.fillStyle = cyan;
+        ctx.beginPath();
+        ctx.roundRect(rx, ry, rw, rh, cr);
+        ctx.fill();
+        ctx.strokeStyle = cyan;
+        ctx.lineWidth = 3;
+        const ringSteps = [10, 22, 38, 58];
+        const ringAlphas = [0.95, 0.65, 0.40, 0.22];
+        for (let i = 0; i < ringSteps.length; i++) {
+          const pad = ringSteps[i];
+          ctx.globalAlpha = intensity * ringAlphas[i];
+          ctx.beginPath();
+          ctx.roundRect(rx - pad, ry - pad, rw + 2 * pad, rh + 2 * pad, cr + pad);
+          ctx.stroke();
+        }
+      } else {
+        // Persistent marker — sit ON the bbox (no inflate) with a rounded
+        // outline so it visibly hugs the component instead of floating
+        // around it. Slightly bumped fill+stroke alpha for crispness.
+        ctx.globalAlpha = 0.16;
+        ctx.fillStyle = cyan;
+        ctx.beginPath();
+        ctx.roundRect(rx, ry, rw, rh, cr);
+        ctx.fill();
+        ctx.strokeStyle = cyan;
+        ctx.lineWidth = 1.5;
+        ctx.globalAlpha = 0.85;
+        ctx.beginPath();
+        ctx.roundRect(rx, ry, rw, rh, cr);
+        ctx.stroke();
+      }
+
+      if (labelAlpha > 0.05) {
+        ctx.globalAlpha = labelAlpha;
+        ctx.font = "700 12px 'JetBrains Mono', ui-monospace, monospace";
+        ctx.textBaseline = 'middle';
+        const labelText = '● AGENT';
+        const tw = ctx.measureText(labelText).width;
+        const padX = 8;
+        const bx = rx;
+        const by = ry - 22;
+        const r = 4;
+        const w = tw + padX * 2;
+        const h = 18;
+        ctx.fillStyle = cyan;
+        ctx.beginPath();
+        ctx.moveTo(bx + r, by);
+        ctx.lineTo(bx + w - r, by);
+        ctx.quadraticCurveTo(bx + w, by, bx + w, by + r);
+        ctx.lineTo(bx + w, by + h - r);
+        ctx.quadraticCurveTo(bx + w, by + h, bx + w - r, by + h);
+        ctx.lineTo(bx + r, by + h);
+        ctx.quadraticCurveTo(bx, by + h, bx, by + h - r);
+        ctx.lineTo(bx, by + r);
+        ctx.quadraticCurveTo(bx, by, bx + r, by);
+        ctx.closePath();
+        ctx.fill();
+        ctx.globalAlpha = labelAlpha;
+        ctx.fillStyle = cssVar('--bg-deep') || '#06080d';
+        ctx.fillText(labelText, bx + padX, by + h / 2);
+      }
+      ctx.restore();
+    }
+    if (pulsing) requestRedraw();
   }
 
   // Agent annotations: small cyan label near the part's bbox top-left.
@@ -1313,12 +1428,14 @@ window.initBoardview = initBoardview;
     const list = Array.isArray(refdes) ? refdes : [refdes];
     if (!additive) state.agent.highlights.clear();
     for (const r of list) state.agent.highlights.add(r);
+    state.agent.highlightPulseAt = performance.now();
     requestRedraw();
   };
 
   const _applyFocus = ({ refdes, bbox, zoom = 2.5, auto_flipped = false }) => {
     state.agent.focused = refdes;
     state.agent.highlights = new Set([refdes]);
+    state.agent.highlightPulseAt = performance.now();
     if (auto_flipped) activeSide = activeSide === LAYER_TOP ? LAYER_BOTTOM : LAYER_TOP;
     // Pan/zoom the viewport to center on bbox. bbox is [[x1,y1],[x2,y2]] in mils.
     if (bbox) {
@@ -1341,6 +1458,7 @@ window.initBoardview = initBoardview;
     state.agent.arrows.clear();
     state.agent.net = null;
     state.agent.filter = null;
+    state.agent.highlightPulseAt = null;
     // Preserve state.user.* and viewport.
     requestRedraw();
   };
