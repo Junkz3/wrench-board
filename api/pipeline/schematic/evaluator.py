@@ -196,7 +196,75 @@ def _is_pertinent(graph: ElectricalGraph, refdes: str, kind: str, mode: str) -> 
         if comp is None:
             return False
         role = (comp.role or "").lower()
-        return role in _PASSIVE_R_ROLES_WITH_REAL_OPEN_CASCADE
+        if role not in _PASSIVE_R_ROLES_WITH_REAL_OPEN_CASCADE:
+            return False
+        # Damping resistors only matter when their open mode actually orphans
+        # something the power-domain model tracks — a power rail or an
+        # enable_net of one. Damping on a pure signal net is silent in this
+        # model (no signal-liveness tracking), so sampling it adds empty
+        # fingerprints to the rank cluster without diagnostic value.
+        if role == "damping":
+            pin_nets = {p.net_label for p in comp.pins if p.net_label}
+            if pin_nets & graph.power_rails.keys():
+                return True
+            enable_nets = _enable_nets(graph)
+            return bool(pin_nets & enable_nets)
+        return True
+    if kind == "passive_fb" and mode == "open":
+        # Mirror the simulator's uniqueness check: opening one ferrite of a
+        # parallel bank leaves the rail powered, so sampling it produces an
+        # empty fingerprint and pollutes the tie cluster.
+        comp = graph.components.get(refdes)
+        if comp is None:
+            return False
+        return _is_unique_supply_for_some_rail(graph, refdes, comp)
+    return True
+
+
+def _enable_nets(graph: ElectricalGraph) -> set[str]:
+    """Union of every rail's enable_net + every enable_in pin of a rail's source IC."""
+    out: set[str] = set()
+    for rail in graph.power_rails.values():
+        if rail.enable_net:
+            out.add(rail.enable_net)
+        if rail.source_refdes and rail.source_refdes in graph.components:
+            for p in graph.components[rail.source_refdes].pins:
+                if p.role == "enable_in" and p.net_label:
+                    out.add(p.net_label)
+    return out
+
+
+def _is_unique_supply_for_some_rail(graph: ElectricalGraph, refdes: str, comp) -> bool:
+    """True when this passive's open-mode would actually orphan some rail.
+
+    Mirrors `simulator._is_unique_passive_supply` semantics — a passive
+    bridging two rails A↔B kills the unsourced one ONLY if no parallel
+    sibling provides another A↔B path."""
+    pin_nets = {p.net_label for p in comp.pins if p.net_label}
+    rail_touched = pin_nets & graph.power_rails.keys()
+    if len(rail_touched) != 2:
+        return False
+    sourced_by_me = {n for n in rail_touched if graph.power_rails[n].source_refdes == refdes}
+    if sourced_by_me:
+        return True  # case (a): kills its own sourced rail
+    no_src = [n for n in rail_touched if graph.power_rails[n].source_refdes is None]
+    if len(no_src) != 1:
+        return False
+    no_src_rail = no_src[0]
+    other_rail = next(iter(rail_touched - {no_src_rail}))
+    if graph.power_rails[other_rail].source_refdes is None:
+        return False
+    for other_refdes, other_comp in graph.components.items():
+        if other_refdes == refdes:
+            continue
+        if other_comp.kind not in ("passive_r", "passive_fb", "passive_d", "passive_q"):
+            continue
+        onets = {p.net_label for p in other_comp.pins if p.net_label}
+        orails = onets & graph.power_rails.keys()
+        if len(orails) != 2 or no_src_rail not in orails:
+            continue
+        if graph.power_rails[next(iter(orails - {no_src_rail}))].source_refdes is not None:
+            return False
     return True
 
 
@@ -235,6 +303,8 @@ def _rank_candidates_for_symptoms(graph: ElectricalGraph, symptoms: dict) -> lis
     for refdes in sorted(graph.components):
         kind = graph.components[refdes].kind or "ic"
         for mode in _MODES_FOR_KIND.get(kind, ("dead",)):
+            if not _is_pertinent(graph, refdes, kind, mode):
+                continue
             pairs.append((refdes, mode))
 
     obs_dead_rails = set(symptoms.get("dead_rails") or [])
