@@ -14,7 +14,6 @@ STUB_EXTENSIONS = [
     (".bdv", "HONHAN BoardViewer"),
     (".asc", "ASUS TSICT"),
     (".tvw", "Tebo IctView"),
-    (".f2b", "Unisoft ProntoPLACE"),
 ]
 
 

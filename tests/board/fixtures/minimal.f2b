@@ -1,0 +1,19 @@
+# Unisoft ProntoPLACE Place5 — synthetic demo (.f2b)
+var_data: 4 2 4 1
+Outline:
+0 0
+1000 0
+1000 500
+0 500
+Components:
+R1 5 2
+C1 10 4
+Pins:
+100 100 -99 1 +3V3
+100 200 -99 1 GND
+400 100 1 2 +3V3
+400 200 -99 2 GND
+Annotations:
+text 500 250 "demo overlay"
+Nails:
+1 400 100 1 +3V3
