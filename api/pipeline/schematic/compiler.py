@@ -204,6 +204,17 @@ def _derive_power_rails(graph: SchematicGraph) -> dict[str, PowerRail]:
                 rails[label].enable_net = edge.src
 
     _augment_consumers_from_pins(rails, graph)
+
+    # Final scrub: a regulator never consumes its own output. The vision pass
+    # occasionally emits a `powered_by(regulator, rail)` edge alongside the
+    # `powers(regulator, rail)` edge for the same regulator (or a `powered_by`
+    # edge whose direction we interpret as making the producer also a
+    # consumer). The pin-augmentation path already enforces
+    # `component != rail.source_refdes`; this enforces the same invariant for
+    # the edge-driven population path.
+    for rail in rails.values():
+        if rail.source_refdes is not None and rail.source_refdes in rail.consumers:
+            rail.consumers.remove(rail.source_refdes)
     return rails
 
 
