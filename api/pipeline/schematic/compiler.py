@@ -204,6 +204,8 @@ def _derive_power_rails(graph: SchematicGraph) -> dict[str, PowerRail]:
                 rails[label].enable_net = edge.src
 
     _augment_consumers_from_pins(rails, graph)
+    _augment_sources_from_producer_pins(rails, graph)
+    _propagate_sources_through_passive_bridges(rails, graph)
 
     # Final scrub: a regulator never consumes its own output. The vision pass
     # occasionally emits a `powered_by(regulator, rail)` edge alongside the
@@ -211,7 +213,10 @@ def _derive_power_rails(graph: SchematicGraph) -> dict[str, PowerRail]:
     # edge whose direction we interpret as making the producer also a
     # consumer). The pin-augmentation path already enforces
     # `component != rail.source_refdes`; this enforces the same invariant for
-    # the edge-driven population path.
+    # the edge-driven population path. Producer-pin and passive-bridge
+    # augmentations may also have raised `source_refdes` to a refdes that was
+    # earlier added to `consumers` by an unrelated rule (e.g. a buck IC's
+    # feedback pin mis-classified as `power_in`); the same scrub applies.
     for rail in rails.values():
         if rail.source_refdes is not None and rail.source_refdes in rail.consumers:
             rail.consumers.remove(rail.source_refdes)
@@ -221,7 +226,11 @@ def _derive_power_rails(graph: SchematicGraph) -> dict[str, PowerRail]:
 _CONSUMER_COMPONENT_TYPES = frozenset(
     {"ic", "module", "transistor", "connector", "led", "crystal", "oscillator"}
 )
+_PRODUCER_COMPONENT_TYPES = frozenset(
+    {"ic", "module", "transistor", "connector"}
+)
 _POWER_PIN_ROLES = frozenset({"power_in"})
+_PRODUCER_PIN_ROLES = frozenset({"power_out", "switch_node"})
 
 
 def _augment_consumers_from_pins(
@@ -250,6 +259,89 @@ def _augment_consumers_from_pins(
                 and component.refdes != rail.source_refdes
             ):
                 rail.consumers.append(component.refdes)
+
+
+def _augment_sources_from_producer_pins(
+    rails: dict[str, PowerRail], graph: SchematicGraph
+) -> None:
+    """Mirror of `_augment_consumers_from_pins` for the producer side.
+
+    Vision models emit `powers` edges sparsely. The pin data is more reliable:
+    any IC / module / transistor / connector with a `power_out` (or, for
+    switching regulators, `switch_node`) pin on a rail label is the producer
+    of that rail. Passives (R, L, FL, C, D) are excluded — they don't
+    generate power. Only fills `source_refdes` when it is currently None
+    (additive, never overrides an existing producer) and only when exactly
+    one candidate exists, to avoid mis-attributing a multi-output PMIC pin
+    that was vision-misclassified.
+    """
+    candidates: dict[str, set[str]] = {}
+    for component in graph.components.values():
+        if component.type not in _PRODUCER_COMPONENT_TYPES:
+            continue
+        for pin in component.pins:
+            if pin.role not in _PRODUCER_PIN_ROLES or not pin.net_label:
+                continue
+            rail = rails.get(pin.net_label)
+            if rail is None or rail.source_refdes is not None:
+                continue
+            candidates.setdefault(pin.net_label, set()).add(component.refdes)
+
+    for label, refs in candidates.items():
+        if len(refs) != 1:
+            # Ambiguous — multiple ICs claim producer pins on this rail.
+            # Leave unsourced rather than guess; the diagnostic agent prefers
+            # an honest null over a wrong producer.
+            continue
+        rail = rails[label]
+        rail.source_refdes = next(iter(refs))
+        rail.source_type = _infer_source_type(graph, rail.source_refdes)
+
+
+def _propagate_sources_through_passive_bridges(
+    rails: dict[str, PowerRail], graph: SchematicGraph
+) -> None:
+    """Forward-propagate `source_refdes` across 2-pin ferrite / inductor bridges.
+
+    Apple-style schematics route an IC's clean output rail (e.g. PP1V8_AON)
+    through a ferrite to a downstream filtered sub-rail (e.g.
+    PP1V8_AON_CAM_CONN). Vision sometimes emits the `powers` edge on the
+    upstream rail only, leaving the downstream sub-rail unsourced — but
+    physically a ferrite or air-core inductor doesn't generate power, it
+    just filters / smooths it. Both rails share the same upstream producer.
+
+    This is intentionally restricted to inductor / ferrite bridges with
+    exactly two pins, both labelled with rails. Resistors and capacitors
+    are excluded — a cap is a decoupler, not a power path; a resistor on a
+    power path is a sense / bleed component, not a clean filter. Iterating
+    to a fixed point handles chains FL_a -> FL_b -> FL_c.
+    """
+    changed = True
+    while changed:
+        changed = False
+        for component in graph.components.values():
+            if component.type not in {"inductor", "ferrite"}:
+                continue
+            if len(component.pins) != 2:
+                continue
+            n1 = component.pins[0].net_label
+            n2 = component.pins[1].net_label
+            if not n1 or not n2:
+                continue
+            r1 = rails.get(n1)
+            r2 = rails.get(n2)
+            if r1 is None or r2 is None:
+                continue
+            if r1.source_refdes and not r2.source_refdes:
+                r2.source_refdes = r1.source_refdes
+                if r1.source_type:
+                    r2.source_type = r1.source_type
+                changed = True
+            elif r2.source_refdes and not r1.source_refdes:
+                r1.source_refdes = r2.source_refdes
+                if r2.source_type:
+                    r1.source_type = r2.source_type
+                changed = True
 
 
 def _classify_rail_component(
