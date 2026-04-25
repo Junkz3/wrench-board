@@ -155,7 +155,7 @@
   min-height: 18px;
 }
 
-.landing-status.error { color: #f87171; }
+.landing-status.error { color: var(--amber); }
 
 /* ============ Pipeline timeline (revealed after submit) ============ */
 
@@ -275,12 +275,12 @@
   background: var(--cyan);
 }
 
-/* Failed: dot red */
+/* Failed: amber per project warning grammar (cf. pipeline_progress.css). */
 .landing-phase.is-failed .landing-phase-dot {
-  border-color: #f87171;
-  background: #f87171;
+  border-color: var(--amber);
+  background: var(--amber);
 }
-.landing-phase.is-failed { color: #f87171; }
+.landing-phase.is-failed { color: var(--amber); }
 
 @keyframes landing-pulse {
   0%, 100% { box-shadow: 0 0 0 4px rgba(125, 211, 252, 0.10); }
