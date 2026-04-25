@@ -134,6 +134,15 @@ async def ingest_schematic(
 
     async def _one_page(idx: int) -> SchematicPageGraph:
         rp = rendered_pages[idx]
+        cached_path = pages_dir / f"page_{rp.page_number:03d}.json"
+        if cached_path.exists():
+            logger.info(
+                "vision skip page %d/%d (cached at %s)",
+                rp.page_number,
+                total,
+                cached_path.name,
+            )
+            return SchematicPageGraph.model_validate_json(cached_path.read_text())
         logger.info(
             "vision call page %d/%d (model=%s)", rp.page_number, total, model
         )
@@ -145,9 +154,7 @@ async def ingest_schematic(
             device_label=device_label,
             grounding=grounding_texts[idx],
         )
-        (pages_dir / f"page_{rp.page_number:03d}.json").write_text(
-            graph.model_dump_json(indent=2)
-        )
+        cached_path.write_text(graph.model_dump_json(indent=2))
         return graph
 
     # Fan every page out immediately. The earlier pattern serialised page
