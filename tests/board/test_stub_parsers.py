@@ -11,7 +11,6 @@ from api.board.parser.base import BoardParser, parser_for
 
 STUB_EXTENSIONS = [
     (".fz", "PCB Repair Tool"),
-    (".bdv", "HONHAN BoardViewer"),
     (".asc", "ASUS TSICT"),
     (".tvw", "Tebo IctView"),
 ]
