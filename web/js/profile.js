@@ -8,6 +8,13 @@
 let _state = null;    // {profile, derived, catalog}
 let _partialLoaded = false;
 
+function escHtml(s) {
+  if (s === null || s === undefined) return "";
+  return String(s).replace(/[&<>"']/g, c => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+  }[c]));
+}
+
 const STATUS_LABELS = {
   mastered:  "Maîtrisées",
   practiced: "Pratiquées",
@@ -55,7 +62,7 @@ function renderTools() {
     const on = !!_state.profile.tools[tool.id];
     const chip = document.createElement("div");
     chip.className = "profile-tool" + (on ? " on" : "");
-    chip.innerHTML = `<span class="dot"></span><span>${tool.label}</span>`;
+    chip.innerHTML = `<span class="dot"></span><span>${escHtml(tool.label)}</span>`;
     chip.addEventListener("click", () => toggleTool(tool.id));
     host.appendChild(chip);
   }
@@ -115,7 +122,7 @@ function renderSkills() {
       const card = document.createElement("div");
       card.className = "profile-skill";
       card.innerHTML = `
-        <span class="profile-skill-label">${entry.label}</span>
+        <span class="profile-skill-label">${escHtml(entry.label)}</span>
         <div class="profile-skill-meta">
           <div class="profile-skill-bar"><span style="width:${pct}%"></span></div>
           <span class="profile-skill-count">${usages}×</span>
@@ -178,9 +185,9 @@ function openDrawer(sid, entry, rec) {
     const card = document.createElement("div");
     card.className = "profile-evidence";
     card.innerHTML = `
-      <span class="dev">${ev.device_slug} · ${ev.symptom}</span>
-      <span class="sum">${ev.action_summary}</span>
-      <span class="date">${ev.date}</span>`;
+      <span class="dev">${escHtml(ev.device_slug)} · ${escHtml(ev.symptom)}</span>
+      <span class="sum">${escHtml(ev.action_summary)}</span>
+      <span class="date">${escHtml(ev.date)}</span>`;
     body.appendChild(card);
   }
 }

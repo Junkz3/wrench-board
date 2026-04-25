@@ -13,6 +13,13 @@
    ========================================================= */
 let DATA = { nodes: [], edges: [] };
 
+function escHtml(s) {
+  if (s === null || s === undefined) return "";
+  return String(s).replace(/[&<>"']/g, c => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+  }[c]));
+}
+
 export async function loadGraphFromBackend() {
   const params = new URLSearchParams(window.location.search);
   const slug = params.get("device");
@@ -403,11 +410,11 @@ function selectNode(d){
     const other = outgoing ? e.target : e.source;
     const row = document.createElement("div"); row.className="edge-item";
     row.innerHTML = `
-      <span class="rel ${e.relation}">${REL_LABEL_FR[e.relation]}</span>
+      <span class="rel ${escHtml(e.relation)}">${escHtml(REL_LABEL_FR[e.relation] || e.relation)}</span>
       <span class="arrow">${outgoing ? "→" : "←"}</span>
       <div class="edge-target">
-        <div>${other.label}</div>
-        <div class="edge-sub">${e.label} · poids ${(e.weight||1).toFixed(2)}</div>
+        <div>${escHtml(other.label)}</div>
+        <div class="edge-sub">${escHtml(e.label)} · poids ${(e.weight||1).toFixed(2)}</div>
       </div>`;
     row.onclick = () => selectNode(other);
     el.appendChild(row);
