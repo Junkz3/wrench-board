@@ -1,0 +1,5 @@
+https://mntre.com/reform2/handbook/advanced.html
+
+---
+
+No power at all — no LEDs, no rail activity after connecting wall or battery power. Likely cause: Blown input fuse F1 on the main power-input path, or no voltage reaching sense resistor R49. Probe R49 for input voltage with DMM; if absent, check F1 for continuity in diode-mode/resistance. Replace F1 if open (SMD fuse).

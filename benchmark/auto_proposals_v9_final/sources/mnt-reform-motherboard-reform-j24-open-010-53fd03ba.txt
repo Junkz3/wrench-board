@@ -1,0 +1,5 @@
+https://community.mnt.re/t/edp-cable-or-board-issue/3898
+
+---
+
+Internal display flickers intermittently or goes blank after reassembly; HDMI output unaffected. Likely cause: Damaged or mis-seated J24 MIPI-DSI flex cable (30-pin, 0.5 mm pitch) between CPU module and SN65DSI86 eDP bridge. Under microscope inspect J24 ZIF pads for lifted contacts; re-seat or re-flow.

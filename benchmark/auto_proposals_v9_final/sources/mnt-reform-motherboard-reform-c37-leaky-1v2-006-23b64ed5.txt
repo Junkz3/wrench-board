@@ -1,0 +1,5 @@
+https://mntre.com/reform2/handbook/advanced.html
+
+---
+
+Internal display dark or no video; USB ports also dead. External HDMI may or may not work. Likely cause: 1.2 V supply rail dead — both the TUSB8041 USB hub (U9) and the SN65DSI86 eDP bridge (U10) require 1.2 V to operate. Probe C37 for 1.2 V first; if absent, diode-mode on nearby decoupling caps to detect short.

@@ -1,0 +1,5 @@
+https://community.mnt.re/t/debugging-dead-motherboard/970
+
+---
+
+LPC UART responds and D11 is lit, but main CPU module does not start after sending `1P` power-on command; D11 goes out and nothing further happens. Likely cause: LPC GPIO lines to main power rail switchers damaged or a downstream rail is shorted, causing immediate shutdown.
