@@ -485,17 +485,40 @@ def _persist_repair(
     slug: str,
     device_label: str,
     symptom: str,
-) -> str:
+) -> tuple[str, bool]:
     """Write the repair metadata to memory/{slug}/repairs/{repair_id}.json.
 
-    Returns the generated repair_id. The file is the durable record of one
-    client intervention on this device — reopenable from the home library
-    so the technician can come back to any past session. `status` starts at
-    'open' and is updated as the session evolves.
+    Returns `(repair_id, is_new)`. When an `open` or `in_progress` repair
+    already exists on this `(slug, normalised_symptom)` we **reuse its id**
+    and return `is_new=False` — the caller short-circuits coverage + expand
+    so the technician doesn't burn $0.40 of LLM tokens every time they
+    resubmit the same form. Closed repairs do NOT block dedup: starting a
+    new ticket on a previously-resolved symptom is intentional.
+
+    `status` starts at 'open' on a fresh repair and is updated as the
+    session evolves.
     """
-    repair_id = uuid.uuid4().hex[:12]
     repairs_dir = memory_root / slug / "repairs"
     repairs_dir.mkdir(parents=True, exist_ok=True)
+
+    norm_symptom = symptom.strip().lower()
+    if norm_symptom:
+        for existing_path in repairs_dir.glob("*.json"):
+            try:
+                payload = json.loads(existing_path.read_text(encoding="utf-8"))
+            except (OSError, json.JSONDecodeError):
+                continue
+            if not isinstance(payload, dict):
+                continue
+            if payload.get("status") not in ("open", "in_progress"):
+                continue
+            if (payload.get("symptom") or "").strip().lower() != norm_symptom:
+                continue
+            existing_id = payload.get("repair_id")
+            if isinstance(existing_id, str) and existing_id:
+                return existing_id, False
+
+    repair_id = uuid.uuid4().hex[:12]
     payload = {
         "repair_id": repair_id,
         "device_slug": slug,
@@ -508,7 +531,7 @@ def _persist_repair(
         json.dumps(payload, indent=2, ensure_ascii=False),
         encoding="utf-8",
     )
-    return repair_id
+    return repair_id, True
 
 
 class RepairSummary(BaseModel):
@@ -818,7 +841,29 @@ async def create_repair(request: RepairRequest) -> RepairResponse:
     # whether the pack is fresh or already on disk. Two repairs on the same
     # iPhone X are two separate sessions with two separate contexts; both
     # must be reopenable later from the library.
-    repair_id = _persist_repair(memory_root, slug, request.device_label, request.symptom)
+    repair_id, is_new = _persist_repair(
+        memory_root, slug, request.device_label, request.symptom
+    )
+
+    # Branch 0 — the tech resubmitted the form for an already-open ticket
+    # on the same (device, symptom). Reuse the existing repair without
+    # burning a coverage check or an expand-pack round-trip. Without this
+    # short-circuit a stuck-on-low-confidence coverage classifier loops
+    # and chews $0.40 of LLM tokens every retry.
+    if not is_new:
+        logger.info(
+            "[API] /pipeline/repairs · reusing open repair=%s for slug=%r — no LLM run",
+            repair_id,
+            slug,
+        )
+        return RepairResponse(
+            repair_id=repair_id,
+            device_slug=slug,
+            device_label=request.device_label,
+            pipeline_started=False,
+            pipeline_kind="none",
+            coverage_reason="reusing existing open ticket on the same symptom",
+        )
 
     pack_complete = _pack_is_complete(pack_dir)
 

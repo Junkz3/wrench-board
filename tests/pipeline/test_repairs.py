@@ -404,3 +404,122 @@ def test_progress_ws_ignores_events_for_other_slugs(memory_root, client):
         # Only our slug's event arrives.
         ev = json.loads(ws.receive_text())
         assert ev == {"type": "pipeline_finished"}
+
+
+def _seed_repair(memory_root, slug, *, repair_id, symptom, status, label="Demo Pi"):
+    rdir = memory_root / slug / "repairs"
+    rdir.mkdir(parents=True, exist_ok=True)
+    (rdir / f"{repair_id}.json").write_text(
+        json.dumps(
+            {
+                "repair_id": repair_id,
+                "device_slug": slug,
+                "device_label": label,
+                "symptom": symptom,
+                "status": status,
+                "created_at": "2026-04-25T10:00:00+00:00",
+            },
+            ensure_ascii=False,
+        )
+    )
+
+
+def test_repairs_endpoint_dedup_reuses_open_ticket(memory_root, client):
+    """Resubmitting the same (device, symptom) on an open ticket must NOT
+    create a new repair_id nor fire any LLM work — that's the credit-burn
+    loop the dedup short-circuit closes."""
+    _seed_repair(
+        memory_root,
+        "demo-pi",
+        repair_id="rExisting",
+        symptom="pas de boot, écran noir",
+        status="open",
+    )
+    with patch(
+        "api.pipeline.generate_knowledge_pack", new=AsyncMock(side_effect=_fake_pipeline)
+    ) as m_pipeline, patch(
+        "api.pipeline.expand_pack", new=AsyncMock()
+    ) as m_expand, patch(
+        "api.pipeline._maybe_check_coverage", new=AsyncMock()
+    ) as m_coverage:
+        res = client.post(
+            "/pipeline/repairs",
+            json={"device_label": "Demo Pi", "symptom": "pas de boot, écran noir"},
+        )
+    assert res.status_code == 200
+    body = res.json()
+    assert body["repair_id"] == "rExisting"
+    assert body["pipeline_started"] is False
+    assert body["pipeline_kind"] == "none"
+    # Crucial — none of the three LLM paths fired.
+    m_pipeline.assert_not_called()
+    m_expand.assert_not_called()
+    m_coverage.assert_not_called()
+
+
+def test_repairs_endpoint_dedup_matches_case_insensitive(memory_root, client):
+    """Symptom matching is whitespace-trimmed + case-folded, so a
+    capitalised resubmit still hits the dedup path."""
+    _seed_repair(
+        memory_root,
+        "demo-pi",
+        repair_id="rExisting",
+        symptom="pas de boot, écran noir",
+        status="in_progress",
+    )
+    with patch(
+        "api.pipeline.generate_knowledge_pack", new=AsyncMock(side_effect=_fake_pipeline)
+    ), patch(
+        "api.pipeline.expand_pack", new=AsyncMock()
+    ):
+        res = client.post(
+            "/pipeline/repairs",
+            json={"device_label": "Demo Pi", "symptom": "  Pas de Boot, Écran Noir  "},
+        )
+    body = res.json()
+    assert body["repair_id"] == "rExisting"
+    assert body["pipeline_started"] is False
+
+
+def test_repairs_endpoint_dedup_skipped_when_existing_is_closed(memory_root, client):
+    """A closed ticket on the same symptom must NOT block a fresh repair —
+    the tech can legitimately reopen a previously-resolved complaint."""
+    _seed_repair(
+        memory_root,
+        "demo-pi",
+        repair_id="rResolved",
+        symptom="pas de boot, écran noir",
+        status="closed",
+    )
+    with patch(
+        "api.pipeline.generate_knowledge_pack", new=AsyncMock(side_effect=_fake_pipeline)
+    ):
+        res = client.post(
+            "/pipeline/repairs",
+            json={"device_label": "Demo Pi", "symptom": "pas de boot, écran noir"},
+        )
+    body = res.json()
+    assert body["repair_id"] != "rResolved"
+    assert body["pipeline_started"] is True
+
+
+def test_repairs_endpoint_dedup_skipped_on_distinct_symptom(memory_root, client):
+    """Same device, different symptom → fresh repair (the existing open
+    ticket is for a different problem)."""
+    _seed_repair(
+        memory_root,
+        "demo-pi",
+        repair_id="rExisting",
+        symptom="pas de boot, écran noir",
+        status="open",
+    )
+    with patch(
+        "api.pipeline.generate_knowledge_pack", new=AsyncMock(side_effect=_fake_pipeline)
+    ):
+        res = client.post(
+            "/pipeline/repairs",
+            json={"device_label": "Demo Pi", "symptom": "USB-C ne charge pas"},
+        )
+    body = res.json()
+    assert body["repair_id"] != "rExisting"
+    assert body["pipeline_started"] is True
