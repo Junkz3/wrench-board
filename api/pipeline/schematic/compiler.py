@@ -131,7 +131,22 @@ _RAIL_LABEL_NOISE = {
 # the power-symbol heuristic doesn't distinguish VCC from GND. Ground is NOT
 # a rail to sequence or visualise — it has hundreds of pin connections that
 # would drown every other rail in the downstream UI.
-_GROUND_LABEL = re.compile(r"^(?:GND|AGND|DGND|PGND|SGND)(?:_[A-Z0-9]+)?$")
+#
+# Token list covers the universal CMOS / ARM / Apple SoC ground conventions:
+#   - GND family: GND, AGND (analog), DGND (digital), PGND (power),
+#     SGND (signal), GNDA / GNDD (suffix-after-prefix variants used by
+#     TI / ON Semi, present on Apple SoC pin-list pages).
+#   - VSS family: VSS (universal CMOS substrate ground used by Apple,
+#     Arm, Intel), AVSS / DVSS (analog/digital substrate), VSSA / VSSD
+#     (alt spellings — same physical net, different style guide).
+# All accept an optional `_<SUFFIX>` qualifier to catch domain-tagged
+# ground nets (e.g. `AGND_RF`, `VSSA_PLL`). Standalone `_PMU_VSS_RTC`
+# style names with VSS in the MIDDLE are NOT matched here on purpose —
+# that token list is anchored at the start so we only catch labels that
+# *begin* with a ground keyword, never substrings buried in a rail name.
+_GROUND_LABEL = re.compile(
+    r"^(?:GND|AGND|DGND|PGND|SGND|GNDA|GNDD|VSS|AVSS|DVSS|VSSA|VSSD)(?:_[A-Z0-9]+)?$"
+)
 
 
 def _is_noise_rail_label(label: str) -> bool:
