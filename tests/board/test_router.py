@@ -61,16 +61,19 @@ def test_parse_rejects_oversized_upload(monkeypatch: pytest.MonkeyPatch):
     assert body["max_bytes"] == 1024
 
 
-def test_parse_returns_501_for_stub_parser_extensions():
-    """A registered but not-yet-implemented format must yield 501, not 500."""
+def test_parse_fz_without_key_returns_422_with_clear_hint(monkeypatch):
+    """Uploading a .fz with no MICROSOLDER_FZ_KEY configured should yield
+    a 422 with a distinct `fz-key-missing` detail so the frontend can
+    prompt the technician for the key rather than failing opaquely."""
+    monkeypatch.delenv("MICROSOLDER_FZ_KEY", raising=False)
     r = client.post(
         "/api/board/parse",
         files={"file": ("something.fz", b"any content", "application/octet-stream")},
     )
-    assert r.status_code == 501
+    assert r.status_code == 422
     body = r.json()["detail"]
-    assert body["detail"] == "parser-not-implemented"
-    assert "PCB Repair Tool" in body["message"]
+    assert body["detail"] == "fz-key-missing"
+    assert "MICROSOLDER_FZ_KEY" in body["message"]
 
 
 def test_parse_rejects_unknown_extension():
