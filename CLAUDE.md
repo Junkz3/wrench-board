@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project overview
 
-`microsolder-agent` is an agent-native diagnostics workbench for board-level
+`wrench-board` is an agent-native diagnostics workbench for board-level
 electronics repair. Claude drives a multi-panel UI (boardview, knowledge
 graph, memory bank, diagnostic chat) through tool calls, in response to a
 microsoldering technician's natural-language questions. Two LLM paths run the
@@ -363,7 +363,7 @@ Custom tools (`manifest.py`):
   `mb_expand_knowledge` (the agent self-extends the pack when rules return
   empty, running a focused Scout + Clinicien pass — see `pipeline/expansion.py`).
   Implementations in `agent/tools.py`. Field-report listing is no longer a
-  tool — the agent greps `/mnt/memory/microsolder-{slug}/field_reports/`
+  tool — the agent greps `/mnt/memory/wrench-board-{slug}/field_reports/`
   directly via `agent_toolset_20260401`.
 - **BV** — boardview control (12 tools): `bv_highlight_component`,
   `bv_focus_component`, `bv_reset_view`, `bv_highlight_net`, `bv_flip_board`,
@@ -612,6 +612,34 @@ English.
     equivalent. No exceptions, even for a trivial `docs:` commit.
 - **Verify before declaring done.** Run `make test` before saying a change
   is complete. UI changes require a manual check in the browser.
+- **Long-running smoke scripts must stream output live.** Anything
+  that takes more than ~30s (curator spawn, `expand_pack`, schematic
+  ingest, MA session smoke) MUST be invocable with live progress
+  visibility — Alexis (or another claude session) needs to see what's
+  happening, not stare at a blank shell for 3 minutes. Three rules,
+  non-negotiable:
+  - **In the script:** call
+    `sys.stdout.reconfigure(line_buffering=True)` at module top, and
+    `logging.basicConfig(level=INFO, stream=sys.stderr)` so the
+    pipeline's own `[Curator]` / `[Expand]` / `[CacheRate]` logs are
+    surfaced. Without this, Python block-buffers stdout when it's not
+    a TTY and you see zero until the process exits.
+  - **When invoking:** never pipe to `tail` (`| tail -60` will silently
+    swallow the entire run and emit nothing if the buffer is small
+    enough). Redirect to a real file: `python -u script.py
+    > /tmp/smoke_X.log 2>&1` and `run_in_background: true`. The `-u`
+    is belt-and-suspenders alongside the in-script reconfigure.
+  - **Watch live:** use the harness `Monitor` tool with `tail -F` on
+    the log file, filtered to the lines Alexis would actually want to
+    see (`[smoke]`, `[Curator]`, `[Expand]`, `web_search`, `is_error`,
+    `Error`, `Traceback`, `PASS`, `FAIL`). Break on a terminal pattern
+    so the monitor ends cleanly. **Don't chain short `sleep` polls** —
+    the harness blocks it, and Monitor + a streaming log is what it's
+    designed for.
+
+  Real incident: the first three runs of `smoke_expand_pack.py` were
+  invisible because `2>&1 | tail -60` ate everything; we relaunched
+  three times before fixing the buffering. Don't repeat that.
 
 ## Models
 
@@ -660,7 +688,7 @@ Currently authoritative specs (start here for structural work):
   10 deterministic invariants the simulator must satisfy on every pack.
 
 Archived specs (still useful as context, no longer authoritative):
-- `docs/superpowers/specs/2026-04-21-microsolder-agent-v1-design.md`
+- `docs/superpowers/specs/2026-04-21-wrench-board-v1-design.md`
 - `docs/superpowers/specs/2026-04-21-boardview-design.md`
 
 `docs/HACKATHON.md` holds submission context (only relevant until the

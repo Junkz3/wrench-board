@@ -1,6 +1,6 @@
 # Architecture
 
-Référence complète de l'architecture `microsolder-agent`. Ce document est la carte mentale à partager entre collaborateurs — il complète `CLAUDE.md` (règles + tour d'horizon) en détaillant les **flux IA**, les **contrats inter-modules** et les **points d'extension**.
+Référence complète de l'architecture `wrench-board`. Ce document est la carte mentale à partager entre collaborateurs — il complète `CLAUDE.md` (règles + tour d'horizon) en détaillant les **flux IA**, les **contrats inter-modules** et les **points d'extension**.
 
 À lire à froid avant toute modification structurelle : pipeline, runtime diagnostic, engines déterministes, parsers boardview, registry des tools.
 
@@ -8,7 +8,7 @@ Référence complète de l'architecture `microsolder-agent`. Ce document est la 
 
 ## TL;DR
 
-`microsolder-agent` est un workbench agent-natif pour le diagnostic microsoudure au niveau carte. L'architecture repose sur **quatre workflows IA orthogonaux** qui produisent et consomment un même corpus on-disk (`memory/{slug}/`) :
+`wrench-board` est un workbench agent-natif pour le diagnostic microsoudure au niveau carte. L'architecture repose sur **quatre workflows IA orthogonaux** qui produisent et consomment un même corpus on-disk (`memory/{slug}/`) :
 
 | # | Workflow | Cadence | Déclencheur |
 |---|----------|---------|-------------|
@@ -69,19 +69,33 @@ Plus **deux engines déterministes purs** (`simulator`, `hypothesize`) qui n'app
 
 **Fichier source** : `api/pipeline/orchestrator.py::generate_knowledge_pack(device_label, documents=None)`
 
-### Les 4 phases
+### Les 5 phases
 
 | Phase | Module | Modèle | Tool forcé | Sortie |
 |-------|--------|--------|------------|--------|
 | 1 Scout | `scout.py` | Sonnet | native `web_search` (non-forcé) | `raw_research_dump.md` |
 | 2 Registry | `registry.py` | Sonnet | `submit_registry` | `registry.json` |
+| 2.5 Mapper | `mapper.py` | Sonnet | `submit_refdes_mapping` | mapping registry → graph refdes (intermédiaire, persistance optionnelle) |
 | 3 Writers ×3 | `writers.py` | Opus (Cartographe, Clinicien) + Sonnet (Lexicographe) | `submit_knowledge_graph`, `submit_rules`, `submit_dictionary` | `knowledge_graph.json`, `rules.json`, `dictionary.json` |
 | 4 Auditor | `auditor.py` | Opus | `submit_audit_verdict` | `audit_verdict.json` |
 
+### Modules de support de la pipeline A
+
+| Module | Rôle |
+|--------|------|
+| `prompts.py` | Hub central des system prompts — Scout, Registry, Mapper, Cartographe, Clinicien, Lexicographe, Auditor, phase narrator. Source unique de vérité, modifié quand une persona change. |
+| `events.py` | Pubsub asyncio par slug. Orchestrator publie `phase_started` / `phase_progress` / `phase_completed` / `phase_narration` / `coverage_check_*` / `expand_*`. WS `/pipeline/progress/{slug}` les relaie. |
+| `phase_narrator.py` | Post-phase Haiku narration FR (2-3 phrases). Lit l'artefact, résume, publie via `events.py`. Découplé : si la narration échoue, la pipeline continue. |
+| `expansion.py` | Targeted self-extend : Scout focalisé + Clinicien sur un `focus_symptoms` set. Append au `raw_research_dump.md`, regenère `rules.json` incrémental. Appelé par `POST /pipeline/packs/{slug}/expand` et par la branche **expand** de `POST /pipeline/repairs`. |
+| `coverage.py` | Haiku forced-tool — classifie si un symptôme tech est couvert par les `rules.json` existantes. Retourne `{covered, confidence, matched_rule_id, reason}`. Seuil `confidence ≥ 0.7` pour court-circuiter la génération. |
+| `intent_classifier.py` | Haiku forced-tool — `POST /pipeline/classify-intent` : free-text de la landing → top-3 device slugs avec confiance. Backbone du form 2-champs de la landing. |
+| `subsystem.py` | Pure-function deterministe — tague chaque node du graph (`power` / `charge` / `usb` / `display` / `audio` / `rf` / `io` / `compute`) via règles regex sur refdes + signal names. Pas de LLM. |
+| `telemetry/token_stats.py` | Tracking des tokens par phase (input / output / cache_read / cache_creation). Consommé par les events de progress et les pricing dashboards. |
+
 ### Particularités non-évidentes
 
-- **Scout résilience** : gère les `pause_turn` du SDK, rejette les dumps « maigres » (< N symptômes / sources / composants), relance avec un scope élargi. Depuis `6377d3b`, Scout peut consommer un **graphe électrique, un boardview parsé et des datasheets PDF** fournis par le tech — les MPN extraits deviennent des query seeds ciblés.
-- **Registry → Writers** : la `registry.json` est le vocabulaire canonique. Toute violation (refdes émis par un Writer absent de la registry) déclenche `drift.py`, qui compile un rapport de drift passé **en entrée** à l'Auditor comme ground truth déterministe.
+- **Scout résilience** : gère les `pause_turn` du SDK, rejette les dumps « maigres » (< N symptômes / sources / composants), relance avec un scope élargi. Depuis `6377d3b`, Scout peut consommer un **graphe électrique, un boardview parsé et des datasheets PDF** fournis par le tech — les MPN extraits deviennent des query seeds ciblés. Depuis `020c168`, le param `focus_symptom` insère un bloc qui alloue 3-4 web_search queries sur un symptôme tech précis (utilisé par les branches **full** et **expand** de `POST /pipeline/repairs`).
+- **Registry → Mapper → Writers** : la `registry.json` est le vocabulaire canonique. Le Mapper produit la passerelle registry → refdes du graph en quote-validating chaque correspondance. Toute violation (refdes émis par un Writer absent de la registry) déclenche `drift.py`, qui compile un rapport de drift passé **en entrée** à l'Auditor comme ground truth déterministe.
 - **Writers cache warmup** : les trois writers partagent un préfixe long (raw dump + registry + system prompt) marqué `cache_control: ephemeral`. Writer 1 part en premier, les writers 2 et 3 attendent `cache_warmup_seconds` pour que la cache entry matérialise — d'où un gain tokens réel de −75 % sur les writers 2-3.
 - **Auditor loop** : verdict `NEEDS_REVISION` → `_apply_revisions()` relance les writers flaggés (max `pipeline_max_revise_rounds`). Verdict `REJECTED` lève. Un drift check déterministe coupe la boucle après `max_rounds`.
 - **Post-pipeline** : `graph_transform.pack_to_graph_payload()` synthétise des nœuds d'action et émet le JSON consommé par `web/js/graph.js` (colonnes Actions → Components → Nets → Symptoms).
@@ -89,6 +103,48 @@ Plus **deux engines déterministes purs** (`simulator`, `hypothesize`) qui n'app
 ### Source de vérité des shapes
 
 `api/pipeline/schemas.py` définit tous les modèles Pydantic du pack. Ils servent *à la fois* de validateurs runtime et de sources JSON Schema pour `input_schema` des tools forcés. **Ne jamais dupliquer une shape** — tout importer de là.
+
+### `POST /pipeline/repairs` — la routing-table à 3 branches
+
+L'entrée principale d'une session client (« nouveau ticket »). À partir d'un `device_label` + `symptom`, l'orchestrator décide laquelle de trois branches déclencher pour minimiser la latence et le coût (commits `860008e`, `b5e4f9f`).
+
+```
+                       POST /pipeline/repairs {device_label, symptom}
+                                      │
+                                      ▼
+                      ┌──────────────────────────────┐
+                      │ Pack présent sous memory/?   │
+                      └──────────────┬───────────────┘
+                                     │
+                  ┌──────────────────┴──────────────────┐
+                  │                                     │
+                NON│                                  OUI│
+                  │                                     │
+                  ▼                                     ▼
+          ┌───────────────┐         ┌────────────────────────────────────┐
+          │ pipeline_kind │         │ coverage.check_symptom_coverage()  │
+          │  = "full"     │         │  Haiku forced-tool sur rules.json  │
+          │ Knowledge     │         └────────────────┬───────────────────┘
+          │ Factory       │                          │
+          │ complète      │      covered=True &      │ covered=False  OU
+          │ (focus_symptom│      confidence≥0.7 &    │ confidence<0.7
+          │  = symptom)   │      matched_rule_id≠∅   │
+          └───────────────┘                          │
+                                  ┌──────────────────┴───────────────┐
+                                  ▼                                  ▼
+                       ┌────────────────────┐             ┌─────────────────────┐
+                       │ pipeline_kind      │             │ pipeline_kind       │
+                       │   = "none"         │             │   = "expand"        │
+                       │ ZÉRO LLM           │             │ expansion.expand_   │
+                       │ Renvoie immédiat   │             │   pack(focus_       │
+                       │ matched_rule_id +  │             │   symptoms=[…])     │
+                       │ coverage_reason    │             │ Scout + Clinicien   │
+                       └────────────────────┘             │ ciblés, append      │
+                                                          │ rules.json          │
+                                                          └─────────────────────┘
+```
+
+`RepairResponse` expose `pipeline_kind` (`"full"` | `"expand"` | `"none"`), `matched_rule_id`, `coverage_reason`. Le frontend (`web/js/home.js`) lit ces champs pour décider d'ouvrir la timeline pipeline (full/expand) ou d'aller direct dans la repair (none).
 
 ---
 
@@ -268,15 +324,35 @@ Manifest : `api/agent/manifest.py`. Sélection dynamique via `build_tools_manife
 
 | Famille | Nombre | Handler principal | Dispatched depuis |
 |---------|--------|-------------------|-------------------|
-| MB (memory bank + board aggregation) | 5 | `api/agent/tools.py` | `runtime_*._dispatch_tool()` |
-| MB (schematic) | 2 (`mb_schematic_graph`, `mb_hypothesize`) | `api/tools/schematic.py`, `api/tools/hypothesize.py` | idem |
-| MB (measurements + validation) | 7 | `api/tools/measurements.py`, `api/tools/validation.py` | idem |
+| MB knowledge (refdes / rules / findings / expand) | 5 | `api/agent/tools.py` | `runtime_*._dispatch_tool()` |
+| MB schematic / hypothesize | 2 (`mb_schematic_graph`, `mb_hypothesize`) | `api/tools/schematic.py`, `api/tools/hypothesize.py` | idem |
+| MB measurements (record / list / compare / observations / set / clear) | 6 | `api/tools/measurements.py` (+ `api/agent/measurement_memory.py`) | idem |
+| MB validation (`mb_validate_finding`) | 1 | `api/tools/validation.py` (+ `api/agent/validation.py`) | idem |
 | BV (boardview control) | 12 | `api/tools/boardview.py` | `api/agent/dispatch_bv.py` |
-| Profile | 3 | `api/profile/tools.py` | `runtime_*._dispatch_tool()` |
+| Profile (`profile_get`, `profile_check_skills`, `profile_track_skill`) | 3 | `api/profile/tools.py` | `runtime_*._dispatch_tool()` |
 
-Total : **29 tools** déclarés dans `manifest.py` (vérifié par `grep -c '"name":'`).
+Total : **29 tools** déclarés dans `manifest.py` (vérifié par `grep -c '"name":'`). Liste complète des noms — voir `manifest.py`, ne pas dupliquer ici.
 
 **État connu** : les handlers sont dispersés en 5 fichiers sans registry unique. Ajouter un tool oblige à éditer `manifest.py` + un fichier d'implémentation + les deux runtimes. Refactor planifié mais non prioritaire (cf. section *Dette architecturale*).
+
+### Modules de support du runtime D
+
+Au-delà des deux runtimes, plusieurs modules dans `api/agent/` portent du state ou des side-effects propres au diagnostic :
+
+| Module | Rôle |
+|--------|------|
+| `chat_history.py` | Append-only JSONL par conversation (`memory/{slug}/repairs/{rid}/conversations/{cid}/messages.jsonl`). Source de vérité pour le replay direct + mirror MA. |
+| `field_reports.py` | Findings cross-session (per-device, pas per-repair). Mirror vers le memory store MA quand dispo. |
+| `measurement_memory.py` | Journal mesures par repair (`measurements.jsonl`). Auto-classifie V/A/W/°C/Ω → `ComponentMode` / `RailMode`. Synthétise des `Observations` pour le simulator. |
+| `diagnosis_log.py` | Append-only par repair. Loggue chaque turn d'observation/hypothèse/pruning du tool `mb_hypothesize` — corpus brut consommé par les loops d'évaluation et les skill `microsolder-evolve*`. |
+| `validation.py` | `RepairOutcome` persistance (`outcome.json` par repair). Reçoit le clic « Marquer fix » du tech : refdes + mode + rationale. |
+| `schematic_boardview_bridge.py` | Enrichit le `SimulationTimeline` (schematic) avec la position 2D de la `Board` (PCB). Émet une `EnrichedTimeline` + jusqu'à 8 `ProbePoint` (route physique de mesures). |
+| `reliability.py` | Lit `simulator_reliability.json`, injecte une ligne dans le system prompt des deux runtimes. |
+| `memory_seed.py` | Première ouverture WS d'une repair fraîche : injecte le pack + findings dans le contexte (mode managed) ou dans le first turn (mode direct). |
+| `memory_stores.py` | Cache per-device des MA memory stores. Beta header `managed-agents-2026-04-01`. NoOp gracieux si la beta est down ou absente. |
+| `managed_ids.py` | Loader de `managed_ids.json` (env + 3 agents tier-scopés). Fallback legacy single-agent toléré. |
+| `pricing.py` | Estimateur de coût des tokens (Avril 2026 : Haiku $1/$5, Sonnet $3/$15, Opus $5/$25 ; cache read 0.10×, cache creation 1.25×). Consommé par les events de progress. |
+| `sanitize.py` | Garde-fou anti-hallucination — voir section dédiée ci-dessous. |
 
 ### Garde-fou anti-hallucination
 
@@ -333,6 +409,25 @@ Prend une observation partielle (composants/rails dead/alive) et énumère les c
 
 Retourne le top-N avec diff structuré et narration FR déterministe. Dépend de `SimulationEngine`. Pas d'IO, pas de LLM.
 
+### Invariants property-based — `tests/pipeline/schematic/test_simulator_invariants.py`
+
+10 contrats que `simulator.py` et `hypothesize.py` doivent honorer pour tout device qui présente un `electrical_graph.json` sous `memory/`. Le runner **auto-découvre** les devices (`_discover_devices()` scanne `memory/<slug>/electrical_graph.json`) et applique les 10 invariants à chacun (commits `71c4c23`, `3c5ed3c`, `d205ec3`).
+
+| # | Invariant | Garantit |
+|---|-----------|----------|
+| INV-1 | Cascade ⊆ graph | Le simulator n'invente jamais de refdes. |
+| INV-2 | `failures = []` ⇒ cascade vide | Pas de death spontanée. |
+| INV-3 | Toute mort de cascade a une cause physique | Pas de mort « orpheline ». |
+| INV-4 | Mort de source ⇒ rail mort | Causalité d'alimentation. |
+| INV-5 | Rail mort ⇒ consommateurs morts (sauf alternative live) | Propagation cohérente. |
+| INV-6 | Déterminisme | Même input → même timeline, run après run. |
+| INV-7 | Rails sans source immunes aux kills internes | Pas de death magique. |
+| INV-8 | Recall top-5 ≥ seuil sur paires pertinentes | `hypothesize` retrouve la cause. |
+| INV-9 | Cohérence du verdict cascade | Pas de contradiction interne. |
+| INV-10 | `hypothesize` sur observation vide ⇒ aucun score positif | Pas de faux signal sans signal. |
+
+C'est le filet de sécurité de la skill `microsolder-evolve` : un commit `evolve:` qui casse un de ces 10 tests est immédiatement reverté.
+
 ---
 
 ## Contrats de données (on-disk, sous `memory/{slug}/`)
@@ -341,83 +436,123 @@ Source de vérité inter-modules. **Toujours regarder ce tableau** avant d'ajout
 
 | Artefact | Écrit par | Lu par |
 |----------|-----------|--------|
-| `raw_research_dump.md` | `pipeline/scout.py` | `pipeline/registry.py`, `pipeline/writers.py`, `pipeline/bench_generator/extractor.py` |
-| `registry.json` | `pipeline/registry.py` | `pipeline/writers.py`, `pipeline/drift.py`, `agent/tools.py::mb_get_component`, frontend `memory_bank.js` |
-| `knowledge_graph.json` | `pipeline/writers.py::Cartographe` | `pipeline/graph_transform.py`, frontend `graph.js` |
-| `rules.json` | `pipeline/writers.py::Clinicien` | `agent/tools.py::mb_get_rules_for_symptoms`, `pipeline/bench_generator` |
+| `raw_research_dump.md` | `pipeline/scout.py` (+ append `pipeline/expansion.py`) | `pipeline/registry.py`, `pipeline/writers.py`, `pipeline/bench_generator/extractor.py` |
+| `registry.json` | `pipeline/registry.py` | `pipeline/mapper.py`, `pipeline/writers.py`, `pipeline/drift.py`, `agent/tools.py::mb_get_component`, frontend `memory_bank.js` |
+| `knowledge_graph.json` | `pipeline/writers.py::Cartographe` | `pipeline/graph_transform.py`, `pipeline/subsystem.py`, frontend `graph.js` |
+| `rules.json` | `pipeline/writers.py::Clinicien` (+ `pipeline/expansion.py`) | `pipeline/coverage.py`, `agent/tools.py::mb_get_rules_for_symptoms`, `pipeline/bench_generator` |
 | `dictionary.json` | `pipeline/writers.py::Lexicographe` | `agent/tools.py::mb_get_component` |
 | `audit_verdict.json` | `pipeline/auditor.py` | frontend `home.js`, `memory_bank.js` |
 | `schematic_pages/page_XXX.json` | `pipeline/schematic/page_vision.py` | `pipeline/schematic/merger.py` |
 | `schematic_graph.json` | `pipeline/schematic/merger.py` | `pipeline/schematic/compiler.py` |
-| `electrical_graph.json` | `pipeline/schematic/compiler.py` | `simulator.py`, `hypothesize.py`, `tools/schematic.py`, `pipeline/bench_generator` |
+| `electrical_graph.json` | `pipeline/schematic/compiler.py` | `simulator.py`, `hypothesize.py`, `tools/schematic.py`, `pipeline/bench_generator`, **`tests/.../test_simulator_invariants.py`** (auto-discovery) |
 | `boot_sequence_analyzed.json` | `pipeline/schematic/boot_analyzer.py` | `simulator.py` (via `analyzed_boot=…`), `api/pipeline/__init__.py` (merge optionnel) |
 | `nets_classified.json` | `pipeline/schematic/net_classifier.py` | `api/pipeline/__init__.py` (merge optionnel) |
 | `simulator_reliability.json` | `pipeline/bench_generator/writer.py` | `agent/reliability.py` |
 | `field_reports/*.md` | `agent/field_reports.py::record_field_report` | `agent/tools.py::mb_list_findings`, MA memory store mirror |
 | `repairs/{rid}/conversations/{cid}/messages.jsonl` | `agent/chat_history.py::append_event` | `runtime_direct.py` (replay), `runtime_managed.py` (JSONL fallback summary) |
+| `repairs/{rid}/measurements.jsonl` | `agent/measurement_memory.py::append_measurement` | `tools/measurements.py::mb_*_measurements`, simulator observations |
+| `repairs/{rid}/diagnosis_log.jsonl` | `agent/diagnosis_log.py::append_turn` | corpus `microsolder-evolve` (eval offline) |
+| `repairs/{rid}/outcome.json` | `agent/validation.py::record_outcome` | UI repair row (✓ « Marquer fix »), exports |
+| `managed.json` (per-device) | `agent/memory_stores.py::ensure_store` | `runtime_managed.py` (resource mount) |
 
 **Invariant** : tout nouveau module qui **produit** un JSON sous `memory/{slug}/` doit déclarer sa shape dans `pipeline/schemas.py` ou `pipeline/schematic/schemas.py`. Pas de shape « ad-hoc » en markdown ou en comment.
 
 ---
 
-## Endpoints HTTP / WS
+## Endpoints HTTP / WS — surface exhaustive (35 routes)
 
-Liste non-exhaustive — le source de vérité est `api/pipeline/__init__.py` (25+ routes), `api/board/router.py`, `api/profile/router.py`, `api/main.py`.
+Source de vérité : `api/pipeline/__init__.py` (27 routes), `api/board/router.py` (1), `api/profile/router.py` (4), `api/main.py` (3).
 
 ### Pipeline — packs & lifecycle (`api/pipeline/__init__.py`)
 - `POST /pipeline/generate` — knowledge factory synchrone (30–120 s)
-- `GET /pipeline/packs` — liste des packs + bitmask de présence
-- `GET /pipeline/packs/{slug}` — métadonnées d'un pack
-- `GET /pipeline/packs/{slug}/full` — bundle de tous les JSON (Memory Bank)
-- `GET /pipeline/packs/{slug}/findings` — field reports d'un device
-- `GET /pipeline/packs/{slug}/graph` — payload graphe synthétisé
-- `POST /pipeline/packs/{slug}/expand` — Scout + Clinicien focalisés (self-extend)
-- `GET /pipeline/packs/{slug}/documents` + upload endpoint — datasheets / schéma / boardview fournis par le tech
-- `GET /pipeline/taxonomy` — arbre brand > model > version (home)
+- `POST /pipeline/ingest-schematic` — wrapper HTTP du workflow B (PDF schéma → `ElectricalGraph`)
+- `GET  /pipeline/packs` — liste des packs + bitmask de présence
+- `GET  /pipeline/packs/{slug}` — métadonnées d'un pack
+- `GET  /pipeline/packs/{slug}/full` — bundle de tous les JSON (Memory Bank)
+- `GET  /pipeline/packs/{slug}/findings` — field reports d'un device
+- `GET  /pipeline/packs/{slug}/graph` — payload graphe synthétisé
+- `POST /pipeline/packs/{slug}/expand` — `pipeline/expansion.py` (Scout + Clinicien focalisés)
+- `POST /pipeline/packs/{slug}/documents` — upload datasheets / schéma / boardview fournis par le tech
+- `GET  /pipeline/packs/{slug}/documents` — liste des documents uploadés
+- `GET  /pipeline/taxonomy` — arbre brand > model > version (home)
 
 ### Pipeline — schematic & engines
-- `GET /pipeline/packs/{slug}/schematic` — `electrical_graph.json` + meta
-- `GET /pipeline/packs/{slug}/schematic/pages` — raw vision pages
-- `GET /pipeline/packs/{slug}/schematic/boot` — boot sequence analyzed
-- `GET /pipeline/packs/{slug}/schematic/passives` — classification passives
+- `GET  /pipeline/packs/{slug}/schematic` — `electrical_graph.json` + meta
+- `GET  /pipeline/packs/{slug}/schematic/pages` — raw vision pages
+- `GET  /pipeline/packs/{slug}/schematic/boot` — boot sequence analyzed
+- `GET  /pipeline/packs/{slug}/schematic/passives` — classification passives
 - `POST /pipeline/packs/{slug}/schematic/analyze-boot` (202) — lance `boot_analyzer` en arrière-plan
 - `POST /pipeline/packs/{slug}/schematic/classify-nets` (202) — lance le classifier nets
 - `POST /pipeline/packs/{slug}/schematic/simulate` — drives `SimulationEngine` (même shape que `mb_schematic_graph(query="simulate")`)
 - `POST /pipeline/packs/{slug}/schematic/hypothesize` — diagnostic inverse depuis observation
 
-### Pipeline — repairs & conversations
-- `POST /pipeline/repairs` — crée une repair + fire-and-forget pack gen si device nouveau
-- `GET /pipeline/repairs` — liste des repairs (home)
-- `GET /pipeline/repairs/{repair_id}` — métadonnées d'une repair
-- `GET /pipeline/repairs/{repair_id}/conversations` — liste des conversations
-- `GET /pipeline/packs/{slug}/repairs/{repair_id}/measurements` — journal de mesures
+### Pipeline — repairs, conversations, mesures
+- `POST /pipeline/repairs` — routing à 3 branches (full / expand / none) — voir section dédiée Workflow A
+- `GET  /pipeline/repairs` — liste des repairs (home)
+- `GET  /pipeline/repairs/{repair_id}` — métadonnées d'une repair
+- `GET  /pipeline/repairs/{repair_id}/conversations` — liste des conversations
+- `POST /pipeline/packs/{slug}/repairs/{repair_id}/measurements` — append au journal mesures
+- `GET  /pipeline/packs/{slug}/repairs/{repair_id}/measurements` — lecture du journal mesures
 
-### Pipeline — WebSocket progress
-- `WS /pipeline/progress/{slug}` — events live (phase_started, phase_progress, phase_completed)
+### Pipeline — landing & progress
+- `POST /pipeline/classify-intent` — Haiku forced-tool, free-text → top-3 device slugs (landing 2-champs)
+- `WS   /pipeline/progress/{slug}` — events live (`phase_started`, `phase_progress`, `phase_completed`, `phase_narration`, `coverage_check_*`, `expand_*`)
 
 ### Board (`api/board/router.py`)
 - `POST /api/board/parse` — upload + parse via `parser_for(path)` → `Board` JSON
 
 ### Profile (`api/profile/router.py`)
-- `GET /profile` — technician profile (catalog / skills)
+- `GET /profile` — technician profile (catalog / skills / preferences)
+- `PUT /profile/identity` — mise à jour identité
+- `PUT /profile/tools` — mise à jour outillage
+- `PUT /profile/preferences` — mise à jour préférences
 
-### Diagnostic
-- `WS /ws/diagnostic/{slug}?tier=&repair=&conv=` — conversation live
-- `WS /ws` — legacy echo (smoke test)
+### Main (`api/main.py`)
+- `GET /health` — healthcheck
+- `WS  /ws/diagnostic/{slug}?tier=&repair=&conv=` — conversation diagnostic live
+- `WS  /ws` — legacy echo (smoke test)
 
 ---
 
 ## Boardview parsers (`api/board/parser/`)
 
-Registry extension-based. Un parser = un fichier qui décore `@register` et déclare `extensions = (".ext",)`.
+Registry extension-based. Un parser = un fichier qui décore `@register` et déclare `extensions = (".ext",)`. 12 formats au total — la table ci-dessous précise le statut **vérifié sur fichiers réels** (commits `b4c8a1a`, `68b1428`, `03a9380`, `3b7cf60`, `d205ec3`).
 
-### Implémentés
-- `test_link.py` — OpenBoardView `.brd` v3 clean-room, refuse les fichiers obfusqués (`ObfuscatedFileError`)
-- `brd2.py` — KiCad boardview `.brd2`
-- `kicad.py` — `.kicad_pcb` natif (helpers dans `_kicad_extract.py`)
+### DONE — vérifiés sur fichiers réels
 
-### Stubs (chaque fichier déclare ses extensions et raise `NotImplementedError`)
-`bv.py`, `cad.py`, `gr.py`, `cst.py`, `tvw.py`, `asc.py`, `fz.py`, `f2b.py`, `bdv.py`. Shape générique dans `_stub.py`.
+| Parser | Format | Particularité |
+|--------|--------|---------------|
+| `test_link.py` | OpenBoardView `.brd` v3 ASCII, clean-room | refuse les fichiers obfusqués via `ObfuscatedFileError` |
+| `brd2.py` | KiCad boardview `.brd2` | export ASCII KiCad standard |
+| `kicad.py` | `.kicad_pcb` natif | helpers dans `_kicad_extract.py` |
+| `asc.py` | ASUS TSICT `.asc` (multi-fichier ou combiné) | directory-aware sur `format.asc` / `parts.asc` / `pins.asc` / `nails.asc` |
+| `fz.py` | ASUS PCB Repair Tool `.fz` | dispatch par magic byte : zlib (déchiffré) ou XOR (gated par env `WRENCH_BOARD_FZ_KEY`, retourne 422 si absente) |
+| `bdv.py` | HONHAN BoardViewer `.bdv` | déchiffrement arithmétique symétrique (key 160..286) puis re-parse Test_Link |
+| `cad.py` | GenCAD 1.4 ASCII (Mentor / Allegro) + dispatch umbrella | délègue à `_gencad.py`, `_fz_zlib.py`, `BRD2Parser` ou `Test_Link` selon shape |
+
+### PARTIAL — implémenté mais couverture limitée
+- `tvw.py` — Tebo IctView 3.0/4.0. Décode rotation-cipher ASCII (rot-13 / rot-10) ou rejette honnêtement les containers binaires (commit `24b962a`).
+
+### SPECULATIVE — heuristiques, non validés sur corpus réel (commit `3b7cf60`)
+- `bv.py` (ATE BoardView 1.5) — détecte ASCII Test_Link shape ; rejette les fichiers binaires non-imprimables (>30 % bytes non-ASCII).
+- `gr.py` (BoardView R5.0) — détecte markers `Components:` / `Pins:` / `TestPoints:` ; rejette le binaire.
+- `cst.py` (IBM Lenovo Castw v3.32) — détecte INI-style `[Format] [Components] [Pins] [Nails]` ; rejette le binaire.
+- `f2b.py` (Unisoft ProntoPLACE Place5) — détecte markers ASCII Test_Link ; ignore `Annotations:`.
+
+Ces 4 parsers extraient correctement quand ils tombent sur un dialecte ASCII compatible Test_Link, mais aucun fichier réel propriétaire n'a encore été parsé end-to-end. Le label `SPECULATIVE` est explicite dans la roadmap pour ne pas mentir au technicien.
+
+### Helpers partagés
+- `_ascii_boardview.py` — `parse_test_link_shape(text, dialect)` factorise les dialectes Test_Link (commit `d1381bb`).
+- `_fz_zlib.py` — décompression zlib + format pipe-delimited (Quanta / ASRock / ASUS Prime / Gigabyte).
+- `_gencad.py` — parser ASCII GenCAD 1.4 (`$HEADER`, `$SHAPES`, `$COMPONENTS`, `$SIGNALS`).
+- `_kicad_extract.py` — extraction modules / nets depuis l'arbre s-expr KiCad.
+- `_stub.py` — shape générique pour les parsers en attente d'un corpus.
+
+### Tests d'intégration sur vrais boards
+- `tests/board/test_parser_real_hardware.py` — fixtures MNT Reform (493 parts, 2 104 pins) — vrai matériel open-hardware.
+- `tests/board/test_parser_consistency.py` — invariants cross-parser sur tous les fichiers détectés.
+- `tests/board/test_parser_realistic_scale.py` — sweep scale-up.
+- `tests/board/test_real_files_runner.py` — drop-in runner pour fichiers locaux ad-hoc.
 
 Ajouter un format = un nouveau fichier sous `api/board/parser/`, aucun changement dans `base.py`.
 
@@ -447,6 +582,8 @@ Ne pas les résoudre « par hygiène » — chaque item a un arbitrage ROI que l
 4. **Duplication de shape** : toute nouvelle shape JSON doit vivre dans un fichier `schemas.py`, jamais redéfinie ailleurs.
 5. **Skip `simulator_reliability.json`.** L'agent perd son auto-conscience de fiabilité.
 6. **Migrer le pipeline sur Managed Agents.** Le split stateless/stateful est intentionnel.
+7. **Casser un des 10 invariants** de `tests/pipeline/schematic/test_simulator_invariants.py`. C'est le filet de sécurité de `microsolder-evolve` ; un commit qui les casse est immédiatement reverté par la skill.
+8. **Promouvoir un parser SPECULATIVE en DONE sans run sur fichier réel.** Le label SPECULATIVE est honnête vis-à-vis du tech ; le passer à DONE exige un fichier propriétaire vérifié end-to-end.
 
 ### À TOUJOURS faire
 
@@ -495,4 +632,4 @@ Ne pas les résoudre « par hygiène » — chaque item a un arbitrage ROI que l
 - Plans en cours : [docs/superpowers/plans/](superpowers/plans/)
 - Scénarios oracle : [benchmark/README.md](../benchmark/README.md)
 
-Ce document reflète l'état du repo au `2026-04-25`. Maintenir avec les changements structurels ; les ajustements purement tactiques (nouveau tool, nouveau parser, nouvelle section) vivent dans leur spec dédiée sous `docs/superpowers/`.
+Ce document reflète l'état du repo au `2026-04-26`. Maintenir avec les changements structurels ; les ajustements purement tactiques (nouveau tool, nouveau parser, nouvelle section) vivent dans leur spec dédiée sous `docs/superpowers/`.
