@@ -1222,8 +1222,8 @@ async def get_pack_schematic_pdf(device_slug: str) -> FileResponse:
 
     Lookup order:
     1. `memory/{slug}/schematic.pdf` — persisted by `ingest_schematic`.
-    2. `board_assets/{slug}.pdf` — fallback for demo devices whose schematic
-       was never re-ingested but ships in the repo.
+    2. `board_assets/{slug}.pdf` — fallback for devices whose schematic
+       ships pre-rendered in the repo.
     Returns 404 when neither exists. Served as `application/pdf` with
     `Content-Disposition: inline` so the browser's native viewer handles
     pagination, zoom, and search.

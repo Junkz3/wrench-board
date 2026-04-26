@@ -4,11 +4,11 @@
 Pricing is tracked by model family. Cache semantics apply: cache_read
 inputs bill at 10% of the base input rate, cache_creation at 125%.
 
-Numbers are best-effort April 2026 estimates — they feed the "cost per
-message / total conversation" surface the tech sees in the chat panel.
-If Anthropic changes prices, bump the table here. Off by a cent or two
-is fine — the goal is to let the tech reason about token spend live,
-not to reconcile invoices.
+Numbers are best-effort estimates — they feed the "cost per message /
+total conversation" surface the tech sees in the chat panel. If Anthropic
+changes prices, bump the table here. Off by a cent or two is fine — the
+goal is to let the tech reason about token spend live, not to reconcile
+invoices.
 """
 
 from __future__ import annotations

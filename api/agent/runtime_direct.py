@@ -4,7 +4,7 @@
 Keeps the WebSocket protocol identical to `runtime_managed`, so the frontend
 doesn't care which mode is active. Activated with env var
 `DIAGNOSTIC_MODE=direct`; used when the Managed Agents beta is unavailable
-or when we want a lighter-weight path for local demos.
+or when a lighter-weight path is wanted for local development.
 
 Uses the streaming Messages API so each completed text block is emitted to
 the WebSocket as soon as it finishes, rather than waiting for the full

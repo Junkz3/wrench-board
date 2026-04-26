@@ -4,10 +4,10 @@
 Reference for the format : the OpenBoardView project documents the .brd
 Test_Link layout. The code below is a clean-room reimplementation from
 that format specification — no code from the OBV codebase was copied
-(per hackathon hard rule #1, Apache 2.0).
+(per hard rule #1 in CLAUDE.md, Apache 2.0).
 
-See docs/superpowers/specs/2026-04-21-boardview-design.md §7 for the
-field layout summary used here.
+See docs/superpowers/specs/2026-04-22-boardview-formats-roadmap.md for the
+parser registry overview.
 """
 
 from __future__ import annotations

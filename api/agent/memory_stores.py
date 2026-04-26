@@ -1,18 +1,17 @@
 # SPDX-License-Identifier: Apache-2.0
 """Per-device memory store cache for Managed Agents sessions.
 
-Anthropic **memory stores** entered public beta on 2026-04-23
-(`anthropic-beta: managed-agents-2026-04-01`). The first session for a
-given device slug creates a store via the API and persists its id in
-`memory/{slug}/managed.json`. Subsequent sessions reuse it so the agent
-retains learnings across repairs without re-seeding.
+Memory stores are gated by the `anthropic-beta: managed-agents-2026-04-01`
+header. The first session for a given device slug creates a store via the
+API and persists its id in `memory/{slug}/managed.json`. Subsequent
+sessions reuse it so the agent retains learnings across repairs without
+re-seeding.
 
 Dual path — SDK first, raw HTTP fallback:
   - When `client.beta.memory_stores` is exposed by the SDK, we call it
     directly (typed, nicer errors).
-  - Otherwise we POST/GET the REST endpoints. SDK 0.96.0 has not yet
-    shipped the surface, so today every call takes the HTTP path; the
-    code auto-promotes to the SDK path once it lands, no migration.
+  - Otherwise we POST/GET the REST endpoints. The code auto-promotes to
+    the SDK path once the typed surface ships, no migration required.
 
 All failures (missing key, network, API rejection) degrade to a WARNING
 log + `None`/empty return — the diagnostic session runs without memory

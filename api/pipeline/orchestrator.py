@@ -604,10 +604,10 @@ async def generate_knowledge_pack(
         logger.info("Pipeline end · pack=%s · rounds=%d", pack_dir, rounds_used)
         logger.info("=" * 72)
 
-        # Prize-move: seed the device's Managed-Agents memory store with the
-        # freshly approved pack so diagnostic sessions read canonical knowledge
-        # via memory_search/memory_read instead of re-loading JSON on every tool
-        # call. No-op when the research-preview flag is off.
+        # Seed the device's Managed-Agents memory store with the freshly
+        # approved pack so diagnostic sessions read canonical knowledge via
+        # the /mnt/memory/ filesystem mount instead of re-loading JSON on
+        # every tool call. No-op when ma_memory_store_enabled is False.
         seed_status = await seed_memory_store_from_pack(
             client=client, device_slug=slug, pack_dir=pack_dir
         )

@@ -13,13 +13,13 @@ Two backends, same interface:
   grep-able, and works without any Anthropic-side feature.
 - **Managed Agents mirror (flag-gated)** additionally pushes the same content
   to the device's memory store when `settings.ma_memory_store_enabled=True` so
-  the MA runtime's native `memory_search` can surface it. The JSON file is
-  still written first — MA is a secondary accelerator, never the sole source
-  of truth.
+  the MA runtime can grep it on the `/mnt/memory/` filesystem mount. The JSON
+  file is still written first — MA is a secondary accelerator, never the sole
+  source of truth.
 
-The split means the prize-move "cross-session learning" demos today via the
-JSON path, and transparently upgrades to native MA memory when Anthropic grants
-our workspace the memory_stores Research Preview. Zero migration, just a flag.
+The split means cross-session learning is durable via the JSON path and
+transparently accelerated through the MA memory store when the flag is on.
+Zero migration when toggling the flag.
 """
 
 from __future__ import annotations

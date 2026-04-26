@@ -1,10 +1,9 @@
 # SPDX-License-Identifier: Apache-2.0
-"""`mb_*` custom tools for the hackathon diagnostic agent.
+"""`mb_*` custom tools for the diagnostic agent.
 
 Deliberately simple: prefix-letter closest-matches (no Levenshtein at this
 layer — the boardview validator keeps the distance-based version for refdes
-typos on a parsed board). Reads straight from disk on every call; caching is
-a Phase-D concern.
+typos on a parsed board). Reads straight from disk on every call.
 
 mb_record_finding powers cross-session memory: every confirmed repair becomes
 a field report on disk, mirrored to the device's MA memory store mount under

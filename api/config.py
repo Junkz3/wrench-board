@@ -48,13 +48,13 @@ class Settings(BaseSettings):
     # --- CORS -----------------------------------------------------------------
     # Default covers local workbench use (:8000 same-origin + common dev
     # ports). Override via CORS_ALLOW_ORIGINS="url1,url2,..." for remote
-    # demos. "*" is still accepted but discouraged — it degrades to permissive
+    # access. "*" is still accepted but discouraged — it degrades to permissive
     # mode without credentials since the wildcard + credentials combo is
     # rejected by browsers regardless of server config.
     cors_allow_origins: str = Field(
         default="http://localhost:8000,http://127.0.0.1:8000,http://localhost:5173,http://127.0.0.1:5173",
         description=(
-            "Comma-separated CORS origins. Use * only for throwaway demos."
+            "Comma-separated CORS origins. Use * only for ad-hoc external access."
         ),
     )
 
@@ -127,26 +127,24 @@ class Settings(BaseSettings):
     )
 
     # --- Managed Agents memory stores -----------------------------------------
-    # Memory stores entered Anthropic's public beta on 2026-04-23. With the
-    # flag on (default), pipeline output is pre-seeded into each device's
-    # store and diagnostic sessions write findings back. Set to False in
-    # .env to fully bypass memory_stores (e.g. for offline dev or if the
-    # workspace loses access). All call sites degrade gracefully either way.
+    # With the flag on (default), pipeline output is pre-seeded into each
+    # device's store and diagnostic sessions write findings back. Set to
+    # False in .env to fully bypass memory_stores (e.g. for offline dev or
+    # if the workspace loses access). All call sites degrade gracefully
+    # either way.
     ma_memory_store_enabled: bool = Field(
         default=True,
         description=(
             "Gate for Anthropic Managed Agents memory_stores integration. "
-            "On since public beta (2026-04-23); set False to disable."
+            "Set False to disable (offline dev, restricted workspace)."
         ),
     )
     chat_history_backend: Literal["jsonl", "managed_agents"] = Field(
         default="jsonl",
         description=(
             "Where diagnostic chat history lives. 'jsonl' writes one line per "
-            "message event under memory/{slug}/repairs/{id}/messages.jsonl — "
-            "works today without any Anthropic feature gate. 'managed_agents' "
-            "will defer replay to native MA sessions when the preview lands "
-            "(same pattern as ma_memory_store_enabled)."
+            "message event under memory/{slug}/repairs/{id}/messages.jsonl. "
+            "'managed_agents' defers replay to native MA sessions."
         ),
     )
 

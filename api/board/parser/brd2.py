@@ -8,7 +8,8 @@ also expose a cumulative `first_pin_0_based` index that drives pin ownership —
 BRD2 has no per-part `end_of_pins` field ; ownership is derived from the
 cumulative `first_pin` indices of successive parts.
 
-See docs/superpowers/specs/2026-04-21-boardview-design.md §7 for layout overview.
+See docs/superpowers/specs/2026-04-22-boardview-formats-roadmap.md for layout
+overview.
 """
 
 from __future__ import annotations
