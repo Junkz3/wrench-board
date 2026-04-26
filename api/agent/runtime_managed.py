@@ -22,6 +22,7 @@ import base64 as _b64
 import json
 import logging
 import secrets
+import time
 from pathlib import Path
 from typing import Any, Literal
 
@@ -2382,6 +2383,18 @@ async def _forward_session_to_ws(
     # ("Invalid user.custom_tool_result event [...] waiting on responses to
     # events [...]") and tears down the stream. Track ids we've answered.
     responded_tool_ids: set[str] = set()
+    # Tool-result processing telemetry. Every event MA streams back carries
+    # `processed_at` (ISO 8601 — null while queued, populated once the agent
+    # picks it up). For our `user.custom_tool_result` events the round-trip
+    # tells us how long the agent took to consume our response: a healthy
+    # session shows sub-second deltas; multi-second values usually mean the
+    # agent is rate-limited or blocked on an upstream call. We don't react
+    # programmatically — just log so post-mortems on a slow turn can pinpoint
+    # the stall without re-running the trace. Keys are the eid of the
+    # original `agent.custom_tool_use`; value is the local `time.monotonic()`
+    # at send time. Cleared on echo; entries that linger past the watchdog
+    # are dropped silently with the rest of the loop state.
+    pending_tool_results: dict[str, float] = {}
     # Stream watchdog: each .__anext__() is wrapped in asyncio.wait_for so an
     # SSE stall (Anthropic outage, dropped TCP without RST, slow keepalive)
     # surfaces as a clean close + WS notification instead of hanging the
@@ -2411,6 +2424,37 @@ async def _forward_session_to_ws(
                             "type": "stream_timeout",
                             "session_id": session_id,
                             "timeout_seconds": stream_timeout,
+                        }
+                    )
+                except Exception:  # noqa: BLE001
+                    pass
+                break
+            except WebSocketDisconnect:
+                # Client window closed mid-stream — bubble up so the caller's
+                # asyncio.wait observes the task completion and the symmetric
+                # WS→session forwarder can shut down too. Not an MA-side error.
+                raise
+            except Exception as exc:  # noqa: BLE001 — SSE transport collapse
+                # Anything else from the SSE iterator is a transport-level
+                # failure (TLS reset, ConnectionError, anthropic.APIStatusError
+                # mid-stream, etc.). Without an explicit catch the task ended
+                # silently, the WS client kept its socket open expecting
+                # `agent.message` chunks that never arrived, and the technician
+                # saw a frozen UI with no signal. Surface it to the WS so the
+                # frontend can render a "session lost — reconnect" hint, then
+                # break cleanly so the orchestrator's finally block runs.
+                logger.exception(
+                    "[Diag-MA] stream iterator failed session=%s exc=%s",
+                    session_id,
+                    type(exc).__name__,
+                )
+                try:
+                    await ws.send_json(
+                        {
+                            "type": "stream_error",
+                            "session_id": session_id,
+                            "error": type(exc).__name__,
+                            "message": str(exc)[:500],
                         }
                     )
                 except Exception:  # noqa: BLE001
@@ -2797,6 +2841,7 @@ async def _forward_session_to_ws(
                             conv_id=conv_id,
                         )
                     result_for_agent = {k: v for k, v in result.items() if k not in ("event", "events")}
+                    pending_tool_results[eid] = time.monotonic()
                     await client.beta.sessions.events.send(
                         session_id,
                         events=[
@@ -2813,6 +2858,41 @@ async def _forward_session_to_ws(
                         ],
                     )
                     responded_tool_ids.add(eid)
+
+            elif etype == "user.custom_tool_result":
+                # MA echoes user-sent events back on the stream — first with
+                # `processed_at: null` (queued), then with a timestamp once
+                # the agent picked up our response. Both arrive after our own
+                # `events.send`, so the second copy gives us the agent's
+                # consumption latency. Useful for diagnosing slow turns: a
+                # healthy session shows sub-second deltas; multi-second
+                # values usually mean the agent is rate-limited or blocked
+                # on an upstream call. Strictly observational — no retry,
+                # no failover, just a log line.
+                processed_at = getattr(event, "processed_at", None)
+                if processed_at is None:
+                    continue
+                eid = getattr(event, "custom_tool_use_id", None)
+                sent_at = pending_tool_results.pop(eid, None) if eid else None
+                if sent_at is None:
+                    continue
+                delay = time.monotonic() - sent_at
+                if delay >= 5.0:
+                    logger.warning(
+                        "[Diag-MA] tool_result consumed slowly session=%s "
+                        "eid=%s delay=%.2fs",
+                        session_id,
+                        eid,
+                        delay,
+                    )
+                else:
+                    logger.info(
+                        "[Diag-MA] tool_result consumed session=%s eid=%s "
+                        "delay=%.2fs",
+                        session_id,
+                        eid,
+                        delay,
+                    )
 
             elif etype == "session.status_terminated":
                 await ws.send_json({"type": "session_terminated"})
