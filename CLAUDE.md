@@ -169,6 +169,9 @@ these shapes.
 
 ## Architecture — the two paths
 
+For the full reference (event flows, tool dispatch, on-disk artefact map,
+known architectural debt), see `docs/ARCHITECTURE.md`.
+
 There are **two distinct LLM paths**, by design:
 
 1. **Pipeline (knowledge factory)** — `api/pipeline/`. Direct
