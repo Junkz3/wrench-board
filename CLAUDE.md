@@ -390,12 +390,17 @@ available.
 - Implemented parsers (all clean-room, Apache 2.0): `test_link.py`
   (OpenBoardView `.brd` v3; refuses obfuscated files with
   `ObfuscatedFileError`), `brd2.py` (KiCad-boardview BRD2 output, content-
-  sniffed from `.brd`), `kicad.py` (`.kicad_pcb`, helpers in
-  `_kicad_extract.py`), plus `asc.py`, `bdv.py`, `bv.py`, `cad.py`,
-  `cst.py`, `f2b.py`, `fz.py`, `gr.py`, `tvw.py` for the corresponding
-  legacy boardview formats. The full roadmap and per-format design notes
-  live in `docs/superpowers/specs/2026-04-22-boardview-formats-roadmap.md`
-  and `docs/superpowers/specs/2026-04-25-boardview-formats-v1.md`.
+  sniffed from `.brd`), `kicad.py` (`.kicad_pcb`), plus `asc.py`, `bdv.py`,
+  `bv.py`, `cad.py`, `cst.py`, `f2b.py`, `fz.py`, `gr.py`, `tvw.py` for
+  the corresponding legacy boardview formats. Shared helpers live in
+  underscore-prefixed siblings: `_kicad_extract.py` (kicad token reader),
+  `_ascii_boardview.py` (Test_Link-shape ASCII dialect parser reused by
+  several text formats), `_fz_zlib.py` (zlib-decompressor + pipe-delimited
+  scanner for the FZ-zlib `.fz` flavour), `_gencad.py` (GenCAD 1.4
+  section parser for `.cad`). The full roadmap and
+  per-format design notes live in
+  `docs/superpowers/specs/2026-04-22-boardview-formats-roadmap.md` and
+  `docs/superpowers/specs/2026-04-25-boardview-formats-v1.md`.
 - `validator.py` — anti-hallucination guardrail (pure functions, no I/O).
   `is_valid_refdes`, `resolve_part`, `resolve_net`, `resolve_pin`,
   `suggest_similar` (Levenshtein neighbours for "did you mean").
