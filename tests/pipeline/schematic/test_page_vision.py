@@ -126,7 +126,7 @@ async def test_extract_page_validates_and_returns_schematic_page_graph(
 
 
 @pytest.mark.asyncio
-async def test_extract_page_forces_the_submit_schematic_page_tool(
+async def test_extract_page_registers_the_submit_schematic_page_tool(
     rendered: RenderedPage,
 ):
     mock_client, stream_mock = _stream_client(_build_mock_response())
@@ -139,7 +139,11 @@ async def test_extract_page_forces_the_submit_schematic_page_tool(
     )
 
     kwargs = stream_mock.call_args.kwargs
-    assert kwargs["tool_choice"] == {"type": "tool", "name": SUBMIT_PAGE_TOOL_NAME}
+    # tool_choice is `auto` (not `tool`) since we run extended thinking on
+    # the vision call; Anthropic rejects forced tool use alongside thinking.
+    # Registering a single tool still guarantees the model emits the
+    # structured payload — auto + 1 tool is functionally equivalent here.
+    assert kwargs["tool_choice"] == {"type": "auto"}
     tool_defs = kwargs["tools"]
     assert len(tool_defs) == 1
     assert tool_defs[0]["name"] == SUBMIT_PAGE_TOOL_NAME
