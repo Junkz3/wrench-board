@@ -20,21 +20,21 @@ from api.board.parser.base import (
 
 # Concrete parsers — importing them populates the dispatch registry.
 # Add new formats here as they ship.
-try:
-    from api.board.parser import test_link  # noqa: F401
-except ImportError:
-    # BRDParser not yet implemented. Safe during bootstrap.
-    pass
-
-try:
-    from api.board.parser import kicad  # noqa: F401
-except ImportError:
-    pass
-
-# Stub parsers — file exists, registry is wired, parse() raises
-# NotImplementedError until the format is actually supported.
-# See docs/superpowers/specs/2026-04-22-boardview-formats-roadmap.md
-from api.board.parser import asc, bdv, bv, cad, cst, f2b, fz, gr, tvw  # noqa: F401, E402
+# See docs/superpowers/specs/2026-04-22-boardview-formats-roadmap.md.
+from api.board.parser import (  # noqa: F401
+    asc,
+    bdv,
+    brd2,
+    bv,
+    cad,
+    cst,
+    f2b,
+    fz,
+    gr,
+    kicad,
+    test_link,
+    tvw,
+)
 
 __all__ = [
     "BoardParser",

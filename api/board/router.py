@@ -82,9 +82,8 @@ async def parse_board(file: UploadFile = File(...)) -> dict:  # noqa: B008
             parser = parser_for(path)
             board = parser.parse(data, file_hash=file_hash, board_id=board_id)
         except NotImplementedError as e:
-            # Stub parser: format extension is registered but the concrete
-            # parser is not yet implemented. Surface as 501 so the frontend
-            # can show a "coming soon" message instead of a generic error.
+            # Defensive: surface unimplemented parser branches as 501 rather
+            # than letting them propagate as a generic 500.
             raise HTTPException(
                 status_code=501,
                 detail={"detail": "parser-not-implemented", "message": str(e)},
