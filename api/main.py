@@ -21,6 +21,7 @@ from api.config import get_settings
 from api.logging_setup import configure_logging
 from api.pipeline import router as pipeline_router
 from api.profile.router import router as profile_router
+from api.ws_security import enforce_ws_origin
 
 logger = logging.getLogger("wrench_board.main")
 
@@ -127,7 +128,14 @@ async def diagnostic_session(websocket: WebSocket, device_slug: str) -> None:
     Query param `tier` selects the model: `fast` (Haiku), `normal` (Sonnet),
     `deep` (Opus). Defaults to `fast` for cheap dev traffic. Changing tier in
     the frontend reconnects the WS — it's an explicit new conversation.
+
+    Origin check runs first: the CORS middleware doesn't cover the WS
+    handshake, so without this guard any cross-origin browser page could
+    open a session and inject `message` frames. See ``api.ws_security``.
     """
+    if not await enforce_ws_origin(websocket):
+        return
+
     tier = websocket.query_params.get("tier", "fast").lower()
     if tier not in _VALID_TIERS:
         tier = "fast"

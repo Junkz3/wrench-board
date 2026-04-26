@@ -45,16 +45,22 @@ class Settings(BaseSettings):
     port: int = Field(default=8000, description="HTTP server port.")
     log_level: str = Field(default="INFO", description="Log level name.")
 
-    # --- CORS -----------------------------------------------------------------
-    # Default covers local workbench use (:8000 same-origin + common dev
-    # ports). Override via CORS_ALLOW_ORIGINS="url1,url2,..." for remote
-    # access. "*" is still accepted but discouraged — it degrades to permissive
-    # mode without credentials since the wildcard + credentials combo is
-    # rejected by browsers regardless of server config.
+    # --- CORS + WebSocket origin allowlist ------------------------------------
+    # Single allowlist consumed by both the HTTP CORS middleware in api.main
+    # AND the WebSocket Origin check in api.ws_security.enforce_ws_origin.
+    # The CORS middleware bypasses WebSocket handshakes entirely, so we
+    # re-validate the Origin at the WS handler edge against the same list.
+    # Default covers local workbench use (:8000 same-origin + Vite dev port).
+    # Override via CORS_ALLOW_ORIGINS="url1,url2,..." for remote access.
+    # "*" disables enforcement on both surfaces (back-compat dev mode); on
+    # the HTTP side it also degrades to permissive without credentials since
+    # the wildcard + credentials combo is rejected by browsers regardless
+    # of server config.
     cors_allow_origins: str = Field(
         default="http://localhost:8000,http://127.0.0.1:8000,http://localhost:5173,http://127.0.0.1:5173",
         description=(
-            "Comma-separated CORS origins. Use * only for ad-hoc external access."
+            "Comma-separated allowlist for both HTTP CORS origins and "
+            "WebSocket Origin headers. Use * to disable enforcement."
         ),
     )
 

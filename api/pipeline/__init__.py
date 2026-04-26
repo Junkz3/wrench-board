@@ -55,6 +55,7 @@ from api.pipeline.schematic.simulator import (
 from api.tools.hypothesize import mb_hypothesize as _mb_hypothesize_tool
 from api.tools.measurements import mb_list_measurements as _mb_list_measurements
 from api.tools.measurements import mb_record_measurement as _mb_record_measurement
+from api.ws_security import enforce_ws_origin
 
 logger = logging.getLogger("wrench_board.pipeline.api")
 
@@ -1153,7 +1154,14 @@ async def progress_ws(websocket: WebSocket, device_slug: str) -> None:
     is live, so the client knows it won't miss subsequent events. Terminal
     events (pipeline_finished / pipeline_failed) are still delivered normally;
     it's up to the client to close the socket when it's done consuming.
+
+    Origin check runs first to keep cross-origin browser pages from
+    silently subscribing to another technician's pipeline progress
+    stream. See ``api.ws_security``.
     """
+    if not await enforce_ws_origin(websocket):
+        return
+
     slug = _slugify(device_slug)
     await websocket.accept()
     queue = events.subscribe(slug)
