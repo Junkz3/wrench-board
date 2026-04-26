@@ -49,6 +49,14 @@
   <form class="llm-input" id="llmForm">
     <textarea id="llmInput" rows="3" placeholder="Pose ta question à l'agent… (Enter pour envoyer, Shift+Enter pour un retour à la ligne)" autocomplete="off" spellcheck="false"></textarea>
     <div class="llm-input-actions">
+      <input type="file" id="llmUploadInput" accept="image/png,image/jpeg" hidden>
+      <button type="button" class="icon-btn llm-upload-btn" id="llmUploadBtn" title="Upload macro photo (PNG/JPEG, max 5MB)" aria-label="Upload macro">
+        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="17 8 12 3 7 8"/>
+          <line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+      </button>
       <button type="button" class="llm-stop icon-btn" id="llmStop" title="Interrompre l'agent (Esc)" aria-label="Stop" disabled>
         <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="7" width="10" height="10" rx="1.5"/></svg>
       </button>
@@ -57,4 +65,7 @@
       </button>
     </div>
   </form>
+  <div class="llm-dropzone" id="llmDropzone" hidden>
+    <span>Lâche la photo ici</span>
+  </div>
 </aside>

@@ -10,6 +10,7 @@ import { initMemoryBank, loadMemoryBank } from './memory_bank.js';
 import { initProfileSection } from './profile.js';
 import { initPipelineProgress } from './pipeline_progress.js';
 import { initLLMPanel, openLLMPanelIfRepairParam } from './llm.js';
+import { initCameraPicker } from './camera.js';
 import { loadSchematic, closeSchematicInspector } from './schematic.js';
 import { initLanding, showLanding } from './landing.js';
 import * as Protocol from './protocol.js?v=quest3';
@@ -68,6 +69,14 @@ if (!window.Boardview) {
   initPipelineProgress();
   await initLLMPanel();
   openLLMPanelIfRepairParam();
+
+  // Files+Vision : camera picker in the metabar. Re-emits a capabilities
+  // frame to the live diag WS when the tech changes camera selection.
+  initCameraPicker(() => {
+    if (window.LLM && typeof window.LLM.sendCapabilities === 'function') {
+      window.LLM.sendCapabilities();
+    }
+  });
 
   // Protocol module — init with a deferred send that reads the live WS at
   // call time (the socket is opened lazily by llm.js on first panel open).

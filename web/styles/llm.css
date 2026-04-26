@@ -692,3 +692,114 @@ body.llm-open .stub{right:420px}
   font-style: italic;
 }
 .context-lost .body p.preserved strong { color: var(--emerald); font-weight: 600; }
+
+/* ============ Files+Vision: upload btn, dropzone, image bubble, modal ==== */
+
+/* Upload button mirrors .llm-stop / .llm-send sizing & hover. */
+.llm-upload-btn {
+  background: transparent;
+  color: var(--text-2);
+}
+.llm-upload-btn:hover {
+  color: var(--text);
+}
+
+/* Drag-drop overlay covers the whole .llm-panel when a file is being
+   dragged in. Glass treatment cohérent avec les autres overlays
+   (inspector, legend, tweaks). */
+.llm-dropzone {
+  position: absolute;
+  inset: 48px 0 0 0;  /* below the panel head */
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(20, 20, 20, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 2px dashed var(--cyan);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 14px;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Image bubble in the chat log — narrow card, click to fullscreen. */
+.msg-image {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  max-width: 240px;
+  padding: 6px 8px;
+}
+.llm-bubble-img {
+  display: block;
+  width: 200px;
+  height: auto;
+  cursor: zoom-in;
+  border-radius: 4px;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+}
+.llm-bubble-caption {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-3);
+  letter-spacing: 0.2px;
+}
+
+/* Fullscreen image modal — click backdrop to dismiss. */
+.llm-image-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  cursor: zoom-out;
+}
+.llm-image-modal img {
+  max-width: 90vw;
+  max-height: 90vh;
+  border-radius: 6px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
+}
+
+/* Camera picker in the metabar — JetBrains Mono label, accent on hover. */
+.meta-camera {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px;
+  border-left: 1px solid var(--border-soft);
+  color: var(--text-2);
+  font-family: var(--mono);
+  font-size: 11px;
+}
+.meta-camera .icon {
+  flex-shrink: 0;
+  color: var(--text-3);
+}
+.meta-camera .meta-select {
+  background: transparent;
+  color: var(--text-2);
+  border: none;
+  font-family: inherit;
+  font-size: inherit;
+  cursor: pointer;
+  outline: none;
+  padding: 2px 4px;
+  border-radius: 3px;
+  transition: background-color 0.15s, color 0.15s;
+}
+.meta-camera .meta-select:hover {
+  background: var(--panel-2);
+  color: var(--text);
+}

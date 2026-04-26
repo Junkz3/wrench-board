@@ -4,14 +4,30 @@
 //
 // Wire protocol (matches api/agent/runtime_{managed,direct}.py):
 //   send: {type: "message", text: "..."}
+//         {type: "client.capabilities", camera_available, ...}     (Files+Vision)
+//         {type: "client.upload_macro", base64, mime, filename}    (Flow A)
+//         {type: "client.capture_response", request_id, base64,    (Flow B)
+//                  mime, device_label}
 //   recv: {type: "session_ready", mode, device_slug, session_id?, memory_store_id?}
 //         {type: "message", role: "assistant", text}
 //         {type: "tool_use", name, input}
 //         {type: "thinking", text}                 (managed mode only)
 //         {type: "error", text}
 //         {type: "session_terminated"}
+//         {type: "server.capture_request", request_id, tool_use_id, reason}
+//         {type: "server.upload_macro_error", reason}
 //
 // Activated by ⌘/Ctrl+J and by clicking the topbar "Agent" button.
+
+import {
+  blobToBase64,
+  captureFrame,
+  isCameraAvailable,
+  selectedCameraDeviceId,
+  selectedCameraLabel,
+} from './camera.js';
+
+const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;  // 5MB raw, mirrors backend cap
 
 let ws = null;
 let currentTier = "fast";
@@ -670,6 +686,141 @@ function setSendEnabled(enabled) {
   el("llmStop").disabled = !enabled;
 }
 
+// --- Files+Vision (Flow A + Flow B) ---------------------------------------
+
+function sendCapabilities() {
+  if (!ws || ws.readyState !== WebSocket.OPEN) return;
+  try {
+    ws.send(JSON.stringify({
+      type: "client.capabilities",
+      camera_available: isCameraAvailable(),
+      selected_device_id: selectedCameraDeviceId(),
+    }));
+  } catch (err) {
+    console.warn("[llm] sendCapabilities failed", err);
+  }
+}
+
+// Optimistic image bubble in the chat log. URL is either a blob: URL
+// (Flow A optimistic local render) or a /api/macros/... URL (replay).
+function appendImageBubble(role, srcUrl, captionText) {
+  const log = el("llmLog");
+  if (!log) return;
+  const row = document.createElement("div");
+  row.className = `msg ${role} msg-image`;
+  const roleLabel = role === "user" ? "Toi" : "Agent";
+  const img = document.createElement("img");
+  img.src = srcUrl;
+  img.alt = captionText || "macro";
+  img.className = "llm-bubble-img";
+  img.addEventListener("click", () => openImageModal(srcUrl, captionText));
+  const cap = document.createElement("div");
+  cap.className = "llm-bubble-caption";
+  cap.textContent = captionText || "";
+  row.innerHTML = `<span class="role">${roleLabel}</span>`;
+  row.appendChild(img);
+  if (captionText) row.appendChild(cap);
+  log.appendChild(row);
+  log.scrollTop = log.scrollHeight;
+}
+
+function openImageModal(srcUrl, captionText) {
+  let modal = document.getElementById("llmImageModal");
+  if (!modal) {
+    modal = document.createElement("div");
+    modal.id = "llmImageModal";
+    modal.className = "llm-image-modal";
+    modal.addEventListener("click", () => modal.remove());
+    document.body.appendChild(modal);
+  } else {
+    modal.innerHTML = "";
+  }
+  const img = document.createElement("img");
+  img.src = srcUrl;
+  img.alt = captionText || "";
+  modal.appendChild(img);
+}
+
+async function handleMacroUpload(file) {
+  if (!file) return;
+  if (file.size > MAX_UPLOAD_BYTES) {
+    logSys(`photo trop grosse (${(file.size / 1024 / 1024).toFixed(1)}MB > 5MB)`, true);
+    return;
+  }
+  if (!["image/png", "image/jpeg"].includes(file.type)) {
+    logSys(`format non supporté : ${file.type} · PNG ou JPEG seulement`, true);
+    return;
+  }
+  if (!ws || ws.readyState !== WebSocket.OPEN) {
+    logSys("impossible d'uploader : socket non ouvert", true);
+    return;
+  }
+  // Optimistic local render — blob URL stays valid for the page lifetime.
+  const url = URL.createObjectURL(file);
+  appendImageBubble("user", url, "Photo macro envoyée par le tech.");
+  try {
+    const base64 = await blobToBase64(file);
+    ws.send(JSON.stringify({
+      type: "client.upload_macro",
+      base64,
+      mime: file.type,
+      filename: file.name || "macro.jpg",
+    }));
+  } catch (err) {
+    logSys(`upload échoué : ${err.message || err}`, true);
+  }
+}
+
+async function handleCaptureRequest(payload) {
+  const { request_id, tool_use_id, reason } = payload;
+  const deviceId = selectedCameraDeviceId();
+  if (!deviceId) {
+    // Tool exposed but no camera selected — surface to the tech and let
+    // the backend's is_error response close the loop on the agent side.
+    logSys("agent demande une capture mais aucune caméra sélectionnée", true);
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({
+        type: "client.capture_response",
+        request_id, base64: "", mime: "", device_label: "",
+      }));
+    }
+    return;
+  }
+  logSys(`capture demandée par l'agent · ${reason || "sans raison"}`);
+  try {
+    const blob = await captureFrame({
+      deviceId, mime: "image/jpeg", quality: 0.92,
+    });
+    if (!blob) throw new Error("canvas.toBlob returned null");
+    const base64 = await blobToBase64(blob);
+    // Optimistic render so the tech sees what the agent received.
+    const url = URL.createObjectURL(blob);
+    appendImageBubble("user", url, `Capture · ${selectedCameraLabel()}`);
+    ws.send(JSON.stringify({
+      type: "client.capture_response",
+      request_id,
+      base64,
+      mime: "image/jpeg",
+      device_label: selectedCameraLabel(),
+    }));
+  } catch (err) {
+    console.error("captureFrame failed", err);
+    logSys(`capture échouée : ${err.message || err}`, true);
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({
+        type: "client.capture_response",
+        request_id, base64: "", mime: "", device_label: "",
+      }));
+    }
+  }
+}
+
+// Expose for camera.js to re-trigger after the user changes the picker.
+window.LLM = window.LLM || {};
+window.LLM.sendCapabilities = sendCapabilities;
+
+// --- end Files+Vision ----------------------------------------------------
+
 // Interrupt the live agent turn. The server translates this into an
 // official `user.interrupt` session event (see
 // https://platform.claude.com/docs/en/managed-agents/events-and-streaming).
@@ -731,6 +882,10 @@ function connect() {
   ws.addEventListener("open", () => {
     statusTone("connected", `connecté · ${slug} · ${currentTier}`);
     setSendEnabled(true);
+    // Files+Vision : announce camera availability so the backend gates
+    // cam_capture in the manifest (runtime_direct) and can short-circuit
+    // empty captures (managed runtime).
+    sendCapabilities();
   });
 
   ws.addEventListener("close", () => {
@@ -936,6 +1091,16 @@ function connect() {
       case "session_terminated":
         logSys("session terminée", true);
         closeTurn();
+        break;
+      case "server.capture_request":
+        // Flow B: agent called cam_capture. Snap from the metabar-selected
+        // device and post back client.capture_response (success or empty).
+        handleCaptureRequest(payload).catch((err) => {
+          console.error("capture handler crash", err);
+        });
+        break;
+      case "server.upload_macro_error":
+        logSys(`upload rejeté · ${payload.reason || "raison inconnue"}`, true);
         break;
       case "turn_complete":
         // Internal signal for benchmarks (end of an agent tech-turn). UI
@@ -1285,4 +1450,43 @@ export async function initLLMPanel() {
       }
     }
   });
+
+  // --- Files+Vision: upload button + drag-drop on the chat panel --------
+  const uploadBtn = el("llmUploadBtn");
+  const uploadInput = el("llmUploadInput");
+  const dropzone = el("llmDropzone");
+  const panelEl = el("llmPanel");
+
+  uploadBtn?.addEventListener("click", () => uploadInput?.click());
+  uploadInput?.addEventListener("change", (e) => {
+    const file = e.target.files && e.target.files[0];
+    e.target.value = "";  // allow re-uploading the same file
+    handleMacroUpload(file);
+  });
+
+  if (panelEl && dropzone) {
+    let dragDepth = 0;
+    panelEl.addEventListener("dragenter", (e) => {
+      if (!e.dataTransfer || !e.dataTransfer.types || !e.dataTransfer.types.includes("Files")) {
+        return;
+      }
+      dragDepth += 1;
+      dropzone.hidden = false;
+    });
+    panelEl.addEventListener("dragleave", () => {
+      dragDepth -= 1;
+      if (dragDepth <= 0) {
+        dragDepth = 0;
+        dropzone.hidden = true;
+      }
+    });
+    panelEl.addEventListener("dragover", (e) => e.preventDefault());
+    panelEl.addEventListener("drop", (e) => {
+      e.preventDefault();
+      dragDepth = 0;
+      dropzone.hidden = true;
+      const file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+      handleMacroUpload(file);
+    });
+  }
 }
