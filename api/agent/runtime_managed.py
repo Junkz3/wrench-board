@@ -1645,7 +1645,14 @@ async def run_diagnostic_session_managed(
     from api.tools.validation import set_ws_emitter as set_validation_emitter
 
     def _emit(event: dict) -> None:
-        asyncio.create_task(ws.send_json(event))
+        # Route through session_mirrors instead of bare asyncio.create_task
+        # so the send is awaited on session close. Bare create_task left the
+        # task orphan: a fast WS close would tear down the session before the
+        # frame hit the wire, and the technician would never see the
+        # measurement / validation event the agent had just acknowledged.
+        # Bonus: spawn() already wires a done callback that surfaces
+        # exceptions instead of letting them die silently in the loop.
+        session_mirrors.spawn(ws.send_json(event))
 
     set_ws_emitter(_emit)
     set_validation_emitter(_emit)
@@ -1691,6 +1698,25 @@ async def run_diagnostic_session_managed(
         )
         for task in pending:
             task.cancel()
+        # Wait for cancelled forwarder tasks to actually unwind before the
+        # finally block tears down the global emitters. Without this await,
+        # a recv_task interrupted mid-`ws.receive_text()` can race with the
+        # `set_ws_emitter(None)` cleanup: the cancellation propagates while
+        # _emit is still being invoked from a measurement tool, leading to
+        # writes on a torn-down WS. Bounded wait so a misbehaving cancel
+        # path can't hang session teardown forever.
+        if pending:
+            try:
+                await asyncio.wait_for(
+                    asyncio.gather(*pending, return_exceptions=True),
+                    timeout=5.0,
+                )
+            except TimeoutError:
+                logger.warning(
+                    "[Diag-MA] forwarder tasks did not unwind within 5s — "
+                    "session=%s; proceeding with teardown",
+                    session.id,
+                )
         # Surface exceptions from the completed task to the logger. A WS close
         # (code 1000 normal, 1012 service restart) raised inside a forwarder task
         # is expected — log it as INFO, not ERROR with a stacktrace.
@@ -2870,8 +2896,47 @@ async def _forward_session_to_ws(
                     # produces its own user.custom_tool_result. Intercept
                     # before the generic _dispatch_tool which wouldn't know
                     # how to handle the WS round-trip.
+                    #
+                    # Track via session_mirrors (not bare create_task) so a
+                    # WS close before the round-trip completes drains the
+                    # task instead of orphaning it. The eid goes into the
+                    # dedup set IMMEDIATELY to block MA from re-dispatching
+                    # while the capture is in flight; on crash we DISCARD
+                    # the eid in the done callback so MA's next
+                    # `requires_action` re-emit gets a real retry instead of
+                    # being silently swallowed. Without the rollback, a
+                    # camera dispatch failure would permablock the tool_use:
+                    # responded_tool_ids would say "answered" but no
+                    # user.custom_tool_result ever reached MA, leaving the
+                    # session waiting forever.
                     if name == "cam_capture":
-                        asyncio.create_task(_dispatch_cam_capture(
+                        cam_eid = eid
+
+                        def _release_eid_on_failure(
+                            task: asyncio.Task,
+                            *,
+                            eid: str = cam_eid,
+                        ) -> None:
+                            if task.cancelled():
+                                responded_tool_ids.discard(eid)
+                                logger.warning(
+                                    "[Diag-MA] cam_capture cancelled for "
+                                    "eid=%s — released for retry",
+                                    eid,
+                                )
+                                return
+                            exc = task.exception()
+                            if exc is not None:
+                                responded_tool_ids.discard(eid)
+                                logger.warning(
+                                    "[Diag-MA] cam_capture crashed for "
+                                    "eid=%s — released for retry: %s",
+                                    eid,
+                                    exc,
+                                )
+
+                        responded_tool_ids.add(cam_eid)
+                        cam_task = session_mirrors.spawn(_dispatch_cam_capture(
                             client=client,
                             session=session_state,
                             ws=ws,
@@ -2879,10 +2944,10 @@ async def _forward_session_to_ws(
                             slug=device_slug,
                             repair_id=repair_id or "default",
                             ma_session_id=session_id,
-                            tool_use_id=eid,
+                            tool_use_id=cam_eid,
                             tool_input=payload,
                         ))
-                        responded_tool_ids.add(eid)
+                        cam_task.add_done_callback(_release_eid_on_failure)
                         continue
 
                     result = await _dispatch_tool(
