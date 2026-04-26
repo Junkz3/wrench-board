@@ -56,11 +56,21 @@ def _http_headers(api_key: str, *, content_json: bool = False) -> dict[str, str]
     return hdrs
 
 
+def _http_timeout() -> float:
+    """Per-request timeout for the raw memory_stores REST fallback.
+
+    Pulled from settings at call time (not module import time) so test
+    monkeypatches of `get_settings` take effect even after this module is
+    already imported by another fixture.
+    """
+    return get_settings().ma_memory_store_http_timeout_seconds
+
+
 async def _create_store_via_http(
     *, api_key: str, name: str, description: str
 ) -> str | None:
     try:
-        async with httpx.AsyncClient(timeout=30.0) as http:
+        async with httpx.AsyncClient(timeout=_http_timeout()) as http:
             resp = await http.post(
                 f"{_API_BASE}/memory_stores",
                 headers=_http_headers(api_key, content_json=True),
@@ -89,7 +99,7 @@ async def _delete_store_via_http(*, api_key: str, store_id: str) -> bool:
     state. Any other error logs a warning and returns False so the caller
     can still proceed with disk cleanup."""
     try:
-        async with httpx.AsyncClient(timeout=30.0) as http:
+        async with httpx.AsyncClient(timeout=_http_timeout()) as http:
             resp = await http.delete(
                 f"{_API_BASE}/memory_stores/{store_id}",
                 headers=_http_headers(api_key),
@@ -121,7 +131,7 @@ async def _update_memory_via_http(
     `{"content": "..."}` either way.
     """
     try:
-        async with httpx.AsyncClient(timeout=30.0) as http:
+        async with httpx.AsyncClient(timeout=_http_timeout()) as http:
             resp = await http.post(
                 f"{_API_BASE}/memory_stores/{store_id}/memories/{memory_id}",
                 headers=_http_headers(api_key, content_json=True),
@@ -160,7 +170,7 @@ async def _upsert_memory_via_http(
     memory instead, giving callers true upsert semantics.
     """
     try:
-        async with httpx.AsyncClient(timeout=30.0) as http:
+        async with httpx.AsyncClient(timeout=_http_timeout()) as http:
             resp = await http.post(
                 f"{_API_BASE}/memory_stores/{store_id}/memories",
                 headers=_http_headers(api_key, content_json=True),
@@ -504,7 +514,7 @@ async def list_memory_paths_to_ids(
         return {}
     out: dict[str, str] = {}
     try:
-        async with httpx.AsyncClient(timeout=30.0) as http:
+        async with httpx.AsyncClient(timeout=_http_timeout()) as http:
             # `limit` is server-capped at 100 (verified live 2026-04-26 —
             # `limit=1000` returns `400 invalid_request_error`). Our
             # knowledge stores carry ≤10 leaf files plus the field-reports

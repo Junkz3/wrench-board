@@ -186,6 +186,91 @@ class Settings(BaseSettings):
         ),
     )
 
+    # --- Managed Agents teardown / async safety -------------------------------
+    # On WS close we cancel the recv/emit forwarder pair and wait briefly for
+    # each task to unwind so tearing down emitters does not race with an
+    # in-flight write. Per-task budget (vs a global gather) prevents one slow
+    # task from starving the other; the warning logged on overrun maps "did
+    # not unwind" to recv vs emit by task name. Override only when a forwarder
+    # is observed routinely overflowing the default and the noise becomes a
+    # post-mortem hazard.
+    ma_forwarder_unwind_timeout_seconds: float = Field(
+        default=2.0,
+        gt=0,
+        description=(
+            "Per-task budget granted to a cancelled MA WS forwarder (recv "
+            "or emit) to unwind cleanly during session teardown."
+        ),
+    )
+    # Mirror tasks (jsonl persistence of MA events) are spawned best-effort
+    # alongside the live stream. On WS close we drain the pending set so a
+    # fast disconnect doesn't cancel a mirror mid-write. 5 s covers a busy
+    # transcript flush; raise if mirrors are observed timing out under load.
+    ma_session_drain_timeout_seconds: float = Field(
+        default=5.0,
+        gt=0,
+        description=(
+            "Maximum time to wait for pending MA mirror tasks (transcript "
+            "persistence) to drain during session teardown."
+        ),
+    )
+
+    # --- Managed Agents sub-agent consultations -------------------------------
+    # The MA runtime can spawn ephemeral sub-agents on demand: a tier-scoped
+    # consultant (one-shot Q&A on another tier) and the bootstrapped
+    # KnowledgeCurator (focused web research). Each runs in its own MA session
+    # and is bounded by a wait_for so a stalled SSE doesn't block the parent
+    # turn forever. Defaults sized for an Opus turn on the parent (consultant
+    # ≈ 2 min, curator ≈ 3 min including web_search round-trips).
+    ma_subagent_consultation_timeout_seconds: float = Field(
+        default=120.0,
+        gt=0,
+        description=(
+            "Maximum wall-clock time for a single MA sub-agent consultation "
+            "(tier-scoped Q&A) before the consume loop is abandoned."
+        ),
+    )
+    ma_curator_timeout_seconds: float = Field(
+        default=180.0,
+        gt=0,
+        description=(
+            "Maximum wall-clock time for one KnowledgeCurator MA run "
+            "(targeted web research) before the consume loop is abandoned."
+        ),
+    )
+
+    # --- Managed Agents camera / capture flow ---------------------------------
+    # Flow B (camera capture): the agent issues a capture_request to the
+    # frontend over WS and waits for the macro frame. If the tech has no
+    # camera selected or the browser stalls, we time out and return an
+    # is_error custom_tool_result so the agent can recover. Mirrors the
+    # default copy in `_dispatch_cam_capture`'s timeout error message.
+    ma_camera_capture_timeout_seconds: float = Field(
+        default=30.0,
+        gt=0,
+        description=(
+            "Maximum time to wait on the frontend to return a captured frame "
+            "after the backend pushed a server.capture_request."
+        ),
+    )
+
+    # --- Managed Agents memory_stores HTTP fallback ---------------------------
+    # Raw HTTP fallback path (used when the SDK does not expose
+    # `client.beta.memory_stores`). The Anthropic memory_stores REST endpoints
+    # respond fast in the happy path; the timeout exists to bound a network
+    # stall so the diagnostic session can degrade to "no memory" instead of
+    # blocking the WS handshake. Override if a slow proxy is in front of the
+    # API.
+    ma_memory_store_http_timeout_seconds: float = Field(
+        default=30.0,
+        gt=0,
+        description=(
+            "Per-request HTTP timeout for the raw memory_stores REST fallback "
+            "(create / get / list / delete). Used only when the SDK surface "
+            "is unavailable."
+        ),
+    )
+
 
 _settings: Settings | None = None
 

@@ -84,6 +84,12 @@ def _stale_settings(monkeypatch, rm, *, timeout: float = 600.0) -> None:
     """Patch get_settings so the watchdog window is controllable in tests."""
     class _Settings:
         ma_stream_event_timeout_seconds = timeout
+        ma_session_drain_timeout_seconds = 5.0
+        ma_forwarder_unwind_timeout_seconds = 2.0
+        ma_subagent_consultation_timeout_seconds = 120.0
+        ma_curator_timeout_seconds = 180.0
+        ma_camera_capture_timeout_seconds = 30.0
+        ma_memory_store_http_timeout_seconds = 30.0
         memory_root = "/tmp"
         ma_memory_store_enabled = False
     monkeypatch.setattr(rm, "get_settings", lambda: _Settings())

@@ -119,6 +119,12 @@ def test_session_start_log_emits_log_id_anchor_line(monkeypatch, caplog):
         anthropic_api_key = "sk-test"
         anthropic_max_retries = 5
         ma_stream_event_timeout_seconds = 600.0
+        ma_session_drain_timeout_seconds = 5.0
+        ma_forwarder_unwind_timeout_seconds = 2.0
+        ma_subagent_consultation_timeout_seconds = 120.0
+        ma_curator_timeout_seconds = 180.0
+        ma_camera_capture_timeout_seconds = 30.0
+        ma_memory_store_http_timeout_seconds = 30.0
         memory_root = "/tmp"
         ma_memory_store_enabled = False
     monkeypatch.setattr(rm, "get_settings", lambda: _Settings())

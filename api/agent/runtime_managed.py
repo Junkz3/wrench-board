@@ -202,9 +202,11 @@ class _SessionMirrors:
         task.add_done_callback(self._pending.discard)
         return task
 
-    async def wait_drain(self, timeout: float = 5.0) -> None:
+    async def wait_drain(self, timeout: float | None = None) -> None:
         if not self._pending:
             return
+        if timeout is None:
+            timeout = get_settings().ma_session_drain_timeout_seconds
         try:
             await asyncio.wait_for(
                 asyncio.gather(*self._pending, return_exceptions=True),
@@ -331,7 +333,7 @@ async def _run_subagent_consultation(
     context: str | None,
     environment_id: str,
     parent_session_id: str | None,
-    timeout_s: float = 120.0,
+    timeout_s: float | None = None,
 ) -> dict:
     """Spawn an MA sub-agent on `tier`, ask it `query`, return its text.
 
@@ -344,6 +346,8 @@ async def _run_subagent_consultation(
         {"ok": True, "tier": ..., "answer": "..."} on success
         {"ok": False, "reason": ..., "error": ...} on failure
     """
+    if timeout_s is None:
+        timeout_s = get_settings().ma_subagent_consultation_timeout_seconds
     try:
         sub_agent_info = get_agent(load_managed_ids(), tier=tier)
     except Exception as exc:  # noqa: BLE001
@@ -491,7 +495,7 @@ async def _run_knowledge_curator(
     environment_id: str,
     parent_session_id: str | None,
     ws: WebSocket | None = None,
-    timeout_s: float = 180.0,
+    timeout_s: float | None = None,
 ) -> str:
     """Spawn the bootstrapped KnowledgeCurator MA agent for a research run.
 
@@ -499,6 +503,8 @@ async def _run_knowledge_curator(
     `api.pipeline.expansion._run_targeted_scout`). Surfaces `agent.tool_use`
     events on `ws` if provided so the tech sees the live web_search queries.
     """
+    if timeout_s is None:
+        timeout_s = get_settings().ma_curator_timeout_seconds
     try:
         curator_info = get_agent(load_managed_ids(), tier="curator")
     except RuntimeError as exc:
@@ -1817,9 +1823,10 @@ async def run_diagnostic_session_managed(
         # writes on a torn-down WS.
         #
         # Per-task cancel + bounded wait (instead of one global gather) so:
-        #   - Each forwarder gets its own 2s unwind budget — a slow task
-        #     can't starve a clean-finishing one out of the shared 5s
-        #     window the previous gather provided.
+        #   - Each forwarder gets its own per-task unwind budget — a slow
+        #     task can't starve a clean-finishing one out of the shared
+        #     window the previous gather provided. The default budget
+        #     (settings.ma_forwarder_unwind_timeout_seconds) is 2 s.
         #   - A task that ignores its cancel is logged BY NAME, so the
         #     operator can map "did not unwind" to recv vs emit when
         #     reading a session teardown trace.
@@ -1828,15 +1835,19 @@ async def run_diagnostic_session_managed(
         # (it just returns them in the pending set), so a task that
         # observed its cancel and re-raised does not produce a noisy
         # exception path during teardown.
+        forwarder_unwind_timeout = (
+            get_settings().ma_forwarder_unwind_timeout_seconds
+        )
         for task in pending:
             task.cancel()
-            _, unwind_pending = await asyncio.wait({task}, timeout=2.0)
+            _, unwind_pending = await asyncio.wait({task}, timeout=forwarder_unwind_timeout)
             if unwind_pending:
                 logger.warning(
                     "[Diag-MA] forwarder task %s did not unwind within "
-                    "2s after cancel — session=%s; proceeding with "
+                    "%.1fs after cancel — session=%s; proceeding with "
                     "teardown",
                     task.get_name(),
+                    forwarder_unwind_timeout,
                     session.id,
                 )
                 continue
@@ -1881,8 +1892,9 @@ async def run_diagnostic_session_managed(
         logger.info("[Diag-MA] WS disconnected for device=%s", device_slug)
     finally:
         # Drain pending mirror tasks before tearing down the session so a
-        # fast WS close doesn't cancel a mirror mid-flight (5 s max wait).
-        await session_mirrors.wait_drain(timeout=5.0)
+        # fast WS close doesn't cancel a mirror mid-flight. Default budget
+        # (settings.ma_session_drain_timeout_seconds) is 5 s.
+        await session_mirrors.wait_drain()
         # DO NOT archive: we want this session reusable on the next reopen
         # so the tech picks up the conversation where they left off. MA
         # keeps idle sessions alive (checkpoint TTL ~30 days per the beta
@@ -2212,9 +2224,6 @@ async def _replay_ma_history_to_ws(
 # JPEG of a board macro at sane resolutions ; bigger payloads waste WS
 # bandwidth and Anthropic Files API quota.
 _MAX_MACRO_BYTES = 5 * 1024 * 1024
-# How long to wait on the frontend to return a captured frame after we
-# pushed server.capture_request. Mirrors the MA stream watchdog default.
-_CAPTURE_TIMEOUT_S = 30.0
 
 
 def _handle_client_capabilities(session: SessionState, frame: dict) -> None:
@@ -2307,7 +2316,7 @@ async def _dispatch_cam_capture(
     ma_session_id: str,
     tool_use_id: str,
     tool_input: dict,
-    timeout_s: float = _CAPTURE_TIMEOUT_S,
+    timeout_s: float | None = None,
 ) -> None:
     """Flow B dispatcher: push capture_request, await response, send tool_result.
 
@@ -2315,7 +2324,12 @@ async def _dispatch_cam_capture(
     tool_use_id — either with the captured image (success) or is_error
     (timeout / decode failure / Files API failure / no-camera). Cleans up
     the pending Future on every exit path.
+
+    `timeout_s` defaults to settings.ma_camera_capture_timeout_seconds
+    when omitted (kept overridable for fast unit tests).
     """
+    if timeout_s is None:
+        timeout_s = get_settings().ma_camera_capture_timeout_seconds
     request_id = secrets.token_urlsafe(8)
     fut: asyncio.Future = asyncio.get_event_loop().create_future()
     session.pending_captures[request_id] = fut
