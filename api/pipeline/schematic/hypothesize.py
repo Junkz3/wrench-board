@@ -576,11 +576,22 @@ def _find_decoupled_rail(
     electrical: ElectricalGraph,
     passive: _CompNode,
 ) -> str | None:
-    """A decoupling cap has one pin on a rail and one on GND. Return the rail."""
+    """A decoupling cap has one pin on a rail and one on GND. Return the rail.
+
+    Fallback: when the cap's own pins don't reference any known rail (typical
+    for SoC-internal rails like VDD_GPU sourced inside the package — the
+    schematic surface-net is named differently from the rail label), look up
+    membership in `rail.decoupling` lists set by the classifier. The
+    classifier sees evidence the human reader sees (placement near IC,
+    annotated decoupling group) that the pin-net string alone misses.
+    """
     nets = [p.net_label for p in passive.pins if p.net_label]
     for n in nets:
         if n in electrical.power_rails:
             return n
+    for label, rail in electrical.power_rails.items():
+        if passive.refdes in (rail.decoupling or []):
+            return label
     return None
 
 
