@@ -110,6 +110,18 @@ async def _run_agent_turn(
         {"type": "text", "text": system_prompt, "cache_control": {"type": "ephemeral"}}
     ]
 
+    # Opus 4.7 reasoning bump: adaptive thinking + xhigh effort give the
+    # deep tier the agentic-coding profile recommended in the API skill
+    # (~20 % better tool-use reasoning vs. defaults). Opus 4.7 only accepts
+    # `thinking.type=adaptive` (enabled returns 400); adaptive is also
+    # incompatible with forced tool_choice — the runtime never sets one
+    # here (default `auto`), so this is safe. Sonnet 4.6 / Haiku 4.5 keep
+    # their defaults: effort=xhigh is Opus-tier only and 400s elsewhere.
+    extra_kwargs: dict[str, Any] = {}
+    if model.startswith("claude-opus-4-7"):
+        extra_kwargs["thinking"] = {"type": "adaptive"}
+        extra_kwargs["output_config"] = {"effort": "xhigh"}
+
     while True:
         # Emit each text block the moment it finishes (content_block_stop),
         # then dispatch any tool_use blocks once stop_reason is known. For a
@@ -122,6 +134,7 @@ async def _run_agent_turn(
             system=cached_system,
             messages=messages,
             tools=cached_tools,
+            **extra_kwargs,
         ) as stream:
             async for event in stream:
                 if getattr(event, "type", None) != "content_block_stop":

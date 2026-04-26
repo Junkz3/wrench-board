@@ -1793,8 +1793,41 @@ async def _forward_session_to_ws(
     # ("Invalid user.custom_tool_result event [...] waiting on responses to
     # events [...]") and tears down the stream. Track ids we've answered.
     responded_tool_ids: set[str] = set()
+    # Stream watchdog: each .__anext__() is wrapped in asyncio.wait_for so an
+    # SSE stall (Anthropic outage, dropped TCP without RST, slow keepalive)
+    # surfaces as a clean close + WS notification instead of hanging the
+    # session indefinitely. Window is per-event (settings.ma_stream_event_
+    # _timeout_seconds, default 600 s) — generous enough that an Opus turn
+    # with adaptive thinking can spend a minute before its first chunk.
+    settings_for_watchdog = get_settings()
+    stream_timeout = settings_for_watchdog.ma_stream_event_timeout_seconds
     async with stream_ctx as stream:
-        async for event in stream:
+        stream_iter = stream.__aiter__()
+        while True:
+            try:
+                event = await asyncio.wait_for(
+                    stream_iter.__anext__(), timeout=stream_timeout,
+                )
+            except StopAsyncIteration:
+                break
+            except asyncio.TimeoutError:
+                logger.warning(
+                    "[Diag-MA] stream inactive for %.0fs — closing session=%s",
+                    stream_timeout,
+                    session_id,
+                )
+                try:
+                    await ws.send_json(
+                        {
+                            "type": "stream_timeout",
+                            "session_id": session_id,
+                            "timeout_seconds": stream_timeout,
+                        }
+                    )
+                except Exception:  # noqa: BLE001
+                    pass
+                break
+
             etype = getattr(event, "type", None)
 
             if etype == "agent.message":

@@ -162,6 +162,24 @@ class Settings(BaseSettings):
         ),
     )
 
+    # --- Managed Agents stream watchdog ---------------------------------------
+    # Inactivity timeout on `client.beta.sessions.events.stream(...)`. The
+    # async iterator can block indefinitely if Anthropic's SSE stalls without
+    # closing the TCP connection (TCP keepalive ~9 min by default). The
+    # watchdog timeouts the stream and emits a `stream_timeout` WS event so
+    # the frontend can surface "session lost — please reconnect" instead of
+    # showing an infinite spinner. 600 s (10 min) is generous: Opus + adaptive
+    # thinking on a complex turn can spend 1-2 min before its first event.
+    ma_stream_event_timeout_seconds: float = Field(
+        default=600.0,
+        gt=0,
+        description=(
+            "Per-event inactivity timeout on the MA SSE event stream. "
+            "If no event arrives within this window, the stream is closed "
+            "cleanly and a stream_timeout WS event is sent to the frontend."
+        ),
+    )
+
 
 _settings: Settings | None = None
 
