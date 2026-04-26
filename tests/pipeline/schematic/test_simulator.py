@@ -425,7 +425,7 @@ def test_cascade_transitive_dead_rails_via_dead_source():
     # transitively. U3 never powers on.
     assert "RAIL_A" in tl.cascade_dead_rails
     assert "RAIL_B" in tl.cascade_dead_rails, (
-        "expected RAIL_B in cascade after fixpoint refactor; got %r" % tl.cascade_dead_rails
+        f"expected RAIL_B in cascade after fixpoint refactor; got {tl.cascade_dead_rails!r}"
     )
     assert "U2" in tl.cascade_dead_components
     assert "U3" in tl.cascade_dead_components

@@ -10,10 +10,10 @@ from pathlib import Path
 
 import pytest
 
-pytestmark = pytest.mark.slow
-
 from api.pipeline.schematic.hypothesize import Observations, hypothesize
 from api.pipeline.schematic.schemas import AnalyzedBootSequence, ElectricalGraph
+
+pytestmark = pytest.mark.slow
 
 FIXTURE = Path(__file__).parent / "fixtures" / "hypothesize_scenarios.json"
 MEMORY_ROOT = Path(__file__).resolve().parents[3] / "memory"
