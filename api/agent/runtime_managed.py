@@ -18,8 +18,10 @@ Key SDK contract (see `docs/en/managed-agents/events-and-streaming`):
 from __future__ import annotations
 
 import asyncio
+import base64 as _b64
 import json
 import logging
+import secrets
 from pathlib import Path
 from typing import Any, Literal
 
@@ -41,6 +43,7 @@ from api.agent.chat_history import (
     touch_conversation,
 )
 from api.agent.dispatch_bv import dispatch_bv
+from api.agent.macros import persist_macro
 from api.agent.managed_ids import get_agent, load_managed_ids
 from api.agent.memory_stores import ensure_memory_store
 from api.agent.pricing import compute_turn_cost
@@ -1216,6 +1219,7 @@ async def run_diagnostic_session_managed(
                 conv_id=resolved_conv_id,
                 memory_root=memory_root,
                 pending_conv=pending_conv,
+                session_state=session_state,
             ),
             name="ws->session",
         )
@@ -1569,6 +1573,201 @@ async def _replay_ma_history_to_ws(
     return True
 
 
+# --------------------------------------------------------------------------
+# Files+Vision (Flow A + Flow B) helpers
+# --------------------------------------------------------------------------
+
+# Hard cap on macro upload size (post-base64-decode). 5 MB is plenty for a
+# JPEG of a board macro at sane resolutions ; bigger payloads waste WS
+# bandwidth and Anthropic Files API quota.
+_MAX_MACRO_BYTES = 5 * 1024 * 1024
+# How long to wait on the frontend to return a captured frame after we
+# pushed server.capture_request. Mirrors the MA stream watchdog default.
+_CAPTURE_TIMEOUT_S = 30.0
+
+
+def _handle_client_capabilities(session: SessionState, frame: dict) -> None:
+    """Update session capability flags from a client.capabilities frame.
+
+    Idempotent ; can be re-sent during the WS session if the frontend's
+    device list changes (camera plugged / unplugged, picker changed).
+    """
+    session.has_camera = bool(frame.get("camera_available"))
+
+
+async def _handle_client_upload_macro(
+    *,
+    client: AsyncAnthropic,
+    session: SessionState,
+    memory_root: Path,
+    slug: str,
+    repair_id: str,
+    ma_session_id: str,
+    frame: dict,
+) -> None:
+    """Flow A: tech-uploaded photo → persist → Files API → user.message.
+
+    Raises :class:`ValueError` on payload too large or invalid base64. The
+    caller should catch and surface to the frontend, not crash the loop.
+    """
+    b64 = frame.get("base64") or ""
+    mime = (frame.get("mime") or "").lower()
+    filename = frame.get("filename") or "macro.png"
+
+    try:
+        bytes_ = _b64.b64decode(b64, validate=True)
+    except Exception as exc:  # noqa: BLE001
+        raise ValueError(f"invalid base64 payload: {exc}") from exc
+
+    if len(bytes_) > _MAX_MACRO_BYTES:
+        raise ValueError(
+            f"macro upload too large: {len(bytes_)} bytes > {_MAX_MACRO_BYTES} cap"
+        )
+
+    persist_macro(
+        memory_root=memory_root, slug=slug, repair_id=repair_id,
+        source="manual", bytes_=bytes_, mime=mime,
+    )
+
+    uploaded = await client.beta.files.upload(
+        file=(filename, bytes_, mime),
+        purpose="agent",
+    )
+
+    await client.beta.sessions.events.send(
+        session_id=ma_session_id,
+        events=[{
+            "type": "user.message",
+            "content": [
+                {"type": "image", "source": {"type": "file", "file_id": uploaded.id}},
+                {"type": "text", "text": "Photo macro envoyée par le tech."},
+            ],
+        }],
+    )
+
+
+async def _handle_client_capture_response(
+    *,
+    session: SessionState,
+    frame: dict,
+) -> None:
+    """Resolve the pending Future for the matching request_id (Flow B)."""
+    request_id = frame.get("request_id")
+    if not request_id or request_id not in session.pending_captures:
+        logger.warning(
+            "[Diag-MA] capture_response with unknown request_id: %r", request_id,
+        )
+        return
+    fut = session.pending_captures[request_id]
+    if not fut.done():
+        fut.set_result(frame)
+
+
+async def _dispatch_cam_capture(
+    *,
+    client: AsyncAnthropic,
+    session: SessionState,
+    ws: WebSocket,
+    memory_root: Path,
+    slug: str,
+    repair_id: str,
+    ma_session_id: str,
+    tool_use_id: str,
+    tool_input: dict,
+    timeout_s: float = _CAPTURE_TIMEOUT_S,
+) -> None:
+    """Flow B dispatcher: push capture_request, await response, send tool_result.
+
+    Always sends back exactly one user.custom_tool_result for the given
+    tool_use_id — either with the captured image (success) or is_error
+    (timeout / decode failure / Files API failure / no-camera). Cleans up
+    the pending Future on every exit path.
+    """
+    request_id = secrets.token_urlsafe(8)
+    fut: asyncio.Future = asyncio.get_event_loop().create_future()
+    session.pending_captures[request_id] = fut
+
+    try:
+        await ws.send_json({
+            "type": "server.capture_request",
+            "request_id": request_id,
+            "tool_use_id": tool_use_id,
+            "reason": tool_input.get("reason") or "",
+        })
+
+        try:
+            response = await asyncio.wait_for(fut, timeout=timeout_s)
+        except asyncio.TimeoutError:
+            await client.beta.sessions.events.send(
+                session_id=ma_session_id,
+                events=[{
+                    "type": "user.custom_tool_result",
+                    "custom_tool_use_id": tool_use_id,
+                    "is_error": True,
+                    "content": [{
+                        "type": "text",
+                        "text": (
+                            f"Capture timeout après {timeout_s:.0f}s — le frontend "
+                            "n'a pas répondu. Vérifie qu'une caméra est sélectionnée "
+                            "dans la metabar."
+                        ),
+                    }],
+                }],
+            )
+            return
+
+        try:
+            bytes_ = _b64.b64decode(response.get("base64") or "", validate=True)
+            if not bytes_:
+                raise ValueError("empty payload")
+            mime = (response.get("mime") or "image/jpeg").lower()
+            device_label = response.get("device_label") or "caméra"
+
+            persist_macro(
+                memory_root=memory_root, slug=slug, repair_id=repair_id,
+                source="capture", bytes_=bytes_, mime=mime,
+            )
+
+            uploaded = await client.beta.files.upload(
+                file=(f"capture_{request_id}.jpg", bytes_, mime),
+                purpose="agent",
+            )
+
+            await client.beta.sessions.events.send(
+                session_id=ma_session_id,
+                events=[{
+                    "type": "user.custom_tool_result",
+                    "custom_tool_use_id": tool_use_id,
+                    "content": [
+                        {"type": "image",
+                         "source": {"type": "file", "file_id": uploaded.id}},
+                        {"type": "text",
+                         "text": f"Capture acquise depuis {device_label}."},
+                    ],
+                }],
+            )
+        except Exception as exc:  # noqa: BLE001
+            logger.exception("[Diag-MA] cam_capture processing failed")
+            await client.beta.sessions.events.send(
+                session_id=ma_session_id,
+                events=[{
+                    "type": "user.custom_tool_result",
+                    "custom_tool_use_id": tool_use_id,
+                    "is_error": True,
+                    "content": [{
+                        "type": "text",
+                        "text": f"Capture processing failed: {exc}",
+                    }],
+                }],
+            )
+    finally:
+        session.pending_captures.pop(request_id, None)
+
+
+# --------------------------------------------------------------------------
+# WS event loops (in / out)
+# --------------------------------------------------------------------------
+
 async def _forward_ws_to_session(
     ws: WebSocket,
     client: AsyncAnthropic,
@@ -1581,6 +1780,7 @@ async def _forward_ws_to_session(
     conv_id: str | None = None,
     memory_root: Path | None = None,
     pending_conv: _PendingConv | None = None,
+    session_state: SessionState | None = None,
 ) -> None:
     """Read user text from the WS, post it as `user.message` to the session.
 
@@ -1601,6 +1801,41 @@ async def _forward_ws_to_session(
             payload = json.loads(raw)
         except json.JSONDecodeError:
             payload = {"text": raw}
+
+        ptype = payload.get("type")
+
+        # Files+Vision frames — handled before MA forwarding.
+        if ptype == "client.capabilities":
+            if session_state is not None:
+                _handle_client_capabilities(session_state, payload)
+            continue
+
+        if ptype == "client.upload_macro":
+            if session_state is None or not repair_id or not device_slug or not memory_root:
+                logger.warning("[Diag-MA] upload_macro received but session context incomplete")
+                continue
+            try:
+                await _handle_client_upload_macro(
+                    client=client,
+                    session=session_state,
+                    memory_root=memory_root,
+                    slug=device_slug,
+                    repair_id=repair_id,
+                    ma_session_id=session_id,
+                    frame=payload,
+                )
+            except ValueError as exc:
+                logger.warning("[Diag-MA] upload_macro rejected: %s", exc)
+                await ws.send_json({
+                    "type": "server.upload_macro_error",
+                    "reason": str(exc),
+                })
+            continue
+
+        if ptype == "client.capture_response":
+            if session_state is not None:
+                await _handle_client_capture_response(session=session_state, frame=payload)
+            continue
 
         # Tech pressed Stop — forward as a user.interrupt MA event so the
         # agent halts any in-flight turn. Session stays alive; the tech can
@@ -1961,6 +2196,26 @@ async def _forward_session_to_ws(
                         continue
                     name = getattr(tool_event, "name", "")
                     payload = getattr(tool_event, "input", {}) or {}
+
+                    # cam_capture is async (round-trips to the frontend) and
+                    # produces its own user.custom_tool_result. Intercept
+                    # before the generic _dispatch_tool which wouldn't know
+                    # how to handle the WS round-trip.
+                    if name == "cam_capture":
+                        asyncio.create_task(_dispatch_cam_capture(
+                            client=client,
+                            session=session_state,
+                            ws=ws,
+                            memory_root=memory_root,
+                            slug=device_slug,
+                            repair_id=repair_id or "default",
+                            ma_session_id=session_id,
+                            tool_use_id=eid,
+                            tool_input=payload,
+                        ))
+                        responded_tool_ids.add(eid)
+                        continue
+
                     result = await _dispatch_tool(
                         name,
                         payload,
