@@ -196,3 +196,75 @@ body[data-section="pcb"] .tweak-row.pcb-only{display:flex;flex-direction:column;
 .brd-color-reset{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:6px 10px;margin-top:4px;background:var(--bg-deep);color:var(--text-2);border:1px solid var(--border);border-radius:4px;font-family:var(--mono);font-size:10.5px;letter-spacing:.3px;cursor:pointer;transition:background .12s,color .12s,border-color .12s}
 .brd-color-reset:hover{background:var(--panel-2);color:var(--text);border-color:var(--border-hover)}
 .brd-color-reset:active{transform:translateY(1px)}
+
+/* ============ Boardview loader ============
+ * Shown during the first fetch + parse round-trip (renderSkeleton in
+ * brd_viewer.js). Spinner ring + shimmering placeholder bars so the
+ * canvas never feels frozen, even on a sub-second load. The .brd-root
+ * is already flex-centered, so the card sits in the middle naturally. */
+
+.brd-root .brd-loader-card{
+  padding:22px 26px;
+  background:rgba(20,32,48,.92);
+  border:1px solid var(--border);
+  border-radius:10px;
+  backdrop-filter:blur(12px);
+  box-shadow:0 20px 56px rgba(0,0,0,.45);
+  min-width:340px;
+  display:flex;flex-direction:column;gap:14px;
+  animation:brd-loader-rise .25s ease-out;
+}
+.brd-root .brd-loader-head{
+  display:flex;align-items:center;gap:12px;
+}
+.brd-root .brd-loader-spinner{
+  width:20px;height:20px;
+  border:2px solid var(--border);
+  border-top-color:var(--cyan);
+  border-radius:50%;
+  flex-shrink:0;
+  animation:brd-loader-spin .8s linear infinite;
+}
+.brd-root .brd-loader-status{
+  font-family:var(--mono);font-size:11px;
+  color:var(--text-2);
+  letter-spacing:.4px;text-transform:uppercase;
+}
+.brd-root .brd-loader-rows{
+  list-style:none;margin:0;padding:12px 0 0;
+  display:flex;flex-direction:column;gap:9px;
+  border-top:1px solid var(--border-soft);
+}
+.brd-root .brd-loader-rows li{
+  display:grid;grid-template-columns:90px 1fr;gap:14px;align-items:center;
+}
+.brd-root .brd-loader-label{
+  font-family:var(--mono);font-size:10px;
+  color:var(--text-3);letter-spacing:.4px;
+  text-transform:uppercase;
+}
+.brd-root .brd-loader-bar{
+  height:8px;border-radius:4px;
+  background:linear-gradient(90deg,
+    rgba(148,163,184,.10) 0%,
+    rgba(148,163,184,.24) 50%,
+    rgba(148,163,184,.10) 100%);
+  background-size:200% 100%;
+  animation:brd-loader-shimmer 1.2s ease-in-out infinite;
+}
+.brd-root .brd-loader-bar-short{width:55%}
+
+@keyframes brd-loader-spin{to{transform:rotate(360deg)}}
+@keyframes brd-loader-shimmer{
+  0%{background-position:200% 0}
+  100%{background-position:-200% 0}
+}
+@keyframes brd-loader-rise{
+  from{opacity:0;transform:translateY(6px)}
+  to{opacity:1;transform:translateY(0)}
+}
+@media (prefers-reduced-motion: reduce){
+  .brd-root .brd-loader-spinner,
+  .brd-root .brd-loader-bar,
+  .brd-root .brd-loader-card{animation:none}
+}

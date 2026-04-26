@@ -1289,16 +1289,23 @@ function attachInteraction(containerEl, toolbar, badge) {
 }
 
 // --- loading skeleton ---
+// Shown during the first fetch + parse round-trip on a fresh boardview.
+// Skipped on subsequent re-mounts (state.board cached). Spinner + shimmer
+// on the placeholder bars so the canvas never feels frozen.
 function renderSkeleton(root) {
   root.innerHTML = `
-    <div class="summary-card" style="opacity:.5;pointer-events:none">
-      <div class="sc-row"><span class="sc-label">board_id</span><span class="sc-value">—</span></div>
-      <div class="sc-row"><span class="sc-label">format</span><span class="sc-value">—</span></div>
-      <div class="sc-row"><span class="sc-label">composants</span><span class="sc-value">—</span></div>
-      <div class="sc-row"><span class="sc-label">pins</span><span class="sc-value">—</span></div>
-      <div class="sc-row"><span class="sc-label">nets</span><span class="sc-value">—</span></div>
-      <div class="sc-row"><span class="sc-label">sha256</span><span class="sc-value">—</span></div>
-      <div class="sc-status">Chargement…</div>
+    <div class="brd-loader-card">
+      <div class="brd-loader-head">
+        <div class="brd-loader-spinner" aria-hidden="true"></div>
+        <div class="brd-loader-status">Chargement de la carte</div>
+      </div>
+      <ul class="brd-loader-rows">
+        <li><span class="brd-loader-label">board_id</span><span class="brd-loader-bar"></span></li>
+        <li><span class="brd-loader-label">format</span><span class="brd-loader-bar brd-loader-bar-short"></span></li>
+        <li><span class="brd-loader-label">composants</span><span class="brd-loader-bar"></span></li>
+        <li><span class="brd-loader-label">pins</span><span class="brd-loader-bar brd-loader-bar-short"></span></li>
+        <li><span class="brd-loader-label">nets</span><span class="brd-loader-bar"></span></li>
+      </ul>
     </div>`;
 }
 
