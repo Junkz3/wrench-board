@@ -106,13 +106,21 @@ def test_cam_capture_dispatch_tracked_with_release_callback(runtime_source: str)
 # ---------------------------------------------------------------------------
 
 
-def test_post_cancel_gather_present_before_finally(runtime_source: str):
+def test_post_cancel_per_task_unwind_present_before_finally(
+    runtime_source: str,
+):
     """After `for task in pending: task.cancel()`, the runtime must
-    `await asyncio.gather(*pending, ...)` (with a timeout) so the
-    cancellation is observed BEFORE `finally` tears down shared state
+    bound EACH cancelled task with its own `asyncio.wait({task}, ...)`
+    so cancellation is observed BEFORE `finally` tears down shared state
     (set_ws_emitter(None), session_mirrors.wait_drain). Without the
-    gather, a recv_task interrupted mid-await of ws.receive_text() can
-    race with the emitter teardown.
+    bounded wait, a recv_task interrupted mid-await of ws.receive_text()
+    can race with the emitter teardown.
+
+    Why per-task rather than a single global gather: a slow forwarder
+    must not consume the entire timeout window and starve its sibling.
+    Each forwarder gets its own budget, and any task that ignores its
+    cancel is logged BY NAME so the operator can route the post-mortem
+    to the right forwarder (see F1 follow-up audit).
     """
     cancel_marker = "for task in pending:\n            task.cancel()"
     idx = runtime_source.find(cancel_marker)
@@ -121,20 +129,28 @@ def test_post_cancel_gather_present_before_finally(runtime_source: str):
         "in the asyncio.wait orchestration"
     )
 
-    # Inspect the next ~800 chars to confirm the gather follows.
-    after_cancel = runtime_source[idx:idx + 800]
-    assert "asyncio.gather(*pending" in after_cancel, (
-        "F8 regression: missing `asyncio.gather(*pending, return_exceptions"
-        "=True)` after the cancel loop. Without it, cancelled forwarder "
-        "tasks can still be unwinding when `finally` pulls global state."
+    # Inspect the body of the loop to confirm a bounded per-task wait
+    # follows the cancel and that the warning includes the task name.
+    after_cancel = runtime_source[idx:idx + 1200]
+    assert "asyncio.wait({task}" in after_cancel, (
+        "F1 follow-up regression: missing per-task `asyncio.wait({task}, "
+        "timeout=...)` after the cancel. The previous global gather has "
+        "been replaced by a per-task bounded wait so a slow task can't "
+        "starve its sibling out of the timeout window."
     )
-    assert "return_exceptions=True" in after_cancel, (
-        "F8 regression: the gather must use return_exceptions=True so the "
-        "CancelledError doesn't propagate out of the orderly teardown path"
+    assert "timeout=" in after_cancel, (
+        "F1 follow-up regression: the per-task wait must carry an explicit "
+        "timeout so a misbehaving cancel handler can't hang teardown forever"
     )
-    assert "asyncio.wait_for" in after_cancel, (
-        "F8 regression: the gather must be bounded by asyncio.wait_for so "
-        "a misbehaving cancel handler can't hang teardown forever"
+    assert "task.get_name()" in after_cancel, (
+        "F1 follow-up regression: when a forwarder ignores its cancel the "
+        "WARNING must name the offending task so the operator can route "
+        "the post-mortem to recv vs emit"
+    )
+    assert "did not unwind" in after_cancel, (
+        "F1 follow-up regression: the WARNING text must keep the 'did not "
+        "unwind' phrase so existing log-grep alerts still fire on a stuck "
+        "teardown"
     )
 
 

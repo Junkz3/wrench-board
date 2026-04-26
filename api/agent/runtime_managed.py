@@ -1696,25 +1696,53 @@ async def run_diagnostic_session_managed(
         done, pending = await asyncio.wait(
             {recv_task, emit_task}, return_when=asyncio.FIRST_COMPLETED
         )
-        for task in pending:
-            task.cancel()
         # Wait for cancelled forwarder tasks to actually unwind before the
         # finally block tears down the global emitters. Without this await,
         # a recv_task interrupted mid-`ws.receive_text()` can race with the
         # `set_ws_emitter(None)` cleanup: the cancellation propagates while
         # _emit is still being invoked from a measurement tool, leading to
-        # writes on a torn-down WS. Bounded wait so a misbehaving cancel
-        # path can't hang session teardown forever.
-        if pending:
-            try:
-                await asyncio.wait_for(
-                    asyncio.gather(*pending, return_exceptions=True),
-                    timeout=5.0,
-                )
-            except TimeoutError:
+        # writes on a torn-down WS.
+        #
+        # Per-task cancel + bounded wait (instead of one global gather) so:
+        #   - Each forwarder gets its own 2s unwind budget — a slow task
+        #     can't starve a clean-finishing one out of the shared 5s
+        #     window the previous gather provided.
+        #   - A task that ignores its cancel is logged BY NAME, so the
+        #     operator can map "did not unwind" to recv vs emit when
+        #     reading a session teardown trace.
+        # asyncio.wait() is preferred over wait_for() here: it never
+        # raises CancelledError or TimeoutError on the awaited tasks
+        # (it just returns them in the pending set), so a task that
+        # observed its cancel and re-raised does not produce a noisy
+        # exception path during teardown.
+        for task in pending:
+            task.cancel()
+            _, unwind_pending = await asyncio.wait({task}, timeout=2.0)
+            if unwind_pending:
                 logger.warning(
-                    "[Diag-MA] forwarder tasks did not unwind within 5s — "
-                    "session=%s; proceeding with teardown",
+                    "[Diag-MA] forwarder task %s did not unwind within "
+                    "2s after cancel — session=%s; proceeding with "
+                    "teardown",
+                    task.get_name(),
+                    session.id,
+                )
+                continue
+            # Task unwound: surface any non-cancellation exception so
+            # a forwarder that died with an unexpected error during
+            # the cancel path is visible in the logs.
+            try:
+                exc = task.exception()
+            except asyncio.CancelledError:
+                # Expected unwind path — nothing to log.
+                continue
+            if exc is not None and not isinstance(
+                exc, (asyncio.CancelledError, WebSocketDisconnect)
+            ):
+                logger.warning(
+                    "[Diag-MA] forwarder task %s raised during unwind: "
+                    "%s — session=%s; proceeding with teardown",
+                    task.get_name(),
+                    exc,
                     session.id,
                 )
         # Surface exceptions from the completed task to the logger. A WS close

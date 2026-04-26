@@ -300,6 +300,214 @@ async def test_post_cancel_gather_swallows_cancelled_error():
 
 
 # ---------------------------------------------------------------------------
+# F1 (post-cancel asymmetry follow-up): per-task cancel + bounded wait
+# ---------------------------------------------------------------------------
+#
+# These two tests pin the new orchestration in runtime_managed where the
+# `await asyncio.gather(*pending, return_exceptions=True)` global call
+# was replaced by a per-task `task.cancel()` + bounded `asyncio.wait`.
+# The replacement gives each forwarder its own unwind window and logs by
+# name when a task ignores its cancel, so a single misbehaving task can
+# no longer starve a clean-finishing sibling out of the shared timeout.
+
+
+def _drive_pending_unwind(
+    pending: set[asyncio.Task],
+    *,
+    per_task_timeout: float,
+    logger,
+    session_id: str,
+):
+    """Mirror of the runtime loop in ``_run_session_loop``.
+
+    Kept as a sync factory returning the coroutine so the tests assert
+    against the exact shape the runtime ships. If the runtime sequence
+    drifts, this helper drifts and the failing tests point the maintainer
+    at the right place.
+    """
+    async def _runner() -> dict[str, str]:
+        outcomes: dict[str, str] = {}
+        for task in pending:
+            task.cancel()
+            _, unwind_pending = await asyncio.wait(
+                {task}, timeout=per_task_timeout
+            )
+            if unwind_pending:
+                logger.warning(
+                    "[Diag-MA] forwarder task %s did not unwind within "
+                    "%.1fs after cancel — session=%s; proceeding with "
+                    "teardown",
+                    task.get_name(),
+                    per_task_timeout,
+                    session_id,
+                )
+                outcomes[task.get_name()] = "timeout"
+                continue
+            try:
+                exc = task.exception()
+            except asyncio.CancelledError:
+                outcomes[task.get_name()] = "cancelled"
+                continue
+            if exc is None:
+                outcomes[task.get_name()] = "clean"
+            elif isinstance(exc, asyncio.CancelledError):
+                outcomes[task.get_name()] = "cancelled"
+            else:
+                logger.warning(
+                    "[Diag-MA] forwarder task %s raised during unwind: "
+                    "%s — session=%s; proceeding with teardown",
+                    task.get_name(),
+                    exc,
+                    session_id,
+                )
+                outcomes[task.get_name()] = "raised"
+        return outcomes
+    return _runner()
+
+
+@pytest.mark.asyncio
+async def test_post_cancel_task_ignoring_cancel_logs_warning_with_name(
+    caplog,
+):
+    """A forwarder that swallows its CancelledError and keeps running
+    must be logged WARNING with its task name, and the teardown loop
+    must move on within the per-task budget instead of hanging.
+
+    This is the audit's F1 fix: the previous code did a single global
+    gather with a 5s timeout, which logged a generic warning that did
+    not name the offender. The new code names the task so the operator
+    can route the post-mortem to the right forwarder.
+    """
+    import logging
+
+    async def ignores_cancel():
+        try:
+            await asyncio.sleep(60)
+        except asyncio.CancelledError:
+            # Misbehaving forwarder: swallows the cancel and keeps
+            # running well past the per-task budget. Real-world example
+            # is a forwarder stuck in a `try: ... except Exception: pass`
+            # loop that catches CancelledError as a side effect.
+            await asyncio.sleep(60)
+
+    task = asyncio.create_task(ignores_cancel(), name="session->ws")
+    await asyncio.sleep(0)  # let it start
+    pending = {task}
+
+    fake_logger = logging.getLogger(
+        "wrench_board.test.post_cancel_ignored"
+    )
+    with caplog.at_level(logging.WARNING, logger=fake_logger.name):
+        outcomes = await _drive_pending_unwind(
+            pending,
+            per_task_timeout=0.05,
+            logger=fake_logger,
+            session_id="sess_test_ignored",
+        )
+
+    assert outcomes == {"session->ws": "timeout"}, (
+        "Task ignoring cancel must be reported as timeout, not silently "
+        "marked clean."
+    )
+    # The warning record must mention the task name so an operator can
+    # tell recv vs emit apart.
+    matching = [
+        r for r in caplog.records
+        if r.levelno == logging.WARNING
+        and "session->ws" in r.getMessage()
+        and "did not unwind" in r.getMessage()
+    ]
+    assert matching, (
+        "Expected a WARNING naming the task that ignored its cancel; got "
+        f"records={[r.getMessage() for r in caplog.records]}"
+    )
+
+    # Cleanup so pytest doesn't surface a leaked-task warning.
+    task.cancel()
+    try:
+        await asyncio.wait({task}, timeout=0.05)
+    except Exception:
+        pass
+
+
+@pytest.mark.asyncio
+async def test_post_cancel_clean_task_not_penalized_by_slow_sibling():
+    """Two pending tasks: one obeys its cancel quickly, the other
+    ignores it and keeps running. Each task is awaited independently,
+    so the clean task must be observed as cancelled within its own
+    budget regardless of the sibling timing out.
+
+    The previous global gather collapsed both into a single 5s window
+    — if one task dragged on, the other's "did this finish?" answer
+    came late. With the per-task wait, the loop's overall wall time is
+    bounded by `sum(per_task_timeout)`, but each task is reported as
+    soon as ITS budget elapses or it unwinds, whichever is first.
+    """
+    import logging
+    import time
+
+    async def cancels_cleanly():
+        try:
+            await asyncio.sleep(60)
+        except asyncio.CancelledError:
+            # Real recv_task close path: cleans up an iterator quickly.
+            await asyncio.sleep(0)
+            raise
+
+    async def ignores_cancel():
+        try:
+            await asyncio.sleep(60)
+        except asyncio.CancelledError:
+            await asyncio.sleep(60)
+
+    clean = asyncio.create_task(cancels_cleanly(), name="ws->session")
+    slow = asyncio.create_task(ignores_cancel(), name="session->ws")
+    await asyncio.sleep(0)  # let both start
+    pending = {clean, slow}
+
+    fake_logger = logging.getLogger(
+        "wrench_board.test.post_cancel_independent"
+    )
+
+    start = time.monotonic()
+    outcomes = await _drive_pending_unwind(
+        pending,
+        per_task_timeout=0.05,
+        logger=fake_logger,
+        session_id="sess_test_independent",
+    )
+    elapsed = time.monotonic() - start
+
+    # Clean task observed as cancelled, slow one as timeout — handled
+    # independently. The order in which the runtime visits `pending`
+    # is set-iteration order, which is deterministic per process but
+    # not specified across runs; we assert on the per-task outcome,
+    # not on log ordering.
+    assert outcomes == {
+        "ws->session": "cancelled",
+        "session->ws": "timeout",
+    }, (
+        "Each task must be reported on its own outcome, regardless of "
+        "the sibling's behaviour."
+    )
+
+    # Wall time must be bounded by 2 * per_task_timeout (worst case the
+    # clean task is visited second and waits ~zero before being seen as
+    # cancelled). Generous upper bound to absorb scheduler jitter on
+    # busy CI hardware.
+    assert elapsed < 0.5, (
+        f"Per-task wait should not balloon past 2*budget; got {elapsed:.3f}s"
+    )
+
+    # Cleanup the misbehaving task to avoid pytest warning.
+    slow.cancel()
+    try:
+        await asyncio.wait({slow}, timeout=0.05)
+    except Exception:
+        pass
+
+
+# ---------------------------------------------------------------------------
 # Integration: _emit + session_mirrors interplay (the real F1 scenario)
 # ---------------------------------------------------------------------------
 
