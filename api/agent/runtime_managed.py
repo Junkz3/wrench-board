@@ -1810,7 +1810,7 @@ async def _forward_session_to_ws(
                 )
             except StopAsyncIteration:
                 break
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 logger.warning(
                     "[Diag-MA] stream inactive for %.0fs — closing session=%s",
                     stream_timeout,

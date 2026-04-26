@@ -1095,7 +1095,7 @@ async def post_pack_document(
     device_slug: str,
     kind: str = Form(...),
     description: str | None = Form(default=None),
-    file: UploadFile = File(...),
+    file: UploadFile = File(...),  # noqa: B008 — FastAPI dependency-injection idiom
 ) -> DocumentUploadResponse:
     """Persist a technician-supplied document under `memory/{slug}/uploads/`.
 
