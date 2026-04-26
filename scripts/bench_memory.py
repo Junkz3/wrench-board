@@ -35,7 +35,7 @@ from typing import Any
 import httpx
 from anthropic import AsyncAnthropic
 
-from api.agent.field_reports import list_field_reports, record_field_report
+from api.agent.field_reports import record_field_report
 from api.agent.managed_ids import get_agent, load_managed_ids
 from api.agent.memory_stores import ensure_memory_store
 from api.agent.pricing import compute_turn_cost
@@ -197,14 +197,6 @@ async def dispatch_custom_tool(
     to their real implementations so the store actually fills up between
     repairs — everything else returns a minimal stub (we're measuring
     memory behaviour, not pack quality)."""
-    if name == "mb_list_findings":
-        # Real list — reads memory/{slug}/field_reports/*.md on disk.
-        reports = list_field_reports(
-            device_slug=device_slug,
-            limit=int(payload.get("limit", 20)),
-            filter_refdes=payload.get("filter_refdes"),
-        )
-        return {"findings": reports, "device_slug": device_slug}
     if name == "mb_record_finding":
         # Real write — JSON on disk, plus MA mirror when ma_memory_store_enabled
         # AND the device's memstore exists (condition A only, because ensure_

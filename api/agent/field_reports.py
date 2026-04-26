@@ -259,8 +259,11 @@ def list_field_reports(
 ) -> list[dict[str, Any]]:
     """Return reports sorted newest-first, filtered by refdes when supplied.
 
-    Pure disk read — the JSON-backed path that works without MA access. The
-    diagnostic agent's `mb_list_findings` tool wraps this.
+    Pure disk read — the JSON-backed path that works without MA access.
+    Used by the `/pipeline/packs/{slug}/findings` HTTP endpoint and as a
+    test helper. The diagnostic agent reads the same content via grep on
+    the FUSE mount (`/mnt/memory/microsolder-{slug}/field_reports/`)
+    rather than through a wrapper tool.
     """
     settings = get_settings()
     memory_root = memory_root or Path(settings.memory_root)

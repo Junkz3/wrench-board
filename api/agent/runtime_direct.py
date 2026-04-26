@@ -41,7 +41,6 @@ from api.agent.tools import (
     mb_expand_knowledge,
     mb_get_component,
     mb_get_rules_for_symptoms,
-    mb_list_findings,
     mb_record_finding,
 )
 from api.config import get_settings
@@ -495,13 +494,6 @@ async def _dispatch_mb_tool(
             memory_root=memory_root,
             max_results=payload.get("max_results", 5),
             session=session,
-        )
-    if name == "mb_list_findings":
-        return mb_list_findings(
-            device_slug=device_slug,
-            memory_root=memory_root,
-            limit=payload.get("limit", 20),
-            filter_refdes=payload.get("filter_refdes"),
         )
     if name == "mb_record_finding":
         return await mb_record_finding(

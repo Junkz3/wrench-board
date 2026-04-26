@@ -398,8 +398,8 @@ async def get_pack_full(device_slug: str) -> dict:
 async def list_device_findings(device_slug: str, limit: int = 50) -> list[dict]:
     """Return every field report recorded for this device, newest first.
 
-    Mirrors what `mb_list_findings` sees at agent-tool scope, exposed to the
-    web UI so the Journal dashboard can render the cross-session memory
+    Same content the agent reads via grep on the FUSE mount, exposed to
+    the web UI so the Journal dashboard can render cross-session memory
     without a WS round-trip. Strictly JSON-on-disk — no MA memory-store.
     """
     return list_field_reports(device_slug=_validate_slug(device_slug), limit=limit)

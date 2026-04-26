@@ -15,17 +15,18 @@ def _session_with_board() -> SessionState:
     return s
 
 
-def test_mb_tools_contains_core_four_plus_expand() -> None:
-    # The core four are the lookup/record set this chantier shipped. A fifth
-    # tool (mb_expand_knowledge) was added out-of-band — we assert the core
-    # set is present without pinning an exact count, so future growth is
-    # allowed but regressions on the four foundational names still trip.
+def test_mb_tools_contains_core_set() -> None:
+    # mb_list_findings was removed when the layered MA memory architecture
+    # landed — the agent now greps the field_reports/ mount directly via
+    # agent_toolset_20260401, making a wrapper tool redundant. The remaining
+    # core set is anti-hallucination + scoring + write + expand.
     names = {t["name"] for t in MB_TOOLS}
     core = {
         "mb_get_component", "mb_get_rules_for_symptoms",
-        "mb_list_findings", "mb_record_finding",
+        "mb_record_finding",
     }
     assert core.issubset(names)
+    assert "mb_list_findings" not in names
 
 
 def test_bv_tools_has_thirteen_entries() -> None:
@@ -139,14 +140,6 @@ def test_bv_show_pin_minimum() -> None:
     """Req 8 — pin index must be >= 1."""
     schema = next(t for t in BV_TOOLS if t["name"] == "bv_show_pin")["input_schema"]
     assert schema["properties"]["pin"].get("minimum") == 1
-
-
-def test_mb_list_findings_limit_constraints() -> None:
-    """Req 9 — limit range 1..100."""
-    schema = next(t for t in MB_TOOLS if t["name"] == "mb_list_findings")["input_schema"]
-    limit = schema["properties"]["limit"]
-    assert limit.get("minimum") == 1
-    assert limit.get("maximum") == 100
 
 
 def test_profile_tools_always_present() -> None:

@@ -348,9 +348,10 @@ def build_session_intro(
     """Compose the hidden bootstrap message the agent sees on session open.
 
     Carries the device identity and the client's reported symptom so the
-    agent can immediately query `mb_list_findings` / `mb_get_rules_for_symptoms`
-    without asking "which device are you on?". Returns None when there's
-    nothing to tell (no repair_id given).
+    agent can immediately consult its mounts (grep field_reports/, lookup
+    matching playbooks) and query mb_get_rules_for_symptoms without asking
+    "which device are you on?". Returns None when there's nothing to tell
+    (no repair_id given).
     """
     if not repair_id:
         return None
@@ -369,8 +370,9 @@ def build_session_intro(
     if symptom:
         lines.append(f"Symptôme signalé par le technicien: {symptom}")
     lines.append(
-        "Commence par mb_list_findings pour voir les réparations passées, "
-        "puis mb_get_rules_for_symptoms pour les règles applicables."
+        "Commence par grep sur /mnt/memory/microsolder-{slug}/field_reports/ "
+        "pour voir les réparations passées, puis mb_get_rules_for_symptoms "
+        "pour les règles applicables.".format(slug=device_slug)
     )
     return "\n".join(lines)
 

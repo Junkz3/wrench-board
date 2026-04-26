@@ -12,19 +12,25 @@ def _load_bootstrap_module():
     return mod
 
 
-def test_system_prompt_has_bimodal_block():
+def test_system_prompt_has_layered_memory_block():
+    """Replaces the old bimodal (mount-vs-disk) test — the prompt now
+    describes the 4-layer architecture (global patterns + global playbooks +
+    device + repair) and the scribe discipline for the per-repair mount."""
     mod = _load_bootstrap_module()
     prompt = mod.SYSTEM_PROMPT
-    assert "Mode mount" in prompt
-    assert "Mode disk-only" in prompt
+    # 4 layers must be named so the agent knows what to grep where.
     assert "/mnt/memory/" in prompt
-    assert "mb_list_findings" in prompt
+    assert "global-patterns" in prompt
+    assert "global-playbooks" in prompt
+    assert "scribe" in prompt.lower()
+    # Must NOT mention the deprecated tool / mode.
+    assert "mb_list_findings" not in prompt
+    assert "Mode disk-only" not in prompt
 
 
 def test_system_prompt_has_grep_example():
+    """Concrete grep usage so the agent has a pattern to imitate when
+    consulting the mount layers (global patterns, device field_reports, etc.)."""
     mod = _load_bootstrap_module()
     prompt = mod.SYSTEM_PROMPT
-    assert "grep -r" in prompt or 'grep "' in prompt, (
-        "prompt should include a concrete grep example so the agent has "
-        "a pattern to imitate in Mode mount"
-    )
+    assert "grep -r" in prompt or 'grep "' in prompt or "grep " in prompt

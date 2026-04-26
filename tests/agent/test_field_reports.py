@@ -16,7 +16,7 @@ from api.agent.field_reports import (
     list_field_reports,
     record_field_report,
 )
-from api.agent.tools import mb_list_findings, mb_record_finding
+from api.agent.tools import mb_record_finding
 
 
 @pytest.fixture(autouse=True)
@@ -177,8 +177,13 @@ async def test_ma_mirror_failure_does_not_block_json_write(
     assert Path(status["json_path"]).exists()
 
 
-async def test_mb_tools_pass_through(tmp_path: Path, monkeypatch):
-    """End-to-end: the tool layer writes, then another tool call reads it back."""
+async def test_mb_record_finding_writes_to_disk(tmp_path: Path, monkeypatch):
+    """End-to-end: mb_record_finding writes a parseable field report to disk.
+
+    Read-back is now done via grep on the FUSE mount (/mnt/memory/microsolder-{slug}/
+    field_reports/) rather than via a wrapper tool — mb_list_findings was removed
+    when the layered MA memory architecture landed.
+    """
     monkeypatch.setenv("MA_MEMORY_STORE_ENABLED", "false")
     write_status = await mb_record_finding(
         client=None,
@@ -190,7 +195,8 @@ async def test_mb_tools_pass_through(tmp_path: Path, monkeypatch):
     )
     assert write_status["json_status"] == "written"
 
-    read = mb_list_findings(device_slug="demo-pi", memory_root=tmp_path)
-    assert read["count"] == 1
-    assert read["reports"][0]["refdes"] == "U7"
-    assert read["reports"][0]["confirmed_cause"] == "PMIC dead"
+    # Verify directly via the disk-backed reader (server-side helper).
+    read = list_field_reports(device_slug="demo-pi", memory_root=tmp_path)
+    assert len(read) == 1
+    assert read[0]["refdes"] == "U7"
+    assert read[0]["confirmed_cause"] == "PMIC dead"

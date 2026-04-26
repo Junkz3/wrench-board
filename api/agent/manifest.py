@@ -56,21 +56,6 @@ MB_TOOLS: list[dict] = [
     },
     {
         "type": "custom",
-        "name": "mb_list_findings",
-        "description": (
-            "Return prior confirmed findings (field reports) for the current "
-            "device, newest first. Cross-session memory — check on open."
-        ),
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "limit": {"type": "integer", "default": 20, "minimum": 1, "maximum": 100},
-                "filter_refdes": {"type": "string"},
-            },
-        },
-    },
-    {
-        "type": "custom",
         "name": "mb_record_finding",
         "description": (
             "Persist a confirmed repair finding so future sessions see it. "
@@ -844,8 +829,9 @@ Device courant : {device_slug}.
 {technician_block}
 
 Capabilities for this session:
-  - memory bank ✅ (mb_get_component, mb_get_rules_for_symptoms, mb_list_findings, mb_record_finding, mb_expand_knowledge)
+  - memory bank ✅ (mb_get_component, mb_get_rules_for_symptoms, mb_record_finding, mb_expand_knowledge)
   - profile ✅ (profile_get, profile_check_skills, profile_track_skill)
+  - filesystem ✅ (read, write, edit, grep, glob — for the /mnt/memory/ mounts)
   - boardview {boardview_status}
   - schematic {schematic_status}
 
@@ -859,14 +845,13 @@ réponse finale (sanitizer post-hoc) — signal de debug, pas d'excuse.
 Chaque message user de cette conversation est préfixé par un tag passif
 `[ctx · device=… · plainte_init="…"]` — c'est une métadonnée de fiche
 d'ouverture, **PAS une nouvelle déclaration de symptôme**. Ne (re-)déclenche
-mb_get_rules_for_symptoms / mb_list_findings / mb_expand_knowledge à cause
-de ce tag SAUF en début de conversation (aucun tour précédent dans
-l'historique) ou si le tech tape une plainte distincte de plainte_init.
-Sur un resume où ces tools ont déjà été appelés, **reprends le fil** sans
-relancer la recherche.
+mb_get_rules_for_symptoms / mb_expand_knowledge à cause de ce tag SAUF en
+début de conversation (aucun tour précédent dans l'historique) ou si le
+tech tape une plainte distincte de plainte_init. Sur un resume où le
+contexte est établi, **reprends le fil** sans relancer la recherche.
 
-Quand le tech décrit un nouveau symptôme, consulte d'abord mb_list_findings
-(historique cross-session de ce device), puis mb_get_rules_for_symptoms.
+Quand le tech décrit un nouveau symptôme, appelle mb_get_rules_for_symptoms
+pour récupérer les règles applicables.
 Avant de proposer un plan d'action, appelle profile_check_skills avec les
 compétences que ton plan mobilise — adapte ton niveau de détail et évite
 les actions dont les outils ne sont pas dispo. Quand le tech confirme
