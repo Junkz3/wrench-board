@@ -836,18 +836,3 @@ def touch_conversation(
         _write_index(root, device_slug, repair_id, index)
 
 
-def close_conversation(
-    *,
-    device_slug: str,
-    repair_id: str,
-    conv_id: str,
-    memory_root: Path | None = None,
-) -> None:
-    """Mark a conversation as closed in the index (informational only)."""
-    root = memory_root or Path(get_settings().memory_root)
-    index = _read_index(root, device_slug, repair_id)
-    for entry in index:
-        if entry["id"] == conv_id and not entry.get("closed"):
-            entry["closed"] = True
-            _write_index(root, device_slug, repair_id, index)
-            return
