@@ -370,9 +370,9 @@ def build_session_intro(
     if symptom:
         lines.append(f"Symptôme signalé par le technicien: {symptom}")
     lines.append(
-        "Commence par grep sur /mnt/memory/microsolder-{slug}/field_reports/ "
+        f"Commence par grep sur /mnt/memory/microsolder-{device_slug}/field_reports/ "
         "pour voir les réparations passées, puis mb_get_rules_for_symptoms "
-        "pour les règles applicables.".format(slug=device_slug)
+        "pour les règles applicables."
     )
     return "\n".join(lines)
 

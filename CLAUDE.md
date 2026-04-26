@@ -340,18 +340,29 @@ Two siblings, same WS protocol:
   user message, relays `agent.message` tokens onto the WS, caches
   `agent.custom_tool_use` events, dispatches them on `requires_action`, and
   writes `user.custom_tool_result` back. Auto-injects device context on fresh
-  repair sessions (pack + findings) via `memory_seed.py`.
+  repair sessions (pack + findings) via `memory_seed.py`. Attaches a
+  **layered 4-store MA memory** to every session: `global-patterns` (RO,
+  cross-device archetypes), `global-playbooks` (RO, protocol templates for
+  `bv_propose_protocol`), `device-{slug}` (RO, knowledge pack mirror),
+  `repair-{repair_id}` (RW, agent's scribe notebook — `state.md` /
+  `decisions/` / `measurements/` / `open_questions.md`). The agent
+  self-orients on resume via `read state.md` instead of a pre-cuisined
+  LLM summary. Spec:
+  `docs/superpowers/plans/2026-04-26-ma-memory-layered-architecture.md`.
 - `runtime_direct.py` — `messages.create` fallback with a Python tool loop.
   Same WS protocol; feature-equivalent for demos when MA beta is
   unavailable.
 
 Custom tools (`manifest.py`):
 
-- **MB** — memory bank + board aggregation (5 tools): `mb_get_component`,
-  `mb_get_rules_for_symptoms`, `mb_list_findings`, `mb_record_finding`,
+- **MB** — memory bank + board aggregation (4 tools): `mb_get_component`
+  (Levenshtein-validated refdes anti-hallucination), `mb_get_rules_for_symptoms`,
+  `mb_record_finding` (canonical archival API; mirrors to the device mount),
   `mb_expand_knowledge` (the agent self-extends the pack when rules return
   empty, running a focused Scout + Clinicien pass — see `pipeline/expansion.py`).
-  Implementations in `agent/tools.py`.
+  Implementations in `agent/tools.py`. Field-report listing is no longer a
+  tool — the agent greps `/mnt/memory/microsolder-{slug}/field_reports/`
+  directly via `agent_toolset_20260401`.
 - **BV** — boardview control (12 tools): `bv_highlight_component`,
   `bv_focus_component`, `bv_reset_view`, `bv_highlight_net`, `bv_flip_board`,
   `bv_annotate`, `bv_filter_by_type`, `bv_draw_arrow`, `bv_measure_distance`,
