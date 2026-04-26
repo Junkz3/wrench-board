@@ -83,9 +83,55 @@ async def _create_store_via_http(
         return None
 
 
+async def _update_memory_via_http(
+    *, api_key: str, store_id: str, memory_id: str, content: str
+) -> str | None:
+    """POST an update to an existing memory by id. Returns content_sha256 on success.
+
+    Note: the public Managed Agents API docs list this as PATCH, but the
+    live endpoint only accepts POST (verified 2026-04-26 — PATCH/PUT both
+    return 405 Method Not Allowed). The shape stays
+    `{"content": "..."}` either way.
+    """
+    try:
+        async with httpx.AsyncClient(timeout=30.0) as http:
+            resp = await http.post(
+                f"{_API_BASE}/memory_stores/{store_id}/memories/{memory_id}",
+                headers=_http_headers(api_key, content_json=True),
+                json={"content": content},
+            )
+    except Exception as exc:  # noqa: BLE001
+        logger.warning(
+            "[MemoryStore] HTTP update raised for memory_id=%s: %s",
+            memory_id,
+            exc,
+        )
+        return None
+    if resp.status_code != 200:
+        logger.warning(
+            "[MemoryStore] HTTP update returned %d for memory_id=%s: %s",
+            resp.status_code,
+            memory_id,
+            resp.text[:300],
+        )
+        return None
+    try:
+        return resp.json().get("content_sha256") or "ok"
+    except ValueError:
+        return "ok"
+
+
 async def _upsert_memory_via_http(
     *, api_key: str, store_id: str, path: str, content: str
 ) -> str | None:
+    """True upsert: try create, on 409 path conflict fall back to update.
+
+    The Anthropic Memory API addresses memories by `mem_...` id for
+    mutations and returns `409 memory_path_conflict_error` when a create
+    is attempted at a path that already has a memory. This helper extracts
+    the `conflicting_memory_id` from the error body and PATCHes that
+    memory instead, giving callers true upsert semantics.
+    """
     try:
         async with httpx.AsyncClient(timeout=30.0) as http:
             resp = await http.post(
@@ -98,18 +144,36 @@ async def _upsert_memory_via_http(
             "[MemoryStore] HTTP upsert raised for path=%s: %s", path, exc
         )
         return None
-    if resp.status_code != 200:
-        logger.warning(
-            "[MemoryStore] HTTP upsert returned %d for path=%s: %s",
-            resp.status_code,
-            path,
-            resp.text[:300],
-        )
-        return None
-    try:
-        return resp.json().get("content_sha256") or "ok"
-    except ValueError:
-        return "ok"
+    if resp.status_code == 200:
+        try:
+            return resp.json().get("content_sha256") or "ok"
+        except ValueError:
+            return "ok"
+
+    # 409 path conflict → switch to PATCH on the conflicting memory id.
+    if resp.status_code == 409:
+        try:
+            body = resp.json()
+            err = body.get("error", {}) if isinstance(body, dict) else {}
+            if err.get("type") == "memory_path_conflict_error":
+                memory_id = err.get("conflicting_memory_id")
+                if memory_id:
+                    return await _update_memory_via_http(
+                        api_key=api_key,
+                        store_id=store_id,
+                        memory_id=memory_id,
+                        content=content,
+                    )
+        except (ValueError, KeyError):
+            pass
+
+    logger.warning(
+        "[MemoryStore] HTTP upsert returned %d for path=%s: %s",
+        resp.status_code,
+        path,
+        resp.text[:300],
+    )
+    return None
 
 
 async def ensure_memory_store(

@@ -1,0 +1,38 @@
+{
+  "playbook_id": "pmic-rail-collapse",
+  "title": "Rail PMU s'effondre sous charge",
+  "applies_when": ["rail-sag", "intermittent-reset", "boot-loop"],
+  "rationale": "Rail nominal au repos, s'effondre quand SoC démarre. Soit PMU faible (cap décourplage HS, FET interne), soit court aval qui s'active sur enable.",
+  "steps": [
+    {
+      "type": "numeric",
+      "target": "VDDMAIN",
+      "rationale": "Mesure rail au repos (avant boot).",
+      "nominal": 0.8,
+      "unit": "V",
+      "pass_range": [0.78, 0.82]
+    },
+    {
+      "type": "boolean",
+      "target": "SOC_RESET_N",
+      "rationale": "Reset relâché — SoC commence à tirer du courant.",
+      "expected": true
+    },
+    {
+      "type": "numeric",
+      "target": "VDDMAIN_LOADED",
+      "rationale": "Mesure rail 1s après boot. Sag > 50 mV indique faiblesse PMU ou cap décourplage HS.",
+      "nominal": 0.8,
+      "unit": "V",
+      "pass_range": [0.75, 0.82]
+    },
+    {
+      "type": "numeric",
+      "target": "PMU_TEMP",
+      "rationale": "Thermal cam sur PMU à 5s post-boot. > 60 °C ambiant suggère charge interne anormale.",
+      "nominal": 35,
+      "unit": "°C",
+      "pass_range": [25, 50]
+    }
+  ]
+}

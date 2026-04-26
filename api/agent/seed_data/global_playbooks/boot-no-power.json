@@ -1,0 +1,52 @@
+{
+  "playbook_id": "boot-no-power",
+  "title": "Pas d'allumage — séquence de démarrage",
+  "applies_when": ["no-power", "device-dead", "boot-failure"],
+  "rationale": "Cascade canonique d'un device qui ne s'allume pas: alim externe → fuse/protection → PMU activation → rails secondaires → SoC reset. Chaque step isole une couche.",
+  "steps": [
+    {
+      "type": "numeric",
+      "target": "VBUS",
+      "rationale": "Vérifie l'alim externe avant de soupçonner le board.",
+      "nominal": 5.0,
+      "unit": "V",
+      "pass_range": [4.5, 5.5]
+    },
+    {
+      "type": "numeric",
+      "target": "F1",
+      "rationale": "Diode-mode du fusible/protection d'entrée. Ouvert → fuse claqué.",
+      "nominal": 0,
+      "unit": "Ω",
+      "pass_range": [0, 5]
+    },
+    {
+      "type": "numeric",
+      "target": "VBAT_MAIN",
+      "rationale": "Rail batterie/main. S'il est mort, le PMU n'a pas son alim de référence.",
+      "nominal": 3.7,
+      "unit": "V",
+      "pass_range": [3.0, 4.4]
+    },
+    {
+      "type": "boolean",
+      "target": "PMU_ENABLE",
+      "rationale": "Vérifie que le signal d'allumage est asserté (bouton power → PMU).",
+      "expected": true
+    },
+    {
+      "type": "numeric",
+      "target": "VDDMAIN",
+      "rationale": "Premier rail digital généré par le PMU. Absent → PMU mort ou court aval.",
+      "nominal": 0.8,
+      "unit": "V",
+      "pass_range": [0.75, 0.85]
+    },
+    {
+      "type": "boolean",
+      "target": "SOC_RESET_N",
+      "rationale": "Reset relâché par le PMU une fois rails stables.",
+      "expected": true
+    }
+  ]
+}

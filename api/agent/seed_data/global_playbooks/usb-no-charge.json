@@ -1,0 +1,38 @@
+{
+  "playbook_id": "usb-no-charge",
+  "title": "Pas de charge USB — protocole charger IC",
+  "applies_when": ["no-charge", "usb-not-detected", "battery-stuck"],
+  "rationale": "Diagnose USB charge path: présence VBUS → enumeration D+/D- → handshake charger IC → enable buck → courant batterie.",
+  "steps": [
+    {
+      "type": "numeric",
+      "target": "VBUS",
+      "rationale": "Tension d'entrée USB.",
+      "nominal": 5.0,
+      "unit": "V",
+      "pass_range": [4.5, 5.5]
+    },
+    {
+      "type": "numeric",
+      "target": "USB_DP",
+      "rationale": "D+ idle voltage. Determine si le device présente une signature de charger valide.",
+      "nominal": 0.6,
+      "unit": "V",
+      "pass_range": [0.4, 3.3]
+    },
+    {
+      "type": "boolean",
+      "target": "CHG_EN",
+      "rationale": "Charger IC enable signal asserté.",
+      "expected": true
+    },
+    {
+      "type": "numeric",
+      "target": "VBAT",
+      "rationale": "Tension batterie chargée. Si absente avec VBUS présent, charger IC mort ou ligne BATFET ouverte.",
+      "nominal": 3.7,
+      "unit": "V",
+      "pass_range": [3.0, 4.4]
+    }
+  ]
+}

@@ -193,6 +193,57 @@ async def test_upsert_returns_none_on_http_failure(monkeypatch):
     assert sha is None
 
 
+async def test_upsert_falls_back_to_update_on_409_path_conflict(monkeypatch):
+    """True upsert: 409 path-conflict on POST → POST to /memories/{id}.
+
+    The MA Memory API does NOT auto-replace on path collision — it returns
+    409 memory_path_conflict_error with the conflicting_memory_id. Our
+    upsert helper must detect that and fall back to an update against the
+    existing memory id (POST, not PATCH — the live endpoint rejects PATCH).
+    """
+    create_resp = _FakeHttpResponse(
+        409,
+        {
+            "type": "error",
+            "error": {
+                "type": "memory_path_conflict_error",
+                "message": "path occupied",
+                "conflicting_memory_id": "mem_existing_001",
+                "conflicting_path": "/patterns/x.md",
+            },
+        },
+    )
+    update_resp = _FakeHttpResponse(200, {"content_sha256": "newsha"})
+
+    sequence = iter([create_resp, update_resp])
+    captured: list[tuple[str, str, dict]] = []
+
+    class _Seq:
+        async def __aenter__(self):
+            return self
+        async def __aexit__(self, *_e):
+            return None
+        async def post(self, url, *, headers, json):
+            captured.append(("POST", url, json))
+            return next(sequence)
+
+    monkeypatch.setattr(httpx, "AsyncClient", lambda **_kw: _Seq())
+
+    client = _client_without_surface()
+    sha = await memory_stores.upsert_memory(
+        client, store_id="memstore_x", path="/patterns/x.md", content="new",
+    )
+
+    assert sha == "newsha"
+    assert len(captured) == 2, "Expected create then update"
+    _, create_url, create_body = captured[0]
+    _, update_url, update_body = captured[1]
+    assert create_url.endswith("/memory_stores/memstore_x/memories")
+    assert create_body == {"path": "/patterns/x.md", "content": "new"}
+    assert update_url.endswith("/memory_stores/memstore_x/memories/mem_existing_001")
+    assert update_body == {"content": "new"}
+
+
 # ---------------------------------------------------------------------------
 # Layered architecture: ensure_global_store + ensure_repair_store
 # ---------------------------------------------------------------------------
