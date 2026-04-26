@@ -13,7 +13,7 @@ Référence complète de l'architecture `wrench-board`. Ce document est la carte
 | # | Workflow | Cadence | Déclencheur |
 |---|----------|---------|-------------|
 | **A** | Knowledge Factory | offline, par device | `POST /pipeline/generate` |
-| **B** | Schematic Ingestion | offline, par device | CLI `api.pipeline.schematic.cli` |
+| **B** | Schematic Ingestion | offline, par device | `POST /pipeline/ingest-schematic` (ou upload via `/pipeline/packs/{slug}/documents`) |
 | **C** | Bench Generator | offline, post-A+B | `scripts/generate_bench_from_pack.py` |
 | **D** | Diagnostic Runtime | live, par session | `WS /ws/diagnostic/{slug}` |
 
@@ -96,7 +96,7 @@ Plus **deux engines déterministes purs** (`simulator`, `hypothesize`) qui n'app
 
 - **Scout résilience** : gère les `pause_turn` du SDK, rejette les dumps « maigres » (< N symptômes / sources / composants), relance avec un scope élargi. Depuis `6377d3b`, Scout peut consommer un **graphe électrique, un boardview parsé et des datasheets PDF** fournis par le tech — les MPN extraits deviennent des query seeds ciblés. Depuis `020c168`, le param `focus_symptom` insère un bloc qui alloue 3-4 web_search queries sur un symptôme tech précis (utilisé par les branches **full** et **expand** de `POST /pipeline/repairs`).
 - **Registry → Mapper → Writers** : la `registry.json` est le vocabulaire canonique. Le Mapper produit la passerelle registry → refdes du graph en quote-validating chaque correspondance. Toute violation (refdes émis par un Writer absent de la registry) déclenche `drift.py`, qui compile un rapport de drift passé **en entrée** à l'Auditor comme ground truth déterministe.
-- **Writers cache warmup** : les trois writers partagent un préfixe long (raw dump + registry + system prompt) marqué `cache_control: ephemeral`. Writer 1 part en premier, les writers 2 et 3 attendent `cache_warmup_seconds` pour que la cache entry matérialise — d'où un gain tokens réel de −75 % sur les writers 2-3.
+- **Writers cache warmup** : les trois writers partagent un préfixe long (raw dump + registry + system prompt) marqué `cache_control: ephemeral`. Writer 1 part en premier, les writers 2 et 3 attendent `cache_warmup_seconds` pour que la cache entry matérialise. Mesure réelle (sur les `memory/*/token_stats.json` persistés) : Clinicien lit le préfixe en cache à ~90 % de hit rate quand le timing fonctionne, Lexicographe paie en full price avec la version actuelle des prompts (signature divergente, à investiguer post-hackathon — gain potentiel ~9–12 k tokens / pack).
 - **Auditor loop** : verdict `NEEDS_REVISION` → `_apply_revisions()` relance les writers flaggés (max `pipeline_max_revise_rounds`). Verdict `REJECTED` lève. Un drift check déterministe coupe la boucle après `max_rounds`.
 - **Post-pipeline** : `graph_transform.pack_to_graph_payload()` synthétise des nœuds d'action et émet le JSON consommé par `web/js/graph.js` (colonnes Actions → Components → Nets → Symptoms).
 
@@ -197,7 +197,26 @@ PDF
  │   (electrical_graph.json)
  ▼
 ┌──────────────────────────────────────┐
-│ 6. boot_analyzer.py (optionnel, NEW) │  Opus, ~$0.25, graceful fail
+│ 6. net_classifier.py (optionnel)     │  Haiku/Sonnet forced tool
+│    submit_net_classification         │  classifie chaque net en
+│                                      │  power / signal / clock / reset /
+│                                      │  data_bus / connector + voltage si
+│                                      │  power. Heuristique regex en fallback.
+└──────────────────────────────────────┘
+     (nets_classified.json)
+ │
+ ▼
+┌──────────────────────────────────────┐
+│ 7. passive_classifier.py (optionnel) │  LLM forced tool + fallback déterministe
+│    submit_passive_classification     │  rôle de chaque R/C/L/Q :
+│                                      │  decoupling / pull_up / pull_down /
+│                                      │  series / feedback / tank / signal_path
+└──────────────────────────────────────┘
+     (passive_classification_llm.json)
+ │
+ ▼
+┌──────────────────────────────────────┐
+│ 8. boot_analyzer.py (optionnel)      │  Opus, ~$0.25, graceful fail
 │    forced tool                       │  raffine boot_sequence :
 │    submit_analyzed_boot_sequence     │  always-on / sequenced / on-demand
 │                                      │  + sequencer_refdes
@@ -205,9 +224,13 @@ PDF
      (boot_sequence_analyzed.json)
 ```
 
+Les étapes 6 / 7 / 8 sont indépendantes, déclenchables séparément (cf. endpoints `POST /pipeline/packs/{slug}/schematic/classify-nets` et `POST /pipeline/packs/{slug}/schematic/analyze-boot`) et regroupées dans `orchestrator.ingest_schematic` via `asyncio.gather` pour ne pas sérialiser les latences.
+
 ### Notes architecturales
 
 - **Tous les shapes** sont dans `api/pipeline/schematic/schemas.py` — même principe que le workflow A.
+- **Net classifier** (`net_classifier.py`) — pass LLM optionnel avec fallback heuristique regex (`classify_net_regex`) sur les noms de nets. Quand il tourne, il enrichit chaque `PowerRail` / net du graph avec un `domain` typé. Consommé par les requêtes `mb_schematic_graph(query="net_domain")`.
+- **Passive classifier** (`passive_classifier.py`) — un pass LLM Sonnet (`classify_passives_llm`) donne un rôle à chaque R/C/L/Q ; en cas de coupure réseau, `classify_passives_heuristic` produit un rôle moins précis mais utilisable. Le rôle est lu par `hypothesize.py` pour choisir la fonction de cascade adaptée (decoupling vs pull_up vs feedback vs tank…).
 - **Boot analyzer** (ajouté dans `3833b43`) est un pass Opus post-compile qui combine `enable_net`, edges `enables` et designer notes pour identifier le vrai séquencement (LPC/PMIC driving `*_PWR_EN`). Tombe gracieusement : en cas d'échec, le simulator utilise la `boot_sequence` topologique du compiler.
 - **Le compiler est déterministe** : pas de LLM après l'étape 3. Les pépites techniques (simulator, hypothesize) en dépendent et exigent cette pureté.
 
@@ -297,7 +320,7 @@ Ce n'est **pas** « un runtime par défaut + un fallback ». Les deux implément
 | Dimension | `runtime_managed.py` (~1 400 L) | `runtime_direct.py` (~700 L) |
 |-----------|----------------------------------|--------------------------------|
 | Pack fourni à l'agent | Monté comme `resources.memory_store` côté session Anthropic (accès `read_only`), lu via memory tools natifs côté serveur | Non-monté — l'agent appelle `mb_*` à la demande, qui relisent les JSON du disque et retournent dans les tool_results |
-| Coûts | Pack hors du contexte des turns → gain documenté −61 % sur Haiku | Pack re-payé à chaque `mb_get_component`, amorti par `cache_control: ephemeral` sur system+tools |
+| Coûts | Pack hors du contexte des turns (monté en filesystem, lu via `agent_toolset_20260401` à la demande) — gain mesuré sur Haiku, non publié faute de méthodologie reproductible | Pack re-payé à chaque `mb_get_component`, amorti par `cache_control: ephemeral` sur system+tools |
 | Historique | Persistance serveur Anthropic 30 j (`client.beta.sessions.events.list`) + JSONL local en mirror | JSONL local = source de vérité unique, rechargé en `messages=[…]` à chaque reopen |
 | Reprise expirée | Haiku résume la session morte → recovery summary injectée dans la nouvelle | Replay direct de la JSONL |
 | Cross-repair memory | `mirror_outcome_to_memory` : findings validés → memory store, accessibles à toute session future du device | Findings écrits sur disque ; relus explicitement via `mb_list_findings` |
@@ -320,20 +343,23 @@ Changer de tier = fermer et rouvrir la WS (nouvelle conversation). Pas de swap i
 
 ### Tools exposés à l'agent
 
-Manifest : `api/agent/manifest.py`. Sélection dynamique via `build_tools_manifest(session)` — les BV tools sont strippés quand aucune boardview n'est chargée.
+Manifest : `api/agent/manifest.py`. Sélection dynamique via `build_tools_manifest(session)` — les BV control tools sont strippés quand aucune boardview n'est chargée, `cam_capture` apparaît uniquement quand `session.has_camera`.
 
-| Famille | Nombre | Handler principal | Dispatched depuis |
-|---------|--------|-------------------|-------------------|
-| MB knowledge (refdes / rules / findings / expand) | 5 | `api/agent/tools.py` | `runtime_*._dispatch_tool()` |
-| MB schematic / hypothesize | 2 (`mb_schematic_graph`, `mb_hypothesize`) | `api/tools/schematic.py`, `api/tools/hypothesize.py` | idem |
-| MB measurements (record / list / compare / observations / set / clear) | 6 | `api/tools/measurements.py` (+ `api/agent/measurement_memory.py`) | idem |
-| MB validation (`mb_validate_finding`) | 1 | `api/tools/validation.py` (+ `api/agent/validation.py`) | idem |
-| BV (boardview control) | 12 | `api/tools/boardview.py` | `api/agent/dispatch_bv.py` |
-| Profile (`profile_get`, `profile_check_skills`, `profile_track_skill`) | 3 | `api/profile/tools.py` | `runtime_*._dispatch_tool()` |
+| Famille | Nombre | Tools | Handler principal | Dispatched depuis |
+|---------|--------|-------|-------------------|-------------------|
+| MB knowledge | 5 | `mb_get_component`, `mb_get_rules_for_symptoms`, `mb_record_finding`, `mb_record_session_log`, `mb_expand_knowledge` | `api/agent/tools.py` | `runtime_*._dispatch_mb_tool()` |
+| MB schematic / hypothesize | 2 | `mb_schematic_graph`, `mb_hypothesize` | `api/tools/schematic.py`, `api/tools/hypothesize.py` | idem |
+| MB measurements | 6 | `mb_record_measurement`, `mb_list_measurements`, `mb_compare_measurements`, `mb_observations_from_measurements`, `mb_set_observation`, `mb_clear_observations` | `api/tools/measurements.py` (+ `api/agent/measurement_memory.py`) | idem |
+| MB validation | 1 | `mb_validate_finding` | `api/tools/validation.py` (+ `api/agent/validation.py`) | idem |
+| BV control (boardview manipulation) | 13 | `bv_scene`, `bv_highlight`, `bv_focus`, `bv_reset_view`, `bv_flip`, `bv_annotate`, `bv_dim_unrelated`, `bv_highlight_net`, `bv_show_pin`, `bv_draw_arrow`, `bv_measure`, `bv_filter_by_type`, `bv_layer_visibility` | `api/tools/boardview.py` | `api/agent/dispatch_bv.py` |
+| BV protocol (stepwise diagnostic) | 4 | `bv_propose_protocol`, `bv_update_protocol`, `bv_record_step_result`, `bv_get_protocol` | `api/tools/protocol.py` | `runtime_*._dispatch_protocol_tool()` |
+| Profile | 3 | `profile_get`, `profile_check_skills`, `profile_track_skill` | `api/profile/tools.py` | `runtime_*._dispatch_profile_tool()` |
+| Vision live | 1 | `cam_capture` | `runtime_managed.py::_dispatch_cam_capture` (+ `api/agent/macros.py`) | `runtime_managed` (managed-only, conditional sur `session.has_camera`) |
+| Sub-agent consultation | 1 | `consult_specialist` | `runtime_managed.py::_run_subagent_consultation` (+ `_run_knowledge_curator`) | `runtime_managed` (managed-only) |
 
-Total : **29 tools** déclarés dans `manifest.py` (vérifié par `grep -c '"name":'`). Liste complète des noms — voir `manifest.py`, ne pas dupliquer ici.
+Total : **36 tools** déclarés dans `manifest.py` (vérifié par `grep -c '"name":' api/agent/manifest.py`). Deux tools sont **managed-only** par construction (`cam_capture`, `consult_specialist`) — le mode direct ne peut ni capturer une image en live ni invoquer un sub-agent.
 
-**État connu** : les handlers sont dispersés en 5 fichiers sans registry unique. Ajouter un tool oblige à éditer `manifest.py` + un fichier d'implémentation + les deux runtimes. Refactor planifié mais non prioritaire (cf. section *Dette architecturale*).
+**État connu** : les handlers sont dispersés en 8 fichiers sans registry unique. Ajouter un tool oblige à éditer `manifest.py` + un fichier d'implémentation + les deux runtimes (sauf managed-only). Refactor `tool_registry.py` planifié mais non prioritaire (cf. section *Dette architecturale*).
 
 ### Modules de support du runtime D
 
@@ -341,16 +367,20 @@ Au-delà des deux runtimes, plusieurs modules dans `api/agent/` portent du state
 
 | Module | Rôle |
 |--------|------|
-| `chat_history.py` | Append-only JSONL par conversation (`memory/{slug}/repairs/{rid}/conversations/{cid}/messages.jsonl`). Source de vérité pour le replay direct + mirror MA. |
+| `chat_history.py` | Append-only JSONL par conversation (`memory/{slug}/repairs/{rid}/conversations/{cid}/messages.jsonl`). Source de vérité pour le replay direct + mirror MA. Aussi `index.json` (liste des convs) et `status.json` (open / in_progress / closed). |
+| `conversation_log.py` | Per-conversation outcome narrative — `record_session_log` écrit un Markdown synthétique sous `memory/{slug}/conversation_log/{stamp}_{rid}_{cid}.md` (per-device, **pas** per-repair) et le mirror sur le MA store du device. Consommé par les rétrospectives multi-repair. |
+| `recovery_state.py` | Reconstruit un bloc Markdown d'état (`build_repair_state_block`) à partir de `outcome.json` + `measurements.jsonl` + `diagnosis_log.jsonl` pour qu'une reprise WS retrouve son contexte sans appeler un LLM résumeur. |
+| `board_state.py` | Snapshot/replay de l'overlay boardview (highlights, focus, dim, layer visibility). Persiste sous `memory/{slug}/repairs/{rid}/board_state.json` après chaque tool `bv_*`. Au reopen WS, `replay_board_state_to_ws` rejoue les events et le frontend retrouve l'overlay exact. |
+| `macros.py` | Files+Vision — persiste les images uploadées (drag-drop) ou capturées caméra (`cam_capture`) sous `memory/{slug}/repairs/{rid}/macros/`. Path-safe par construction (`macro_path_for` rejette les `..`). Builder d'`ImageRef` pour les blocs vision Anthropic. |
 | `field_reports.py` | Findings cross-session (per-device, pas per-repair). Mirror vers le memory store MA quand dispo. |
 | `measurement_memory.py` | Journal mesures par repair (`measurements.jsonl`). Auto-classifie V/A/W/°C/Ω → `ComponentMode` / `RailMode`. Synthétise des `Observations` pour le simulator. |
 | `diagnosis_log.py` | Append-only par repair. Loggue chaque turn d'observation/hypothèse/pruning du tool `mb_hypothesize` — corpus brut consommé par les loops d'évaluation et les skill `microsolder-evolve*`. |
 | `validation.py` | `RepairOutcome` persistance (`outcome.json` par repair). Reçoit le clic « Marquer fix » du tech : refdes + mode + rationale. |
 | `schematic_boardview_bridge.py` | Enrichit le `SimulationTimeline` (schematic) avec la position 2D de la `Board` (PCB). Émet une `EnrichedTimeline` + jusqu'à 8 `ProbePoint` (route physique de mesures). |
 | `reliability.py` | Lit `simulator_reliability.json`, injecte une ligne dans le system prompt des deux runtimes. |
-| `memory_seed.py` | Première ouverture WS d'une repair fraîche : injecte le pack + findings dans le contexte (mode managed) ou dans le first turn (mode direct). |
-| `memory_stores.py` | Cache per-device des MA memory stores. Beta header `managed-agents-2026-04-01`. NoOp gracieux si la beta est down ou absente. |
-| `managed_ids.py` | Loader de `managed_ids.json` (env + 3 agents tier-scopés). Fallback legacy single-agent toléré. |
+| `memory_seed.py` | Première ouverture WS d'une repair fraîche : injecte le pack + findings dans le contexte (mode managed) ou dans le first turn (mode direct). Écrit un marker `managed.json` pour ne pas re-seed. |
+| `memory_stores.py` | Cache per-device des MA memory stores. Trois ensure-fonctions distinctes pour la mémoire en couches (cf. section dédiée *Architecture mémoire MA*). Beta header `managed-agents-2026-04-01`. NoOp gracieux si la beta est down ou absente. |
+| `managed_ids.py` | Loader de `managed_ids.json` (env + 3 agents tier-scopés Haiku/Sonnet/Opus). |
 | `pricing.py` | Estimateur de coût des tokens (Avril 2026 : Haiku $1/$5, Sonnet $3/$15, Opus $5/$25 ; cache read 0.10×, cache creation 1.25×). Consommé par les events de progress. |
 | `sanitize.py` | Garde-fou anti-hallucination — voir section dédiée ci-dessous. |
 
@@ -361,19 +391,87 @@ Hard rule #5 de `CLAUDE.md`. Deux couches :
 1. **Tool discipline** — les tools renvoient `{found: false, closest_matches: [...]}` pour les refdes inconnus, jamais de donnée fabriquée. Le system prompt force l'agent à piocher dans `closest_matches` ou à demander au tech.
 2. **Sanitizer post-hoc** — `api/agent/sanitize.py` scanne chaque texte sortant pour les tokens `\b[A-Z]{1,3}\d{1,4}\b` et wraps en `⟨?U999⟩` tout refdes absent de `session.board.part_by_refdes()`. Les deux runtimes y passent avant `ws.send_json`.
 
+### Architecture mémoire MA — 4 stores en couches
+
+Le mode `managed` attache à chaque session **quatre memory stores** distincts, chacun avec sa portée et son régime d'écriture. C'est ce qui permet à un agent de reprendre une repair sans recharger le pack et de retrouver ses notes scribe sans qu'un LLM résume.
+
+| Store | Portée | Régime | Contenu |
+|-------|--------|--------|---------|
+| `global-patterns` | cross-device | RO | archetypes (ex: « rail dead → check decoupling caps adjacent »), conservés entre tous les devices. Manuel. |
+| `global-playbooks` | cross-device | RO | templates de protocoles de mesure (consommés par `bv_propose_protocol`). Manuel. |
+| `device-{slug}` | per-device | RO | mirror du knowledge pack — `registry`, `rules`, `dictionary`, `knowledge_graph`, `electrical_graph` montés en filesystem. Seedé par `memory_seed.seed_memory_store_from_pack`. |
+| `repair-{repair_id}` | per-repair | RW | scribe notebook de l'agent — `state.md`, `decisions/<n>.md`, `measurements/<n>.md`, `open_questions.md`. C'est l'agent qui écrit (via `agent_toolset_20260401`), pas un LLM tiers. |
+
+Au reopen d'une repair, l'agent fait `read state.md` au lieu de recevoir un résumé pré-mâché — il s'auto-oriente. C'est le résultat livré par la refonte `2026-04-26-ma-memory-layered-architecture` (cf. `docs/superpowers/plans/`).
+
+**Trois `ensure_*` symétriques** dans `memory_stores.py` :
+- `ensure_global_store(client)` → idempotent, partagé inter-device
+- `ensure_memory_store(client, slug)` → per-device (`device-{slug}`)
+- `ensure_repair_store(client, slug, repair_id)` → per-repair (`repair-{rid}`)
+
+Le mode `direct` n'a aucun équivalent : sans MA, l'agent ne peut pas tenir un scribe entre les sessions, donc `recovery_state.build_repair_state_block` reconstruit synthétiquement le contexte à partir des artefacts disque (`outcome.json` + `measurements.jsonl` + `diagnosis_log.jsonl`).
+
+### Files + Vision — l'agent peut demander à voir
+
+Le diagnostic microsoudure dépend de ce que la sonde touche *à l'instant*, et un chat box ne porte pas cette information. Le runtime expose deux mécanismes :
+
+- **Drag-drop** depuis le frontend → events WS `client.upload_macro` traités par `_handle_client_upload_macro` (runtime managed). L'image est persistée par `macros.persist_macro` sous `memory/{slug}/repairs/{rid}/macros/<filename>`, et un `ImageRef` Anthropic est inséré dans le prochain turn.
+- **Demande agent** via le tool `cam_capture` → mode managed uniquement. L'agent émet l'appel, le runtime envoie `server.request_capture` au frontend, le frontend prend une frame de la caméra USB sélectionnée et répond `client.capture_response`. `_handle_client_capture_response` persiste l'image et l'agent reçoit le `tool_result` avec un `ImageRef` qu'il peut lire au turn suivant.
+
+Côté session :
+- `session.has_camera: bool` → contrôle dynamique de la présence du tool dans le manifest (cf. `build_tools_manifest`).
+- `session.pending_captures: dict[capture_id → asyncio.Future]` → corrélation request/response entre le tool call et la réponse client.
+
+Côté disque : les images vivent sous `memory/{slug}/repairs/{rid}/macros/`. Replay via l'endpoint `GET /api/macros/{slug}/{repair_id}/{filename}` (path-safe).
+
+Côté system prompt : le bloc **VISION** dans `bootstrap_managed_agent.py::SYSTEM_PROMPT` instruit explicitement l'agent quand demander une capture (« when the user describes a physical observation you cannot interpret from text alone, request a frame »).
+
+### Knowledge Curator + `consult_specialist`
+
+Sub-agent invocable depuis le runtime managed via le tool `consult_specialist`. Quand l'agent principal frappe une question pointue de knowledge (« est-ce que cette signature de défaillance est documentée dans la rules base ? »), il délègue à un sub-agent spécialisé :
+
+- `_run_subagent_consultation` (générique) — orchestre l'invocation, relaye le résultat dans le tool_result.
+- `_run_knowledge_curator` (spécialisation actuelle) — sub-agent qui fouille `device-{slug}` + `global-patterns` et synthétise.
+
+Disponible **uniquement en mode managed** : la primitive `client.beta.agents.create` chaîne les agents, pas les `messages.create` du mode direct. Le manifest masque le tool en mode direct.
+
+### Stepwise diagnostic protocol
+
+Quand l'agent quitte le mode « réponse à une question » pour passer en mode « plan de mesure », il émet un protocole numéroté (« 1. mesure 5V0 sur PP5V0_S0, attendu 5,0 V ; 2. si dead, mesure entrée U2300 ; … »). 4 tools BV-namespaced gèrent ce cycle :
+
+| Tool | Effet |
+|------|-------|
+| `bv_propose_protocol` | crée un nouveau `Protocol` (titre, rationale, steps) et l'attache à la conversation active |
+| `bv_update_protocol` | ajoute / supprime / réordonne / annule une étape |
+| `bv_record_step_result` | enregistre la mesure d'une étape (valeur + unit + note) et avance le `current_step_id` |
+| `bv_get_protocol` | lit l'état actif (utile pour la reprise d'une session interrompue) |
+
+Persistance dans `memory/{slug}/repairs/{rid}/protocol.json` (avec `history` append-only). Endpoint frontend `GET /pipeline/repairs/{repair_id}/protocol` pour afficher la timeline. Modèles dans `api/tools/protocol.py::Protocol/Step/StepResult/HistoryEntry`.
+
 ### Persistance
 
 ```
-memory/{slug}/repairs/{repair_id}/
-  conversations/{conv_id}/
-    messages.jsonl                 # tous les events Anthropic-shaped
-    status.json                    # open | in_progress | closed
-    ma_session_{tier}.json         # MA session id (mode managed uniquement)
-  index.json                       # liste de convs, tiers, coûts
-  findings.json                    # snapshot des field reports attachés
+memory/{slug}/
+  repairs/{repair_id}/
+    conversations/{conv_id}/
+      messages.jsonl              # tous les events Anthropic-shaped
+      status.json                 # open | in_progress | closed
+      ma_session_{tier}.json      # MA session id (mode managed uniquement)
+    index.json                    # liste de convs, tiers, coûts
+    findings.json                 # snapshot des field reports attachés
+    outcome.json                  # validated fix (mb_validate_finding)
+    protocol.json                 # active stepwise diagnostic protocol + history
+    measurements.jsonl            # journal mesures append-only
+    diagnosis_log.jsonl           # turn-by-turn observations / hypothèses
+    board_state.json              # overlay boardview (highlights, focus, dim, …)
+    macros/<filename>.{png,jpg}   # images upload + cam_capture (Files+Vision)
+  conversation_log/
+    {stamp}_{rid}_{cid}.md        # outcome narrative per conversation
+                                   #   (per-device, pas per-repair)
+  managed.json                    # marker store + seeded files (mode managed)
 ```
 
-Le JSONL est appendé **systématiquement**, même en mode managed — c'est le mirror qui permet de reconstruire l'historique en cas d'expiration de la session MA (30 j TTL).
+Le `messages.jsonl` est appendé **systématiquement**, même en mode managed — c'est le mirror qui permet de reconstruire l'historique en cas d'expiration de la session MA (30 j TTL).
 
 ### Bootstrap Managed Agents (prérequis mode `managed`)
 
@@ -446,22 +544,27 @@ Source de vérité inter-modules. **Toujours regarder ce tableau** avant d'ajout
 | `schematic_graph.json` | `pipeline/schematic/merger.py` | `pipeline/schematic/compiler.py` |
 | `electrical_graph.json` | `pipeline/schematic/compiler.py` | `simulator.py`, `hypothesize.py`, `tools/schematic.py`, `pipeline/bench_generator`, **`tests/.../test_simulator_invariants.py`** (auto-discovery) |
 | `boot_sequence_analyzed.json` | `pipeline/schematic/boot_analyzer.py` | `simulator.py` (via `analyzed_boot=…`), `api/pipeline/__init__.py` (merge optionnel) |
-| `nets_classified.json` | `pipeline/schematic/net_classifier.py` | `api/pipeline/__init__.py` (merge optionnel) |
+| `nets_classified.json` | `pipeline/schematic/net_classifier.py` | `api/pipeline/__init__.py` (merge optionnel), `tools/schematic.py::mb_schematic_graph(query="net_domain")` |
+| `passive_classification_llm.json` | `pipeline/schematic/passive_classifier.py` | `hypothesize.py` (sélection de la fonction de cascade par rôle), `compiler.py` (post-merge) |
 | `simulator_reliability.json` | `pipeline/bench_generator/writer.py` | `agent/reliability.py` |
 | `field_reports/*.md` | `agent/field_reports.py::record_field_report` | `agent/tools.py::mb_list_findings`, MA memory store mirror |
+| `conversation_log/{stamp}_{rid}_{cid}.md` | `agent/conversation_log.py::record_session_log` | `agent/conversation_log.py::list_session_logs`, MA store mirror per-device |
 | `repairs/{rid}/conversations/{cid}/messages.jsonl` | `agent/chat_history.py::append_event` | `runtime_direct.py` (replay), `runtime_managed.py` (JSONL fallback summary) |
 | `repairs/{rid}/measurements.jsonl` | `agent/measurement_memory.py::append_measurement` | `tools/measurements.py::mb_*_measurements`, simulator observations |
 | `repairs/{rid}/diagnosis_log.jsonl` | `agent/diagnosis_log.py::append_turn` | corpus `microsolder-evolve` (eval offline) |
-| `repairs/{rid}/outcome.json` | `agent/validation.py::record_outcome` | UI repair row (✓ « Marquer fix »), exports |
-| `managed.json` (per-device) | `agent/memory_stores.py::ensure_store` | `runtime_managed.py` (resource mount) |
+| `repairs/{rid}/outcome.json` | `agent/validation.py::record_outcome` | UI repair row (✓ « Marquer fix »), exports, `recovery_state.build_repair_state_block` |
+| `repairs/{rid}/board_state.json` | `agent/board_state.py::save_board_state` | `agent/board_state.py::replay_board_state_to_ws` au reopen WS |
+| `repairs/{rid}/protocol.json` | `tools/protocol.py::save_protocol` | `tools/protocol.py::load_active_protocol`, endpoint `GET /pipeline/repairs/{rid}/protocol` |
+| `repairs/{rid}/macros/<file>` | `agent/macros.py::persist_macro` | endpoint `GET /api/macros/{slug}/{rid}/{filename}` (replay), agent (re-vision) |
+| `managed.json` (per-device) | `agent/memory_seed.py::write_seed_marker` | `agent/memory_seed.py::read_seed_marker` (skip re-seed) |
 
 **Invariant** : tout nouveau module qui **produit** un JSON sous `memory/{slug}/` doit déclarer sa shape dans `pipeline/schemas.py` ou `pipeline/schematic/schemas.py`. Pas de shape « ad-hoc » en markdown ou en comment.
 
 ---
 
-## Endpoints HTTP / WS — surface exhaustive (35 routes)
+## Endpoints HTTP / WS — surface exhaustive (38 routes)
 
-Source de vérité : `api/pipeline/__init__.py` (27 routes), `api/board/router.py` (1), `api/profile/router.py` (4), `api/main.py` (3).
+Source de vérité : `api/pipeline/__init__.py` (30 routes), `api/profile/router.py` (4), `api/main.py` (3), `api/board/router.py` (1).
 
 ### Pipeline — packs & lifecycle (`api/pipeline/__init__.py`)
 - `POST /pipeline/generate` — knowledge factory synchrone (30–120 s)
@@ -485,14 +588,17 @@ Source de vérité : `api/pipeline/__init__.py` (27 routes), `api/board/router.p
 - `POST /pipeline/packs/{slug}/schematic/classify-nets` (202) — lance le classifier nets
 - `POST /pipeline/packs/{slug}/schematic/simulate` — drives `SimulationEngine` (même shape que `mb_schematic_graph(query="simulate")`)
 - `POST /pipeline/packs/{slug}/schematic/hypothesize` — diagnostic inverse depuis observation
+- `POST /pipeline/packs/{slug}/schematic/extract-scenarios` — drive le bench generator (Workflow C) sur un pack
 
 ### Pipeline — repairs, conversations, mesures
-- `POST /pipeline/repairs` — routing à 3 branches (full / expand / none) — voir section dédiée Workflow A
-- `GET  /pipeline/repairs` — liste des repairs (home)
-- `GET  /pipeline/repairs/{repair_id}` — métadonnées d'une repair
-- `GET  /pipeline/repairs/{repair_id}/conversations` — liste des conversations
-- `POST /pipeline/packs/{slug}/repairs/{repair_id}/measurements` — append au journal mesures
-- `GET  /pipeline/packs/{slug}/repairs/{repair_id}/measurements` — lecture du journal mesures
+- `POST   /pipeline/repairs` — routing à 3 branches (full / expand / none) — voir section dédiée Workflow A
+- `GET    /pipeline/repairs` — liste des repairs (home)
+- `GET    /pipeline/repairs/{repair_id}` — métadonnées d'une repair
+- `DELETE /pipeline/repairs/{repair_id}` — supprime une repair (artefacts disque + cleanup MA store associé via `delete_repair_store`)
+- `GET    /pipeline/repairs/{repair_id}/conversations` — liste des conversations
+- `GET    /pipeline/repairs/{repair_id}/protocol` — protocole stepwise actif (cf. tools `bv_propose_protocol` etc.)
+- `POST   /pipeline/packs/{slug}/repairs/{repair_id}/measurements` — append au journal mesures
+- `GET    /pipeline/packs/{slug}/repairs/{repair_id}/measurements` — lecture du journal mesures
 
 ### Pipeline — landing & progress
 - `POST /pipeline/classify-intent` — Haiku forced-tool, free-text → top-3 device slugs (landing 2-champs)
@@ -509,8 +615,8 @@ Source de vérité : `api/pipeline/__init__.py` (27 routes), `api/board/router.p
 
 ### Main (`api/main.py`)
 - `GET /health` — healthcheck
+- `GET /api/macros/{slug}/{repair_id}/{filename}` — replay des images Files+Vision (uploads + cam_capture)
 - `WS  /ws/diagnostic/{slug}?tier=&repair=&conv=` — conversation diagnostic live
-- `WS  /ws` — legacy echo (smoke test)
 
 ---
 
@@ -564,7 +670,7 @@ Ne pas les résoudre « par hygiène » — chaque item a un arbitrage ROI que l
 
 | Zone | Description | Pourquoi on tolère |
 |------|-------------|--------------------|
-| **Tool registry dispersé** | 29 tools déclarés dans `manifest.py`, handlers en 5 fichiers, dispatch dupliqué dans les 2 runtimes | Refactor `tool_registry.py` planifié, ROI faible tant que le manifest est stable |
+| **Tool registry dispersé** | 36 tools déclarés dans `manifest.py`, handlers en 8 fichiers, dispatch dupliqué dans les 2 runtimes (sauf `cam_capture` et `consult_specialist` qui sont managed-only) | Refactor `tool_registry.py` planifié, ROI faible tant que le manifest est stable |
 | **Boot sequence dual-path** | `compiler.boot_sequence` (topologique) vs `boot_analyzer.analyzed_boot_sequence` (Opus) | Analyzer optionnel, graceful fail documenté ; le simulator accepte les deux |
 | **WS events sans schema partagé** | Backend Pydantic (`api/tools/ws_events.py`), frontend lit `event.type` en string matching | Faible surface de changement, schema TypeScript généré coûte cher pour un bénéfice marginal |
 | **`memory/` contrats JSON non-versionnés** | Pas de migration framework quand une shape évolue | `pipeline/schemas.py` est contract-first ; les fichiers sont régénérables |
