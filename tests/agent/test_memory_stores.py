@@ -191,3 +191,145 @@ async def test_upsert_returns_none_on_http_failure(monkeypatch):
         content="x" * 10,
     )
     assert sha is None
+
+
+# ---------------------------------------------------------------------------
+# Layered architecture: ensure_global_store + ensure_repair_store
+# ---------------------------------------------------------------------------
+
+
+async def test_ensure_global_store_creates_once(tmp_path, monkeypatch):
+    """Global store is created on first call, reused on second (no HTTP hit)."""
+    fake_resp = _FakeHttpResponse(200, {"id": "memstore_global_patterns"})
+    fake_http = _FakeHttpClient(fake_resp)
+    monkeypatch.setattr(httpx, "AsyncClient", lambda **_kw: fake_http)
+
+    client = _client_without_surface()
+    sid1 = await memory_stores.ensure_global_store(
+        client, kind="patterns", description="Test patterns store",
+    )
+    sid2 = await memory_stores.ensure_global_store(
+        client, kind="patterns", description="Test patterns store",
+    )
+
+    assert sid1 == "memstore_global_patterns"
+    assert sid2 == "memstore_global_patterns"
+    assert len(fake_http.calls) == 1, "Second call must reuse cached id"
+
+    registry_file = tmp_path / "_managed" / "global.json"
+    assert registry_file.exists()
+    import json as _json
+    registry = _json.loads(registry_file.read_text())
+    assert registry["patterns"]["memory_store_id"] == "memstore_global_patterns"
+    assert registry["patterns"]["name"] == "microsolder-global-patterns"
+
+
+async def test_ensure_global_store_kind_validation():
+    """Unknown kinds raise ValueError before any I/O."""
+    client = _client_without_surface()
+    with pytest.raises(ValueError, match="Unknown global store kind"):
+        await memory_stores.ensure_global_store(
+            client, kind="bogus", description="x",
+        )
+
+
+async def test_ensure_global_store_separate_kinds(tmp_path, monkeypatch):
+    """patterns and playbooks live as distinct entries in the same registry."""
+    responses = iter([
+        _FakeHttpResponse(200, {"id": "memstore_patterns_001"}),
+        _FakeHttpResponse(200, {"id": "memstore_playbooks_001"}),
+    ])
+
+    class _MultiHttp:
+        def __init__(self):
+            self.calls = []
+        async def __aenter__(self):
+            return self
+        async def __aexit__(self, *_e):
+            return None
+        async def post(self, url, *, headers, json):
+            self.calls.append({"url": url, "json": json})
+            return next(responses)
+
+    fake_http = _MultiHttp()
+    monkeypatch.setattr(httpx, "AsyncClient", lambda **_kw: fake_http)
+
+    client = _client_without_surface()
+    p_id = await memory_stores.ensure_global_store(
+        client, kind="patterns", description="P",
+    )
+    pb_id = await memory_stores.ensure_global_store(
+        client, kind="playbooks", description="PB",
+    )
+
+    assert p_id == "memstore_patterns_001"
+    assert pb_id == "memstore_playbooks_001"
+    assert len(fake_http.calls) == 2
+
+    import json as _json
+    registry = _json.loads(
+        (tmp_path / "_managed" / "global.json").read_text()
+    )
+    assert set(registry.keys()) == {"patterns", "playbooks"}
+
+
+async def test_ensure_repair_store_per_repair(tmp_path, monkeypatch):
+    """Per-repair store is created once per (slug, repair_id) tuple."""
+    create_log: list[str] = []
+
+    class _PerCallHttp:
+        def __init__(self):
+            self.calls = []
+        async def __aenter__(self):
+            return self
+        async def __aexit__(self, *_e):
+            return None
+        async def post(self, url, *, headers, json):
+            create_log.append(json["name"])
+            self.calls.append({"json": json})
+            return _FakeHttpResponse(200, {"id": f"memstore_{json['name']}"})
+
+    fake_http = _PerCallHttp()
+    monkeypatch.setattr(httpx, "AsyncClient", lambda **_kw: fake_http)
+
+    client = _client_without_surface()
+    a1 = await memory_stores.ensure_repair_store(
+        client, device_slug="iphone-x", repair_id="R1",
+    )
+    a2 = await memory_stores.ensure_repair_store(
+        client, device_slug="iphone-x", repair_id="R1",
+    )
+    b = await memory_stores.ensure_repair_store(
+        client, device_slug="iphone-x", repair_id="R2",
+    )
+
+    assert a1 == a2, "Same (slug, repair_id) must reuse the same store"
+    assert a1 != b, "Different repair_id must yield a distinct store"
+    assert create_log == [
+        "microsolder-repair-iphone-x-R1",
+        "microsolder-repair-iphone-x-R2",
+    ]
+
+    import json as _json
+    marker = _json.loads(
+        (tmp_path / "iphone-x" / "repairs" / "R1" / "managed.json").read_text()
+    )
+    assert marker["memory_store_id"] == a1
+    assert marker["device_slug"] == "iphone-x"
+    assert marker["repair_id"] == "R1"
+
+
+async def test_ensure_repair_store_returns_none_on_http_failure(
+    tmp_path, monkeypatch
+):
+    fake_http = _FakeHttpClient(_FakeHttpResponse(403, "denied"))
+    monkeypatch.setattr(httpx, "AsyncClient", lambda **_kw: fake_http)
+
+    client = _client_without_surface()
+    sid = await memory_stores.ensure_repair_store(
+        client, device_slug="iphone-x", repair_id="R-bad",
+    )
+    assert sid is None
+    assert not (
+        tmp_path / "iphone-x" / "repairs" / "R-bad" / "managed.json"
+    ).exists()

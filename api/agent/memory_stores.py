@@ -180,6 +180,220 @@ async def ensure_memory_store(
     return store_id
 
 
+GLOBAL_REGISTRY_DIR = "_managed"
+GLOBAL_REGISTRY_FILE = "global.json"
+
+# Allowed kinds for the global singleton registry. Each maps to a single
+# store created at most once per workspace; the id is cached locally so
+# subsequent sessions reuse it. See
+# docs/superpowers/plans/2026-04-26-ma-memory-layered-architecture.md
+# for the layered MA memory architecture (4 stores per session).
+_GLOBAL_KINDS = {"patterns", "playbooks"}
+
+
+def _global_registry_path() -> Path:
+    settings = get_settings()
+    root = Path(settings.memory_root) / GLOBAL_REGISTRY_DIR
+    root.mkdir(parents=True, exist_ok=True)
+    return root / GLOBAL_REGISTRY_FILE
+
+
+def _read_global_registry() -> dict:
+    path = _global_registry_path()
+    if not path.exists():
+        return {}
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+        return data if isinstance(data, dict) else {}
+    except (json.JSONDecodeError, OSError):
+        logger.warning("[MemoryStore] global registry at %s unreadable", path)
+        return {}
+
+
+def _write_global_registry(data: dict) -> None:
+    path = _global_registry_path()
+    path.write_text(
+        json.dumps(data, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
+
+
+async def ensure_global_store(
+    client: AsyncAnthropic,
+    *,
+    kind: str,
+    description: str,
+) -> str | None:
+    """Return the singleton memstore id for `kind` ∈ {patterns, playbooks}.
+
+    Created on first call, cached in `memory/_managed/global.json` for
+    re-use across all sessions and devices. The store hosts cross-device
+    knowledge (failure taxonomy, diagnostic playbook templates) attached
+    read-only to every diagnostic session.
+    """
+    if kind not in _GLOBAL_KINDS:
+        raise ValueError(f"Unknown global store kind: {kind!r}")
+
+    registry = _read_global_registry()
+    cached = registry.get(kind, {})
+    cached_id = cached.get("memory_store_id")
+    if cached_id:
+        return cached_id
+
+    name = f"microsolder-global-{kind}"
+    store_id: str | None = None
+
+    sdk_beta = getattr(client, "beta", None)
+    sdk_surface = (
+        getattr(sdk_beta, "memory_stores", None) if sdk_beta else None
+    )
+    if sdk_surface is not None:
+        try:
+            store = await sdk_surface.create(name=name, description=description)
+            store_id = getattr(store, "id", None)
+        except Exception as exc:  # noqa: BLE001
+            logger.warning(
+                "[MemoryStore] SDK create failed for global %s: %s — "
+                "falling back to HTTP",
+                kind,
+                exc,
+            )
+
+    if store_id is None:
+        settings = get_settings()
+        if not settings.anthropic_api_key:
+            logger.warning(
+                "[MemoryStore] no API key; running without global %s store",
+                kind,
+            )
+            return None
+        store_id = await _create_store_via_http(
+            api_key=settings.anthropic_api_key,
+            name=name,
+            description=description,
+        )
+
+    if not store_id:
+        return None
+
+    registry[kind] = {
+        "memory_store_id": store_id,
+        "name": name,
+        "description": description,
+    }
+    _write_global_registry(registry)
+    logger.info(
+        "[MemoryStore] Created global %s store id=%s", kind, store_id
+    )
+    return store_id
+
+
+def _repair_marker_path(device_slug: str, repair_id: str) -> Path:
+    settings = get_settings()
+    return (
+        Path(settings.memory_root)
+        / device_slug
+        / "repairs"
+        / repair_id
+        / "managed.json"
+    )
+
+
+def _repair_store_description(device_slug: str, repair_id: str) -> str:
+    return (
+        f"Scratch notebook for repair {repair_id} on device {device_slug}. "
+        "Read-write scribe layer for the agent's own working notes across "
+        "sessions of THIS specific repair: state.md (latest snapshot), "
+        "decisions/{ts}.md (validated/refuted hypotheses), "
+        "measurements/{rail}.md (time series of probed values), "
+        "open_questions.md (unresolved threads to revisit)."
+    )
+
+
+async def ensure_repair_store(
+    client: AsyncAnthropic,
+    *,
+    device_slug: str,
+    repair_id: str,
+) -> str | None:
+    """Return the per-repair RW memstore id, creating one on first session.
+
+    Persisted at `memory/{slug}/repairs/{repair_id}/managed.json`. Backbone
+    of the "agent-as-its-own-librarian" pattern that replaces the LLM-driven
+    session resume summary.
+    """
+    marker = _repair_marker_path(device_slug, repair_id)
+    marker.parent.mkdir(parents=True, exist_ok=True)
+
+    if marker.exists():
+        try:
+            data = json.loads(marker.read_text(encoding="utf-8"))
+            existing = data.get("memory_store_id")
+            if existing:
+                return existing
+        except (json.JSONDecodeError, OSError):
+            logger.warning(
+                "[MemoryStore] repair marker %s unreadable", marker
+            )
+
+    name = f"microsolder-repair-{device_slug}-{repair_id}"
+    description = _repair_store_description(device_slug, repair_id)
+    store_id: str | None = None
+
+    sdk_beta = getattr(client, "beta", None)
+    sdk_surface = (
+        getattr(sdk_beta, "memory_stores", None) if sdk_beta else None
+    )
+    if sdk_surface is not None:
+        try:
+            store = await sdk_surface.create(name=name, description=description)
+            store_id = getattr(store, "id", None)
+        except Exception as exc:  # noqa: BLE001
+            logger.warning(
+                "[MemoryStore] SDK create failed for repair=%s: %s — "
+                "falling back to HTTP",
+                repair_id,
+                exc,
+            )
+
+    if store_id is None:
+        settings = get_settings()
+        if not settings.anthropic_api_key:
+            logger.warning(
+                "[MemoryStore] no API key; running repair=%s/%s without scribe store",
+                device_slug,
+                repair_id,
+            )
+            return None
+        store_id = await _create_store_via_http(
+            api_key=settings.anthropic_api_key,
+            name=name,
+            description=description,
+        )
+
+    if not store_id:
+        return None
+
+    marker.write_text(
+        json.dumps(
+            {
+                "memory_store_id": store_id,
+                "device_slug": device_slug,
+                "repair_id": repair_id,
+            },
+            indent=2,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    logger.info(
+        "[MemoryStore] Created repair store id=%s for %s/%s",
+        store_id,
+        device_slug,
+        repair_id,
+    )
+    return store_id
+
+
 async def upsert_memory(
     client: AsyncAnthropic,
     *,
