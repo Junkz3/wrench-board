@@ -12,6 +12,7 @@ import { initPipelineProgress } from './pipeline_progress.js';
 import { initLLMPanel, openLLMPanelIfRepairParam } from './llm.js';
 import { loadSchematic, closeSchematicInspector } from './schematic.js';
 import { initLanding, showLanding, hideLanding } from './landing.js';
+import * as Protocol from './protocol.js?v=quest3';
 
 // Tracks which device slug the graph has already been mounted for. Guards
 // against a second initGraphWithData() call on re-navigation to #graphe —
@@ -67,6 +68,14 @@ if (!window.Boardview) {
   initPipelineProgress();
   await initLLMPanel();
   openLLMPanelIfRepairParam();
+
+  // Protocol module — init with a deferred send that reads the live WS at
+  // call time (the socket is opened lazily by llm.js on first panel open).
+  Protocol.init({
+    send: (payload) => window.__diagnosticWS?.send(JSON.stringify(payload)),
+    hasBoard: !!window.Boardview?.hasBoard?.(),
+  });
+  window.Protocol = Protocol;
 
   // Landing hero — initialise listeners; show only if no repair param.
   initLanding();

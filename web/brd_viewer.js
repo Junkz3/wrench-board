@@ -48,6 +48,8 @@ const state = {
     net: null,                // agent-highlighted net name or null
     filter: null,             // agent-filter refdes prefix or null
     highlightPulseAt: null,   // performance.now() ts of latest highlight/focus event — drives halo+badge
+    protocolSteps: [],         // [{id, target, status}, ...] from active protocol
+    protocolActive: null,      // current_step_id
   },
 };
 
@@ -671,6 +673,75 @@ function draw() {
       ctx.restore();
     }
     if (pulsing) requestRedraw();
+  }
+
+  // Protocol step badges — numbered circles above each step's target refdes.
+  // Color = cyan for pending/done/active, amber for failed/skipped. Active
+  // step pulses (uses the same highlightPulseAt timestamp envelope).
+  // Multiple steps targeting the same refdes stack vertically (newer steps
+  // sit higher above the bbox), so each step gets its own visible badge.
+  if (state.agent.protocolSteps && state.agent.protocolSteps.length > 0) {
+    const cyan = cssVar('--cyan') || '#38bdf8';
+    const amber = cssVar('--amber') || '#f59e0b';
+    const bgDeep = cssVar('--bg-deep') || '#06080d';
+    const now = performance.now();
+
+    // Group steps by target refdes so we can stack badges sharing the same anchor.
+    const grouped = new Map();   // refdes → [{step, displayIndex}]
+    for (let i = 0; i < state.agent.protocolSteps.length; i++) {
+      const st = state.agent.protocolSteps[i];
+      if (!st.target) continue;
+      const arr = grouped.get(st.target) || [];
+      arr.push({ step: st, displayIndex: i + 1 });
+      grouped.set(st.target, arr);
+    }
+
+    for (const [refdes, group] of grouped) {
+      const part = state.partByRefdes?.get(refdes);
+      if (!part) continue;
+      if (part.layer !== LAYER_BOTH) {
+        if (activeSide === LAYER_TOP    && part.layer !== LAYER_TOP)    continue;
+        if (activeSide === LAYER_BOTTOM && part.layer !== LAYER_BOTTOM) continue;
+      }
+      const bbox = state.partBodyBboxes?.get(refdes) || part.bbox;
+      if (!bbox || bbox.length < 2) continue;
+      const a = milsToScreen(bbox[0].x, bbox[0].y, boardW);
+      const b = milsToScreen(bbox[1].x, bbox[1].y, boardW);
+      const cx = (a.x + b.x) / 2;
+      const cyBase = Math.min(a.y, b.y) - 10;
+
+      // Stack: first badge sits closest to the bbox, later badges climb upward.
+      for (let k = 0; k < group.length; k++) {
+        const { step: st, displayIndex } = group[k];
+        const cy = cyBase - k * 22;
+
+        const isActive = st.id === state.agent.protocolActive;
+        const isDone   = st.status === "done";
+        const isFail   = st.status === "failed";
+        const isSkip   = st.status === "skipped";
+        const fill     = (isFail || isSkip) ? amber : cyan;
+        const glyph    = isDone ? "✓" : isFail ? "✗" : isSkip ? "·" : displayIndex.toString();
+
+        ctx.save();
+        if (isActive) {
+          const elapsed = state.agent.highlightPulseAt ? now - state.agent.highlightPulseAt : 0;
+          const env = Math.max(0, 1 - elapsed / 3200);
+          ctx.globalAlpha = 0.4 + 0.4 * env;
+        } else if (isDone) {
+          ctx.globalAlpha = 0.7;
+        }
+        ctx.fillStyle = fill;
+        ctx.beginPath();
+        ctx.arc(cx, cy, 9, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = bgDeep;
+        ctx.font = "600 11px 'JetBrains Mono', monospace";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(glyph, cx, cy + 0.5);
+        ctx.restore();
+      }
+    }
   }
 
   // Agent annotations: small cyan label near the part's bbox top-left.
@@ -1577,11 +1648,36 @@ window.initBoardview = initBoardview;
     measure:          _applyMeasure,
     layer_visibility: _applyLayerVisibility,
 
+    // Protocol badge control — called by protocol.js on every state change.
+    setProtocolBadges(steps, currentId) {
+      state.agent.protocolSteps = Array.isArray(steps) ? steps : [];
+      state.agent.protocolActive = currentId || null;
+      requestRedraw();
+    },
+    clearProtocolBadges() {
+      state.agent.protocolSteps = [];
+      state.agent.protocolActive = null;
+      requestRedraw();
+    },
+    // Returns the canvas-pixel centre-top position for a given refdes, or
+    // null when the part is not found or the board is not loaded.
+    refdesScreenPos(refdes) {
+      const part = state.partByRefdes?.get(refdes);
+      if (!part) return null;
+      const bb = outlineBbox(state.board);
+      const boardW = bb.x1 + bb.x0;
+      const bbox = state.partBodyBboxes?.get(refdes) || part.bbox;
+      if (!bbox || bbox.length < 2) return null;
+      const a = milsToScreen(bbox[0].x, bbox[0].y, boardW);
+      const b = milsToScreen(bbox[1].x, bbox[1].y, boardW);
+      return { x: (a.x + b.x) / 2, y: Math.min(a.y, b.y) };
+    },
+
     // Lookups used by the chat panel to decide whether a refdes/net in
     // agent text should be rendered as a clickable chip. No-op when no
     // board is loaded. Case-sensitive match — the board parser preserves
     // original casing, and agent text tends to cite the canonical form.
-    hasBoard() { return !!state.board; },
+    hasBoard() { return !!state.board && state.partByRefdes != null && state.partByRefdes.size > 0; },
     hasRefdes(refdes) {
       return !!(state.partByRefdes && state.partByRefdes.get(String(refdes).trim()));
     },

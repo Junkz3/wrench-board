@@ -1,0 +1,304 @@
+/* web/styles/protocol.css
+   Stepwise diagnostic protocol — RPG-style quest tracker pinned top-right
+   over the boardview canvas, read-only floating refdes pin, inline cards
+   for the no-board fallback. Tokens reused from tokens.css; cyan + amber
+   only per spec §6.5. */
+
+/* When the quest tracker is mounted (body.has-protocol-quest), shift any
+   right-anchored board overlays left of the quest column so they sit side
+   by side instead of stacking. 308 (quest) + 12 (gap) + 12 (right margin)
+   = 332 — keep in sync with .protocol-quest width. Smooth slide via the
+   same .15-.22s ease used elsewhere. */
+.brd-toolbar,
+.brd-inspector { transition: right .18s cubic-bezier(.2,.8,.2,1); }
+body.has-protocol-quest .brd-toolbar  { right: 332px; }
+body.has-protocol-quest .brd-inspector { right: 332px; }
+
+/* ---------- Quest tracker (top-right of canvas) -------------------------- */
+
+.protocol-quest {
+  position: absolute;
+  z-index: 30;
+  top: 12px;
+  right: 12px;
+  width: 308px;
+  max-height: calc(100% - 24px);
+  display: flex;
+  flex-direction: column;
+  background: rgba(20, 24, 30, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.45);
+  font-size: 12.5px;
+  color: var(--text);
+  overflow: hidden;
+  transition: max-height .25s cubic-bezier(.2,.8,.2,1);
+}
+.protocol-quest.hidden { display: none; }
+
+.protocol-quest-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border-soft);
+  background: linear-gradient(180deg, rgba(255,255,255,.03) 0%, transparent 100%);
+}
+.protocol-quest-title {
+  flex: 1;
+  min-width: 0;
+  font: 600 12.5px Inter, sans-serif;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.protocol-quest-counter {
+  font: 600 10.5px 'JetBrains Mono', monospace;
+  color: var(--cyan);
+  letter-spacing: .4px;
+  text-transform: uppercase;
+}
+.protocol-quest-toggle,
+.protocol-quest-abandon {
+  background: none;
+  border: none;
+  padding: 2px;
+  color: var(--text-3);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 3px;
+  transition: color .15s, background .15s;
+}
+.protocol-quest-toggle:hover { color: var(--text); background: rgba(255,255,255,.05); }
+.protocol-quest-abandon:hover { color: var(--amber); background: rgba(255,255,255,.05); }
+
+.protocol-quest.is-collapsed .protocol-quest-toggle svg { transform: rotate(-90deg); transition: transform .2s; }
+.protocol-quest-toggle svg { transition: transform .2s; }
+
+/* When collapsed, hide everything past the active step + history */
+.protocol-quest.is-collapsed .protocol-quest-list .protocol-step:not(.is-active) { display: none; }
+.protocol-quest.is-collapsed .protocol-quest-history { display: none; }
+
+.protocol-quest-list {
+  list-style: none;
+  margin: 0;
+  padding: 4px 0;
+  overflow-y: auto;
+  max-height: 60vh;
+  scrollbar-width: thin;
+}
+.protocol-quest-list::-webkit-scrollbar { width: 6px; }
+.protocol-quest-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+.protocol-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  padding: 7px 12px;
+  border-bottom: 1px solid var(--border-soft);
+}
+.protocol-step:last-child { border-bottom: none; }
+.protocol-step.is-pending { opacity: 0.55; }
+.protocol-step.is-active  { background: rgba(56, 189, 248, 0.06); }
+.protocol-step.is-done    { opacity: 0.65; }
+.protocol-step.is-skipped { opacity: 0.55; }
+.protocol-step.is-failed  { background: rgba(245, 158, 11, 0.05); }
+
+.protocol-step-badge {
+  flex: 0 0 22px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font: 600 11px 'JetBrains Mono', ui-monospace, monospace;
+  border: 1.5px solid var(--cyan);
+  margin-top: 1px;
+}
+.protocol-step.is-pending .protocol-step-badge { background: var(--panel-2); color: var(--text-2); }
+.protocol-step.is-active  .protocol-step-badge { background: var(--cyan); color: var(--bg-deep); }
+.protocol-step.is-done    .protocol-step-badge { background: var(--cyan); color: var(--bg-deep); }
+.protocol-step.is-skipped .protocol-step-badge,
+.protocol-step.is-failed  .protocol-step-badge {
+  background: var(--amber); color: var(--bg-deep); border-color: var(--amber);
+}
+
+.protocol-step-body { flex: 1; min-width: 0; }
+.protocol-step-target {
+  font: 600 10.5px 'JetBrains Mono', monospace;
+  color: var(--cyan);
+  text-transform: uppercase;
+  letter-spacing: .4px;
+}
+.protocol-step.is-failed .protocol-step-target { color: var(--amber); }
+.protocol-step-instruction {
+  font-size: 12.5px;
+  color: var(--text);
+  margin: 2px 0 0;
+  line-height: 1.35;
+}
+/* Collapsed (non-active) steps clip instruction to one line */
+.protocol-step:not(.is-active) .protocol-step-instruction {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.protocol-step-rationale {
+  font-size: 11px;
+  color: var(--text-3);
+  margin: 3px 0 0;
+  line-height: 1.35;
+}
+.protocol-step:not(.is-active) .protocol-step-rationale { display: none; }
+.protocol-step-result {
+  font: 600 11px 'JetBrains Mono', monospace;
+  color: var(--text-2);
+  margin-top: 4px;
+}
+.protocol-step.is-failed .protocol-step-result { color: var(--amber); }
+
+.protocol-step.is-active .protocol-step-form {
+  display: flex;
+  gap: 5px;
+  margin-top: 7px;
+  align-items: stretch;
+  flex-wrap: wrap;
+}
+.protocol-step-form input,
+.protocol-step-form select,
+.protocol-step-form textarea {
+  background: var(--bg-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  font: 12px Inter, sans-serif;
+  padding: 4px 7px;
+  border-radius: 3px;
+  flex: 1;
+  min-width: 0;
+}
+.protocol-step-form input[type="number"] { max-width: 90px; flex: 0 0 90px; }
+.protocol-step-form select { max-width: 70px; flex: 0 0 70px; }
+.protocol-step-form textarea {
+  flex: 1 1 100%;
+  resize: vertical;
+  min-height: 44px;
+  font-family: Inter, sans-serif;
+}
+.protocol-step-form button {
+  background: var(--cyan);
+  color: var(--bg-deep);
+  border: none;
+  padding: 4px 11px;
+  border-radius: 3px;
+  font: 600 12px Inter, sans-serif;
+  cursor: pointer;
+  transition: filter .15s;
+}
+.protocol-step-form button:hover { filter: brightness(1.08); }
+.protocol-step-form button.is-skip {
+  background: transparent;
+  color: var(--text-3);
+  border: 1px solid var(--border);
+}
+.protocol-step-form button.is-skip:hover { color: var(--amber); border-color: var(--amber); }
+
+.protocol-quest-history {
+  border-top: 1px solid var(--border-soft);
+  padding: 5px 12px 7px;
+  font-size: 11px;
+  background: rgba(0,0,0,.15);
+}
+.protocol-quest-history summary {
+  cursor: pointer;
+  color: var(--text-3);
+  user-select: none;
+  font: 600 10.5px 'JetBrains Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+}
+.protocol-quest-history summary:hover { color: var(--text-2); }
+.protocol-quest-history-list {
+  list-style: none;
+  margin: 5px 0 0;
+  padding: 0;
+  font: 10.5px 'JetBrains Mono', monospace;
+  color: var(--text-3);
+  max-height: 100px;
+  overflow-y: auto;
+}
+.protocol-quest-history-list li { padding: 1px 0; }
+
+/* ---------- Floating refdes pin (read-only, anchored on canvas) ---------- */
+/* Compact glass chip above the active component's bbox: badge number +
+   refdes label + small arrow pointing toward the quest tracker (top-right).
+   No form, no instruction — just a "tu sondes ici" indicator that ties the
+   board to the quest tracker. */
+
+.protocol-float {
+  position: absolute;
+  z-index: 25;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px 4px 4px;
+  background: rgba(20, 24, 30, 0.94);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--cyan);
+  border-radius: 18px;
+  font: 600 11px 'JetBrains Mono', monospace;
+  color: var(--cyan);
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+  pointer-events: none;
+  white-space: nowrap;
+}
+.protocol-float.hidden { display: none; }
+.protocol-float-badge {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--cyan);
+  color: var(--bg-deep);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font: 600 10.5px 'JetBrains Mono', monospace;
+}
+.protocol-float-target { color: var(--cyan); }
+.protocol-float-arrow {
+  width: 12px;
+  height: 12px;
+  opacity: .7;
+}
+
+/* ---------- Inline card fallback (chat stream, no board) ----------------- */
+
+.protocol-inline-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--cyan);
+  border-radius: 4px;
+  padding: 8px 10px;
+  margin: 6px 0;
+  font-size: 12.5px;
+}
+.protocol-inline-card .protocol-step-form { margin-top: 6px; display: flex; gap: 6px; flex-wrap: wrap; }
+.protocol-inline-card .protocol-step-target {
+  font: 600 10.5px 'JetBrains Mono', monospace;
+  color: var(--cyan);
+  text-transform: uppercase;
+  letter-spacing: .4px;
+}
+.protocol-inline-card .protocol-step-instruction { margin: 4px 0 2px; }
+.protocol-inline-card .protocol-step-rationale {
+  font-size: 11px; color: var(--text-3); margin: 2px 0 0;
+}

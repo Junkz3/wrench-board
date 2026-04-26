@@ -15,6 +15,12 @@
 
 let ws = null;
 let currentTier = "fast";
+// True once the tech has explicitly chosen a tier this page-load (clicked
+// the popover, or any path that calls switchTier). Until that happens,
+// session_ready may auto-realign currentTier with the resumed conv's
+// preferred tier — opening a Sonnet conv shouldn't silently land on its
+// almost-empty Haiku thread because the URL default was `fast`.
+let userPickedTier = false;
 // Multi-conversation state. `currentConvId` is captured from session_ready.
 // `conversationsCache` backs the popover render. `pendingConvParam` is the
 // ?conv value to use on the next connect() — "new" to force a fresh conv,
@@ -50,6 +56,15 @@ const ICON_BV =
   'stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" ' +
   'aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/>' +
   '<circle cx="12" cy="12" r="1.2" fill="currentColor"/></svg>';
+// MEM = MA-native filesystem ops on the device's memory store (read / write /
+// edit / grep / glob), surfaced via the agent_toolset_20260401 toolset. Cylinder
+// = persistent storage. Distinct from MB (knowledge bank queries via mb_*).
+const ICON_MEM =
+  '<svg class="step-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" ' +
+  'stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" ' +
+  'aria-hidden="true"><ellipse cx="12" cy="5" rx="8" ry="2.5"/>' +
+  '<path d="M4 5v14c0 1.4 3.6 2.5 8 2.5s8-1.1 8-2.5V5"/>' +
+  '<path d="M4 12c0 1.4 3.6 2.5 8 2.5s8-1.1 8-2.5"/></svg>';
 
 // French paraphrase + family icon for each known tool name. Each entry
 // is a function receiving the tool input object and returning
@@ -90,11 +105,14 @@ const TOOL_PHRASES = {
   }),
 
   // --- BV (boardview — action) ---
-  bv_highlight_component: (i) => ({
-    icon: ICON_BV,
-    phraseHTML: `Mise en évidence de <span class="refdes">${escapeHTML(i?.refdes || "?")}</span>`,
-  }),
-  bv_focus_component: (i) => ({
+  bv_highlight: (i) => {
+    const r = Array.isArray(i?.refdes) ? i.refdes.join(", ") : (i?.refdes || "?");
+    return {
+      icon: ICON_BV,
+      phraseHTML: `Mise en évidence de <span class="refdes">${escapeHTML(r)}</span>`,
+    };
+  },
+  bv_focus: (i) => ({
     icon: ICON_BV,
     phraseHTML: `Focus sur <span class="refdes">${escapeHTML(i?.refdes || "?")}</span>`,
   }),
@@ -103,7 +121,7 @@ const TOOL_PHRASES = {
     icon: ICON_BV,
     phraseHTML: `Highlight du net <span class="net">${escapeHTML(i?.net || "?")}</span>`,
   }),
-  bv_flip_board: () => ({ icon: ICON_BV, phraseHTML: `Retournement du board` }),
+  bv_flip: () => ({ icon: ICON_BV, phraseHTML: `Retournement du board` }),
   bv_annotate: (i) => {
     const tgt = i?.refdes ? `près de <span class="refdes">${escapeHTML(i.refdes)}</span>` :
                 (Number.isFinite(i?.x) && Number.isFinite(i?.y) ? `en (${i.x}, ${i.y})` : "");
@@ -111,17 +129,17 @@ const TOOL_PHRASES = {
   },
   bv_filter_by_type: (i) => ({
     icon: ICON_BV,
-    phraseHTML: `Filtrage par type — ${escapeHTML(i?.type || "?")}`,
+    phraseHTML: `Filtrage par type — ${escapeHTML(i?.prefix || "?")}`,
   }),
   bv_draw_arrow: (i) => ({
     icon: ICON_BV,
-    phraseHTML: `Flèche de <span class="refdes">${escapeHTML(i?.from || "?")}</span> ` +
-                `vers <span class="refdes">${escapeHTML(i?.to || "?")}</span>`,
+    phraseHTML: `Flèche de <span class="refdes">${escapeHTML(i?.from_refdes || "?")}</span> ` +
+                `vers <span class="refdes">${escapeHTML(i?.to_refdes || "?")}</span>`,
   }),
-  bv_measure_distance: (i) => ({
+  bv_measure: (i) => ({
     icon: ICON_BV,
-    phraseHTML: `Mesure entre <span class="refdes">${escapeHTML(i?.a || "?")}</span> ` +
-                `et <span class="refdes">${escapeHTML(i?.b || "?")}</span>`,
+    phraseHTML: `Mesure entre <span class="refdes">${escapeHTML(i?.refdes_a || "?")}</span> ` +
+                `et <span class="refdes">${escapeHTML(i?.refdes_b || "?")}</span>`,
   }),
   bv_show_pin: (i) => ({
     icon: ICON_BV,
@@ -132,11 +150,87 @@ const TOOL_PHRASES = {
     icon: ICON_BV,
     phraseHTML: `Visibilité de la couche ${escapeHTML(i?.layer || "?")}`,
   }),
+  bv_scene: (i) => {
+    const parts = [];
+    const hl = Array.isArray(i?.highlights) ? i.highlights.length : 0;
+    const an = Array.isArray(i?.annotations) ? i.annotations.length : 0;
+    const ar = Array.isArray(i?.arrows) ? i.arrows.length : 0;
+    if (hl) parts.push(`${hl} highlight${hl > 1 ? "s" : ""}`);
+    if (an) parts.push(`${an} annotation${an > 1 ? "s" : ""}`);
+    if (ar) parts.push(`${ar} flèche${ar > 1 ? "s" : ""}`);
+    if (i?.focus?.refdes) parts.push(`focus <span class="refdes">${escapeHTML(i.focus.refdes)}</span>`);
+    if (i?.dim_unrelated) parts.push("dim");
+    if (i?.reset) parts.unshift("reset");
+    return {
+      icon: ICON_BV,
+      phraseHTML: `Scène — ${parts.join(", ") || "vide"}`,
+    };
+  },
 };
 
 function toolFallback(name) {
   return {
     icon: "",
+    phraseHTML: `<span class="tool-name-raw">${escapeHTML(name)}</span>`,
+  };
+}
+
+// Strip the `/mnt/memory/{slug}/` MA-mount prefix so memory paths read as
+// short relative paths (`outcomes/abc.json`) instead of full absolute ones.
+function memPath(p) {
+  if (!p) return "";
+  const m = String(p).match(/^\/mnt\/memory\/[^/]+\/(.+)$/);
+  return m ? m[1] : String(p);
+}
+
+function memPathChip(p) {
+  return `<code class="mem-path">${escapeHTML(memPath(p))}</code>`;
+}
+
+// French paraphrase + ICON_MEM for each MA-native filesystem tool. Same
+// shape contract as TOOL_PHRASES — receives the tool input object and
+// returns {icon, phraseHTML}.
+const MEMORY_TOOL_PHRASES = {
+  read: (i) => ({
+    icon: ICON_MEM,
+    phraseHTML: `Lecture mémoire — ${memPathChip(i?.file_path || i?.path)}`,
+  }),
+  write: (i) => ({
+    icon: ICON_MEM,
+    phraseHTML: `Écriture mémoire — ${memPathChip(i?.file_path || i?.path)}`,
+  }),
+  edit: (i) => ({
+    icon: ICON_MEM,
+    phraseHTML: `Édition mémoire — ${memPathChip(i?.file_path || i?.path)}`,
+  }),
+  view: (i) => ({
+    icon: ICON_MEM,
+    phraseHTML: `Vue mémoire — ${memPathChip(i?.file_path || i?.path)}`,
+  }),
+  grep: (i) => {
+    const where = i?.path ? ` dans ${memPathChip(i.path)}` : "";
+    return {
+      icon: ICON_MEM,
+      phraseHTML: `grep <code class="mem-path">${escapeHTML(String(i?.pattern || ""))}</code>${where}`,
+    };
+  },
+  glob: (i) => ({
+    icon: ICON_MEM,
+    phraseHTML: `glob <code class="mem-path">${escapeHTML(String(i?.pattern || ""))}</code>`,
+  }),
+  list: (i) => ({
+    icon: ICON_MEM,
+    phraseHTML: `Listing mémoire${i?.path ? ` — ${memPathChip(i.path)}` : ""}`,
+  }),
+  ls: (i) => ({
+    icon: ICON_MEM,
+    phraseHTML: `Listing mémoire${i?.path ? ` — ${memPathChip(i.path)}` : ""}`,
+  }),
+};
+
+function memToolFallback(name) {
+  return {
+    icon: ICON_MEM,
     phraseHTML: `<span class="tool-name-raw">${escapeHTML(name)}</span>`,
   };
 }
@@ -189,6 +283,52 @@ function logMessage(role, text, isReplay = false) {
   );
 }
 
+// Distinct card rendered when MA dropped the prior session AND we had
+// no local JSONL backup to summarize from. The agent was recreated from
+// scratch; it has zero memory of the prior turns. Amber alert (different
+// from the violet "resumed-with-summary" card) so the tech knows their
+// next message hits a blank-slate model.
+function renderContextLost(payload) {
+  const oldId = payload?.old_session_id || "";
+  const newId = payload?.new_session_id || "";
+  const reason = payload?.reason === "ma_events_empty"
+    ? "Session précédente archivée par le backend Managed Agents (events.list vide), et aucun backup JSONL local disponible."
+    : "La session précédente n'a pas pu être restaurée et aucun résumé n'a pu être généré.";
+  // `preserved` summarises what survived on disk independently of MA.
+  // The backend already pushed these facts to the fresh agent (intro
+  // block on resumed=False, synthetic user.message on resumed=True).
+  // This UI just tells the tech which artefacts the agent now has so they
+  // know what NOT to re-explain.
+  const preserved = payload?.preserved || {};
+  const mCount = Number(preserved.measurements || 0);
+  const proto = preserved.protocol;
+  const outcome = !!preserved.outcome;
+  const preservedItems = [];
+  if (mCount > 0) preservedItems.push(`${mCount} mesure${mCount > 1 ? "s" : ""}`);
+  if (proto) {
+    const p = `protocole « ${escapeHTML(proto.title || "")} » (${proto.completed || 0}/${proto.total || 0})`;
+    preservedItems.push(p);
+  }
+  if (outcome) preservedItems.push("outcome final");
+  const preservedHTML = preservedItems.length
+    ? `<p class="preserved"><strong>Récupéré du disque et réinjecté à l'agent</strong> : ${preservedItems.join(" · ")}.</p>`
+    : `<p class="preserved muted">Aucun artefact persistant trouvé pour ce repair (pas de mesures, pas de protocole, pas d'outcome).</p>`;
+  logRow(
+    "context-lost",
+    `<header>
+       <span class="icon-dot"></span>
+       <span class="title">Historique de turns perdu</span>
+     </header>
+     <div class="body">
+       <p>${escapeHTML(reason)}</p>
+       <p>Le device, le symptôme et ton profil sont automatiquement réinjectés ci-dessous — l'agent saura sur quoi tu travailles.</p>
+       ${preservedHTML}
+       <p>Ce qui reste perdu : le <strong>fil conversationnel</strong> (raisonnement de l'agent, hypothèses émises, échanges libres). Si tu as discuté de pistes ou pris des décisions hors-protocole, redonne-les en une ligne pour qu'il s'aligne.</p>
+       ${oldId ? `<p class="meta">old=<code>${escapeHTML(oldId)}</code> · new=<code>${escapeHTML(newId)}</code></p>` : ""}
+     </div>`,
+  );
+}
+
 // Distinct card rendered when an expired MA session had to be recreated and
 // Haiku summarised the prior conversation for the fresh agent. Shows the
 // same block the new agent is seeing, so the tech knows what carried over.
@@ -224,6 +364,31 @@ function escapeHTML(s) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#39;");
+}
+
+// Mode C — inline protocol step card in the chat stream when no board is loaded.
+// Renders only the active step (past steps are summarized in the wizard).
+// One card per active step id; subsequent events for the same id no-op.
+function renderInlineProtocolCard(_ev) {
+  const proto = window.Protocol?.getProtocol?.();
+  if (!proto) return;
+  const active = proto.steps.find((s) => s.id === proto.current_step_id);
+  if (!active) return;
+  const log = el("llmLog");
+  if (!log) return;
+  if (log.querySelector(`.protocol-inline-card[data-step="${active.id}"]`)) return;
+  const card = document.createElement("div");
+  card.className = "protocol-inline-card";
+  card.dataset.step = active.id;
+  card.innerHTML =
+    `<div class="protocol-step-target">${escapeHTML(active.target || active.test_point || "—")}</div>` +
+    `<p class="protocol-step-instruction">${escapeHTML(active.instruction)}</p>` +
+    `<p class="protocol-step-rationale">${escapeHTML(active.rationale)}</p>`;
+  if (window.Protocol?.buildStepForm) {
+    card.appendChild(window.Protocol.buildStepForm(active));
+  }
+  log.appendChild(card);
+  log.scrollTop = log.scrollHeight;
 }
 
 // Create a fresh turn-block container and append it to the log.
@@ -586,6 +751,20 @@ function connect() {
       return;
     }
 
+    // Protocol events drive the stepwise diagnostic wizard. Route them to
+    // the Protocol module which owns state + renderer (protocol.js). When
+    // no board is loaded, also render an inline card in the chat stream
+    // (Mode C) so the tech still sees the active step + form even without
+    // the wizard column visible.
+    if (typeof payload.type === "string" && payload.type.startsWith("protocol_")) {
+      window.Protocol?.applyEvent(payload);
+      const noBoard = !window.Boardview?.hasBoard?.();
+      if (noBoard && payload.type !== "protocol_completed") {
+        renderInlineProtocolCard(payload);
+      }
+      return;
+    }
+
     // Simulation observation events mirror the agent's measurement tools
     // onto the schematic UI in real time. Same one-way channel, different
     // controller (SimulationController lives in schematic.js).
@@ -623,6 +802,40 @@ function connect() {
         logSys(`session prête — ${mode} · ${model}${rid}`);
         currentConvId = payload.conv_id || null;
         loadConversations();
+        // Auto-align tier with the resumed conv when the tech hasn't
+        // explicitly picked one this session AND the conv was created on
+        // a different tier. Without this, defaulting to fast/Haiku silently
+        // resumed the (almost empty) per-tier thread of a Sonnet conv —
+        // the user saw "0 messages" on a 31-turn conversation because
+        // they were looking at the wrong thread.
+        const convTier = payload.conv_tier;
+        if (
+          convTier &&
+          convTier !== currentTier &&
+          !userPickedTier &&
+          ["fast", "normal", "deep"].includes(convTier)
+        ) {
+          logSys(`→ alignement automatique sur le tier de cette conv : ${convTier}`);
+          // Mirror switchTier logic but skip the "user-chose" mark so a
+          // future explicit tier pick still gates this auto-align.
+          currentTier = convTier;
+          const chip = el("llmTierChip");
+          if (chip) {
+            chip.dataset.tier = convTier;
+            const label = chip.querySelector(".tier-label");
+            if (label) label.textContent = convTier.toUpperCase();
+          }
+          document.querySelectorAll(".llm-tier-popover button[data-tier]").forEach(btn => {
+            btn.classList.toggle("on", btn.dataset.tier === convTier);
+          });
+          if (ws && ws.readyState <= 1) {
+            try { ws.close(); } catch (_) { /* ignore */ }
+          }
+          ws = null;
+          // Keep the same conv_id on reconnect so we land on the right thread.
+          pendingConvParam = currentConvId || null;
+          connect();
+        }
         break;
       }
       case "history_replay_start":
@@ -642,6 +855,16 @@ function connect() {
         break;
       case "session_resumed_summary":
         renderResumeSummary(payload);
+        break;
+      case "context_lost":
+        // The Anthropic Managed Agents session has been silently dropped /
+        // compacted by the beta backend, AND we had no local JSONL backup
+        // to summarize. The freshly created session has no memory of the
+        // prior turns — anything the tech asks now will be answered as if
+        // it's the first turn of the conversation. Without this card the
+        // chat panel pretends nothing happened and the tech wastes minutes
+        // wondering why the agent forgot the symptom they discussed.
+        renderContextLost(payload);
         break;
       case "message":
         if ((payload.role || "assistant") === "user") {
@@ -665,6 +888,23 @@ function connect() {
           ...(payload.result != null ? { result: payload.result } : {}),
         };
         addExpandToStep(step, payloadJSON);
+        break;
+      }
+      case "memory_tool_use": {
+        // MA-native filesystem ops on /mnt/memory/{slug}/. These can arrive
+        // after the assistant's message (next agent inference step starting),
+        // so open a fresh turn in that case — otherwise the new step would
+        // render in the rail above the message.
+        let turn = ensureTurn();
+        if (turn.querySelector(".turn-message")) {
+          closeTurn();
+          turn = ensureTurn();
+        }
+        const name = payload.name || "?";
+        const renderer = MEMORY_TOOL_PHRASES[name];
+        const { icon, phraseHTML } = renderer ? renderer(payload.input || {}) : memToolFallback(name);
+        const step = appendStep(turn, "mem", `${icon}${phraseHTML}`);
+        addExpandToStep(step, { args: payload.input || {} });
         break;
       }
       case "thinking": {
@@ -693,13 +933,36 @@ function connect() {
         logSys("session terminée", true);
         closeTurn();
         break;
+      case "turn_complete":
+        // Internal signal for benchmarks (end of an agent tech-turn). UI
+        // doesn't render it — turn boundaries are already conveyed by the
+        // turn_cost foot and the next user message.
+        break;
       default:
-        logSys(`? ${JSON.stringify(payload)}`);
+        // Unknown WS event type — typically means the backend grew a new
+        // signal that the frontend handler list hasn't caught up with, OR
+        // the browser is serving a stale cached llm.js. Either way, raw
+        // JSON in the chat log is meaningless to the tech (looked like
+        // garbage `? {...}` rows in production). Surface to the dev console
+        // for debug instead so the chat stream stays readable.
+        console.warn("[llm] unhandled WS event:", payload?.type, payload);
     }
   });
 }
 
-export function openPanel() {
+// `targetConv` (optional): "new" or an existing conv id. When set, the panel
+// opens directly on that conversation in a single connect() — avoids the
+// double-connect race where openPanel() first lands on the active conv and
+// switchConv() then immediately reconnects to the right one (which spawned
+// useless 0-turn slots before the lazy-materialize landing).
+export function openPanel(targetConv) {
+  if (targetConv && targetConv !== currentConvId) {
+    pendingConvParam = targetConv;
+    if (ws && ws.readyState <= 1) {
+      try { ws.close(); } catch (_) { /* ignore */ }
+    }
+    ws = null;
+  }
   el("llmPanel").classList.add("open");
   el("llmPanel").setAttribute("aria-hidden", "false");
   document.body.classList.add("llm-open");
@@ -722,6 +985,9 @@ function togglePanel() {
 
 function switchTier(newTier) {
   if (newTier === currentTier) return;
+  // Mark as explicit user choice — disables the conv_tier auto-align that
+  // session_ready otherwise applies on default landings.
+  userPickedTier = true;
   currentTier = newTier;
   const chip = el("llmTierChip");
   if (chip) {
@@ -831,6 +1097,14 @@ export function switchConv(convIdOrNew) {
   ws = null;
   // Route connect() to target the requested conv on reopen.
   pendingConvParam = convIdOrNew;
+  // Picking a different conv defers tier choice back to the conv: its
+  // active per-tier thread is what the tech actually means to see, even
+  // if they had picked a tier earlier in this session. "+ Nouvelle
+  // conversation" keeps the explicit tier choice intact (no conv_tier
+  // to align to anyway).
+  if (convIdOrNew !== "new") {
+    userPickedTier = false;
+  }
   connect();
 }
 

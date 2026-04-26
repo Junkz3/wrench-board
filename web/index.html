@@ -23,6 +23,7 @@
 <link rel="stylesheet" href="styles/llm.css">
 <link rel="stylesheet" href="styles/schematic.css">
 <link rel="stylesheet" href="/styles/profile.css" />
+<link rel="stylesheet" href="styles/protocol.css?v=quest4" />
 <!-- Markdown rendering + sanitization for agent chat (MIT / Apache 2.0) -->
 <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.8/dist/purify.min.js" defer></script>
@@ -160,6 +161,34 @@
 <!-- Stub sections — progressively replaced in following tasks -->
 <section class="stub hidden" data-section-stub="pcb">
   <div id="brdRoot" class="brd-root"></div>
+  <!-- Sibling of brdRoot so brd_viewer's mountCanvas (containerEl.innerHTML='')
+       doesn't wipe these mounts. Section is position:fixed → positioning ctx. -->
+  <div id="protocolFloatingCard" class="protocol-float hidden" role="dialog" aria-label="step pin"></div>
+  <aside id="protocolQuest" class="protocol-quest hidden" aria-label="protocole de diagnostic">
+    <header class="protocol-quest-head">
+      <span class="protocol-quest-title" id="protocolTitle">—</span>
+      <span class="protocol-quest-counter" id="protocolCounter"></span>
+      <button class="protocol-quest-toggle" id="protocolToggleBtn" type="button"
+              aria-label="Plier / déplier" aria-expanded="true" title="Plier">
+        <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor"
+             stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+      </button>
+      <button class="protocol-quest-abandon" id="protocolAbandonBtn" type="button"
+              aria-label="Abandonner le protocole" title="Abandonner">
+        <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor"
+             stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 6l12 12M18 6L6 18"/>
+        </svg>
+      </button>
+    </header>
+    <ul class="protocol-quest-list" id="protocolStepList"></ul>
+    <details class="protocol-quest-history" id="protocolHistoryFold">
+      <summary>historique</summary>
+      <ol class="protocol-quest-history-list" id="protocolHistoryList"></ol>
+    </details>
+  </aside>
   <!-- Relations-schematic minimap — populated by js/schematic_minimap.js when
        the user clicks a part or pin in the boardview. Glass overlay top-left. -->
   <div id="bvMinimap" class="bv-minimap hidden" aria-hidden="true">
@@ -758,8 +787,8 @@
      This isolates chat-panel edits from parallel work on index.html. -->
 <div id="llmRoot"></div>
 
-<script type="module" src="js/main.js"></script>
-<script type="module" src="brd_viewer.js?v=agentpulse2" defer></script>
+<script type="module" src="js/main.js?v=quest4"></script>
+<script type="module" src="brd_viewer.js?v=quest1" defer></script>
 <script type="module" src="js/schematic_minimap.js" defer></script>
 <script type="module" src="/js/profile.js"></script>
 </body>
