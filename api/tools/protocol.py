@@ -15,14 +15,29 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 import secrets
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 logger = logging.getLogger("wrench_board.tools.protocol")
+
+
+# Some agents (Haiku especially) double-escape Unicode inside tool-argument
+# JSON strings, so the persisted text reads literally as `éteinte`
+# instead of `éteinte`. We decode `\uXXXX` patterns at the schema boundary
+# so disk artefacts and WS events stay clean. Properly-encoded titles are
+# untouched (the regex only fires when a literal `\u` shows up).
+_UNICODE_ESCAPE_RE = re.compile(r"\\u([0-9a-fA-F]{4})")
+
+
+def _decode_unicode_escapes(value: str) -> str:
+    if "\\u" not in value:
+        return value
+    return _UNICODE_ESCAPE_RE.sub(lambda m: chr(int(m.group(1), 16)), value)
 
 
 StepType = Literal["numeric", "boolean", "observation", "ack"]
@@ -54,6 +69,11 @@ class StepInput(BaseModel):
     nominal: float | None = None
     pass_range: tuple[float, float] | None = None
     expected: bool | None = None  # boolean only
+
+    @field_validator("instruction", "rationale", mode="before")
+    @classmethod
+    def _decode_escapes(cls, v: Any) -> Any:
+        return _decode_unicode_escapes(v) if isinstance(v, str) else v
 
     @model_validator(mode="after")
     def _validate_type_specific(self) -> StepInput:
@@ -116,6 +136,11 @@ class Protocol(BaseModel):
     title: str
     rationale: str
     rule_inspirations: list[str] = Field(default_factory=list)
+
+    @field_validator("title", "rationale", mode="before")
+    @classmethod
+    def _decode_escapes(cls, v: Any) -> Any:
+        return _decode_unicode_escapes(v) if isinstance(v, str) else v
     current_step_id: str | None = None
     status: ProtocolStatus = "active"
     created_at: str
