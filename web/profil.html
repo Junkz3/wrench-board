@@ -1,38 +1,172 @@
 <!-- Profile section body. Fetched by web/js/profile.js and injected into
      #profileSection in index.html on first navigation. The identity
-     modal lives here too so it ships with the section's DOM in one fetch. -->
-<header class="profile-head">
-  <div class="profile-avatar" id="profAvatar">—</div>
-  <div class="profile-head-main">
-    <h1 id="profName">—</h1>
-    <p class="profile-head-meta">
-      <span id="profLevel" class="tag">—</span>
-      <span>·</span>
-      <span id="profYears">—</span>
-      <span>·</span>
-      <span id="profSpecs">—</span>
-    </p>
-  </div>
-  <button class="btn" id="profEditIdentityBtn">
-    <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
-    Éditer
-  </button>
-</header>
+     modal lives here too so it ships with the section's DOM in one fetch.
+     Layout mirrors the repair dashboard's "cockpit" pattern: dense header,
+     state ribbon, 4-stat cards, then dense block sections. -->
+<div class="profile-shell">
 
-<section class="profile-block">
-  <h2>Outillage</h2>
-  <div class="profile-tools" id="profTools"></div>
-</section>
+  <!-- Header — identity + level badge + edit. Single dense row. -->
+  <header class="prof-head">
+    <div class="prof-head-left">
+      <div class="prof-avatar" id="profAvatar">—</div>
+      <div class="prof-head-titles">
+        <div class="prof-head-tagline">
+          <span class="prof-head-tag">technicien</span>
+          <span class="prof-head-level" id="profLevel">—</span>
+        </div>
+        <h1 id="profName">—</h1>
+        <p class="prof-head-meta">
+          <span id="profYears">—</span>
+          <span class="prof-sep">·</span>
+          <span id="profSpecs">—</span>
+          <span class="prof-sep">·</span>
+          <span class="mono" id="profUpdated">—</span>
+        </p>
+      </div>
+    </div>
+    <div class="prof-head-right">
+      <button class="prof-edit-btn" id="profEditIdentityBtn" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4 12.5-12.5z"/>
+        </svg>
+        Éditer l'identité
+      </button>
+    </div>
+  </header>
 
-<section class="profile-block">
-  <h2>Compétences</h2>
-  <div class="profile-skills" id="profSkills"></div>
-</section>
+  <!-- Level ribbon — visual XP track with the four level rungs. The active
+       rung is highlighted, prior rungs filled, future rungs ghosted. The
+       JS sets data-level on .prof-ribbon to drive accent colour. -->
+  <section class="prof-ribbon" id="profRibbon" data-level="loading">
+    <div class="prof-ribbon-head">
+      <span class="prof-ribbon-pulse"></span>
+      <span class="prof-ribbon-tag">progression</span>
+      <span class="prof-ribbon-title" id="profRibbonTitle">—</span>
+      <span class="prof-ribbon-score mono" id="profRibbonScore">—</span>
+    </div>
+    <ol class="prof-ribbon-track" id="profRibbonTrack">
+      <li class="prof-rung" data-rung="beginner">
+        <span class="prof-rung-dot"></span>
+        <span class="prof-rung-label">Beginner</span>
+      </li>
+      <li class="prof-rung" data-rung="intermediate">
+        <span class="prof-rung-dot"></span>
+        <span class="prof-rung-label">Intermediate</span>
+      </li>
+      <li class="prof-rung" data-rung="confirmed">
+        <span class="prof-rung-dot"></span>
+        <span class="prof-rung-label">Confirmed</span>
+      </li>
+      <li class="prof-rung" data-rung="expert">
+        <span class="prof-rung-dot"></span>
+        <span class="prof-rung-label">Expert</span>
+      </li>
+    </ol>
+    <p class="prof-ribbon-body" id="profRibbonBody">—</p>
+  </section>
 
-<section class="profile-block">
-  <h2>Préférences diagnostic</h2>
-  <div class="profile-prefs" id="profPrefs"></div>
-</section>
+  <!-- 4 stat cards — same data-state visual language as the repair dash:
+       coloured left rail + state badge + mono numbers. -->
+  <section class="prof-stats">
+
+    <article class="prof-stat" data-tone="violet">
+      <header class="prof-stat-head">
+        <span class="prof-stat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2l3 6 6 1-4.5 4.5L18 20l-6-3-6 3 1.5-6.5L3 9l6-1z"/>
+          </svg>
+        </span>
+        <span class="prof-stat-tag">maîtrisées</span>
+      </header>
+      <div class="prof-stat-value mono" id="profStatMastered">—</div>
+      <div class="prof-stat-sub" id="profStatMasteredSub">—</div>
+      <div class="prof-stat-bar"><span id="profStatMasteredBar"></span></div>
+    </article>
+
+    <article class="prof-stat" data-tone="emerald">
+      <header class="prof-stat-head">
+        <span class="prof-stat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12l5 5L20 7"/>
+          </svg>
+        </span>
+        <span class="prof-stat-tag">pratiquées</span>
+      </header>
+      <div class="prof-stat-value mono" id="profStatPracticed">—</div>
+      <div class="prof-stat-sub" id="profStatPracticedSub">—</div>
+      <div class="prof-stat-bar"><span id="profStatPracticedBar"></span></div>
+    </article>
+
+    <article class="prof-stat" data-tone="cyan">
+      <header class="prof-stat-head">
+        <span class="prof-stat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+               stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="9"/>
+            <path d="M12 7v5l3 2"/>
+          </svg>
+        </span>
+        <span class="prof-stat-tag">apprentissage</span>
+      </header>
+      <div class="prof-stat-value mono" id="profStatLearning">—</div>
+      <div class="prof-stat-sub" id="profStatLearningSub">—</div>
+      <div class="prof-stat-bar"><span id="profStatLearningBar"></span></div>
+    </article>
+
+    <article class="prof-stat" data-tone="amber">
+      <header class="prof-stat-head">
+        <span class="prof-stat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14.7 6.3a4 4 0 100 5.7l4.6 4.6a2 2 0 002.8-2.8l-4.6-4.6a4 4 0 00-2.8-2.9z"/>
+            <path d="M9.5 11l-6 6 1.5 1.5 6-6"/>
+          </svg>
+        </span>
+        <span class="prof-stat-tag">outillage</span>
+      </header>
+      <div class="prof-stat-value mono" id="profStatTools">—</div>
+      <div class="prof-stat-sub" id="profStatToolsSub">—</div>
+      <div class="prof-stat-bar"><span id="profStatToolsBar"></span></div>
+    </article>
+
+  </section>
+
+  <!-- Skills — 3 progress columns + a chip row for unlearned. Same as
+       before but restyled with a cockpit treatment (mono headers, dense
+       cards, a left-rail accent per status). -->
+  <section class="prof-block prof-block--skills">
+    <header class="prof-block-head">
+      <span class="prof-block-tag">compétences</span>
+      <h2>Profil opérationnel</h2>
+      <span class="prof-block-count" id="profSkillsTotal">—</span>
+    </header>
+    <div class="profile-skills" id="profSkills"></div>
+  </section>
+
+  <!-- Tools — 12 toggleable tools, grouped by category. Active = emerald
+       chip, inactive = muted. Each tool drives which skills are unlocked. -->
+  <section class="prof-block prof-block--tools">
+    <header class="prof-block-head">
+      <span class="prof-block-tag">outillage</span>
+      <h2>Atelier déclaré</h2>
+      <span class="prof-block-count" id="profToolsTotal">—</span>
+    </header>
+    <div class="profile-tools" id="profTools"></div>
+  </section>
+
+  <!-- Preferences — diagnostic verbosity + language. -->
+  <section class="prof-block prof-block--prefs">
+    <header class="prof-block-head">
+      <span class="prof-block-tag">préférences diag</span>
+      <h2>Posture de l'agent</h2>
+    </header>
+    <div class="profile-prefs" id="profPrefs"></div>
+  </section>
+
+</div>
 
 <aside class="profile-drawer hidden" id="profDrawer">
   <header class="profile-drawer-head">

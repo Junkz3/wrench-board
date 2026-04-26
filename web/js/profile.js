@@ -45,14 +45,87 @@ function fmtYears(n) {
   return `${n} an${n > 1 ? "s" : ""} d'XP`;
 }
 
+function fmtUpdated(iso) {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  if (isNaN(d)) return "—";
+  return `MAJ ${d.toLocaleDateString("fr-FR", { day: "numeric", month: "short" })}`;
+}
+
+const LEVEL_ORDER = ["beginner", "intermediate", "confirmed", "expert"];
+const LEVEL_BLURBS = {
+  beginner:     "Tu débutes. L'agent expliquera chaque étape avant de te demander d'intervenir.",
+  intermediate: "Tu progresses. L'agent allègera les explications et te laissera mener davantage.",
+  confirmed:    "Tu es confirmé. L'agent te confie les décisions et confirme tes hypothèses.",
+  expert:       "Tu es expert. L'agent reste concis et te suit sur les pannes complexes.",
+};
+
 function renderHead() {
   const id = _state.profile.identity;
   const level = _state.derived.level;
-  document.getElementById("profAvatar").textContent = id.avatar || (id.name.slice(0,2).toUpperCase() || "—");
+  document.getElementById("profAvatar").textContent =
+    id.avatar || (id.name?.slice(0, 2)?.toUpperCase() || "—");
   document.getElementById("profName").textContent = id.name || "Sans nom";
-  document.getElementById("profLevel").textContent = level.toUpperCase();
+  const levelEl = document.getElementById("profLevel");
+  levelEl.textContent = level.toUpperCase();
+  levelEl.dataset.level = level;
+  document.querySelector(".prof-head")?.setAttribute("data-level", level);
   document.getElementById("profYears").textContent = fmtYears(id.years_experience);
-  document.getElementById("profSpecs").textContent = id.specialties.length ? id.specialties.join(" · ") : "Sans spécialité";
+  document.getElementById("profSpecs").textContent = id.specialties.length
+    ? id.specialties.join(" · ")
+    : "Aucune spécialité";
+  document.getElementById("profUpdated").textContent = fmtUpdated(_state.profile.updated_at);
+}
+
+// Ribbon = the four-rung XP track. The active rung gets data-state="active",
+// every prior rung gets data-state="done", every later rung stays empty.
+function renderRibbon() {
+  const ribbon = document.getElementById("profRibbon");
+  const level = _state.derived.level;
+  ribbon.dataset.level = level;
+  document.getElementById("profRibbonTitle").textContent = `Niveau ${level}`;
+  const idx = LEVEL_ORDER.indexOf(level);
+  const total = LEVEL_ORDER.length;
+  document.getElementById("profRibbonScore").textContent = `${idx + 1} / ${total}`;
+  document.getElementById("profRibbonBody").textContent =
+    LEVEL_BLURBS[level] || "Le niveau est dérivé du nombre de compétences pratiquées.";
+  ribbon.querySelectorAll(".prof-rung").forEach(rung => {
+    const r = rung.dataset.rung;
+    const ri = LEVEL_ORDER.indexOf(r);
+    rung.dataset.state = ri < idx ? "done" : ri === idx ? "active" : "empty";
+  });
+}
+
+// Stat cards — counts + visual progress vs total. Pure derivations from
+// _state.derived.skills_by_status + _state.profile.tools, no extra fetch.
+function renderStats() {
+  const buckets = _state.derived.skills_by_status;
+  const totalSkills = (buckets.mastered.length + buckets.practiced.length
+    + buckets.learning.length + buckets.unlearned.length) || 1;
+  const setStat = (prefix, count, total, sub) => {
+    const valEl = document.getElementById(`profStat${prefix}`);
+    const subEl = document.getElementById(`profStat${prefix}Sub`);
+    const barEl = document.getElementById(`profStat${prefix}Bar`);
+    if (valEl) valEl.textContent = String(count);
+    if (subEl) subEl.textContent = sub;
+    if (barEl) barEl.style.width = `${Math.round((count / total) * 100)}%`;
+  };
+  setStat("Mastered",  buckets.mastered.length,  totalSkills,
+    `sur ${totalSkills} compétences cataloguées`);
+  setStat("Practiced", buckets.practiced.length, totalSkills,
+    `sur ${totalSkills} compétences cataloguées`);
+  setStat("Learning",  buckets.learning.length,  totalSkills,
+    `sur ${totalSkills} compétences cataloguées`);
+  // Tools: count of "true" entries vs catalog size.
+  const toolsOn = Object.values(_state.profile.tools).filter(Boolean).length;
+  const toolsTotal = _state.catalog.tools.length || 1;
+  setStat("Tools", toolsOn, toolsTotal, `sur ${toolsTotal} outils du catalogue`);
+
+  // Block-level counts (next to the section h2s).
+  const totalEl = document.getElementById("profSkillsTotal");
+  if (totalEl) totalEl.textContent = `${totalSkills} compétences`;
+  const toolsTotalEl = document.getElementById("profToolsTotal");
+  if (toolsTotalEl) toolsTotalEl.textContent = `${toolsOn} / ${toolsTotal} actifs`;
 }
 
 function renderTools() {
@@ -78,6 +151,7 @@ async function toggleTool(toolId) {
   });
   _state = fresh;
   renderTools();
+  renderStats();
 }
 
 function renderSkills() {
@@ -168,6 +242,7 @@ async function changePref(key, value) {
   _state = fresh;
   renderPrefs();
   renderHead();
+  renderRibbon();
 }
 
 function openDrawer(sid, entry, rec) {
@@ -231,6 +306,8 @@ async function submitIdentity(evt) {
       body: JSON.stringify(payload),
     });
     renderHead();
+    renderRibbon();
+    renderStats();
     closeIdentityModal();
   } catch (err) {
     console.error("submitIdentity:", err);
@@ -267,6 +344,8 @@ export async function initProfileSection() {
     return;
   }
   renderHead();
+  renderRibbon();
+  renderStats();
   renderTools();
   renderSkills();
   renderPrefs();
