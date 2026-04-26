@@ -20,7 +20,6 @@ def board_assets_dir(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
 def test_from_device_slug_with_no_file_returns_empty_session(board_assets_dir: Path) -> None:
     session = SessionState.from_device("does-not-exist")
     assert session.board is None
-    assert session.schematic is None
 
 
 def test_from_device_prefers_kicad_pcb_over_brd(board_assets_dir: Path) -> None:
@@ -57,7 +56,3 @@ def test_from_device_swallows_parse_errors(board_assets_dir: Path, caplog: pytes
         session = SessionState.from_device("bogus")
     assert session.board is None
     assert any("board load failed" in rec.message.lower() for rec in caplog.records)
-
-
-def test_schematic_field_defaults_to_none() -> None:
-    assert SessionState().schematic is None

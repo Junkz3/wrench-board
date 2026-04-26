@@ -34,7 +34,6 @@ def _board_assets_root() -> Path:
 @dataclass
 class SessionState:
     board: Board | None = None
-    schematic: Any = None  # Hook for future sch_* tool family; not populated here.
     layer: Side = "top"
     highlights: set[str] = field(default_factory=set)
     # Color the last bv_highlight / bv_focus call asked for. Without this,
