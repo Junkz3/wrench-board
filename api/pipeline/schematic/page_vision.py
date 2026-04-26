@@ -227,13 +227,12 @@ async def extract_page(
         # thinking_budget back to 16k to free 8k more visible budget.
         max_tokens=64000,
         # Extended thinking: model reasons before emitting the structured
-        # tool_call, breaking the "instruction adherence collapse" pattern
-        # observed when ANY prompt change made the model deprioritize the
-        # user-instruction reactive sweep on p11 nets (sessions 14-19, all
-        # caused p11 nets 0.957 → 0.6). Thinking is incompatible with
-        # forced tool_choice; tool_call.py auto-switches to tool_choice="any"
-        # when this is set (with only one tool defined, the effect is
-        # identical to forced).
+        # tool_call. Adaptive thinking on Opus 4.7+ (the deprecated
+        # `enabled` type returns 400). Adaptive is incompatible with
+        # forced tool_choice — tool_call.py auto-switches to
+        # tool_choice="auto" when thinking is on; the SYSTEM_PROMPT
+        # below tells the model to always emit the submit_schematic_page
+        # tool, so the effective behavior is identical.
         thinking_budget=24000,
         log_label=f"page_vision:page_{rendered.page_number}",
     )

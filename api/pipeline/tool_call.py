@@ -64,16 +64,22 @@ async def call_with_forced_tool(
             else:
                 effective_system = system + retry_suffix
 
-        # tool_choice rules with thinking:
+        # tool_choice rules with thinking (Opus 4.7+):
         #   - Default: `{"type": "tool", "name": forced_tool_name}` — fully
-        #     forced. Compatible with deterministic structured output.
+        #     forced, deterministic structured output.
         #   - When `thinking_budget` is set: ONLY `{"type": "auto"}` works.
-        #     Anthropic rejects thinking + (`tool` | `any`) — both treated as
-        #     "forces tool use". With "auto" the model decides whether to
-        #     call a tool; the system prompt explicitly tells the model to
-        #     always emit a tool call (see page_vision SYSTEM_PROMPT). The
-        #     parser falls through to retry with a system suffix if the
-        #     model returns text instead of the tool_use block.
+        #     The Anthropic API rejects thinking + (`tool` | `any`) with
+        #     "Thinking may not be enabled when tool_choice forces tool use"
+        #     (verified live req_011CaRamyfazF6nwgzTJSQMu, 2026-04-26). With
+        #     "auto" the model decides whether to call a tool; the system
+        #     prompt explicitly tells it to always emit the tool (see
+        #     page_vision SYSTEM_PROMPT). The parser falls through to retry
+        #     with a system suffix if the model returns text instead.
+        #   - Opus 4.7 also rejects `thinking.type="enabled"` — only
+        #     `"adaptive"` is accepted. The integer `thinking_budget` arg is
+        #     preserved for source-compat but its value is unused under
+        #     adaptive; we pair adaptive with `output_config.effort="high"`
+        #     to nudge the model toward deeper reasoning.
         #
         # Streaming required for max_tokens >= ~16k (SDK refuses non-stream
         # otherwise with "operations that may take longer than 10 minutes").
@@ -91,10 +97,8 @@ async def call_with_forced_tool(
             tool_choice=tool_choice_param,
         )
         if thinking_budget is not None:
-            stream_kwargs["thinking"] = {
-                "type": "enabled",
-                "budget_tokens": thinking_budget,
-            }
+            stream_kwargs["thinking"] = {"type": "adaptive"}
+            stream_kwargs.setdefault("output_config", {})["effort"] = "high"
 
         async with client.messages.stream(**stream_kwargs) as stream:
             response = await stream.get_final_message()
