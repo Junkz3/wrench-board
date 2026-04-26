@@ -26,6 +26,11 @@ import {
   selectedCameraDeviceId,
   selectedCameraLabel,
 } from './camera.js';
+import {
+  closePreview,
+  isPreviewOpen,
+  openPreview,
+} from './camera_preview.js';
 
 const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;  // 5MB raw, mirrors backend cap
 
@@ -1451,11 +1456,37 @@ export async function initLLMPanel() {
     }
   });
 
-  // --- Files+Vision: upload button + drag-drop on the chat panel --------
+  // --- Files+Vision: upload button + drag-drop + preview toggle --------
   const uploadBtn = el("llmUploadBtn");
   const uploadInput = el("llmUploadInput");
   const dropzone = el("llmDropzone");
   const panelEl = el("llmPanel");
+  const previewBtn = el("cameraPreviewBtn");
+
+  function syncPreviewBtn() {
+    if (!previewBtn) return;
+    const on = isPreviewOpen();
+    previewBtn.setAttribute("aria-pressed", on ? "true" : "false");
+  }
+
+  previewBtn?.addEventListener("click", async () => {
+    if (isPreviewOpen()) {
+      closePreview();
+      syncPreviewBtn();
+      return;
+    }
+    const id = selectedCameraDeviceId();
+    if (!id) {
+      logSys("sélectionne d'abord une caméra dans le picker", true);
+      return;
+    }
+    const ok = await openPreview(id, selectedCameraLabel());
+    if (!ok) {
+      logSys("ouverture preview échouée — vérifie les permissions", true);
+    }
+    syncPreviewBtn();
+  });
+  syncPreviewBtn();
 
   uploadBtn?.addEventListener("click", () => uploadInput?.click());
   uploadInput?.addEventListener("change", (e) => {

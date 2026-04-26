@@ -776,42 +776,162 @@ body.llm-open .stub{right:420px}
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
 }
 
-/* Camera picker in the LLM panel head, next to the tier chip. Lives
-   here (not in the metabar) so it stays visible across every section
-   — the metabar is hidden on home/pcb/schematic/profile via
+/* Camera picker — custom chip+popover (mirrors .llm-tier-chip pattern).
+   Lives in .llm-head-actions next to the tier chip so it's visible
+   across every section — the metabar is hidden on most sections via
    body.no-metabar in layout.css. */
-.llm-camera {
-  display: flex;
+.llm-camera-wrap { position: relative; }
+.llm-camera-chip {
+  display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 2px 6px;
+  padding: 3px 7px;
   border: 1px solid var(--border);
   border-radius: 4px;
   background: var(--panel);
   color: var(--text-2);
   font-family: var(--mono);
   font-size: 10px;
-  max-width: 130px;
-}
-.llm-camera .icon {
-  flex-shrink: 0;
-  color: var(--text-3);
-}
-.llm-camera-select {
-  background: transparent;
-  color: var(--text-2);
-  border: none;
-  font-family: inherit;
-  font-size: inherit;
   cursor: pointer;
-  outline: none;
-  padding: 0;
-  max-width: 100px;
+  max-width: 150px;
+  transition: all 0.15s;
+}
+.llm-camera-chip:hover {
+  background: var(--panel-2);
+  border-color: var(--border-hover);
+  color: var(--text);
+}
+.llm-camera-chip[aria-expanded="true"] {
+  background: var(--panel-2);
+  border-color: var(--cyan);
+  color: var(--text);
+}
+.llm-camera-chip .icon { flex-shrink: 0; color: var(--text-3); }
+.llm-camera-chip .camera-label {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  transition: color 0.15s;
+  max-width: 90px;
 }
-.llm-camera-select:hover {
+.llm-camera-chip .chevron-down { flex-shrink: 0; color: var(--text-3); }
+
+.llm-camera-popover {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  z-index: 50;
+  min-width: 180px;
+  max-width: 260px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+  font-family: var(--mono);
+  font-size: 10.5px;
+}
+.llm-camera-popover button {
+  background: transparent;
+  border: none;
+  color: var(--text-2);
+  text-align: left;
+  padding: 5px 8px;
+  border-radius: 3px;
+  cursor: pointer;
+  font: inherit;
+  letter-spacing: 0.2px;
+  transition: background-color 0.12s, color 0.12s;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.llm-camera-popover button:hover {
+  background: var(--panel-2);
   color: var(--text);
+}
+.llm-camera-popover button.on {
+  background: rgba(34, 211, 238, 0.10);
+  color: var(--cyan);
+}
+
+/* Preview toggle button in the head. .on state = preview window open. */
+.llm-camera-preview-btn {
+  background: transparent;
+  color: var(--text-2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 3px 5px;
+}
+.llm-camera-preview-btn:hover {
+  background: var(--panel-2);
+  border-color: var(--border-hover);
+  color: var(--text);
+}
+.llm-camera-preview-btn[aria-pressed="true"] {
+  color: var(--cyan);
+  border-color: var(--cyan);
+  background: rgba(34, 211, 238, 0.08);
+}
+
+/* Floating draggable camera preview window. Mounted into <body> on
+   first open, position persists in localStorage. */
+.camera-preview {
+  position: fixed;
+  top: 100px;
+  right: 460px;  /* default sits left of an open .llm-panel (420px wide) */
+  z-index: 900;
+  width: 280px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.camera-preview[hidden] { display: none !important; }
+.camera-preview-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 8px;
+  background: linear-gradient(180deg, var(--panel-2), var(--panel));
+  border-bottom: 1px solid var(--border-soft);
+  cursor: move;
+  user-select: none;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--text-2);
+  letter-spacing: 0.3px;
+}
+.camera-preview-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+.camera-preview-close {
+  background: transparent;
+  border: none;
+  color: var(--text-3);
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+.camera-preview-close:hover {
+  background: var(--panel-2);
+  color: var(--text);
+}
+.camera-preview-video {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: #000;
 }

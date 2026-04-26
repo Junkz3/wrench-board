@@ -9,16 +9,33 @@
       <div class="llm-subline" id="llmSubline">—</div>
     </div>
     <div class="llm-head-actions">
-      <div class="llm-camera" title="Caméra pour cam_capture (Flow B)">
-        <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M3 7h3l2-2h8l2 2h3v12H3z"/>
-          <circle cx="12" cy="13" r="4"/>
-        </svg>
-        <select id="camera-picker" class="llm-camera-select" aria-label="Caméra sélectionnée">
-          <option value="">— aucune —</option>
-        </select>
+      <div class="llm-camera-wrap">
+        <button class="llm-camera-chip" id="cameraChip" type="button"
+                aria-haspopup="menu" aria-expanded="false"
+                title="Caméra pour cam_capture (Flow B)">
+          <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 7h3l2-2h8l2 2h3v12H3z"/>
+            <circle cx="12" cy="13" r="4"/>
+          </svg>
+          <span class="camera-label" id="cameraChipLabel">— aucune —</span>
+          <svg class="chevron-down" width="9" height="9" viewBox="0 0 24 24"
+               fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </button>
+        <div class="llm-camera-popover" id="cameraPopover" role="menu" hidden></div>
       </div>
+      <button class="icon-btn llm-camera-preview-btn" id="cameraPreviewBtn"
+              type="button" title="Afficher / cacher la preview caméra"
+              aria-label="Toggle preview caméra" aria-pressed="false">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none"
+             stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/>
+          <circle cx="12" cy="12" r="3"/>
+        </svg>
+      </button>
       <button class="llm-tier-chip" id="llmTierChip" data-tier="fast" aria-haspopup="menu" aria-expanded="false" title="Tier de modèle">
         <span class="tier-label">FAST</span>
         <svg class="chevron-down" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>

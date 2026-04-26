@@ -11,8 +11,10 @@ import { initProfileSection } from './profile.js';
 import { initPipelineProgress } from './pipeline_progress.js';
 import { initLLMPanel, openLLMPanelIfRepairParam } from './llm.js';
 import { initCameraPicker } from './camera.js';
+import { updatePreviewDevice } from './camera_preview.js';
 import { loadSchematic, closeSchematicInspector } from './schematic.js';
 import { initLanding, showLanding } from './landing.js';
+import { mountMascot } from './mascot.js';
 import * as Protocol from './protocol.js?v=quest3';
 
 // Tracks which device slug the graph has already been mounted for. Guards
@@ -63,6 +65,7 @@ if (!window.Boardview) {
 (async function bootstrap() {
   // Stamp the static version once — chrome state is then handled by navigate().
   document.getElementById("appVersion").textContent = APP_VERSION;
+  mountMascot(document.getElementById("brandMascot"), { size: "xs", state: "idle" });
   wireRouter();
   initNewRepairModal();
   initMemoryBank();
@@ -70,12 +73,14 @@ if (!window.Boardview) {
   await initLLMPanel();
   openLLMPanelIfRepairParam();
 
-  // Files+Vision : camera picker in the metabar. Re-emits a capabilities
-  // frame to the live diag WS when the tech changes camera selection.
-  initCameraPicker(() => {
+  // Files+Vision : camera picker in the LLM panel head. On change :
+  //   - notify the diag WS via client.capabilities (gates cam_capture)
+  //   - swap the preview window's stream if the preview is currently open
+  initCameraPicker((deviceId, label) => {
     if (window.LLM && typeof window.LLM.sendCapabilities === 'function') {
       window.LLM.sendCapabilities();
     }
+    updatePreviewDevice(deviceId, label);
   });
 
   // Protocol module — init with a deferred send that reads the live WS at
