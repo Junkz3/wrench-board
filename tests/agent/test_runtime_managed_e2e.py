@@ -378,3 +378,141 @@ async def test_processed_at_null_echo_is_ignored(
         f"queued (processed_at=None) echo must not produce a delay log, "
         f"got {[r.getMessage() for r in delay_logs]!r}"
     )
+
+
+@pytest.mark.asyncio
+async def test_full_turn_flow_message_tool_result_complete(
+    monkeypatch, tmp_path,
+):
+    """End-to-end: agent.message → custom_tool_use → requires_action →
+    dispatch → user.custom_tool_result → agent.message → end_turn.
+
+    Replays the most common turn shape (tool-using assistant) through the
+    full stream loop and asserts:
+
+    * Both `agent.message` chunks reach the WS as `message` frames in
+      order, sanitized.
+    * The dispatcher runs once with the right name + payload.
+    * `user.custom_tool_result` is sent back to MA with the dispatcher's
+      result serialized as JSON, keyed by the original tool_use eid.
+    * The closing `end_turn` lands as a `turn_complete` WS frame.
+
+    This is the "happy path" the previous suite never covered — every
+    other test exercised an edge (error, timeout, dedupe). A regression
+    in any of the four steps above would have shipped silently before.
+    """
+    import json
+
+    from api.agent import runtime_managed as rm
+    from api.session.state import SessionState
+
+    _stale_settings(monkeypatch, rm)
+
+    # Capture the dispatcher invocation so we can assert on its inputs.
+    dispatch_calls: list[tuple[str, dict]] = []
+
+    async def fake_dispatch(name, payload, *_a, **_kw):
+        dispatch_calls.append((name, payload))
+        # The runtime strips `event` / `events` keys from the result
+        # before serializing into user.custom_tool_result, so include
+        # one to verify the strip behavior end-to-end.
+        return {
+            "ok": True,
+            "highlighted": payload.get("refdes"),
+            "event": {"type": "bv_highlight", "refdes": payload.get("refdes")},
+        }
+
+    monkeypatch.setattr(rm, "_dispatch_tool", fake_dispatch)
+
+    # Full turn sequence, in order MA would emit it.
+    intro_message = SimpleNamespace(
+        type="agent.message",
+        content=[
+            SimpleNamespace(type="text", text="Je vais surligner U7 pour vérifier."),
+        ],
+    )
+    tool_use = SimpleNamespace(
+        type="agent.custom_tool_use",
+        id="sevt_full_001",
+        name="bv_highlight_component",
+        input={"refdes": "U7"},
+    )
+    requires_action = SimpleNamespace(
+        type="session.status_idle",
+        stop_reason=SimpleNamespace(
+            type="requires_action", event_ids=["sevt_full_001"],
+        ),
+    )
+    closing_message = SimpleNamespace(
+        type="agent.message",
+        content=[
+            SimpleNamespace(type="text", text="U7 est surligné. Que mesures-tu ?"),
+        ],
+    )
+    end_turn = SimpleNamespace(
+        type="session.status_idle",
+        stop_reason=SimpleNamespace(type="end_turn", event_ids=[]),
+    )
+
+    stream = _FakeStream(events=[
+        intro_message, tool_use, requires_action, closing_message, end_turn,
+    ])
+    client = _make_client(stream)
+    ws = _make_ws()
+    session_state = SessionState.from_device("nonexistent-slug")
+
+    await rm._forward_session_to_ws(
+        ws=ws, client=client, session_id="sesn_test",
+        device_slug="demo", memory_root=tmp_path,
+        events_by_id={}, session_state=session_state,
+        agent_model="claude-haiku-4-5", tier="fast",
+        environment_id="env_test", repair_id=None, conv_id=None,
+    )
+
+    # ---- Assertions ----------------------------------------------------
+
+    # 1. Both agent.message texts reached the WS as `message` frames, in order.
+    payloads = [call.args[0] for call in ws.send_json.await_args_list]
+    message_frames = [p for p in payloads if p.get("type") == "message"]
+    assert len(message_frames) == 2, (
+        f"expected 2 message frames (intro + closing), got {len(message_frames)}: "
+        f"{message_frames!r}"
+    )
+    assert message_frames[0]["role"] == "assistant"
+    assert "U7" in message_frames[0]["text"]
+    assert "mesures" in message_frames[1]["text"]
+
+    # 2. tool_use frame announced to the WS so the UI chat can show it.
+    tool_use_frames = [p for p in payloads if p.get("type") == "tool_use"]
+    assert len(tool_use_frames) == 1
+    assert tool_use_frames[0]["name"] == "bv_highlight_component"
+    assert tool_use_frames[0]["input"] == {"refdes": "U7"}
+
+    # 3. Dispatcher ran exactly once with the right inputs.
+    assert dispatch_calls == [("bv_highlight_component", {"refdes": "U7"})], (
+        f"dispatcher invocation mismatch: {dispatch_calls!r}"
+    )
+
+    # 4. user.custom_tool_result was posted back to MA with the eid + JSON
+    #    body, and the `event` key was stripped from the agent-facing payload.
+    sent_events = client.beta.sessions.events.send.await_args_list
+    tool_results = [
+        ev for call in sent_events
+        for ev in call.kwargs.get("events", [])
+        if ev.get("type") == "user.custom_tool_result"
+    ]
+    assert len(tool_results) == 1
+    tr = tool_results[0]
+    assert tr["custom_tool_use_id"] == "sevt_full_001"
+    body = json.loads(tr["content"][0]["text"])
+    assert body == {"ok": True, "highlighted": "U7"}, (
+        f"event/events keys must be stripped from agent-facing tool_result, "
+        f"got {body!r}"
+    )
+
+    # 5. turn_complete WS frame was emitted at end_turn.
+    turn_complete_frames = [p for p in payloads if p.get("type") == "turn_complete"]
+    assert len(turn_complete_frames) == 1, (
+        f"expected exactly one turn_complete frame, got {len(turn_complete_frames)}"
+    )
+    assert turn_complete_frames[0]["stop_reason"] == "end_turn"
