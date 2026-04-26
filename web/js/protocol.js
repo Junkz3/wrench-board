@@ -58,6 +58,14 @@ export function applyEvent(ev) {
     case "protocol_completed":
       state.proto = null;
       break;
+    case "protocol_cleared":
+      // Emitted by the runtime at WS-open when the resolved conv has no
+      // active protocol. Without this, switching from a conv with a
+      // running wizard to a fresh conv left the previous wizard pinned
+      // on screen because no `protocol_proposed` arrives to overwrite
+      // state.proto and silence ≠ "no protocol here".
+      state.proto = null;
+      break;
     default:
       return;
   }

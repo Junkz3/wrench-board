@@ -100,7 +100,7 @@ body.llm-open .stub{right:420px}
 
 /* --- log --- */
 .llm-log{
-  flex:1;overflow-y:auto;padding:12px 14px;
+  flex:1;overflow:hidden auto;padding:12px 14px;
   display:flex;flex-direction:column;gap:9px;
   font-size:12.5px;line-height:1.55;
 }
@@ -126,6 +126,7 @@ body.llm-open .stub{right:420px}
 .llm-log .sys{
   font-family:var(--mono);font-size:10.5px;color:var(--text-3);
   padding:3px 10px;
+  overflow-wrap:anywhere;
 }
 .llm-log .sys.err{color:oklch(0.72 0.20 25)}
 
@@ -296,18 +297,51 @@ body.llm-open .stub{right:420px}
   background: var(--violet);
   box-shadow: 0 0 0 2px rgba(192,132,252,.15);
 }
+/* MEM = MA-native filesystem ops (read/write/edit/grep/glob on the device's
+   memory store). Muted grey on purpose — this is technical plumbing, not
+   part of the four-color semantic ontology (amber/cyan/emerald/violet). */
+.step.mem {
+  color: var(--text-3);
+}
+.step.mem .node {
+  background: var(--text-3);
+  box-shadow: 0 0 0 2px rgba(148,163,184,.15);
+}
+.step.mem .step-icon { color: var(--text-3); }
 .step .step-phrase {
   flex: 1;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+/* Memory ops carry long paths/patterns — let them wrap so the tech can
+   actually read what was searched/read. The rail already paginates the
+   chronology vertically; an extra line per step is fine. */
+.step.mem {
+  align-items: flex-start;
+}
+.step.mem .step-phrase {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  overflow-wrap: anywhere;
+  line-height: 1.4;
+}
+.step.mem .node { top: 8px; }
 .step .refdes, .step .net {
   font-family: var(--mono);
   font-size: 10.5px;
 }
 .step.mb .refdes, .step.mb .net { color: var(--cyan); }
 .step.bv .refdes, .step.bv .net { color: var(--violet); }
+.step.mem .mem-path {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--text-2);
+  background: rgba(148,163,184,.08);
+  padding: 0 4px;
+  border-radius: 3px;
+}
 
 /* Replay dimming: whole log dims, not per-row. */
 .llm-log.replay .turn,
@@ -347,6 +381,7 @@ body.llm-open .stub{right:420px}
 }
 .step.mb .step-payload { border-left-color: var(--cyan); }
 .step.bv .step-payload { border-left-color: var(--violet); }
+.step.mem .step-payload { border-left-color: var(--text-3); }
 .step.expanded .step-payload { display: block; }
 .step.expanded { flex-wrap: wrap; align-items: center; }
 
@@ -599,3 +634,61 @@ body.llm-open .stub{right:420px}
   margin: 4px 0 6px; padding-left: 18px;
 }
 .resume-summary .body li { margin-bottom: 2px; }
+
+/* =========== Context-lost alert card =========== */
+/* Rendered when MA dropped the session AND there was no local JSONL backup
+   to summarize. Different from .resume-summary on purpose: amber tone,
+   dashed border, "alert" semantic — the agent has zero memory of prior
+   turns and the tech needs to know before they fire off a follow-up that
+   assumes context. */
+.context-lost {
+  margin: 8px 6px 10px;
+  padding: 10px 12px;
+  background: linear-gradient(135deg, rgba(245,158,11,.10), rgba(245,158,11,.04));
+  border: 1px dashed rgba(245,158,11,.55);
+  border-radius: 8px;
+}
+.context-lost header {
+  display: flex; align-items: center; gap: 8px;
+  padding-bottom: 8px; margin-bottom: 8px;
+  border-bottom: 1px dashed rgba(245,158,11,.35);
+}
+.context-lost .icon-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--amber);
+  box-shadow: 0 0 6px var(--amber);
+}
+.context-lost .title {
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: .4px;
+  text-transform: uppercase; color: var(--amber); font-weight: 600;
+}
+.context-lost .body {
+  font-size: 12.5px; color: var(--text); line-height: 1.55;
+}
+.context-lost .body p { margin: 0 0 6px; }
+.context-lost .body p:last-child { margin-bottom: 0; }
+.context-lost .body p.meta {
+  font-family: var(--mono); font-size: 10px; color: var(--text-3);
+  margin-top: 4px; letter-spacing: .2px;
+}
+.context-lost .body code {
+  font-family: var(--mono); font-size: 10px;
+  background: rgba(245,158,11,.08); padding: 1px 4px; border-radius: 3px;
+  color: var(--text-2);
+}
+/* "Récupéré du disque" line — emerald (= net / signal alive in our
+   semantic palette). Highlights what survived so the tech reads it as
+   a positive recovery signal next to the amber loss header. */
+.context-lost .body p.preserved {
+  background: rgba(52,211,153,.07);
+  border-left: 2px solid var(--emerald);
+  padding: 6px 8px; border-radius: 0 4px 4px 0;
+  margin: 8px 0;
+}
+.context-lost .body p.preserved.muted {
+  background: rgba(148,163,184,.05);
+  border-left-color: var(--text-3);
+  color: var(--text-3);
+  font-style: italic;
+}
+.context-lost .body p.preserved strong { color: var(--emerald); font-weight: 600; }

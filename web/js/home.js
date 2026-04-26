@@ -9,7 +9,7 @@
 
 import { openPipelineProgress } from './pipeline_progress.js';
 import { leaveSession } from './router.js';
-import { switchConv, openPanel } from './llm.js';
+import { openPanel } from './llm.js';
 import { ICON_CHECK } from './icons.js';
 
 export async function loadHomePacks() {
@@ -354,8 +354,7 @@ function renderDashboardConvs(conversations, rid) {
         `<span class="rd-conv-title">${title}</span>` +
         `<span class="rd-conv-meta">${c.turns || 0} turns · ${cost} · ${escapeHtml(ago)}</span>`;
       row.addEventListener("click", () => {
-        openPanel();
-        switchConv(c.id);
+        openPanel(c.id);  // single connect targeting the right conv
       });
       body.appendChild(row);
     }
@@ -365,8 +364,7 @@ function renderDashboardConvs(conversations, rid) {
   newBtn.className = "rd-conv-new";
   newBtn.textContent = "+ Nouvelle conversation";
   newBtn.addEventListener("click", () => {
-    openPanel();
-    switchConv("new");
+    openPanel("new");  // single connect; backend lazy-materializes on first message
   });
   body.appendChild(newBtn);
 }
