@@ -163,3 +163,4 @@ docs/notes/local/
 
 # Archived state of overnight evolve loops (worktree backups)
 archive-evolve-runs/
+tests/fixtures/macro_devboard_synthetic.png
