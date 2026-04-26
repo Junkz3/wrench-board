@@ -72,6 +72,20 @@ DEFAULT_TIER: TierLiteral = "fast"
 
 logger = logging.getLogger("wrench_board.agent.managed")
 
+# Process-local guard: at most one diagnostic WS per
+# (device_slug, repair_id, conv_id) triplet at a time. The audit-revealed
+# bug — `responded_tool_ids` lives inside `_forward_session_to_ws` and is
+# NOT shared across sibling forwarders — would otherwise let two browser
+# tabs on the same conv each dispatch the same `agent.custom_tool_use`,
+# both POST `user.custom_tool_result`, and the second POST returns HTTP
+# 400 ("waiting on responses to events …") which tears down the stream.
+# Server-side rejection at WS-open is the simplest fix that doesn't
+# require shared mutable state across forwarders. Anonymous WS (no
+# repair_id, no conv_id) skip the guard since they can't collide.
+# asyncio is single-threaded so set membership + add happens atomically
+# between awaits — no lock needed.
+_active_diagnostic_keys: set[tuple[str, str, str]] = set()
+
 
 async def _sessions_create_with_retry(
     client: AsyncAnthropic,
@@ -1114,6 +1128,33 @@ async def run_diagnostic_session_managed(
             )
         )
 
+    # Single-WS guard. The dedup of `responded_tool_ids` is per-forwarder,
+    # so two WS that share an MA session (same triplet) would each respond
+    # to the same `agent.custom_tool_use`; the second POST is rejected by
+    # MA (HTTP 400, "waiting on responses to events …") and the stream
+    # gets torn down. Reject the second WS at handshake time instead of
+    # letting it crash later. The key is claimed BEFORE any further await
+    # so a concurrent open can't slip through between the membership
+    # check and the add (asyncio is single-threaded; both happen in one
+    # uninterrupted scheduler step). Released in `finally` further down.
+    diagnostic_key: tuple[str, str, str] | None = None
+    if repair_id and resolved_conv_id:
+        candidate_key = (device_slug, repair_id, resolved_conv_id)
+        if candidate_key in _active_diagnostic_keys:
+            await ws.accept()
+            await ws.send_json({
+                "type": "error",
+                "code": "session_already_open",
+                "text": (
+                    "Une conversation est déjà ouverte ailleurs pour ce "
+                    "repair. Ferme-la avant d'en ouvrir une nouvelle."
+                ),
+            })
+            await ws.close(code=1008, reason="session already open")
+            return
+        _active_diagnostic_keys.add(candidate_key)
+        diagnostic_key = candidate_key
+
     # Build session params. `resources` is the current (2026-04-01) surface
     # for attaching memory stores. We attach up to 4 layers (global patterns +
     # global playbooks + device + repair); any that returned None (beta off,
@@ -1277,6 +1318,14 @@ async def run_diagnostic_session_managed(
             await ws.accept()
             await ws.send_json({"type": "error", "text": f"session create failed: {exc}"})
             await ws.close()
+            # Release the single-WS guard claimed up-stream so the next
+            # tab open isn't permablocked by a transient session.create
+            # failure (e.g. MA quota burst). Mirror release happens in
+            # the function-final `finally`; this early return bypasses
+            # it. discard() is a no-op if the key was never claimed
+            # (anonymous WS path).
+            if diagnostic_key is not None:
+                _active_diagnostic_keys.discard(diagnostic_key)
             return
         # Save the link from this conv to the fresh MA session id NOW only
         # for already-materialized convs. Pending convs defer this until
@@ -1450,7 +1499,7 @@ async def run_diagnostic_session_managed(
             parts.append(device_intro)
         if state_block:
             parts.append(state_block)
-        parts.append(f"[CONTEXTE TECHNICIEN]\n{tech_block}")
+        parts.append(f"[TECHNICIAN CONTEXT]\n{tech_block}")
         intro = "\n\n---\n\n".join(parts) if parts else None
 
     # Per-turn context tag — prepended to EVERY user message so smaller models
@@ -1784,6 +1833,12 @@ async def run_diagnostic_session_managed(
             pass
         set_ws_emitter(None)
         set_validation_emitter(None)
+        # Release the single-WS guard claimed earlier (after
+        # ensure_conversation). Anonymous sessions never claimed one.
+        # discard() is no-op if already absent, so an unexpected
+        # mid-setup failure path that already released elsewhere is safe.
+        if diagnostic_key is not None:
+            _active_diagnostic_keys.discard(diagnostic_key)
 
 
 async def _replay_jsonl_history_to_ws(
@@ -1829,6 +1884,12 @@ async def _replay_jsonl_history_to_ws(
             text = strip_ctx_tag(text)
             if text.startswith(
                 (
+                    "[New diagnostic session]",
+                    "[TECHNICIAN CONTEXT]",
+                    "[CONVERSATION RESUMED",
+                    # Keep the legacy French markers so JSONL files written
+                    # before the system-prompt translation still get stripped
+                    # cleanly on replay.
                     "[Nouvelle session de diagnostic]",
                     "[CONTEXTE TECHNICIEN]",
                     "[REPRISE DE CONVERSATION",
@@ -1893,7 +1954,7 @@ async def _replay_ma_history_to_ws(
     The SDK exposes events via `client.beta.sessions.events.list(session_id)`.
     We iterate chronologically and surface only the subset the chat UI
     renders: user text, agent text, agent custom_tool_use. The session
-    intro prefix (the hidden "[Nouvelle session de diagnostic] …" glued to
+    intro prefix (the hidden "[New diagnostic session] …" glued to
     the first real user message) is stripped so the tech sees only what
     they themselves typed.
 
@@ -1991,6 +2052,12 @@ async def _replay_ma_history_to_ws(
                 text = strip_ctx_tag(text)
                 if text.startswith(
                     (
+                        "[New diagnostic session]",
+                        "[TECHNICIAN CONTEXT]",
+                        "[CONVERSATION RESUMED",
+                        # Legacy French markers — kept so MA event streams
+                        # produced before the system-prompt translation
+                        # still get stripped cleanly on replay.
                         "[Nouvelle session de diagnostic]",
                         "[CONTEXTE TECHNICIEN]",
                         "[REPRISE DE CONVERSATION",
@@ -2142,7 +2209,7 @@ async def _handle_client_upload_macro(
             "type": "user.message",
             "content": [
                 {"type": "image", "source": {"type": "file", "file_id": uploaded.id}},
-                {"type": "text", "text": "Photo macro envoyée par le tech."},
+                {"type": "text", "text": "Macro photo uploaded by the technician."},
             ],
         }],
     )
@@ -2209,9 +2276,9 @@ async def _dispatch_cam_capture(
                     "content": [{
                         "type": "text",
                         "text": (
-                            f"Capture timeout après {timeout_s:.0f}s — le frontend "
-                            "n'a pas répondu. Vérifie qu'une caméra est sélectionnée "
-                            "dans la metabar."
+                            f"Capture timeout after {timeout_s:.0f}s — the "
+                            "frontend did not respond. Check that a camera "
+                            "is selected in the metabar."
                         ),
                     }],
                 }],
@@ -2223,7 +2290,7 @@ async def _dispatch_cam_capture(
             if not bytes_:
                 raise ValueError("empty payload")
             mime = (response.get("mime") or "image/jpeg").lower()
-            device_label = response.get("device_label") or "caméra"
+            device_label = response.get("device_label") or "camera"
 
             persist_macro(
                 memory_root=memory_root, slug=slug, repair_id=repair_id,
@@ -2417,12 +2484,12 @@ async def _forward_ws_to_session(
         # to summarise fixes and call mb_validate_finding.
         if payload.get("type") == "validation.start":
             text = (
-                "J'ai fini cette réparation. Peux-tu résumer en une phrase "
-                "quel(s) composant(s) j'ai réparé ou remplacé à partir de "
-                "l'historique de notre discussion et des mesures prises, "
-                "puis enregistrer le résultat avec l'outil "
-                "`mb_validate_finding` ? Si tu as un doute sur un refdes ou "
-                "un mode, demande-moi avant d'appeler l'outil."
+                "I just finished this repair. Can you summarise in one "
+                "sentence which component(s) I fixed or replaced based on "
+                "the history of our chat and the measurements taken, then "
+                "record the result with the `mb_validate_finding` tool? "
+                "If you have any doubt about a refdes or a mode, ask me "
+                "before calling the tool."
             )
             if repair_id and conv_id and device_slug and memory_root:
                 if pending_conv is not None:
