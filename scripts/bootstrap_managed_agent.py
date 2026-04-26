@@ -22,6 +22,38 @@ approval). When it lands natively, this bootstrap can be updated so
 the `normal` agent declares the other two as `callable_agents` — the
 orchestration then becomes native rather than frontend-routed.
 
+SDK FEATURES NOT APPLICABLE TO MA AGENT CREATION
+================================================
+The following Messages-API parameters are *intentionally absent* from
+`agents.create()` because the MA control plane does not surface them
+(verified 2026-04 against `managed-agents-2026-04-01` + Python SDK
+0.97.0 + the official MA agent-setup docs):
+
+  - `output_config.effort` (low|medium|high|xhigh|max) — not accepted
+    on `agents.create` nor `sessions.create`. MA decides effort from
+    its own internal heuristics. See `runtime_direct.py` for the
+    Messages-API equivalent (we set `effort=xhigh` on Opus 4.7 there).
+
+  - `output_config.task_budget` (beta `task-budgets-2026-03-13`) —
+    same: not exposed by MA. The MA control plane has its own budget
+    surface (per-environment quotas, billable-hour pool). Re-evaluate
+    whenever a new MA beta header lands.
+
+  - `thinking` config (`{type: "adaptive", display: "summarized"}`) —
+    not exposed; MA enables adaptive thinking by default and emits
+    `agent.thinking` events on the session stream. The runtime relays
+    them to the WS — see `runtime_managed.py::_forward_session_to_ws`.
+
+  - Sampling parameters (`temperature`, `top_p`, `top_k`) — Opus 4.7
+    400s on these via Messages API, and MA strips them anyway. Never
+    set them.
+
+Custom-tool `permission_policy` is also not applicable: the always-ask
+flow only exists on the built-in `agent_toolset_20260401` (already
+wired here on the diagnostic + curator agents). Custom tools always
+round-trip through `agent.custom_tool_use → user.custom_tool_result`,
+so the runtime *is* the gate — `permission_policy` would be a no-op.
+
 On-disk format (`managed_ids.json`, gitignored):
 
     {

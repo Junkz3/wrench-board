@@ -2761,6 +2761,12 @@ async def _forward_session_to_ws(
                         )
 
             elif etype == "agent.thinking":
+                # MA surfaces summarized thinking text on this event when the
+                # configured model supports adaptive thinking (Opus 4.6/4.7,
+                # Sonnet 4.6 — all enabled by default server-side; the agent
+                # config doesn't expose a `thinking` knob, see bootstrap docs).
+                # Empty `text` means MA emitted the marker but the model chose
+                # `display: omitted` for that block — skip.
                 text = getattr(event, "text", "") or ""
                 if text:
                     await ws.send_json({"type": "thinking", "text": text})
