@@ -80,6 +80,8 @@ managed_ids.json
 *.swo
 *~
 .zed/
+.claude/scheduled_tasks.lock
+.claude/*.lock
 
 # --- OS ---
 .DS_Store
@@ -98,7 +100,7 @@ pids/
 *.pid
 *.seed
 
-# --- Project-specific: hackathon anti-contamination ---
+# --- Project-specific: local-only working files ---
 brain_dump_hackathon.md
 notes_perso/
 ref_repairmind/
@@ -118,6 +120,8 @@ memory/*
 !memory/.gitkeep
 
 # Evolve loop state — locally-managed per-machine, do not version
+# Path itself (covers symlink case when evolve→archive-evolve-runs/sim)
+/evolve
 evolve/*
 !evolve/.gitkeep
 !evolve/reports
