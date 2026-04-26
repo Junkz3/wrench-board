@@ -1,42 +1,171 @@
-# wrench-board
+# Wrench Board
 
-> A senior microsoldering technician, available to every repair shop.
+> Agent-native diagnostic workbench for board-level electronics repair, powered by Claude Opus 4.7.
 
-## What it does
+<!-- [Logo / mascot — drop into web/assets/ and link here] -->
 
-`wrench-board` is an agent-native diagnostics workbench for board-level
-electronics repair. A technician asks questions in natural language —
-"where is the PMIC?", "why isn't the 3V3 rail coming up?" — and Claude
-highlights components, traces nets on the boardview, and narrates the
-reasoning in a persistent repair journal.
+<!-- [Demo video — embed link after recording] -->
 
-The agent is not a chatbot glued on top of buttons. It *is* the interface:
-pan, zoom, highlight, and net tracing happen through tool calls emitted by
-Claude in response to the technician's questions.
+## What it is
 
-## Stack
+Tens of millions of tonnes of electronics end up as e-waste every year. A
+large share of that is recoverable at the board level — a dead capacitor, a
+blown diode, a bad PMIC — but only a microsoldering technician can find and
+fix it. We are the **last mile** of repair before the landfill, and there
+are not many of us.
 
-- **Backend:** Python 3.11+, FastAPI, WebSocket, Pydantic, pdfplumber
-- **Agent:** Anthropic Python SDK with `claude-opus-4-7` (reasoning) and
-  `claude-haiku-4-5` (validation, formatting)
-- **Frontend:** Vanilla HTML, CSS, JS — no build step, no framework
-- **Boards:** open-hardware only. Ships with KiCad `.kicad_pcb` support;
-  parser architecture designed to extend to OpenBoardView formats.
+Wrench Board is a senior microsoldering teammate built for that last mile.
+It ingests a schematic PDF and a boardview, builds a per-device knowledge
+pack in two minutes, and runs an Opus 4.7 diagnostic agent that pilots the
+board visually — highlights pins, traces nets, simulates failures — while
+the technician keeps the iron in their hand.
 
-## Quick start
+The bet is **precision over magic**. The agent is not allowed to invent a
+reference designator. Every refdes it utters originates from a tool lookup,
+and a server-side sanitizer wraps any token it cannot verify *before* the
+text reaches the screen. The deterministic engines underneath produce
+verifiable causal chains, not vibes.
+
+## Why it exists
+
+I've been a microsoldering technician for three years. For most of that
+time, I sent screenshots to Claude one at a time, manually, and pasted the
+answer into a paper notebook. I built the workbench I needed.
+
+## How it works
+
+Four orthogonal workflows feed a single on-disk corpus per device under
+`memory/{slug}/`:
+
+- **Knowledge Factory** — four Claude personas (Scout, Registry, Writers,
+  Auditor) build a verified repair pack from a device label in ~2 minutes.
+  The three Writers (Cartographe / Clinicien / Lexicographe) run in
+  parallel and share a cache-warmed prefix to amortize the long shared
+  input across writers.
+- **Schematic Ingestion** — Opus 4.7 vision compiles a PDF schematic, page
+  by page, into a queryable `ElectricalGraph`: nets classified, boot
+  sequence inferred, quality report attached.
+- **Diagnostic Agent** — an Anthropic Managed Agent per device, with a
+  four-store layered memory (`global-patterns`, `global-playbooks`,
+  `device-{slug}`, `repair-{repair_id}`), pilots the boardview through 12
+  `bv_*` tools and queries the pack, schematic graph, measurements,
+  validations and technician profile through ~24 more — 36 custom tools
+  declared in `api/agent/manifest.py`. The agent never fabricates a
+  refdes : tool discipline plus a post-hoc sanitizer.
+- **microsolder-evolve** — four overnight search loops, one
+  per surface : the deterministic simulator + hypothesize engines
+  (`sim`), the schematic compiler (`pipeline`), the schematic vision
+  pass (`pipeline-vision`), and the diagnostic agent itself (`agent`).
+  Each loop proposes patches against an oracle benchmark and either
+  keeps them (`evolve:`-prefixed commit) or reverts. The loops have
+  been running and shipping improvements while I work on other things.
+
+### Files + Vision — the agent can ask to see
+
+A microsoldering diagnosis lives or dies on what the probe is touching
+*right now*, and a chat box can't carry that. The technician plugs a USB
+microscope or webcam into the workbench and the agent requests a frame on
+demand through the `cam_capture` tool, reads the image, and feeds it back
+into its reasoning. The technician can also drop a macro shot or a close-up
+of a suspect chip into the chat at any time. Captures and uploads are
+persisted under the repair so a session can be replayed end-to-end —
+words, decisions, and the actual photographs the agent looked at.
+
+This closes the loop the screenshot-pasting workflow never could: the
+agent stops *guessing* what the board looks like and starts *seeing* it,
+on the technician's cue, on the technician's optics.
+
+## Under the hood
+
+- **Backend** — Python 3.11+ / FastAPI / native WebSocket / Pydantic v2 /
+  pdfplumber. No build step, no bundler.
+- **Frontend** — vanilla HTML + CSS + JS, OKLCH design tokens, D3 v7 for
+  the boardview and knowledge graph. Inline SVG icons. No framework.
+- **Models** — Claude Opus 4.7 (heavy pipeline writers, schematic vision,
+  `deep` diagnostic tier), Claude Sonnet 4.6 (Scout, Registry, Mapper,
+  Lexicographe, `normal` tier), Claude Haiku 4.5 (intent classifier, phase
+  narrator, coverage gate, `fast` tier).
+- **Memory** — per-device Anthropic Managed Agents memory stores. The
+  agent self-orients across sessions by reading its own scribe notebook
+  (`state.md`, `decisions/`, `measurements/`, `open_questions.md`)
+  instead of relying on an LLM-generated resume.
+- **Boardview** — 12 clean-room parsers in `api/board/parser/`, dispatched
+  by extension: KiCad `.kicad_pcb`, OpenBoardView Test_Link `.brd`,
+  KiCad-boardview BRD2, plus `.asc` `.bdv` `.bv` `.cad` `.cst` `.f2b`
+  `.fz` `.gr` `.tvw`. Adding a format = one new file.
+- **Tests** — ~1100 functions across 133 files, including 10 deterministic
+  invariants on the simulator + hypothesize engines and frozen-oracle
+  accuracy gates marked `@slow`.
+- **Anti-hallucination** — defense in depth, two layers. (1) Tools return
+  `{found: false, closest_matches: [...]}` for unknown refdes; the system
+  prompt instructs the agent to pick from suggestions or ask the user.
+  (2) `api/agent/sanitize.py` scans every outbound text for refdes-shaped
+  tokens (`\b[A-Z]{1,3}\d{1,4}\b`) and wraps any unverified match as
+  `⟨?U999⟩` before it reaches the technician.
+
+Two pure-sync deterministic engines (`simulator.py`, `hypothesize.py`) sit
+at the core of the diagnostic stack. The simulator advances phase-by-phase
+over a boot sequence and emits a timeline of dead rails, dead components,
+and the cause of blocking per phase. The hypothesizer takes a partial
+observation and enumerates 1- and 2-fault refdes-kill candidates that
+explain it, ranked by F1 against the observation. Neither calls an LLM at
+runtime.
+
+The diagnostic agent has two interchangeable runtimes — **managed** via
+Anthropic Managed Agents, **direct** via the Messages API. Managed is the
+default and the production path; direct serves as a fallback when the MA
+beta is unavailable and as an on-disk inspection harness during
+development. The WebSocket protocol is identical so the frontend doesn't
+know which one is running. See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
+§ *Workflow D — Diagnostic Runtime* for the full trade-off (pack mounting,
+cost profile, history persistence, cross-repair memory).
+
+## Roadmap — Community Evolution Loop
+
+Wrench Board runs locally. Each technician's instance can improve its
+deterministic simulator against their own field cases. When the evolve
+loop discovers a rule that holds up, it surfaces a candidate pull request
+to the upstream repo. Right-to-repair, built in the open, by the people
+who actually do the repairs.
+
+## Quickstart
 
 ```bash
-make install          # create venv and install deps
+git clone https://github.com/<you>/wrench-board
+cd wrench-board
+make install          # create .venv and install deps (incl. [dev])
 cp .env.example .env  # then fill in ANTHROPIC_API_KEY
 make run              # uvicorn --reload on http://localhost:8000
 ```
 
-Run the tests with `make test`.
+For Managed Agents mode (default), bootstrap the environment + tier-scoped
+agents once :
 
-## Project status
+```bash
+.venv/bin/python scripts/bootstrap_managed_agent.py
+```
 
-In active development.
+Fallback to direct mode if the Managed Agents beta is unavailable :
 
-## License
+```bash
+DIAGNOSTIC_MODE=direct make run
+# or: make demo-fallback
+```
 
-Apache 2.0 — see [LICENSE](LICENSE).
+See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the full
+architecture reference and [`CLAUDE.md`](CLAUDE.md) for development
+conventions.
+
+## License & credits
+
+Apache 2.0 — see [`LICENSE`](LICENSE). All code in this repository was
+written from scratch; dependencies are MIT / Apache 2.0 / BSD only. The
+MNT Reform motherboard used as the canonical test target is
+CERN-OHL-S-2.0. Built solo at Repair Valley, an independent electronics
+repair workshop.
+
+## Contributing
+
+Wrench Board is open to contributors who care about right-to-repair.
+Field reports, new boardview parsers, simulator rules — open an issue or
+a PR.
