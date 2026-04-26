@@ -325,14 +325,8 @@ def test_strip_ctx_tag_returns_empty_on_tag_only():
     assert strip_ctx_tag("[ctx · device=foo]") == ""
 
 
-def test_strip_ctx_tag_then_intro_strip_chains_correctly():
-    """The managed runtime peels ctx_tag first, then bootstrap intro markers."""
-    from api.agent.runtime_managed import _strip_intro_wrapper
-
-    body = (
-        '[ctx · device=iPhone X (iphone-x) · plainte_init="écran noir"]\n\n'
-        "[Nouvelle session de diagnostic]\n"
-        "Device: iPhone X (slug: iphone-x)\n\n---\n\n"
-        "Salut"
-    )
-    assert _strip_intro_wrapper(body) == "Salut"
+# `_strip_intro_wrapper` was removed when the layered MA memory architecture
+# replaced the LLM-driven session-resume summary path (2026-04-26). The
+# function it tested no longer exists; the agent now self-orients from the
+# per-repair scribe mount, and there's no longer a Haiku summarization that
+# needs the prior intro stripped from transcript lines.
