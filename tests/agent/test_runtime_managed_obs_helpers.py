@@ -108,9 +108,9 @@ def test_session_start_log_emits_log_id_anchor_line(monkeypatch, caplog):
     back to the device/repair grouping."""
     import logging
     import re
+    from unittest.mock import AsyncMock, MagicMock
 
     from api.agent import runtime_managed as rm
-    from unittest.mock import AsyncMock, MagicMock
 
     caplog.set_level(logging.INFO, logger=rm.logger.name)
     rm._active_diagnostic_keys.clear()
