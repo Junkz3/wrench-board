@@ -6,18 +6,6 @@ registered itself with the dispatch registry, so callers can use
 `parser_for(path)` without worrying about import order.
 """
 
-from api.board.parser.base import (
-    BoardParser,
-    BoardParserError,
-    InvalidBoardFile,
-    MalformedHeaderError,
-    ObfuscatedFileError,
-    PinPartMismatchError,
-    UnsupportedFormatError,
-    parser_for,
-    register,
-)
-
 # Concrete parsers — importing them populates the dispatch registry.
 # Add new formats here as they ship.
 # See docs/superpowers/specs/2026-04-22-boardview-formats-roadmap.md.
@@ -34,6 +22,17 @@ from api.board.parser import (  # noqa: F401
     kicad,
     test_link,
     tvw,
+)
+from api.board.parser.base import (
+    BoardParser,
+    BoardParserError,
+    InvalidBoardFile,
+    MalformedHeaderError,
+    ObfuscatedFileError,
+    PinPartMismatchError,
+    UnsupportedFormatError,
+    parser_for,
+    register,
 )
 
 __all__ = [
