@@ -28,14 +28,14 @@ def test_mb_tools_contains_core_four_plus_expand() -> None:
     assert core.issubset(names)
 
 
-def test_bv_tools_has_twelve_entries() -> None:
-    assert len(BV_TOOLS) == 12
+def test_bv_tools_has_thirteen_entries() -> None:
+    assert len(BV_TOOLS) == 13
     names = {t["name"] for t in BV_TOOLS}
     assert names == {
         "bv_highlight", "bv_focus", "bv_reset_view", "bv_flip",
         "bv_annotate", "bv_dim_unrelated", "bv_highlight_net",
         "bv_show_pin", "bv_draw_arrow", "bv_measure",
-        "bv_filter_by_type", "bv_layer_visibility",
+        "bv_filter_by_type", "bv_layer_visibility", "bv_scene",
     }
 
 

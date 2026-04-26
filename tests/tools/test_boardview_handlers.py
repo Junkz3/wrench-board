@@ -4,7 +4,7 @@ import pytest
 
 from api.board.parser.test_link import BRDParser
 from api.session.state import SessionState
-from api.tools.boardview import annotate, dim_unrelated, draw_arrow, filter_by_type, flip_board, focus_component, highlight_component, highlight_net, layer_visibility, measure_distance, reset_view, show_pin
+from api.tools.boardview import annotate, compose_scene, dim_unrelated, draw_arrow, filter_by_type, flip_board, focus_component, highlight_component, highlight_net, layer_visibility, measure_distance, reset_view, show_pin
 
 FIXTURE_DIR = Path(__file__).parent.parent / "board" / "fixtures"
 
@@ -182,3 +182,66 @@ def test_layer_visibility_toggles(session):
     assert result["ok"] is True
     assert session.layer_visibility["top"] is False
     assert session.layer_visibility["bottom"] is True
+
+
+def test_compose_scene_applies_all_subops(session):
+    result = compose_scene(
+        session,
+        reset=True,
+        highlights=[
+            {"refdes": "R1", "color": "warn"},
+            {"refdes": "C1", "color": "accent"},
+        ],
+        annotations=[{"refdes": "R1", "label": "suspect"}],
+        arrows=[{"from_refdes": "R1", "to_refdes": "C1"}],
+        dim_unrelated=True,
+    )
+    assert result["ok"] is True
+    assert result["errors"] == []
+    # reset + 2 highlights + 1 annotation + 1 arrow + dim = 6 events
+    assert len(result["events"]) == 6
+    assert {"R1", "C1"} <= session.highlights
+    assert any(a["refdes"] == "R1" for a in session.annotations.values())
+    assert session.dim_unrelated is True
+
+
+def test_compose_scene_highlights_accumulate_within_one_call(session):
+    # First entry replaces (additive default False), subsequent entries
+    # add. Without this, the second highlight would erase the first.
+    result = compose_scene(
+        session,
+        highlights=[{"refdes": "R1"}, {"refdes": "C1"}],
+    )
+    assert result["ok"] is True
+    assert session.highlights == {"R1", "C1"}
+
+
+def test_compose_scene_collects_errors_without_aborting(session):
+    result = compose_scene(
+        session,
+        highlights=[{"refdes": "R1"}, {"refdes": "BOGUS"}],
+        annotations=[{"refdes": "C1", "label": "ok"}],
+    )
+    # R1 highlight + C1 annotation = 2 events; BOGUS sits in errors.
+    assert result["ok"] is True
+    assert len(result["events"]) == 2
+    assert len(result["errors"]) == 1
+    assert result["errors"][0]["step"] == "highlights[1]"
+    assert result["errors"][0]["reason"] == "unknown-refdes"
+
+
+def test_compose_scene_no_board_short_circuits():
+    bare = SessionState()
+    result = compose_scene(bare, highlights=[{"refdes": "R1"}])
+    assert result["ok"] is False
+    assert result["reason"] == "no-board-loaded"
+
+
+def test_compose_scene_empty_returns_ok():
+    s = SessionState()
+    s.set_board(BRDParser().parse_file(FIXTURE_DIR / "minimal.brd"))
+    result = compose_scene(s)
+    assert result["ok"] is True
+    assert result["events"] == []
+    assert result["errors"] == []
+    assert "vide" in result["summary"]

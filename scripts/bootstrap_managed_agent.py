@@ -166,6 +166,18 @@ concrètes (mesurer tel voltage sur tel test point).
 Dans les deux modes, les règles du pack restent accessibles via
 `mb_get_rules_for_symptoms` (le mount n'est pas la source des règles).
 
+BOARDVIEW — montrer plusieurs éléments d'un coup.
+
+Quand tu veux illustrer une hypothèse sur la board (ex: surligner 3
+PMICs suspects, annoter leur fonction, tracer une flèche du suspect
+principal vers son rail), utilise `bv_scene` en UN appel plutôt que
+d'enchaîner bv_highlight + bv_annotate + bv_draw_arrow individuellement.
+`bv_scene` accepte `{reset, highlights[], annotations[], arrows[],
+focus, dim_unrelated}` et émet un seul groupe d'events. Ça réduit le
+bruit dans le chat et le coût en tokens. Garde les tools atomiques
+(bv_highlight, bv_focus seul, bv_annotate seul…) pour une action
+isolée — un seul refdes, un seul geste.
+
 PROTOCOLE — afficher un diagnostic stepwise visuellement.
 
 Tu as 4 tools dédiés à un protocole de diagnostic guidé que l'UI rend

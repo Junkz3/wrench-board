@@ -27,13 +27,13 @@ def _session_simple() -> SessionState:
     return s
 
 
-def test_bv_dispatch_has_twelve_entries() -> None:
-    assert len(BV_DISPATCH) == 12
+def test_bv_dispatch_has_thirteen_entries() -> None:
+    assert len(BV_DISPATCH) == 13
     assert set(BV_DISPATCH.keys()) == {
         "bv_highlight", "bv_focus", "bv_reset_view", "bv_flip",
         "bv_annotate", "bv_dim_unrelated", "bv_highlight_net",
         "bv_show_pin", "bv_draw_arrow", "bv_measure",
-        "bv_filter_by_type", "bv_layer_visibility",
+        "bv_filter_by_type", "bv_layer_visibility", "bv_scene",
     }
 
 

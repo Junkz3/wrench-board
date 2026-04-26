@@ -401,6 +401,84 @@ MB_TOOLS: list[dict] = [
 BV_TOOLS: list[dict] = [
     {
         "type": "custom",
+        "name": "bv_scene",
+        "description": (
+            "Compose une scène diagnostique sur la board en UN appel : "
+            "reset, highlights, annotations, arrows, focus, dim. "
+            "PRÉFÈRE ce tool dès que tu veux montrer plusieurs éléments "
+            "liés à la même hypothèse (ex: surligner 3 PMICs + annoter "
+            "leur fonction + tracer une flèche du suspect vers son rail). "
+            "Les sous-ops s'exécutent dans l'ordre reset → highlights → "
+            "annotations → arrows → focus → dim et émettent un seul "
+            "groupe d'events. Les tools atomiques (bv_highlight, "
+            "bv_annotate, bv_draw_arrow…) restent pour des actions "
+            "isolées (un seul refdes, un seul geste). Cap soft : ~10 "
+            "highlights, 10 annotations, 5 flèches par scène."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "reset": {
+                    "type": "boolean",
+                    "default": False,
+                    "description": "Clear toutes les overlays avant d'appliquer la scène.",
+                },
+                "highlights": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "refdes": {
+                                "oneOf": [
+                                    {"type": "string"},
+                                    {"type": "array", "items": {"type": "string"}},
+                                ],
+                            },
+                            "color": {
+                                "type": "string",
+                                "enum": ["accent", "warn", "mute"],
+                                "default": "accent",
+                            },
+                        },
+                        "required": ["refdes"],
+                    },
+                },
+                "annotations": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "refdes": {"type": "string"},
+                            "label": {"type": "string"},
+                        },
+                        "required": ["refdes", "label"],
+                    },
+                },
+                "arrows": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "from_refdes": {"type": "string"},
+                            "to_refdes": {"type": "string"},
+                        },
+                        "required": ["from_refdes", "to_refdes"],
+                    },
+                },
+                "focus": {
+                    "type": "object",
+                    "properties": {
+                        "refdes": {"type": "string"},
+                        "zoom": {"type": "number", "default": 1.4},
+                    },
+                    "required": ["refdes"],
+                },
+                "dim_unrelated": {"type": "boolean", "default": False},
+            },
+        },
+    },
+    {
+        "type": "custom",
         "name": "bv_highlight",
         "description": "Highlight one or more components on the PCB canvas.",
         "input_schema": {
@@ -809,8 +887,11 @@ PROPOSE mb_expand_knowledge ("Je peux lancer un Scout ciblé sur ces symptômes
 — ~30s, ~0.40$ de tokens. Go ?"). NE LANCE PAS tant que le tech n'a pas dit
 oui. Après son go, invoque le tool, patiente, puis re-call
 mb_get_rules_for_symptoms. Quand il demande un composant, appelle
-mb_get_component. Si la boardview est disponible, enchaîne bv_focus +
-bv_highlight pour MONTRER le suspect. Quand le tech confirme la cause,
+mb_get_component. Si la boardview est disponible et que tu veux montrer
+plusieurs éléments d'un coup (highlights + annotations + flèches d'une
+même hypothèse), utilise `bv_scene` en UN appel — tools atomiques
+(bv_highlight, bv_focus, bv_annotate seuls) seulement pour une action
+isolée. Quand le tech confirme la cause,
 appelle mb_record_finding. Ne réponds JAMAIS depuis ta mémoire de formation
 pour des refdes ou des symptômes — utilise toujours les tools ci-dessus.
 

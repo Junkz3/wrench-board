@@ -31,6 +31,7 @@ BV_DISPATCH: dict[str, Callable[..., dict[str, Any]]] = {
     "bv_measure":          bv.measure_distance,
     "bv_filter_by_type":   bv.filter_by_type,
     "bv_layer_visibility": bv.layer_visibility,
+    "bv_scene":            bv.compose_scene,
 }
 
 
