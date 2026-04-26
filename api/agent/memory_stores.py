@@ -82,6 +82,34 @@ async def _create_store_via_http(
         return None
 
 
+async def _delete_store_via_http(*, api_key: str, store_id: str) -> bool:
+    """DELETE a memory store. Returns True on 200/204, False otherwise.
+
+    Treats 404 as success — a store that's already gone is the desired end
+    state. Any other error logs a warning and returns False so the caller
+    can still proceed with disk cleanup."""
+    try:
+        async with httpx.AsyncClient(timeout=30.0) as http:
+            resp = await http.delete(
+                f"{_API_BASE}/memory_stores/{store_id}",
+                headers=_http_headers(api_key),
+            )
+    except Exception as exc:  # noqa: BLE001
+        logger.warning(
+            "[MemoryStore] HTTP delete raised for store=%s: %s", store_id, exc
+        )
+        return False
+    if resp.status_code in (200, 204, 404):
+        return True
+    logger.warning(
+        "[MemoryStore] HTTP delete returned %d for store=%s: %s",
+        resp.status_code,
+        store_id,
+        resp.text[:300],
+    )
+    return False
+
+
 async def _update_memory_via_http(
     *, api_key: str, store_id: str, memory_id: str, content: str
 ) -> str | None:
@@ -595,4 +623,67 @@ async def upsert_memory(
         store_id=store_id,
         path=path,
         content=content,
+    )
+
+
+async def delete_repair_store(
+    client: AsyncAnthropic,
+    *,
+    device_slug: str,
+    repair_id: str,
+) -> bool:
+    """Delete the per-repair MA memory store, if any.
+
+    Reads `memory/{slug}/repairs/{repair_id}/managed.json` to find the
+    `memory_store_id`, then deletes the store via SDK or HTTP. Returns True
+    when the store is gone (deleted now, or already absent / no marker —
+    nothing to clean). Errors are swallowed and logged so disk cleanup can
+    still proceed in the caller.
+    """
+    marker = _repair_marker_path(device_slug, repair_id)
+    if not marker.exists():
+        return True
+
+    try:
+        data = json.loads(marker.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError) as exc:
+        logger.warning(
+            "[MemoryStore] repair marker %s unreadable on delete: %s — "
+            "skipping MA cleanup",
+            marker,
+            exc,
+        )
+        return True
+
+    store_id = data.get("memory_store_id")
+    if not store_id:
+        return True
+
+    sdk_beta = getattr(client, "beta", None)
+    sdk_surface = (
+        getattr(sdk_beta, "memory_stores", None) if sdk_beta else None
+    )
+    if sdk_surface is not None:
+        try:
+            await sdk_surface.delete(store_id)
+            return True
+        except Exception as exc:  # noqa: BLE001
+            logger.warning(
+                "[MemoryStore] SDK delete failed for repair=%s store=%s: %s — "
+                "falling back to HTTP",
+                repair_id,
+                store_id,
+                exc,
+            )
+
+    settings = get_settings()
+    if not settings.anthropic_api_key:
+        logger.warning(
+            "[MemoryStore] no API key; cannot delete MA store %s for repair=%s",
+            store_id,
+            repair_id,
+        )
+        return False
+    return await _delete_store_via_http(
+        api_key=settings.anthropic_api_key, store_id=store_id
     )

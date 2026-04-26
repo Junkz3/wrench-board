@@ -21,6 +21,7 @@ import asyncio
 import json
 import logging
 import re
+import shutil
 import time
 import uuid
 from datetime import UTC, datetime
@@ -33,6 +34,7 @@ from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
 from api.agent.field_reports import list_field_reports
+from api.agent.memory_stores import delete_repair_store
 from api.config import get_settings
 from api.pipeline import events
 from api.pipeline.expansion import expand_pack
@@ -248,11 +250,86 @@ class PackSummary(BaseModel):
     has_rules: bool
     has_dictionary: bool
     has_audit_verdict: bool
+    # Inputs the technician may have provided. Drive the data-aware
+    # repair dashboard (cards explicitly switch between "importé" and
+    # "à importer" based on these flags).
+    has_boardview: bool
+    boardview_format: str | None
+    has_schematic_pdf: bool
+    has_electrical_graph: bool
+
+
+# Boardview parsers — the dispatch registry is the source of truth, but we
+# materialise the supported extension list once for filesystem scans (the
+# registry is keyed on extension, not on file path glob).
+_BOARDVIEW_EXTENSIONS = (
+    ".kicad_pcb",
+    ".brd",
+    ".brd2",
+    ".asc",
+    ".bdv",
+    ".bv",
+    ".cad",
+    ".cst",
+    ".f2b",
+    ".fz",
+    ".gr",
+    ".tvw",
+)
+
+
+def _detect_boardview(slug: str, pack_dir: Path) -> tuple[bool, str | None]:
+    """Find a boardview file for this slug, returning (present, extension).
+
+    Looks at two locations, in priority order:
+        1. `board_assets/{slug}.<ext>` — canonical, in-repo demo boards.
+        2. `memory/{slug}/uploads/*-boardview-*` — technician-uploaded.
+    Returns the dotted extension (e.g. ".kicad_pcb") so the UI can label
+    the format on the boardview card. ".kicad_pcb" beats ".brd" if both
+    exist, matching `SessionState.from_device` priority.
+    """
+    assets_root = Path.cwd() / "board_assets"
+    for ext in _BOARDVIEW_EXTENSIONS:
+        candidate = assets_root / f"{slug}{ext}"
+        if candidate.exists() and candidate.is_file():
+            return True, ext
+
+    uploads_dir = pack_dir / "uploads"
+    if uploads_dir.exists():
+        for path in sorted(uploads_dir.iterdir()):
+            if not path.is_file():
+                continue
+            if "-boardview-" not in path.name:
+                continue
+            return True, path.suffix.lower() or None
+    return False, None
+
+
+def _detect_schematic_pdf(slug: str, pack_dir: Path) -> bool:
+    """True when a source schematic PDF exists for this slug.
+
+    Checks `memory/{slug}/schematic.pdf`, `board_assets/{slug}.pdf`, and
+    any technician-uploaded `*-schematic_pdf-*` file under
+    `memory/{slug}/uploads/`. Mirrors the logic used by the schematic
+    serving routes so the dashboard never lies about input availability.
+    """
+    if (pack_dir / "schematic.pdf").exists():
+        return True
+    if (Path.cwd() / "board_assets" / f"{slug}.pdf").exists():
+        return True
+    uploads_dir = pack_dir / "uploads"
+    if uploads_dir.exists():
+        for path in uploads_dir.iterdir():
+            if path.is_file() and "-schematic_pdf-" in path.name:
+                return True
+    return False
 
 
 def _summarize_pack(pack_dir: Path) -> PackSummary:
+    slug = pack_dir.name
+    bv_present, bv_ext = _detect_boardview(slug, pack_dir)
     return PackSummary(
-        device_slug=pack_dir.name,
+        device_slug=slug,
         disk_path=str(pack_dir),
         has_raw_dump=(pack_dir / "raw_research_dump.md").exists(),
         has_registry=(pack_dir / "registry.json").exists(),
@@ -260,6 +337,10 @@ def _summarize_pack(pack_dir: Path) -> PackSummary:
         has_rules=(pack_dir / "rules.json").exists(),
         has_dictionary=(pack_dir / "dictionary.json").exists(),
         has_audit_verdict=(pack_dir / "audit_verdict.json").exists(),
+        has_boardview=bv_present,
+        boardview_format=bv_ext,
+        has_schematic_pdf=_detect_schematic_pdf(slug, pack_dir),
+        has_electrical_graph=(pack_dir / "electrical_graph.json").exists(),
     )
 
 
@@ -605,6 +686,95 @@ async def get_repair(repair_id: str) -> RepairSummary:
                 created_at=payload.get("created_at", ""),
             )
     raise HTTPException(status_code=404, detail=f"No repair {repair_id!r}")
+
+
+@router.delete("/repairs/{repair_id}")
+async def delete_repair(repair_id: str) -> dict:
+    """Delete a repair: its disk artefacts AND any per-repair MA memory store.
+
+    Scope:
+      - removes `memory/{slug}/repairs/{repair_id}.json` (the metadata)
+      - removes `memory/{slug}/repairs/{repair_id}/` (subdir with chat
+        history, findings, managed.json marker, conversations…)
+      - calls the Managed Agents API to delete the per-repair memory store
+        named `wrench-board-repair-{slug}-{repair_id}` (if a marker is on
+        disk). Best-effort: an MA failure logs but doesn't block disk
+        cleanup, since a stranded store is recoverable manually whereas a
+        half-deleted disk state is not.
+
+    Does NOT touch the device-level pack (`memory/{slug}/*.json`) or the
+    shared `device-{slug}` / `global-*` memory stores — that knowledge is
+    reused by the next repair on the same device.
+    """
+    settings = get_settings()
+    root = Path(settings.memory_root)
+    if not root.exists():
+        raise HTTPException(status_code=404, detail=f"No repair {repair_id!r}")
+
+    metadata_file: Path | None = None
+    device_slug: str | None = None
+    for pack_dir in root.iterdir():
+        if not pack_dir.is_dir():
+            continue
+        candidate = pack_dir / "repairs" / f"{repair_id}.json"
+        if candidate.exists():
+            metadata_file = candidate
+            device_slug = pack_dir.name
+            break
+
+    if metadata_file is None or device_slug is None:
+        raise HTTPException(status_code=404, detail=f"No repair {repair_id!r}")
+
+    # 1. MA cleanup (best-effort). Drives off the on-disk marker so that a
+    # repair which never opened a session simply no-ops here.
+    store_deleted = False
+    try:
+        client = AsyncAnthropic(api_key=settings.anthropic_api_key or "missing")
+        store_deleted = await delete_repair_store(
+            client, device_slug=device_slug, repair_id=repair_id
+        )
+    except Exception as exc:  # noqa: BLE001
+        logger.warning(
+            "delete_repair: MA cleanup raised for repair=%s: %s — proceeding with disk",
+            repair_id,
+            exc,
+        )
+
+    # 2. Disk cleanup. Remove subdir first (best-effort), then the metadata
+    # JSON. Order matters — list_repairs scans the JSONs, so wiping the
+    # metadata last is what makes the repair disappear from the library.
+    subdir = metadata_file.parent / repair_id
+    dir_deleted = False
+    if subdir.exists() and subdir.is_dir():
+        try:
+            shutil.rmtree(subdir)
+            dir_deleted = True
+        except OSError as exc:
+            logger.error(
+                "delete_repair: rmtree failed for %s: %s", subdir, exc
+            )
+            raise HTTPException(
+                status_code=500,
+                detail=f"Failed to remove repair directory: {exc}",
+            ) from exc
+
+    try:
+        metadata_file.unlink()
+    except OSError as exc:
+        logger.error(
+            "delete_repair: unlink failed for %s: %s", metadata_file, exc
+        )
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to remove repair metadata: {exc}",
+        ) from exc
+
+    return {
+        "repair_id": repair_id,
+        "device_slug": device_slug,
+        "store_deleted": store_deleted,
+        "dir_deleted": dir_deleted,
+    }
 
 
 @router.get("/repairs/{repair_id}/conversations")
