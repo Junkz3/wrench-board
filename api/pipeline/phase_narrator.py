@@ -8,6 +8,16 @@ that text as a `phase_narration` event on the same WS bus, where the landing UI 
 it as the user watches the pipeline build their device's knowledge in real time.
 
 Failures here are non-fatal — narrations are nice-to-have, never blocking the pipeline.
+
+SDK note (2026-04-26 audit): this module hand-rolls a forced `tool_choice` instead
+of routing through `tool_call.call_with_forced_tool`. Migration was evaluated and
+deferred — the helper would force a streaming `messages.stream` path (required for
+its retry / deep-unwrap / telemetry features), but Haiku's 300-token narration is
+trivially short and a raise after max_attempts would surface as a user-visible
+narration failure, while today the broad except below silently degrades to "" as
+designed. Telemetry contribution is negligible (~10 input tokens × 5 phases per
+run). Re-evaluate if narration ever moves to a Pydantic-validated multi-field
+schema or starts contributing meaningfully to per-phase token stats.
 """
 from __future__ import annotations
 

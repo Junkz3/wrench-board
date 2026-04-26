@@ -31,7 +31,7 @@ from typing import Literal
 from anthropic import AsyncAnthropic
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ValidationError
 
 from api.agent.field_reports import list_field_reports
 from api.agent.memory_stores import delete_repair_store
@@ -213,7 +213,7 @@ async def _run_schematic_in_background(
             device_slug,
             time.monotonic() - t0,
         )
-    except Exception:
+    except Exception:  # noqa: BLE001 — fire-and-forget bg task; 202 already returned, just log
         logger.exception("[API] schematic ingestion failed for slug=%r", device_slug)
 
 
@@ -742,7 +742,7 @@ async def delete_repair(repair_id: str) -> dict:
         store_deleted = await delete_repair_store(
             client, device_slug=device_slug, repair_id=repair_id
         )
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:  # noqa: BLE001 — MA cleanup is best-effort; never block disk wipe
         logger.warning(
             "delete_repair: MA cleanup raised for repair=%s: %s — proceeding with disk",
             repair_id,
@@ -871,7 +871,7 @@ async def _run_pipeline_with_events(
             return
         try:
             text = await narrate_phase(phase, slug, client=narrator_client)
-        except Exception as exc:  # narrate_phase already swallows; defence-in-depth
+        except Exception as exc:  # noqa: BLE001 — narrate_phase already swallows; defence-in-depth
             logger.warning(
                 "[API] narrator unexpected raise (phase=%s slug=%s): %s",
                 phase, slug, exc,
@@ -898,7 +898,7 @@ async def _run_pipeline_with_events(
             on_event=_on_event,
             focus_symptom=focus_symptom,
         )
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001 — fire-and-forget bg task; report failure on event bus
         logger.exception("[API] background pipeline failed for slug=%r", slug)
         await events.publish(
             slug,
@@ -1493,7 +1493,7 @@ def _count_pdf_pages(pdf_path: Path) -> int | None:
 
         with pdfplumber.open(str(pdf_path)) as pdf:
             return len(pdf.pages)
-    except Exception:
+    except Exception:  # noqa: BLE001 — pdfplumber may raise many parse-time errors; "ETA unknown" is fine
         logger.warning("could not count pages in %s", pdf_path, exc_info=True)
         return None
 
@@ -1546,7 +1546,7 @@ async def _reingest_and_cache(slug: str, pack_dir: Path, pdf_path: Path, pdf_has
         # Persist this version's artefacts so a future switch back is instant.
         sources.write_through_cache(pack_dir, pdf_hash)
         logger.info("[sources] reingest complete for %s hash=%s", slug, pdf_hash)
-    except Exception:
+    except Exception:  # noqa: BLE001 — fire-and-forget bg task; pin stays set so UI can retry
         logger.exception("[sources] reingest failed for %s hash=%s", slug, pdf_hash)
 
 
@@ -1790,7 +1790,7 @@ def _render_and_extract_pages(pdf_path: Path, pages_dir: Path, dpi: int = 150) -
     for rp in rendered:
         try:
             g = extract_grounding(pdf_path, rp.page_number)
-        except Exception:
+        except Exception:  # noqa: BLE001 — pdfplumber/extractor failures are page-local, skip + continue
             logger.exception(
                 "grounding failed on page %d of %s — skipping anchors",
                 rp.page_number,
@@ -1996,7 +1996,7 @@ async def _run_boot_analyzer_in_background(device_slug: str, pack_dir: Path) -> 
     graph_path = pack_dir / "electrical_graph.json"
     try:
         graph = ElectricalGraph.model_validate_json(graph_path.read_text())
-    except Exception:
+    except (OSError, ValidationError):
         logger.exception("[API] analyze-boot: failed to load electrical_graph for %s", device_slug)
         return
     _s = get_settings()
@@ -2014,7 +2014,7 @@ async def _run_boot_analyzer_in_background(device_slug: str, pack_dir: Path) -> 
             len(analyzed.phases),
             analyzed.global_confidence,
         )
-    except Exception:
+    except Exception:  # noqa: BLE001 — fire-and-forget bg task; 202 already returned, just log
         logger.exception("[API] analyze-boot failed for %s", device_slug)
 
 
@@ -2048,7 +2048,7 @@ async def _run_net_classifier_in_background(device_slug: str, pack_dir: Path) ->
     graph_path = pack_dir / "electrical_graph.json"
     try:
         graph = ElectricalGraph.model_validate_json(graph_path.read_text())
-    except Exception:
+    except (OSError, ValidationError):
         logger.exception("[API] classify-nets: failed to load electrical_graph for %s", device_slug)
         return
     _s = get_settings()
@@ -2063,7 +2063,7 @@ async def _run_net_classifier_in_background(device_slug: str, pack_dir: Path) ->
             len(classification.nets),
             classification.model_used,
         )
-    except Exception:
+    except Exception:  # noqa: BLE001 — fire-and-forget bg task; 202 already returned, just log
         logger.exception("[API] classify-nets failed for %s", device_slug)
 
 
@@ -2182,7 +2182,7 @@ async def post_simulate(device_slug: str, request: SimulateRequest) -> dict:
 
     try:
         electrical = ElectricalGraph.model_validate_json(graph_path.read_text())
-    except Exception as exc:
+    except (OSError, ValidationError) as exc:
         raise HTTPException(
             status_code=422,
             detail=f"Malformed electrical_graph for {slug!r}: {exc}",
@@ -2212,7 +2212,7 @@ async def post_simulate(device_slug: str, request: SimulateRequest) -> dict:
     if ab_path.exists():
         try:
             analyzed = AnalyzedBootSequence.model_validate_json(ab_path.read_text())
-        except Exception:
+        except (OSError, ValidationError):
             analyzed = None
 
     tl = SimulationEngine(
