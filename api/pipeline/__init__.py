@@ -279,26 +279,27 @@ _BOARDVIEW_EXTENSIONS = (
 )
 
 
-def _detect_boardview(slug: str, pack_dir: Path) -> tuple[bool, str | None]:
-    """Find a boardview file for this slug, returning (present, extension).
+def _find_boardview(slug: str, pack_dir: Path) -> Path | None:
+    """Return the absolute path of the active boardview for this slug, or None.
 
-    Looks in priority order:
+    Lookup order — same priority chain as `_detect_boardview`:
         1. The active pin from `active_sources.json` (if present).
         2. `board_assets/{slug}.<ext>` — canonical, in-repo demo boards.
         3. `memory/{slug}/uploads/*-boardview-*` — technician-uploaded
-           (newest first).
-    Returns the dotted extension (e.g. ".kicad_pcb") so the UI can label
-    the format on the boardview card.
+           (alphabetical first match).
+    Used by both `_detect_boardview` (for the on-disk presence bitmask in
+    `PackSummary`) and by `GET /pipeline/packs/{slug}/boardview` (which
+    needs the actual path to stream the file).
     """
     pinned = sources.resolve_path(pack_dir, sources.BOARDVIEW_KIND)
     if pinned is not None:
-        return True, pinned.suffix.lower() or None
+        return pinned
 
     assets_root = Path.cwd() / "board_assets"
     for ext in _BOARDVIEW_EXTENSIONS:
         candidate = assets_root / f"{slug}{ext}"
         if candidate.exists() and candidate.is_file():
-            return True, ext
+            return candidate
 
     uploads_dir = pack_dir / "uploads"
     if uploads_dir.exists():
@@ -307,8 +308,20 @@ def _detect_boardview(slug: str, pack_dir: Path) -> tuple[bool, str | None]:
                 continue
             if "-boardview-" not in path.name:
                 continue
-            return True, path.suffix.lower() or None
-    return False, None
+            return path
+    return None
+
+
+def _detect_boardview(slug: str, pack_dir: Path) -> tuple[bool, str | None]:
+    """Return (present, extension) for a slug's boardview — bitmask helper.
+
+    Returns the dotted extension (e.g. ".kicad_pcb") so the UI can label
+    the format on the boardview card.
+    """
+    path = _find_boardview(slug, pack_dir)
+    if path is None:
+        return False, None
+    return True, path.suffix.lower() or None
 
 
 def _detect_schematic_pdf(slug: str, pack_dir: Path) -> bool:
@@ -809,6 +822,57 @@ def list_repair_conversations(repair_id: str) -> dict:
         "device_slug": found_slug,
         "repair_id": repair_id,
         "conversations": convs,
+    }
+
+
+@router.delete("/repairs/{repair_id}/conversations/{conv_id}")
+def delete_repair_conversation(repair_id: str, conv_id: str) -> dict:
+    """Delete a single conversation from a repair.
+
+    Wipes `memory/{slug}/repairs/{repair_id}/conversations/{conv_id}/` and
+    drops the matching entry from `conversations/index.json`. The repair
+    itself, its metadata file, sibling conversations, and the shared
+    repair-level MA memory store are untouched. The per-tier MA sessions
+    stored under the conv dir are dropped with it; their upstream Anthropic
+    counterparts are left to expire naturally.
+    """
+    safe_repair_id = _validate_repair_id(repair_id)
+    safe_conv_id = _validate_repair_id(conv_id)  # same shape constraints
+    from api.agent.chat_history import delete_conversation
+
+    settings = get_settings()
+    memory = Path(settings.memory_root)
+    found_slug: str | None = None
+    if memory.exists():
+        for metadata_file in memory.glob(f"*/repairs/{safe_repair_id}.json"):
+            found_slug = metadata_file.parent.parent.name
+            break
+    if not found_slug:
+        raise HTTPException(status_code=404, detail=f"unknown repair_id {safe_repair_id}")
+
+    try:
+        removed = delete_conversation(
+            device_slug=found_slug,
+            repair_id=safe_repair_id,
+            conv_id=safe_conv_id,
+        )
+    except OSError as exc:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to remove conversation: {exc}",
+        ) from exc
+
+    if not removed:
+        raise HTTPException(
+            status_code=404,
+            detail=f"unknown conversation {safe_conv_id} for repair {safe_repair_id}",
+        )
+
+    return {
+        "repair_id": safe_repair_id,
+        "conv_id": safe_conv_id,
+        "device_slug": found_slug,
+        "removed": True,
     }
 
 
@@ -1723,6 +1787,51 @@ async def switch_pack_source(
         detail="cache miss; vision pipeline launched in background.",
         eta_seconds=eta,
         page_count=pages,
+    )
+
+
+_BOARDVIEW_MEDIA_TYPES = {
+    ".brd":       "application/octet-stream",
+    ".brd2":      "application/octet-stream",
+    ".kicad_pcb": "application/octet-stream",
+    ".asc":       "text/plain",
+    ".bdv":       "application/octet-stream",
+    ".bv":        "application/octet-stream",
+    ".cad":       "application/octet-stream",
+    ".cst":       "application/octet-stream",
+    ".f2b":       "application/octet-stream",
+    ".fz":        "application/octet-stream",
+    ".gr":        "application/octet-stream",
+    ".tvw":       "application/octet-stream",
+}
+
+
+@router.api_route("/packs/{device_slug}/boardview", methods=["GET", "HEAD"])
+async def get_pack_boardview(device_slug: str) -> FileResponse:
+    """Serve the active boardview file for this device.
+
+    Resolution chain (same as `_find_boardview`):
+      1. `active_sources.json` pin -> `memory/{slug}/uploads/<pinned>`.
+      2. `board_assets/{slug}.<ext>` (in-repo demo boards).
+      3. `memory/{slug}/uploads/*-boardview-*` (alphabetical first).
+    Returns 404 when none resolves. Served with the original filename in
+    `Content-Disposition` so the frontend can preserve the extension when
+    re-POSTing to `/api/board/parse` (extension drives parser dispatch).
+    """
+    settings = get_settings()
+    slug = _slugify(device_slug)
+    pack_dir = Path(settings.memory_root) / slug
+    path = _find_boardview(slug, pack_dir)
+    if path is None:
+        raise HTTPException(
+            status_code=404,
+            detail=f"No boardview on disk for device_slug={slug!r}",
+        )
+    media_type = _BOARDVIEW_MEDIA_TYPES.get(path.suffix.lower(), "application/octet-stream")
+    return FileResponse(
+        path,
+        media_type=media_type,
+        headers={"Content-Disposition": f'inline; filename="{path.name}"'},
     )
 
 

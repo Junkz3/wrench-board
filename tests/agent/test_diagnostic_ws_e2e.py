@@ -199,9 +199,10 @@ def test_ws_diagnostic_rejects_missing_api_key(monkeypatch: pytest.MonkeyPatch) 
         assert "ANTHROPIC_API_KEY" in frame["text"]
 
 
-def test_ws_diagnostic_invalid_tier_falls_back_to_fast(monkeypatch: pytest.MonkeyPatch) -> None:
-    """A garbage `tier` query param is silently downgraded to `fast` so the
-    session always opens rather than 400ing the browser."""
+def test_ws_diagnostic_invalid_tier_falls_back_to_deep(monkeypatch: pytest.MonkeyPatch) -> None:
+    """A garbage `tier` query param is silently downgraded to the default
+    (`deep`, Opus) so the session always opens rather than 400ing the
+    browser."""
     _patch_runtime(monkeypatch, scripted=[_stream_text("ok")])
 
     with TestClient(app) as client, client.websocket_connect(
@@ -209,7 +210,7 @@ def test_ws_diagnostic_invalid_tier_falls_back_to_fast(monkeypatch: pytest.Monke
     ) as ws:
         ready = ws.receive_json()
         assert ready["type"] == "session_ready"
-        assert ready["tier"] == "fast"
+        assert ready["tier"] == "deep"
 
 
 def test_ws_diagnostic_sanitizes_unknown_refdes_over_the_wire(

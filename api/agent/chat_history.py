@@ -557,6 +557,51 @@ def create_conversation(
     return conv_id
 
 
+def delete_conversation(
+    *,
+    device_slug: str,
+    repair_id: str,
+    conv_id: str,
+    memory_root: Path | None = None,
+) -> bool:
+    """Remove a single conversation from disk: drop its index entry and wipe
+    its `conversations/{conv_id}/` directory (messages.jsonl + per-tier MA
+    session pointers + any artefacts the runtime persisted there).
+
+    Returns True when something was actually removed (entry or directory),
+    False when the conv was already absent. The repair itself, its metadata
+    file, and other conversations are untouched.
+
+    The per-tier MA session ids stored under the conv directory are dropped
+    along with it; the upstream Anthropic sessions are left to expire on
+    their own (the repair-scoped memory store is shared across convs and
+    must outlive any single deletion).
+    """
+    import shutil
+
+    root = memory_root or Path(get_settings().memory_root)
+    index = _read_index(root, device_slug, repair_id)
+    new_index = [entry for entry in index if entry.get("id") != conv_id]
+    index_changed = len(new_index) != len(index)
+    if index_changed:
+        _write_index(root, device_slug, repair_id, new_index)
+
+    conv_dir = _conv_dir(root, device_slug, repair_id, conv_id)
+    dir_removed = False
+    if conv_dir.exists() and conv_dir.is_dir():
+        try:
+            shutil.rmtree(conv_dir)
+            dir_removed = True
+        except OSError as exc:
+            logger.error(
+                "[ChatHistory] delete_conversation: rmtree failed for %s: %s",
+                conv_dir, exc,
+            )
+            raise
+
+    return index_changed or dir_removed
+
+
 def get_conversation_tier(
     *,
     device_slug: str,

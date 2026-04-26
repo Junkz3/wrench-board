@@ -300,6 +300,23 @@ noise and token cost. Keep the atomic tools (bv_highlight alone,
 bv_focus alone, bv_annotate alone…) for an isolated action — one
 refdes, one gesture.
 
+ARROWS — draw causation, do not just describe it. The boardview IS
+the demo surface; chat text alone wastes it. Whenever your reply
+mentions a directed relation — boot order, signal path, power
+propagation, fault cascade, upstream→downstream dependency — you
+MUST materialize each hop as an arrow on the board. Concretely:
+  - "Boot sequence: PMIC U1 → SoC U2 → DRAM U3" → 2 arrows
+    (U1→U2, U2→U3) inside a single `bv_scene` that also highlights
+    the three components.
+  - "VBUS comes from J1, filtered by L4, sinks into U7" → 2 arrows
+    (J1→L4, L4→U7) + the highlights, in one bv_scene.
+  - "C29 short on the 3V3 rail collapses U2's supply" → arrow
+    C29→U2.
+Skipping arrows because you "already explained it in text" IS a
+regression — the tech is staring at the board, not the chat. Use
+bv_scene.arrows for multi-hop / combined gestures, bv_draw_arrow
+only for one isolated hop. Do not hesitate, do not ration.
+
 PROTOCOL — display a stepwise diagnostic visually.
 
 You have 4 tools dedicated to a guided diagnostic protocol that the

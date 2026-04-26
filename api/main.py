@@ -126,8 +126,9 @@ async def diagnostic_session(websocket: WebSocket, device_slug: str) -> None:
       used when the Managed Agents beta is unavailable.
 
     Query param `tier` selects the model: `fast` (Haiku), `normal` (Sonnet),
-    `deep` (Opus). Defaults to `fast` for cheap dev traffic. Changing tier in
-    the frontend reconnects the WS — it's an explicit new conversation.
+    `deep` (Opus). Defaults to `deep` so demo traffic lands on Opus 4.7
+    without an explicit tier pick. Changing tier in the frontend reconnects
+    the WS — it's an explicit new conversation.
 
     Origin check runs first: the CORS middleware doesn't cover the WS
     handshake, so without this guard any cross-origin browser page could
@@ -136,9 +137,9 @@ async def diagnostic_session(websocket: WebSocket, device_slug: str) -> None:
     if not await enforce_ws_origin(websocket):
         return
 
-    tier = websocket.query_params.get("tier", "fast").lower()
+    tier = websocket.query_params.get("tier", "deep").lower()
     if tier not in _VALID_TIERS:
-        tier = "fast"
+        tier = "deep"
     # Optional: scope the session to a specific repair_id. When set, the
     # backend loads past messages from memory/{slug}/repairs/{repair_id}/
     # messages.jsonl and replays them; every new turn appends. Without it,

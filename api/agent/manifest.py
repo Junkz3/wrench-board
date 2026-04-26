@@ -516,6 +516,15 @@ BV_TOOLS: list[dict] = [
                 },
                 "arrows": {
                     "type": "array",
+                    "description": (
+                        "Directional arrows refdes→refdes. Include them "
+                        "EVERY TIME the scene describes a directed relation: "
+                        "boot order, signal path, power propagation, fault "
+                        "cascade, upstream→downstream causation. One arrow "
+                        "per hop (e.g. boot PMIC→SoC→DRAM = 2 arrows). A "
+                        "scene without arrows is a static highlight; a scene "
+                        "WITH arrows tells the story the tech needs to see."
+                    ),
                     "items": {
                         "type": "object",
                         "properties": {
@@ -629,7 +638,19 @@ BV_TOOLS: list[dict] = [
     {
         "type": "custom",
         "name": "bv_draw_arrow",
-        "description": "Draw an arrow between two components (e.g. to show a signal path).",
+        "description": (
+            "Draw a directional arrow on the PCB from one refdes to another. "
+            "Materializes a directed relation the tech needs to SEE: signal "
+            "path, power propagation, boot dependency, causation chain, "
+            "upstream→downstream link. RULE: every time your reply describes "
+            "such a relation in words (\"the rail comes from U2\", \"U7 "
+            "drives the SoC\", \"boot order: PMIC → SoC → DRAM\"), draw the "
+            "matching arrow(s) — one per hop. Words alone aren't enough on "
+            "this UI; the diagram is the explanation. For multi-hop chains "
+            "or arrows combined with highlights/annotations, prefer "
+            "bv_scene.arrows in ONE call. Use bv_draw_arrow only for an "
+            "isolated single-hop gesture."
+        ),
         "input_schema": {
             "type": "object",
             "properties": {
@@ -1051,6 +1072,21 @@ atomic tools (bv_highlight, bv_focus, bv_annotate alone) only for an
 isolated action. When the tech confirms the cause, call
 mb_record_finding. NEVER answer from your training memory for
 refdes or symptoms — always use the tools above.
+
+ARROWS — draw causation, do not just describe it. The boardview is
+the demo surface; words alone don't earn it. Whenever your reply
+describes a directed relation — boot order, signal path, power
+propagation, fault cascade, upstream→downstream dependency — you
+MUST draw the matching arrows on the board, one per hop. Examples:
+  - "Boot order: PMIC U1 → SoC U2 → DRAM U3" → 2 arrows (U1→U2,
+    U2→U3) inside a `bv_scene` that also highlights the three.
+  - "VBUS comes from J1, filtered by L4, sinks into U7" → 2 arrows
+    (J1→L4, L4→U7).
+  - "C29 short on the 3V3 rail collapses U2's supply" → arrow
+    C29→U2.
+A scene without arrows when you described a flow IS a regression;
+do not skip them to save tokens. Use bv_scene.arrows for any
+multi-hop / combined gesture, bv_draw_arrow for one isolated hop.
 
 STYLE. Write like a bench engineer typing fast: short sentences, no
 emoji, no polite opener, no verbose bullet list when 2 lines
