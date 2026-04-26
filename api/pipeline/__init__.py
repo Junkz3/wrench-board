@@ -36,7 +36,7 @@ from pydantic import BaseModel, Field
 from api.agent.field_reports import list_field_reports
 from api.agent.memory_stores import delete_repair_store
 from api.config import get_settings
-from api.pipeline import events
+from api.pipeline import events, sources
 from api.pipeline.expansion import expand_pack
 from api.pipeline.graph_transform import pack_to_graph_payload
 from api.pipeline.orchestrator import _slugify, generate_knowledge_pack
@@ -281,13 +281,18 @@ _BOARDVIEW_EXTENSIONS = (
 def _detect_boardview(slug: str, pack_dir: Path) -> tuple[bool, str | None]:
     """Find a boardview file for this slug, returning (present, extension).
 
-    Looks at two locations, in priority order:
-        1. `board_assets/{slug}.<ext>` — canonical, in-repo demo boards.
-        2. `memory/{slug}/uploads/*-boardview-*` — technician-uploaded.
+    Looks in priority order:
+        1. The active pin from `active_sources.json` (if present).
+        2. `board_assets/{slug}.<ext>` — canonical, in-repo demo boards.
+        3. `memory/{slug}/uploads/*-boardview-*` — technician-uploaded
+           (newest first).
     Returns the dotted extension (e.g. ".kicad_pcb") so the UI can label
-    the format on the boardview card. ".kicad_pcb" beats ".brd" if both
-    exist, matching `SessionState.from_device` priority.
+    the format on the boardview card.
     """
+    pinned = sources.resolve_path(pack_dir, sources.BOARDVIEW_KIND)
+    if pinned is not None:
+        return True, pinned.suffix.lower() or None
+
     assets_root = Path.cwd() / "board_assets"
     for ext in _BOARDVIEW_EXTENSIONS:
         candidate = assets_root / f"{slug}{ext}"
@@ -308,11 +313,14 @@ def _detect_boardview(slug: str, pack_dir: Path) -> tuple[bool, str | None]:
 def _detect_schematic_pdf(slug: str, pack_dir: Path) -> bool:
     """True when a source schematic PDF exists for this slug.
 
-    Checks `memory/{slug}/schematic.pdf`, `board_assets/{slug}.pdf`, and
-    any technician-uploaded `*-schematic_pdf-*` file under
-    `memory/{slug}/uploads/`. Mirrors the logic used by the schematic
-    serving routes so the dashboard never lies about input availability.
+    Order:
+      1. Active pin from `active_sources.json`.
+      2. `memory/{slug}/schematic.pdf` (canonical post-ingest copy).
+      3. `board_assets/{slug}.pdf`.
+      4. Any technician-uploaded `*-schematic_pdf-*`.
     """
+    if sources.resolve_path(pack_dir, sources.SCHEMATIC_KIND) is not None:
+        return True
     if (pack_dir / "schematic.pdf").exists():
         return True
     if (Path.cwd() / "board_assets" / f"{slug}.pdf").exists():
@@ -1338,6 +1346,17 @@ async def post_pack_document(
         target.name,
         total,
     )
+
+    # Auto-pin policy: the FIRST upload of a kind becomes active. Later
+    # uploads only become active via an explicit PUT /sources/{kind}, so
+    # the technician keeps control of which version is live.
+    if kind in sources.KNOWN_KINDS:
+        pack_dir = uploads_dir.parent
+        pins = sources.read_active(pack_dir)
+        if not pins.get(kind):
+            pins[kind] = target.name
+            sources.write_active(pack_dir, pins)
+
     return DocumentUploadResponse(
         device_slug=slug,
         kind=kind,
@@ -1384,6 +1403,187 @@ async def list_pack_documents(device_slug: str) -> dict:
             }
         )
     return {"device_slug": slug, "uploads": items}
+
+
+# ─── Versioned sources — list + switch ─────────────────────────────────
+
+class SourceVersion(BaseModel):
+    filename: str
+    timestamp: str
+    original_name: str
+    size_bytes: int
+    is_active: bool
+
+
+class SourceKindEntry(BaseModel):
+    kind: str
+    active: str | None
+    versions: list[SourceVersion]
+
+
+class SourcesResponse(BaseModel):
+    device_slug: str
+    schematic_pdf: SourceKindEntry
+    boardview: SourceKindEntry
+
+
+class SwitchSourceRequest(BaseModel):
+    filename: str = Field(min_length=1, max_length=255)
+
+
+class SwitchSourceResponse(BaseModel):
+    device_slug: str
+    kind: str
+    active: str
+    status: Literal["pinned", "cached", "rebuilding"]
+    detail: str
+
+
+@router.get("/packs/{device_slug}/sources", response_model=SourcesResponse)
+async def get_pack_sources(device_slug: str) -> SourcesResponse:
+    """List every uploaded version per kind, with the active pin marked."""
+    slug = _validate_slug(device_slug)
+    settings = get_settings()
+    pack_dir = Path(settings.memory_root) / slug
+    if not pack_dir.exists():
+        raise HTTPException(status_code=404, detail=f"No pack for device_slug={slug!r}")
+
+    pins = sources.read_active(pack_dir)
+    out_kinds: dict[str, SourceKindEntry] = {}
+    for kind in (sources.SCHEMATIC_KIND, sources.BOARDVIEW_KIND):
+        versions = [
+            SourceVersion(**v.to_dict())
+            for v in sources.list_versions(pack_dir, kind)
+        ]
+        out_kinds[kind] = SourceKindEntry(
+            kind=kind, active=pins.get(kind), versions=versions
+        )
+    return SourcesResponse(
+        device_slug=slug,
+        schematic_pdf=out_kinds[sources.SCHEMATIC_KIND],
+        boardview=out_kinds[sources.BOARDVIEW_KIND],
+    )
+
+
+async def _reingest_and_cache(slug: str, pack_dir: Path, pdf_path: Path, pdf_hash: str) -> None:
+    """Run the schematic vision pipeline then write-through to the hashed cache.
+
+    Used as a background task on PUT sources when the target hash is not
+    cached. Errors are logged; the pin stays set so the UI can retry.
+    """
+    settings = get_settings()
+    api_key = settings.anthropic_api_key
+    if not api_key:
+        logger.error("[sources] cannot reingest without ANTHROPIC_API_KEY for %s", slug)
+        return
+    try:
+        client = AsyncAnthropic(api_key=api_key, max_retries=4)
+        await ingest_schematic(
+            device_slug=slug,
+            pdf_path=pdf_path,
+            client=client,
+            memory_root=Path(settings.memory_root),
+        )
+        # Persist this version's artefacts so a future switch back is instant.
+        sources.write_through_cache(pack_dir, pdf_hash)
+        logger.info("[sources] reingest complete for %s hash=%s", slug, pdf_hash)
+    except Exception:
+        logger.exception("[sources] reingest failed for %s hash=%s", slug, pdf_hash)
+
+
+@router.put(
+    "/packs/{device_slug}/sources/{kind}",
+    response_model=SwitchSourceResponse,
+)
+async def switch_pack_source(
+    device_slug: str,
+    kind: str,
+    payload: SwitchSourceRequest,
+) -> SwitchSourceResponse:
+    """Pin a different uploaded version as the active source for this kind.
+
+    For `boardview` the switch is just a pin update — the new file takes
+    effect at the next WS open (`SessionState.from_device`).
+    For `schematic_pdf` the response distinguishes three statuses:
+      - `cached`     : we found the target PDF's hash in the cache, copied
+        the cached artefacts back into place; the new graph is live now.
+      - `rebuilding` : the hash is unknown, the source PDF was copied to
+        `memory/{slug}/schematic.pdf`, the in-place derived files were
+        cleared, and a background ingest_schematic was kicked off. The
+        Schematic / Graphe électrique cards stay in `building` until done.
+      - `pinned`     : (rare) pin updated but the target file is missing
+        from disk; nothing else changed.
+    """
+    slug = _validate_slug(device_slug)
+    if kind not in sources.KNOWN_KINDS:
+        raise HTTPException(
+            status_code=422,
+            detail=f"unknown kind={kind!r} — allowed: {list(sources.KNOWN_KINDS)}",
+        )
+
+    settings = get_settings()
+    pack_dir = Path(settings.memory_root) / slug
+    if not pack_dir.exists():
+        raise HTTPException(status_code=404, detail=f"No pack for device_slug={slug!r}")
+
+    target = pack_dir / "uploads" / payload.filename
+    if not target.exists() or not target.is_file():
+        raise HTTPException(
+            status_code=404,
+            detail=f"upload {payload.filename!r} not found in {slug!r}/uploads",
+        )
+    # Defense in depth: filename must contain the kind marker.
+    if f"-{kind}-" not in payload.filename:
+        raise HTTPException(
+            status_code=422,
+            detail=f"filename does not match kind={kind!r}",
+        )
+
+    pins = sources.read_active(pack_dir)
+    pins[kind] = payload.filename
+    sources.write_active(pack_dir, pins)
+
+    if kind == sources.BOARDVIEW_KIND:
+        return SwitchSourceResponse(
+            device_slug=slug,
+            kind=kind,
+            active=payload.filename,
+            status="pinned",
+            detail="boardview pin updated; effective at next WS open.",
+        )
+
+    # schematic_pdf — try cache first, else trigger reingest.
+    pdf_hash = sources.hash_pdf(target)
+    if sources.is_cached(pack_dir, pdf_hash):
+        sources.restore_from_cache(pack_dir, pdf_hash)
+        return SwitchSourceResponse(
+            device_slug=slug,
+            kind=kind,
+            active=payload.filename,
+            status="cached",
+            detail=f"cache hit for hash={pdf_hash}; graphe électrique restored from cache.",
+        )
+
+    # Cache miss — copy PDF in place, drop stale derived files, kick off
+    # a background ingestion that will write-through to the cache when done.
+    try:
+        shutil.copyfile(target, pack_dir / "schematic.pdf")
+    except OSError as exc:
+        raise HTTPException(status_code=500, detail=f"could not copy PDF: {exc}") from exc
+    sources.clear_in_place_schematic(pack_dir)
+    # Re-copy because clear_in_place_schematic also drops schematic.pdf.
+    shutil.copyfile(target, pack_dir / "schematic.pdf")
+
+    asyncio.create_task(
+        _reingest_and_cache(slug, pack_dir, pack_dir / "schematic.pdf", pdf_hash)
+    )
+    return SwitchSourceResponse(
+        device_slug=slug,
+        kind=kind,
+        active=payload.filename,
+        status="rebuilding",
+        detail=f"cache miss for hash={pdf_hash}; vision pipeline launched in background.",
+    )
 
 
 @router.api_route("/packs/{device_slug}/schematic.pdf", methods=["GET", "HEAD"])

@@ -58,17 +58,25 @@ def _memory_root() -> Path:
 def _candidate_boardview_paths(device_slug: str) -> list[Path]:
     """Ordered candidate boardview files for a slug — first match wins.
 
-    Built from the priority list (board_assets first, by richest format)
-    plus any technician upload landing under `memory/{slug}/uploads/` with
-    the `-boardview-` marker. The upload list is sorted newest-first so a
-    re-uploaded file supersedes an older one.
+    Order:
+      1. Pinned active version from `memory/{slug}/active_sources.json`.
+      2. `board_assets/{slug}.<ext>` for every parser-supported extension.
+      3. Any other `memory/{slug}/uploads/*-boardview-*`, newest-first.
+    The pin is read on import to avoid a circular import with the pipeline
+    package, so we duplicate the lightweight read here.
     """
     candidates: list[Path] = []
+
+    pack_dir = _memory_root() / device_slug
+    pinned = _read_active_pin(pack_dir, "boardview")
+    if pinned is not None:
+        candidates.append(pinned)
+
     assets_root = _board_assets_root()
     for ext in _BOARD_EXT_PRIORITY:
         candidates.append(assets_root / f"{device_slug}{ext}")
 
-    uploads_dir = _memory_root() / device_slug / "uploads"
+    uploads_dir = pack_dir / "uploads"
     if uploads_dir.exists():
         bv_uploads = [
             p for p in uploads_dir.iterdir()
@@ -80,6 +88,31 @@ def _candidate_boardview_paths(device_slug: str) -> list[Path]:
         candidates.extend(bv_uploads)
 
     return candidates
+
+
+def _read_active_pin(pack_dir: Path, kind: str) -> Path | None:
+    """Read `active_sources.json` and resolve `kind` to an absolute file path.
+
+    Inlined to keep `api.session` free of an import on `api.pipeline.sources`
+    (which would close the dependency cycle session → pipeline → session
+    via FastAPI router registration). The file format is owned by
+    `api/pipeline/sources.py` — keep these two readers in sync.
+    """
+    pin_file = pack_dir / "active_sources.json"
+    if not pin_file.exists():
+        return None
+    try:
+        import json  # local import: this path is not hot
+        data = json.loads(pin_file.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    if not isinstance(data, dict):
+        return None
+    name = data.get(kind)
+    if not isinstance(name, str) or not name:
+        return None
+    candidate = pack_dir / "uploads" / name
+    return candidate if candidate.exists() else None
 
 
 @dataclass
