@@ -85,7 +85,7 @@ async def test_ensure_creates_store_via_http_when_sdk_absent(tmp_path, monkeypat
     call = fake_http.calls[0]
     assert call["url"].endswith("/memory_stores")
     assert call["headers"]["anthropic-beta"] == "managed-agents-2026-04-01"
-    assert call["json"]["name"] == "microsolder-demo-pi"
+    assert call["json"]["name"] == "wrench-board-demo-pi"
     # The id is persisted so the next call doesn't hit the network.
     meta = (tmp_path / "demo-pi" / "managed.json").read_text()
     assert "memstore_abc123" in meta
@@ -272,7 +272,7 @@ async def test_ensure_global_store_creates_once(tmp_path, monkeypatch):
     import json as _json
     registry = _json.loads(registry_file.read_text())
     assert registry["patterns"]["memory_store_id"] == "memstore_global_patterns"
-    assert registry["patterns"]["name"] == "microsolder-global-patterns"
+    assert registry["patterns"]["name"] == "wrench-board-global-patterns"
 
 
 async def test_ensure_global_store_kind_validation():
@@ -357,8 +357,8 @@ async def test_ensure_repair_store_per_repair(tmp_path, monkeypatch):
     assert a1 == a2, "Same (slug, repair_id) must reuse the same store"
     assert a1 != b, "Different repair_id must yield a distinct store"
     assert create_log == [
-        "microsolder-repair-iphone-x-R1",
-        "microsolder-repair-iphone-x-R2",
+        "wrench-board-repair-iphone-x-R1",
+        "wrench-board-repair-iphone-x-R2",
     ]
 
     import json as _json

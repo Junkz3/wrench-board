@@ -13,7 +13,7 @@ import json
 import logging
 from pathlib import Path
 
-logger = logging.getLogger("microsolder.agent.reliability")
+logger = logging.getLogger("wrench_board.agent.reliability")
 
 
 def _memory_root() -> Path:

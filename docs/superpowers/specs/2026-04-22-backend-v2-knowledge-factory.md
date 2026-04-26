@@ -1,7 +1,7 @@
 # Spécification Architecture Backend V2 : "Prod-Ready Knowledge Factory"
 
 **Date :** 22 Avril 2026
-**Projet :** `microsolder-agent` (Hackathon Anthropic x Cerebral Valley)
+**Projet :** `wrench-board` (Hackathon Anthropic x Cerebral Valley)
 **Mode d'Orchestration :** Asynchrone Multi-Agents (Swarm)
 **Technologie :** Python, FastAPI, Anthropic SDK (Opus 4.7)
 

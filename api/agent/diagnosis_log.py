@@ -16,7 +16,7 @@ from pathlib import Path
 
 from pydantic import BaseModel, ConfigDict
 
-logger = logging.getLogger("microsolder.agent.diagnosis_log")
+logger = logging.getLogger("wrench_board.agent.diagnosis_log")
 
 
 class DiagnosisLogEntry(BaseModel):

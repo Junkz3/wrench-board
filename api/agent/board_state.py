@@ -28,7 +28,7 @@ from typing import Any
 
 from api.session.state import SessionState
 
-logger = logging.getLogger("microsolder.agent.board_state")
+logger = logging.getLogger("wrench_board.agent.board_state")
 
 _FILENAME = "board_state.json"
 

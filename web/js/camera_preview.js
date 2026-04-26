@@ -12,8 +12,8 @@
 // session (avoids the "device busy" / re-prompt pattern on some
 // hardware).
 
-const POS_KEY = 'microsolder.cameraPreview.position';
-const OPEN_KEY = 'microsolder.cameraPreview.open';
+const POS_KEY = 'wrench_board.cameraPreview.position';
+const OPEN_KEY = 'wrench_board.cameraPreview.open';
 
 let _root = null;
 let _video = null;

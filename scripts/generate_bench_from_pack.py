@@ -25,7 +25,7 @@ from api.pipeline.bench_generator.errors import (
 )
 from api.pipeline.bench_generator.orchestrator import generate_from_pack
 
-logger = logging.getLogger("microsolder.bench_generator.cli")
+logger = logging.getLogger("wrench_board.bench_generator.cli")
 
 
 def build_parser() -> argparse.ArgumentParser:

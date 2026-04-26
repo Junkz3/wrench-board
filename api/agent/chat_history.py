@@ -47,7 +47,7 @@ from typing import Any
 
 from api.config import get_settings
 
-logger = logging.getLogger("microsolder.agent.chat_history")
+logger = logging.getLogger("wrench_board.agent.chat_history")
 
 
 def _repair_dir(memory_root: Path, device_slug: str, repair_id: str) -> Path:
@@ -370,7 +370,7 @@ def build_session_intro(
     if symptom:
         lines.append(f"Symptôme signalé par le technicien: {symptom}")
     lines.append(
-        f"Commence par grep sur /mnt/memory/microsolder-{device_slug}/field_reports/ "
+        f"Commence par grep sur /mnt/memory/wrench-board-{device_slug}/field_reports/ "
         "pour voir les réparations passées, puis mb_get_rules_for_symptoms "
         "pour les règles applicables."
     )

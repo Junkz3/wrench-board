@@ -23,7 +23,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict
 
-logger = logging.getLogger("microsolder.agent.measurement_memory")
+logger = logging.getLogger("wrench_board.agent.measurement_memory")
 
 
 Source = Literal["ui", "agent"]

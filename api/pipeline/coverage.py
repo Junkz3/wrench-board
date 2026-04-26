@@ -28,7 +28,7 @@ from api.pipeline.tool_call import call_with_forced_tool
 if TYPE_CHECKING:
     from api.pipeline.telemetry.token_stats import PhaseTokenStats
 
-logger = logging.getLogger("microsolder.pipeline.coverage")
+logger = logging.getLogger("wrench_board.pipeline.coverage")
 
 
 SUBMIT_COVERAGE_TOOL = "submit_coverage_check"

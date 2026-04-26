@@ -1,0 +1,151 @@
+/* ============================================================
+   Wrench Board mascot — sizes, palette, animation states.
+   The mascot SVG is defined inline in `web/index.html` as
+   <template id="tpl-mascot"> and cloned at insertion time by
+   `web/js/mascot.js`. No external asset is fetched.
+   ============================================================ */
+
+/* ---------- sizes & layout ---------- */
+.mascot{display:inline-block;vertical-align:middle;line-height:0;color:var(--text);overflow:visible}
+.mascot-xs{width:32px;height:auto}
+.mascot-sm{width:80px;height:auto}
+.mascot-md{width:160px;height:auto}
+.mascot-lg{width:320px;height:auto}
+
+/* ---------- chat panel companion ----------
+   Pinned to the bottom-right of the diagnostic panel, hovering above the
+   composer. The parent <aside class="llm-panel"> is already position:fixed,
+   which is enough to anchor an absolute child — do NOT override it.
+   pointer-events:none so clicks fall through to the form. */
+.llm-mascot{position:absolute;right:12px;bottom:128px;width:48px;pointer-events:none;z-index:6;opacity:.92;filter:drop-shadow(0 3px 10px rgba(0,0,0,.35));transition:opacity .25s ease}
+.llm-mascot .mascot{width:100%}
+
+/* ---------- palette ----------
+   Body = brand cyan. Face details (eyes, mouth) sit on the cyan body
+   so they get the dark contrast. Limbs (legs, arms, wrench) sit on the
+   dark app bg so they take a soft light tint. */
+.mascot-body{fill:var(--cyan)}
+.mascot-body-shade{fill:rgba(0,0,0,.10)}
+.mascot-detail-fill{fill:var(--text)}
+.mascot-detail-stroke{fill:none;stroke:var(--text);stroke-linecap:round;stroke-linejoin:round}
+
+/* face overrides — dark on the cyan body */
+.mascot-eye-ball{fill:var(--bg-deep)}
+.mascot-eye-shine{fill:var(--text)}
+.mascot-mouth-smile,.mascot-mouth-grin{stroke:var(--bg-deep)}
+
+/* mouth: smile is the resting state, grin is shown only on success */
+.mascot-mouth-grin{display:none}
+
+/* ---------- per-element transform anchors ----------
+   SVG groups need transform-box:view-box so transform-origin reads in
+   the SVG user-coordinate system (the viewBox), letting us pivot around
+   precise points like the wrench wrist. */
+.mascot #body,
+.mascot #face,
+.mascot .mascot-eye,
+.mascot .mascot-wrench{transform-box:view-box}
+
+.mascot #body,
+.mascot #face{transform-origin:200px 210px}
+
+.mascot .mascot-eye-left{transform-origin:172px 205px}
+.mascot .mascot-eye-right{transform-origin:228px 205px}
+
+.mascot .mascot-wrench{transform-origin:335px 145px}
+
+/* the inner <g class="mascot-wrench-base"> keeps the static 20° lean of
+   the wrench in SVG-attribute form (set inline in the SVG file) so CSS
+   animations on .mascot-wrench compose as a delta on top of it. */
+
+/* ============================================================
+   IDLE — always on. Subtle breathing + eye-blinks.
+   Targeted at .mascot directly so it runs in every context unless
+   a more specific state class overrides it.
+   ============================================================ */
+@keyframes mascot-breathe{
+  0%,100%{transform:scale(1)}
+  50%{transform:scale(1.015)}
+}
+@keyframes mascot-blink{
+  0%,90%,100%{transform:scaleY(1)}
+  94%,97%{transform:scaleY(.08)}
+}
+
+.mascot #body,
+.mascot #face{animation:mascot-breathe 4s ease-in-out infinite}
+
+.mascot .mascot-eye-left{animation:mascot-blink 5.2s ease-in-out infinite}
+.mascot .mascot-eye-right{animation:mascot-blink 5.2s ease-in-out infinite -.03s}
+
+/* ============================================================
+   THINKING — agent reasoning. Wrench taps slowly, eyes drift.
+   ============================================================ */
+@keyframes mascot-wrench-tap{
+  0%,100%{transform:rotate(0deg)}
+  50%{transform:rotate(-8deg)}
+}
+@keyframes mascot-eye-drift{
+  0%,100%{transform:translateX(0)}
+  50%{transform:translateX(1.5px)}
+}
+
+.mascot.is-thinking .mascot-wrench{animation:mascot-wrench-tap 1.4s ease-in-out infinite}
+.mascot.is-thinking .mascot-eye-ball{animation:mascot-eye-drift 2.2s ease-in-out infinite}
+
+/* ============================================================
+   WORKING — pipeline running. Wrench cranks like a ratchet,
+   breathing speeds up to convey effort.
+   ============================================================ */
+@keyframes mascot-wrench-ratchet{
+  0%{transform:rotate(-14deg)}
+  50%{transform:rotate(14deg)}
+  100%{transform:rotate(-14deg)}
+}
+
+.mascot.is-working .mascot-wrench{animation:mascot-wrench-ratchet .75s ease-in-out infinite}
+.mascot.is-working #body,
+.mascot.is-working #face{animation-duration:2s}
+
+/* ============================================================
+   SUCCESS — one-shot celebration. Wrench thrust, grin appears.
+   The class can be left in place permanently; the wrench rests
+   raised after the animation finishes via animation-fill-mode.
+   ============================================================ */
+@keyframes mascot-wrench-cheer{
+  0%{transform:rotate(0deg)}
+  30%{transform:rotate(-32deg)}
+  55%{transform:rotate(-32deg)}
+  75%{transform:rotate(-26deg)}
+  100%{transform:rotate(-22deg)}
+}
+
+.mascot.is-success .mascot-wrench{
+  animation:mascot-wrench-cheer 1.2s cubic-bezier(.2,.8,.2,1) 1 forwards;
+}
+.mascot.is-success .mascot-mouth-smile{display:none}
+.mascot.is-success .mascot-mouth-grin{display:block}
+
+/* ============================================================
+   ERROR — eye amber flash, wrench droops.
+   Eye-ball normally fills with --bg-deep; on .is-error we
+   transition the fill to --amber and back via the keyframe.
+   ============================================================ */
+@keyframes mascot-eye-flash{
+  0%,100%{fill:var(--bg-deep)}
+  20%,60%{fill:var(--amber)}
+}
+@keyframes mascot-wrench-droop{
+  0%{transform:rotate(0deg)}
+  100%{transform:rotate(18deg)}
+}
+
+.mascot.is-error .mascot-eye-ball{animation:mascot-eye-flash 1.6s ease-in-out 1 forwards}
+.mascot.is-error .mascot-wrench{animation:mascot-wrench-droop .5s ease-out 1 forwards}
+
+/* ============================================================
+   Reduced-motion respect — keep the figure visible, drop motion.
+   ============================================================ */
+@media (prefers-reduced-motion: reduce){
+  .mascot *,.mascot{animation:none!important}
+}

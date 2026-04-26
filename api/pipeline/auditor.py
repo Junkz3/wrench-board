@@ -33,7 +33,7 @@ from api.pipeline.tool_call import call_with_forced_tool
 if TYPE_CHECKING:
     from api.pipeline.telemetry.token_stats import PhaseTokenStats
 
-logger = logging.getLogger("microsolder.pipeline.auditor")
+logger = logging.getLogger("wrench_board.pipeline.auditor")
 
 
 SUBMIT_AUDIT_TOOL_NAME = "submit_audit_verdict"

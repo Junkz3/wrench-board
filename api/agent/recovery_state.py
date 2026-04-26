@@ -32,7 +32,7 @@ from typing import Any
 from api.agent.measurement_memory import load_measurements
 from api.tools.protocol import load_active_protocol
 
-logger = logging.getLogger("microsolder.agent.recovery_state")
+logger = logging.getLogger("wrench_board.agent.recovery_state")
 
 
 _BLOCK_HEADER = "[ÉTAT REPAIR — faits persistés sur disque, indépendants de MA]"

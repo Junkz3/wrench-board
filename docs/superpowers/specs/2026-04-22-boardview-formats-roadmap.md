@@ -1,6 +1,6 @@
 # Boardview formats — roadmap
 
-microsolder-agent is designed to read any PCB boardview format a technician might legitimately have. The parser architecture (`api/board/parser/`) dispatches via file extension + content-sniffing to a format-specific parser that populates the unified `api/board/model.py::Board` model. Adding a new format = one new file in `api/board/parser/`, registered automatically via the `@register` decorator. No changes to `base.py`, the validator, the agent, or the UI.
+wrench-board is designed to read any PCB boardview format a technician might legitimately have. The parser architecture (`api/board/parser/`) dispatches via file extension + content-sniffing to a format-specific parser that populates the unified `api/board/model.py::Board` model. Adding a new format = one new file in `api/board/parser/`, registered automatically via the `@register` decorator. No changes to `base.py`, the validator, the agent, or the UI.
 
 This document tracks the status of every format we know about.
 
@@ -21,7 +21,7 @@ Per CLAUDE.md hard rule #4 (**open hardware only**), we commit fixtures under `b
 | `.brd` | Test_Link | Landrex (80s) | `test_link.py::BRDParser` | **DONE** | Refuses OBV-signature obfuscated files. Content-sniffed via `str_length:` marker. |
 | `.brd` | BRD2 | whitequark/kicad-boardview | `brd2.py::BRD2Parser` | **DONE** | Content-sniffed via `BRDOUT:` marker. 0BSD reference fixture at `web/boards/whitequark-example.brd`. |
 | `.kicad_pcb` | KiCad native | KiCad project | `kicad.py::KicadPcbParser` | **DONE** | Rich source — value, footprint, rotation, pad shape / size. Via `pcbnew` Python API. |
-| `.fz` | PCB Repair Tool / Boardview | mixed | `fz.py::FZParser` | **DONE (zlib variant)** / PARTIAL (XOR variant) | **FZ-zlib** is the dominant variant in the field — verified end-to-end on real Quanta BKL (2701 parts / 11438 pins / 1985 nets) and ASRock X470 (2833 / 11378 / 2018). 4-byte LE size + zlib + pipe-delimited columnar (`A!schema` / `S!data`). The OBV-documented XOR-key variant remains a fallback that needs `MICROSOLDER_FZ_KEY`. |
+| `.fz` | PCB Repair Tool / Boardview | mixed | `fz.py::FZParser` | **DONE (zlib variant)** / PARTIAL (XOR variant) | **FZ-zlib** is the dominant variant in the field — verified end-to-end on real Quanta BKL (2701 parts / 11438 pins / 1985 nets) and ASRock X470 (2833 / 11378 / 2018). 4-byte LE size + zlib + pipe-delimited columnar (`A!schema` / `S!data`). The OBV-documented XOR-key variant remains a fallback that needs `WRENCH_BOARD_FZ_KEY`. |
 | `.bdv` | HONHAN BoardViewer | HONHAN (CN) | `bdv.py::BDVParser` | **DONE** | Arithmetic cipher (key 160, incr, wraps 286→159). Algorithm publicly documented (piernov gist). Decodes to Test_Link ASCII. |
 | `.asc` | ASUS TSICT | ASUS | `asc.py::ASCParser` | **DONE** | Plain ASCII (confirmed via OBV issue #45). Accepts combined single-file or the five-file sub-directory layout. |
 | `.bv` | ATE Boardview | ATE | `bv.py::BVParser` | **SPECULATIVE** | Test_Link-shape ASCII variant only. No public spec — production `.bv` likely binary. Binary payloads detected and rejected with hint. |
@@ -33,7 +33,7 @@ Per CLAUDE.md hard rule #4 (**open hardware only**), we commit fixtures under `b
 
 ### Real-board verification status
 
-Concrete topology stats for files validated end-to-end (via `tests/board/test_real_files_runner.py` against `/tmp/microsolder-real-boards/`):
+Concrete topology stats for files validated end-to-end (via `tests/board/test_real_files_runner.py` against `/tmp/wrench-board-real-boards/`):
 
 | Source board                                  | Format     | Parts | Pins   | Nets  | Nails |
 |-----------------------------------------------|------------|-------|--------|-------|-------|
@@ -54,7 +54,7 @@ Total real bytes parsed across the seven non-rejected boards: ~25 400 parts, ~68
 - **PARTIAL** — structurally implemented, but a real-world signal is missing (`.fz` XOR variant needs the ASUS key; `.tvw` binary needs a container walker).
 - **SPECULATIVE** — no public format specification and no real sample to-date; assumes a Test_Link-shape ASCII variant observed in some redistributions but the production native format is almost certainly a different binary container. Each speculative parser detects clearly-binary payloads and raises `ObfuscatedFileError` with a specific hint instead of silently emitting an empty `Board`.
 
-When real samples land for `.bv` / `.gr` / `.cst` / `.f2b`, drop them in `/tmp/microsolder-real-boards/` and run the runner — either the ASCII assumption holds (promote SPECULATIVE → DONE), or the runner surfaces a clean binary-rejection hint giving us the next reverse-engineering target.
+When real samples land for `.bv` / `.gr` / `.cst` / `.f2b`, drop them in `/tmp/wrench-board-real-boards/` and run the runner — either the ASCII assumption holds (promote SPECULATIVE → DONE), or the runner surfaces a clean binary-rejection hint giving us the next reverse-engineering target.
 
 ## Unified model
 
@@ -81,15 +81,15 @@ Until then the stub file exists so that:
 
 ## Fixtures policy for binary / obfuscated formats
 
-For the three Family-B formats (`.fz`, `.bdv`, `.tvw`) we can't ship a real-world proprietary binary in the repo. Each parser's test suite therefore generates its synthetic fixture at authoring time by running the symmetric encoder on a plaintext Test_Link payload. The committed fixture is the encoded bytes; a "fixture-is-genuinely-encoded" test guards against the encoder silently regressing to a no-op. Real ASUS `.fz` files additionally require the user's 44×32-bit key (via `MICROSOLDER_FZ_KEY` or the constructor) — this stays a runtime concern.
+For the three Family-B formats (`.fz`, `.bdv`, `.tvw`) we can't ship a real-world proprietary binary in the repo. Each parser's test suite therefore generates its synthetic fixture at authoring time by running the symmetric encoder on a plaintext Test_Link payload. The committed fixture is the encoded bytes; a "fixture-is-genuinely-encoded" test guards against the encoder silently regressing to a no-op. Real ASUS `.fz` files additionally require the user's 44×32-bit key (via `WRENCH_BOARD_FZ_KEY` or the constructor) — this stays a runtime concern.
 
 ## Testing real-world files
 
 When a technician has a legitimate copy of a real boardview file (iPhone, ThinkPad, whatever lands on the bench — brand-unrestricted at runtime per the Open-hardware-rule-is-repo-only memory note), drop the file into any of these three directories — first populated one wins:
 
-1. Path set via `MICROSOLDER_REAL_BOARDS_DIR` env var
-2. `/tmp/microsolder-real-boards/`
-3. `~/Downloads/microsolder-real-boards/`
+1. Path set via `WRENCH_BOARD_REAL_BOARDS_DIR` env var
+2. `/tmp/wrench-board-real-boards/`
+3. `~/Downloads/wrench-board-real-boards/`
 
 Then `pytest tests/board/test_real_files_runner.py -v -s` parametrises one test per file, asserts the parse either succeeds or raises a documented known-limitation error (fz-key-missing, binary-TVW), cross-validates pin→part and net→pin on the real bytes, and prints a PASS summary with counts. Nothing in that dir is committed.
 

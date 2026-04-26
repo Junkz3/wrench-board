@@ -85,7 +85,7 @@ def board_assets_dir(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     assets = tmp_path / "board_assets"
     assets.mkdir()
     # Point SessionState.from_device at this dir via an env var the helper reads.
-    monkeypatch.setenv("MICROSOLDER_BOARD_ASSETS", str(assets))
+    monkeypatch.setenv("WRENCH_BOARD_BOARD_ASSETS", str(assets))
     return assets
 
 
@@ -160,7 +160,7 @@ from typing import Any, Literal
 from api.board.model import Board
 from api.board.parser.base import parser_for
 
-logger = logging.getLogger("microsolder.session")
+logger = logging.getLogger("wrench_board.session")
 
 Side = Literal["top", "bottom"]
 
@@ -170,8 +170,8 @@ _BOARD_EXT_PRIORITY = (".kicad_pcb", ".brd")
 
 
 def _board_assets_root() -> Path:
-    """Root of board_assets/. Overridable via MICROSOLDER_BOARD_ASSETS env for tests."""
-    override = os.environ.get("MICROSOLDER_BOARD_ASSETS")
+    """Root of board_assets/. Overridable via WRENCH_BOARD_BOARD_ASSETS env for tests."""
+    override = os.environ.get("WRENCH_BOARD_BOARD_ASSETS")
     if override:
         return Path(override)
     # api/session/state.py → ../../board_assets
@@ -1246,7 +1246,7 @@ from typing import Any, Callable
 from api.session.state import SessionState
 from api.tools import boardview as bv
 
-logger = logging.getLogger("microsolder.agent.dispatch_bv")
+logger = logging.getLogger("wrench_board.agent.dispatch_bv")
 
 
 BV_DISPATCH: dict[str, Callable[..., dict[str, Any]]] = {
@@ -1336,7 +1336,7 @@ from api.agent.tools import (
 from api.config import get_settings
 from api.session.state import SessionState
 
-logger = logging.getLogger("microsolder.agent.direct")
+logger = logging.getLogger("wrench_board.agent.direct")
 
 
 async def _dispatch_mb_tool(

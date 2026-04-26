@@ -13,7 +13,7 @@
 ---
 
 **Date :** 2026-04-21
-**Scope :** panneau Boardview du workbench `microsolder-agent` (parser, rendu, tool surface agent, intégration session). Hors scope : agent loop Claude, panneau Schematic, pipeline knowledge.
+**Scope :** panneau Boardview du workbench `wrench-board` (parser, rendu, tool surface agent, intégration session). Hors scope : agent loop Claude, panneau Schematic, pipeline knowledge.
 **Hackathon :** Anthropic × Cerebral Valley « Built with Opus 4.7 » — livraison démo 2026-04-26.
 
 ---

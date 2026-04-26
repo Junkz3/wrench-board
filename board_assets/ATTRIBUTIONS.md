@@ -1,7 +1,7 @@
 # board_assets/ — attributions
 
 This directory contains third-party hardware design files included as
-reference fixtures for microsolder-agent. All files are redistributed
+reference fixtures for wrench-board. All files are redistributed
 under their original open-hardware licenses, which require attribution.
 
 ## MNT Reform motherboard v2.5

@@ -37,7 +37,7 @@ if TYPE_CHECKING:
     from api.pipeline.schematic.schemas import ElectricalGraph
     from api.pipeline.telemetry.token_stats import PhaseTokenStats
 
-logger = logging.getLogger("microsolder.pipeline.mapper")
+logger = logging.getLogger("wrench_board.pipeline.mapper")
 
 
 SUBMIT_REFDES_MAPPINGS_TOOL_NAME = "submit_refdes_mappings"

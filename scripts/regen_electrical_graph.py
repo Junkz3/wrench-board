@@ -31,7 +31,7 @@ from api.pipeline.schematic.schemas import (
     SchematicGraph,
 )
 
-logger = logging.getLogger("microsolder.scripts.regen_electrical_graph")
+logger = logging.getLogger("wrench_board.scripts.regen_electrical_graph")
 
 
 def regenerate(device_slug: str, memory_root: Path, *, min_confidence: float = 0.7) -> dict:

@@ -15,7 +15,7 @@ from typing import Any
 from api.session.state import SessionState
 from api.tools import boardview as bv
 
-logger = logging.getLogger("microsolder.agent.dispatch_bv")
+logger = logging.getLogger("wrench_board.agent.dispatch_bv")
 
 
 BV_DISPATCH: dict[str, Callable[..., dict[str, Any]]] = {

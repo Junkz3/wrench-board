@@ -1232,7 +1232,7 @@ Replace it with:
 Run: `make run` then open `http://localhost:8000/`.
 
 Verify in order:
-1. **Cold start `/`** → list renders, no regression. Breadcrumb: `microsolder-agent / Journal des réparations`. Mode pill: `JOURNAL · Réparations`.
+1. **Cold start `/`** → list renders, no regression. Breadcrumb: `wrench-board / Journal des réparations`. Mode pill: `JOURNAL · Réparations`.
 2. **Click a repair card** → URL becomes `/?device=<slug>&repair=<rid>#home`. The Journal list disappears, the dashboard shell appears populated with device name, symptom, status badge, repair id, tile shortcuts, conversations list (or empty state), findings list (or empty state), timeline, pack status. Mode pill reads `JOURNAL · Session`. Chat panel auto-opens on the right.
 3. **Click a tile (e.g. PCB)** → hash changes to `#pcb` (query params preserved). Dashboard is swapped for the PCB section. URL stays `?device=X&repair=R#pcb`.
 4. **Click rail Journal icon** → back to dashboard (not list), because session is still active.

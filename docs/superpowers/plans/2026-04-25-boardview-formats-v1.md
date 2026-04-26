@@ -117,7 +117,7 @@ the 16-byte sliding-buffer XOR described in spec Family B. Add
 `MissingFZKeyError(InvalidBoardFile)` to `parser/base.py`. Key input:
 
 - `FZParser(key=<tuple of 44 ints>)` constructor; or
-- `MICROSOLDER_FZ_KEY` env var (`44` space- or hex-separated ints);
+- `WRENCH_BOARD_FZ_KEY` env var (`44` space- or hex-separated ints);
 - Missing → `MissingFZKeyError`.
 
 Output bytes are parsed as Test_Link-shape ASCII.

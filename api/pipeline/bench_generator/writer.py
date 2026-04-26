@@ -24,7 +24,7 @@ from api.pipeline.bench_generator.schemas import (
 )
 from api.pipeline.schematic.evaluator import Scorecard
 
-logger = logging.getLogger("microsolder.bench_generator.writer")
+logger = logging.getLogger("wrench_board.bench_generator.writer")
 
 
 def _atomic_write_text(path: Path, content: str) -> None:

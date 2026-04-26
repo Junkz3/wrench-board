@@ -26,13 +26,13 @@ from typing import Any
 
 from api.agent.validation import RepairOutcome, ValidatedFix, load_outcome, write_outcome
 
-logger = logging.getLogger("microsolder.tools.validation")
+logger = logging.getLogger("wrench_board.tools.validation")
 
 # Per-async-context emitter — each WS session sets its own; concurrent
 # sessions never cross-talk. See api/tools/measurements.py for the same
 # pattern and rationale.
 _ws_emitter: ContextVar[Callable[[dict[str, Any]], None] | None] = ContextVar(
-    "microsolder_validation_ws_emitter", default=None,
+    "wrench_board_validation_ws_emitter", default=None,
 )
 
 

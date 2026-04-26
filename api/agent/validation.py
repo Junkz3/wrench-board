@@ -15,7 +15,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict
 
-logger = logging.getLogger("microsolder.agent.validation")
+logger = logging.getLogger("wrench_board.agent.validation")
 
 
 FixMode = Literal["dead", "alive", "anomalous", "hot", "shorted", "passive_swap"]

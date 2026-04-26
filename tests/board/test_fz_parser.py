@@ -27,13 +27,13 @@ def test_dispatches_fz_extension(tmp_path: Path):
 
 
 def test_missing_key_raises_with_helpful_message(tmp_path: Path, monkeypatch):
-    monkeypatch.delenv("MICROSOLDER_FZ_KEY", raising=False)
+    monkeypatch.delenv("WRENCH_BOARD_FZ_KEY", raising=False)
     f = tmp_path / "bad.fz"
     f.write_bytes(b"any payload")
     with pytest.raises(MissingFZKeyError) as exc:
         FZParser().parse_file(f)
     msg = str(exc.value)
-    assert "MICROSOLDER_FZ_KEY" in msg
+    assert "WRENCH_BOARD_FZ_KEY" in msg
     assert "44" in msg
 
 
@@ -71,10 +71,10 @@ def test_parses_roundtripped_test_link_payload(tmp_path: Path):
 
 
 def test_env_var_key_is_loaded(tmp_path: Path, monkeypatch):
-    """When MICROSOLDER_FZ_KEY holds 44 space-separated ints, the default
+    """When WRENCH_BOARD_FZ_KEY holds 44 space-separated ints, the default
     FZParser() picks it up."""
     key_str = " ".join(str(w) for w in DUMMY_KEY)
-    monkeypatch.setenv("MICROSOLDER_FZ_KEY", key_str)
+    monkeypatch.setenv("WRENCH_BOARD_FZ_KEY", key_str)
 
     plaintext = "var_data: 0 1 1 0\nParts:\nR1 5 1\nPins:\n0 0 -99 1 +3V3\n"
     f = tmp_path / "demo.fz"
@@ -87,12 +87,12 @@ def test_env_var_key_is_loaded(tmp_path: Path, monkeypatch):
 def test_malformed_env_var_is_ignored_parser_still_raises_missing(monkeypatch, tmp_path):
     """A bad env var (wrong count, non-numeric) should not half-configure
     the parser — it must behave exactly like no key was set."""
-    monkeypatch.setenv("MICROSOLDER_FZ_KEY", "1 2 3")  # only 3 words
+    monkeypatch.setenv("WRENCH_BOARD_FZ_KEY", "1 2 3")  # only 3 words
     f = tmp_path / "x.fz"
     f.write_bytes(b"payload")
     with pytest.raises(MissingFZKeyError):
         FZParser().parse_file(f)
 
-    monkeypatch.setenv("MICROSOLDER_FZ_KEY", "not numbers at all")
+    monkeypatch.setenv("WRENCH_BOARD_FZ_KEY", "not numbers at all")
     with pytest.raises(MissingFZKeyError):
         FZParser().parse_file(f)

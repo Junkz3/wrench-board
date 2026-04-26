@@ -23,7 +23,7 @@ from api.pipeline.schematic.renderer import RenderedPage
 from api.pipeline.schematic.schemas import SchematicPageGraph
 from api.pipeline.tool_call import call_with_forced_tool
 
-logger = logging.getLogger("microsolder.pipeline.schematic.page_vision")
+logger = logging.getLogger("wrench_board.pipeline.schematic.page_vision")
 
 
 SUBMIT_PAGE_TOOL_NAME = "submit_schematic_page"

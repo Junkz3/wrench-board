@@ -3,9 +3,9 @@
 Runs the new parsers against real-world boardview files that the user
 drops into one of these directories (scanned in order, first match wins):
 
-  1. Path from env var `MICROSOLDER_REAL_BOARDS_DIR`
-  2. `/tmp/microsolder-real-boards` (convenient scratch area)
-  3. `~/Downloads/microsolder-real-boards`
+  1. Path from env var `WRENCH_BOARD_REAL_BOARDS_DIR`
+  2. `/tmp/wrench-board-real-boards` (convenient scratch area)
+  3. `~/Downloads/wrench-board-real-boards`
 
 Files must never be committed — CLAUDE.md hard-rule #4 keeps proprietary
 content out of the repo. At runtime, any brand is fair game (per the
@@ -42,11 +42,11 @@ _KNOWN_EXTS = {".bv", ".gr", ".cad", ".cst", ".f2b", ".bdv", ".tvw", ".fz", ".as
 
 def _candidate_dirs() -> list[Path]:
     out: list[Path] = []
-    env = os.environ.get("MICROSOLDER_REAL_BOARDS_DIR", "").strip()
+    env = os.environ.get("WRENCH_BOARD_REAL_BOARDS_DIR", "").strip()
     if env:
         out.append(Path(env))
-    out.append(Path("/tmp/microsolder-real-boards"))
-    out.append(Path.home() / "Downloads" / "microsolder-real-boards")
+    out.append(Path("/tmp/wrench-board-real-boards"))
+    out.append(Path.home() / "Downloads" / "wrench-board-real-boards")
     return out
 
 
@@ -74,7 +74,7 @@ def test_real_file_parses_or_raises_known_limitation(path: Path):
     try:
         board = parser.parse_file(path)
     except MissingFZKeyError:
-        print(f"REAL  {path.name:30} KNOWN fz-key-missing (set MICROSOLDER_FZ_KEY)")
+        print(f"REAL  {path.name:30} KNOWN fz-key-missing (set WRENCH_BOARD_FZ_KEY)")
         return
     except ObfuscatedFileError as exc:
         # Binary TVW is the documented known limitation.

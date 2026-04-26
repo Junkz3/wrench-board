@@ -18,7 +18,7 @@ from typing import Literal
 
 import pdfplumber
 
-logger = logging.getLogger("microsolder.pipeline.schematic.renderer")
+logger = logging.getLogger("wrench_board.pipeline.schematic.renderer")
 
 
 @dataclass(frozen=True)

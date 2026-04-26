@@ -24,7 +24,7 @@ import logging
 from collections import defaultdict, deque
 from typing import Any
 
-logger = logging.getLogger("microsolder.pipeline.events")
+logger = logging.getLogger("wrench_board.pipeline.events")
 
 # slug -> list of subscriber queues. Plain dict of lists is enough — we don't
 # expect contention here, and the queues themselves are the async primitive.

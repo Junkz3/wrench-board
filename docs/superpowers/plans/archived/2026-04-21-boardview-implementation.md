@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Build the boardview panel for the `microsolder-agent` workbench — a Canvas-2D board viewer driven by Claude Opus via tool calls, with a from-scratch OpenBoardView `.brd` parser, an anti-hallucination validator, and drag-drop support.
+**Goal:** Build the boardview panel for the `wrench-board` workbench — a Canvas-2D board viewer driven by Claude Opus via tool calls, with a from-scratch OpenBoardView `.brd` parser, an anti-hallucination validator, and drag-drop support.
 
 **Architecture:** Python 3.11 + FastAPI + Pydantic on the backend (`api/board/`, `api/tools/boardview.py`, `api/session/`) ; vanilla JS + Canvas 2D on the frontend (`web/boardview/`). Data flows : `.brd` → parser → immutable `Board` model → session state → tool handlers (validated refdes) → WebSocket events → store → renderer.
 
@@ -2673,7 +2673,7 @@ Expected: FAIL on missing `api.main:app`.
 - [ ] **Step 4: Implement `api/main.py`**
 
 ```python
-"""FastAPI entry point for microsolder-agent workbench."""
+"""FastAPI entry point for wrench-board workbench."""
 
 from __future__ import annotations
 

@@ -106,13 +106,17 @@ function updateChrome(section, deviceSlug, pack) {
     }
   }
 
-  // Breadcrumbs
-  const crumbs = ["microsolder-agent"];
-  if (section === "graphe" && deviceSlug) {
-    crumbs.push("Réparations", prettifySlug(deviceSlug), "Mémoire");
-  } else {
-    crumbs.push(meta.crumb);
+  // Breadcrumbs — contextual path: device / repair-short / section.
+  // The brand name already lives in the .brand block on the left, so we
+  // don't repeat it here. With no session we fall back to just the section.
+  const crumbs = [];
+  if (activeSession) {
+    crumbs.push(prettifySlug(activeSession.device));
+    crumbs.push(activeSession.repair.slice(0, 8));
+  } else if (deviceSlug) {
+    crumbs.push(prettifySlug(deviceSlug));
   }
+  crumbs.push(meta.crumb);
   renderCrumbs(crumbs);
 
   // Metabar — Graphe-only. body.no-metabar pulls .canvas/.home/.stub up.

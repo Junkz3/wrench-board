@@ -37,7 +37,7 @@ from api.pipeline.tool_call import call_with_forced_tool
 if TYPE_CHECKING:
     from api.pipeline.telemetry.token_stats import PhaseTokenStats
 
-logger = logging.getLogger("microsolder.pipeline.writers")
+logger = logging.getLogger("wrench_board.pipeline.writers")
 
 
 # Tool names — must match the forced tool_choice calls below.

@@ -10,7 +10,7 @@ Flow:
   1. Provision a fresh per-repair store (timestamped repair_id, never
      reused by previous runs).
   2. Session 1: kickoff explicitly tells the agent to write a
-     diagnostic snapshot to /mnt/memory/microsolder-repair-*/state.md
+     diagnostic snapshot to /mnt/memory/wrench-board-repair-*/state.md
      plus a decision file. Wait for end_turn.
   3. Session 2 on the SAME repair_id (so the same store reattaches):
      kickoff asks "what did we figure out earlier?" with NO context.
@@ -265,7 +265,7 @@ async def main() -> None:
         "Mon hypothèse principale après une diode-mode rapide est que C156 est "
         f"shorté plaque-à-plaque (rail VDD_MAIN à ~0Ω, code de tracking interne {PLANTED_TOKEN}). "
         "Avant que je parte chercher du matériel, écris immédiatement dans ton mount "
-        "repair (`/mnt/memory/microsolder-repair-iphone-x-{repair_id}/`) un `state.md` "
+        "repair (`/mnt/memory/wrench-board-repair-iphone-x-{repair_id}/`) un `state.md` "
         "avec ton snapshot, ET un `decisions/initial.md` justifiant pourquoi tu te "
         f"focus sur C156 + le tracking code {PLANTED_TOKEN}. Liste les outils utilisés "
         "(read/write/edit/glob). Court et structuré."

@@ -31,7 +31,7 @@ from api.pipeline.schematic.passive_classifier import classify_passives_heuristi
 from api.pipeline.schematic.renderer import render_pages
 from api.pipeline.schematic.schemas import ElectricalGraph
 
-logger = logging.getLogger("microsolder.pipeline.schematic.cli")
+logger = logging.getLogger("wrench_board.pipeline.schematic.cli")
 
 
 async def _run(

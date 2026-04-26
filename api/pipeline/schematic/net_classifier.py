@@ -45,7 +45,7 @@ _BATCH_SIZE = 100
 # Callers can override with model= to use anything. The default is read
 # lazily from settings.anthropic_model_sonnet at call time.
 
-logger = logging.getLogger("microsolder.pipeline.schematic.net_classifier")
+logger = logging.getLogger("wrench_board.pipeline.schematic.net_classifier")
 
 
 SUBMIT_TOOL_NAME = "submit_net_classification"

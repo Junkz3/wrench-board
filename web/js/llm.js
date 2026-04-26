@@ -31,11 +31,28 @@ import {
   isPreviewOpen,
   openPreview,
 } from './camera_preview.js';
+import { mountMascot, setMascotState } from './mascot.js';
 
 const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;  // 5MB raw, mirrors backend cap
 
 let ws = null;
 let currentTier = "fast";
+// Cached <svg.mascot> mounted into #llmMascot at panel-fragment init time.
+// `setPanelMascot()` is the single chokepoint for animating it from WS events
+// and form submission — null-safe when the fragment hasn't loaded yet.
+let panelMascot = null;
+let _errorRecoveryT = null;
+function setPanelMascot(state) {
+  if (!panelMascot) return;
+  if (_errorRecoveryT) { clearTimeout(_errorRecoveryT); _errorRecoveryT = null; }
+  setMascotState(panelMascot, state);
+  if (state === "error") {
+    _errorRecoveryT = setTimeout(() => {
+      setMascotState(panelMascot, "idle");
+      _errorRecoveryT = null;
+    }, 1800);
+  }
+}
 // True once the tech has explicitly chosen a tier this page-load (clicked
 // the popover, or any path that calls switchTier). Until that happens,
 // session_ready may auto-realign currentTier with the resumed conv's
@@ -514,10 +531,6 @@ function appendTurnMessage(turn, text) {
   msg = document.createElement("div");
   msg.className = "turn-message";
   renderAgentMarkup(msg, text || "");
-  // Caret: visible until turn_cost arrives (removed in appendTurnFoot).
-  const caret = document.createElement("span");
-  caret.className = "caret";
-  msg.appendChild(caret);
   turn.appendChild(msg);
   el("llmLog").scrollTop = el("llmLog").scrollHeight;
   return msg;
@@ -644,8 +657,6 @@ function makeChipNode(match) {
 
 function appendTurnFoot(turn, payload) {
   // Terminal signal for this turn — clear transient indicators.
-  const caret = turn.querySelector(".turn-message .caret");
-  if (caret) caret.remove();
   clearPendingNode(turn);
   let foot = turn.querySelector(".turn-foot");
   if (!foot) {
@@ -896,11 +907,13 @@ function connect() {
   ws.addEventListener("close", () => {
     statusTone("closed", "fermé");
     setSendEnabled(false);
+    setPanelMascot("idle");
   });
 
   ws.addEventListener("error", () => {
     statusTone("error", "erreur socket");
     setSendEnabled(false);
+    setPanelMascot("error");
   });
 
   ws.addEventListener("message", ev => {
@@ -1052,6 +1065,7 @@ function connect() {
           ...(payload.result != null ? { result: payload.result } : {}),
         };
         addExpandToStep(step, payloadJSON);
+        setPanelMascot("working");
         break;
       }
       case "memory_tool_use": {
@@ -1069,11 +1083,13 @@ function connect() {
         const { icon, phraseHTML } = renderer ? renderer(payload.input || {}) : memToolFallback(name);
         const step = appendStep(turn, "mem", `${icon}${phraseHTML}`);
         addExpandToStep(step, { args: payload.input || {} });
+        setPanelMascot("working");
         break;
       }
       case "thinking": {
         const turn = ensureTurn();
         appendStep(turn, "thinking", escapeHTML(payload.text || "…"));
+        setPanelMascot("thinking");
         break;
       }
       case "turn_cost":
@@ -1092,10 +1108,12 @@ function connect() {
         if (typeof window.__resetDashboardFixBtn === "function") {
           window.__resetDashboardFixBtn();
         }
+        setPanelMascot("error");
         break;
       case "session_terminated":
         logSys("session terminée", true);
         closeTurn();
+        setPanelMascot("idle");
         break;
       case "server.capture_request":
         // Flow B: agent called cam_capture. Snap from the metabar-selected
@@ -1111,6 +1129,7 @@ function connect() {
         // Internal signal for benchmarks (end of an agent tech-turn). UI
         // doesn't render it — turn boundaries are already conveyed by the
         // turn_cost foot and the next user message.
+        setPanelMascot("idle");
         break;
       default:
         // Unknown WS event type — typically means the backend grew a new
@@ -1325,6 +1344,8 @@ export async function initLLMPanel() {
   const mounted = await mountPanelFragment();
   if (!mounted) return;
 
+  panelMascot = mountMascot(el("llmMascot"), { size: "sm", state: "idle" });
+
   el("llmToggle")?.addEventListener("click", togglePanel);
   el("llmClose")?.addEventListener("click", closePanel);
   el("llmStop")?.addEventListener("click", interruptAgent);
@@ -1429,6 +1450,7 @@ export async function initLLMPanel() {
     closeTurn();
     const turn = ensureTurn();
     ensurePendingNode(turn);
+    setPanelMascot("thinking");
     if (input) {
       input.value = "";
       autoGrow();

@@ -13,7 +13,7 @@ def board_assets_dir(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     assets = tmp_path / "board_assets"
     assets.mkdir()
     # Point SessionState.from_device at this dir via an env var the helper reads.
-    monkeypatch.setenv("MICROSOLDER_BOARD_ASSETS", str(assets))
+    monkeypatch.setenv("WRENCH_BOARD_BOARD_ASSETS", str(assets))
     return assets
 
 

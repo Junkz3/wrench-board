@@ -10,7 +10,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    """Runtime configuration for the microsolder-agent backend."""
+    """Runtime configuration for the wrench-board backend."""
 
     model_config = SettingsConfigDict(
         env_file=".env",

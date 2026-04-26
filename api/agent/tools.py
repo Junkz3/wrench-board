@@ -7,7 +7,7 @@ typos on a parsed board). Reads straight from disk on every call.
 
 mb_record_finding powers cross-session memory: every confirmed repair becomes
 a field report on disk, mirrored to the device's MA memory store mount under
-/mnt/memory/microsolder-{slug}/field_reports/. The agent reads them via grep
+/mnt/memory/wrench-board-{slug}/field_reports/. The agent reads them via grep
 on the mount (with the layered MA memory architecture) — there is no
 mb_list_findings tool: that's a redundant API surface vs. the mount.
 """

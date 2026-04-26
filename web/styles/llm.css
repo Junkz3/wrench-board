@@ -431,20 +431,6 @@ body.llm-open .stub{right:420px}
 }
 
 /* ============ Live feedback ============ */
-.turn-message .caret {
-  display: inline-block;
-  width: 2px;
-  height: 1em;
-  margin-left: 2px;
-  background: var(--violet);
-  animation: caret-blink 1s step-end infinite;
-  vertical-align: text-bottom;
-}
-@keyframes caret-blink {
-  0%, 50%   { opacity: 1 }
-  51%, 100% { opacity: 0 }
-}
-
 /* Phantom "agent is working" node at the bottom of the rail. */
 .step.pending {
   color: var(--violet);
@@ -488,8 +474,7 @@ body.llm-open .stub{right:420px}
 }
 
 /* Suppress live indicators during replay (CSS guard). */
-.llm-log.replay .step.pending,
-.llm-log.replay .turn-message .caret { display: none; }
+.llm-log.replay .step.pending { display: none; }
 
 /* Cost-chip migrated into .turn-foot — hide any residual instance. */
 .llm-log .cost-chip { display: none; }

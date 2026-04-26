@@ -8,7 +8,7 @@
 
 **Tech Stack:** Python 3.11, Pydantic v2, pytest + pytest-asyncio, `anthropic` async client (mocked in unit tests), forced tool use via `api/pipeline/tool_call.py::call_with_forced_tool`, JSONL + atomic file writes via `tempfile` + `os.replace`, `fcntl.flock` advisory lock on the aggregate `_latest.json`.
 
-**Workspace:** All edits happen in the dedicated worktree `/home/alex/Documents/hackathon-microsolder-bench-gen/` on branch `feature/bench-auto-generator`. The main tree `/home/alex/Documents/hackathon-microsolder/` remains on `evolve/2026-04-24` and continues to be mutated by the evolve runner — do **not** touch that working directory.
+**Workspace:** All edits happen in the dedicated worktree `/home/alex/Documents/hackathon-wrench-board-bench-gen/` on branch `feature/bench-auto-generator`. The main tree `/home/alex/Documents/hackathon-microsolder/` remains on `evolve/2026-04-24` and continues to be mutated by the evolve runner — do **not** touch that working directory.
 
 **Hard no-go list (spec §2.1 + §7.2):** never write to `api/pipeline/schematic/simulator.py`, `api/pipeline/schematic/hypothesize.py`, `api/pipeline/schematic/evaluator.py`, `benchmark/scenarios.jsonl`, `benchmark/sources/`, `evolve/*`, `api/pipeline/schematic/boot_analyzer.py`, `tests/pipeline/schematic/test_boot_analyzer.py`. Import from `evaluator.py` is allowed (read-only consumption).
 
@@ -108,7 +108,7 @@ def test_precondition_error_carries_reason():
 - [ ] **Step 2: Run test to verify it fails**
 
 ```bash
-cd /home/alex/Documents/hackathon-microsolder-bench-gen
+cd /home/alex/Documents/hackathon-wrench-board-bench-gen
 .venv/bin/pytest tests/pipeline/bench_generator/test_errors.py -v
 ```
 Expected: `ModuleNotFoundError: No module named 'api.pipeline.bench_generator'`.
@@ -1773,7 +1773,7 @@ from api.pipeline.bench_generator.schemas import ProposalsPayload
 from api.pipeline.schematic.schemas import ElectricalGraph
 from api.pipeline.tool_call import call_with_forced_tool
 
-logger = logging.getLogger("microsolder.bench_generator.extractor")
+logger = logging.getLogger("wrench_board.bench_generator.extractor")
 
 
 def _propose_tool() -> dict:
@@ -2301,7 +2301,7 @@ from api.pipeline.bench_generator.schemas import (
 )
 from api.pipeline.schematic.evaluator import Scorecard
 
-logger = logging.getLogger("microsolder.bench_generator.writer")
+logger = logging.getLogger("wrench_board.bench_generator.writer")
 
 
 def _atomic_write_text(path: Path, content: str) -> None:
@@ -2821,7 +2821,7 @@ from api.pipeline.bench_generator.writer import (
 )
 from api.pipeline.schematic.schemas import ElectricalGraph
 
-logger = logging.getLogger("microsolder.bench_generator.orchestrator")
+logger = logging.getLogger("wrench_board.bench_generator.orchestrator")
 
 
 def _load_pack(pack_dir: Path) -> tuple[str, str, str, ElectricalGraph]:
@@ -3179,7 +3179,7 @@ from api.pipeline.bench_generator.errors import (
 )
 from api.pipeline.bench_generator.orchestrator import generate_from_pack
 
-logger = logging.getLogger("microsolder.bench_generator.cli")
+logger = logging.getLogger("wrench_board.bench_generator.cli")
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -3394,7 +3394,7 @@ import json
 import logging
 from pathlib import Path
 
-logger = logging.getLogger("microsolder.agent.reliability")
+logger = logging.getLogger("wrench_board.agent.reliability")
 
 
 def _memory_root() -> Path:
@@ -3754,7 +3754,7 @@ Human-driven validation. No code changes in this task — only running the scrip
 (Note: `--dry-run` currently still writes — see Task 17 note. Treat this as a full real run and discard / version the outputs as appropriate.)
 
 ```bash
-cd /home/alex/Documents/hackathon-microsolder-bench-gen
+cd /home/alex/Documents/hackathon-wrench-board-bench-gen
 .venv/bin/python scripts/generate_bench_from_pack.py \
     --slug mnt-reform-motherboard --verbose
 ```

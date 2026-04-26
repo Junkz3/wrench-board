@@ -11,7 +11,7 @@ RUFF = $(VENV)/bin/ruff
 PORT ?= 8000
 
 help:
-	@echo "microsolder-agent — common tasks"
+	@echo "wrench-board — common tasks"
 	@echo ""
 	@echo "  make install   Create .venv and install dependencies (incl. dev)"
 	@echo "  make run       Start uvicorn in dev mode on port $(PORT) with --reload"

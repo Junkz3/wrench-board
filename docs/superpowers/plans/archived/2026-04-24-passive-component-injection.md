@@ -629,7 +629,7 @@ from api.pipeline.schematic.schemas import (
     ElectricalGraph,
 )
 
-logger = logging.getLogger("microsolder.pipeline.schematic.passive_classifier")
+logger = logging.getLogger("wrench_board.pipeline.schematic.passive_classifier")
 
 # Map schema `ComponentType` → `ComponentKind` for passives we handle.
 _TYPE_TO_KIND: dict[str, str] = {

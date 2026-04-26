@@ -35,7 +35,7 @@ from api.board.parser._ascii_boardview import DialectMarkers, parse_test_link_sh
 from api.board.parser._fz_zlib import looks_like_fz_zlib, parse_fz_zlib
 from api.board.parser.base import BoardParser, MissingFZKeyError, register
 
-_ENV_KEY = "MICROSOLDER_FZ_KEY"
+_ENV_KEY = "WRENCH_BOARD_FZ_KEY"
 _KEY_WORDS = 44  # 44 × 32-bit, per the ASUS format
 _WINDOW_BYTES = 16
 

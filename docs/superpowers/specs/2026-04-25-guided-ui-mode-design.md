@@ -1,7 +1,7 @@
 # Spécification — Mode Guidé (Workspace par Repair)
 
 **Date :** 25 avril 2026
-**Projet :** `microsolder-agent`
+**Projet :** `wrench-board`
 **Auteur :** Brainstorm Alexis ↔ Claude Code (Opus 4.7)
 **Échéance d'implémentation :** dimanche 26 avril 20:00 EST (lundi 02:00 FR)
 **Statut :** validé pour implémentation
@@ -140,7 +140,7 @@ activé en localStorage *et* le mode est `guided`. Sinon → workspace direct.
   (CSS `filter: blur(8px) brightness(0.4)`) en couche basse — image
   `web/assets/board-blur.jpg` (open-source, commitable, à sourcer Unsplash
   CC0 ou photo perso CC).
-- Centré : titre `microsolder` (Inter 32 px), sous-titre
+- Centré : titre `Wrench Board` (Inter 32 px), sous-titre
   « Ton assistant de réparation hardware ».
 - Champ unique de saisie : `placeholder="Décris ce qui ne marche pas — ex. 'mon Framework ne s'allume plus'"`.
 - Bouton « Diagnostiquer » (ou submit on Enter).
@@ -186,10 +186,10 @@ construire en arrière-plan (~2 min) ou on continue sans, tu choisis ».
 
 Une fois la landing franchie, l'utilisateur arrive dans le workspace du
 repair. URL : `/?repair={rid}`. Le mode est `guided` par défaut, l'état
-est persisté en `localStorage` (`microsolder.mode`).
+est persisté en `localStorage` (`wrench_board.mode`).
 
 **Topbar** (48 px) :
-- Gauche : logo `⚡ microsolder` (clic = retour landing si zéro repair courant, sinon switch repair via sidebar).
+- Gauche : logo `⚡ Wrench Board` (clic = retour landing si zéro repair courant, sinon switch repair via sidebar).
 - Centre : nom du repair (« MNT Reform — pas de boot ») éditable inline au double-clic.
 - Centre droit : 3 onglets `Memory | Schéma | Graphe`. Clic sur un onglet → bascule en **mode workbench-detail** sur la section correspondante (cf. §4.5).
 - Droite : pill de coût ($X.YY total session), bouton ⚙ qui toggle le mode expert.
@@ -234,7 +234,7 @@ workbench-detail sur la section correspondante.
 
 Bouton ⚙ dans le topbar. Au clic :
 1. `body.classList.toggle("guided-mode"); body.classList.toggle("expert-mode")`.
-2. `localStorage.setItem("microsolder.mode", currentMode)`.
+2. `localStorage.setItem("wrench_board.mode", currentMode)`.
 3. Le rail 52 px + métabar 44 px réapparaissent (CSS conditionnel sur `.expert-mode`).
 4. La sidebar guidée 220 px se rétracte à un mini-rail conv (40 px, visible verticalement, icône + tooltip).
 5. Le centre rebascule en `#agent` panel actuel (chat sidebar + centre par défaut sur le `#pcb` ou la dernière section visitée).

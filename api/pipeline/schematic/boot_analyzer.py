@@ -37,7 +37,7 @@ from api.pipeline.schematic.schemas import (
 )
 from api.pipeline.tool_call import call_with_forced_tool
 
-logger = logging.getLogger("microsolder.pipeline.schematic.boot_analyzer")
+logger = logging.getLogger("wrench_board.pipeline.schematic.boot_analyzer")
 
 
 SUBMIT_TOOL_NAME = "submit_analyzed_boot_sequence"

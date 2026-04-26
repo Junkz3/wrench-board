@@ -4,10 +4,10 @@ Two singleton MA memory stores are created lazily by the agent runtime
 (see `api/agent/memory_stores.py::ensure_global_store`) and attached
 read-only to every diagnostic session:
 
-- **`microsolder-global-patterns`** — cross-device failure archetypes
+- **`wrench-board-global-patterns`** — cross-device failure archetypes
   (PMU shorts, thermal cascades, BGA lift, bench anti-patterns).
   Seeded from `global_patterns/*.md`.
-- **`microsolder-global-playbooks`** — JSON protocol templates
+- **`wrench-board-global-playbooks`** — JSON protocol templates
   conformant to `bv_propose_protocol(steps=[...])`.
   Seeded from `global_playbooks/*.json`.
 

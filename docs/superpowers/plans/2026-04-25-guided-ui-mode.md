@@ -539,10 +539,10 @@ Append à `web/js/router.js` :
 //   - expert  : original pro-tool workbench with the 8-section rail
 //
 // State is stored on `<body>` as `guided-mode` or `expert-mode` and persisted
-// in localStorage under "microsolder.mode". The rest of the app reads from
+// in localStorage under "wrench_board.mode". The rest of the app reads from
 // these classes via plain CSS selectors (no JS event bus needed).
 
-const MODE_KEY = "microsolder.mode";
+const MODE_KEY = "wrench_board.mode";
 export const MODES = Object.freeze({ GUIDED: "guided", EXPERT: "expert" });
 
 export function getMode() {
@@ -632,7 +632,7 @@ Ouvre `http://localhost:8000` puis dans la console :
 ```javascript
 console.log(document.body.className);
 // Doit contenir "guided-mode"
-localStorage.setItem("microsolder.mode", "expert");
+localStorage.setItem("wrench_board.mode", "expert");
 location.reload();
 console.log(document.body.className);
 // Doit contenir "expert-mode"
@@ -672,7 +672,7 @@ Ouvre `web/index.html`. Trouve la ligne `<div class="topbar">` (autour de la lig
            stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round">
         <path d="M13 2L3 14h7l-1 8 11-13h-7z" fill="currentColor" stroke="none"/>
       </svg>
-      <span>microsolder</span>
+      <span>Wrench Board</span>
     </div>
     <h1 class="landing-title">Ton assistant de réparation hardware.</h1>
     <p class="landing-sub">Décris ce qui ne marche pas — je m'occupe du diagnostic.</p>
@@ -1573,7 +1573,7 @@ Dans `<head>` de `index.html`, ajoute (après `landing.css`) :
 - Topbar : onglets « Memory | Schéma | Graphe » + bouton ⚙
 - Le chat occupe le reste
 - Rail et métabar invisibles
-- Bascule expert : `localStorage.setItem('microsolder.mode','expert'); location.reload()` → tout redevient comme avant.
+- Bascule expert : `localStorage.setItem('wrench_board.mode','expert'); location.reload()` → tout redevient comme avant.
 
 **VALIDATION VISUELLE ALEXIS.**
 
@@ -2342,7 +2342,7 @@ Dans `openWorkspaceForSlug()` quand `opts.needsConfirm` est true :
 
 ```javascript
 if (opts.needsConfirm && opts.candidates) {
-  sessionStorage.setItem("microsolder.intent_candidates", JSON.stringify(opts.candidates));
+  sessionStorage.setItem("wrench_board.intent_candidates", JSON.stringify(opts.candidates));
 }
 ```
 
@@ -2354,11 +2354,11 @@ if (opts.needsConfirm && opts.candidates) {
 function maybePostIntentConfirmWidget() {
   const params = new URLSearchParams(location.search);
   if (params.get("confirm_intent") !== "1") return;
-  const raw = sessionStorage.getItem("microsolder.intent_candidates");
+  const raw = sessionStorage.getItem("wrench_board.intent_candidates");
   if (!raw) return;
   let candidates;
   try { candidates = JSON.parse(raw); } catch { return; }
-  sessionStorage.removeItem("microsolder.intent_candidates");
+  sessionStorage.removeItem("wrench_board.intent_candidates");
 
   appendChatWidget({
     title: "Confirme l'appareil",

@@ -44,7 +44,7 @@ from api.pipeline.bench_generator.writer import (
 )
 from api.pipeline.schematic.schemas import ElectricalGraph
 
-logger = logging.getLogger("microsolder.bench_generator.orchestrator")
+logger = logging.getLogger("wrench_board.bench_generator.orchestrator")
 
 
 def _load_pack(

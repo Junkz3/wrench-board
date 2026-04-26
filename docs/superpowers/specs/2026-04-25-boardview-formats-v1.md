@@ -76,7 +76,7 @@ These wrap ASCII boardview data inside a trivial obfuscation layer:
   Policy: implement the descrambling structure, raise
   `MissingFZKeyError` (new, subclass of `InvalidBoardFile`) when no key
   is supplied. The key can be passed via `FZParser(key=...)` or the
-  `MICROSOLDER_FZ_KEY` environment variable (hex-space-separated 44
+  `WRENCH_BOARD_FZ_KEY` environment variable (hex-space-separated 44
   32-bit words).
 
 ### Family C — Multi-file ASCII (ASUS TSICT)

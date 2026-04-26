@@ -36,7 +36,7 @@ Le runner `evolve/` mute en continu `simulator.py` et `hypothesize.py` la nuit. 
 
 Règle d'or : **`benchmark/auto_proposals/` ↔ `benchmark/scenarios.jsonl` sont disjoints**. La promotion de l'un vers l'autre (si elle arrive un jour) est un geste **manuel** hors de ce scope, non-automatisable par ce générateur.
 
-Sous le capot, pour matérialiser cette garantie, le travail se fait dans un **worktree git isolé** (`/home/alex/Documents/hackathon-microsolder-bench-gen/`) basé sur `main`. L'evolve runner continue de tourner dans son working tree d'origine sans interférence.
+Sous le capot, pour matérialiser cette garantie, le travail se fait dans un **worktree git isolé** (`/home/alex/Documents/hackathon-wrench-board-bench-gen/`) basé sur `main`. L'evolve runner continue de tourner dans son working tree d'origine sans interférence.
 
 ---
 
@@ -307,7 +307,7 @@ Exit codes:
 
 ### 7.1 Isolation du worktree
 
-Le développement se fait dans un worktree git distinct (`/home/alex/Documents/hackathon-microsolder-bench-gen/`) sur la branche `feature/bench-auto-generator` basée sur `main`. L'evolve runner continue de tourner dans le working tree principal (`/home/alex/Documents/hackathon-microsolder/`) sur `evolve/2026-04-24` sans interférence. La branche `feature/bench-auto-generator` ne fera **jamais** de fast-forward ou merge avec `evolve/*`.
+Le développement se fait dans un worktree git distinct (`/home/alex/Documents/hackathon-wrench-board-bench-gen/`) sur la branche `feature/bench-auto-generator` basée sur `main`. L'evolve runner continue de tourner dans le working tree principal (`/home/alex/Documents/hackathon-microsolder/`) sur `evolve/2026-04-24` sans interférence. La branche `feature/bench-auto-generator` ne fera **jamais** de fast-forward ou merge avec `evolve/*`.
 
 ### 7.2 Hard-gate evolve
 

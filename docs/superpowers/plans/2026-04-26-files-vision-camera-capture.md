@@ -91,7 +91,7 @@ the existing assertions out of the helper — the helper just streams + collects
 ```python
 SESSION_1_KICKOFF = (
     "Salut. iphone-x sur le banc, plainte: ne s'allume pas. "
-    "Avant de partir, écris ton état actuel dans /mnt/memory/microsolder-repair-smoke-R1/state.md "
+    "Avant de partir, écris ton état actuel dans /mnt/memory/wrench-board-repair-smoke-R1/state.md "
     "(symptôme initial, hypothèse en cours, prochaine action) et un fichier decisions/initial.md "
     "résumant ta première décision. Réponds-moi juste 'OK noté' à la fin."
 )
@@ -105,7 +105,7 @@ same `repair_id="smoke-R1"` and a fresh `agent.id` reference (same agent, new se
 ```python
 SESSION_2_KICKOFF = (
     "Re-bonjour. On reprend la repair en cours. "
-    "Lis /mnt/memory/microsolder-repair-smoke-R1/state.md et raconte-moi ce que tu trouves "
+    "Lis /mnt/memory/wrench-board-repair-smoke-R1/state.md et raconte-moi ce que tu trouves "
     "(quelle hypothèse, quelle prochaine action). Cite explicitement le contenu du fichier."
 )
 ```
@@ -1451,7 +1451,7 @@ def _seed_macro(memory_root: Path, slug: str, repair_id: str, filename: str, con
 
 
 def test_macros_route_serves_jpeg(monkeypatch, tmp_path: Path):
-    monkeypatch.setenv("MICROSOLDER_MEMORY_ROOT", str(tmp_path))
+    monkeypatch.setenv("WRENCH_BOARD_MEMORY_ROOT", str(tmp_path))
     bytes_ = b"\xff\xd8\xff\xe0fake_jpeg"
     _seed_macro(tmp_path, "iphone-x", "R1", "1745704812_manual.jpg", bytes_)
 
@@ -1463,14 +1463,14 @@ def test_macros_route_serves_jpeg(monkeypatch, tmp_path: Path):
 
 
 def test_macros_route_404_on_missing(monkeypatch, tmp_path: Path):
-    monkeypatch.setenv("MICROSOLDER_MEMORY_ROOT", str(tmp_path))
+    monkeypatch.setenv("WRENCH_BOARD_MEMORY_ROOT", str(tmp_path))
     client = TestClient(app)
     res = client.get("/api/macros/iphone-x/R1/does_not_exist.png")
     assert res.status_code == 404
 
 
 def test_macros_route_blocks_path_traversal(monkeypatch, tmp_path: Path):
-    monkeypatch.setenv("MICROSOLDER_MEMORY_ROOT", str(tmp_path))
+    monkeypatch.setenv("WRENCH_BOARD_MEMORY_ROOT", str(tmp_path))
     client = TestClient(app)
     # Note FastAPI may URL-decode dots ; the route handler validates.
     res = client.get("/api/macros/iphone-x/R1/..%2F..%2Fetc%2Fpasswd")
@@ -1573,7 +1573,7 @@ Add a new `.meta-camera` block among the existing `.meta-*` widgets :
 // SPDX-License-Identifier: Apache-2.0
 // Camera picker + capture helpers for the metabar.
 
-const LS_KEY = 'microsolder.cameraDeviceId';
+const LS_KEY = 'wrench_board.cameraDeviceId';
 
 let _cachedDevices = [];
 let _onChangeCb = null;

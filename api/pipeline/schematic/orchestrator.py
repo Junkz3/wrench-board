@@ -49,7 +49,7 @@ from api.pipeline.schematic.schemas import (
     SchematicPageGraph,
 )
 
-logger = logging.getLogger("microsolder.pipeline.schematic.orchestrator")
+logger = logging.getLogger("wrench_board.pipeline.schematic.orchestrator")
 
 
 async def ingest_schematic(

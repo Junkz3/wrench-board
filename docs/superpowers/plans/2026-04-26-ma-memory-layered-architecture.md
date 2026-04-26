@@ -262,7 +262,7 @@ async def ensure_global_store(
     if cached_id:
         return cached_id
 
-    name = f"microsolder-global-{kind}"
+    name = f"wrench-board-global-{kind}"
     store_id: str | None = None
 
     sdk_beta = getattr(client, "beta", None)
@@ -420,7 +420,7 @@ async def ensure_repair_store(
         except (json.JSONDecodeError, OSError):
             logger.warning("[MemoryStore] repair marker %s unreadable", marker)
 
-    name = f"microsolder-repair-{device_slug}-{repair_id}"
+    name = f"wrench-board-repair-{device_slug}-{repair_id}"
     description = _repair_store_description(device_slug, repair_id)
     store_id: str | None = None
 
@@ -524,10 +524,10 @@ Write `api/agent/seed_data/README.md`:
 
 Two singleton MA memory stores are created lazily by the agent runtime:
 
-- **`microsolder-global-patterns`** (RO at runtime) — cross-device failure
+- **`wrench-board-global-patterns`** (RO at runtime) — cross-device failure
   archetypes (PMU shorts, thermal cascades, BGA lift…). Seeded from
   `global_patterns/*.md`.
-- **`microsolder-global-playbooks`** (RO at runtime) — JSON protocol
+- **`wrench-board-global-playbooks`** (RO at runtime) — JSON protocol
   templates conformant to `bv_propose_protocol(steps=[...])`. Seeded from
   `global_playbooks/*.json`.
 
@@ -1210,7 +1210,7 @@ git add api/agent/manifest.py api/agent/tools.py api/agent/dispatch_mb.py tests/
 git commit -m "refactor(agent): drop mb_list_findings (redundant with mount grep)
 
 With the layered MA memory architecture, every session has the device's
-field_reports mirrored to /mnt/memory/microsolder-{slug}/field_reports/
+field_reports mirrored to /mnt/memory/wrench-board-{slug}/field_reports/
 and the agent has the agent_toolset_20260401 (read/write/edit/grep/glob)
 to query it directly. mb_list_findings became a duplicate API surface
 that the SYSTEM_PROMPT itself flagged as 'do not call in mount mode'.
@@ -1242,7 +1242,7 @@ _AGENT_TOOLSET = {
 }
 ```
 
-`glob` is needed for the scribe pattern: agent does `glob /mnt/memory/microsolder-repair-*/decisions/*.md` to list past decisions chronologically.
+`glob` is needed for the scribe pattern: agent does `glob /mnt/memory/wrench-board-repair-*/decisions/*.md` to list past decisions chronologically.
 
 - [ ] **Step 2: Commit Task 4.2**
 
@@ -1280,28 +1280,28 @@ chaque session de ce repair. La note d'attachement en tête de prompt te
 donne le nom exact de chaque mount et son rôle. Lis-les dans cet ordre
 quand tu cherches du contexte (du général au spécifique) :
 
-  1. **/mnt/memory/microsolder-global-patterns/** (read-only)
+  1. **/mnt/memory/wrench-board-global-patterns/** (read-only)
      Archétypes de défaillance cross-device : `/patterns/short-to-gnd.md`,
      `/patterns/thermal-cascades.md`, `/patterns/bga-lift-archetype.md`,
      `/patterns/anti-patterns-bench.md`. Grep ici quand
      `mb_get_rules_for_symptoms` retourne 0 résultats — un archétype
      global s'applique souvent au-delà d'une famille de devices.
 
-  2. **/mnt/memory/microsolder-global-playbooks/** (read-only)
+  2. **/mnt/memory/wrench-board-global-playbooks/** (read-only)
      Templates de protocoles JSON conformes au schéma de
      `bv_propose_protocol(steps=[...])` : `/playbooks/boot-no-power.json`,
      `/playbooks/usb-no-charge.json`, `/playbooks/pmic-rail-collapse.json`.
      **Avant de synthétiser un protocole**, grep ici pour un playbook qui
      match le symptôme et préfère-le — il est field-tested.
 
-  3. **/mnt/memory/microsolder-{device-slug}/** (read-write)
+  3. **/mnt/memory/wrench-board-{device-slug}/** (read-write)
      Pack de connaissance et findings confirmés DE CE DEVICE.
      `/knowledge/*.json` est pipeline-authored (registry, rules, etc.) —
      traite-le comme référence. `/field_reports/*.md` est mirroré depuis
      `mb_record_finding` — **n'écris PAS ici directement**, utilise le
      tool pour les findings canoniques (validation refdes + format).
 
-  4. **/mnt/memory/microsolder-repair-{slug}-{repair_id}/** (read-write)
+  4. **/mnt/memory/wrench-board-repair-{slug}-{repair_id}/** (read-write)
      **Ton bloc-notes scratch DE CE REPAIR**, persisté à travers toutes
      les sessions du même repair. Arborescence canonique :
        - `state.md` — snapshot des hypothèses + mesures clés
@@ -1313,9 +1313,9 @@ quand tu cherches du contexte (du général au spécifique) :
 
 Au début de chaque session, lis le mount repair pour reprendre le fil :
 ```
-ls /mnt/memory/microsolder-repair-*/
-read /mnt/memory/microsolder-repair-*/state.md   # si existe
-glob /mnt/memory/microsolder-repair-*/decisions/*.md
+ls /mnt/memory/wrench-board-repair-*/
+read /mnt/memory/wrench-board-repair-*/state.md   # si existe
+glob /mnt/memory/wrench-board-repair-*/decisions/*.md
 ```
 Si le mount est vide → première session du repair, démarre normalement.
 
@@ -1346,7 +1346,7 @@ Find the bullet describing `mb_get_component(refdes)` in the SYSTEM_PROMPT and r
   - mb_get_component(refdes) — VALIDATEUR anti-hallucination. Vérifie
     qu'un refdes existe dans le registry du device et retourne
     `closest_matches` (Levenshtein) en cas de miss. Tu peux aussi
-    `read /mnt/memory/microsolder-{slug}/knowledge/registry.json` pour
+    `read /mnt/memory/wrench-board-{slug}/knowledge/registry.json` pour
     explorer la structure, mais tout refdes que tu mentionnes au tech
     DOIT passer par ce tool — c'est la garantie qu'il existe.
 ```
@@ -1360,8 +1360,8 @@ Find the bullet for `mb_record_finding` and replace with:
     — API canonique pour persister un finding confirmé par le technicien
     en fin de session ("c'était bien U7, je l'ai remplacé, ça fonctionne").
     Le serveur valide le refdes, écrit en JSON+Markdown, et mirror dans
-    `/mnt/memory/microsolder-{slug}/field_reports/`. **Ne confonds pas**
-    avec ton bloc-notes scratch (`/mnt/memory/microsolder-repair-*/`) —
+    `/mnt/memory/wrench-board-{slug}/field_reports/`. **Ne confonds pas**
+    avec ton bloc-notes scratch (`/mnt/memory/wrench-board-repair-*/`) —
     le scratch est tes notes de travail, `mb_record_finding` est
     l'archive officielle lue par les futures sessions.
 ```
@@ -1689,7 +1689,7 @@ Expected: prints the 4 store ids, then streams agent response, then PASS or PART
 
 If smoke FAILed:
 - Re-read the agent's response. Did it reference its tools at all? If no fs tool was called, the prompt isn't motivating it.
-- Strengthen the playbooks bullet in SYSTEM_PROMPT (see Phase 5) to say something like *"Lance toujours `glob /mnt/memory/microsolder-global-playbooks/playbooks/*.json` au début d'un diagnostic 'pas d'allumage' ou 'pas de charge' avant tout autre tool."*
+- Strengthen the playbooks bullet in SYSTEM_PROMPT (see Phase 5) to say something like *"Lance toujours `glob /mnt/memory/wrench-board-global-playbooks/playbooks/*.json` au début d'un diagnostic 'pas d'allumage' ou 'pas de charge' avant tout autre tool."*
 - Refresh agents (`bootstrap --refresh-tools`).
 - Re-run smoke.
 

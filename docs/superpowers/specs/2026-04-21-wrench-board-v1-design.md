@@ -1,4 +1,4 @@
-# microsolder-agent — Design Spec v1
+# wrench-board — Design Spec v1
 
 > **⚠️ ARCHIVE — brainstorming historique (2026-04-21). Ne pas implémenter depuis ce doc.**
 >
@@ -21,7 +21,7 @@
 | Status | Draft — section par section avec gate de validation |
 | Auteur | Alexis (+ Claude Opus 4.7 en pair-design) |
 | Contexte | *Built with Opus 4.7* Hackathon (Anthropic × Cerebral Valley, 2026-04-21 → 2026-04-26) |
-| Spec location | `docs/superpowers/specs/2026-04-21-microsolder-agent-v1-design.md` |
+| Spec location | `docs/superpowers/specs/2026-04-21-wrench-board-v1-design.md` |
 
 ---
 
@@ -29,7 +29,7 @@
 
 ### 1.1 Positionnement
 
-`microsolder-agent` transforme un technicien microsoudure en opérateur d'un copilote de diagnostic. L'utilisateur pose ses questions en langage naturel (« pourquoi le rail 3V3 ne monte pas ? », « où est le PMIC ? »), et un agent Claude Opus 4.7 **pilote visuellement** l'interface — il highlight des composants sur le boardview, ouvre les bonnes pages du schematic, cite ses sources, et consigne tout dans un journal de réparation.
+`wrench-board` transforme un technicien microsoudure en opérateur d'un copilote de diagnostic. L'utilisateur pose ses questions en langage naturel (« pourquoi le rail 3V3 ne monte pas ? », « où est le PMIC ? »), et un agent Claude Opus 4.7 **pilote visuellement** l'interface — il highlight des composants sur le boardview, ouvre les bonnes pages du schematic, cite ses sources, et consigne tout dans un journal de réparation.
 
 Le projet est construit autour d'une **couche de connaissance technique par device** — la Memory Bank — qui est simultanément :
 
@@ -169,7 +169,7 @@ Trois tiers au service du backend :
 4. Anthropic consulte automatiquement le memory store, l'agent décide → émet `agent.message` (texte streamé) et/ou `agent.custom_tool_use`
 5. Backend intercepte chaque `custom_tool_use` :
    - `mb_*` → dispatch vers `api/memory_bank/tools.py`, lecture disque, réponse structurée
-   - Tools **boardview** (les 12 de Boardviewer spec §9) → dispatch vers `api/tools/boardview.py` → **L1 validator `is_valid_refdes`** → **L2 validation `mb_get_component`** → émission d'un message WS suivant **exactement** le protocole `boardview.*` défini dans Boardviewer spec §10 → réponse Anthropic `user.custom_tool_result`. microsolder-agent **ne définit pas** de nouveaux messages `boardview.*` (cf. §2.7).
+   - Tools **boardview** (les 12 de Boardviewer spec §9) → dispatch vers `api/tools/boardview.py` → **L1 validator `is_valid_refdes`** → **L2 validation `mb_get_component`** → émission d'un message WS suivant **exactement** le protocole `boardview.*` défini dans Boardviewer spec §10 → réponse Anthropic `user.custom_tool_result`. wrench-board **ne définit pas** de nouveaux messages `boardview.*` (cf. §2.7).
    - Tools **schematic** (à venir, spec séparée) → messages `schematic.*` équivalents
 6. Événements mirrorés dans Postgres `events` au fil de l'eau, pour alimenter la Timeline de l'UI
 7. Fin de session → Anthropic sauvegarde learnings dans le memory store automatiquement (zéro prompt custom à écrire)
@@ -244,19 +244,19 @@ api/
 - `vision/` → fusionné dans `schematic/` (rendering PDF pour le viewer schematic). Les rendus du domaine Boardview sont gérés côté frontend par `web/boardviewer/` conformément à la Boardviewer spec.
 - `session/` → supprimé, état session porté soit par WebSocket (éphémère) soit par Postgres (persistant).
 
-**Note sur `api/board/`** — ce dossier implémente la partie backend du domaine Boardview selon les indications structurelles de la Boardviewer spec (§5, §7, et §2–§4 pour le parser). microsolder-agent ne **redéfinit pas** ces composants dans le présent spec — la Boardviewer spec est la source de vérité (cf. §2.7).
+**Note sur `api/board/`** — ce dossier implémente la partie backend du domaine Boardview selon les indications structurelles de la Boardviewer spec (§5, §7, et §2–§4 pour le parser). wrench-board ne **redéfinit pas** ces composants dans le présent spec — la Boardviewer spec est la source de vérité (cf. §2.7).
 
 ### 2.6 Arborescence frontend
 
 Le frontend (`web/`) évolue significativement (Home + sidebar + 6 sections full-page + panel LLM push), mais le détail du layout, des fichiers JS/CSS et des composants Alpine est traité **section 9** (UI layout général) et **section 10** (détail par section). Section 2 se limite à acter que `web/` devient plus qu'un `index.html` + deux fichiers : il y aura plusieurs vues (Home et workbench) et plusieurs modules JS (un par section).
 
-**Point critique** : le composant **boardviewer** (parsing de fichiers PCB + rendering canvas + API de contrôle) est développé **en parallèle par un agent Claude Code séparé** (« Agent Boardviewer »). Il vit sous `web/boardviewer/` et expose son API comme spécifié en **§2.7**. microsolder-agent **consomme** cette API, ne spécifie **pas** son implémentation.
+**Point critique** : le composant **boardviewer** (parsing de fichiers PCB + rendering canvas + API de contrôle) est développé **en parallèle par un agent Claude Code séparé** (« Agent Boardviewer »). Il vit sous `web/boardviewer/` et expose son API comme spécifié en **§2.7**. wrench-board **consomme** cette API, ne spécifie **pas** son implémentation.
 
 ### 2.7 Composants externes et contrats d'interface
 
 #### 2.7.1 Séparation des responsabilités
 
-Le projet est développé par **deux agents Claude Code en parallèle**. Le **domaine Boardview** — parsing de fichiers PCB, modèle de données board, validation anti-hallucination des refdes, tools de contrôle UI, protocole WebSocket, renderer canvas, event bus interne — est **spécifié par un document dédié produit par l'Agent Boardviewer** (« **Boardviewer spec** »). Ce document est la **source de vérité** pour tout ce qui relève du Boardview ; microsolder-agent s'y conforme, **ne le redéfinit pas**.
+Le projet est développé par **deux agents Claude Code en parallèle**. Le **domaine Boardview** — parsing de fichiers PCB, modèle de données board, validation anti-hallucination des refdes, tools de contrôle UI, protocole WebSocket, renderer canvas, event bus interne — est **spécifié par un document dédié produit par l'Agent Boardviewer** (« **Boardviewer spec** »). Ce document est la **source de vérité** pour tout ce qui relève du Boardview ; wrench-board s'y conforme, **ne le redéfinit pas**.
 
 Référence canonique figée à J+2 dans `docs/integration/boardviewer-contract.md` (co-édité par les 2 agents, versioning sémantique).
 
@@ -270,14 +270,14 @@ Référence canonique figée à J+2 dans `docs/integration/boardviewer-contract.
 | Renderer Canvas 2D | Boardviewer spec §11 | `web/boardviewer/` |
 | Event bus interne `board:loaded` | Boardviewer spec §14 | frontend + backend |
 
-**Ce que microsolder-agent spécifie** (dans *ce* document) :
+**Ce que wrench-board spécifie** (dans *ce* document) :
 
 - Comment le **diagnostic agent** Claude Opus 4.7 **utilise** les 12 tools boardview (section 7 — prompting système, stratégie de décision)
 - Comment l'event `board:loaded` **déclenche** le pipeline de génération de knowledge pack (section 5)
 - Comment les refdes du **knowledge pack** (`registry.json`) **s'alignent** avec les refdes validés par `api/board/validator.py`
 - Le **contrat de responsabilité partagée** pour la règle dure #5 (§2.7.3 ci-dessous)
 
-**Ce que microsolder-agent ne spécifie PAS** (responsabilité Boardviewer spec) :
+**Ce que wrench-board ne spécifie PAS** (responsabilité Boardviewer spec) :
 
 - Format interne des fichiers `.brd`, `.brd2`, `.bdv`, `.fz`, et tous formats ajoutés ultérieurement
 - Algorithme de rendering canvas 2D
@@ -289,14 +289,14 @@ Référence canonique figée à J+2 dans `docs/integration/boardviewer-contract.
 
 #### 2.7.2 Les 12 tools boardview — liste fermée, signatures dans Boardviewer spec §9
 
-Exposés à l'agent Claude Opus 4.7 **tels que définis** par la Boardviewer spec §9. Leur liste est fermée ; microsolder-agent **n'en invente ni n'en renomme aucun**.
+Exposés à l'agent Claude Opus 4.7 **tels que définis** par la Boardviewer spec §9. Leur liste est fermée ; wrench-board **n'en invente ni n'en renomme aucun**.
 
 Exemples cités au fil de ce spec (la liste exhaustive des 12 est dans Boardviewer spec §9, reprise verbatim dans `docs/integration/boardviewer-contract.md`) :
 - `load_board(...)`
 - `focus_component(...)` — centre la vue sur un composant (remplace toute velléité de « `pan_to_component` »)
 - `highlight_component(...)`
 
-**Règle** : si un besoin émerge côté microsolder-agent qui n'est pas couvert par les 12 tools existants, c'est une **demande d'extension à coordonner via Boardviewer spec**, pas une invention locale. Aucun tool boardview fantôme ne sera ajouté dans `api/tools/boardview.py` sans mise à jour préalable de la Boardviewer spec.
+**Règle** : si un besoin émerge côté wrench-board qui n'est pas couvert par les 12 tools existants, c'est une **demande d'extension à coordonner via Boardviewer spec**, pas une invention locale. Aucun tool boardview fantôme ne sera ajouté dans `api/tools/boardview.py` sans mise à jour préalable de la Boardviewer spec.
 
 #### 2.7.3 Règle dure #5 — double enforcement
 
@@ -326,11 +326,11 @@ boardview.measure            boardview.show_pin
 boardview.highlight_net      boardview.upload_error
 ```
 
-microsolder-agent ne définit **aucun** message WS supplémentaire pour le domaine Boardview. Le domaine Schematic (spec séparée à venir) aura ses propres messages `schematic.*`.
+wrench-board ne définit **aucun** message WS supplémentaire pour le domaine Boardview. Le domaine Schematic (spec séparée à venir) aura ses propres messages `schematic.*`.
 
 #### 2.7.5 Contrats transverses entre les deux specs
 
-| Contrat | Côté microsolder-agent | Côté Boardviewer |
+| Contrat | Côté wrench-board | Côté Boardviewer |
 |---|---|---|
 | **Alignement refdes** | `registry.json` (§4.2) est source des `canonical_name` ; sanity script au boot : `set(registry.components.where(naming_level='exact_ref'))` doit être inclus dans les refdes parsés par le viewer | `validator.is_valid_refdes`, `suggest_similar` (spec §7) |
 | **Event `board:loaded`** | consommé par le pipeline de génération (§5.1, trois cas is_known) | émis après `load_board` réussi (spec §14) |
@@ -342,13 +342,13 @@ microsolder-agent ne définit **aucun** message WS supplémentaire pour le domai
 - **Test d'intégration cross-spec J+2** :
   - **Golden path** — agent émet `custom_tool_use highlight_component("U7")` → validator L1 OK → event WS `boardview.highlight` émis → frontend rend → agent reçoit confirmation
   - **Failure path** — agent émet `custom_tool_use highlight_component("U999")` → validator L1 renvoie `{ok: false, suggestions: ["U9", "U99"]}` → agent reçoit l'erreur structurée et **ne ment pas** dans sa réponse textuelle
-- **Si divergence détectée** lors du test : **Boardviewer spec = source de vérité**, microsolder-agent s'aligne.
+- **Si divergence détectée** lors du test : **Boardviewer spec = source de vérité**, wrench-board s'aligne.
 
 #### 2.7.7 Mocks pour développement parallèle
 
 - **Mock backend** : `api/tools/boardview.py` dispose d'un mode `mock=True` qui log les dispatch au lieu d'émettre les events WS. Permet de tester le flow `agent → validation → dispatch` sans frontend.
 - **Mock frontend** : `web/boardviewer/boardviewer.mock.js` (fourni par Agent Boardviewer) rend un placeholder simple à la réception des events `boardview.*`. Active via `window.USE_BOARDVIEWER_MOCK = true`.
-- Tests unitaires microsolder-agent : n'importent ni le vrai boardviewer ni le mock, stubent uniquement le pipeline de dispatch côté Python.
+- Tests unitaires wrench-board : n'importent ni le vrai boardviewer ni le mock, stubent uniquement le pipeline de dispatch côté Python.
 
 ---
 
@@ -1511,7 +1511,7 @@ class SubAgentOrchestrator(Protocol):
 **Notes de contrat** :
 
 - Toutes les méthodes sont `async` — elles awaitent du I/O réseau (Anthropic).
-- `session_id` fait référence à la **session microsolder-agent** (ligne `sessions` du `generation_job`), **pas** à la session Anthropic. Les sessions Anthropic sont internes à l'orchestrator.
+- `session_id` fait référence à la **session wrench-board** (ligne `sessions` du `generation_job`), **pas** à la session Anthropic. Les sessions Anthropic sont internes à l'orchestrator.
 - Les paramètres sont **kwargs-only** (`*,`) pour forcer la lisibilité des appels côté pipeline.
 - Les types de retour sont les dataclasses structurées définies dans `api/memory_bank/packs.py` (à écrire — alignées sur les schemas §4).
 
@@ -1694,7 +1694,7 @@ Durée observable : le writer le plus lent dicte le `gather` (pas la somme). En 
 for role in REQUIRED_ROLES:  # les 10 rôles §3.2.3
     if managed_agents.select(role=role) is None:
         agent = client.beta.agents.create(
-            name=f"microsolder-{role}",
+            name=f"wrench-board-{role}",
             model=MODEL_FOR_ROLE[role],       # Opus sauf facts_extractor (Haiku)
             tools=TOOLS_FOR_ROLE[role],
         )
@@ -2635,7 +2635,7 @@ Grille de cartes (3–4 colonnes selon largeur), une carte par device connu. Cha
 
 ### 10.2 PCB (Boardviewer)
 
-Consomme le composant `web/boardviewer/` d'Agent Boardviewer. microsolder-agent fournit uniquement le shell de la section :
+Consomme le composant `web/boardviewer/` d'Agent Boardviewer. wrench-board fournit uniquement le shell de la section :
 - En-tête : device courant, toggle face Top/Bottom, reset view
 - Canvas plein écran (Agent Boardviewer)
 - Panel latéral droit (collapsable) : liste filtrable des refdes visibles, click → `focus_component`

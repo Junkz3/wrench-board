@@ -19,7 +19,7 @@
 
 import { captureFromPreview, isPreviewOpen } from './camera_preview.js';
 
-const LS_KEY = 'microsolder.cameraDeviceId';
+const LS_KEY = 'wrench_board.cameraDeviceId';
 
 let _cachedDevices = [];
 let _selectedDeviceId = '';

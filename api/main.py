@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-"""FastAPI application entrypoint for microsolder-agent."""
+"""FastAPI application entrypoint for wrench-board."""
 
 from __future__ import annotations
 
@@ -22,7 +22,7 @@ from api.logging_setup import configure_logging
 from api.pipeline import router as pipeline_router
 from api.profile.router import router as profile_router
 
-logger = logging.getLogger("microsolder.main")
+logger = logging.getLogger("wrench_board.main")
 
 WEB_DIR = Path(__file__).resolve().parent.parent / "web"
 
@@ -32,7 +32,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     """Startup / shutdown hooks."""
     settings = get_settings()
     configure_logging(settings.log_level)
-    logger.info("microsolder-agent v%s starting up", __version__)
+    logger.info("wrench-board v%s starting up", __version__)
     logger.info(
         "main model=%s fast model=%s", settings.anthropic_model_main, settings.anthropic_model_fast
     )
@@ -43,11 +43,11 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
             "(/health, /pipeline/packs read, board parsing) keep working."
         )
     yield
-    logger.info("microsolder-agent shutting down")
+    logger.info("wrench-board shutting down")
 
 
 app = FastAPI(
-    title="microsolder-agent",
+    title="wrench-board",
     version=__version__,
     description="Agent-native board-level diagnostics workbench.",
     lifespan=lifespan,

@@ -27,7 +27,7 @@ from api.pipeline.bench_generator.schemas import (
 from api.pipeline.schematic.schemas import ElectricalGraph
 from api.pipeline.tool_call import call_with_forced_tool
 
-logger = logging.getLogger("microsolder.bench_generator.extractor")
+logger = logging.getLogger("wrench_board.bench_generator.extractor")
 
 
 def _propose_tool() -> dict:

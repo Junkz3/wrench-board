@@ -22,7 +22,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field, model_validator
 
-logger = logging.getLogger("microsolder.tools.protocol")
+logger = logging.getLogger("wrench_board.tools.protocol")
 
 
 StepType = Literal["numeric", "boolean", "observation", "ack"]

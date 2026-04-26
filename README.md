@@ -1,10 +1,10 @@
-# microsolder-agent
+# wrench-board
 
 > A senior microsoldering technician, available to every repair shop.
 
 ## What it does
 
-`microsolder-agent` is an agent-native diagnostics workbench for board-level
+`wrench-board` is an agent-native diagnostics workbench for board-level
 electronics repair. A technician asks questions in natural language —
 "where is the PMIC?", "why isn't the 3V3 rail coming up?" — and Claude
 highlights components, traces nets on the boardview, and narrates the

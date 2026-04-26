@@ -26,14 +26,14 @@ sys.path.insert(0, str(REPO_ROOT))
 
 
 # Note on path casing : the MA infra normalizes mount paths to lowercase, so
-# even though the store name is `microsolder-repair-iphone-x-smoke-R1`, the
+# even though the store name is `wrench-board-repair-iphone-x-smoke-R1`, the
 # mount appears at `…-smoke-r1`. We use lowercase in the kickoffs to match.
 SESSION_1_KICKOFF = (
     "Salut. iphone-x sur le banc, plainte: ne s'allume pas, écran reste noir. "
     "Avant de proposer un plan, va voir si tes mounts contiennent un playbook "
     "qui match ce symptôme — montre-moi ce que tu trouves. "
     "Avant de partir, écris ton état actuel dans "
-    "/mnt/memory/microsolder-repair-iphone-x-smoke-r1/state.md "
+    "/mnt/memory/wrench-board-repair-iphone-x-smoke-r1/state.md "
     "(symptôme initial, hypothèse en cours, prochaine action) et un fichier "
     "decisions/initial.md résumant ta première décision. Confirme-moi 'OK noté' "
     "à la fin."
@@ -41,7 +41,7 @@ SESSION_1_KICKOFF = (
 
 SESSION_2_KICKOFF = (
     "Re-bonjour. On reprend la repair iphone-x R1 en cours. "
-    "Lis /mnt/memory/microsolder-repair-iphone-x-smoke-r1/state.md et "
+    "Lis /mnt/memory/wrench-board-repair-iphone-x-smoke-r1/state.md et "
     "raconte-moi ce que tu trouves : quel symptôme, quelle hypothèse, quelle "
     "prochaine action. Cite explicitement le contenu du fichier — pas de "
     "paraphrase, je veux vérifier que tu as bien grep le mount."

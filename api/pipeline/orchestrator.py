@@ -42,7 +42,7 @@ from api.pipeline.scout import run_scout
 from api.pipeline.telemetry.token_stats import PhaseTokenStats, write_token_stats
 from api.pipeline.writers import run_single_writer_revision, run_writers_parallel
 
-logger = logging.getLogger("microsolder.pipeline.orchestrator")
+logger = logging.getLogger("wrench_board.pipeline.orchestrator")
 
 
 # Upload kinds the orchestrator recognises in `memory/{slug}/uploads/`.

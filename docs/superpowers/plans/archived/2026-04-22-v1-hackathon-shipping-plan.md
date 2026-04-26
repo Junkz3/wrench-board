@@ -1,4 +1,4 @@
-# microsolder-agent — v1 Hackathon Shipping Plan
+# wrench-board — v1 Hackathon Shipping Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
@@ -12,7 +12,7 @@ The split is deliberate : the pipeline doesn't need session primitives (one-shot
 
 **Tech Stack:** Python 3.11+, FastAPI, Pydantic v2, `anthropic ~= 0.96.0`, D3.js v7, JetBrains Mono + Inter fonts. Tests: pytest + pytest-asyncio. No DB — knowledge packs live on disk as the canonical store (spec §4).
 
-**Spec reference:** `docs/superpowers/specs/2026-04-21-microsolder-agent-v1-design.md`.
+**Spec reference:** `docs/superpowers/specs/2026-04-21-wrench-board-v1-design.md`.
 
 **Current state (end of J+1 / 2026-04-22):**
 - ✅ FastAPI scaffolding + static serving + tests green
@@ -1191,14 +1191,14 @@ def main() -> None:
 
     print("Creating environment…")
     env = client.beta.environments.create(
-        name="microsolder-diagnostic-env",
+        name="wrench-board-diagnostic-env",
         config={"type": "cloud", "networking": {"type": "unrestricted"}},
     )
     print(f"   → {env.id}")
 
     print("Creating diagnostic agent…")
     agent = client.beta.agents.create(
-        name="microsolder-diagnostic",
+        name="wrench-board-diagnostic",
         model="claude-opus-4-7",
         system=SYSTEM_PROMPT,
         tools=TOOLS,
@@ -1275,7 +1275,7 @@ git commit -m "$(cat <<'MSG'
 feat(agent): bootstrap script for Managed Agents diagnostic setup
 
 scripts/bootstrap_managed_agent.py creates the persistent
-diagnostic agent (`microsolder-diagnostic`, claude-opus-4-7,
+diagnostic agent (`wrench-board-diagnostic`, claude-opus-4-7,
 2 custom tools) and a shared environment. Persists the IDs in
 managed_ids.json (gitignored — the IDs are tenant-specific).
 Idempotent: re-runs read the existing file.
@@ -1494,7 +1494,7 @@ from anthropic import AsyncAnthropic
 
 from api.config import get_settings
 
-logger = logging.getLogger("microsolder.agent.memory_stores")
+logger = logging.getLogger("wrench_board.agent.memory_stores")
 
 
 async def ensure_memory_store(client: AsyncAnthropic, device_slug: str) -> str:
@@ -1511,7 +1511,7 @@ async def ensure_memory_store(client: AsyncAnthropic, device_slug: str) -> str:
 
     logger.info("[MemoryStore] Creating for device=%s", device_slug)
     store = await client.beta.memory_stores.create(
-        name=f"microsolder-{device_slug}",
+        name=f"wrench-board-{device_slug}",
         description=(
             f"Repair history + learned facts for device {device_slug}. "
             "Contains previous diagnostic sessions, confirmed component failures, "
@@ -1559,7 +1559,7 @@ from api.agent.memory_stores import ensure_memory_store
 from api.agent.tools import mb_get_component, mb_get_rules_for_symptoms
 from api.config import get_settings
 
-logger = logging.getLogger("microsolder.agent.managed")
+logger = logging.getLogger("wrench_board.agent.managed")
 
 
 async def run_diagnostic_session_managed(ws: WebSocket, device_slug: str) -> None:
@@ -1727,7 +1727,7 @@ from fastapi import WebSocket, WebSocketDisconnect
 from api.agent.tools import mb_get_component, mb_get_rules_for_symptoms
 from api.config import get_settings
 
-logger = logging.getLogger("microsolder.agent.direct")
+logger = logging.getLogger("wrench_board.agent.direct")
 
 SYSTEM_PROMPT_DIRECT = """\
 You are a calm, methodical board-level diagnostics assistant for a
@@ -2354,11 +2354,11 @@ Known limitations (tracked in spec §1.4, out of scope for v1) :
 - [ ] **Create `docs/submission.md`** :
 
 ```markdown
-# Cerebral Valley submission — microsolder-agent
+# Cerebral Valley submission — wrench-board
 
 ## 100–200-word description (paste into the form)
 
-microsolder-agent turns an electronics repair technician into
+wrench-board turns an electronics repair technician into
 the operator of a diagnostic copilot. Claude Opus 4.7 runs an
 autonomous knowledge-factory that researches the community's
 collected wisdom for any device, structures it into a canonical

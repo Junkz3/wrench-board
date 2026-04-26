@@ -54,7 +54,7 @@ from api.tools.hypothesize import mb_hypothesize as _mb_hypothesize_tool
 from api.tools.measurements import mb_list_measurements as _mb_list_measurements
 from api.tools.measurements import mb_record_measurement as _mb_record_measurement
 
-logger = logging.getLogger("microsolder.pipeline.api")
+logger = logging.getLogger("wrench_board.pipeline.api")
 
 router = APIRouter(prefix="/pipeline", tags=["pipeline"])
 

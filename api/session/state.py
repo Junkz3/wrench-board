@@ -14,7 +14,7 @@ from typing import Any, ClassVar, Literal
 from api.board.model import Board
 from api.board.parser.base import parser_for
 
-logger = logging.getLogger("microsolder.session")
+logger = logging.getLogger("wrench_board.session")
 
 Side = Literal["top", "bottom"]
 
@@ -24,8 +24,8 @@ _BOARD_EXT_PRIORITY = (".kicad_pcb", ".brd")
 
 
 def _board_assets_root() -> Path:
-    """Root of board_assets/. Overridable via MICROSOLDER_BOARD_ASSETS env for tests."""
-    override = os.environ.get("MICROSOLDER_BOARD_ASSETS")
+    """Root of board_assets/. Overridable via WRENCH_BOARD_BOARD_ASSETS env for tests."""
+    override = os.environ.get("WRENCH_BOARD_BOARD_ASSETS")
     if override:
         return Path(override)
     # api/session/state.py → ../../board_assets

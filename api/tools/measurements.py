@@ -26,7 +26,7 @@ from api.agent.measurement_memory import (
 # tasks spawned inside a session inherit the session's context, so tool
 # dispatch reads the right emitter without threading it through every call.
 _ws_emitter: ContextVar[Callable[[dict[str, Any]], None] | None] = ContextVar(
-    "microsolder_measurements_ws_emitter", default=None,
+    "wrench_board_measurements_ws_emitter", default=None,
 )
 
 

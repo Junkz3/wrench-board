@@ -410,7 +410,7 @@ document.getElementById("sessionPillClose")?.addEventListener("click", (ev) => {
 
 1. Tech clique la tuile **PCB**. Href : `?device=iphone-x-logic-board&repair=a1b2c3d4#pcb`. Navigation intra-page (hash change uniquement).
 2. `hashchange` → `navigate("pcb")` → `initBoardview(...)` comme aujourd'hui.
-3. Pastille topbar reste visible, chat reste ouvert. Breadcrumb : `microsolder-agent / Réparations / iPhone X · Logic Board / Boardview`.
+3. Pastille topbar reste visible, chat reste ouvert. Breadcrumb : `wrench-board / Réparations / iPhone X · Logic Board / Boardview`.
 
 ### 8.3 Retour au dashboard
 

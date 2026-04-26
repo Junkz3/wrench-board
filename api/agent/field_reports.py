@@ -37,7 +37,7 @@ from anthropic import AsyncAnthropic
 from api.agent.memory_stores import ensure_memory_store, upsert_memory
 from api.config import get_settings
 
-logger = logging.getLogger("microsolder.agent.field_reports")
+logger = logging.getLogger("wrench_board.agent.field_reports")
 
 
 @dataclass
@@ -262,7 +262,7 @@ def list_field_reports(
     Pure disk read — the JSON-backed path that works without MA access.
     Used by the `/pipeline/packs/{slug}/findings` HTTP endpoint and as a
     test helper. The diagnostic agent reads the same content via grep on
-    the FUSE mount (`/mnt/memory/microsolder-{slug}/field_reports/`)
+    the FUSE mount (`/mnt/memory/wrench-board-{slug}/field_reports/`)
     rather than through a wrapper tool.
     """
     settings = get_settings()

@@ -180,7 +180,7 @@ async def test_ma_mirror_failure_does_not_block_json_write(
 async def test_mb_record_finding_writes_to_disk(tmp_path: Path, monkeypatch):
     """End-to-end: mb_record_finding writes a parseable field report to disk.
 
-    Read-back is now done via grep on the FUSE mount (/mnt/memory/microsolder-{slug}/
+    Read-back is now done via grep on the FUSE mount (/mnt/memory/wrench-board-{slug}/
     field_reports/) rather than via a wrapper tool — mb_list_findings was removed
     when the layered MA memory architecture landed.
     """

@@ -19,7 +19,7 @@ from anthropic import AsyncAnthropic
 
 from api.config import get_settings
 
-logger = logging.getLogger("microsolder.pipeline.phase_narrator")
+logger = logging.getLogger("wrench_board.pipeline.phase_narrator")
 
 _TOOL_NAME = "narrate"
 _MAX_NARRATION_CHARS = 600   # cap to prevent runaway output
