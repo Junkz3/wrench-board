@@ -49,6 +49,24 @@ def test_every_tool_has_name_description_input_schema() -> None:
         assert "properties" in tool["input_schema"]
 
 
+def test_no_description_exceeds_managed_agents_limit() -> None:
+    # Anthropic Managed Agents reject tool definitions whose description
+    # exceeds 1024 characters; the bootstrap script silently *skips* such
+    # tools, so the agent loses the capability without an obvious failure.
+    # Regression-guard the budget at manifest-load time.
+    MA_DESCRIPTION_LIMIT = 1024
+    from api.agent.manifest import PROFILE_TOOLS, PROTOCOL_TOOLS
+    overflows = [
+        (t["name"], len(t["description"]))
+        for t in MB_TOOLS + BV_TOOLS + PROFILE_TOOLS + PROTOCOL_TOOLS
+        if len(t["description"]) > MA_DESCRIPTION_LIMIT
+    ]
+    assert overflows == [], (
+        f"tool descriptions over the MA {MA_DESCRIPTION_LIMIT}-char limit: "
+        f"{overflows}"
+    )
+
+
 def test_manifest_without_board_has_only_mb_profile_protocol_tools() -> None:
     from api.agent.manifest import PROFILE_TOOLS, PROTOCOL_TOOLS
     session = SessionState()  # board=None
