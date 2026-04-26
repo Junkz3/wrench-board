@@ -14,7 +14,6 @@ from __future__ import annotations
 import logging
 import re
 from dataclasses import dataclass
-from pathlib import Path
 from typing import TYPE_CHECKING
 
 from anthropic import AsyncAnthropic
@@ -22,8 +21,6 @@ from anthropic import AsyncAnthropic
 from api.pipeline.prompts import SCOUT_RETRY_SUFFIX, SCOUT_SYSTEM, SCOUT_USER_TEMPLATE
 
 if TYPE_CHECKING:
-    from api.board.model import Board
-    from api.pipeline.schematic.schemas import ElectricalGraph
     from api.pipeline.telemetry.token_stats import PhaseTokenStats
 
 logger = logging.getLogger("microsolder.pipeline.scout")
@@ -96,9 +93,6 @@ async def run_scout(
     client: AsyncAnthropic,
     model: str,
     device_label: str,
-    graph: ElectricalGraph | None = None,
-    board: Board | None = None,
-    datasheet_paths: list[Path] | None = None,
     focus_symptom: str | None = None,
     max_continuations: int = 3,
     min_symptoms: int = 3,
@@ -114,24 +108,14 @@ async def run_scout(
     retries, raises `ThinScoutDumpError` — the orchestrator must surface that
     instead of burning cash on Phases 2-4 with a bankrupt dump.
 
-    `graph`, `board`, and `datasheet_paths` are technician-supplied search
-    targeting. Passing none of them reproduces the legacy user prompt
-    byte-for-byte; passing any of them appends "# Provided …" sections to
-    the user message that Scout uses to seed MPN-targeted queries and to
-    attach refdes to its quotes when an external source supports them.
-    The anti-hallucination contracts live in SCOUT_SYSTEM, not here.
-
     `focus_symptom`, when supplied, tells Scout to allocate 3-4 of its
     web_search queries specifically to that symptom so the technician's
     reason-for-repair is covered on the very first pack generation
     rather than requiring a follow-up expand pass.
     """
     logger.info(
-        "[Scout] Starting research for device=%r · graph=%s · board=%s · datasheets=%d · focus_symptom=%s",
+        "[Scout] Starting research for device=%r · focus_symptom=%s",
         device_label,
-        "yes" if graph is not None else "no",
-        "yes" if board is not None else "no",
-        len(datasheet_paths or []),
         "yes" if focus_symptom else "no",
     )
 
@@ -143,9 +127,6 @@ async def run_scout(
             client=client,
             model=model,
             device_label=device_label,
-            graph=graph,
-            board=board,
-            datasheet_paths=datasheet_paths,
             focus_symptom=focus_symptom,
             max_continuations=max_continuations,
             attempt=attempt,
@@ -185,68 +166,6 @@ async def run_scout(
     )
 
 
-def _build_graph_summary(graph: ElectricalGraph) -> str:
-    """Render the technician-supplied ElectricalGraph as a Scout targeting block.
-
-    Compact projection: per-component MPN line, per-rail source/consumers,
-    boot phases. Drops pin-level detail (Scout only needs to know what
-    chips and rails exist on the board, not their connectivity)."""
-    lines: list[str] = ["# Provided ElectricalGraph (technician-supplied schematic — for targeting only)"]
-
-    # MPN map — the most useful surface for seeding web_search queries.
-    mpn_lines: list[str] = ["", "## MPN map (refdes → MPN, kind, role)"]
-    for refdes in sorted(graph.components):
-        comp = graph.components[refdes]
-        mpn = (comp.value.mpn if comp.value is not None else None) or "—"
-        kind = comp.kind or "—"
-        role = comp.role or "—"
-        mpn_lines.append(f"- {refdes}: mpn={mpn} kind={kind} role={role}")
-    lines.extend(mpn_lines)
-
-    # Power rails — for naming-when-symptomatic discipline.
-    rail_lines: list[str] = ["", "## Power rails"]
-    for rail_key in sorted(graph.power_rails):
-        rail = graph.power_rails[rail_key]
-        v = (
-            f"{rail.voltage_nominal:.2f}V"
-            if rail.voltage_nominal is not None
-            else "?"
-        )
-        src = rail.source_refdes or "—"
-        consumers = ",".join(rail.consumers) if rail.consumers else "—"
-        rail_lines.append(
-            f"- {rail.label}: voltage={v} source={src} consumers={consumers}"
-        )
-    lines.extend(rail_lines)
-
-    # Boot phases — for sequencing context.
-    if graph.boot_sequence:
-        phase_lines: list[str] = ["", "## Boot phases (compiler-derived)"]
-        for phase in graph.boot_sequence:
-            phase_lines.append(f"- {phase.index}: {phase.name}")
-        lines.extend(phase_lines)
-
-    return "\n".join(lines)
-
-
-def _build_boardview_summary(board: Board) -> str:
-    """Render the technician-supplied Board parts list. One line per part."""
-    lines: list[str] = ["# Provided boardview (technician-supplied)", "", "## Parts"]
-    for part in sorted(board.parts, key=lambda p: p.refdes):
-        value = part.value or "—"
-        footprint = part.footprint or "—"
-        lines.append(f"- {part.refdes}: value={value} footprint={footprint}")
-    return "\n".join(lines)
-
-
-def _build_datasheets_block(datasheet_paths: list[Path]) -> str:
-    """List local datasheet filenames. Scout may cite via local:// URLs."""
-    lines = ["# Provided local datasheets", ""]
-    for p in datasheet_paths:
-        lines.append(f"- local://datasheets/{p.name}")
-    return "\n".join(lines)
-
-
 def _build_focus_symptom_block(symptom: str) -> str:
     """Render the technician-supplied focus symptom as a Scout directive.
 
@@ -271,30 +190,17 @@ def _build_user_prompt(
     *,
     device_label: str,
     attempt: int,
-    graph: ElectricalGraph | None,
-    board: Board | None,
-    datasheet_paths: list[Path] | None,
     focus_symptom: str | None = None,
 ) -> str:
     """Assemble the Scout user message.
 
-    When all optional inputs are absent / empty, returns exactly the
-    legacy `SCOUT_USER_TEMPLATE.format(...)` (+ retry suffix), so the
-    no-documents path is byte-for-byte identical to today's pipeline."""
+    Without `focus_symptom`, returns exactly `SCOUT_USER_TEMPLATE.format(...)`
+    plus the retry suffix on retries. With a focus symptom, prepends a
+    technician-priority block before the retry suffix."""
     user_prompt = SCOUT_USER_TEMPLATE.format(device_label=device_label)
 
-    extra_blocks: list[str] = []
     if focus_symptom:
-        extra_blocks.append(_build_focus_symptom_block(focus_symptom))
-    if graph is not None:
-        extra_blocks.append(_build_graph_summary(graph))
-    if board is not None:
-        extra_blocks.append(_build_boardview_summary(board))
-    if datasheet_paths:
-        extra_blocks.append(_build_datasheets_block(datasheet_paths))
-
-    if extra_blocks:
-        user_prompt = user_prompt + "\n\n" + "\n\n".join(extra_blocks)
+        user_prompt = user_prompt + "\n\n" + _build_focus_symptom_block(focus_symptom)
 
     if attempt > 0:
         user_prompt = user_prompt + SCOUT_RETRY_SUFFIX
@@ -307,9 +213,6 @@ async def _scout_once(
     client: AsyncAnthropic,
     model: str,
     device_label: str,
-    graph: ElectricalGraph | None,
-    board: Board | None,
-    datasheet_paths: list[Path] | None,
     focus_symptom: str | None,
     max_continuations: int,
     attempt: int,
@@ -319,9 +222,6 @@ async def _scout_once(
     user_prompt = _build_user_prompt(
         device_label=device_label,
         attempt=attempt,
-        graph=graph,
-        board=board,
-        datasheet_paths=datasheet_paths,
         focus_symptom=focus_symptom,
     )
 

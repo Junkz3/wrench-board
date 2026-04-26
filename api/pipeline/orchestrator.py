@@ -12,7 +12,6 @@ Persists all intermediate artefacts under `memory/{device_slug}/` on disk:
 
 from __future__ import annotations
 
-import hashlib
 import logging
 import re
 import time
@@ -24,7 +23,6 @@ from typing import Any
 from anthropic import AsyncAnthropic
 
 from api.agent.memory_seed import seed_memory_store_from_pack
-from api.board.model import Board
 from api.config import get_settings
 from api.pipeline.auditor import run_auditor
 from api.pipeline.drift import compute_drift
@@ -130,33 +128,6 @@ def scan_uploads(uploads_dir: Path) -> UploadedDocuments:
         notes=notes,
         other=other,
     )
-
-
-def _load_uploaded_board(path: Path) -> Board | None:
-    """Parse a technician-uploaded boardview file into a `Board`.
-
-    Returns None on any failure (unknown extension, parse error, file
-    unreadable). The caller logs and continues without `Board`."""
-    try:
-        from api.board.parser.base import UnsupportedFormatError, parser_for
-
-        parser = parser_for(path)
-        raw = path.read_bytes()
-        file_hash = hashlib.sha256(raw).hexdigest()
-        return parser.parse(raw, file_hash=file_hash, board_id=path.stem)
-    except (UnsupportedFormatError, NotImplementedError, OSError, ValueError):
-        logger.warning(
-            "[Pipeline] Could not parse uploaded boardview at %s — continuing without Board",
-            path,
-            exc_info=True,
-        )
-        return None
-    except Exception:  # noqa: BLE001 — defensive: any parser bug must not abort the pipeline
-        logger.exception(
-            "[Pipeline] Unexpected failure parsing uploaded boardview at %s — continuing without Board",
-            path,
-        )
-        return None
 
 
 def _load_existing_electrical_graph(pack_dir: Path) -> ElectricalGraph | None:
@@ -306,20 +277,14 @@ async def generate_knowledge_pack(
             )
 
     graph = _load_existing_electrical_graph(pack_dir)
-    board = (
-        _load_uploaded_board(uploads.boardview) if uploads.boardview is not None else None
-    )
-    datasheet_paths = list(uploads.datasheets) if uploads.datasheets else None
 
     logger.info("=" * 72)
     logger.info(
-        "Pipeline start · device=%r · models=%s · pack=%s · graph=%s · board=%s · datasheets=%d",
+        "Pipeline start · device=%r · models=%s · pack=%s · graph=%s",
         device_label,
         models_by_role,
         pack_dir,
         "yes" if graph is not None else "no",
-        "yes" if board is not None else "no",
-        len(datasheet_paths or []),
     )
     logger.info("=" * 72)
 

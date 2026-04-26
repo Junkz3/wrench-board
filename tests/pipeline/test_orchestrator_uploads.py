@@ -10,7 +10,6 @@ from pathlib import Path
 
 from api.pipeline.orchestrator import (
     UploadedDocuments,
-    _load_uploaded_board,
     scan_uploads,
 )
 
@@ -79,9 +78,3 @@ def test_scan_ignores_subdirectories(tmp_path: Path) -> None:
     assert out.schematic_pdf is None
 
 
-def test_load_uploaded_board_unsupported_extension_returns_none(
-    tmp_path: Path,
-) -> None:
-    p = tmp_path / "broken.bin"
-    p.write_bytes(b"\x00\x01\x02\x03")
-    assert _load_uploaded_board(p) is None
