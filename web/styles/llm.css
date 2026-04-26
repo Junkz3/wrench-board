@@ -706,7 +706,11 @@ body.llm-open .stub{right:420px}
 
 /* Drag-drop overlay covers the whole .llm-panel when a file is being
    dragged in. Glass treatment cohérent avec les autres overlays
-   (inspector, legend, tweaks). */
+   (inspector, legend, tweaks). The [hidden] override is REQUIRED — our
+   .llm-dropzone sets display:flex which beats the user-agent
+   `[hidden]{display:none}` rule. Without this, the overlay is always on
+   and obscures the chat. */
+.llm-dropzone[hidden] { display: none !important; }
 .llm-dropzone {
   position: absolute;
   inset: 48px 0 0 0;  /* below the panel head */
@@ -772,22 +776,28 @@ body.llm-open .stub{right:420px}
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
 }
 
-/* Camera picker in the metabar — JetBrains Mono label, accent on hover. */
-.meta-camera {
+/* Camera picker in the LLM panel head, next to the tier chip. Lives
+   here (not in the metabar) so it stays visible across every section
+   — the metabar is hidden on home/pcb/schematic/profile via
+   body.no-metabar in layout.css. */
+.llm-camera {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 0 10px;
-  border-left: 1px solid var(--border-soft);
+  gap: 5px;
+  padding: 2px 6px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--panel);
   color: var(--text-2);
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 10px;
+  max-width: 130px;
 }
-.meta-camera .icon {
+.llm-camera .icon {
   flex-shrink: 0;
   color: var(--text-3);
 }
-.meta-camera .meta-select {
+.llm-camera-select {
   background: transparent;
   color: var(--text-2);
   border: none;
@@ -795,11 +805,13 @@ body.llm-open .stub{right:420px}
   font-size: inherit;
   cursor: pointer;
   outline: none;
-  padding: 2px 4px;
-  border-radius: 3px;
-  transition: background-color 0.15s, color 0.15s;
+  padding: 0;
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: color 0.15s;
 }
-.meta-camera .meta-select:hover {
-  background: var(--panel-2);
+.llm-camera-select:hover {
   color: var(--text);
 }

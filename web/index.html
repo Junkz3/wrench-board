@@ -21,6 +21,7 @@
 <link rel="stylesheet" href="styles/memory_bank.css">
 <link rel="stylesheet" href="styles/pipeline_progress.css">
 <link rel="stylesheet" href="styles/llm.css">
+<link rel="stylesheet" href="styles/mascot.css">
 <link rel="stylesheet" href="styles/schematic.css">
 <link rel="stylesheet" href="/styles/profile.css" />
 <link rel="stylesheet" href="styles/protocol.css?v=quest4" />
@@ -29,6 +30,46 @@
 <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.8/dist/purify.min.js" defer></script>
 </head>
 <body>
+
+<!-- Wrench Board mascot — single source, cloned into mount points by web/js/mascot.js. -->
+<template id="tpl-mascot"><svg xmlns="http://www.w3.org/2000/svg" viewBox="50 30 360 330" role="img" aria-label="Wrench Board mascot" class="mascot-svg">
+  <g id="legs" class="mascot-legs">
+    <rect class="mascot-detail-fill" x="135" y="285" width="14" height="38" rx="3"/>
+    <rect class="mascot-detail-fill" x="175" y="285" width="14" height="38" rx="3"/>
+    <rect class="mascot-detail-fill" x="215" y="285" width="14" height="38" rx="3"/>
+    <rect class="mascot-detail-fill" x="255" y="285" width="14" height="38" rx="3"/>
+  </g>
+  <g id="arm-left" class="mascot-arm-left">
+    <path class="mascot-detail-stroke" stroke-width="14" d="M 115 200 Q 95 240, 95 275"/>
+    <circle class="mascot-detail-fill" cx="95" cy="282" r="11"/>
+  </g>
+  <g id="arm-right" class="mascot-arm-right">
+    <path class="mascot-detail-stroke" stroke-width="14" d="M 285 200 Q 320 175, 335 145"/>
+    <g id="wrench" class="mascot-wrench">
+      <g class="mascot-wrench-base" transform="rotate(20 335 145)">
+        <path class="mascot-detail-fill" d="M 322 145 L 322 88 Q 322 82, 317 80 L 305 76 Q 300 74, 300 68 L 300 51 Q 300 44, 307 44 L 324 44 Q 327 44, 327 47 L 327 60 Q 327 64, 331 64 L 339 64 Q 343 64, 343 60 L 343 47 Q 343 44, 346 44 L 363 44 Q 370 44, 370 51 L 370 68 Q 370 74, 365 76 L 353 80 Q 348 82, 348 88 L 348 145 Z"/>
+      </g>
+    </g>
+  </g>
+  <g id="body" class="mascot-body-group">
+    <rect class="mascot-body" x="115" y="125" width="170" height="170" rx="28" ry="28"/>
+    <rect class="mascot-body-shade" x="135" y="145" width="130" height="130" rx="18" ry="18"/>
+  </g>
+  <g id="face" class="mascot-face">
+    <g id="eye-left" class="mascot-eye mascot-eye-left">
+      <circle class="mascot-detail-fill mascot-eye-ball" cx="172" cy="205" r="13"/>
+      <circle class="mascot-eye-shine" cx="176" cy="201" r="3.5"/>
+    </g>
+    <g id="eye-right" class="mascot-eye mascot-eye-right">
+      <circle class="mascot-detail-fill mascot-eye-ball" cx="228" cy="205" r="13"/>
+      <circle class="mascot-eye-shine" cx="232" cy="201" r="3.5"/>
+    </g>
+    <g id="mouth" class="mascot-mouth">
+      <path class="mascot-detail-stroke mascot-mouth-smile" stroke-width="5" d="M 188 240 Q 200 252, 212 240"/>
+      <path class="mascot-detail-stroke mascot-mouth-grin" stroke-width="5" d="M 184 238 Q 200 258, 216 238"/>
+    </g>
+  </g>
+</svg></template>
 
 <!-- Landing hero — visible only when body has class .show-landing -->
 <div id="landing-overlay" class="landing" hidden>
@@ -90,7 +131,7 @@
 <!-- ============ TOP BAR ============ -->
 <div class="topbar">
   <div class="brand">
-    <div class="brand-mark"></div>
+    <span class="brand-mascot" id="brandMascot" aria-hidden="true"></span>
     <div>microsolder-agent<span class="sub" id="appVersion"></span></div>
   </div>
   <div class="crumbs" id="crumbs"><span class="active">microsolder-agent</span></div>
@@ -154,16 +195,6 @@
       <input id="searchInput" placeholder="Rechercher un nœud…" />
       <kbd>⌘K</kbd>
     </div>
-  </div>
-  <div class="meta-camera" title="Caméra pour cam_capture (Flow B)">
-    <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none"
-         stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M3 7h3l2-2h8l2 2h3v12H3z"/>
-      <circle cx="12" cy="13" r="4"/>
-    </svg>
-    <select id="camera-picker" class="meta-select" aria-label="Caméra sélectionnée">
-      <option value="">— aucune —</option>
-    </select>
   </div>
 </div>
 
