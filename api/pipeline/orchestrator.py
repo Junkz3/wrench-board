@@ -470,7 +470,7 @@ async def generate_knowledge_pack(
             )
             auditor_phase_name = "auditor" if rounds_used == 0 else f"auditor_rev_{rounds_used}"
             auditor_stats = PhaseTokenStats(phase=auditor_phase_name)
-            previous_brief = verdict.revision_brief if rounds_used > 0 else ""
+            previous_brief = verdict.revision_brief if rounds_used > 0 else ""  # noqa: F821 — verdict is bound on the prior loop iteration; rounds_used==0 short-circuits
             call_t0 = time.monotonic()
             verdict = await run_auditor(
                 client=client,
