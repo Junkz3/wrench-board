@@ -1,5 +1,0 @@
-https://community.mnt.re/t/usb-port-is-dead/4299
-
----
-
-Attaching a camera, mouse, or NFC reader produces nothing — no power, no data. Try all ports; a partially functional port (enumeration errors only) can help isolate whether the fault is in the VBUS switch or the data path.

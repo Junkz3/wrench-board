@@ -1,5 +1,0 @@
-https://community.mnt.re/t/battery-failure/604
-
----
-
-One battery cell may be leaking slightly, leaving a tiny dark spot visible on the cover. Visual inspection of cells through the acrylic bottom is sufficient to identify the affected cell.

@@ -1,5 +1,0 @@
-https://community.mnt.re/t/edp-cable-or-board-issue/3898
-
----
-
-Internal eDP display does not turn on; Components mentioned: U10 (SN65DSI86IPAPQ1, DSI-to-eDP bridge). Probe VCC (1.2 V) and VCCIO (1.8 V) at U10 supply pins for DSI-bridge health.

@@ -1,9 +1,0 @@
-{
-  "mnt-reform-motherboard": {
-    "score": 0.7760372392311121,
-    "self_mrr": 0.713685253790984,
-    "cascade_recall": 0.8695652173913043,
-    "n_scenarios": 23,
-    "run_date": "2026-04-24"
-  }
-}

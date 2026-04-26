@@ -1,5 +1,0 @@
-https://community.mnt.re/t/edp-cable-or-board-issue/3898
-
----
-
-If absent, trace back through FB15 to U24 AP22815 output - check enable line continuity. EDP_BL_VCC at J24 eDP connector - Internal eDP display does not turn on after chassis reassembly; backlight flickers briefly on occasion then goes dark.

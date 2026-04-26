@@ -1,5 +1,0 @@
-https://community.mnt.re/t/mnt-reform-motherboard-repair-logs/1261
-
----
-
-MNT Reform Motherboard Repair Logs — common failure clusters centre on the LPC system controller, battery management circuitry, display interconnects, and USB power paths.

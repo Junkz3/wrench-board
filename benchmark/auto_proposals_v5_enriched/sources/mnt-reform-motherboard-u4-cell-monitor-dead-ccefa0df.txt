@@ -1,5 +1,0 @@
-https://community.mnt.re/t/battery-is-not-charging/270
-
----
-
-OLED shows zero charge current and wildly incorrect per-cell voltages (e.g., 5.3 V on individual cells); LTC6803-4 cell monitor returns nonsense readings when cells are in over-discharge protection. Rail / test point: VREG at U4

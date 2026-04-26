@@ -1,5 +1,0 @@
-https://mntre.com/documentation/reform-handbook/advanced.html
-
----
-
-Symptom: White LED D11 absent; System Controller (LPC) unresponsive to SYSCTL UART commands. Likely cause: Always-on 3.3V regulator U14 failed or its output is shorted, starving the LPC11U24 (U18) of its supply rail LPC_VCC. Components mentioned: U14, U18 (LPC11U24), D11. Rail / test point: LPC_VCC (3.3 V) at J22 pin 15; D11 illuminates when this rail is live.

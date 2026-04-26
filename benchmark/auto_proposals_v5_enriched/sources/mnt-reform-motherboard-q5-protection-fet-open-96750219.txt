@@ -1,5 +1,0 @@
-https://community.mnt.re/t/damaged-battery-while-using-reform/1477
-
----
-
-Cell reports reverse voltage or deep under-voltage; system shuts down mid-use with an audible click; pack won't sustain load. Likely cause: One or more cells driven to reverse polarity during over-discharge; cell protection FET (Q5, PMV50EPEAR) opens the BAT bus.

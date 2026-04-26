@@ -1,5 +1,0 @@
-https://community.mnt.re/t/usb-port-is-dead/4299
-
----
-
-One or more USB-A host ports deliver no power and no data; only partial/erratic enumeration on one port. Likely cause: AP22815 load switch (U24 or U27) not asserting USB_PWR. Probe USB_PWR at U24 output - if absent with LPC powered, check AP22815 enable line for correct logic level.

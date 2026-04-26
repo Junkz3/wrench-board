@@ -1,5 +1,0 @@
-https://community.mnt.re/t/debugging-dead-motherboard/970
-
----
-
-Symptom: SD card boot fails; system won't read SD card even though LPC and 3.3 V main rail are confirmed live. Likely cause: 1.8 V rail dead — level shifters U28 and U8 require both 3.3 V and 1.8 V to operate, blocking the SD interface. Components mentioned: U28, U8 (level shifters). Rail / test point: 1.8 V rail at C130. Probe C130 for 1.8 V; if absent, identify 1.8 V buck regulator in schematic (Power section), check for short on output in diode-mode before reflowing or replacing.

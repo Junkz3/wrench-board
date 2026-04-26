@@ -1,5 +1,0 @@
-https://community.mnt.re/t/wm8960-fix-without-reboot/660
-
----
-
-No audio output; kernel log repeats `wm8960 2-001a: Failed to issue reset`; codec cannot be initialized on the I2C bus. Likely cause: WM8960 (U3) fails to acknowledge on I2C; cause may be a cold joint under the QFN body or collapsed DCVDD/AVDD supply rails preventing internal reset.

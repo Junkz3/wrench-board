@@ -1,5 +1,0 @@
-https://community.mnt.re/t/edp-cable-or-board-issue/3898
-
----
-
-After reassembly the screen did not turn on; HDMI works fine; the screen flickers into existence for a few minutes then disappears — and this happens without anything touching the connector. Wi-Fi antenna placement can cause interference into the display path, though symptoms would differ and not affect the backlight specifically.

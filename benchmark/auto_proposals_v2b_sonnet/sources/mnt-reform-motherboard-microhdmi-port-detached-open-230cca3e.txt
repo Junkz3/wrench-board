@@ -1,5 +1,0 @@
-https://community.mnt.re/t/tragedy-microhdmi-port-has-detached/4240
-
----
-
-A prior report was incorrectly attributed to a detached port but turned out to be a faulty cable; a later confirmed case involved the port actually detaching after upgrading to a newer motherboard + sound board. Visual inspection and gentle tug test on the connector shell.

@@ -1,5 +1,0 @@
-https://community.mnt.re/t/wm8960-fix-without-reboot/660
-
----
-
-AVDD at U3 (from FB21, ~3.3 V); collapsed DCVDD/AVDD supply rails preventing internal reset; both must be present before I2C reset can succeed.

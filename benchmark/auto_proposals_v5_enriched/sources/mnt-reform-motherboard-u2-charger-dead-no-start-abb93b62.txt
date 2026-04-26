@@ -1,5 +1,0 @@
-https://community.mnt.re/t/battery-is-not-charging/270
-
----
-
-Charging LEDs do not illuminate when 24 V DC adapter is connected; OLED shows zero charge current and wildly incorrect per-cell voltages (e.g., 5.3 V on individual cells); total pack voltage stalls at 3.3-3.5 V after hours on the charger. Likely cause: Cells below the LTC4020 charge-initiation threshold after deep discharge; charger refuses to start sequence

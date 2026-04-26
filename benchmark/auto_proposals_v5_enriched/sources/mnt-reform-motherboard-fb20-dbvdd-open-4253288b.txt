@@ -1,5 +1,0 @@
-https://community.mnt.re/t/wm8960-fix-without-reboot/660
-
----
-
-DBVDD at U3 (from FB20, ~3.3 V); No audio output; kernel log repeats `wm8960 2-001a: Failed to issue reset`; codec cannot be initialized on the I2C bus.

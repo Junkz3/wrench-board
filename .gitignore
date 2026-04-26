@@ -161,6 +161,13 @@ web/vendor/*.js
 web/intro.html
 web/assets/
 
+# Bench-generator per-run artefacts (auto_proposals_*) — research output of
+# scripts/generate_bench_from_pack.py. The frozen oracle lives in
+# benchmark/scenarios.jsonl; per-run dumps are local-only.
+benchmark/auto_proposals/
+benchmark/auto_proposals_*/
+benchmark/poc_multi_agent/
+
 # --- Local-only notes (gap analyses, prompts ad-hoc, working memos) ---
 # Use docs/notes/local/ for any markdown that should NOT land in the repo
 # history. Tracked architecture/design notes go directly in docs/notes/.

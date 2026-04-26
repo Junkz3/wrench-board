@@ -1,5 +1,0 @@
-https://community.mnt.re/t/debugging-dead-motherboard/970
-
----
-
-compute module LCD and CPU serial produce no output. Likely cause: Power sequencing fails to sustain main compute rails after load-switch enable; possible overcurrent protection firing on +5 V, +3.3 V, or PCIE1_PWR at the point the compute module is turned on. Components mentioned: U12 (LM2677SX-3.3, 3.3 V buck)

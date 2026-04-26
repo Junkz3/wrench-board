@@ -1,5 +1,0 @@
-https://community.mnt.re/t/debugging-dead-motherboard/970
-
----
-
-When the power adapter is plugged in, the two white LEDs and green LED on the compute module are present; the LPC serial is interactive; new batteries report healthy voltages; all LPC commands work — but entering "1P" turns the white LEDs off and nothing appears on the main LCD or CPU Serial 1.

@@ -1,5 +1,0 @@
-https://community.mnt.re/t/usb-port-is-dead/4299
-
----
-
-AP22815 load switch (U24 or U27) not asserting USB_PWR; or TUSB8040PFP USB hub (U9) internal fault locking downstream ports. Components mentioned: U27 (AP22815, 3V3_PWR_AUX load switch)

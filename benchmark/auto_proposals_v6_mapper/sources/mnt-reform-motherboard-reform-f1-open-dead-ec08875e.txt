@@ -1,5 +1,0 @@
-https://mntre.com/reform2/handbook/advanced.html
-
----
-
-Symptom: No power at all — no LEDs, no rail activity after connecting wall or battery power. Likely cause: Blown input fuse F1 on the main power-input path, or no voltage reaching sense resistor R49. Components mentioned: F1, R49, J1. Rail / test point: Input rail (9–32 V nominal 24 V) measured at R49; fuse F1 in series before it.

@@ -1,5 +1,0 @@
-https://community.mnt.re/t/edp-cable-or-board-issue/3898
-
----
-
-Probe VCCIO (1.8 V) at U10 from U17. Internal eDP display does not turn on after chassis reassembly; external HDMI output works normally.

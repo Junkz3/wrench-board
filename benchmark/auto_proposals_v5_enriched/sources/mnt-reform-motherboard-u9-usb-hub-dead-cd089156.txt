@@ -1,5 +1,0 @@
-https://community.mnt.re/t/usb-port-is-dead/4299
-
----
-
-If USB_PWR is present but ports are dead, probe USBH_3V3 and USBH_1V1 at U9 supply pins; missing 1V1 core points to U9 (QFP-48) needing replacement. TUSB8040PFP USB hub (U9) internal fault locking downstream ports.

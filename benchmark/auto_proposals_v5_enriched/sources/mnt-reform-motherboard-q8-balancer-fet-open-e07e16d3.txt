@@ -1,5 +1,0 @@
-https://community.mnt.re/t/mnt-reform-r-2-motherboard-update-2021-04-19/177
-
----
-
-R-2 motherboard battery cells diverge significantly in voltage during charge cycle; balancing is ineffective. Components mentioned: Q6-Q12 (PMV50EPEAR, cell balancer FETs), U4 (LTC6803-4)

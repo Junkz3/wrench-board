@@ -1,5 +1,0 @@
-https://community.mnt.re/t/power-issues-and-lpc-wakeup/596
-
----
-
-Board completely unresponsive after being left plugged-in while off — no LCD, no LPC wakeup indication, nothing happens when the power key is pressed. Likely cause: LPC system controller enters an unrecoverable state; a firmware bug prevents it from leaving its locked-up condition. Try the LPC reset button (nearest the battery connector); if that fails, the only reliable recovery is disconnecting and reconnecting the battery cables.

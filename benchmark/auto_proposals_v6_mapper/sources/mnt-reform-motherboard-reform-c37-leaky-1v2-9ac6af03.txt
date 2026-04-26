@@ -1,5 +1,0 @@
-https://mntre.com/reform2/handbook/advanced.html
-
----
-
-Symptom: Internal display dark or no video; USB ports also dead. External HDMI may or may not work. Likely cause: 1.2 V supply rail dead — both the TUSB8041 USB hub (U9) and the SN65DSI86 eDP bridge (U10) require 1.2 V to operate. Additionally, the display needs 3V3_PWR_AUX and USB_PWR (5 V) switched on by the System Controller. Components mentioned: U9 (TUSB8041), U10 (SN65DSI86), J24. Rail / test point: 1.2 V at C37; 3V3_PWR_AUX (3.3 V switched); USB_PWR (5 V, D12 indicator). Probe C37 for 1.2 V first; if absent, diode-mode on nearby decoupling caps to detect short.
