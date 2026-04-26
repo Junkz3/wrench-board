@@ -1347,15 +1347,36 @@ async def post_pack_document(
         total,
     )
 
-    # Auto-pin policy: the FIRST upload of a kind becomes active. Later
-    # uploads only become active via an explicit PUT /sources/{kind}, so
-    # the technician keeps control of which version is live.
+    # Versioning glue. Two responsibilities:
+    #   1. Archive the legacy schematic.pdf (one that pre-dates this system)
+    #      into uploads/ + cache, so the technician can switch back to it.
+    #   2. Auto-pin: the FIRST upload of a kind becomes active. We then
+    #      materialise the pin (cache hit or kick off ingestion). Without
+    #      step 2, the pin would point to a file that doesn't match the
+    #      derived artefacts on disk — incoherent.
     if kind in sources.KNOWN_KINDS:
         pack_dir = uploads_dir.parent
+        if kind == sources.SCHEMATIC_KIND:
+            # MUST run before reading existing uploads — once we've added
+            # the new file, list_uploads_for_kind would no longer be empty.
+            _archive_legacy_schematic_if_present(pack_dir)
         pins = sources.read_active(pack_dir)
         if not pins.get(kind):
             pins[kind] = target.name
             sources.write_active(pack_dir, pins)
+            if kind == sources.SCHEMATIC_KIND:
+                # Materialise the pin we just wrote. Cache hit (rare here
+                # since this is a brand-new upload) → instant; cache miss
+                # → background ingestion. Either way, schematic.pdf on
+                # disk now matches the active pin.
+                try:
+                    _apply_schematic_pin(slug, pack_dir, target.name)
+                except OSError:
+                    logger.warning(
+                        "could not materialise schematic pin for %s",
+                        target.name,
+                        exc_info=True,
+                    )
 
     return DocumentUploadResponse(
         device_slug=slug,
@@ -1437,6 +1458,36 @@ class SwitchSourceResponse(BaseModel):
     active: str
     status: Literal["pinned", "cached", "rebuilding"]
     detail: str
+    # Populated only when status="rebuilding" — heuristic ETA so the UI
+    # can show a countdown without polling for progress events.
+    eta_seconds: int | None = None
+    page_count: int | None = None
+
+
+# Vision pipeline ~ wall-clock per page on Opus 4.7 with grounding +
+# fan-out parallelism: empirically 25-35s on iPhone X / MNT Reform sized
+# packs. We bias slightly high (35s) so the countdown rarely undershoots
+# the real completion. Updated value lives here so a single tweak
+# propagates to both the response ETA and the doc string above.
+_VISION_SECONDS_PER_PAGE = 35
+
+
+def _count_pdf_pages(pdf_path: Path) -> int | None:
+    """Return the page count without opening the file twice.
+
+    pdfplumber is already in the dependency tree (used by the renderer +
+    grounding extractor) so reusing it avoids pulling in a second PDF
+    library. Returns None on any read failure — the caller treats that
+    as "ETA unknown" rather than failing the switch.
+    """
+    try:
+        import pdfplumber
+
+        with pdfplumber.open(str(pdf_path)) as pdf:
+            return len(pdf.pages)
+    except Exception:
+        logger.warning("could not count pages in %s", pdf_path, exc_info=True)
+        return None
 
 
 @router.get("/packs/{device_slug}/sources", response_model=SourcesResponse)
@@ -1489,6 +1540,95 @@ async def _reingest_and_cache(slug: str, pack_dir: Path, pdf_path: Path, pdf_has
         logger.info("[sources] reingest complete for %s hash=%s", slug, pdf_hash)
     except Exception:
         logger.exception("[sources] reingest failed for %s hash=%s", slug, pdf_hash)
+
+
+# Reserved filename used to surface a "legacy" schematic.pdf — one that
+# pre-dates the versioning system and therefore lives at
+# `memory/{slug}/schematic.pdf` without a matching entry in `uploads/`.
+# The leading 0-timestamp sorts it to the bottom of the version list so
+# newer real uploads stay on top, and the literal "baseline" suffix
+# makes it scannable in the UI.
+_LEGACY_SCHEMATIC_FILENAME = "00000000T000000Z-schematic_pdf-baseline.pdf"
+
+
+def _archive_legacy_schematic_if_present(pack_dir: Path) -> str | None:
+    """Snapshot an in-place schematic.pdf into `uploads/` + cache.
+
+    Runs once per pack, on the first technician upload of a schematic_pdf.
+    If `memory/{slug}/schematic.pdf` exists AND no upload of that kind has
+    been recorded yet, this copies it into `uploads/` under a fixed
+    "baseline" filename and (when a derived `electrical_graph.json` is
+    present) writes through to the hashed cache so the user can switch
+    back to it instantly later. Returns the archived filename, or None
+    when nothing needed archiving.
+    """
+    legacy_pdf = pack_dir / "schematic.pdf"
+    if not legacy_pdf.exists():
+        return None
+    # Already archived (or any other schematic_pdf upload exists)? Skip.
+    existing = sources.list_uploads_for_kind(pack_dir, sources.SCHEMATIC_KIND)
+    if existing:
+        return None
+
+    uploads_dir = pack_dir / "uploads"
+    uploads_dir.mkdir(parents=True, exist_ok=True)
+    target = uploads_dir / _LEGACY_SCHEMATIC_FILENAME
+    try:
+        shutil.copyfile(legacy_pdf, target)
+    except OSError:
+        logger.warning("could not archive legacy schematic for %s", pack_dir.name, exc_info=True)
+        return None
+
+    # Cache the legacy artefacts under their hash so a switch back is free.
+    if (pack_dir / "electrical_graph.json").exists():
+        try:
+            legacy_hash = sources.hash_pdf(legacy_pdf)
+            sources.write_through_cache(pack_dir, legacy_hash)
+        except OSError:
+            logger.warning(
+                "could not write-through legacy cache for %s",
+                pack_dir.name,
+                exc_info=True,
+            )
+    logger.info("[sources] archived legacy schematic for %s as %s", pack_dir.name, target.name)
+    return _LEGACY_SCHEMATIC_FILENAME
+
+
+def _apply_schematic_pin(
+    slug: str, pack_dir: Path, target_filename: str
+) -> tuple[Literal["cached", "rebuilding"], int | None, int | None]:
+    """Materialise a schematic_pdf pin in place. Returns (status, eta, pages).
+
+    Centralises the cache-vs-reingest decision shared by POST /documents
+    auto-pin and PUT /sources/{kind}. Caller must already have:
+      - validated the target file exists in `uploads/`
+      - written the new pin to `active_sources.json`
+
+    On `cached`: copies the cached artefacts back into place; the new
+    graph is live before the function returns.
+    On `rebuilding`: copies the source PDF to `memory/{slug}/schematic.pdf`,
+    drops stale derivatives, schedules a background ingestion task. ETA
+    is heuristic (page count × seconds-per-page).
+    """
+    target = pack_dir / "uploads" / target_filename
+    pdf_hash = sources.hash_pdf(target)
+
+    if sources.is_cached(pack_dir, pdf_hash):
+        sources.restore_from_cache(pack_dir, pdf_hash)
+        return "cached", None, None
+
+    # Cache miss — install the new PDF in place, drop stale derived files
+    # (so detect helpers report has_electrical_graph=False during build),
+    # then kick off the vision pipeline as a background task.
+    shutil.copyfile(target, pack_dir / "schematic.pdf")
+    sources.clear_in_place_schematic(pack_dir)
+    shutil.copyfile(target, pack_dir / "schematic.pdf")
+    asyncio.create_task(
+        _reingest_and_cache(slug, pack_dir, pack_dir / "schematic.pdf", pdf_hash)
+    )
+    pages = _count_pdf_pages(pack_dir / "schematic.pdf")
+    eta = pages * _VISION_SECONDS_PER_PAGE if pages else None
+    return "rebuilding", eta, pages
 
 
 @router.put(
@@ -1552,37 +1692,29 @@ async def switch_pack_source(
             detail="boardview pin updated; effective at next WS open.",
         )
 
-    # schematic_pdf — try cache first, else trigger reingest.
-    pdf_hash = sources.hash_pdf(target)
-    if sources.is_cached(pack_dir, pdf_hash):
-        sources.restore_from_cache(pack_dir, pdf_hash)
+    # schematic_pdf — delegate to the shared helper so the cache-or-reingest
+    # logic stays consistent between explicit switch and auto-pin paths.
+    try:
+        status, eta, pages = _apply_schematic_pin(slug, pack_dir, payload.filename)
+    except OSError as exc:
+        raise HTTPException(status_code=500, detail=f"could not apply pin: {exc}") from exc
+
+    if status == "cached":
         return SwitchSourceResponse(
             device_slug=slug,
             kind=kind,
             active=payload.filename,
             status="cached",
-            detail=f"cache hit for hash={pdf_hash}; graphe électrique restored from cache.",
+            detail="cache hit; graphe électrique restored from cache.",
         )
-
-    # Cache miss — copy PDF in place, drop stale derived files, kick off
-    # a background ingestion that will write-through to the cache when done.
-    try:
-        shutil.copyfile(target, pack_dir / "schematic.pdf")
-    except OSError as exc:
-        raise HTTPException(status_code=500, detail=f"could not copy PDF: {exc}") from exc
-    sources.clear_in_place_schematic(pack_dir)
-    # Re-copy because clear_in_place_schematic also drops schematic.pdf.
-    shutil.copyfile(target, pack_dir / "schematic.pdf")
-
-    asyncio.create_task(
-        _reingest_and_cache(slug, pack_dir, pack_dir / "schematic.pdf", pdf_hash)
-    )
     return SwitchSourceResponse(
         device_slug=slug,
         kind=kind,
         active=payload.filename,
         status="rebuilding",
-        detail=f"cache miss for hash={pdf_hash}; vision pipeline launched in background.",
+        detail="cache miss; vision pipeline launched in background.",
+        eta_seconds=eta,
+        page_count=pages,
     )
 
 
