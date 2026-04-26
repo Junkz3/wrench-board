@@ -7,7 +7,10 @@ body.no-metabar .sch-inspector{top:60px}
 .sch-canvas{position:absolute;inset:0;cursor:grab}
 .sch-canvas:active{cursor:grabbing}
 .sch-canvas.hidden{display:none}
-.sch-canvas svg{width:100%;height:100%;display:block;touch-action:none}
+/* `pointer-events:all` — without it, browsers only hit-test the painted
+   shapes inside the SVG and mousedown on empty canvas falls through, so
+   d3.zoom never receives the drag and pan silently breaks. */
+.sch-canvas svg{width:100%;height:100%;display:block;touch-action:none;pointer-events:all}
 
 /* subtle workshop grid */
 .sch-grid{position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(rgba(45,70,110,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(45,70,110,.05) 1px,transparent 1px);background-size:48px 48px}
@@ -295,61 +298,6 @@ body.llm-open .sch-root{right:420px}
 .sch-stat-pill{padding:5px 10px;border-radius:20px;background:rgba(52,211,153,.1);color:var(--emerald);border:1px solid rgba(52,211,153,.3);font-family:var(--mono);font-size:10.5px;text-transform:uppercase;letter-spacing:.4px;display:none}
 .sch-stat-pill.on{display:inline-flex}
 .sch-stat-pill.warn{background:rgba(245,158,11,.1);color:var(--amber);border-color:rgba(245,158,11,.3)}
-.sch-toggle{padding:5px 10px;border-radius:20px;background:rgba(10,17,32,.92);color:var(--text-3);border:1px solid var(--border);font-family:var(--mono);font-size:10.5px;letter-spacing:.3px;text-transform:uppercase;cursor:pointer;transition:all .15s}
-.sch-toggle:hover{color:var(--text);border-color:var(--border-soft)}
-.sch-toggle.on{background:rgba(52,211,153,.14);color:var(--emerald);border-color:rgba(52,211,153,.35)}
-
-/* Deuxième ligne d'outils — centrée sous le switch Graphe/PDF, regroupe
-   le sélecteur de mode (Focus rail / Power-tree / Grille) + les toggles
-   passifs (Passifs signal / Signaux / Toutes pins). Masquée quand la
-   surface est PDF (via .sch-root.surface-pdf .sch-toolbar-below). */
-.sch-toolbar-below{
-  position:absolute;
-  top:54px;
-  left:50%;
-  transform:translateX(-50%);
-  z-index:5;
-  display:inline-flex;
-  align-items:center;
-  gap:6px;
-  padding:4px;
-  background:rgba(10,17,32,.86);
-  border:1px solid var(--border);
-  border-radius:22px;
-  backdrop-filter:blur(10px);
-  box-shadow:0 4px 14px rgba(0,0,0,.3);
-  max-width:calc(100% - 32px);
-  flex-wrap:wrap;
-  justify-content:center;
-}
-.sch-toolbar-sep{
-  width:1px;
-  height:18px;
-  background:var(--border);
-  margin:0 4px;
-}
-/* Les composants qu'on rembobine dans .sch-toolbar-below avaient leurs
-   propres backgrounds + borders — on les neutralise ici pour éviter la
-   double-capsule et obtenir une barre visuellement homogène. */
-.sch-toolbar-below .sch-mode-toggle{
-  background:transparent;
-  border:0;
-  backdrop-filter:none;
-}
-.sch-toolbar-below .sch-toggle{
-  background:transparent;
-  backdrop-filter:none;
-}
-.sch-toolbar-below .sch-toggle:hover{
-  background:rgba(56,189,248,.08);
-}
-/* Segmented layout-mode selector (Power-tree / Grille phase×V) */
-.sch-mode-toggle{display:inline-flex;background:rgba(10,17,32,.92);border:1px solid var(--border);border-radius:20px;overflow:hidden;backdrop-filter:blur(6px)}
-.sch-mode-btn{padding:5px 12px;background:transparent;border:0;color:var(--text-3);font-family:var(--mono);font-size:10.5px;letter-spacing:.3px;text-transform:uppercase;cursor:pointer;transition:all .15s;border-right:1px solid var(--border)}
-.sch-mode-btn:last-child{border-right:0}
-.sch-mode-btn:hover{color:var(--text);background:rgba(30,42,60,.5)}
-.sch-mode-btn.on{background:rgba(56,189,248,.14);color:var(--cyan)}
-
 /* Power-tree mode — horizontal bus lines */
 .sch-pt-busline{stroke:rgba(52,211,153,.28);stroke-width:1;stroke-dasharray:6 4}
 .sch-pt-band-label{font-family:var(--mono);font-size:10px;fill:var(--text-3);letter-spacing:.5px;text-transform:uppercase;font-weight:700;pointer-events:none}
@@ -362,7 +310,9 @@ body.llm-open .sch-root{right:420px}
 .sch-filter-status{font-family:var(--mono);font-size:10px;color:var(--text-3);min-width:70px;text-align:right}
 
 /* =========== ZOOM CONTROLS =========== */
-.sch-zoom{position:absolute;right:16px;bottom:16px;display:flex;flex-direction:column;gap:6px;background:rgba(20,32,48,.85);border:1px solid var(--border);backdrop-filter:blur(8px);border-radius:8px;padding:6px;z-index:5}
+/* `bottom:156px` lifts the bar clear of the 148px boot timeline so it
+   never sits on top of the boot-sequence chips. */
+.sch-zoom{position:absolute;right:16px;bottom:156px;display:flex;flex-direction:column;gap:6px;background:rgba(20,32,48,.85);border:1px solid var(--border);backdrop-filter:blur(8px);border-radius:8px;padding:6px;z-index:5}
 .sch-zoom-btn{width:34px;height:34px;border-radius:5px;background:transparent;border:0;color:var(--text-2);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s}
 .sch-zoom-btn:hover{background:var(--panel-2);color:var(--text)}
 .sch-zoom-sep{height:1px;background:var(--border);margin:2px 4px}
@@ -419,7 +369,7 @@ body.llm-open .sch-root{right:420px}
    down to just above the boot timeline. */
 /* Rail sidebar — occupe toute la colonne gauche en mode Focus-rail.
    La barre va de top à bottom de la section schématique ; les overlays
-   flottants (statsbar / toolbar-below) sont décalés vers la droite en
+   flottants (statsbar / surface-toggle) sont décalés vers la droite en
    mode railfocus pour ne pas couvrir la sidebar. */
 .sch-railbar{position:absolute;top:0;left:0;bottom:0;width:260px;background:linear-gradient(180deg,rgba(15,24,42,.98),rgba(12,19,36,.98));border-right:1px solid var(--border);display:none;flex-direction:column;z-index:4;backdrop-filter:blur(6px)}
 body.sch-mode-railfocus .sch-railbar{display:flex}
@@ -428,11 +378,10 @@ body.sch-mode-railfocus .sch-boot-timeline{left:260px}
 /* En mode Focus-rail, la sidebar occupe les 260 premiers pixels — on
    décale les overlays flottants pour qu'ils vivent dans la zone visible
    (à droite de la sidebar) sans la couvrir. Le +130px correspond à la
-   moitié de la largeur de la sidebar, ce qui re-centre le switch et la
-   toolbar au milieu de la zone visible (entre 260 et la droite). */
+   moitié de la largeur de la sidebar, ce qui re-centre le switch au
+   milieu de la zone visible (entre 260 et la droite). */
 body.sch-mode-railfocus .sch-statsbar{left:276px;max-width:calc(50% - 230px)}
 body.sch-mode-railfocus .sch-surface-toggle{left:calc(50% + 130px)}
-body.sch-mode-railfocus .sch-toolbar-below{left:calc(50% + 130px)}
 
 .sch-railbar-head{display:flex;align-items:baseline;justify-content:space-between;padding:18px 16px 12px;border-bottom:1px solid var(--border)}
 .sch-railbar-title{font-family:var(--mono);font-size:11.5px;letter-spacing:.6px;text-transform:uppercase;color:var(--text-2);font-weight:700}
@@ -1185,7 +1134,6 @@ body.sch-mode-railfocus .sch-toolbar-below{left:calc(50% + 130px)}
 .sch-root.surface-pdf .sch-pdf-view{display:block}
 .sch-root.surface-pdf .sch-canvas,
 .sch-root.surface-pdf .sch-statsbar,
-.sch-root.surface-pdf .sch-toolbar-below,
 .sch-root.surface-pdf .sch-filter,
 .sch-root.surface-pdf .sch-zoom,
 .sch-root.surface-pdf .sch-railbar,

@@ -22,7 +22,7 @@
 <link rel="stylesheet" href="styles/pipeline_progress.css">
 <link rel="stylesheet" href="styles/llm.css">
 <link rel="stylesheet" href="styles/mascot.css">
-<link rel="stylesheet" href="styles/schematic.css">
+<link rel="stylesheet" href="styles/schematic.css?v=fitcenter">
 <link rel="stylesheet" href="/styles/profile.css" />
 <link rel="stylesheet" href="styles/protocol.css?v=quest4" />
 <!-- Markdown rendering + sanitization for agent chat (MIT / Apache 2.0) -->
@@ -327,21 +327,6 @@
     <span class="sch-stat"><span class="k" data-i18n="schematic.stats.conf">Conf.</span><span class="v" id="schStatConf">—</span></span>
     <span class="sch-stat"><span class="k" data-i18n="schematic.stats.pages">Pages</span><span class="v" id="schStatPages">—</span></span>
     <span class="sch-stat-pill warn" id="schStatDegraded" data-i18n="schematic.stats.degraded">degraded</span>
-  </div>
-
-  <!-- Second row (only in Graph surface) — mode selector + passive
-       toggles, centered under the surface toggle. Dedicated z-index so
-       it never overlaps the Graph/PDF switch. -->
-  <div class="sch-toolbar-below">
-    <div class="sch-mode-toggle" role="radiogroup" data-i18n-attr="aria-label:schematic.mode.aria_label" aria-label="Graph display mode">
-      <button class="sch-mode-btn" data-sch-mode="railfocus" data-i18n="schematic.mode.railfocus" data-i18n-attr="title:schematic.mode.railfocus_title" title="Rail focus: rail sidebar, canvas shows one rail at a time (clean, no spaghetti)">Rail focus</button>
-      <button class="sch-mode-btn" data-sch-mode="powertree" data-i18n="schematic.mode.powertree" data-i18n-attr="title:schematic.mode.powertree_title" title="Power-tree: all rails stacked with their consumers">Power-tree</button>
-      <button class="sch-mode-btn" data-sch-mode="grid" data-i18n="schematic.mode.grid" data-i18n-attr="title:schematic.mode.grid_title" title="Phase × voltage grid: columns = boot phases, rows = voltage levels">Phase × V grid</button>
-    </div>
-    <div class="sch-toolbar-sep"></div>
-    <button class="sch-toggle" id="schTogglePassives" data-i18n="schematic.toggles.passives" data-i18n-attr="title:schematic.toggles.passives_title" title="Show pure signal R/C/L (not attached to a power rail)">Signal passives</button>
-    <button class="sch-toggle" id="schToggleSignals" data-i18n="schematic.toggles.signals" data-i18n-attr="title:schematic.toggles.signals_title" title="Show signal edges (enable, reset, clock, bus)">Signals</button>
-    <button class="sch-toggle" id="schToggleAllPins" data-i18n="schematic.toggles.all_pins" data-i18n-attr="title:schematic.toggles.all_pins_title" title="Show every IC pin (not just power-relevant ones)">All pins</button>
   </div>
 
   <!-- filter input (top-right) -->
@@ -984,7 +969,7 @@
      This isolates chat-panel edits from parallel work on index.html. -->
 <div id="llmRoot"></div>
 
-<script type="module" src="js/main.js?v=quest4"></script>
+<script type="module" src="js/main.js?v=quest8"></script>
 <script type="module" src="brd_viewer.js?v=quest1" defer></script>
 <script type="module" src="js/schematic_minimap.js" defer></script>
 <script type="module" src="/js/profile.js"></script>

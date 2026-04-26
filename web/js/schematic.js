@@ -1000,7 +1000,6 @@ const COL_W = 320;      // per-phase column width
 const ROW_H = 170;      // per-voltage-row height
 const GRID_TOP = 110;   // y of the first row's center
 const GRID_LEFT = 180;  // x of the first column's center
-const TIMELINE_H = 148; // reserved at bottom for boot timeline (must match CSS)
 
 // Voltage rows, top→bottom. Signal-only nodes fall into the last row.
 const V_ROWS = [
@@ -1494,11 +1493,17 @@ function computeRailFocusLayout(model, railId) {
   } else {
     const xs = visible.map(n => n.x);
     const ys = visible.map(n => n.y);
+    // Heads (zone bands + labels rendered by renderRailFocusHeads) span from
+    // railY-220 (zone label) to railY+210 (zone band bottom). Bounds must
+    // include them or the fit centres on nodes alone and the heads bleed up
+    // behind the surface toggle / statsbar / filter overlays.
+    const headTop = RF_CENTER_Y - 220;
+    const headBot = RF_CENTER_Y + 220;
     model.bounds = {
       minX: Math.min(...xs) - 140,
-      minY: Math.min(...ys) - 120,
+      minY: Math.min(Math.min(...ys) - 120, headTop),
       maxX: Math.max(...xs) + 140,
-      maxY: Math.max(...ys) + 120,
+      maxY: Math.max(Math.max(...ys) + 120, headBot),
     };
   }
 }
@@ -1913,9 +1918,9 @@ function pinAnchor(node, pin) {
 
 function edgeAnchors(e, model) {
   const s = model.nodeById.get(e.sourceId);
-  const t = model.nodeById.get(e.targetId);
-  if (!s || !t) return null;
-  let sx = s.x, sy = s.y, tx = t.x, ty = t.y;
+  const tn = model.nodeById.get(e.targetId);
+  if (!s || !tn) return null;
+  let sx = s.x, sy = s.y, tx = tn.x, ty = tn.y;
 
   const isCleanLayout = model.layoutMode === "powertree" || model.layoutMode === "railfocus";
   // In power-tree / rail-focus modes, skip fine pin-level anchoring (nodes
@@ -1924,16 +1929,16 @@ function edgeAnchors(e, model) {
   if (isCleanLayout) {
     if (s.kind === "component") {
       const w = s.width || 40;
-      sx = s.x + (t.x > s.x ? w / 2 : -w / 2);
+      sx = s.x + (tn.x > s.x ? w / 2 : -w / 2);
       sy = s.y;
     }
-    if (t.kind === "component") {
-      const w = t.width || 40;
-      tx = t.x + (s.x > t.x ? w / 2 : -w / 2);
-      ty = t.y;
+    if (tn.kind === "component") {
+      const w = tn.width || 40;
+      tx = tn.x + (s.x > tn.x ? w / 2 : -w / 2);
+      ty = tn.y;
     }
-    if (s.kind === "rail") sx = s.x + (t.x > s.x ? 50 : -50);
-    if (t.kind === "rail") tx = t.x + (s.x > t.x ? 50 : -50);
+    if (s.kind === "rail") sx = s.x + (tn.x > s.x ? 50 : -50);
+    if (tn.kind === "rail") tx = tn.x + (s.x > tn.x ? 50 : -50);
     return { x1: sx, y1: sy, x2: tx, y2: ty };
   }
 
@@ -1942,12 +1947,12 @@ function edgeAnchors(e, model) {
     const p = (s.pins.sides.left.concat(s.pins.sides.right, s.pins.sides.top, s.pins.sides.bottom)).find(x => x.net_label === e.netLabel);
     if (p) { const [dx, dy] = pinAnchor(s, p); sx = s.x + dx; sy = s.y + dy; }
   }
-  if (e.netLabel && t.kind === "component" && t.showPins) {
-    const p = (t.pins.sides.left.concat(t.pins.sides.right, t.pins.sides.top, t.pins.sides.bottom)).find(x => x.net_label === e.netLabel);
-    if (p) { const [dx, dy] = pinAnchor(t, p); tx = t.x + dx; ty = t.y + dy; }
+  if (e.netLabel && tn.kind === "component" && tn.showPins) {
+    const p = (tn.pins.sides.left.concat(tn.pins.sides.right, tn.pins.sides.top, tn.pins.sides.bottom)).find(x => x.net_label === e.netLabel);
+    if (p) { const [dx, dy] = pinAnchor(tn, p); tx = tn.x + dx; ty = tn.y + dy; }
   }
-  if (s.kind === "rail") sx = s.x + (t.x > s.x ? 50 : -50);
-  if (t.kind === "rail") tx = t.x + (s.x > t.x ? 50 : -50);
+  if (s.kind === "rail") sx = s.x + (tn.x > s.x ? 50 : -50);
+  if (tn.kind === "rail") tx = tn.x + (s.x > tn.x ? 50 : -50);
   return { x1: sx, y1: sy, x2: tx, y2: ty };
 }
 
@@ -2148,8 +2153,8 @@ function renderEdges(model) {
   const edgesData = model.layoutMode === "railfocus"
     ? model.edges.filter(e => {
         const s = model.nodeById.get(e.sourceId);
-        const t = model.nodeById.get(e.targetId);
-        return s && t && s._visible && t._visible;
+        const tn = model.nodeById.get(e.targetId);
+        return s && tn && s._visible && tn._visible;
       })
     : model.edges;
   g.selectAll("path").data(edgesData, d => d.id).join("path")
@@ -2791,17 +2796,42 @@ function initZoom(model) {
   STATE.zoom = zoom;
   svg.call(zoom);
   fitToBounds(model);
+  // Refit on canvas resize — fires when the chat panel opens/closes (which
+  // shrinks .sch-root via right:420px), on window resize, and when the rail
+  // sidebar toggles. Without this, the zoom transform stays anchored to the
+  // pre-resize geometry and content drifts off-screen behind the chat panel.
+  if (STATE._resizeObserver) STATE._resizeObserver.disconnect();
+  let refitTimer = null;
+  STATE._resizeObserver = new ResizeObserver(() => {
+    clearTimeout(refitTimer);
+    refitTimer = setTimeout(() => {
+      if (STATE.model) fitToBounds(STATE.model);
+    }, 150);
+  });
+  STATE._resizeObserver.observe(el("schCanvas"));
 }
+
+// FIT_TOP_INSET reserves clearance for the top floating overlays that sit
+// above the canvas content. The canvas's CSS bottom already excludes the
+// boot timeline (148px), so the visual centre of what the user perceives
+// as the workspace is NOT the canvas centre — it sits below it. We centre
+// content in the available zone [FIT_TOP_INSET, H-PAD] so the rail/heads
+// land at the visual midpoint instead of the raw centre.
+const FIT_TOP_INSET = 140;
+const FIT_PAD = 30;
 
 function fitToBounds(model) {
   if (!model.bounds) return;
   const canvas = el("schCanvas");
+  // canvas.clientHeight already excludes the boot timeline (CSS bottom:148px).
   const W = canvas.clientWidth, H = canvas.clientHeight;
   const { minX, minY, maxX, maxY } = model.bounds;
   const bw = maxX - minX, bh = maxY - minY;
-  const scale = Math.min((W - 60) / bw, (H - TIMELINE_H - 60) / bh, 1.4);
-  const tx = (W - bw * scale) / 2 - minX * scale;
-  const ty = (H - TIMELINE_H - bh * scale) / 2 - minY * scale + 10;
+  const availW = W - FIT_PAD * 2;
+  const availH = H - FIT_TOP_INSET - FIT_PAD;
+  const scale = Math.min(availW / bw, availH / bh, 1.4);
+  const tx = FIT_PAD + (availW - bw * scale) / 2 - minX * scale;
+  const ty = FIT_TOP_INSET + (availH - bh * scale) / 2 - minY * scale;
   d3.select("#schGraph").transition().duration(400).call(STATE.zoom.transform, d3.zoomIdentity.translate(tx, ty).scale(scale));
 }
 
@@ -2926,10 +2956,14 @@ function runFilter(q, model) {
   d3.selectAll("#schLayerLinks path")
     .classed("active-link", d => d.sourceId === hit.id || d.targetId === hit.id);
   const canvas = el("schCanvas");
+  // canvas.clientHeight already excludes the boot timeline (CSS bottom:148px).
+  // Centre the focused node on the workspace midpoint (top overlays excluded)
+  // so it sits where the user expects to look, not behind the surface toggle.
   const W = canvas.clientWidth, H = canvas.clientHeight;
+  const workspaceCY = FIT_TOP_INSET + (H - FIT_TOP_INSET - FIT_PAD) / 2;
   const scale = 1.7;
   const tx = W / 2 - hit.x * scale;
-  const ty = (H - TIMELINE_H) / 2 - hit.y * scale;
+  const ty = workspaceCY - hit.y * scale;
   d3.select("#schGraph").transition().duration(400).call(STATE.zoom.transform, d3.zoomIdentity.translate(tx, ty).scale(scale));
 }
 
@@ -2943,17 +2977,17 @@ function updateStats(model, graph) {
   const sourceShown = model.nodes.filter(
     n => n.kind === "component" && n.role === "source"
   ).length;
-  const t = model.totals || {};
+  const tot = model.totals || {};
 
   // Stats show "affiché / total" so the tech knows what's filtered. A
   // grey-out helper styles the denominator in CSS.
   const ratio = (shown, total) => total && shown < total
     ? `${shown}<span class="sch-stat-total">/${total}</span>`
     : `${shown}`;
-  el("schStatComps").innerHTML  = ratio(compCount,   t.components ?? compCount);
-  el("schStatRails").innerHTML  = ratio(railCount,   t.rails      ?? railCount);
-  el("schStatRegs").innerHTML   = ratio(sourceShown, t.sources    ?? sourceShown);
-  el("schStatPhases").textContent = t.phases ?? (graph.boot_sequence || []).length;
+  el("schStatComps").innerHTML  = ratio(compCount,   tot.components ?? compCount);
+  el("schStatRails").innerHTML  = ratio(railCount,   tot.rails      ?? railCount);
+  el("schStatRegs").innerHTML   = ratio(sourceShown, tot.sources    ?? sourceShown);
+  el("schStatPhases").textContent = tot.phases ?? (graph.boot_sequence || []).length;
   const q = graph.quality || {};
   el("schStatConf").textContent   = q.confidence_global != null ? q.confidence_global.toFixed(2) : "—";
   el("schStatPages").textContent  = q.pages_parsed != null ? `${q.pages_parsed}/${q.total_pages}` : "—";
@@ -3041,10 +3075,6 @@ function fullRender(graph) {
   d3.select("#schGraph").on("click", (ev) => {
     if (ev.target.tagName === "svg" || ev.target.id === "schGraph") clearFocus();
   });
-  // Reflect the current mode on the toggle buttons.
-  document.querySelectorAll("[data-sch-mode]").forEach(btn => {
-    btn.classList.toggle("on", btn.dataset.schMode === STATE.layoutMode);
-  });
 }
 
 // Re-render localised content (boot timeline, inspector, simulator, rail bar)
@@ -3100,6 +3130,11 @@ export async function loadSchematic() {
   if (res.error) { showEmptyState(t("schematic.empty.load_error_title"), res.error); return; }
   STATE.graph = res.graph;
   fullRender(res.graph);
+  // Wire zoom/filter/rail-search controls IMMEDIATELY after the first render
+  // — before any awaitable work — so the buttons in the bottom-right zoom bar
+  // become live the moment the canvas is on screen, even if the simulator
+  // hydrate below stalls or throws.
+  wireControls();
   // Trigger the simulator fetch — the endpoint is fast (< 10ms server-side);
   // we do it unconditionally when a graph has boot_sequence + power_rails.
   if (STATE.graph && STATE.graph.boot_sequence?.length && Object.keys(STATE.graph.power_rails || {}).length) {
@@ -3107,16 +3142,28 @@ export async function loadSchematic() {
   }
   // Hydrate the observation state from the per-repair measurement journal so
   // the tech's past readings persist across reloads.
-  await SimulationController.hydrateFromJournal(slug);
-  wireControls();
+  try {
+    await SimulationController.hydrateFromJournal(slug);
+  } catch (err) {
+    console.warn("[schematic] hydrateFromJournal failed:", err);
+  }
 }
 
 function wireControls() {
-  el("schBtnFit")?.addEventListener("click", () => { if (STATE.model) fitToBounds(STATE.model); });
-  el("schBtnZoomIn")?.addEventListener("click", () => {
+  // Guard against double-wiring on section re-entry — `addEventListener`
+  // would otherwise stack a new handler on every loadSchematic() call and
+  // each click would fire N transitions in parallel.
+  const wireOnce = (id, handler) => {
+    const node = el(id);
+    if (!node || node.dataset.schWired === "1") return;
+    node.dataset.schWired = "1";
+    node.addEventListener("click", handler);
+  };
+  wireOnce("schBtnFit", () => { if (STATE.model) fitToBounds(STATE.model); });
+  wireOnce("schBtnZoomIn", () => {
     if (STATE.zoom) d3.select("#schGraph").transition().duration(180).call(STATE.zoom.scaleBy, 1.3);
   });
-  el("schBtnZoomOut")?.addEventListener("click", () => {
+  wireOnce("schBtnZoomOut", () => {
     if (STATE.zoom) d3.select("#schGraph").transition().duration(180).call(STATE.zoom.scaleBy, 1 / 1.3);
   });
   const filterIn = el("schFilterInput");
@@ -3137,32 +3184,6 @@ function wireControls() {
       clearFocus();
       el("schFilterStatus").textContent = "";
     }
-  });
-  // DRY toggle wiring — each button flips a STATE flag, reflects in CSS,
-  // and re-renders. The three toggles (Passifs signal / Signaux /
-  // Toutes pins) need identical plumbing.
-  const wireToggle = (buttonId, stateKey) => {
-    const btn = el(buttonId);
-    if (!btn) return;
-    // Reflect initial state in case it was loaded from elsewhere.
-    btn.classList.toggle("on", Boolean(STATE[stateKey]));
-    btn.addEventListener("click", (ev) => {
-      STATE[stateKey] = !STATE[stateKey];
-      ev.currentTarget.classList.toggle("on", STATE[stateKey]);
-      if (STATE.graph) fullRender(STATE.graph);
-    });
-  };
-  wireToggle("schTogglePassives", "showPassives");
-  wireToggle("schToggleSignals",  "showSignals");
-  wireToggle("schToggleAllPins",  "showAllPins");
-  document.querySelectorAll("[data-sch-mode]").forEach(btn => {
-    btn.addEventListener("click", (ev) => {
-      const mode = ev.currentTarget.dataset.schMode;
-      if (!mode || mode === STATE.layoutMode) return;
-      STATE.layoutMode = mode;
-      try { localStorage.setItem("schLayoutMode", mode); } catch (_) { /* ignore quota/denied */ }
-      if (STATE.graph) fullRender(STATE.graph);
-    });
   });
   // Rail sidebar local search — filtre client-side sur le nom du rail.
   // Marque la substring qui match en cyan, cache les rails qui ne matchent

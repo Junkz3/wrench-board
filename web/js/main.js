@@ -12,7 +12,7 @@ import { initPipelineProgress } from './pipeline_progress.js';
 import { initLLMPanel, openLLMPanelIfRepairParam } from './llm.js';
 import { initCameraPicker } from './camera.js';
 import { updatePreviewDevice } from './camera_preview.js';
-import { loadSchematic, closeSchematicInspector } from './schematic.js';
+import { loadSchematic, closeSchematicInspector } from './schematic.js?v=fitzoom';
 import { initLanding, showLanding } from './landing.js';
 import { mountMascot } from './mascot.js';
 import * as Protocol from './protocol.js?v=quest3';
