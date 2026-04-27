@@ -21,10 +21,13 @@ fix it. We are the **last mile** of repair before the landfill, and there
 are not many of us.
 
 Wrench Board is a senior microsoldering teammate built for that last mile.
-It ingests a schematic PDF and a boardview, builds a per-device knowledge
-pack in two minutes, and runs an Opus 4.7 diagnostic agent that pilots the
-board visually — highlights pins, traces nets, simulates failures — while
-the technician keeps the iron in their hand.
+For the seasoned tech, it's a second pair of eyes that never gets tired.
+For the apprentice, it's a senior teammate who explains the boot sequence
+the tenth time, in their language, with their tools, without judgment. It ingests a schematic PDF and a
+boardview, builds a per-device knowledge pack in two minutes, and runs an
+Opus 4.7 diagnostic agent that pilots the board visually — highlights
+pins, traces nets, simulates failures — while the technician keeps the
+iron in their hand.
 
 The bet is **precision over magic**. The agent is not allowed to invent a
 reference designator. Every refdes it utters originates from a tool lookup,
