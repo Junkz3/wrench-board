@@ -149,18 +149,19 @@ cp .env.example .env  # then fill in ANTHROPIC_API_KEY
 make run              # uvicorn --reload on http://localhost:8000
 ```
 
-For Managed Agents mode (default), bootstrap the environment + tier-scoped
-agents once :
+On the first `make run` in Managed Agents mode (default), the start
+script prints a one-screen warning describing what it is about to create
+on your Anthropic account (1 environment + 4 tier-scoped agents — idle,
+no cost until used) and waits 5 seconds for Ctrl+C before bootstrapping.
+The IDs land in `managed_ids.json` (gitignored) and subsequent runs go
+straight to uvicorn.
+
+Fallback to direct mode if the Managed Agents beta is unavailable on
+your account — no bootstrap, plain `messages.create` tool loop :
 
 ```bash
-.venv/bin/python scripts/bootstrap_managed_agent.py
-```
-
-Fallback to direct mode if the Managed Agents beta is unavailable :
-
-```bash
-DIAGNOSTIC_MODE=direct make run
-# or: make demo-fallback
+make demo-fallback
+# or: DIAGNOSTIC_MODE=direct make run
 ```
 
 See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the full

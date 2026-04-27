@@ -28,7 +28,7 @@ install:
 	$(PIP) install -e ".[dev]"
 
 run:
-	$(UVICORN) api.main:app --reload --host 0.0.0.0 --port $(PORT)
+	@PORT=$(PORT) bash scripts/start.sh
 
 # Rebuild the field-calibrated benchmark fixture from persisted data
 # (live outcome.json + legacy field_reports/*.md). Commit the fixture
