@@ -284,8 +284,14 @@ def test_repairs_branch_full_when_pack_absent(memory_root, client):
     assert captured_kwargs["focus_symptom"] == "screen is dark on power-on"
 
 
-def test_repairs_branch_expand_when_pack_complete_and_symptom_uncovered(memory_root, client):
+def test_repairs_branch_expand_when_pack_complete_and_symptom_uncovered(memory_root, client, monkeypatch):
     """Pack complete + coverage classifier says NOT covered → Branch 3: expand."""
+    # `_safe_coverage_check` early-returns "no API key" before calling
+    # `check_symptom_coverage` when ANTHROPIC_API_KEY is empty, which would
+    # bypass the patch below. Inject a fake key + reset settings cache so
+    # the wrapper proceeds to the patched call site.
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-test-fake-for-mocked-call")
+    monkeypatch.setattr(config_mod, "_settings", None)
     slug_dir = memory_root / "demo-pi"
     slug_dir.mkdir()
     (slug_dir / "registry.json").write_text('{"schema_version":"1.0","device_label":"Demo Pi","components":[],"signals":[]}')
@@ -331,9 +337,13 @@ def test_repairs_branch_expand_when_pack_complete_and_symptom_uncovered(memory_r
     m_expand.assert_called_once()
 
 
-def test_repairs_branch_none_when_symptom_already_covered(memory_root, client):
+def test_repairs_branch_none_when_symptom_already_covered(memory_root, client, monkeypatch):
     """Pack complete + coverage classifier says covered with confidence≥0.7
     AND matched_rule_id set → Branch 2: skip, return matched rule."""
+    # See sibling test for rationale — the wrapper short-circuits on an
+    # empty API key, never reaching the patched coverage call.
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-test-fake-for-mocked-call")
+    monkeypatch.setattr(config_mod, "_settings", None)
     slug_dir = memory_root / "demo-pi"
     slug_dir.mkdir()
     (slug_dir / "registry.json").write_text('{"schema_version":"1.0","device_label":"Demo Pi","components":[],"signals":[]}')
