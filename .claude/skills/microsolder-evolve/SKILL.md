@@ -1,13 +1,13 @@
 ---
 name: microsolder-evolve
-description: Boucle d'amélioration nocturne autonome du simulateur diagnostic microsolder. Pattern autoresearch — modifies simulator.py ou hypothesize.py, mesure via eval_simulator, garde ou jette via git. NEVER STOP, autonomie totale.
+description: Boucle d'amélioration nocturne autonome du simulateur diagnostic microsolder. Pattern autoresearch — tune engine_params.json (knob layer, préféré) ou modifies simulator.py / hypothesize.py (changements algorithmiques), mesure via eval_simulator, garde ou jette via git. NEVER STOP, autonomie totale.
 ---
 
 # Microsolder Evolve
 
 ## Mission
 
-Tu es un agent Opus autonome qui améliore le pipeline de diagnostic électronique microsolder (`api/pipeline/schematic/simulator.py` et `api/pipeline/schematic/hypothesize.py`).
+Tu es un agent Opus autonome qui améliore le pipeline de diagnostic électronique microsolder. Trois surfaces d'édition par ordre de préférence : `api/pipeline/schematic/engine_params.json` (knob layer — constantes numériques, à privilégier), `api/pipeline/schematic/simulator.py` et `api/pipeline/schematic/hypothesize.py` (changements algorithmiques — nouveaux modes, nouvelles edges, nouvelles fonctions de scoring).
 
 **Objectif scalaire :** maximiser `score = 0.6 × self_MRR + 0.4 × cascade_recall`. Plus haut = meilleur. Cette métrique vient de `scripts/eval_simulator.py` qui produit un JSON one-line conforme au pydantic `Scorecard` défini dans la spec axes 2/3.
 
@@ -17,11 +17,13 @@ Tu es un agent Opus autonome qui améliore le pipeline de diagnostic électroniq
 
 **TU PEUX éditer (et seulement ces fichiers) :**
 
+- `api/pipeline/schematic/engine_params.json` ← **knob layer, à privilégier** pour les changements de constantes numériques
 - `api/pipeline/schematic/simulator.py`
 - `api/pipeline/schematic/hypothesize.py`
 
 **TU NE DOIS PAS toucher (READ-ONLY ABSOLU) :**
 
+- `api/pipeline/schematic/engine_params.py` ← le loader du knob layer ; tu touches le JSON, jamais le loader
 - `api/pipeline/schematic/schemas.py`
 - `api/pipeline/schematic/evaluator.py`
 - `scripts/eval_simulator.py`
@@ -31,6 +33,18 @@ Tu es un agent Opus autonome qui améliore le pipeline de diagnostic électroniq
 - Tout autre fichier du repo non listé comme éditable
 
 Si une amélioration nécessite de toucher un fichier read-only : **tu n'élargis pas la surface**. Tu logs `out-of-scope` dans `evolve/results.tsv` et tu quittes la session. L'humain reverra au matin.
+
+### Knob layer first — préfère engine_params.json au source code
+
+Pour toute hypothèse qui consiste à **tuner une constante numérique** (un seuil, une pondération, un cap, un multiplicateur) qui apparaît dans `SIMULATOR_DEFAULTS` ou `HYPOTHESIZE_DEFAULTS` du loader `engine_params.py` : tu modifies `engine_params.json`, **pas** le source. Trois raisons :
+
+1. **Revert trivial.** Un commit qui change uniquement le JSON est un `git revert` propre — aucun risque de toucher de la logique adjacente.
+2. **Pas de conflit avec refactors humains.** L'humain peut renommer une fonction dans `simulator.py` la nuit prochaine sans casser ton diff.
+3. **Profils paramétriques.** Plusieurs jeux de constantes peuvent coexister à terme (par device, par campagne) — c'est le JSON qui scale, pas un patch source.
+
+Pour des changements **algorithmiques** (nouveau mode de panne, nouvelle edge dans le graph, nouvelle fonction de scoring, nouveau cas dans une cascade), `simulator.py` / `hypothesize.py` reste la cible légitime.
+
+Règle de discrimination : si ton hypothèse peut s'écrire « la valeur de X devrait être Y au lieu de Z », c'est un knob. Si elle s'écrit « il faut introduire la notion de W qui n'existe pas », c'est du code.
 
 ### Cas spécial : `evaluator.py` est l'oracle
 
@@ -146,6 +160,7 @@ Si tu n'arrives pas à formuler une hypothèse claire, OU si tu sens qu'un audit
 - "Identifie pourquoi le scénario `<scenario_id>` rate dans `cascade_recall`"
 - "Propose une amélioration de l'algorithme de scoring dans `hypothesize.py`"
 - "Cherche des cascades downstream non propagées dans `_PASSIVE_CASCADE_TABLE`"
+- "Évalue si `leaky_short_per_consumer_ma` devrait être tuné (knob layer dans `engine_params.json`)"
 
 Synthèse des findings → tu retournes au step 4 avec UNE hypothèse fusionnée. Si le dispatch ne donne rien d'actionnable, log `status=skip-no-idea` et quitte.
 
@@ -153,8 +168,11 @@ Synthèse des findings → tu retournes au step 4 avec UNE hypothèse fusionnée
 
 Formule en 1-2 phrases. Pas plus. Pas de stack de modifs (jamais 2 hypothèses dans le même cycle — c'est dans les Rules dures).
 
-Exemple format :
-> "Hypothèse : ajouter mode `intermittent_short` à `passive_C` dans simulator.py — tire le rail à 50% au lieu de 0% pendant les phases impaires, devrait améliorer cascade_recall sur les scénarios `iphone-x-c0210-*`."
+Exemples format (deux flavors selon la nature du changement) :
+
+> [Algorithmique] "Hypothèse : ajouter mode `intermittent_short` à `passive_C` dans simulator.py — tire le rail à 50% au lieu de 0% pendant les phases impaires, devrait améliorer cascade_recall sur les scénarios `iphone-x-c0210-*`."
+
+> [Knob layer] "Hypothèse : abaisser `leaky_short_per_consumer_ma` de 50.0 à 30.0 dans engine_params.json — la valeur actuelle masque les MLCC légèrement leaky pré-court franc, devrait améliorer self_mrr sur les scénarios `*-leaky-cap-*`."
 
 ### Step 5 — Pré-édit guard
 
@@ -169,7 +187,7 @@ fi
 
 ### Step 6 — Édit
 
-Modifier UNIQUEMENT `api/pipeline/schematic/simulator.py` et/ou `api/pipeline/schematic/hypothesize.py`. Si l'hypothèse demande de toucher autre chose (schemas, evaluator, fixtures, etc.) → ne pas éditer, écrire dans `evolve/results.tsv` :
+Modifier UNIQUEMENT `api/pipeline/schematic/engine_params.json`, `api/pipeline/schematic/simulator.py`, et/ou `api/pipeline/schematic/hypothesize.py`. Si l'hypothèse demande de toucher autre chose (schemas, evaluator, engine_params.py loader, fixtures, etc.) → ne pas éditer, écrire dans `evolve/results.tsv` :
 
 ```
 <timestamp>	<baseline_commit>	0.000000	0.000000	0.000000	out-of-scope	<hypothèse> — needs <other_file> edit
@@ -306,7 +324,8 @@ timestamp	commit	score	self_mrr	cascade_recall	status	description
 4. **Pas de `--no-verify`, pas de `git push`, pas de `git tag`, pas de `git rebase`.** La branche reste locale jusqu'à validation humaine au matin.
 5. **Test set sacré.** Tu ne touches JAMAIS `benchmark/scenarios.jsonl` ni `benchmark/sources/`.
 6. **Pas de `pytest.skip`, pas de tests désactivés.** Si un test casse à cause de ta modif, c'est un signal de régression — discard.
-7. **Surface d'édition stricte.** `simulator.py` + `hypothesize.py`. Tout autre fichier touché → status `out-of-scope` + quit.
+7. **Surface d'édition stricte.** `engine_params.json` + `simulator.py` + `hypothesize.py`. Tout autre fichier touché (y compris `engine_params.py` loader) → status `out-of-scope` + quit.
+8. **Knob layer d'abord.** Si l'hypothèse est une simple variation numérique d'une constante exposée dans `SIMULATOR_DEFAULTS` ou `HYPOTHESIZE_DEFAULTS`, modifie `engine_params.json` et JAMAIS le source. Voir section « Knob layer first ».
 
 ## Garde-fous
 
@@ -324,9 +343,10 @@ timestamp	commit	score	self_mrr	cascade_recall	status	description
 Quand `last_5_statuses` contient ≥ 3 `discard` consécutifs :
 
 1. Lire intégralement `api/pipeline/schematic/simulator.py` et `api/pipeline/schematic/hypothesize.py` (pas juste skim — vraie lecture).
-2. Lire `api/pipeline/schematic/schemas.py` pour comprendre les types.
-3. Lire les 5 derniers `per_scenario` pour les scénarios qui ratent — qu'ont-ils en commun ?
-4. Lire `benchmark/sources/` (juste 2-3 fichiers texte, pas tout) — quel comportement physique le scénario décrit ?
-5. À partir de cette synthèse, formuler 1 hypothèse qualitativement nouvelle (pas une variation des 3 précédentes).
+2. Lire `api/pipeline/schematic/engine_params.py` (loader) pour la liste exhaustive des constantes tunables exposées via le knob layer.
+3. Lire `api/pipeline/schematic/schemas.py` pour comprendre les types.
+4. Lire les 5 derniers `per_scenario` pour les scénarios qui ratent — qu'ont-ils en commun ?
+5. Lire `benchmark/sources/` (juste 2-3 fichiers texte, pas tout) — quel comportement physique le scénario décrit ?
+6. À partir de cette synthèse, formuler 1 hypothèse qualitativement nouvelle (pas une variation des 3 précédentes).
 
 Si après ça tu n'as toujours pas d'idée → status=`skip-no-idea`. C'est OK. La nuit fera plein d'autres sessions.
