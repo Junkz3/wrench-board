@@ -20,6 +20,7 @@ from typing import TYPE_CHECKING, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from api.pipeline.schematic.engine_params import load_params
 from api.pipeline.schematic.passive_classifier import _BAT_FAMILY_PATTERN
 from api.pipeline.schematic.schemas import AnalyzedBootSequence, ElectricalGraph
 from api.pipeline.schematic.simulator import SimulationEngine
@@ -33,28 +34,34 @@ CascadeFn = Callable[["ElectricalGraph", "_CompNode"], dict]
 # Tunable constants — exported so tests and scripts can override without
 # monkey-patching. `tune_hypothesize_weights.py` rewrites PENALTY_WEIGHTS
 # based on benchmark accuracy.
+#
+# Values are sourced from engine_params.json with module-level defaults as
+# fallback (see api/pipeline/schematic/engine_params.py). Names are
+# preserved at module level so external imports and runtime mutations
+# (tune_hypothesize_weights.py) keep working.
 # ---------------------------------------------------------------------------
 
-PENALTY_WEIGHTS: tuple[int, int] = (10, 2)  # (fp_weight, fn_weight)
-TOP_K_SINGLE: int = 20  # how many single-fault survivors seed 2-fault
-MAX_RESULTS_DEFAULT: int = 5
-TWO_FAULT_ENABLED: bool = True
-MAX_PAIRS: int = 100  # 2-fault pair cap (safety net, rarely hit)
+_params = load_params()["hypothesize"]
+
+PENALTY_WEIGHTS: tuple[int, int] = tuple(_params["penalty_weights"])  # (fp_weight, fn_weight)
+TOP_K_SINGLE: int = _params["top_k_single"]  # how many single-fault survivors seed 2-fault
+MAX_RESULTS_DEFAULT: int = _params["max_results_default"]
+TWO_FAULT_ENABLED: bool = _params["two_fault_enabled"]
+MAX_PAIRS: int = _params["max_pairs"]  # 2-fault pair cap (safety net, rarely hit)
 
 # ---------------------------------------------------------------------------
 # Phase 4: visibility multiplier — dampens topologically weak passive cascades.
 # Key is (kind, role, mode). Missing entries default to 1.0 (no dampening).
 # Applied to `tp_comps` only; FP/FN weights are unchanged.
+#
+# JSON storage uses a list of [kind, role, mode, multiplier] rows (tuple
+# keys aren't JSON-representable); we re-key to tuple → float here.
 # ---------------------------------------------------------------------------
 
 _SCORE_VISIBILITY: dict[tuple[str, str, str], float] = {
-    ("passive_c", "decoupling", "open"): 0.5,
-    ("passive_c", "bulk", "open"): 0.5,
-    ("passive_c", "filter", "open"): 0.5,
-    ("passive_r", "pull_up", "open"): 0.5,
-    ("passive_r", "pull_down", "open"): 0.5,
-    # shorts are visible at rail level → no multiplier.
+    (kind, role, mode): float(mult) for kind, role, mode, mult in _params["score_visibility"]
 }
+# shorts are visible at rail level → no multiplier (no entry in the dict).
 
 # ---------------------------------------------------------------------------
 # Mode vocabulary — imported by tools, HTTP, tests, UI JSON.

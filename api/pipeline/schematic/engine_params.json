@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "simulator": {
+    "tolerance_ok": 0.9,
+    "tolerance_uvlo": 0.5,
+    "leaky_short_per_consumer_ma": 50.0
+  },
+  "hypothesize": {
+    "penalty_weights": [10, 2],
+    "top_k_single": 20,
+    "max_results_default": 5,
+    "two_fault_enabled": true,
+    "max_pairs": 100,
+    "score_visibility": [
+      ["passive_c", "decoupling", "open", 0.5],
+      ["passive_c", "bulk", "open", 0.5],
+      ["passive_c", "filter", "open", 0.5],
+      ["passive_r", "pull_up", "open", 0.5],
+      ["passive_r", "pull_down", "open", 0.5]
+    ]
+  }
+}

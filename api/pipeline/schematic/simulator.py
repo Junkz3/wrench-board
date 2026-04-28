@@ -17,6 +17,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from api.pipeline.schematic.engine_params import load_params
 from api.pipeline.schematic.schemas import AnalyzedBootSequence, ElectricalGraph
 
 RailState = Literal["off", "rising", "stable", "degraded", "shorted"]
@@ -24,17 +25,22 @@ ComponentState = Literal["off", "on", "degraded", "dead"]
 SignalState = Literal["low", "high", "floating"]
 FinalVerdict = Literal["completed", "blocked", "cascade", "degraded"]
 
+# Tunable numeric constants are sourced from engine_params.json (with
+# module-level defaults as fallback — see api/pipeline/schematic/engine_params.py).
+# Names are preserved at module level so external imports keep working.
+_params = load_params()["simulator"]
+
 # Voltage tolerance thresholds, fraction of nominal.
-# Above 0.9 → consumer treated as fully on.
-# Between 0.5 and 0.9 → consumer enters degraded state.
-# Below 0.5 → under-voltage lockout, consumer marked dead.
-TOLERANCE_OK = 0.9
-TOLERANCE_UVLO = 0.5
+# Above tolerance_ok → consumer treated as fully on.
+# Between tolerance_uvlo and tolerance_ok → consumer enters degraded state.
+# Below tolerance_uvlo → under-voltage lockout, consumer marked dead.
+TOLERANCE_OK = _params["tolerance_ok"]
+TOLERANCE_UVLO = _params["tolerance_uvlo"]
 
 # Estimated nominal current draw per consumer when computing leaky_short
 # voltage drop. Chosen for order-of-magnitude correctness — tests pin
 # behaviour, not the exact curve. Override per-rail later if needed.
-LEAKY_SHORT_PER_CONSUMER_MA = 50.0
+LEAKY_SHORT_PER_CONSUMER_MA = _params["leaky_short_per_consumer_ma"]
 
 
 class BoardState(BaseModel):
