@@ -1,6 +1,6 @@
 """Tests for sanitize_agent_text — post-hoc refdes guard."""
 
-from api.agent.sanitize import sanitize_agent_text
+from api.agent.sanitize import PROTOCOL_BLOCKLIST, sanitize_agent_text
 from api.board.model import Board, Layer, Part, Point
 
 
@@ -59,12 +59,45 @@ def test_does_not_match_lowercase() -> None:
     assert unknown == []
 
 
-def test_flags_refdes_shaped_protocol_names() -> None:
-    """Tokens like USB3 match the pattern; flagged when absent. Known limitation."""
+def test_excludes_protocol_names_from_wrapping() -> None:
+    """Bus/interface names matching the refdes regex (USB3, I2C1, PCIE…)
+    are explicitly blocklisted: wrapping them as ⟨?USB3⟩ is a
+    false-positive that erodes user trust in the warning marker."""
     board = _board_with_parts([])
     clean, unknown = sanitize_agent_text("USB3 is fine", board)
-    assert clean == "⟨?USB3⟩ is fine"
-    assert unknown == ["USB3"]
+    assert clean == "USB3 is fine"
+    assert unknown == []
+
+
+def test_protocol_blocklist_contains_common_buses() -> None:
+    """Sanity check: the blocklist covers the most common bus / interface
+    names that match the refdes regex shape."""
+    for sample in ("USB3", "I2C1", "SPI0", "PCI4", "DDR4", "UART2", "DP1"):
+        assert sample in PROTOCOL_BLOCKLIST, (
+            f"{sample!r} should be in PROTOCOL_BLOCKLIST"
+        )
+
+
+def test_real_refdes_still_wrapped_when_unknown() -> None:
+    """Regression check: introducing the protocol blocklist must not
+    weaken the core anti-hallucination guard. Plain refdes tokens
+    (R123, U7, C19) absent from the board still get wrapped."""
+    board = _board_with_parts([])
+    for refdes in ("R123", "U7", "C19"):
+        clean, unknown = sanitize_agent_text(f"check {refdes} please", board)
+        assert f"⟨?{refdes}⟩" in clean, f"{refdes!r} should be wrapped"
+        assert unknown == [refdes]
+
+
+def test_protocol_named_with_unknown_suffix_still_wrapped() -> None:
+    """A sentence mixing a protocol name (USB3, blocklisted) and an
+    unknown refdes (R456) should pass USB3 through and wrap only R456."""
+    board = _board_with_parts([])
+    clean, unknown = sanitize_agent_text("USB3 line near R456 is suspect", board)
+    assert "USB3" in clean
+    assert "⟨?USB3⟩" not in clean
+    assert "⟨?R456⟩" in clean
+    assert unknown == ["R456"]
 
 
 def test_empty_text() -> None:
