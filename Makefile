@@ -1,4 +1,4 @@
-.PHONY: install run test test-all test-fast test-eval lint format clean help build-field-corpus demo-fallback pin-cdn tools-inventory
+.PHONY: install run test test-all test-fast test-eval lint format clean help build-field-corpus demo-fallback pin-cdn tools-inventory doctor
 
 PYTHON ?= python3
 VENV ?= .venv
@@ -26,6 +26,7 @@ help:
 	@echo "  make format    Run ruff format"
 	@echo "  make clean     Remove caches (keeps .venv)"
 	@echo "  make tools-inventory  Regenerate docs/tools.md from api/agent/manifest.py"
+	@echo "  make doctor    Run local health check (env/pack/board) — exit 1 on critical failure"
 
 install:
 	$(PYTHON) -m venv $(VENV)
@@ -89,6 +90,11 @@ demo-fallback:
 # Vendored files are gitignored (re-fetched on demand).
 pin-cdn:
 	bash scripts/pin_cdn.sh
+
+# Local health check — surfaces missing .env / managed_ids / packs / parsers
+# in ~1s with a colored report. Exit 1 if any CRITICAL check fails.
+doctor:
+	@$(PY) scripts/doctor.py
 
 # Re-generate docs/tools.md from api/agent/manifest.py. Idempotent: the
 # script writes only when the rendered body actually changed. Run after
