@@ -19,6 +19,9 @@ cd "$(dirname "$0")/.."
 MODE="${DIAGNOSTIC_MODE:-managed}"
 IDS_FILE="managed_ids.json"
 PORT="${PORT:-8000}"
+# Bind interface — defaults to 127.0.0.1 so the dev server is local-only.
+# Override with `HOST=0.0.0.0` (or `make run HOST=0.0.0.0`) for LAN access.
+HOST="${HOST:-127.0.0.1}"
 PYTHON=".venv/bin/python"
 UVICORN=".venv/bin/uvicorn"
 
@@ -50,4 +53,4 @@ EOF
     echo
 fi
 
-exec "$UVICORN" api.main:app --reload --host 0.0.0.0 --port "$PORT"
+exec "$UVICORN" api.main:app --reload --host "$HOST" --port "$PORT"

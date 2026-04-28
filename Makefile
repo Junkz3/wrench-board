@@ -9,6 +9,10 @@ PYTEST = $(VENV)/bin/pytest
 RUFF = $(VENV)/bin/ruff
 
 PORT ?= 8000
+# Bind interface for `make run` and `make demo-fallback`. Defaults to
+# 127.0.0.1 so the dev server is local-only and not reachable from the LAN.
+# Override for LAN access (e.g. testing from a phone): `make run HOST=0.0.0.0`.
+HOST ?= 127.0.0.1
 
 help:
 	@echo "wrench-board — common tasks"
@@ -28,7 +32,7 @@ install:
 	$(PIP) install -e ".[dev]"
 
 run:
-	@PORT=$(PORT) bash scripts/start.sh
+	@PORT=$(PORT) HOST=$(HOST) bash scripts/start.sh
 
 # Rebuild the field-calibrated benchmark fixture from persisted data
 # (live outcome.json + legacy field_reports/*.md). Commit the fixture
@@ -78,7 +82,7 @@ clean:
 # Use if Managed Agents API has an outage during the demo.
 demo-fallback:
 	@echo "Switching to direct (non-MA) diagnostic mode and restarting uvicorn"
-	DIAGNOSTIC_MODE=direct $(UVICORN) api.main:app --host 0.0.0.0 --port $(PORT)
+	DIAGNOSTIC_MODE=direct $(UVICORN) api.main:app --host $(HOST) --port $(PORT)
 
 # Mirror the CDN dependencies into web/vendor/ for offline-resilient demo.
 # Vendored files are gitignored (re-fetched on demand).
