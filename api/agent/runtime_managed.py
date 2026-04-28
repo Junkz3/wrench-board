@@ -2416,9 +2416,15 @@ async def _forward_ws_to_session(
             continue
 
         # Tech pressed Abandon on the running quest panel — mark the protocol
-        # as abandoned in the on-disk store, broadcast a protocol_updated WS
-        # event so the UI cleans its state, and forward a synthetic
-        # user.message so the agent stops acting on the dead protocol.
+        # as abandoned in the on-disk store and broadcast a protocol_updated
+        # WS event so the UI cleans its state. We deliberately do NOT inject
+        # a synthetic user.message into the MA session: the state machine
+        # rejects out-of-order user events (after replay or mid-stream)
+        # with a generic "internal service error", surfaced to the tech as
+        # noise. The on-disk transition (proto.status="abandoned" and
+        # cleared active_pointer) is enough — any subsequent protocol-aware
+        # tool call will return "no_active_protocol" and the agent will
+        # learn naturally on the next user turn.
         if payload.get("type") == "protocol_abandon":
             from api.tools.protocol import (
                 load_active_protocol,
@@ -2445,16 +2451,6 @@ async def _forward_ws_to_session(
                     "history_tail": [h.model_dump(mode="json") for h in history_tail],
                     "status": "abandoned",
                 })
-                synthetic = (
-                    f"[protocol_abandoned] The technician abandoned the "
-                    f"running protocol. Reason: {reason}. Stop acting on "
-                    f"this protocol; propose a fresh approach if relevant."
-                )
-                await client.beta.sessions.events.send(
-                    session_id,
-                    events=[{"type": "user.message",
-                             "content": [{"type": "text", "text": synthetic}]}],
-                )
             else:
                 await ws.send_json({
                     "type": "error",
