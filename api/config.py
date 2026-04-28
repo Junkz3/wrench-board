@@ -76,6 +76,17 @@ class Settings(BaseSettings):
             "Requests exceeding this cap are rejected with 413 before parsing."
         ),
     )
+    pipeline_schematic_max_pages: int = Field(
+        default=200,
+        ge=1,
+        description=(
+            "Hard cap on schematic PDF page count. Bounds pdfplumber decode "
+            "and per-page vision cost; also a defence-in-depth against "
+            "decompression-bomb PDFs whose 50 MiB upload cap alone is "
+            "insufficient. iPhone- and laptop-class schematics rarely exceed "
+            "30–50 pages."
+        ),
+    )
 
     # --- Pipeline V2 settings -------------------------------------------------
     memory_root: str = Field(

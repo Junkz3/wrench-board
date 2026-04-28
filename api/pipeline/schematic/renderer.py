@@ -18,6 +18,8 @@ from typing import Literal
 
 import pdfplumber
 
+from api.config import get_settings
+
 logger = logging.getLogger("wrench_board.pipeline.schematic.renderer")
 
 
@@ -33,6 +35,10 @@ class RenderedPage:
 
 class PdftoppmNotAvailableError(RuntimeError):
     pass
+
+
+class SchematicPageLimitExceeded(ValueError):
+    """Raised when an uploaded schematic exceeds `pipeline_schematic_max_pages`."""
 
 
 def render_pages(
@@ -111,7 +117,13 @@ def render_pages(
 
 
 def _probe_pages(pdf_path: Path) -> list[dict]:
+    cap = get_settings().pipeline_schematic_max_pages
     with pdfplumber.open(str(pdf_path)) as pdf:
+        n = len(pdf.pages)
+        if n > cap:
+            raise SchematicPageLimitExceeded(
+                f"schematic has {n} pages, exceeds cap of {cap}"
+            )
         return [
             {
                 "page": i,
