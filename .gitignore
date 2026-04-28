@@ -128,11 +128,11 @@ evolve/*
 evolve/reports/*
 !evolve/reports/.gitkeep
 
-# Pipeline-evolve loop (uncommitted experiment — runtime state + infra + skills)
+# Pipeline-evolve loop — runtime state + private infra + private skills.
+# scripts/eval_pipeline.py and scripts/eval_pipeline_vision.py are TRACKED
+# because eval_all.py and docs/ARCHITECTURE.md reference them publicly.
 evolve-pipeline/
 evolve-pipeline-vision/
-scripts/eval_pipeline.py
-scripts/eval_pipeline_vision.py
 scripts/pipeline-evolve-bootstrap.sh
 scripts/pipeline-evolve-runner.sh
 scripts/pipeline-evolve-vision-bootstrap.sh
@@ -141,14 +141,14 @@ scripts/pipeline-evolve-vision-runner.sh
 .claude/skills/microsolder-pipeline-evolve-monitor/
 .claude/skills/microsolder-pipeline-evolve-vision/
 
-# Agent-evolve loop (uncommitted experiment — runtime state + infra + skills + bench harness)
+# Agent-evolve loop — runtime state + private infra + private skills.
+# scripts/eval_diagnostic_agent.py and benchmark/agent_scenarios.jsonl are
+# TRACKED (eval_all.py / docs / tests reference them); the rest stays local.
 evolve-agent/
-scripts/eval_diagnostic_agent.py
 scripts/agent-evolve-bootstrap.sh
 scripts/agent-evolve-runner.sh
 scripts/agent_baseline_report.py
 scripts/clean_memory_store.py
-benchmark/agent_scenarios.jsonl
 .claude/skills/microsolder-agent-evolve/
 
 # --- Demo / offline fallback ---
