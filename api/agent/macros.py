@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Persistence helpers for macro images.
 
 Macros land under ``memory/{slug}/repairs/{repair_id}/macros/{ts}_{source}.{ext}``.

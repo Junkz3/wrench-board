@@ -13,25 +13,16 @@ and a stateful **diagnostic conversation** runs the live repair session.
 
 ## Hard rules — NEVER violate
 
-1. **All code written from scratch.** Never copy from any external codebase.
-2. **Apache 2.0** is the license for all code in this repo.
-3. **Permissive dependencies only** (MIT, Apache 2.0, BSD). Never pull in
-   GPL, AGPL, or LGPL packages.
-4. **Open hardware only *in the repo*.** No proprietary schematics or
-   boardviews committed to this repository — no Apple, Samsung, ZXW or
-   WUXINJI content in `board_assets/`, `web/boards/`, test fixtures, or
-   any other tracked path. **Runtime is a separate matter.** The product
-   is a pro microsoldering workbench, so the technician must be able to
-   run a diagnostic on *any* device at runtime. Knowledge packs built by
-   the pipeline (LLM-driven research under `memory/{slug}/*.json`) are
-   unrestricted by device brand — iPhone, Galaxy, ThinkPad, Framework,
-   whatever hits the bench. The technician may also upload their own
-   schematic PDF or boardview and those land under `memory/{slug}/` so
-   subsequent repairs on the same device reuse the pack + schematic +
-   boardview automatically. What stays out of this repo is proprietary
-   *source* material — not the technician's runtime workflow. The entire
-   `memory/` tree (except `.gitkeep`) is gitignored for this reason.
-5. **No hallucinated component IDs.** Defense in depth, two layers.
+1. **Proprietary source-available license** for all code in this repo — see
+   the `LICENSE` file at the root for the canonical terms. The repo is
+   public for evaluation, education, and personal non-commercial use only;
+   redistribution, hosted deployment, and any commercial use require prior
+   written permission. Do **not** add per-file copyright or SPDX headers
+   to new source files; the root `LICENSE` is the single source of truth.
+2. **Permissive dependencies only** (MIT, Apache 2.0, BSD). Never pull in
+   GPL, AGPL, or LGPL packages — the proprietary license on our own code
+   does not relax this; copyleft deps would still contaminate the bundle.
+3. **No hallucinated component IDs.** Defense in depth, two layers.
    (1) Tool discipline: every refdes the agent surfaces must originate from
    a tool lookup (`mb_get_component` for memory bank + board aggregation, or
    a `bv_*` tool that cross-checks the parsed board). These tools never
@@ -53,11 +44,13 @@ and a stateful **diagnostic conversation** runs the live repair session.
   (`claude-haiku-4-5`). The pipeline distributes Sonnet/Opus per sub-agent.
 - **Frontend:** Vanilla HTML + CSS + JS (no build step, no bundler). All
   external assets come from permissively-licensed CDNs: D3.js v7
-  (`d3js.org`), marked and DOMPurify (`cdn.jsdelivr.net`, both MIT) for
-  safe Markdown rendering in the chat panel, and Inter + JetBrains Mono
-  fonts (`fonts.googleapis.com`). No Tailwind, no Alpine, no component
-  library. Any new CDN dependency must be permissively licensed and land
-  in `web/index.html` with no transitive package-manager step.
+  (`d3js.org`), Three.js r128 (`cdnjs.cloudflare.com`, MIT) for the WebGL
+  boardview, Tailwind CDN (`cdn.tailwindcss.com`, MIT) for utility classes
+  in the PCB section, marked and DOMPurify (`cdn.jsdelivr.net`, both MIT)
+  for safe Markdown rendering in the chat panel, and Inter + JetBrains
+  Mono fonts (`fonts.googleapis.com`). Any new CDN dependency must be
+  permissively licensed and land in `web/index.html` with no transitive
+  package-manager step.
 
 ## Commands
 
@@ -125,7 +118,12 @@ api/
   telemetry/         Stub — reserved for structured logs / metrics
 web/                 Static frontend served by FastAPI
   index.html         Shell (topbar/rail/metabar/workspace/statusbar)
-  brd_viewer.js      D3 board renderer + WS event consumer + window.Boardview
+  brd_viewer.js      Legacy D3 fallback renderer (kept for non-XZZ formats)
+  js/pcb_viewer.js   Three.js WebGL boardview (InstancedMesh renderer)
+                     — consumed via /api/board/render
+  js/pcb_viewer_bridge.js  Bridges window.Boardview / window.initBoardview
+                           to the WebGL viewer; falls back to brd_viewer.js
+                           when the render endpoint is unavailable
   js/                main, router, home, graph, memory_bank, pipeline_progress, llm
   styles/            tokens, layout, graph, home, memory_bank, pipeline_progress,
                      llm, brd, modal, stub (semantic OKLCH palette in tokens.css)
@@ -138,7 +136,6 @@ board_assets/        Input boards (.brd / .kicad_pcb / schematic .pdf) + ATTRIBU
 scripts/             bootstrap_managed_agent.py — one-off MA environment setup
 managed_ids.json     (gitignored) Environment + tier→agent IDs written by bootstrap
 docs/superpowers/    specs/ and plans/ — read these before structural changes
-docs/HACKATHON.md    submission context, outside CLAUDE.md scope
 ```
 
 ### memory-layout — on-disk canonical store
@@ -349,29 +346,41 @@ Two siblings, same WS protocol:
   `repair-{repair_id}` (RW, agent's scribe notebook — `state.md` /
   `decisions/` / `measurements/` / `open_questions.md`). The agent
   self-orients on resume via `read state.md` instead of a pre-cuisined
-  LLM summary. Spec:
-  `docs/superpowers/plans/2026-04-26-ma-memory-layered-architecture.md`.
+  LLM summary.
 - `runtime_direct.py` — `messages.create` fallback with a Python tool loop.
   Same WS protocol; feature-equivalent fallback when the MA beta is
   unavailable.
 
 Custom tools (`manifest.py`):
 
-- **MB** — memory bank + board aggregation (4 tools): `mb_get_component`
+- **MB** — memory bank + board aggregation (14 tools): `mb_get_component`
   (Levenshtein-validated refdes anti-hallucination), `mb_get_rules_for_symptoms`,
   `mb_record_finding` (canonical archival API; mirrors to the device mount),
-  `mb_expand_knowledge` (the agent self-extends the pack when rules return
-  empty, running a focused Scout + Clinicien pass — see `pipeline/expansion.py`).
-  Implementations in `agent/tools.py`. Field-report listing is no longer a
-  tool — the agent greps `/mnt/memory/wrench-board-{slug}/field_reports/`
-  directly via `agent_toolset_20260401`.
-- **BV** — boardview control (12 tools): `bv_highlight_component`,
-  `bv_focus_component`, `bv_reset_view`, `bv_highlight_net`, `bv_flip_board`,
-  `bv_annotate`, `bv_filter_by_type`, `bv_draw_arrow`, `bv_measure_distance`,
-  `bv_show_pin`, `bv_dim_unrelated`, `bv_layer_visibility`. Conditional —
+  `mb_record_session_log`, `mb_record_measurement`, `mb_list_measurements`,
+  `mb_compare_measurements`, `mb_observations_from_measurements`,
+  `mb_set_observation`, `mb_clear_observations`, `mb_validate_finding`,
+  `mb_schematic_graph` (drives the simulator + boot sequence views),
+  `mb_hypothesize` (reverse-diagnostic enumeration), `mb_expand_knowledge`
+  (the agent self-extends the pack when rules return empty, running a focused
+  Scout + Clinicien pass — see `pipeline/expansion.py`). Implementations in
+  `agent/tools.py`. Field-report listing is no longer a tool — the agent greps
+  `/mnt/memory/wrench-board-{slug}/field_reports/` directly via
+  `agent_toolset_20260401`.
+- **BV** — boardview control (17 tools): `bv_highlight`, `bv_highlight_net`,
+  `bv_focus`, `bv_reset_view`, `bv_flip`, `bv_annotate`, `bv_filter_by_type`,
+  `bv_draw_arrow`, `bv_measure`, `bv_show_pin`, `bv_dim_unrelated`,
+  `bv_layer_visibility`, `bv_scene`, `bv_propose_protocol`, `bv_get_protocol`,
+  `bv_update_protocol`, `bv_record_step_result`. Conditional —
   `build_tools_manifest(session)` strips BV when no board is loaded.
   Dispatched by `dispatch_bv.py` to `api/tools/boardview.py`; each call
   mutates `session` and emits a WS event consumed by `brd_viewer.js`.
+- **Profile** (3 tools): `profile_get`, `profile_check_skills`,
+  `profile_track_skill` — read/update the technician profile under
+  `memory/_profile/technician.json`.
+- **Camera** (1 tool, conditional): `cam_capture` — request a webcam frame from
+  the frontend for visual inspection during diagnosis.
+- **Consult** (1 tool): `consult_specialist` — escalate to a deeper-tier
+  sub-agent for a focused second opinion.
 
 Chat persistence: `chat_history.py` appends every turn to
 `memory/{slug}/repairs/{repair_id}/messages.jsonl`. Cross-session findings
@@ -397,10 +406,7 @@ available.
   `_ascii_boardview.py` (Test_Link-shape ASCII dialect parser reused by
   several text formats), `_fz_zlib.py` (zlib-decompressor + pipe-delimited
   scanner for the FZ-zlib `.fz` flavour), `_gencad.py` (GenCAD 1.4
-  section parser for `.cad`). The full roadmap and
-  per-format design notes live in
-  `docs/superpowers/specs/2026-04-22-boardview-formats-roadmap.md` and
-  `docs/superpowers/specs/2026-04-25-boardview-formats-v1.md`.
+  section parser for `.cad`).
 - `validator.py` — anti-hallucination guardrail (pure functions, no I/O).
   `is_valid_refdes`, `resolve_part`, `resolve_net`, `resolve_pin`,
   `suggest_similar` (Levenshtein neighbours for "did you mean").
@@ -575,15 +581,10 @@ English.
   `memory/{slug}/repairs/{repair_id}/`). A **pack** is shared device
   knowledge (`memory/{slug}/*.json`) reused across repairs. Don't conflate
   them at the UI, endpoint, or storage layer.
-- **Commit hygiene — one commit = one user-visible change.** Descriptive
-  English messages, conventional-commits style (`feat(scope):`,
-  `fix(scope):`, `refactor(scope):`, `chore(scope):`, `docs(scope):`,
-  `test(scope):`). Each commit passes tests and is independently reviewable
-  by an outside reader walking the history cold. A cohesive feature lands
-  as **one** commit — a rename + CSS + HTML + JS wiring that all serves the
-  same user-visible change stay together. Split only when concerns are
-  genuinely separable (docs vs code, backend vs frontend, or when one
-  sub-change is risky enough to want isolated revert).
+- **Commit hygiene.** Descriptive English messages, conventional-commits
+  style (`feat(scope):`, `fix(scope):`, `refactor(scope):`, `chore(scope):`,
+  `docs(scope):`, `test(scope):`). Each commit passes tests and is
+  independently reviewable by an outside reader walking the history cold.
   - Never bundle changes from two different domains (e.g. `web/` + `api/`
     pivots) into the same commit, even if they land in the same working
     session. Stage narrowly across domain boundaries, commit cohesively
@@ -597,11 +598,10 @@ English.
     ignore the rest of the staging area. Without it, `git add X && git
     commit` will also sweep up anything another agent had already staged
     in preparation for its own commit — bundling its unrelated work under
-    your misleading commit message (real incident: commit e053002, later
-    corrected in 71dd23a). The staged-but-not-yours files remain staged
-    after your commit, ready for the other agent to commit with its own
-    message. Always prefer this form over `git add ... && git commit`
-    whenever a parallel agent might be active.
+    your misleading commit message. The staged-but-not-yours files
+    remain staged after your commit, ready for the other agent to
+    commit with its own message. Always prefer this form over
+    `git add ... && git commit` whenever a parallel agent might be active.
   - Never rewrite history (`reset --soft`, `rebase -i`, `commit --amend`)
     once another agent has committed on top of yours — leave the
     sub-optimal commit and split better next time.
@@ -637,10 +637,6 @@ English.
     the harness blocks it, and Monitor + a streaming log is what it's
     designed for.
 
-  Real incident: the first three runs of `smoke_expand_pack.py` were
-  invisible because `2>&1 | tail -60` ate everything; we relaunched
-  three times before fixing the buffering. Don't repeat that.
-
 ## Models
 
 Loaded from `.env` via `api/config.py`:
@@ -655,49 +651,10 @@ commit 21de00b). The diagnostic runtime picks the model from the `tier`
 query param at WS open: `fast` / `normal` / `deep`. Changing tier in the
 frontend reconnects the WS (explicit new conversation).
 
-**Schematic vision pipeline = Opus 4.7 only — do not migrate to Sonnet.**
-`page_vision.extract_page` defaults to `settings.anthropic_model_main`
-(Opus 4.7) on purpose. Sonnet 4.6 was tested empirically on iPhone X
-schematic page 4 (2026-04-25): identical capacitor/IC/net coverage but
-**3 OCR hallucinations on rail names** (`PP9V8_SOC_FIXED_S1` instead of
-`PP0V8_SOC_FIXED_S1`, etc.) — silent corruption of the power tree, not
-detectable by the simulator invariants. Opus 4.7 had zero hallucinations
-on the same page. Full methodology + reproduction script:
-`docs/notes/2026-04-25-vision-model-opus-vs-sonnet.md`. Re-test only when
-a new vision-capable model lands (Sonnet 4.7+ or improved Haiku).
-
-## Specs and plans — read before structural work
-
-Specs in `docs/superpowers/specs/` are the authoritative design docs;
-plans in `docs/superpowers/plans/` are the per-feature implementation
-walkthroughs. Plans whose work has shipped are moved under
-`docs/superpowers/plans/archived/` so the live folder is a short list of
-in-flight or recently-touched plans only.
-
-Currently authoritative specs (start here for structural work):
-- `docs/superpowers/specs/2026-04-22-backend-v2-knowledge-factory.md` — the
-  authoritative knowledge-factory spec; supersedes the 2026-04-21 v1 design.
-- `docs/superpowers/specs/2026-04-22-boardview-formats-roadmap.md` and
-  `docs/superpowers/specs/2026-04-25-boardview-formats-v1.md` — parser
-  roadmap and the v1 fixture-validation programme for `api/board/parser/`.
-- `docs/superpowers/specs/2026-04-23-agent-boardview-control-design.md` —
-  bv_* tools + dynamic manifest + mb_* aggregation design.
-- `docs/superpowers/specs/2026-04-25-refdes-mapper-agent.md` — Phase 2.5
-  function→refdes bridge (replaces the reverted Scout/Registry enrichment).
-- `docs/superpowers/specs/2026-04-25-simulator-invariants-design.md` — the
-  10 deterministic invariants the simulator must satisfy on every pack.
-
-Archived specs (still useful as context, no longer authoritative):
-- `docs/superpowers/specs/2026-04-21-wrench-board-v1-design.md`
-- `docs/superpowers/specs/2026-04-21-boardview-design.md`
-
-`docs/HACKATHON.md` holds submission context (only relevant until the
-original build window closes) — never mix that framing into this file.
-
 ## Editorial rule — keep this file permanent
 
-Temporal pressure framing ("this week", "ship by X", "demo", "hackathon",
-"prize track") never appears in `CLAUDE.md` or `README.md`. That content
-lives in `docs/HACKATHON.md` or a dated plan file under
-`docs/superpowers/plans/` only. When editing either file, strip any phrasing
-that would read as outdated six months from now.
+`CLAUDE.md` and `README.md` are reference docs, not changelogs. Strip any
+temporal or urgency framing when editing them — these files should still
+read as accurate six months from now. Dated context (incidents,
+empirical observations, in-flight plans) belongs in the auto-memory
+under `~/.claude/projects/.../memory/` or in local-only design notes.

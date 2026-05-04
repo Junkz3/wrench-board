@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: Apache-2.0
 // Camera picker + capture helpers for the LLM panel head.
 //
 // Uses a custom chip+popover dropdown (cohérent avec .llm-tier-chip) so

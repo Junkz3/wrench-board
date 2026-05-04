@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Tests for the `mb_schematic_graph` runtime tool.
 
 The tool is a deterministic reader over `memory/{slug}/electrical_graph.json`

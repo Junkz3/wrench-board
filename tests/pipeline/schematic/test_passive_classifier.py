@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Tests for the passive role classifier (heuristic + Opus post-pass).
 
 Deterministic path exercised directly. LLM path mocked at

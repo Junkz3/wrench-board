@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Compose a one-shot snapshot of a repair's hard, on-disk state.
 
 Used to bootstrap a fresh Managed-Agents session with the technician's

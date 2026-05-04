@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """mb_hypothesize — reverse diagnostic tool (schema B)."""
 
 from __future__ import annotations

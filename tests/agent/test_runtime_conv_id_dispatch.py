@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Anti-regression : conv_id name discipline in _forward_session_to_ws.
 
 Original bug (commit 6bd6628) : the inner code that calls save_board_state

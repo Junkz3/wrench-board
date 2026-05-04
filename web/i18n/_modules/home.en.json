@@ -95,7 +95,10 @@
       "meta_missing": "The agent cannot point at a component or measure a distance.",
       "open": "Open",
       "import_version": "Import a version",
-      "import_boardview": "Import a boardview"
+      "import_boardview": "Import a boardview",
+      "diag_count_label": "refs",
+      "diag_popover_title": "Diagnostic-ready",
+      "diag_popover_body": "This board ships manufacturer-tagged net references (expected resistance per net, voltage when present). Probe a suspect net, compare with the expected value in the inspector — a wide deviation means an open or short. Boards without these refs require eyeball diagnostic or comparison against a known-good board."
     },
     "knowledge": {
       "title": "Causal graph",

@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Agent tools for the measurement journal.
 
 Every write tool emits a `simulation.observation_set` WS event through a

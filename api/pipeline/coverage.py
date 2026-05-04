@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Symptom-coverage classifier.
 
 At repair-creation time, the pipeline compares the technician's newly-

@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Per-device memory store cache for Managed Agents sessions.
 
 Memory stores are gated by the `anthropic-beta: managed-agents-2026-04-01`

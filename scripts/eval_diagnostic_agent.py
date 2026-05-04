@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: Apache-2.0
 """End-to-end benchmark of the diagnostic agent on a frozen scenario set.
 
 Plays each scenario in `benchmark/agent_scenarios.jsonl` against a live

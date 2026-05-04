@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: Apache-2.0
 """Post-process eval_diagnostic_agent JSON output for layered MA mount usage.
 
 Reads the harness's JSON payload, walks every captured `tool_call` per

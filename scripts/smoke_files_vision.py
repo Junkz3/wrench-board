@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Live smoke test for Files+Vision Flow A (manual upload).
 
 Drives _handle_client_upload_macro end-to-end against a real MA session :

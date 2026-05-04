@@ -1,5 +1,4 @@
-# SPDX-License-Identifier: Apache-2.0
-"""ATE BoardView .bv parser — written from scratch.
+"""ATE BoardView `.bv` parser.
 
 **Scope honesty.** ATE BoardView 1.5.0 has no published format
 specification and is documented in the wild only as "drag-and-drop"
@@ -7,12 +6,10 @@ to the viewer. Some redistributions in repair forums carry a
 Test_Link-shape ASCII payload (an optional `BoardView <version>`
 banner followed by `var_data:` / `Format:` / `Parts:` / `Pins:` /
 `Nails:` blocks); native ATE output is more likely a binary
-container. Until we have a real `.bv` sample to reverse-engineer,
-this parser handles the ASCII variant only. Files whose first 2 KB
-look binary trip a clear `ObfuscatedFileError` rather than silently
+container. Until a binary fixture lands in `board_assets/`, this
+parser handles the ASCII variant only. Files whose first 2 KB look
+binary trip a clear `ObfuscatedFileError` rather than silently
 producing an empty Board.
-
-No code copied from any external codebase.
 """
 
 from __future__ import annotations

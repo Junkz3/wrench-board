@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Per-repair append-only log of every hypothesize() call during a session.
 
 JSONL store at memory/{slug}/repairs/{repair_id}/diagnosis_log.jsonl, same

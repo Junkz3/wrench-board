@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """CLI: print a one-line JSON scorecard for the simulator + hypothesize stack.
 
 Usage:

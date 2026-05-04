@@ -1,5 +1,4 @@
 # api/pipeline/schematic/simulator.py
-# SPDX-License-Identifier: Apache-2.0
 """Behavioral event-driven simulator over the compiled ElectricalGraph.
 
 Sync, pure, deterministic. Progresses a board state phase-by-phase using the

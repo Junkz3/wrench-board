@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Dispatch router for the bv_* tool family.
 
 Maps the public names (exposed to Claude in the manifest) to the existing

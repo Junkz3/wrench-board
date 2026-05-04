@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Pipeline orchestrator — full Phase 1 → 2 → 3 → 4 chain (+ revise loop).
 
 Persists all intermediate artefacts under `memory/{device_slug}/` on disk:
@@ -627,7 +626,7 @@ def _wrap_on_event(on_event: OnEvent | None) -> OnEvent:
     async def safe(event: dict[str, Any]) -> None:
         try:
             await on_event(event)
-        except Exception:
+        except Exception:  # noqa: BLE001 — listener failures must not abort pipeline
             logger.warning("[Pipeline] on_event listener raised; swallowing", exc_info=True)
 
     return safe

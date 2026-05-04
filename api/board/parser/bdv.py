@@ -1,5 +1,4 @@
-# SPDX-License-Identifier: Apache-2.0
-"""HONHAN BoardViewer .bdv parser — written from scratch.
+"""HONHAN BoardViewer .bdv parser.
 
 HONHAN wraps the Test_Link ASCII grammar in a trivial arithmetic
 obfuscation layer. On decode: `clear = (key - cipher) & 0xFF`, where
@@ -10,10 +9,6 @@ line grammar of the underlying boardview payload.
 
 After deobfuscation the bytes carry plaintext Test_Link-shape ASCII,
 which we route through the shared `parse_test_link_shape` helper.
-
-The obfuscation algorithm itself is documented publicly (e.g. piernov's
-2018 reverse-engineering gist). This implementation is written from
-scratch — no code was copied.
 """
 
 from __future__ import annotations

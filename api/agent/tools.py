@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """`mb_*` custom tools for the diagnostic agent.
 
 Deliberately simple: prefix-letter closest-matches (no Levenshtein at this

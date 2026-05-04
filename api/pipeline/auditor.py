@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Phase 4 — Auditor. Verifies internal consistency of the generated knowledge pack
 and emits a structured verdict that drives the self-healing loop.
 

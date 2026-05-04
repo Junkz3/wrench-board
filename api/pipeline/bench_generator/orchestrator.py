@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Composed entrypoint: generate_from_pack.
 
 1. Load pack → validate preconditions.

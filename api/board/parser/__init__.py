@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Board parsers — one implementation per file format.
 
 Importing this package guarantees that every available concrete parser has
@@ -14,6 +13,7 @@ from api.board.parser import (  # noqa: F401
     bdv,
     brd2,
     bv,
+    bvr,
     cad,
     cst,
     f2b,
@@ -22,6 +22,7 @@ from api.board.parser import (  # noqa: F401
     kicad,
     test_link,
     tvw,
+    xzz,
 )
 from api.board.parser.base import (
     BoardParser,

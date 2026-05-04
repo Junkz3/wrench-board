@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """render_technician_block — default + rich profile snapshots."""
 
 from api.profile.catalog import SkillId

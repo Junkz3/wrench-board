@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Passive role classifier — deterministic heuristic + optional Opus pass.
 
 Same architecture as `net_classifier.py`:

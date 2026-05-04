@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """FastAPI application entrypoint for wrench-board."""
 
 from __future__ import annotations

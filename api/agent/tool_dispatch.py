@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Custom-tool dispatch registry for the managed diagnostic runtime.
 
 Why this module exists

@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Helper for tracking fire-and-forget mirror tasks spawned from a managed
 diagnostic session.
 

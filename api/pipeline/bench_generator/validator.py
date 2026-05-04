@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Stateless validation passes. Each check returns a `Rejection | None`.
 
 Passes V1-V5 per spec §4.4, extended with V2b semantic guardrails:

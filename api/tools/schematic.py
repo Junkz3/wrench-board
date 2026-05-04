@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """`mb_schematic_graph` — deterministic reader over the compiled electrical graph.
 
 Pure disk-read tool for the diagnostic agent. Zero LLM calls, zero mutation,

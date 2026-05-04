@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Round-trip + replay tests for the boardview overlay persistence."""
 
 from __future__ import annotations

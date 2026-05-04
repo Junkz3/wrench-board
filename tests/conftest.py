@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Shared test fixtures.
 
 Both fixtures lived as near-identical copies in ~10 endpoint test modules

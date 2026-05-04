@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Coverage for api/pipeline/schematic/evaluator.py."""
 
 from __future__ import annotations

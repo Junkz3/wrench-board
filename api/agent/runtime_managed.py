@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Diagnostic runtime using Anthropic Managed Agents.
 
 Wire flow:
@@ -207,8 +206,9 @@ def _mirror_jsonl(
     `messages.jsonl`. The managed runtime historically relied on MA's
     server-side event store as its only source of truth for transcripts,
     but MA can archive sessions out from under us (beta TTL is undocumented
-    and shorter than the ~30 d the docs imply — see real loss of a 31-turn
-    iPhone repair conv on 2026-04-26 where `events.list` returned empty).
+    and shorter than the ~30 d the docs imply — observed real loss of a
+    31-turn diagnostic conv on 2026-04-26 where `events.list` returned
+    empty).
     Mirroring every user message + agent text + tool_use to disk gives
     `_replay_ma_history_to_ws` (UI re-rendering on reconnect) something
     to fall back on. Anonymous (no repair_id) and pending convs skip

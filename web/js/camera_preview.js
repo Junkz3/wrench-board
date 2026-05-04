@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: Apache-2.0
 // Floating draggable camera preview frame.
 //
 // Rendered as a position:fixed PiP-style window mounted into <body> on

@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """WebSocket-level security helpers.
 
 The CORS middleware in ``api.main`` only fires for HTTP requests; the

@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """HTTP coverage for POST /pipeline/packs/{slug}/schematic/simulate.
 
 Writes a synthetic electrical_graph.json to a tmp memory root, overrides

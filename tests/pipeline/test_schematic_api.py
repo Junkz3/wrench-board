@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Tests for the schematic HTTP surface (wired in `api/pipeline/__init__.py`).
 
 Three endpoints under test:

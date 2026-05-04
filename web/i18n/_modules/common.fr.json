@@ -46,13 +46,17 @@
     "label_none": "Aucune",
     "min_confidence": "Confiance minimale",
     "particle_speed": "Vitesse des particules",
-    "boardview_colors": "Couleurs boardview",
+    "boardview_colors": "Couleurs des pins",
     "color_signal": "Signal",
     "color_power": "Power",
     "color_ground": "Ground",
     "color_clock": "Clock",
     "color_reset": "Reset",
     "color_nc": "NC",
+    "color_testpad": "Test pad",
+    "color_via": "Via",
+    "color_board_outline": "Contour board",
+    "color_board_fill": "Fond board",
     "reset_colors": "Réinitialiser les couleurs"
   }
 }

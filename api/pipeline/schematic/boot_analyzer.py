@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Boot sequence analyzer — Opus-refined, post-compile pass.
 
 The deterministic compiler produces a `boot_sequence` via Kahn topological

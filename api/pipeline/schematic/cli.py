@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """One-shot CLI for validating a single page through the vision pass.
 
 Usage:

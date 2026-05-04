@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Versioned input source management for a knowledge pack.
 
 The technician can upload multiple schematic PDFs and multiple boardview

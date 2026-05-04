@@ -1,6 +1,6 @@
 """Tests for GET /pipeline/taxonomy — groups memory/*/registry.json by
 brand > model > version, with an uncategorized bucket for packs whose
-taxonomy is null (hard rule #5 = null beats guessing).
+taxonomy is null (hard rule #4 = null beats guessing).
 """
 
 from __future__ import annotations

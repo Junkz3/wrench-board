@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Pipeline phase narrator — turns each phase artifact into a 2-3 sentence narration.
 
 The orchestrator emits `phase_finished` events as Scout / Registry / Writers / Auditor

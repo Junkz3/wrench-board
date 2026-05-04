@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Tests for the Refdes Mapper agent — phase 2.5.
 
 The LLM call is forced-tool and Pydantic-validated by call_with_forced_tool;

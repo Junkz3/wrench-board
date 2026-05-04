@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Ground-truth outcome persisted per repair when the tech clicks « Marquer fix ».
 
 One JSON file per repair at memory/{slug}/repairs/{repair_id}/outcome.json.

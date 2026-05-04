@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Contract tests for the measurement-memory agent tools."""
 
 from __future__ import annotations

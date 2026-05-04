@@ -95,7 +95,10 @@
       "meta_missing": "L'agent ne peut pas pointer un composant ni mesurer une distance.",
       "open": "Ouvrir",
       "import_version": "Importer une version",
-      "import_boardview": "Importer un boardview"
+      "import_boardview": "Importer un boardview",
+      "diag_count_label": "réfs",
+      "diag_popover_title": "Diagnostic-ready",
+      "diag_popover_body": "Ce board ship des valeurs de référence mesurées par le constructeur (résistance attendue par net, tension le cas échéant). Sonde un net suspect, compare avec la valeur attendue dans l'inspector — une déviation forte = coupure ou court-circuit. Sur les boards sans ces refs, le diagnostic se fait à l'œil ou par comparaison avec un board sain."
     },
     "knowledge": {
       "title": "Graphe causal",

@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Origin allowlist on WebSocket endpoints.
 
 The CORS middleware in ``api.main`` only fires for HTTP — the WebSocket

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: Apache-2.0
 """Re-derive `electrical_graph.json` from existing on-disk artefacts.
 
 Offline equivalent of the orchestrator's post-classifier re-compile: reads

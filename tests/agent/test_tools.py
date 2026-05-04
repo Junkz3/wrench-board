@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Tests for api.agent.tools (the 2 mb_* tools exposed in v1)."""
 
 from __future__ import annotations

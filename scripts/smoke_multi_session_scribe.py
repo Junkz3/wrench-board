@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Live smoke test: per-repair scribe mount survives across two sessions.
 
 Validates the *real* value of the layered MA memory architecture: an agent

@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Regression tests for `scripts/dump_tools_inventory.py` and the
 `api/agent/manifest.py` docstring family-count line.
 

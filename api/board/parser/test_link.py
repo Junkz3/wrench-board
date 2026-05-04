@@ -1,13 +1,8 @@
-# SPDX-License-Identifier: Apache-2.0
-"""OpenBoardView .brd (Test_Link) parser — written from scratch.
+"""OpenBoardView `.brd` (Test_Link) parser.
 
-Reference for the format : the OpenBoardView project documents the .brd
+Reference for the format: the OpenBoardView project documents the .brd
 Test_Link layout. The code below is a clean-room reimplementation from
-that format specification — no code from the OBV codebase was copied
-(per hard rule #1 in CLAUDE.md, Apache 2.0).
-
-See docs/superpowers/specs/2026-04-22-boardview-formats-roadmap.md for the
-parser registry overview.
+that format specification (Apache 2.0).
 """
 
 from __future__ import annotations
@@ -261,7 +256,7 @@ def _parse_pins_and_patch_parts(
     # Cross-validate the two ownership sources (end_of_pins boundaries vs the
     # part_idx on each pin line). If they disagree, the file is inconsistent —
     # raise rather than silently producing a board where pin.part_refdes
-    # contradicts parts[k].pin_refs (anti-hallucination hard rule #5).
+    # contradicts parts[k].pin_refs (anti-hallucination hard rule #4).
     for k, refs in enumerate(pin_refs_by_part):
         expected = parts[k].refdes
         for i in refs:

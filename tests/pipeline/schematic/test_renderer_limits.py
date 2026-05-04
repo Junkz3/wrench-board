@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Fast unit tests for the schematic renderer page-count cap.
 
 No pdftoppm, no real PDF — pdfplumber.open is monkeypatched so these run in

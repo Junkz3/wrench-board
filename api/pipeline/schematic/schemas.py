@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Pydantic V2 schemas for the schematic ingestion pipeline.
 
 Three compilation levels, each a full artefact on disk:
@@ -12,7 +11,7 @@ Three compilation levels, each a full artefact on disk:
 
 Every shape doubles as a JSON Schema source for the forced-tool `input_schema`
 on the vision call, so descriptions are authored for the model, not for human
-readers. Follows hard rule #5 — nullable fields rather than fabrication.
+readers. Follows hard rule #4 — nullable fields rather than fabrication.
 """
 
 from __future__ import annotations

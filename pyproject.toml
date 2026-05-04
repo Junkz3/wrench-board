@@ -40,6 +40,7 @@ dependencies = [
     "httpx ~= 0.28.0",
     "python-multipart ~= 0.0.20",
     "websockets >= 13.1, < 17.0",
+    "cryptography ~= 46.0",
 ]
 
 [project.optional-dependencies]

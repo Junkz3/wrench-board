@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Live smoke test for the 4-layer MA memory architecture.
 
 Runs TWO sessions back-to-back on the same repair_id to validate the scribe

@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Thin wrapper around `evaluator.compute_score`.
 
 The evaluator accepts `list[dict]` scenarios. Our accepted scenarios are

@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """profile_get / profile_check_skills / profile_track_skill handlers."""
 
 from pathlib import Path

@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Tests for the symptom-coverage classifier.
 
 The LLM call itself is exercised end-to-end by the tool_call helper;

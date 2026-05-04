@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Per-phase token + cache accounting for the knowledge-factory pipeline.
 
 Each phase (scout, registry, writer_*, auditor, auditor_rev_N) gets a

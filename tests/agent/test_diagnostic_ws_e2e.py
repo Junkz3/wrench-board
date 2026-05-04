@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """End-to-end test for /ws/diagnostic/{slug} over a real TestClient WebSocket.
 
 Unlike the existing tests in test_ws_flow.py — which drive the runtime loop

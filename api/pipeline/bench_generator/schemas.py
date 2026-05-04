@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Pydantic shapes for the bench generator.
 
 Every model is `extra='forbid'`. Shapes come in three groups:

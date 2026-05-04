@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Unit tests for the scenario-filter wiring of `scripts/eval_diagnostic_agent.py`.
 
 All tests are fast (no `slow` marker), no network, no WS, no Anthropic API

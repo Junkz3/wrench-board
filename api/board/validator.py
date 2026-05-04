@@ -1,9 +1,8 @@
-# SPDX-License-Identifier: Apache-2.0
 """Anti-hallucination guardrail — every refdes the agent mentions passes here.
 
 Pure functions over an already-parsed `Board`. No I/O, no mutation. If a
 lookup fails the caller is expected to return a structured null/unknown
-response, not fabricate data (per CLAUDE.md hard rule #5).
+response, not fabricate data (per the anti-hallucination contract).
 """
 
 from __future__ import annotations

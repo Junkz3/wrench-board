@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """HTTP surface for the technician profile."""
 
 from __future__ import annotations

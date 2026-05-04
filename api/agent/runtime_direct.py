@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Fallback diagnostic runtime using `messages.stream` (no Managed Agents).
 
 Keeps the WebSocket protocol identical to `runtime_managed`, so the frontend
@@ -8,7 +7,7 @@ or when a lighter-weight path is wanted for local development.
 
 Uses the streaming Messages API so each completed text block is emitted to
 the WebSocket as soon as it finishes, rather than waiting for the full
-response — CLAUDE.md §"Streaming over polling".
+response.
 """
 
 from __future__ import annotations

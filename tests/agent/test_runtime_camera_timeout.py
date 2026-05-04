@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Flow B timeout: no client.capture_response → is_error tool_result."""
 
 from __future__ import annotations

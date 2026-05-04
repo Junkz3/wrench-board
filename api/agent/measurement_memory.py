@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Per-repair append-only journal of tech measurements.
 
 Same JSONL pattern as `api/agent/chat_history.py` — one `{ts, event}`

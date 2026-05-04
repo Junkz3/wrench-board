@@ -35,12 +35,12 @@ from api.board.parser.cad import CADParser
 from api.board.parser.cst import CSTParser
 from api.board.parser.f2b import F2BParser
 from api.board.parser.fz import FZParser
-from api.board.parser.fz import _encrypt as _fz_encrypt
 from api.board.parser.gr import GRParser
 from api.board.parser.test_link import BRDParser
 from api.board.parser.tvw import TVWParser
 from api.board.parser.tvw import _obfuscate as _tvw_encode
 from api.main import app
+from tests.board.test_fz_xor_cipher import _encrypt as _fz_encrypt
 
 # ---------------------------------------------------------------------------
 # Plaintext generator — one realistic Test_Link-shape payload
@@ -69,22 +69,62 @@ def _build_realistic_plaintext() -> tuple[str, dict]:
     lines_nails: list[str] = []
 
     net_pool = [
-        "+3V3", "+5V", "+1V8", "+12V", "+1V0_CORE", "+2V5_DDR", "+0V9_VTT",
-        "+3V3_PMIC_RTC", "VCC", "VCC_CORE", "VCC_IO", "VDD_CPU", "VDD_GPU",
-        "VDD_SDRAM", "V_USB",
-        "GND", "AGND", "DGND", "PGND",
-        "CLK_100M", "CLK_25M", "XTAL_IN", "XTAL_OUT",
-        "USB_DP", "USB_DN", "HDMI_D0+", "HDMI_D0-", "HDMI_D1+", "HDMI_D1-",
-        "SATA_RX+", "SATA_RX-", "SATA_TX+", "SATA_TX-",
-        "I2C_SDA", "I2C_SCL", "SPI_MOSI", "SPI_MISO", "SPI_CLK", "SPI_CS",
-        "RESET_n", "PWR_EN", "PWR_GOOD",
+        "+3V3",
+        "+5V",
+        "+1V8",
+        "+12V",
+        "+1V0_CORE",
+        "+2V5_DDR",
+        "+0V9_VTT",
+        "+3V3_PMIC_RTC",
+        "VCC",
+        "VCC_CORE",
+        "VCC_IO",
+        "VDD_CPU",
+        "VDD_GPU",
+        "VDD_SDRAM",
+        "V_USB",
+        "GND",
+        "AGND",
+        "DGND",
+        "PGND",
+        "CLK_100M",
+        "CLK_25M",
+        "XTAL_IN",
+        "XTAL_OUT",
+        "USB_DP",
+        "USB_DN",
+        "HDMI_D0+",
+        "HDMI_D0-",
+        "HDMI_D1+",
+        "HDMI_D1-",
+        "SATA_RX+",
+        "SATA_RX-",
+        "SATA_TX+",
+        "SATA_TX-",
+        "I2C_SDA",
+        "I2C_SCL",
+        "SPI_MOSI",
+        "SPI_MISO",
+        "SPI_CLK",
+        "SPI_CS",
+        "RESET_n",
+        "PWR_EN",
+        "PWR_GOOD",
     ]
     n_nets = len(net_pool)  # 41 distinct nets
 
     pin_idx = 0  # 0-based running index across the pins block
 
-    def add_pins(refdes_prefix: str, count: int, pins_per: int, layer_bits: int,
-                 start_x: int, start_y: int, step_y: int):
+    def add_pins(
+        refdes_prefix: str,
+        count: int,
+        pins_per: int,
+        layer_bits: int,
+        start_x: int,
+        start_y: int,
+        step_y: int,
+    ):
         nonlocal pin_idx
         for i in range(1, count + 1):
             refdes = f"{refdes_prefix}{i}"
@@ -124,7 +164,9 @@ def _build_realistic_plaintext() -> tuple[str, dict]:
     outline_points = [(0, 0), (20000, 0), (20000, 20000), (0, 20000)]
     n_format = len(outline_points)
 
-    header = f"str_length: 20000 20000\nvar_data: {n_format} {total_parts} {total_pins} {total_nails}\n"
+    header = (
+        f"str_length: 20000 20000\nvar_data: {n_format} {total_parts} {total_pins} {total_nails}\n"
+    )
     outline = "Format:\n" + "\n".join(f"{x} {y}" for x, y in outline_points) + "\n"
     parts_block = "Parts:\n" + "\n".join(lines_parts) + "\n"
     pins_block = "Pins:\n" + "\n".join(lines_pins) + "\n"
@@ -216,9 +258,7 @@ def _raw_for(text: str) -> bytes:
 def test_realistic_plaintext_passes_canonical_test_link_parser(realistic):
     """Sanity check: the generator actually produces a valid Test_Link file."""
     text, expected = realistic
-    board = BRDParser().parse(
-        _raw_for(text), file_hash="sha256:realistic", board_id="realistic"
-    )
+    board = BRDParser().parse(_raw_for(text), file_hash="sha256:realistic", board_id="realistic")
     _assert_scale_matches(board, expected)
     _assert_power_ground_classification(board)
     _assert_topology_resolvable(board)
@@ -240,13 +280,8 @@ def test_realistic_bv(realistic):
 def test_realistic_gr(realistic):
     """GR uses `Components:` / `TestPoints:` — swap the plaintext markers."""
     text, expected = realistic
-    dialect = (
-        text.replace("Parts:", "Components:")
-        .replace("Nails:", "TestPoints:")
-    )
-    board = GRParser().parse(
-        _raw_for(dialect), file_hash="sha256:gr", board_id="realistic-gr"
-    )
+    dialect = text.replace("Parts:", "Components:").replace("Nails:", "TestPoints:")
+    board = GRParser().parse(_raw_for(dialect), file_hash="sha256:gr", board_id="realistic-gr")
     assert board.source_format == "gr"
     _assert_scale_matches(board, expected)
     _assert_power_ground_classification(board)
@@ -261,9 +296,7 @@ def test_realistic_cad_test_link_form(realistic):
         .replace("Pins:", "PINS:")
         .replace("Nails:", "NAILS:")
     )
-    board = CADParser().parse(
-        _raw_for(dialect), file_hash="sha256:cad", board_id="realistic-cad"
-    )
+    board = CADParser().parse(_raw_for(dialect), file_hash="sha256:cad", board_id="realistic-cad")
     assert board.source_format == "cad"
     _assert_scale_matches(board, expected)
     _assert_power_ground_classification(board)
@@ -273,17 +306,21 @@ def test_realistic_cst(realistic):
     text, expected = realistic
     # CST uses [Bracketed] section headers and no var_data prelude.
     # Drop the `str_length:` and `var_data:` prelude, swap markers.
-    body = text.split("Format:", 1)[1]  # drop prelude, keep from "Format:" onward (minus the marker)
+    body = text.split("Format:", 1)[
+        1
+    ]  # drop prelude, keep from "Format:" onward (minus the marker)
     dialect = (
         "; Castw v3.32 synthetic realistic\n"
-        "[Format]\n" + body.split("Parts:", 1)[0]
-        + "[Components]\n" + body.split("Parts:", 1)[1].split("Pins:", 1)[0]
-        + "[Pins]\n" + body.split("Pins:", 1)[1].split("Nails:", 1)[0]
-        + "[Nails]\n" + body.split("Nails:", 1)[1]
+        "[Format]\n"
+        + body.split("Parts:", 1)[0]
+        + "[Components]\n"
+        + body.split("Parts:", 1)[1].split("Pins:", 1)[0]
+        + "[Pins]\n"
+        + body.split("Pins:", 1)[1].split("Nails:", 1)[0]
+        + "[Nails]\n"
+        + body.split("Nails:", 1)[1]
     )
-    board = CSTParser().parse(
-        _raw_for(dialect), file_hash="sha256:cst", board_id="realistic-cst"
-    )
+    board = CSTParser().parse(_raw_for(dialect), file_hash="sha256:cst", board_id="realistic-cst")
     assert board.source_format == "cst"
     _assert_scale_matches(board, expected)
     _assert_power_ground_classification(board)
@@ -291,13 +328,8 @@ def test_realistic_cst(realistic):
 
 def test_realistic_f2b(realistic):
     text, expected = realistic
-    dialect = (
-        text.replace("Format:", "Outline:")
-        .replace("Parts:", "Components:")
-    )
-    board = F2BParser().parse(
-        _raw_for(dialect), file_hash="sha256:f2b", board_id="realistic-f2b"
-    )
+    dialect = text.replace("Format:", "Outline:").replace("Parts:", "Components:")
+    board = F2BParser().parse(_raw_for(dialect), file_hash="sha256:f2b", board_id="realistic-f2b")
     assert board.source_format == "f2b"
     _assert_scale_matches(board, expected)
     _assert_power_ground_classification(board)
@@ -306,9 +338,7 @@ def test_realistic_f2b(realistic):
 def test_realistic_bdv(realistic):
     text, expected = realistic
     encoded = _bdv_encode(text)
-    board = BDVParser().parse(
-        encoded, file_hash="sha256:bdv", board_id="realistic-bdv"
-    )
+    board = BDVParser().parse(encoded, file_hash="sha256:bdv", board_id="realistic-bdv")
     assert board.source_format == "bdv"
     _assert_scale_matches(board, expected)
     _assert_power_ground_classification(board)
@@ -317,31 +347,85 @@ def test_realistic_bdv(realistic):
 def test_realistic_tvw(realistic):
     text, expected = realistic
     encoded = _tvw_encode(text)
-    board = TVWParser().parse(
-        encoded, file_hash="sha256:tvw", board_id="realistic-tvw"
-    )
+    board = TVWParser().parse(encoded, file_hash="sha256:tvw", board_id="realistic-tvw")
     assert board.source_format == "tvw"
     _assert_scale_matches(board, expected)
     _assert_power_ground_classification(board)
 
 
 def test_realistic_fz_with_key(realistic):
-    text, expected = realistic
-    key = tuple(range(1, 45))  # 44 words
-    encoded = _fz_encrypt(text.encode(), key)
-    board = FZParser(key=key).parse(
-        encoded, file_hash="sha256:fz", board_id="realistic-fz"
+    """End-to-end realistic-scale validation of the FZ-xor → zlib path.
+
+    The on-disk shape of a real `.fz` file is a 4-byte LE size header
+    followed by a zlib stream of pipe-delimited (`A!`/`S!`) rows, then
+    wrapped in the 16-byte sliding-window byte cipher. Build that shape
+    with the realistic-scale parts/pins/nails counts so the cipher,
+    inflate, and section walker are all exercised at production scale.
+    """
+    import struct
+    import zlib
+
+    _text, expected = realistic
+
+    # Translate the realistic Test_Link plaintext into an FZ-zlib
+    # pipe-delimited equivalent. We rebuild it here from the same fixture
+    # fields (parts/pins/nails) so counts match exactly.
+    a_parts = "A!REFDES!COMP_INSERTION_CODE!SYM_NAME!SYM_MIRROR!SYM_ROTATE"
+    a_pins = "A!NET_NAME!REFDES!PIN_NUMBER!PIN_NAME!PIN_X!PIN_Y!TEST_POINT!RADIUS"
+    a_via = "A!TESTVIA!NET_NAME!REFDES!PIN_NUMBER!PIN_NAME!VIA_X!VIA_Y!TEST_POINT!RADIUS"
+
+    parts: list[tuple[str, str]] = []  # (refdes, mirror)
+    for prefix, n, mirror in (("R", 100, "NO"), ("C", 80, "NO"), ("U", 15, "YES"), ("J", 5, "NO")):
+        for i in range(n):
+            parts.append((f"{prefix}{i + 1}", mirror))
+
+    pins_rows: list[str] = []
+    nails_rows: list[str] = []
+    pin_idx = 0
+    nail_idx = 0
+    for refdes, _mirror in parts:
+        prefix = refdes[0]
+        n_pins = {"R": 2, "C": 2, "U": 20, "J": 40}[prefix]
+        for k in range(1, n_pins + 1):
+            net = sorted(expected["expected_nets"])[pin_idx % len(expected["expected_nets"])]
+            x = 100 + (pin_idx % 50) * 10
+            y = 200 + (pin_idx // 50) * 20
+            pins_rows.append(f"S!{net}!{refdes}!0!{k}!{x}.0!{y}.0!!1")
+            if pin_idx % 4 == 0:
+                nail_idx += 1
+                nails_rows.append(f"S!{nail_idx}!{net}!{refdes}!0!{k}!{x}.0!{y}.0!T!1")
+            pin_idx += 1
+
+    parts_rows = [f"S!{r}!1!FOOTPRINT!{m}!0" for r, m in parts]
+    text = (
+        a_parts
+        + "\n"
+        + "\n".join(parts_rows)
+        + "\n"
+        + a_pins
+        + "\n"
+        + "\n".join(pins_rows)
+        + "\n"
+        + a_via
+        + "\n"
+        + "\n".join(nails_rows)
+        + "\n"
     )
+    payload = struct.pack("<I", len(text)) + zlib.compress(text.encode())
+
+    key = tuple(range(1, 45))
+    encoded = _fz_encrypt(payload, key)
+    board = FZParser(key=key).parse(encoded, file_hash="sha256:fz", board_id="realistic-fz")
     assert board.source_format == "fz"
-    _assert_scale_matches(board, expected)
+    assert len(board.parts) == expected["n_parts"]
+    assert len(board.pins) == expected["n_pins"]
+    assert len(board.nails) == expected["n_nails"]
     _assert_power_ground_classification(board)
 
 
 def test_realistic_asc_combined(realistic):
     text, expected = realistic
-    board = ASCParser().parse(
-        _raw_for(text), file_hash="sha256:asc", board_id="realistic-asc"
-    )
+    board = ASCParser().parse(_raw_for(text), file_hash="sha256:asc", board_id="realistic-asc")
     assert board.source_format == "asc"
     _assert_scale_matches(board, expected)
     _assert_power_ground_classification(board)
@@ -360,12 +444,16 @@ def test_http_upload_at_scale_each_format(realistic):
     client = TestClient(app)
     cases = [
         ("board.bv", _raw_for("BoardView 1.5\n" + text), "bv"),
-        ("board.gr", _raw_for(
-            text.replace("Parts:", "Components:").replace("Nails:", "TestPoints:")
-        ), "gr"),
-        ("board.f2b", _raw_for(
-            text.replace("Format:", "Outline:").replace("Parts:", "Components:")
-        ), "f2b"),
+        (
+            "board.gr",
+            _raw_for(text.replace("Parts:", "Components:").replace("Nails:", "TestPoints:")),
+            "gr",
+        ),
+        (
+            "board.f2b",
+            _raw_for(text.replace("Format:", "Outline:").replace("Parts:", "Components:")),
+            "f2b",
+        ),
         ("board.bdv", _bdv_encode(text), "bdv"),
         ("board.tvw", _tvw_encode(text), "tvw"),
         ("board.asc", _raw_for(text), "asc"),
@@ -378,12 +466,8 @@ def test_http_upload_at_scale_each_format(realistic):
         assert r.status_code == 200, f"{fname} → {r.status_code}: {r.text[:300]}"
         body = r.json()
         assert body["source_format"] == expected_src
-        assert len(body["parts"]) == expected["n_parts"], (
-            f"{fname}: parts count mismatch"
-        )
-        assert len(body["pins"]) == expected["n_pins"], (
-            f"{fname}: pins count mismatch"
-        )
+        assert len(body["parts"]) == expected["n_parts"], f"{fname}: parts count mismatch"
+        assert len(body["pins"]) == expected["n_pins"], f"{fname}: pins count mismatch"
         # Every pin.part_refdes resolves to a part in the same JSON
         refdes = {p["refdes"] for p in body["parts"]}
         for pin in body["pins"]:

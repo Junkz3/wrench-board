@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Tiny per-slug async pubsub for pipeline progress events.
 
 Used by the orchestrator to broadcast phase transitions, and by the

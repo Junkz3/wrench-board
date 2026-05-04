@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """mb_validate_finding — persist a repair outcome + emit WS event.
 
 Called by the agent at the end of a diagnostic session once the tech

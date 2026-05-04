@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Unit tests for the dispatch table extracted from ``runtime_managed``.
 
 The legacy ``_dispatch_tool`` waterfall lived inside ``runtime_managed.py``

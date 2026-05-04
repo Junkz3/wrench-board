@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Contract tests for mb_validate_finding."""
 
 from __future__ import annotations

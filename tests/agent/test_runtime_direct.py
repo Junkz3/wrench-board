@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Targeted unit tests for `api.agent.runtime_direct`.
 
 These tests fill gaps left by the existing coverage:
@@ -559,7 +558,7 @@ async def test_sanitizer_logs_unknown_refdes_and_wraps_text(
     """The runtime calls sanitize_agent_text on each text block before WS send.
     When the agent surfaces an unknown refdes, the wrapped form ⟨?…⟩ hits the
     wire AND the runtime logs the offence at WARNING — both are required for
-    the anti-hallucination defense in depth (CLAUDE.md hard-rule #5)."""
+    the anti-hallucination defense in depth."""
     import logging
 
     _stub_session(monkeypatch, _board_with_u7())

@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Hand-written Phase 4 scenario gate.
 
 Anti-auto-referential corpus — scenarios encode observations that were

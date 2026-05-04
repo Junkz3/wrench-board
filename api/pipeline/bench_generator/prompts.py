@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Static prompts + user-message assembly for the bench generator LLM call.
 
 Kept in one module so the system prompt can be version-controlled in

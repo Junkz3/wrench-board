@@ -9,6 +9,39 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://d3js.org/d3.v7.min.js"></script>
+<!-- Three.js r128 (MIT) — backs the WebGL boardview in web/js/pcb_viewer.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<!-- Pickr 1.9.1 (MIT) — drives the Tweaks panel "Pin colors" pickers.
+     Replaces native <input type="color"> whose Chromium popover can
+     clip off the right edge of a fixed-position panel; Pickr's own
+     popover auto-flips and stays on-screen. -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@simonwep/pickr@1.9.1/dist/themes/classic.min.css">
+<script src="https://cdn.jsdelivr.net/npm/@simonwep/pickr@1.9.1/dist/pickr.min.js"></script>
+<!-- Tailwind (MIT) — utility classes for the PCB viewer chrome.
+     Inline config registers the dark-* / accent-* palette the viewer
+     uses everywhere. -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          dark: {
+            500: "#475569",
+            600: "#334155",
+            700: "#1e293b",
+            800: "#0f172a",
+            900: "#020617",
+          },
+          accent: {
+            primary: "#3b82f6",
+            secondary: "#06b6d4",
+          },
+        },
+      },
+    },
+  };
+</script>
 <link rel="stylesheet" href="styles/tokens.css">
 <link rel="stylesheet" href="styles/landing.css">
 <link rel="stylesheet" href="styles/layout.css">
@@ -25,11 +58,11 @@
 <link rel="stylesheet" href="styles/mascot.css">
 <link rel="stylesheet" href="styles/schematic.css?v=fitcenter">
 <link rel="stylesheet" href="/styles/profile.css" />
-<link rel="stylesheet" href="styles/protocol.css?v=quest4" />
+<link rel="stylesheet" href="styles/protocol.css?v=dnp26" />
 <!-- Markdown rendering + sanitization for agent chat (MIT / Apache 2.0) -->
 <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.8/dist/purify.min.js" defer></script>
-<script type="module" src="js/i18n.js?v=quest4"></script>
+<script type="module" src="js/i18n.js?v=dnp26"></script>
 </head>
 <body>
 
@@ -223,11 +256,175 @@
   </div>
 </div>
 
-<!-- Stub sections — progressively replaced in following tasks -->
+<!-- PCB section — WebGL viewer (Three.js + InstancedMesh).
+     Layout: canvas takes the bulk of the panel, info+stats column at the
+     right. The viewer reads `pcb-canvas`/`pcb-canvas-container` by id and
+     pushes status into `stats-*` / `cursor-*` / `zoom-level`. -->
 <section class="stub hidden" data-section-stub="pcb">
-  <div id="brdRoot" class="brd-root"></div>
-  <!-- Sibling of brdRoot so brd_viewer's mountCanvas (containerEl.innerHTML='')
-       doesn't wipe these mounts. Section is position:fixed → positioning ctx. -->
+  <div id="brdRoot" class="brd-root">
+    <!-- Empty state — glass card, sits centred via .brd-empty-card. -->
+    <div id="no-file-message" class="brd-empty-card hidden">
+      <div class="brd-empty-glyph">
+        <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor"
+             stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/>
+        </svg>
+      </div>
+      <p class="brd-empty-title">Aucun boardview chargé</p>
+      <p class="brd-empty-sub">Importez un fichier depuis le repair dashboard.</p>
+    </div>
+
+    <!-- Pointer-transparent host so events fall through to the canvas
+         beneath. The canvas itself sits at .brd-canvas. -->
+    <div id="pcb-canvas-container" class="brd-canvas-host"></div>
+    <canvas id="pcb-canvas" class="brd-canvas"></canvas>
+
+    <!-- Top-right toolbar: layer toggle + Fit. Mirrors brd_viewer.js's chrome. -->
+    <div class="brd-toolbar">
+      <div class="brd-seg" role="tablist" aria-label="Layer">
+        <button class="brd-seg-btn" id="brdLayerTop" data-layer="top" type="button">Top</button>
+        <button class="brd-seg-btn" id="brdLayerBoth" data-layer="both" type="button">Both</button>
+        <button class="brd-seg-btn" id="brdLayerBottom" data-layer="bottom" type="button">Bottom</button>
+      </div>
+      <button class="brd-btn" id="brdRotL" type="button"
+              title="Rotation gauche (-90°)" aria-label="Rotation gauche">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor"
+             stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 12a9 9 0 1 0 3-6.7"/>
+          <path d="M3 4v5h5"/>
+        </svg>
+      </button>
+      <button class="brd-btn" id="brdRotR" type="button"
+              title="Rotation droite (+90°)" aria-label="Rotation droite">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor"
+             stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12a9 9 0 1 1-3-6.7"/>
+          <path d="M21 4v5h-5"/>
+        </svg>
+      </button>
+      <button class="brd-btn" id="brdFitBtn" type="button"
+              title="Fit to view" aria-label="Fit to view">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor"
+             stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 8V4h4M16 4h4v4M4 16v4h4M16 20h4v-4"/>
+        </svg>
+      </button>
+      <!-- DNP / DFM-alternate toggle. OFF by default — the canvas only
+           shows physically-placed components (matches what XZZ /
+           FlexBV do in their default view). Toggle ON to overlay the
+           non-stuffed alternate footprints as dashed cyan outlines so
+           a tech can spot DFM-alternate seats while diagnosing. -->
+      <button class="brd-btn" id="brdToggleDnp" type="button"
+              title="Afficher les alternates DNP / DFM"
+              aria-label="Afficher les DNP" aria-pressed="false">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor"
+             stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"
+             stroke-dasharray="3 2">
+          <rect x="4" y="6" width="16" height="12" rx="1.5"/>
+        </svg>
+      </button>
+      <!-- Vias toggle. OFF by default. GenCAD (.cad) boards ship
+           thousands of routing/stitching vias that crush perf and
+           clutter dense areas (around BGAs especially) — turn on
+           when actually probing routing or stitching. -->
+      <button class="brd-btn" id="brdToggleVias" type="button"
+              title="Afficher les vias"
+              aria-label="Afficher les vias" aria-pressed="false">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor"
+             stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="6"/>
+          <circle cx="12" cy="12" r="2"/>
+        </svg>
+      </button>
+      <!-- Copper traces toggle. ON by default. Dense GenCAD boards
+           ship 30k+ routed segments — turn off for a clean
+           silhouette + pads view, on for routing inspection. -->
+      <button class="brd-btn" id="brdToggleTraces" type="button"
+              title="Afficher les pistes cuivre"
+              aria-label="Afficher les pistes" aria-pressed="false">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor"
+             stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 17h4l3-10h4l3 10h4"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Bottom-left badge: counts. -->
+    <div class="brd-badge" data-role="stats">
+      <span class="brd-badge-row"><span id="stats-components">0</span> Comp</span>
+      <span class="brd-badge-row"><span id="stats-pins">0</span> Pins</span>
+      <span class="brd-badge-row"><span id="stats-nets">0</span> Nets</span>
+    </div>
+
+    <!-- Bottom-right badge: cursor + zoom. -->
+    <div class="brd-badge" data-role="cursor">
+      <span class="brd-badge-row">X: <span id="cursor-x">0.00</span></span>
+      <span class="brd-badge-row">Y: <span id="cursor-y">0.00</span></span>
+      <span class="brd-badge-row">Zoom: <span id="zoom-level">100</span>%</span>
+    </div>
+
+    <!-- Selection inspector — populated by viewer.selectItem(). The
+         `hidden` attribute is removed when a part / pin is clicked. -->
+    <aside id="component-info" class="brd-inspector" hidden>
+      <header class="brd-ins-head">
+        <span class="brd-ins-ref" id="info-id">—</span>
+        <button class="brd-ins-close" id="info-close" type="button" aria-label="Close">
+          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor"
+               stroke-width="1.8" stroke-linecap="round">
+            <path d="M6 6l12 12M18 6L6 18"/>
+          </svg>
+        </button>
+      </header>
+      <div class="brd-ins-scroll">
+        <div class="brd-ins-body">
+          <div class="brd-ins-value" id="info-value">—</div>
+          <div class="brd-ins-meta">
+            <span id="info-type">—</span>
+            <span id="info-layer">TOP</span>
+          </div>
+          <div class="brd-ins-size" id="info-pos">X: 0  Y: 0</div>
+          <div class="brd-ins-size" id="info-size"></div>
+          <!-- Component metadata — populated by selectItem when the
+               item is a part (id, footprint, pin count). Hidden when
+               the selected item is a pin / via / test pad. -->
+          <div class="brd-ins-size" id="info-footprint" hidden></div>
+          <div class="brd-ins-size" id="info-pincount" hidden></div>
+        </div>
+        <div class="brd-ins-section-label" id="info-net-label" hidden>Net</div>
+        <div class="brd-ins-body" id="info-net-row" hidden>
+          <span class="brd-ins-value" id="info-net">—</span>
+        </div>
+        <!-- Manufacturer-tagged diagnostic expectations from the
+             source format (XZZ post-v6 block on iPad/iPhone dumps).
+             Whole block stays hidden when the net carries no data. -->
+        <div class="brd-ins-section-label" id="info-diag-label" hidden>Diagnostic attendu</div>
+        <div class="brd-ins-body" id="info-diag-row" hidden>
+          <div class="brd-ins-size" id="info-diag-resistance" hidden></div>
+          <div class="brd-ins-size" id="info-diag-voltage" hidden></div>
+        </div>
+        <!-- DFM alternates / DNP — surfaces the `dnp_alternates` field
+             from api/board/render.py. Visible only when the placed
+             component shares its physical seat with one or more
+             non-stuffed footprints (ASUS .fz dumps and similar). -->
+        <div class="brd-ins-section-label" id="info-alt-label" hidden>Alternates DNP</div>
+        <div class="brd-ins-body" id="info-alt-row" hidden>
+          <ul class="brd-ins-linklist" id="info-alt-list"></ul>
+        </div>
+        <div class="brd-ins-section-label" id="info-connections-label" hidden>Connections</div>
+        <ul class="brd-ins-linklist" id="connections-list"></ul>
+        <div class="brd-ins-size" id="connections-count" hidden></div>
+      </div>
+    </aside>
+
+    <!-- Legacy hidden hooks — IDs the viewer still references; the actual
+         content has moved into .brd-inspector above. -->
+    <div id="no-selection" class="hidden"></div>
+    <div id="selection-info" class="hidden"></div>
+    <div id="info-connections" class="hidden"></div>
+  </div>
+  <!-- Overlays kept above the canvas (protocol, minimap). The agent's
+       protocol UI and the bv_minimap render relations on top of the
+       boardview without interfering with the WebGL canvas. -->
   <div id="protocolFloatingCard" class="protocol-float hidden" role="dialog"
        data-i18n-attr="aria-label:protocol.aria.step_pin" aria-label="step pin"></div>
   <aside id="protocolQuest" class="protocol-quest hidden"
@@ -610,6 +807,28 @@
             <h3 data-i18n="home.dashboard.boardview.title">Boardview</h3>
             <span class="rd-data-card-sub" id="rdCardBoardviewFmt">input · .brd / .kicad_pcb / .fz…</span>
           </div>
+          <!-- Diagnostic-ready badge — visible only when the loaded
+               boardview ships manufacturer-tagged net references
+               (XZZ post-v6 resistance/voltage section). The icon
+               is a probe tip pointing at a pad — same vocabulary
+               as the test-pad pin colour in the WebGL viewer. Click
+               the badge to open a localized popover explaining the
+               workflow implication (see js/home.js wiring). -->
+          <span class="rd-diag-wrap" id="rdCardBoardviewDiagWrap" hidden>
+            <button type="button" class="rd-diag-badge" id="rdCardBoardviewDiagBadge"
+                    aria-haspopup="dialog" aria-expanded="false">
+              <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M14 4l6 6-9 9H5v-6l9-9z"/>
+                <circle cx="6" cy="18" r="1.5" fill="currentColor"/>
+              </svg>
+              <span class="rd-diag-badge-count" id="rdCardBoardviewDiagCount">0</span>
+              <span class="rd-diag-badge-label" data-i18n="home.dashboard.boardview.diag_count_label">refs</span>
+            </button>
+            <div class="rd-diag-popover" id="rdCardBoardviewDiagPopover" role="dialog" hidden>
+              <strong class="rd-diag-popover-title" data-i18n="home.dashboard.boardview.diag_popover_title">Diagnostic-ready</strong>
+              <p class="rd-diag-popover-body" data-i18n="home.dashboard.boardview.diag_popover_body">…</p>
+            </div>
+          </span>
           <span class="rd-data-card-state" id="rdCardBoardviewState">—</span>
         </header>
         <p class="rd-data-card-meta" id="rdCardBoardviewMeta" data-i18n="home.dashboard.schematic.checking">checking…</p>
@@ -666,7 +885,7 @@
     <!-- Hidden upload inputs — wired by home.js to per-card "Importer" buttons. -->
     <input type="file" id="rdUploadSchematic" hidden accept=".pdf,application/pdf">
     <input type="file" id="rdUploadBoardview" hidden
-      accept=".brd,.brd2,.kicad_pcb,.asc,.bdv,.bv,.cad,.cst,.f2b,.fz,.gr,.tvw">
+      accept=".brd,.brd2,.kicad_pcb,.asc,.bdv,.bv,.bvr,.cad,.cst,.f2b,.fz,.gr,.pcb,.tvw">
 
     <!-- Inline upload-progress toast — fixed bottom-right while uploading. -->
     <div class="rd-toast hidden" id="rdToast" role="status" aria-live="polite">
@@ -984,12 +1203,15 @@
     <div class="tweak-row pcb-only">
       <label data-i18n="common.tweaks.boardview_colors">Boardview colors</label>
       <div class="brd-color-grid">
-        <div class="brd-color-row"><span class="brd-color-dot" data-cat="signal"></span><span data-i18n="common.tweaks.color_signal">Signal</span><input type="color" id="brdCol-signal" data-cat="signal"></div>
-        <div class="brd-color-row"><span class="brd-color-dot" data-cat="power"></span><span data-i18n="common.tweaks.color_power">Power</span><input type="color" id="brdCol-power" data-cat="power"></div>
-        <div class="brd-color-row"><span class="brd-color-dot" data-cat="ground"></span><span data-i18n="common.tweaks.color_ground">Ground</span><input type="color" id="brdCol-ground" data-cat="ground"></div>
-        <div class="brd-color-row"><span class="brd-color-dot" data-cat="clock"></span><span data-i18n="common.tweaks.color_clock">Clock</span><input type="color" id="brdCol-clock" data-cat="clock"></div>
-        <div class="brd-color-row"><span class="brd-color-dot" data-cat="reset"></span><span data-i18n="common.tweaks.color_reset">Reset</span><input type="color" id="brdCol-reset" data-cat="reset"></div>
-        <div class="brd-color-row"><span class="brd-color-dot" data-cat="no-net"></span><span data-i18n="common.tweaks.color_nc">NC</span><input type="color" id="brdCol-no-net" data-cat="no-net"></div>
+        <div class="brd-color-row" title="Nets nommés non-spéciaux (DATA, ENABLE, …) — fallback par défaut."><span class="brd-color-dot" data-cat="signal"></span><span data-i18n="common.tweaks.color_signal">Signal</span><span class="brd-color-count" data-cat-count="signal"></span></div>
+        <div class="brd-color-row" title="Nets matchant PP*, VDD, +V, *_PWR, AVDD, VBAT — alimentations."><span class="brd-color-dot" data-cat="power"></span><span data-i18n="common.tweaks.color_power">Power</span><span class="brd-color-count" data-cat-count="power"></span></div>
+        <div class="brd-color-row" title="GND, VSS, AGND, DGND, PGND, GROUND."><span class="brd-color-dot" data-cat="ground"></span><span data-i18n="common.tweaks.color_ground">Ground</span><span class="brd-color-count" data-cat-count="ground"></span></div>
+        <div class="brd-color-row" title="CLK_*, *_CLK, REFCLK, OSC_OUT — signaux d'horloge."><span class="brd-color-dot" data-cat="clock"></span><span data-i18n="common.tweaks.color_clock">Clock</span><span class="brd-color-count" data-cat-count="clock"></span></div>
+        <div class="brd-color-row" title="RESET_*, RST_*, NRST, PORST_* — lignes de reset."><span class="brd-color-dot" data-cat="reset"></span><span data-i18n="common.tweaks.color_reset">Reset</span><span class="brd-color-count" data-cat-count="reset"></span></div>
+        <div class="brd-color-row" title="Pins sans net assigné (NC, N/A, UNCONNECTED)."><span class="brd-color-dot" data-cat="no-net"></span><span data-i18n="common.tweaks.color_nc">NC</span><span class="brd-color-count" data-cat-count="no-net"></span></div>
+        <div class="brd-color-row" title="Test pads & probe pads (XZZ type_09 solid, TEST_POINT pins XW/TPxxx, mounting holes / vias mécaniques sans net)."><span class="brd-color-dot" data-cat="testPad"></span><span data-i18n="common.tweaks.color_testpad">Test pad</span><span class="brd-color-count" data-cat-count="testPad"></span></div>
+        <div class="brd-color-row" title="Contour de la carte (le trait du board outline)."><span class="brd-color-dot" data-cat="boardOutline"></span><span data-i18n="common.tweaks.color_board_outline">Contour board</span><span class="brd-color-count" data-cat-count="boardOutline"></span></div>
+        <div class="brd-color-row" title="Remplissage du substrat. Mettre la même couleur que le fond pour ne pas remplir."><span class="brd-color-dot" data-cat="boardFill"></span><span data-i18n="common.tweaks.color_board_fill">Fond board</span><span class="brd-color-count" data-cat-count="boardFill"></span></div>
       </div>
       <button id="brdColReset" class="brd-color-reset">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
@@ -1004,8 +1226,15 @@
      This isolates chat-panel edits from parallel work on index.html. -->
 <div id="llmRoot"></div>
 
-<script type="module" src="js/main.js?v=quest8"></script>
-<script type="module" src="brd_viewer.js?v=quest1" defer></script>
+<script type="module" src="js/main.js?v=dnp26"></script>
+<!-- pcb_viewer.js exports window.PCBViewerOptimized (the ported WebGL viewer).
+     brd_viewer.js installs the legacy SVG/D3 viewer + window.Boardview API.
+     pcb_viewer_bridge.js loads LAST so it can override window.Boardview /
+     window.initBoardview to drive Three.js while keeping the SVG path as a
+     fallback for any session where /api/board/render is unreachable. -->
+<script src="js/pcb_viewer.js?v=dnp26"></script>
+<script type="module" src="brd_viewer.js?v=dnp26" defer></script>
+<script type="module" src="js/pcb_viewer_bridge.js?v=dnp26" defer></script>
 <script type="module" src="js/schematic_minimap.js" defer></script>
 <script type="module" src="/js/profile.js"></script>
 </body>

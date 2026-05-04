@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Single-WS guard tests for the diagnostic runtime.
 
 The audit-revealed concurrency bug: `responded_tool_ids` is per-forwarder,
@@ -246,8 +245,8 @@ async def test_different_conv_ids_dont_collide(
 ):
     """Two WS on the SAME repair but DIFFERENT conv_ids must both be
     allowed — they're separate conversation threads (e.g. tier switch
-    creates a new conv per CLAUDE.md). The guard keys on the full
-    triplet, not just (slug, repair)."""
+    creates a new conv). The guard keys on the full triplet, not just
+    (slug, repair)."""
     from api.agent import runtime_managed as rm
 
     _stale_settings(monkeypatch, rm)

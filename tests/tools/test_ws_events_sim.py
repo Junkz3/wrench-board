@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """WS event envelopes for the simulation / observation layer."""
 
 from __future__ import annotations

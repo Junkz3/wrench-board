@@ -1,5 +1,4 @@
 #!/bin/bash
-# SPDX-License-Identifier: Apache-2.0
 # Microsolder Evolve — Bootstrap (one-shot, run before the first night)
 #
 # Usage: scripts/evolve-bootstrap.sh

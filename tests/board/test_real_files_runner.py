@@ -7,9 +7,9 @@ drops into one of these directories (scanned in order, first match wins):
   2. `/tmp/wrench-board-real-boards` (convenient scratch area)
   3. `~/Downloads/wrench-board-real-boards`
 
-Files must never be committed — CLAUDE.md hard-rule #4 keeps proprietary
-content out of the repo. At runtime, any brand is fair game (per the
-Open-hardware-rule-is-repo-only memory note).
+Files must never be committed — the open-hardware-only rule keeps
+proprietary content out of the repo. At runtime, any brand is fair
+game.
 
 If no directory exists or is empty, every test is skipped cleanly.
 

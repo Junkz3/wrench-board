@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """TechnicianProfile model — round-trip, defaults, validation."""
 
 import pytest

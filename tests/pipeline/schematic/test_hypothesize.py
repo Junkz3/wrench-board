@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Tests for the reverse-diagnostic hypothesis engine (schema B)."""
 
 from __future__ import annotations

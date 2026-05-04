@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Anti-régression: scope hygiene of `_forward_session_to_ws`.
 
 `run_diagnostic_session_managed` defines a local `resolved_conv_id` (the

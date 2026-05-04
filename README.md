@@ -102,18 +102,18 @@ on the technician's cue, on the technician's optics.
   agent self-orients across sessions by reading its own scribe notebook
   (`state.md`, `decisions/`, `measurements/`, `open_questions.md`)
   instead of relying on an LLM-generated resume.
-- **Boardview** — 12 clean-room parsers in `api/board/parser/`, dispatched
+- **Boardview** — 13 clean-room parsers in `api/board/parser/`, dispatched
   by extension: KiCad `.kicad_pcb`, OpenBoardView Test_Link `.brd`,
-  KiCad-boardview BRD2, plus `.asc` `.bdv` `.bv` `.cad` `.cst` `.f2b`
-  `.fz` `.gr` `.tvw`. Adding a format = one new file.
-- **Tests** — 1 429 fast tests (~30 s) plus a `@slow` accuracy-gate suite,
+  KiCad-boardview BRD2, plus `.asc` `.bdv` `.bv` `.bvr` `.cad` `.cst`
+  `.f2b` `.fz` `.gr` `.pcb` `.tvw`. Adding a format = one new file.
+- **Tests** — 1 589 fast tests (~30 s) plus a `@slow` accuracy-gate suite,
   including 10 deterministic invariants on the simulator + hypothesize
   engines and frozen-oracle gates.
 - **Tooling** — `make doctor` runs 8 local health checks (env, packs,
   parsers, camera) for atelier deployment. `make eval-all` orchestrates
   the four eval surfaces (simulator, pipeline, vision, agent) with
-  cross-skill regression detection. `make tools-inventory` regenerates
-  `docs/tools.md` from the agent manifest.
+  cross-skill regression detection. `make tools-inventory` writes a
+  local agent-manifest index for offline review.
 - **Anti-hallucination** — defense in depth, two layers. (1) Tools return
   `{found: false, closest_matches: [...]}` for unknown refdes; the system
   prompt instructs the agent to pick from suggestions or ask the user.
@@ -134,9 +134,7 @@ Anthropic Managed Agents, **direct** via the Messages API. Managed is the
 default and the production path; direct serves as a fallback when the MA
 beta is unavailable and as an on-disk inspection harness during
 development. The WebSocket protocol is identical so the frontend doesn't
-know which one is running. See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
-§ *Workflow D — Diagnostic Runtime* for the full trade-off (pack mounting,
-cost profile, history persistence, cross-repair memory).
+know which one is running.
 
 ## Roadmap — Community Evolution Loop
 
@@ -171,17 +169,18 @@ make demo-fallback
 # or: DIAGNOSTIC_MODE=direct make run
 ```
 
-See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the full
-architecture reference and [`CLAUDE.md`](CLAUDE.md) for development
-conventions.
-
 ## License & credits
 
-Apache 2.0 — see [`LICENSE`](LICENSE). All code in this repository was
-written from scratch; dependencies are MIT / Apache 2.0 / BSD only. The
-MNT Reform motherboard used as the canonical test target is
-CERN-OHL-S-2.0. Built solo at Repair Valley, an independent electronics
-repair workshop.
+Source-available under a proprietary license — see [`LICENSE`](LICENSE).
+Free for personal evaluation, study, and local use. **Independent
+electronics repair professionals may also use it as an internal tool
+when servicing their own clients** (commercial remuneration OK), with
+no separate licence needed. Redistribution, hosted SaaS deployment,
+sublicensing, and any use for training competing AI / ML models still
+require written permission (contact: alexis@repairmind.co.uk).
+Dependencies are MIT / Apache 2.0 / BSD only. The MNT Reform motherboard
+used as the canonical test target is CERN-OHL-S-2.0. Built solo at
+Repair Valley, an independent electronics repair workshop.
 
 ## Contributing
 

@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Integration: tools dispatch + WS event roundtrip."""
 
 from __future__ import annotations

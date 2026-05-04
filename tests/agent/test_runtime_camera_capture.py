@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Flow B happy path: cam_capture → server.capture_request → client.capture_response."""
 
 from __future__ import annotations

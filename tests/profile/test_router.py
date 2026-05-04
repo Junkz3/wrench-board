@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """HTTP surface: GET /profile + 3 PUTs."""
 
 from pathlib import Path

@@ -1,5 +1,4 @@
-# SPDX-License-Identifier: Apache-2.0
-"""Generic BoardViewer 2.1.0.8 .cad parser — written from scratch.
+"""Generic BoardViewer 2.1.0.8 `.cad` parser.
 
 The `.cad` extension is an umbrella used by the generic BoardViewer
 2.1.0.8 distribution. The reliable path is the BRD2 sniff: when the

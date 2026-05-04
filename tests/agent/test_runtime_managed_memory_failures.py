@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Memory store provisioning failures must surface to the WS.
 
 Previously, if `ensure_global_store` or `ensure_memory_store` raised,

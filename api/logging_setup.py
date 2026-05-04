@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Logging configuration — plain text by default, one handler on stdout."""
 
 from __future__ import annotations

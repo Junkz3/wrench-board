@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Render the <technician_profile> block injected into the agent prompt."""
 
 from __future__ import annotations

@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# SPDX-License-Identifier: Apache-2.0
 """Generate benchable scenarios from a device's knowledge pack.
 
 Reads memory/{slug}/ and writes benchmark/auto_proposals/{slug}-YYYY-MM-DD.*

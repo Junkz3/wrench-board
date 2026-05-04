@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: Apache-2.0
 """Sweep (fp_weight, fn_weight) pairs and visibility multipliers, pick best."""
 
 from __future__ import annotations

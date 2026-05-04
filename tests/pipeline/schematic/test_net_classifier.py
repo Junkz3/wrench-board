@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Tests for the net classifier (regex fallback + Opus wrapper).
 
 Deterministic — we never hit Anthropic in tests; the LLM path is mocked

@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Unit tests for the repair-outcome shape + IO."""
 
 from __future__ import annotations

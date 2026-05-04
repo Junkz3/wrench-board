@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Asyncio-safety regression tests for runtime_managed.
 
 These tests exercise real behaviors (not just signature shapes), targeting

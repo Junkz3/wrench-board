@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Atomic file writes for the bench generator.
 
 Four per-run artefacts + the cross-run `_latest.json` aggregate + the

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: Apache-2.0
 """Perf benchmark for hypothesize() on the fixture corpus.
 
 Usage:

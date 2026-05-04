@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Reverse-diagnostic hypothesis engine — inverse of the behavioral simulator.
 
 Given a partial observation of the board (dead / alive components and rails,

@@ -196,15 +196,19 @@ def test_all_new_parsers_share_power_ground_regex():
             )
 
 
-def test_every_pin_position_is_integer_mils():
-    """The `Point.x/y` fields are ints (mils, per OBV convention). A parser
-    that accidentally produces a float breaks Pydantic validation at Board
-    construction time; this stand-alone test guards the invariant explicitly."""
+def test_every_pin_position_is_finite():
+    """Pin coordinates must be finite real numbers. `Point.x/y` is float
+    since XZZ board-to-board connector pads land at fractional mils
+    (sub-mil precision is required to keep them centred). Earlier this
+    test asserted int type — that invariant was relaxed when Point
+    moved to float, but each parser must still produce real numbers
+    for every pin."""
+    import math
     for parser, path, _src in _CASES:
         board = parser.parse_file(path)
         for pin in board.pins:
-            assert isinstance(pin.pos.x, int) and isinstance(pin.pos.y, int), (
-                f"{path.name}: pin {pin.part_refdes}#{pin.index} has non-int pos"
+            assert math.isfinite(pin.pos.x) and math.isfinite(pin.pos.y), (
+                f"{path.name}: pin {pin.part_refdes}#{pin.index} has non-finite pos"
             )
 
 

@@ -1,5 +1,4 @@
 # api/tools/protocol.py
-# SPDX-License-Identifier: Apache-2.0
 """Stepwise diagnostic protocol — schemas, persistence, state machine.
 
 The agent emits a typed plan via `bv_propose_protocol`; the tech submits

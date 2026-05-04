@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: Apache-2.0
 """One-shot purge of memory entries that are now served by mb_schematic_graph.
 
 Background — 2026-04-28: `electrical_graph.json` and `nets_classified.json`

@@ -357,6 +357,33 @@ function fmtBytes(n) {
 // Each card boils down to one of: on / off / building / loading / error.
 // ───────────────────────────────────────────────────────────────
 
+// Click-toggle handler for the diagnostic-ready badge popover.
+// Bound once per session — re-calling _wireDiagPopover() after the
+// first time is a no-op thanks to the `_diagWired` guard.
+let _diagWired = false;
+function _wireDiagPopover() {
+  if (_diagWired) return;
+  const badge = document.getElementById("rdCardBoardviewDiagBadge");
+  const popover = document.getElementById("rdCardBoardviewDiagPopover");
+  if (!badge || !popover) return;
+  const setOpen = (open) => {
+    popover.hidden = !open;
+    badge.setAttribute("aria-expanded", open ? "true" : "false");
+  };
+  badge.addEventListener("click", (e) => {
+    e.stopPropagation();
+    setOpen(popover.hidden);
+  });
+  document.addEventListener("click", (e) => {
+    if (popover.hidden) return;
+    if (!popover.contains(e.target) && e.target !== badge) setOpen(false);
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !popover.hidden) setOpen(false);
+  });
+  _diagWired = true;
+}
+
 function renderDashboardData(slug, rid, pack, sourcesData) {
   const qs = `?device=${encodeURIComponent(slug)}&repair=${encodeURIComponent(rid)}`;
   const schemVersions = sourcesData?.schematic_pdf?.versions || [];
@@ -416,6 +443,28 @@ function renderDashboardData(slug, rid, pack, sourcesData) {
       })
     : t("home.dashboard.boardview.meta_missing"));
   toggleEl("rdCardBoardviewLoss", !pack?.has_boardview);
+
+  // Diagnostic-ready badge — visible only when the loaded boardview
+  // ships manufacturer-tagged net references (XZZ post-v6 resistance
+  // / voltage section). Lazy-fetched via /api/board/render so we
+  // don't pay the parse cost on devices without a boardview. Click
+  // the badge to open a localized FR popover (i18n-driven body).
+  const diagWrapEl = document.getElementById("rdCardBoardviewDiagWrap");
+  if (diagWrapEl) diagWrapEl.hidden = true;
+  if (pack?.has_boardview && diagWrapEl) {
+    fetch(`/api/board/render?slug=${encodeURIComponent(slug)}`)
+      .then(r => r.ok ? r.json() : null)
+      .then(payload => {
+        const refs = payload?.net_diagnostics?.length || 0;
+        if (refs > 0) {
+          const countEl = document.getElementById("rdCardBoardviewDiagCount");
+          if (countEl) countEl.textContent = refs.toString();
+          diagWrapEl.hidden = false;
+          _wireDiagPopover();
+        }
+      })
+      .catch(() => { /* fail-quiet — the badge just stays hidden */ });
+  }
 
   const bvActions = document.getElementById("rdCardBoardviewActions");
   if (bvActions) {
@@ -805,6 +854,15 @@ async function switchSource(slug, rid, kind, version) {
       showToast("ok",
         t("home.toast.pin_updated_title"),
         t("home.toast.pin_updated_sub", { name: version.original_name }));
+    }
+    // Drop the PCB viewer's payload cache so the next #pcb visit
+    // refetches /api/board/render and parses the freshly-pinned file
+    // — without this, the bridge's slug cache would serve the stale
+    // version because the slug itself didn't change.
+    if (kind === "boardview"
+        && window.Boardview
+        && typeof window.Boardview.invalidate === "function") {
+      window.Boardview.invalidate(slug);
     }
     await refreshDashboardData(slug, rid);
   } catch (err) {

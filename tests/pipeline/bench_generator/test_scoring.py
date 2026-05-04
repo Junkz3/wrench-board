@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 from api.pipeline.bench_generator.schemas import (
     Cause,
     ProposedScenario,

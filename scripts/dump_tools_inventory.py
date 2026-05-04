@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: Apache-2.0
 """Auto-generate `docs/tools.md` from the diagnostic-agent tool manifest.
 
 Reads the tool group lists declared in `api.agent.manifest` (`MB_TOOLS`,

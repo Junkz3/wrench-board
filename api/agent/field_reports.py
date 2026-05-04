@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Cross-session memory for the diagnostic agent.
 
 Each "field report" captures a confirmed finding from a technician — the refdes

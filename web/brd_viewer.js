@@ -1,60 +1,32 @@
-// Board fixture selection. Reads `?device=<slug>` first (matches the WS
-// device_slug the backend uses) so navigating from a repair card stays in
-// sync, then falls back to `?board=<slug>` (legacy dev override).
-//
-// Behaviour:
-//   - No slug at all in the URL  → DEFAULT_BOARD (dev/local mode).
-//   - Explicit slug, in fixtures → that fixture.
-//   - Explicit slug, NOT in      → null  (caller renders an empty-state
-//     fixtures                     instead of silently showing the wrong
-//                                  device's PCB — that fallback was the
-//                                  source of "iPhone 13 shows MNT board").
-const BOARD_FIXTURES = {
-  // Backend slug (same string used by /ws/diagnostic/{device_slug}).
-  'mnt-reform-motherboard': '/boards/mnt-reform-motherboard.kicad_pcb',
-  // Short aliases for dev-mode `?board=` override.
-  'mnt-reform':             '/boards/mnt-reform-motherboard.kicad_pcb',
-  'mnt-reform-brd':         '/boards/mnt-reform-motherboard.brd',
-  'bilayer':                '/boards/bilayer_minimal.brd',
-  // 0BSD reference fixture from whitequark/kicad-boardview — 245 parts,
-  // 165 top + 80 bottom, canonical production-grade bilayer test board.
-  'whitequark':             '/boards/whitequark-example.brd',
-};
-const DEFAULT_BOARD = 'mnt-reform-motherboard';
+// Board source selection — backend-only. The active boardview for a slug
+// is whatever `active_sources.json` pins to (versioned per device). No
+// hardcoded fixture fallback: a missing or unknown slug renders an
+// empty-state, never silently swaps in another device's board.
 function resolveBoardSlug() {
   const qs = new URLSearchParams(window.location.search);
   return qs.get('device') || qs.get('board') || null;
 }
 
-// Probe the backend boardview endpoint for this slug. Returns the URL if
-// the server has a file on disk (active pin / board_assets / uploads),
-// or null on 404 / network error. Done as HEAD so we don't pay the
-// 16MB transfer just to test for existence.
+// Returns the backend boardview URL for this slug, or null if the server
+// has no file on disk for it. HEAD probe so we don't pay the transfer
+// just to test for existence.
 async function probeBackendBoardview(slug) {
   if (!slug) return null;
   const url = `/pipeline/packs/${encodeURIComponent(slug)}/boardview`;
   try {
-    const res = await fetch(url, { method: 'HEAD' });
+    const res = await fetch(url, { method: 'HEAD', cache: 'no-store' });
     if (res.ok) return url;
-  } catch (_) { /* fall through to fixtures */ }
+  } catch (_) { /* network error → null */ }
   return null;
 }
 
-// Resolve order:
-//   - No slug in URL  → DEFAULT_BOARD (dev/local mode)
-//   - Backend has a file for the slug → use it (real uploads in memory/)
-//   - Slug matches a hardcoded fixture → use it (dev fixtures)
-//   - Otherwise → null (loader renders the empty-state)
+// No slug or no backend file → null (loader renders empty-state).
 async function resolveBoardUrl() {
   const slug = resolveBoardSlug();
-  if (!slug) return BOARD_FIXTURES[DEFAULT_BOARD];
-  const backend = await probeBackendBoardview(slug);
-  if (backend) return backend;
-  return BOARD_FIXTURES[slug] || null;
+  if (!slug) return null;
+  return await probeBackendBoardview(slug);
 }
 
-let BRD_URL = null;          // populated by load() before the first fetch
-const BRD_SLUG = resolveBoardSlug();
 const PARSE_URL = '/api/board/parse';
 
 const state = {
@@ -94,13 +66,26 @@ const AGENT_PULSE_DURATION_MS = 3200;  // halo decays over this window; AGENT ba
 // ---------- Net colour configuration ----------
 // Default hex per category; override-able at runtime via window.setBoardviewNetColor,
 // persisted in localStorage so the technician's palette survives reloads.
+// KEEP IN SYNC with `web/js/pcb_viewer.js`'s PCB_DEFAULT_NET_HEX +
+// PCB_NET_COLOR_STORAGE_KEY — both viewers share the same picker /
+// localStorage entry. (Can't import: pcb_viewer.js loads as a classic
+// script and this file is an ES module.)
 const DEFAULT_NET_HEX = {
   signal:   '#a9b6cc',
-  power:    '#f59e0b',
-  ground:   '#6e7d96',
+  power:    '#B16628',
+  ground:   '#40455C',
   clock:    '#c084fc',
   reset:    '#f58278',
   'no-net': '#e6edf7',
+  // Entity-typed pseudo-categories — kept here for storage parity
+  // with the WebGL viewer; the SVG renderer doesn't use them at draw
+  // time but reads/writes the same localStorage entry, so we keep
+  // both maps shape-aligned to avoid losing user picks when one
+  // viewer writes a value the other doesn't know about.
+  testPad:  '#d4af37',
+  via:      '#c084fc',
+  boardOutline: '#67d4f5',
+  boardFill:    '#07101f',
 };
 const NET_COLOR_STORAGE_KEY = 'msa.pcb.netColors';
 
@@ -1498,26 +1483,17 @@ function mountCanvas(containerEl, board) {
 }
 
 export async function initBoardview(containerEl) {
-  if (state.board) {
-    // Board already loaded — re-mount canvas (container may have been rebuilt)
-    mountCanvas(containerEl, state.board);
-    return;
-  }
   if (!containerEl) return;
 
-  // Late URL resolution — async because we probe the backend boardview
-  // endpoint (memory/{slug}/uploads/) before falling back to the
-  // hardcoded BOARD_FIXTURES. Done here (not at module load) so the
-  // initial empty-state render isn't blocked on a network round-trip.
-  if (BRD_URL === null) {
-    BRD_URL = await resolveBoardUrl();
-  }
+  const slug = resolveBoardSlug();
+  const url = await resolveBoardUrl();
 
-  // Still null → no fixture, no upload, no canonical asset for this slug.
-  // Render empty-state. The user can upload a boardview from the repair
-  // page; reload then reveals the new file via the backend endpoint.
-  if (BRD_URL === null) {
-    renderEmpty(containerEl, BRD_SLUG);
+  // No slug or backend has nothing for this slug → empty-state. The user
+  // can upload a boardview from the repair dashboard; the next mount
+  // reveals the new file via the backend endpoint.
+  if (!url) {
+    state.board = null;
+    renderEmpty(containerEl, slug);
     return;
   }
 
@@ -1526,8 +1502,8 @@ export async function initBoardview(containerEl) {
   let blob;
   let serverFilename = null;
   try {
-    const res = await fetch(BRD_URL);
-    if (!res.ok) throw { detail: 'FETCH_FAILED', message: t('brd.error.fetch_failed_msg', { status: res.status, url: BRD_URL }) };
+    const res = await fetch(url, { cache: 'no-store' });
+    if (!res.ok) throw { detail: 'FETCH_FAILED', message: t('brd.error.fetch_failed_msg', { status: res.status, url }) };
     // Pull the filename out of Content-Disposition when the backend
     // boardview endpoint serves it — the URL itself
     // (`/pipeline/packs/{slug}/boardview`) carries no extension.
@@ -1540,11 +1516,10 @@ export async function initBoardview(containerEl) {
     return;
   }
 
-  // Preserve the original filename (extension drives parser dispatch in
-  // the backend — .kicad_pcb must not become .brd here or content-sniffing
-  // will route to the wrong parser). Prefer the server-supplied name when
-  // present; otherwise fall back to the URL basename (works for fixtures).
-  const filename = serverFilename || BRD_URL.split('/').pop() || 'upload.brd';
+  // Preserve the original filename — the extension drives parser dispatch
+  // in the backend, so .kicad_pcb must not become .brd here or content
+  // sniffing routes to the wrong parser.
+  const filename = serverFilename || 'upload.brd';
   const form = new FormData();
   form.append('file', blob, filename);
 

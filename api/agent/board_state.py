@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Per-repair persistence + replay of the boardview overlay state.
 
 The chat replay (managed runtime) re-emits agent text + tool_use events

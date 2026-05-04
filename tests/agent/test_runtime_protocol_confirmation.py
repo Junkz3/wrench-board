@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Pattern 4 round-trip for ``bv_propose_protocol``.
 
 The runtime gates the proposal on an explicit tech accept / reject before

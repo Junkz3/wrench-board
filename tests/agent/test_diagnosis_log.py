@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Unit tests for the per-repair diagnosis log store."""
 
 from __future__ import annotations

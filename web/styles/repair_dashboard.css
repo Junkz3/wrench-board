@@ -431,6 +431,80 @@ body.llm-open .rd-data-grid-4 { grid-template-columns: repeat(2, 1fr); }
   background: color-mix(in oklch, var(--cyan) 8%, var(--bg-2));
 }
 
+/* Diagnostic-ready badge — gold ring matching the WebGL viewer's
+   signal-test-pad colour vocabulary (#d4af37). Click opens a
+   localized popover next to the badge with the workflow
+   explanation; the badge itself is a button (focusable, aria). */
+.rd-diag-wrap {
+  position: relative;
+  display: inline-block;
+  flex-shrink: 0;
+  align-self: flex-start;
+}
+.rd-diag-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 7px;
+  border-radius: 999px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: .3px;
+  text-transform: uppercase;
+  color: #d4af37;
+  border: 1px solid color-mix(in oklch, #d4af37 45%, var(--border-soft));
+  background: color-mix(in oklch, #d4af37 10%, var(--bg-2));
+  cursor: pointer;
+  white-space: nowrap;
+  font: inherit;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: .3px;
+  text-transform: uppercase;
+}
+.rd-diag-badge:hover,
+.rd-diag-badge[aria-expanded="true"] {
+  background: color-mix(in oklch, #d4af37 18%, var(--bg-2));
+  border-color: #d4af37;
+}
+.rd-diag-badge svg { flex-shrink: 0; }
+.rd-diag-badge-count { font-weight: 700; }
+.rd-diag-badge-label { opacity: .75; }
+
+/* Glass popover, anchored just below the badge. Same blur/glass
+   token as other floating overlays per the frontend design rule. */
+.rd-diag-popover {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 50;
+  width: 320px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: color-mix(in oklch, var(--panel) 90%, transparent);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, .35);
+  font-family: var(--font-sans);
+  text-transform: none;
+  letter-spacing: 0;
+}
+.rd-diag-popover-title {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: #d4af37;
+  margin-bottom: 6px;
+  letter-spacing: .3px;
+  text-transform: uppercase;
+}
+.rd-diag-popover-body {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-2);
+}
+
 .rd-data-card-meta {
   margin: 0;
   font-family: var(--mono);

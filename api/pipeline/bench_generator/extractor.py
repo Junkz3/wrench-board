@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """LLM extraction pass.
 
 Calls `call_with_forced_tool` with the `propose_scenarios` tool and

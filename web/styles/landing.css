@@ -135,8 +135,8 @@
 /* ============ Device autocomplete ============
  * Lazy-loaded list of packs already on disk, surfaced under the device
  * input as the tech types. Glass panel style matching the rest of the
- * floating overlays (inspector, legend, tooltip — see CLAUDE.md
- * "Interaction vocabulary"). */
+ * floating overlays (inspector, legend, tooltip — shared glass-panel
+ * convention across the workbench). */
 .landing-input-wrap {
   position: relative;
   width: 100%;
@@ -470,10 +470,10 @@
 .landing-sidebar-item:hover { background: var(--panel-2); }
 
 /* No left-rail accent on hover. The cyan in tokens.css is locked to
-   component semantics (see CLAUDE.md "design tokens"); using it as a
-   generic hover affordance was a semantic violation AND read as
-   stock-SaaS-sidebar. Hover = background lift + symptom/meta brightening
-   + the × button reveal — that's enough signal. */
+   component semantics; using it as a generic hover affordance was a
+   semantic violation AND read as stock-SaaS-sidebar. Hover = background
+   lift + symptom/meta brightening + the × button reveal — that's enough
+   signal. */
 .landing-sidebar-link {
   display: block;
   padding: 9px 30px 9px 12px;

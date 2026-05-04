@@ -1,5 +1,4 @@
 # tests/pipeline/test_hypothesize_endpoint.py
-# SPDX-License-Identifier: Apache-2.0
 """HTTP coverage for POST /pipeline/packs/{slug}/schematic/hypothesize."""
 
 from __future__ import annotations

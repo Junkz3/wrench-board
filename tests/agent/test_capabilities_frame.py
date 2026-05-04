@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """client.capabilities frame must update session.has_camera."""
 
 from __future__ import annotations

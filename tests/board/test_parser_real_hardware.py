@@ -117,7 +117,10 @@ def _serialize_as_test_link(board: Board) -> str:
     pins are contiguous (so `end_of_pins` monotonically increases).
     This mirrors the invariant every Test_Link dialect expects.
     """
-    outline_lines = [f"{p.x} {p.y}" for p in board.outline]
+    # Test_Link grammar takes integer-mil tokens — Point is float now
+    # to support sub-mil XZZ probe-pad positions, but the ASCII format
+    # is still int by convention. Cast on the way out.
+    outline_lines = [f"{int(p.x)} {int(p.y)}" for p in board.outline]
 
     # Regroup pins by part so the file is Test_Link-valid (contiguous
     # pin ranges per part, with per-part 1-based pin.index).
@@ -145,11 +148,11 @@ def _serialize_as_test_link(board: Board) -> str:
         probe = pin.probe if pin.probe is not None else -99
         net = _escape_net(pin.net or "")
         pins_lines.append(
-            f"{pin.pos.x} {pin.pos.y} {probe} {part_idx} {net}".rstrip()
+            f"{int(pin.pos.x)} {int(pin.pos.y)} {probe} {part_idx} {net}".rstrip()
         )
 
     nails_lines = [
-        f"{nl.probe} {nl.pos.x} {nl.pos.y} "
+        f"{nl.probe} {int(nl.pos.x)} {int(nl.pos.y)} "
         f"{1 if nl.layer == Layer.TOP else 2} {_escape_net(nl.net)}"
         for nl in board.nails
     ]

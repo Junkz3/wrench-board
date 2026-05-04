@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """LLM-path tests for passive_classifier — fully mocked, no Anthropic calls."""
 
 from __future__ import annotations

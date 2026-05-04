@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """On-disk profile store.
 
 Single file `memory/_profile/technician.json`. Writes are atomic via

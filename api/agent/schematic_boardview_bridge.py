@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Joins a SimulationTimeline (schematic-space) with a parsed Board
 (physical-PCB-space) to produce a measurement-friendly EnrichedTimeline.
 

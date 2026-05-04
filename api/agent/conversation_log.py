@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Cross-conversation narrative log for the diagnostic agent.
 
 A field_report (`api/agent/field_reports.py`) is component-grain: "I confirmed

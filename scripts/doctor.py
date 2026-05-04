@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Local health check for a wrench-board install.
 
 Runs a battery of fast, offline checks on the local install and emits a

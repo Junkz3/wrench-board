@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Pydantic DTOs for the pipeline HTTP/WS surface — request/response shapes."""
 
 from __future__ import annotations
@@ -86,7 +85,7 @@ class TaxonomyPackEntry(BaseModel):
 
 class TaxonomyTree(BaseModel):
     """Packs grouped by brand > model > version, with fallback bucket for
-    registries missing brand or model (hard rule #5 = null rather than invent).
+    registries missing brand or model (hard rule #4 = null rather than invent).
     """
 
     brands: dict[str, dict[str, list[TaxonomyPackEntry]]] = Field(default_factory=dict)

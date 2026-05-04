@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Closed catalogues of tools and skills + status/level thresholds.
 
 Adding a skill or tool is a code change + schema_version bump — no runtime

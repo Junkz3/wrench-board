@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Net classifier — tags every net with a functional domain.
 
 Two layers of intelligence, same pattern as the boot sequence analyzer:

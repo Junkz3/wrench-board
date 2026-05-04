@@ -15,7 +15,7 @@ import { updatePreviewDevice } from './camera_preview.js';
 import { loadSchematic, closeSchematicInspector } from './schematic.js?v=fitzoom';
 import { initLanding, showLanding } from './landing.js';
 import { mountMascot } from './mascot.js';
-import * as Protocol from './protocol.js?v=quest3';
+import * as Protocol from './protocol.js?v=quest4';
 
 // Tracks which device slug the graph has already been mounted for. Guards
 // against a second initGraphWithData() call on re-navigation to #graphe —
@@ -179,8 +179,23 @@ if (!window.Boardview) {
   const tweaksPanelEl  = document.getElementById("tweaksPanel");
   const tweaksToggleEl = document.getElementById("tweaksToggle");
   const tweaksCloseEl  = document.getElementById("tweaksClose");
+  // Refresh the pin-count pills next to each colour row from the
+  // currently-loaded board. Called when the panel opens (board may
+  // have been swapped while the panel was closed) and after every
+  // colour change (cosmetic — the count itself doesn't change with
+  // colour, but cheap enough to keep the path uniform).
+  const refreshPinCounts = () => {
+    const counts = (window.Boardview && window.Boardview.getPinCounts && window.Boardview.getPinCounts()) || null;
+    document.querySelectorAll('[data-cat-count]').forEach(span => {
+      const cat = span.dataset.catCount;
+      span.textContent = counts && counts[cat] != null ? counts[cat] : '';
+    });
+  };
   if (tweaksPanelEl && tweaksToggleEl) {
-    tweaksToggleEl.addEventListener("click", () => tweaksPanelEl.classList.toggle("show"));
+    tweaksToggleEl.addEventListener("click", () => {
+      tweaksPanelEl.classList.toggle("show");
+      if (tweaksPanelEl.classList.contains("show")) refreshPinCounts();
+    });
   }
   if (tweaksPanelEl && tweaksCloseEl) {
     tweaksCloseEl.addEventListener("click", () => tweaksPanelEl.classList.remove("show"));
@@ -192,33 +207,96 @@ if (!window.Boardview) {
   // `window.getBoardviewColors` which is defined by brd_viewer.js (an ES module
   // with implicit `defer`), so we run the initial sync after DOMContentLoaded
   // when deferred modules are guaranteed to have executed.
+  const paintDot = (row, hex) => {
+    const dot = row && row.querySelector('.brd-color-dot');
+    if (!dot || !hex) return;
+    dot.style.background = hex;
+    dot.style.boxShadow = `0 0 6px ${hex}`;
+  };
+  // Per-category Pickr instance, keyed by `data-cat`. Built lazily
+  // when the Pickr library + brd_viewer.js's `getBoardviewColors` are
+  // both ready — Pickr is loaded as a non-deferred CDN script so it
+  // usually beats this code, but we tick in case it doesn't.
+  const pickrByCategory = {};
+  const buildPickrs = () => {
+    if (typeof Pickr === 'undefined') return false;
+    const current = (window.getBoardviewColors && window.getBoardviewColors()) || {};
+    document.querySelectorAll('.brd-color-row .brd-color-dot[data-cat]').forEach(dot => {
+      const cat = dot.dataset.cat;
+      if (pickrByCategory[cat]) return;
+      const initial = current[cat] || '#a9b6cc';
+      paintDot(dot.closest('.brd-color-row'), initial);
+      const pickr = Pickr.create({
+        el: dot,
+        theme: 'classic',
+        useAsButton: true,         // dot itself is the trigger
+        default: initial,
+        defaultRepresentation: 'HEX',
+        appClass: 'brd-pickr',     // namespace for any future tweaks
+        position: 'left-middle',   // popover opens to the LEFT of the
+                                   // panel (which is pinned right) so
+                                   // it stays fully on-screen
+        components: {
+          preview: true,
+          opacity: false,
+          hue: true,
+          // `clear` reverts that single row to its parse-time default.
+          // Especially useful on `boardFill` — the default is bg-deep,
+          // so clear == "no fill" (the substrate becomes invisible
+          // again). Saves the user from a separate "Reset colors"
+          // round trip when they only wanted to undo one row.
+          interaction: { hex: true, rgba: false, input: true, save: false, clear: true },
+        },
+      });
+      pickr.on('change', (color) => {
+        const hex = color.toHEXA().toString().slice(0, 7);  // drop alpha
+        window.setBoardviewNetColor?.(cat, hex);
+        paintDot(dot.closest('.brd-color-row'), hex);
+      });
+      pickr.on('clear', () => {
+        const defaults = (window.getBoardviewColorDefaults && window.getBoardviewColorDefaults()) || {};
+        const defaultHex = defaults[cat];
+        if (!defaultHex) return;
+        window.setBoardviewNetColor?.(cat, defaultHex);
+        paintDot(dot.closest('.brd-color-row'), defaultHex);
+        pickr.setColor(defaultHex, true);
+      });
+      pickrByCategory[cat] = pickr;
+    });
+    return true;
+  };
   const syncInputs = () => {
     const current = (window.getBoardviewColors && window.getBoardviewColors()) || {};
-    document.querySelectorAll('input[type="color"][data-cat]').forEach(inp => {
-      const cat = inp.dataset.cat;
-      if (current[cat]) inp.value = current[cat];
+    document.querySelectorAll('.brd-color-row .brd-color-dot[data-cat]').forEach(dot => {
+      const cat = dot.dataset.cat;
+      const hex = current[cat];
+      if (!hex) return;
+      paintDot(dot.closest('.brd-color-row'), hex);
+      if (pickrByCategory[cat]) {
+        pickrByCategory[cat].setColor(hex, /* silent */ true);
+      }
     });
+    refreshPinCounts();
   };
-  document.querySelectorAll('input[type="color"][data-cat]').forEach(inp => {
-    inp.addEventListener('input', (e) => {
-      window.setBoardviewNetColor?.(inp.dataset.cat, e.target.value);
-    });
-  });
   document.getElementById("brdColReset")?.addEventListener("click", () => {
     window.resetBoardviewColors?.();
     syncInputs();
   });
+  // Wait for Pickr + brd_viewer.js's window.getBoardviewColors before
+  // building the pickers and hydrating their initial colours.
+  let tries = 0;
+  const init = () => {
+    if (typeof Pickr !== 'undefined' && window.getBoardviewColors) {
+      buildPickrs();
+      syncInputs();
+      return;
+    }
+    if (++tries < 60) requestAnimationFrame(init);
+  };
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", syncInputs);
+    document.addEventListener("DOMContentLoaded", init);
   } else {
-    // DOM is already ready — but the deferred module may not have executed yet.
-    // Poll briefly until window.getBoardviewColors is defined (typically 1-2 frames).
-    let tries = 0;
-    const tick = () => {
-      if (window.getBoardviewColors) { syncInputs(); return; }
-      if (++tries < 40) requestAnimationFrame(tick);
-    };
-    tick();
+    init();
   }
 
   // Session pill — click body to go to dashboard, click [×] to quit session.

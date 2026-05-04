@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Orchestrator — full schematic ingestion for one device.
 
 Renders the PDF page by page, extracts pdfplumber grounding, runs the Claude

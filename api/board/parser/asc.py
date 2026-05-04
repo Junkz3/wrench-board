@@ -1,5 +1,4 @@
-# SPDX-License-Identifier: Apache-2.0
-"""ASUS TSICT .asc parser — written from scratch.
+"""ASUS TSICT `.asc` parser.
 
 ASUS's internal viewer writes a directory of five files: `format.asc`
 (outline), `parts.asc` (components), `pins.asc` (pin placements),

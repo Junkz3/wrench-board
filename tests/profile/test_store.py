@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Profile store — disk I/O, atomicity, bump_skill."""
 
 from pathlib import Path

@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Agent-facing tool handlers for the technician profile.
 
 Three tools:

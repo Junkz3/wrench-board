@@ -1,5 +1,4 @@
 # tests/pipeline/schematic/test_simulator_spof_correlation.py
-# SPDX-License-Identifier: Apache-2.0
 """Cross-check critical_path SPOF ranking with simulator blockage depth.
 
 The `mb_schematic_graph(query="critical_path")` tool ranks nodes by raw

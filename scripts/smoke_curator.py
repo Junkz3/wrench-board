@@ -26,7 +26,7 @@ load_dotenv(REPO_ROOT / ".env")
 
 # Force line-buffered stdout so the script streams live when not on a TTY
 # (eg piped to a file or backgrounded). Without this, Python buffers the
-# whole 2-3 min run and only flushes at exit. See CLAUDE.md streaming rule.
+# whole 2-3 min run and only flushes at exit.
 try:
     sys.stdout.reconfigure(line_buffering=True)
 except Exception:  # noqa: BLE001

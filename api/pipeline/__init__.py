@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Pipeline package — FastAPI router for the knowledge-generation factory.
 
 Exposes:
@@ -412,7 +411,7 @@ def _read_optional_json(path: Path) -> dict | None:
 async def get_pack_full(device_slug: str) -> dict:
     """Return every JSON artefact of a pack in a single payload.
 
-    Missing files become `null` — never fabricated (hard rule #5). Consumed by
+    Missing files become `null` — never fabricated (hard rule #4). Consumed by
     the Memory Bank UI so it can render all five sections in one fetch.
     """
     settings = get_settings()

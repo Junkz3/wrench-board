@@ -87,7 +87,7 @@ let lastTurnCostUsd = 0;
 // (agent emitted two messages back-to-back without a user interjection).
 let currentTurn = null;
 
-// Family icons for tool-call steps. 12×12, stroke currentColor, per CLAUDE.md §icons.
+// Family icons for tool-call steps. 12×12, inline SVG, stroke currentColor.
 const ICON_MB =
   '<svg class="step-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" ' +
   'stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" ' +

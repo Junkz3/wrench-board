@@ -542,16 +542,29 @@ if (window.i18n && window.i18n.onChange) {
   window.i18n.onChange(() => notify());
 }
 
+let _lastFocusedStepId = null;
+
 function pushBadgesToBoard(proto) {
   if (!window.Boardview || !window.Boardview.setProtocolBadges) return;
   if (!proto) {
     window.Boardview.clearProtocolBadges();
+    _lastFocusedStepId = null;
     return;
   }
   const minimal = proto.steps.map((s) => ({
     id: s.id, target: s.target, status: s.status,
   }));
   window.Boardview.setProtocolBadges(minimal, proto.current_step_id);
+  // Auto-focus the camera on the active step's target when it changes —
+  // fires on first accept (transition from null → step1.id) and on every
+  // subsequent step transition. Same target as the previous push = no-op.
+  if (proto.current_step_id !== _lastFocusedStepId) {
+    _lastFocusedStepId = proto.current_step_id;
+    const active = proto.steps.find((s) => s.id === proto.current_step_id);
+    if (active && active.target && window.Boardview.focus) {
+      try { window.Boardview.focus(active.target); } catch (_) {}
+    }
+  }
 }
 subscribe(pushBadgesToBoard);
 

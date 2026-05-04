@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Read the bootstrap IDs produced by `scripts/bootstrap_managed_agent.py`.
 
 The expected on-disk shape is the multi-tier format

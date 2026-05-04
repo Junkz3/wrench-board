@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Tests for `api.pipeline.writers.run_writers_parallel` orchestration.
 
 `writers.py` is phase 3 of the knowledge factory: 3 LLM writers (Cartographe,

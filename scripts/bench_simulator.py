@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: Apache-2.0
 """Benchmark the SimulationEngine against an on-disk electrical graph.
 
 Usage:

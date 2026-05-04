@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 from api.agent.memory_seed import _SEED_FILES
 
 

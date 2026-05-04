@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """CLI: print a one-line JSON scorecard for the deterministic schematic pipeline.
 
 Mirrors `scripts/eval_simulator.py` but for the pipeline-evolve loop. The loop

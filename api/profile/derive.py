@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Pure derivation helpers — no I/O, safe to call from prompt rendering / HTTP."""
 
 from __future__ import annotations

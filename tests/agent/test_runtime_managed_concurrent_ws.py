@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Concurrent-WebSocket tests for the Managed Agents stream loop.
 
 These tests exercise scenarios where two `_forward_session_to_ws` calls

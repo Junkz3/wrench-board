@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Tests for the mb_hypothesize tool wrapper (schema B)."""
 
 from __future__ import annotations

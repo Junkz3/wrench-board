@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Tool manifest + system prompt builders for the diagnostic agent.
 
 Tool families (counts kept in sync with the lists below — the

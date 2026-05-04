@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Tests for the uploads scanner that the pipeline orchestrator runs
 before Scout. Covers shape (kinds extracted, most-recent-wins for
 schematic/boardview, accumulation for datasheets), edge cases (empty

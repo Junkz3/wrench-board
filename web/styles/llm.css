@@ -131,8 +131,8 @@ body.llm-open .stub{right:420px}
 .llm-log .sys.err{color:oklch(0.72 0.20 25)}
 
 /* --- input --- */
-/* Buttons overlay the bottom-right corner of the textarea for a fused,
-   ChatGPT-like feel. Textarea reserves right-padding so typed text never
+/* Buttons overlay the bottom-right corner of the textarea for a fused
+   chat-input feel. Textarea reserves right-padding so typed text never
    slides under the icons. */
 .llm-input{
   position:relative;display:block;padding:12px 14px 14px;

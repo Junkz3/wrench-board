@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Tests for the explicit Managed Agents session-start state machine.
 
 Each test pins one of the five disjoint modes the runtime can land in,

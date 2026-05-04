@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """CI-gated accuracy + perf benchmarks — per-mode thresholds."""
 
 from __future__ import annotations

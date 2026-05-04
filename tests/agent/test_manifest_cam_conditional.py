@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """cam_capture must be in the manifest only when session.has_camera is True."""
 
 from __future__ import annotations

@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Tests for the 4 presence cases of restructured mb_get_component."""
 
 from __future__ import annotations

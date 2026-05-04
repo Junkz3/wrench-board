@@ -1,31 +1,24 @@
-# SPDX-License-Identifier: Apache-2.0
-"""Tebo IctView .tvw parser — written from scratch.
+"""Tebo IctView `.tvw` parser.
 
-**Reality check: there are two different TVW layouts in circulation.**
+**Two TVW layouts coexist in circulation, both supported here.**
 
-1. Some TVW redistributions carry a Test_Link-shape ASCII body wrapped
-   in a symmetric per-character rotation cipher: digits rotate by 3
-   within `0-9`, Latin letters rotate by 10 within their case class.
-   Literal separators pass through untouched. This parser handles
-   that layout — subtract the shift on decode, add it on encode.
+1. Some redistributions carry a Test_Link-shape ASCII body wrapped in a
+   symmetric per-character rotation cipher: digits rotate by 3 within
+   `0-9`, Latin letters rotate by 10 within their case class. Literal
+   separators pass through untouched. This parser decodes the cipher
+   then hands off to the shared Test_Link ASCII shape walker.
 
-2. The *production* `.tvw` format emitted by Tebo IctView 3.0 / 4.0
-   is a **binary** container with little-endian integers, Pascal
-   strings, layer sections (marker 0x33), D-code tables, and pad /
-   line / arc / surface lists per layer. See the reverse-engineering
-   notes at https://github.com/inflex/teboviewformat for the full
-   `fileformat-tvw.txt`. This parser does **not** decode the binary
-   layout — proper support requires walking the layer sections and
-   is out of scope for a clean-room ASCII-helper-based parser.
+2. The *production* `.tvw` format emitted by Tebo IctView 3.0 / 4.0 is
+   a **binary** container with little-endian integers, Pascal-prefixed
+   strings, per-layer aperture (D-code) tables, and per-layer placement
+   records. We dispatch this flavour to `_tvw_engine` which produces a
+   dimensionally-accurate `Board` with synthetic refdes (`PAD_NNN`) —
+   Tebo IctView does not store netlist info at file level so connectivity
+   must be inferred later.
 
-When a binary-layout TVW file is uploaded, the first bytes decoded
-through the rotation cipher will not spell any Test_Link marker —
-the helper raises `InvalidBoardFile` with a specific "binary TVW"
-hint so the user knows to look for a viewer that handles the binary
-container. When a rotation-cipher TVW is uploaded, the parser
-decodes and parses end-to-end.
-
-Written from scratch — no code copied from any external codebase.
+Dispatch: a 3-Pascal-string magic at the head of the file (see
+`_tvw_engine/magic.py`) routes the production-binary path; otherwise
+we apply the rotation cipher and try the Test_Link walker.
 """
 
 from __future__ import annotations
@@ -104,13 +97,24 @@ class TVWParser(BoardParser):
     extensions = (".tvw",)
 
     def parse(self, raw: bytes, *, file_hash: str, board_id: str) -> Board:
+        # Production binary first — magic detection is more discriminating
+        # than the non-printable-byte heuristic.
+        from api.board.parser._tvw_engine.board_mapper import to_board
+        from api.board.parser._tvw_engine.magic import is_production_binary
+        from api.board.parser._tvw_engine.walker import parse as walk_tvw
+
+        if is_production_binary(raw):
+            tvw_file = walk_tvw(raw)
+            return to_board(tvw_file, board_id=board_id, file_hash=file_hash)
+
+        # Fallback path 1: rotation-cipher ASCII variant.
         if _looks_binary_tvw(raw):
             raise ObfuscatedFileError(
-                "tvw: this file looks like the production binary-layout TVW "
-                "container (Tebo IctView 3.0/4.0). Current parser only "
-                "handles the rotation-cipher ASCII variant. See "
-                "docs/superpowers/specs/2026-04-25-boardview-formats-v1.md "
-                "for the scope rationale and the teboviewformat reference."
+                "tvw: looks like a binary-layout TVW container but does not "
+                "match the Tebo IctView production-binary magic. Unknown TVW "
+                "variant; the rotation-cipher ASCII parser cannot decode "
+                "binary containers. See docs/superpowers/specs/"
+                "2026-04-25-boardview-formats-v1.md."
             )
         try:
             plain = _deobfuscate(raw).decode("utf-8", errors="replace")

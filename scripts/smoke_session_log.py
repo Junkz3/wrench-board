@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Live smoke: cross-repair conversation_log via mb_record_session_log.
 
 Validates the user scenario "but I told you in the other diag we already
@@ -44,7 +43,7 @@ from dotenv import load_dotenv
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
-# Stream stdout / surface internal pipeline INFO logs (per CLAUDE.md rule).
+# Stream stdout / surface internal pipeline INFO logs.
 sys.stdout.reconfigure(line_buffering=True)
 logging.basicConfig(level=logging.INFO, stream=sys.stderr,
                     format="%(asctime)s %(levelname)s %(name)s :: %(message)s")

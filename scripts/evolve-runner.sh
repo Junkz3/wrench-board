@@ -1,5 +1,4 @@
 #!/bin/bash
-# SPDX-License-Identifier: Apache-2.0
 # Microsolder Evolve — Runner (infinite loop, agent-driven)
 #
 # Usage:

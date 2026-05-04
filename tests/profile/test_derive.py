@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Pure derivation helpers: skill_status, global_level, effective_verbosity."""
 
 import pytest

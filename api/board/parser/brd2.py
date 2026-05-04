@@ -1,5 +1,4 @@
-# SPDX-License-Identifier: Apache-2.0
-"""OpenBoardView BRD2 parser — written from scratch (Apache 2.0).
+"""OpenBoardView BRD2 parser.
 
 Parses BRD2-format files produced by converters like `whitequark/kicad-boardview`.
 Distinct from Test_Link : block markers are UPPERCASE (`BRDOUT:`, `NETS:`,

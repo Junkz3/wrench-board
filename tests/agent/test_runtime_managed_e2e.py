@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """End-to-end tests for the Managed Agents stream loop in `_forward_session_to_ws`.
 
 These tests focus on edge cases that previously slipped through:

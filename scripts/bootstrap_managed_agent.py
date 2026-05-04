@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Bootstrap the Managed Agents resources for the diagnostic conversation.
 
 Creates **three tier-scoped agents** that differ only by `model`:

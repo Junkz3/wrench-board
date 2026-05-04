@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Post-hoc refdes sanitizer.
 
 Second layer of defense against hallucinated component IDs. The first

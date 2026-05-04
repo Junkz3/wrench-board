@@ -1,17 +1,14 @@
-# SPDX-License-Identifier: Apache-2.0
-"""IBM Lenovo Card Analysis Support Tool .cst parser — written from scratch.
+"""IBM Lenovo Card Analysis Support Tool `.cst` parser.
 
 **Scope honesty.** Castw v3.32 (IBM's internal ICT viewer for
 ThinkPad service dumps) is a 1990s-era tool with no published
 file-format spec. This parser assumes a Test_Link-shape ASCII
 variant with INI-style bracketed section headers (`[Format]`,
 `[Components]`, `[Pins]`, `[Nails]`). Real Castw files in the field
-are more likely a binary container. Until we have a real `.cst` to
-reverse-engineer, this stays best-effort: the parser detects clearly
+are more likely a binary container. Until a binary fixture lands in
+`board_assets/`, this stays best-effort: the parser detects clearly
 binary payloads and rejects them with a clear hint instead of
 silently emitting an empty Board.
-
-No code copied from any external codebase.
 """
 
 from __future__ import annotations

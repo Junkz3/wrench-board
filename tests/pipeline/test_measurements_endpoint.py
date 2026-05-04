@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """HTTP coverage for /pipeline/packs/{slug}/repairs/{repair_id}/measurements."""
 
 from __future__ import annotations

@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Push api/agent/seed_data/global_{patterns,playbooks}/* to the singleton
 Managed Agents memory stores.
 

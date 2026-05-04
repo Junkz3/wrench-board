@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Verify that a validation.start payload round-trips through chat_history
 with a source=trigger marker."""
 

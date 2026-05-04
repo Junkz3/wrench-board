@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: Apache-2.0
 """Build the field-calibrated benchmark corpus from already-persisted data.
 
 Two canonical sources — NO hand-curated seed file:

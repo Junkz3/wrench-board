@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Exception classes for the bench generator.
 
 Split from the main module so they can be imported without triggering

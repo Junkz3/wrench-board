@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Tests for the Opus-refined boot-sequence analyzer.
 
 Kept deterministic — we mock `call_with_forced_tool` at the point it is

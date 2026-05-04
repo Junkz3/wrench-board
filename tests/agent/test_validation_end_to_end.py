@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """End-to-end: diagnose → validate → outcome + WS event."""
 
 from pathlib import Path

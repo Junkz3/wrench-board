@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Phase 2.5 — Refdes Mapper.
 
 Forced-tool sub-agent that maps registry canonical names to graph refdes

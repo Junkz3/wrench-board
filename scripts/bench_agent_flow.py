@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: Apache-2.0
 """End-to-end agent flow benchmark — scripted repair session.
 
 Plays a canonical MNT Reform U13 buck-dead scenario against a live

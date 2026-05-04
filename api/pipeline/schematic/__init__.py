@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Schematic ingestion pipeline — PDF schematic → ElectricalGraph.
 
 Per-page Claude vision extracts a `SchematicPageGraph` from each rendered page.

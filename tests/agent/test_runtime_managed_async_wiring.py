@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Wiring tests: confirm runtime_managed actually uses the F1/F2/F8 patterns.
 
 The async_safety tests prove the patterns themselves work. These tests

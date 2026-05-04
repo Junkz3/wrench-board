@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """GET /api/macros/{slug}/{repair_id}/{filename} serves macro images."""
 
 from __future__ import annotations

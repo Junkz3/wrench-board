@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Catalogue integrity: ids unique, requires resolve, thresholds monotonic."""
 
 from api.profile.catalog import (

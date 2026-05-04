@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Tests for the engine_params knob layer.
 
 The loader reads engine_params.json and merges it onto module-level

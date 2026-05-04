@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Helper shared by runtime_direct and runtime_managed.
 
 Reads memory/{slug}/simulator_reliability.json and formats a one-liner

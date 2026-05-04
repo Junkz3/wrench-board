@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Field-calibrated accuracy gates — runs against real + legacy scenarios.
 
 Distinct from test_hypothesize_accuracy.py (synthetic, self-referential

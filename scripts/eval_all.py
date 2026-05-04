@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Composite eval orchestrator — runs the 4 microsolder evals, consolidates
 scores, compares against the previous run, and flags regressions.
 

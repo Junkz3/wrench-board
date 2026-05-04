@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Python-level vocabulary drift detection for the knowledge pack.
 
 The former LLM Auditor re-implemented a set diff in natural language. That work

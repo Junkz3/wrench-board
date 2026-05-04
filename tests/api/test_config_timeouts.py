@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Validation contract for the timeout-related Settings fields.
 
 Asserts that every `*_timeout_seconds` setting parameterising the agent

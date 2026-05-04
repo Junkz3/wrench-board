@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """CLI: print a one-line JSON scorecard for the schematic vision pipeline.
 
 Mirror of `eval_pipeline.py` but for mode B — scores `page_vision.py` /

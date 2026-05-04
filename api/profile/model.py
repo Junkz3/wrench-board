@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Pydantic v2 models for the technician profile.
 
 Source of truth for both runtime validation and the JSON Schema surface

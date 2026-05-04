@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Coverage for api.agent.schematic_boardview_bridge."""
 
 from __future__ import annotations

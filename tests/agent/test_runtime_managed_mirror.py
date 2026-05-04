@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Tests for durable mirror outcomes — Task 5 (D1).
 
 Covers:

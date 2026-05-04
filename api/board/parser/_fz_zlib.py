@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """FZ-zlib parser — Mentor/Allegro-style pipe-delimited boardview format.
 
 Real-world `.fz` files in the repair community come in two distinct
@@ -35,12 +34,21 @@ import zlib
 
 from api.board.model import Board, Layer, Nail, Net, Part, Pin, Point
 from api.board.parser._ascii_boardview import GROUND_RE, POWER_RE
+from api.board.parser._pad_shape_inference import infer_pad_shape
 from api.board.parser.base import InvalidBoardFile, MalformedHeaderError
 
 _ZLIB_MAGIC_FAST = b"\x78\x9c"  # default compression
 _ZLIB_MAGIC_BEST = b"\x78\xda"  # best compression
 _ZLIB_MAGIC_NONE = b"\x78\x01"  # store
 _ZLIB_MAGICS = (_ZLIB_MAGIC_FAST, _ZLIB_MAGIC_BEST, _ZLIB_MAGIC_NONE)
+
+# `Board` coordinates are mils per the OBV convention. Some `.fz` files
+# (typically the AMD/ASUS graphics-card dumps) ship in millimeters and
+# announce the choice with a top-level `UNIT:millimeters` directive.
+# Without scaling, every coordinate is 25× too small and the viewer
+# fits the board to a postage stamp.
+_MILS_PER_MM = 39.3700787
+_MILS_PER_INCH = 1000.0
 
 
 def looks_like_fz_zlib(raw: bytes) -> bool:
@@ -63,7 +71,7 @@ def parse_fz_zlib(
     if not looks_like_fz_zlib(raw):
         raise InvalidBoardFile("fz-zlib: missing zlib magic at offset 4")
     try:
-        text = zlib.decompress(raw[4:]).decode("utf-8", errors="replace")
+        text, bom_text = _decompress_streams(raw)
     except zlib.error as exc:
         raise InvalidBoardFile(f"fz-zlib: decompression failed ({exc})") from exc
 
@@ -71,20 +79,31 @@ def parse_fz_zlib(
     parts_section = _pick_section(sections, "REFDES")
     pins_section = _pick_section(sections, "NET_NAME")
     vias_section = _pick_section(sections, "TESTVIA")
+    scale = _detect_unit_scale(text)
 
     if parts_section is None or pins_section is None:
         raise MalformedHeaderError("fz-zlib: missing REFDES or NET_NAME section")
 
     parts, pin_lookup = _build_parts(parts_section)
-    pins, parts = _build_pins(pins_section, parts, pin_lookup)
-    nails = _build_nails(vias_section) if vias_section else []
+    # Patch parts with BOM descriptions before building pins so the
+    # pad-shape inference can fall back to `Part.value` when the
+    # SYM_NAME column duplicates the refdes (Asus DUAL 1060 style).
+    if bom_text is not None:
+        parts = _apply_bom_descriptions(parts, _parse_bom(bom_text))
+    pins, parts = _build_pins(pins_section, parts, pin_lookup, scale=scale)
+    nails = _build_nails(vias_section, scale=scale) if vias_section else []
     nets = _derive_nets(pins)
+    parts = _detect_dnp_alternates(parts, pins)
+
+    outline = _synthesize_outline(pins)
 
     return Board(
         board_id=board_id,
         file_hash=file_hash,
         source_format=source_format,
-        outline=[],  # FZ-zlib carries no explicit outline; UI infers from pins.
+        # Synthesized from pin bbox — the format itself ships no outline,
+        # and OpenBoardView's reference implementation does the same.
+        outline=outline,
         parts=parts,
         pins=pins,
         nets=nets,
@@ -93,8 +112,202 @@ def parse_fz_zlib(
 
 
 # ---------------------------------------------------------------------------
+# Two-stream decompression (content + BOM)
+# ---------------------------------------------------------------------------
+
+
+def _decompress_streams(raw: bytes) -> tuple[str, str | None]:
+    """Inflate the content stream and, if present, the trailing BOM stream.
+
+    Real `.fz` files carry two zlib streams concatenated: stream 1 is the
+    pipe-delimited content (REFDES / NET_NAME / TESTVIA), stream 2 is a
+    tab-separated BOM (PARTNUMBER / DESCRIPTION / QTY / LOCATION / …).
+    The two streams are separated by an 8-byte header (decompressed-size
+    metadata) that zlib-inflate ignores via `unused_data`.
+    """
+    d1 = zlib.decompressobj()
+    s1 = d1.decompress(raw[4:])
+    text = s1.decode("utf-8", errors="replace")
+    leftover = d1.unused_data
+    bom_text: str | None = None
+    if leftover:
+        for off in range(min(16, max(0, len(leftover) - 1))):
+            if leftover[off : off + 2] in (_ZLIB_MAGIC_FAST, _ZLIB_MAGIC_BEST, _ZLIB_MAGIC_NONE):
+                try:
+                    bom_text = zlib.decompress(leftover[off:]).decode(
+                        "utf-8", errors="replace"
+                    )
+                except zlib.error:
+                    bom_text = None
+                break
+    return text, bom_text
+
+
+# ---------------------------------------------------------------------------
+# BOM (descr) — partno, description, qty, refdes locations
+# ---------------------------------------------------------------------------
+
+
+def _parse_bom(text: str) -> dict[str, str]:
+    """Map every refdes listed in the BOM to its DESCRIPTION column.
+
+    Layout: line 1 is a board-model banner, line 2 is the column header,
+    and every following row is `PARTNUMBER \\t DESCRIPTION \\t QTY \\t
+    REFDES_LIST \\t PARTNUMBER2`. REFDES_LIST is space-separated. Rows
+    starting with a literal `s` are flagged as secondary by the producer
+    and carry no useful data — skip them, matching OpenBoardView.
+    """
+    out: dict[str, str] = {}
+    lines = text.splitlines()
+    if len(lines) < 3:
+        return out
+    for line in lines[2:]:
+        stripped = line.strip()
+        if not stripped or stripped.startswith("s"):
+            continue
+        cols = stripped.split("\t")
+        if len(cols) < 4:
+            continue
+        description = cols[1].strip()
+        if not description:
+            continue
+        for refdes in cols[3].split():
+            if refdes:
+                out[refdes] = description
+    return out
+
+
+def _apply_bom_descriptions(parts: list[Part], bom: dict[str, str]) -> list[Part]:
+    """Patch each `Part.value` with the BOM description when available."""
+    if not bom:
+        return parts
+    return [
+        part.model_copy(update={"value": bom[part.refdes]})
+        if part.refdes in bom
+        else part
+        for part in parts
+    ]
+
+
+# ---------------------------------------------------------------------------
+# Synthetic outline (the format ships none — OBV does the same)
+# ---------------------------------------------------------------------------
+
+_OUTLINE_MARGIN_MILS = 100.0
+
+# Spatial-overlap thresholds for DFM-alternate (DNP) detection. Two parts
+# are considered alternates of each other if their first pin centres land
+# within `_DNP_OVERLAP_MILS` on both axes. 100 mils ≈ 2.5 mm — wide
+# enough to absorb the small pin-grid offsets ASUS uses between its
+# `PGCEx` 8x9.7 footprint and the smaller `PGCEx_alt` 7x8 footprint at
+# the same physical seat.
+_DNP_OVERLAP_MILS = 100.0
+_DNP_BUCKET_MILS = 200.0
+
+
+def _detect_dnp_alternates(parts: list[Part], pins: list[Pin]) -> list[Part]:
+    """Tag parts that share their physical seat with a placed sibling.
+
+    `.fz` ASUS dumps encode DFM alternates: two refdes at the same
+    pin-cluster, only one of which appears in the BOM (the populated
+    one). The unpopulated one becomes a "ghost" — the parser flags it
+    `is_dnp=True` and attaches its refdes to the placed sibling's
+    `dnp_alternates` so the viewer can surface the relationship in
+    its info panel.
+    """
+    placed: dict[tuple[int, int], list[int]] = {}
+    for i, part in enumerate(parts):
+        if part.value is not None and part.pin_refs:
+            first = pins[part.pin_refs[0]]
+            key = (
+                int(first.pos.x // _DNP_BUCKET_MILS),
+                int(first.pos.y // _DNP_BUCKET_MILS),
+            )
+            placed.setdefault(key, []).append(i)
+
+    ghost_to_real: dict[int, int] = {}
+    for gi, part in enumerate(parts):
+        if part.value is not None or not part.pin_refs:
+            continue
+        first = pins[part.pin_refs[0]]
+        gx = first.pos.x // _DNP_BUCKET_MILS
+        gy = first.pos.y // _DNP_BUCKET_MILS
+        for dx in (-1, 0, 1):
+            for dy in (-1, 0, 1):
+                for ri in placed.get((int(gx + dx), int(gy + dy)), []):
+                    if ri == gi:
+                        continue
+                    rfirst = pins[parts[ri].pin_refs[0]]
+                    if (
+                        abs(rfirst.pos.x - first.pos.x) < _DNP_OVERLAP_MILS
+                        and abs(rfirst.pos.y - first.pos.y) < _DNP_OVERLAP_MILS
+                    ):
+                        ghost_to_real[gi] = ri
+                        break
+                if gi in ghost_to_real:
+                    break
+            if gi in ghost_to_real:
+                break
+
+    real_alternates: dict[int, list[str]] = {}
+    for gi, ri in ghost_to_real.items():
+        real_alternates.setdefault(ri, []).append(parts[gi].refdes)
+
+    out: list[Part] = []
+    for i, part in enumerate(parts):
+        if i in ghost_to_real:
+            out.append(part.model_copy(update={"is_dnp": True}))
+        elif i in real_alternates:
+            out.append(part.model_copy(update={"dnp_alternates": real_alternates[i]}))
+        else:
+            out.append(part)
+    return out
+
+
+def _synthesize_outline(pins: list[Pin]) -> list[Point]:
+    """Return a closed-polygon bbox around all pins with a margin so the
+    Three.js viewer has a board chrome to draw. Empty when no pins exist."""
+    if not pins:
+        return []
+    xs = [p.pos.x for p in pins]
+    ys = [p.pos.y for p in pins]
+    minx = min(xs) - _OUTLINE_MARGIN_MILS
+    maxx = max(xs) + _OUTLINE_MARGIN_MILS
+    miny = min(ys) - _OUTLINE_MARGIN_MILS
+    maxy = max(ys) + _OUTLINE_MARGIN_MILS
+    return [
+        Point(x=minx, y=miny),
+        Point(x=maxx, y=miny),
+        Point(x=maxx, y=maxy),
+        Point(x=minx, y=maxy),
+        Point(x=minx, y=miny),
+    ]
+
+
+# ---------------------------------------------------------------------------
 # Section walker
 # ---------------------------------------------------------------------------
+
+
+def _detect_unit_scale(text: str) -> float:
+    """Return the multiplier needed to bring source coordinates into mils.
+
+    Looks for a top-level `UNIT:<name>` directive. Recognised names:
+    `millimeters` / `mm` (×39.37), `inches` (×1000), `mils` / unset
+    (×1, default). Any unrecognised value falls back to mils with no
+    scaling so we don't silently corrupt the board geometry.
+    """
+    for raw in text.splitlines():
+        line = raw.strip()
+        if not line.upper().startswith("UNIT:"):
+            continue
+        unit = line.split(":", 1)[1].strip().lower()
+        if unit in ("millimeters", "millimetres", "mm"):
+            return _MILS_PER_MM
+        if unit == "inches":
+            return _MILS_PER_INCH
+        return 1.0
+    return 1.0
 
 
 def _split_sections(text: str) -> dict[str, dict]:
@@ -199,6 +412,8 @@ def _build_pins(
     rows: list[list[str]],
     parts: list[Part],
     lookup: dict[str, int],
+    *,
+    scale: float = 1.0,
 ) -> tuple[list[Pin], list[Part]]:
     """Resolve each pin row to its owning part, build `Pin` objects, and
     patch each `Part` with `pin_refs` + bbox computed from pin positions.
@@ -223,9 +438,10 @@ def _build_pins(
         # row[2] == PIN_NUMBER (often 0 — kept for compatibility with the
         # source format but not used downstream)
         pin_name = row[3].strip()
-        x = _safe_float(row[4])
-        y = _safe_float(row[5])
+        x = _safe_float(row[4]) * scale
+        y = _safe_float(row[5]) * scale
         # row[6] == TEST_POINT (often empty), row[7] == RADIUS (pad radius mils)
+        radius = (_safe_float(row[7]) if len(row) >= 8 else 0.0) * scale
 
         if refdes not in lookup:
             # Orphan pin — skip. We refuse to fabricate parts.
@@ -240,6 +456,25 @@ def _build_pins(
 
         ix = int(round(x))
         iy = int(round(y))
+        pin_kwargs: dict = {}
+        if radius > 0.0:
+            # The FZ format ships a per-pin pad RADIUS (mils) but no
+            # shape token — every pad would default to a circle of
+            # diameter 2r. We override the shape via package-aware
+            # inference on the parent part's footprint when it
+            # confidently maps to a rectangular pad (chip passive,
+            # leaded SMD, SMD inductor); BGA / mounting / test-point
+            # footprints keep "circle". Unknown footprints stay circle
+            # (the radius-derived default).
+            diameter = 2.0 * radius
+            # Try the SYM_NAME footprint first; if it's empty or just
+            # echoes the refdes (no package keyword), fall back to the
+            # BOM description (`Part.value`). Some `.fz` dialects ship
+            # all parts with `SYM_NAME == REFDES` and the real package
+            # info only lives in the BOM stream.
+            inferred = infer_pad_shape(owner.footprint) or infer_pad_shape(owner.value)
+            pin_kwargs["pad_shape"] = inferred or "circle"
+            pin_kwargs["pad_size"] = (diameter, diameter)
         pins.append(
             Pin(
                 part_refdes=refdes,
@@ -248,6 +483,7 @@ def _build_pins(
                 net=(net_name or None),
                 probe=None,
                 layer=owner.layer,
+                **pin_kwargs,
             )
         )
         refs_by_part[k].append(len(pins) - 1)
@@ -272,15 +508,15 @@ def _build_pins(
 # ---------------------------------------------------------------------------
 
 
-def _build_nails(rows: list[list[str]]) -> list[Nail]:
+def _build_nails(rows: list[list[str]], *, scale: float = 1.0) -> list[Nail]:
     """TESTVIA schema: `TESTVIA NET_NAME REFDES PIN_NUMBER PIN_NAME VIA_X VIA_Y TEST_POINT RADIUS`."""
     out: list[Nail] = []
     for i, row in enumerate(rows, start=1):
         if len(row) < 7:
             continue
         net_name = row[1].strip()
-        x = _safe_float(row[5])
-        y = _safe_float(row[6])
+        x = _safe_float(row[5]) * scale
+        y = _safe_float(row[6]) * scale
         out.append(
             Nail(
                 probe=i,

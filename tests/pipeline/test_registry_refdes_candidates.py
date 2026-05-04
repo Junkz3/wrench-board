@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Schema-level tests for the Registry refdes_candidates extension.
 
 Behavioural tests for the actual run_registry_builder enrichment live

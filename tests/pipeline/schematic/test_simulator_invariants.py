@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Property-based contract tests on the simulator + hypothesize stack.
 
 These tests assert universal invariants that must hold over the entire

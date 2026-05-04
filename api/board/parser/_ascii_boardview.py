@@ -1,11 +1,10 @@
-# SPDX-License-Identifier: Apache-2.0
 """Reusable ASCII-boardview parser for Test_Link-shape dialects.
 
-Several vendor boardview formats share the Test_Link layout invented by
-Landrex in the 1980s: a four-integer count header, followed by an outline
-block, a parts block, a pins block and a nails block. Each dialect swaps
-the block marker spellings (`Parts:` vs `Components:` vs `[Parts]`) but
-keeps the same line grammar inside.
+Several vendor boardview formats share the Test_Link layout: a
+four-integer count header, followed by an outline block, a parts
+block, a pins block and a nails block. Each dialect swaps the block
+marker spellings (`Parts:` vs `Components:` vs `[Parts]`) but keeps
+the same line grammar inside.
 
 `parse_test_link_shape()` takes a dialect description (`TestLinkMarkers`)
 and returns a `Board`. The canonical Test_Link parser in `test_link.py`
@@ -13,9 +12,8 @@ stays as-is — it predates this helper and its tests are stable. New
 dialect parsers (.bv / .gr / .cad / .cst / .f2b and the post-decode
 payload of .bdv / .tvw / .fz / .asc) compose this helper.
 
-Written from scratch against the public format descriptions collected
-under `docs/superpowers/specs/2026-04-25-boardview-formats-v1.md`. No
-code from OpenBoardView or FlexBV was copied.
+Format descriptions are collected under
+`docs/superpowers/specs/2026-04-25-boardview-formats-v1.md`.
 """
 
 from __future__ import annotations

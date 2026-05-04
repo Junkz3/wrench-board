@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: Apache-2.0
 """Generate ground-truth scenarios for the reverse-diagnostic benchmark,
 covering all applicable failure modes per refdes.
 

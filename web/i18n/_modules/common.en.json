@@ -46,13 +46,17 @@
     "label_none": "None",
     "min_confidence": "Minimum confidence",
     "particle_speed": "Particle speed",
-    "boardview_colors": "Boardview colors",
+    "boardview_colors": "Pin colors",
     "color_signal": "Signal",
     "color_power": "Power",
     "color_ground": "Ground",
     "color_clock": "Clock",
     "color_reset": "Reset",
     "color_nc": "NC",
+    "color_testpad": "Test pad",
+    "color_via": "Via",
+    "color_board_outline": "Board outline",
+    "color_board_fill": "Board fill",
     "reset_colors": "Reset colors"
   }
 }

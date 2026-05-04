@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Seed a device's Managed-Agents memory store from its on-disk knowledge pack.
 
 Called from the pipeline orchestrator right after an APPROVED verdict. The

@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Per-turn token cost estimation for diagnostic sessions.
 
 Pricing is tracked by model family. Cache semantics apply: cache_read

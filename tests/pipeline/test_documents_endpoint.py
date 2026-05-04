@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Tests for POST /pipeline/packs/{slug}/documents — multipart upload of
 technician-supplied documents (schematic / boardview / datasheet / notes /
 other) into memory/{slug}/uploads/."""

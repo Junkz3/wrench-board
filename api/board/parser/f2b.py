@@ -1,5 +1,4 @@
-# SPDX-License-Identifier: Apache-2.0
-"""Unisoft ProntoPLACE .f2b parser — written from scratch.
+"""Unisoft ProntoPLACE `.f2b` parser.
 
 **Scope honesty.** Unisoft describes `.f2b` as "complete board save"
 — a proprietary database format used by ProntoPLACE and the Place5
@@ -9,11 +8,9 @@ repair community appear to carry a Test_Link-shape ASCII payload
 with `Outline:` / `Components:` markers (plus an `Annotations:`
 block we skip — the unified `Board` model doesn't carry overlay
 annotations; the runtime `bv_annotate` tool covers that path
-instead). Until we have a real `.f2b` to reverse-engineer, this
+instead). Until a binary fixture lands in `board_assets/`, this
 parser handles the ASCII variant only and rejects clearly-binary
 payloads with a clear hint.
-
-No code copied from any external codebase.
 """
 
 from __future__ import annotations

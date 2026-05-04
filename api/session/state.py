@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Per-session state for the boardview panel."""
 
 from __future__ import annotations
@@ -29,11 +28,13 @@ _BOARD_EXT_PRIORITY = (
     ".asc",
     ".bdv",
     ".bv",
+    ".bvr",
     ".cad",
     ".cst",
     ".f2b",
     ".fz",
     ".gr",
+    ".pcb",
     ".tvw",
 )
 

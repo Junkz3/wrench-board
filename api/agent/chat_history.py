@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Per-repair chat history persistence for diagnostic sessions.
 
 Each repair_id owns a set of *conversations* under

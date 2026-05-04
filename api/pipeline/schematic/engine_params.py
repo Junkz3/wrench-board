@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Knob layer: load tunable engine params from JSON, with code-level fallback defaults.
 
 The dual source design means: if engine_params.json is missing or partial,

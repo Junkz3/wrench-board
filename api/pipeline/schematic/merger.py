@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Deterministic merger — list[SchematicPageGraph] → SchematicGraph.
 
 Stitches per-page extractions into a single flat catalogue:

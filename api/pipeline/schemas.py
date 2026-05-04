@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Pydantic V2 schemas for the knowledge generation pipeline.
 
 Every structured output of Phases 2–4 is declared here. These classes double as:
@@ -21,7 +20,7 @@ class DeviceTaxonomy(BaseModel):
     """Hierarchical classification extracted from the raw dump by the taxonomist.
 
     Every field is nullable — the extractor MUST output null rather than
-    invent when a source doesn't state the fact (hard rule #5). Populated
+    invent when a source doesn't state the fact (hard rule #4). Populated
     after the Registry Builder so the writers see the final taxonomy, and
     used by the UI to group devices by brand > model > version.
     """
@@ -170,7 +169,7 @@ class Registry(BaseModel):
         description=(
             "Hierarchical classification (brand > model > version > form_factor). "
             "Fields are individually nullable — leave null when the sources don't "
-            "state the fact rather than guessing (hard rule #5)."
+            "state the fact rather than guessing (hard rule #4)."
         ),
     )
     components: list[RegistryComponent] = Field(default_factory=list)

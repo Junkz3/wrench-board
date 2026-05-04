@@ -1,5 +1,4 @@
-# SPDX-License-Identifier: Apache-2.0
-"""BoardView R5.0 .gr parser — written from scratch.
+"""BoardView R5.0 `.gr` parser.
 
 **Scope honesty.** BoardView R5.0 has no published file-format spec.
 This parser assumes a Test_Link-shape ASCII variant with
@@ -7,8 +6,8 @@ This parser assumes a Test_Link-shape ASCII variant with
 canonical `Parts:` / `Nails:` spellings as fallback). If a real `.gr`
 file lands binary instead — likely, given the era — the parser
 trips a clear `ObfuscatedFileError` rather than producing nonsense.
-Until we have a real `.gr` sample to reverse-engineer, this stays
-best-effort. No code copied from any external codebase.
+Until a binary fixture lands in `board_assets/`, this stays
+best-effort.
 """
 
 from __future__ import annotations

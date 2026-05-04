@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """System prompts for each sub-agent in the pipeline.
 
 Kept in one file so prompt drift between phases is easy to audit in a single diff.
@@ -249,7 +248,7 @@ Taxonomy rules:
 - Extract `taxonomy.form_factor` (physical board — 'motherboard', 'logic board',
   'mainboard', 'daughterboard', 'charging board').
 - Any taxonomy field the dump doesn't clearly state MUST be left null. Null beats
-  guessing (hard rule #5). Do not invent a brand or version to tidy up the record.
+  guessing (hard rule #4). Do not invent a brand or version to tidy up the record.
 
 Component / signal rules:
 - Every component and signal MUST have a stable `canonical_name`.
@@ -555,7 +554,7 @@ technician.
   Aim for 2–5 modes per component.
 - `notes` — rework hints from the sources: hot-air profile, pre-heat temp, flux
   type, donor board, jumpers. Numbers when the dump gives them. Null otherwise.
-- Set ANY field to null when unknown. DO NOT invent — hard rule #5.
+- Set ANY field to null when unknown. DO NOT invent — hard rule #4.
 """
 
 

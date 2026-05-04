@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Scalar evaluation of the simulator + hypothesize stack.
 
 Pure functions. Caller loads the graph and the bench from disk and

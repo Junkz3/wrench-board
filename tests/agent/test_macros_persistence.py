@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Persistence helpers for macro images (Flow A + Flow B)."""
 
 from __future__ import annotations

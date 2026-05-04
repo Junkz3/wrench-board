@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Application settings — loaded from environment / .env."""
 
 from __future__ import annotations

@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Explicit state machine for how a Managed Agents session was started.
 
 Replaces the booleans `resumed` + `stale_agent_recovery` + the implicit

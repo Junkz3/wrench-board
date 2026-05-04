@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Unit tests for `scripts/doctor.py`.
 
 All tests are fast (no `slow` marker), filesystem-only, no network.

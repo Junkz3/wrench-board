@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Flow A handler: client.upload_macro injects user.message into MA session."""
 
 from __future__ import annotations

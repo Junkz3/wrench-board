@@ -119,6 +119,17 @@ board_assets/*.pdf
 memory/*
 !memory/.gitkeep
 
+# --- Proprietary boardview / schematic dumps (local-only) ---
+# The product runs on any board at runtime. Dumps that ship as proprietary
+# binaries (XZZ encrypted .pcb, ASUS .fz with vendor key, anything dropped
+# in `private/`) stay on the local disk and never enter git history. Drop
+# files anywhere under one of these patterns and the parser will still
+# pick them up via `parser_for(path)`.
+board_assets/private/
+tests/board/fixtures/private/
+*.pcb
+*.fz
+
 # Evolve loop state — locally-managed per-machine, do not version
 # Path itself (covers symlink case when evolve→archive-evolve-runs/sim)
 /evolve
@@ -130,7 +141,7 @@ evolve/reports/*
 
 # Pipeline-evolve loop — runtime state + private infra + private skills.
 # scripts/eval_pipeline.py and scripts/eval_pipeline_vision.py are TRACKED
-# because eval_all.py and docs/ARCHITECTURE.md reference them publicly.
+# because eval_all.py references them.
 evolve-pipeline/
 evolve-pipeline-vision/
 scripts/pipeline-evolve-bootstrap.sh
@@ -168,10 +179,18 @@ benchmark/auto_proposals/
 benchmark/auto_proposals_*/
 benchmark/poc_multi_agent/
 
-# --- Local-only notes (gap analyses, prompts ad-hoc, working memos) ---
-# Use docs/notes/local/ for any markdown that should NOT land in the repo
-# history. Tracked architecture/design notes go directly in docs/notes/.
-docs/notes/local/
+# --- Internal docs / specs / plans / notes ---
+# Design specs, implementation plans, and internal architecture notes
+# stay on the local disk only — they are not part of the source-available
+# distribution. Public-facing assets referenced by README.md (mascot SVG,
+# screenshots) live under docs/assets/ and remain tracked.
+.codex
+docs/ARCHITECTURE.md
+docs/EVOLVE.md
+docs/tools.md
+docs/archive/
+docs/notes/
+docs/superpowers/
 
 # Archived state of overnight evolve loops (worktree backups)
 archive-evolve-runs/

@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """Observability + safety helpers in runtime_managed.
 
 Two pure helpers added in the post-audit hardening pass:
