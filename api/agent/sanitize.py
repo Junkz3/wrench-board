@@ -130,7 +130,7 @@ def sanitize_agent_text(text: str, board: Board | None) -> tuple[str, list[str]]
     If board is None, no ground truth exists — returns text unchanged.
     """
     if board is None:
-        return text, []
+        return _validate_donor_ids(text), []
 
     unknown: list[str] = []
 
@@ -143,4 +143,35 @@ def sanitize_agent_text(text: str, board: Board | None) -> tuple[str, list[str]]
         unknown.append(token)
         return f"⟨?{token}⟩"
 
-    return REFDES_RE.sub(_wrap, text), unknown
+    cleaned = REFDES_RE.sub(_wrap, text)
+    return _validate_donor_ids(cleaned), unknown
+
+
+# --------------------------------------------------------------------------- #
+# Donor ID validation — second-pass anti-hallucination guard for stock_*
+# tool outputs leaked into prose. See spec §9 last paragraph.
+# --------------------------------------------------------------------------- #
+
+_DONOR_ID_RE = re.compile(r"\b[a-z][a-z0-9-]*-donor-\d{4}-\d{3}\b")
+
+
+def _validate_donor_ids(text: str) -> str:
+    """Wrap unknown donor_id-shaped tokens as ⟨?donor:invalid⟩.
+
+    Fail-open if the inventory store is unavailable (degraded session).
+    """
+    from api.stock.store import load_inventory
+    try:
+        inv = load_inventory()
+    except Exception:
+        return text
+
+    valid = set(inv.donors.keys())
+
+    def _wrap(m: re.Match[str]) -> str:
+        token = m.group(0)
+        if token in valid:
+            return token
+        return "⟨?donor:invalid⟩"
+
+    return _DONOR_ID_RE.sub(_wrap, text)
