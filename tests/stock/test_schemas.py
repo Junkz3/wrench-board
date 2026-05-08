@@ -1,5 +1,4 @@
-import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pytest
 from pydantic import ValidationError
@@ -10,7 +9,6 @@ from api.stock.schemas import (
     PartsIndex,
     PartsIndexEntry,
     StockInventory,
-    StockSearchMatch,
     StockSearchQuery,
     StockSearchResult,
 )
@@ -64,12 +62,12 @@ def test_donor_entry_consumed_dict():
         donor_id="iphone-x-donor-2026-001",
         device_slug="iphone-x",
         label="iPhone X HS écran cassé lot 2024-001",
-        added_at=datetime(2026, 5, 8, 10, 0, tzinfo=timezone.utc),
+        added_at=datetime(2026, 5, 8, 10, 0, tzinfo=UTC),
         condition="donor_only",
         consumed={
             "U7": ConsumedEvent(
                 refdes="U7",
-                consumed_at=datetime(2026, 5, 9, 14, 30, tzinfo=timezone.utc),
+                consumed_at=datetime(2026, 5, 9, 14, 30, tzinfo=UTC),
                 repair_id="repair-abc",
                 notes="remplacement PMIC sur iphone-13-...",
             )
@@ -92,7 +90,7 @@ def test_parts_index_entries_keyed_by_refdes():
     idx = PartsIndex(
         schema_version="1.0",
         device_slug="iphone-x",
-        generated_at=datetime(2026, 5, 8, tzinfo=timezone.utc),
+        generated_at=datetime(2026, 5, 8, tzinfo=UTC),
         source_electrical_graph_hash="deadbeef" * 8,
         entries={
             "C42": PartsIndexEntry(
