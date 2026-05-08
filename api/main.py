@@ -20,6 +20,7 @@ from api.config import get_settings
 from api.logging_setup import configure_logging
 from api.pipeline import router as pipeline_router
 from api.profile.router import router as profile_router
+from api.stock import stock_router
 from api.ws_security import enforce_ws_origin
 
 logger = logging.getLogger("wrench_board.main")
@@ -70,6 +71,7 @@ app.add_middleware(
 app.include_router(pipeline_router)
 app.include_router(board_router)
 app.include_router(profile_router)
+app.include_router(stock_router)
 
 
 @app.get("/health")
