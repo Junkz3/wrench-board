@@ -43,8 +43,20 @@ def _coerce_voltage_rating(raw) -> float | None:
 def _canonicalize_value(value: dict | None) -> str | None:
     """Normalize the raw value string to a canonical form.
 
-    Caps: 100nF → 0.1uF, 0.1µF → 0.1uF, 1µF → 1uF, 10pF → 10pF
-    Resistors: 10K0 → 10k, 0R1 → 0.1, 4.7k → 4.7k
+    Strips annotations (current/freq ratings, type words, sheet refs,
+    package suffixes) before unit matching. Cross-pipeline goal: lever1
+    LP-md output and Opus baseline both reduce to identical canonical
+    strings so stock_search keys agree.
+
+    Caps:       100nF → 0.1uF, 0.1µF → 0.1uF
+    Resistors:  10K0 → 10k, 0R1 → 0.1, 4.7k → 4.7k
+                33-OHM → 33, 150OHM → 150, 10KOHM → 10k
+                33Ω @ 1500mA → 33, 240-OHM-25%-0.20A-0.9DCR → 240
+    Inductors:  1uH → 1uH, 0.47µH → 0.47uH, 15nH → 15nH
+    Crystals:   24.000MHz → 24MHz, 32.768kHz → 32.768kHz
+    Voltages:   5.5V Zener → 5.5V (zeners, TVS)
+    MPNs:       BZT52C20LP, DFN10062 → BZT52C20LP (strips package suffix)
+                D2462 WLCSP SYM 4 OF 4 → D2462 (strips sheet ref)
     Unknown → passthrough.
     """
     if value is None:
@@ -53,7 +65,29 @@ def _canonicalize_value(value: dict | None) -> str | None:
     if not raw:
         return None
 
-    s = raw.replace("µ", "u").replace("Ω", "")
+    s = raw
+    # Strip annotations BEFORE unit normalization so the regexes see only
+    # the bare <num><unit> pattern.
+
+    # @-prefixed rating: "33Ω @ 1500mA", "150Ω@100MHz" → strip annotation
+    s = re.sub(r"\s*@\s*[\d.]+\s*[A-Za-z]+\b.*$", "", s)
+    # Trailing "<num><unit>" without @: "10Ω 750mA" → strip second number-with-unit
+    s = re.sub(r"\s+\d+(?:\.\d+)?\s*[mukpnGM]?[AVHz]\b.*$", "", s)
+    # Trailing type word: "5.5V Zener", "Schottky", "TVS", "Bidirectional"
+    s = re.sub(
+        r"\s+(?:Zener|Schottky|TVS|Bidirectional|Unidirectional)\b.*$",
+        "", s, flags=re.IGNORECASE,
+    )
+    # Trailing sheet reference: "D2462 WLCSP SYM 4 OF 4" → "D2462 WLCSP"
+    s = re.sub(r"\s+(?:SYM|SHEET|SH)\s.*$", "", s, flags=re.IGNORECASE)
+    # Trailing package suffix after comma: "BZT52C20LP, DFN10062"
+    s = re.sub(r",\s*[A-Z][A-Z0-9-]+\s*$", "", s)
+    # Trailing all-caps token (typically a package): "D2462 WLCSP" → "D2462"
+    s = re.sub(r"\s+[A-Z][A-Z0-9-]+\s*$", "", s)
+    # Hyphenated multi-spec resistor: "240-OHM-25%-0.20A-0.9DCR" → "240-OHM"
+    s = re.sub(r"^([\d.]+\s*-?\s*[Kk]?OHM)-.+$", r"\1", s, flags=re.IGNORECASE)
+
+    s = s.replace("µ", "u").replace("Ω", "").strip()
 
     # Caps: <num><unit{pF,nF,uF,F}>
     m = re.fullmatch(r"(\d+(?:\.\d+)?)\s*(pF|nF|uF|F)", s, re.IGNORECASE)
@@ -85,14 +119,71 @@ def _canonicalize_value(value: dict | None) -> str | None:
         num, unit = m.groups()
         return f"{float(num):g}{unit.lower() if unit == 'K' else unit}"
 
-    # Resistors: bare number ohms (rare but happens — "47", "100")
+    # Resistors with explicit OHM unit: 33-OHM, 150OHM, 10KOHM
+    m = re.fullmatch(r"(\d+(?:\.\d+)?)\s*-?\s*([Kk]?)OHM", s, re.IGNORECASE)
+    if m:
+        num, prefix = m.groups()
+        if prefix.lower() == "k":
+            return f"{float(num):g}k"
+        return f"{float(num):g}"
+
+    # Inductors: 1uH, 0.47uH, 15nH, 1.5mH
+    m = re.fullmatch(r"(\d+(?:\.\d+)?)\s*([num])?H", s, re.IGNORECASE)
+    if m:
+        num, prefix = m.groups()
+        prefix_norm = (prefix or "").lower()
+        return f"{float(num):g}{prefix_norm}H"
+
+    # Crystals/oscillators: 24MHz, 32.768kHz, 1GHz
+    m = re.fullmatch(r"(\d+(?:\.\d+)?)\s*([kMG])?Hz", s, re.IGNORECASE)
+    if m:
+        num, prefix = m.groups()
+        if prefix:
+            # k stays lowercase, M and G uppercase
+            prefix_norm = "k" if prefix.upper() == "K" else prefix.upper()
+        else:
+            prefix_norm = ""
+        return f"{float(num):g}{prefix_norm}Hz"
+
+    # Voltages (zeners, TVS, etc.): 5.5V, 12V
+    m = re.fullmatch(r"(\d+(?:\.\d+)?)\s*V", s, re.IGNORECASE)
+    if m:
+        return f"{float(m.group(1)):g}V"
+
+    # Resistors: bare number ohms (rare but happens — "47", "100", "0.00").
+    # Normalize trailing zeros so "0.00" and "0" collapse to "0" (zero-ohm
+    # jumpers are routinely written either way across pipelines).
     m = re.fullmatch(r"\d+(?:\.\d+)?", s)
     if m:
-        return s
+        return f"{float(s):g}"
 
-    # Unknown form — passthrough, log
-    logger.warning("parts_index: unrecognized value form %r — passing through", raw)
-    return raw
+    # Unknown form — passthrough the *stripped* form (annotations removed)
+    # so MPN-like strings still benefit from the package/sheet/type strips.
+    # Falls back to original raw when strips emptied the string.
+    final = s.strip() or raw
+    if final == raw:
+        logger.warning("parts_index: unrecognized value form %r — passing through", raw)
+    return final
+
+
+def _canonicalize_package(package: str | None) -> str | None:
+    """Normalize package strings so footprint-library variants collapse.
+
+    Apple schematics dual-label imperial passives with library-variant
+    suffixes: '0201-1', '0402-0.1MM', '01005-1'. The base footprint
+    (0201, 0402, 01005) is what matters for stock substitution — a
+    0201-1 donor fits a 0201 slot. KiCad and other tools emit just the
+    base form. Collapsing the suffix lets cross-pipeline parts_index
+    agree on the same key.
+    """
+    if not package:
+        return None
+    s = package.strip()
+    # Apple variant suffix on imperial passives: <digits>-<variant>
+    m = re.match(r"^(\d{4,5})-[\w.]+$", s)
+    if m:
+        return m.group(1)
+    return s
 
 
 def _criticality_from_boot_sequence(
@@ -177,7 +268,7 @@ def build_parts_index(
             kind=comp_kind,
             value_canonical=_canonicalize_value(value),
             value_raw=(value.get("raw") if value else None),
-            package=(value.get("package") if value else None),
+            package=_canonicalize_package(value.get("package") if value else None),
             mpn=(value.get("mpn") if value else None),
             voltage_rating=_coerce_voltage_rating(value.get("voltage_rating") if value else None),
             tolerance=(value.get("tolerance") if value else None),
