@@ -21,6 +21,7 @@ from api.agent.chat_history import (
     load_ma_session_id,
     save_ma_session_id,
 )
+from api.agent.runtime import _aux
 from api.agent.runtime._aux import (
     DEFAULT_TIER,
     TierLiteral,
@@ -212,21 +213,41 @@ async def run_diagnostic_session_managed(
     # so a concurrent open can't slip through between the membership
     # check and the add (asyncio is single-threaded; both happen in one
     # uninterrupted scheduler step). Released in `finally` further down.
+    #
+    # Acquire policy: on contention, briefly wait for the sibling WS to
+    # finish its teardown rather than rejecting outright. The frontend
+    # routinely does close + immediate reconnect (tier auto-align on
+    # session_ready, page reload while a prior session is still tearing
+    # down), and the two sockets land on the server out of order under
+    # asyncio scheduling. Without the wait, the second WS sees the guard
+    # still claimed and bounces with `session_already_open` even though
+    # the user only opened the panel once. Typical legit teardown is
+    # <100 ms (forwarders cancel-and-await is bounded by
+    # ma_forwarder_unwind_timeout_seconds, default 2 s); 5 s of waiting
+    # comfortably absorbs that. Anything still claimed after 5 s is a
+    # genuine concurrent double-open (two tabs / two browsers) and gets
+    # the original rejection.
     diagnostic_key: tuple[str, str, str] | None = None
     if repair_id and resolved_conv_id:
         candidate_key = (device_slug, repair_id, resolved_conv_id)
-        if candidate_key in _active_diagnostic_keys:
-            await ws.accept()
-            await ws.send_json({
-                "type": "error",
-                "code": "session_already_open",
-                "text": (
-                    "Another conversation is already open for this repair. "
-                    "Close it before opening a new one."
-                ),
-            })
-            await ws.close(code=1008, reason="session already open")
-            return
+        loop = asyncio.get_event_loop()
+        # Read via the module so tests can monkeypatch
+        # `_aux._GUARD_ACQUIRE_TIMEOUT_SECONDS` to a small value.
+        wait_deadline = loop.time() + _aux._GUARD_ACQUIRE_TIMEOUT_SECONDS
+        while candidate_key in _active_diagnostic_keys:
+            if loop.time() >= wait_deadline:
+                await ws.accept()
+                await ws.send_json({
+                    "type": "error",
+                    "code": "session_already_open",
+                    "text": (
+                        "Another conversation is already open for this repair. "
+                        "Close it before opening a new one."
+                    ),
+                })
+                await ws.close(code=1008, reason="session already open")
+                return
+            await asyncio.sleep(0.05)
         _active_diagnostic_keys.add(candidate_key)
         diagnostic_key = candidate_key
 
@@ -904,6 +925,21 @@ async def run_diagnostic_session_managed(
     except WebSocketDisconnect:
         logger.info("[Diag-MA] WS disconnected for device=%s", device_slug)
     finally:
+        # Release the single-WS guard FIRST, before the slow teardown steps
+        # below. The forwarders were already cancelled-and-awaited above
+        # (lines 854-866), so by the time we hit this finally there is no
+        # more code on this coroutine that can race with a sibling WS
+        # against the MA session. Keeping the release at the end of the
+        # finally caused page-reload races: the frontend's tier auto-align
+        # in session_ready closes WS1 and immediately reconnects WS2 on the
+        # correct tier; WS2 used to land while WS1 was still inside
+        # wait_drain + events.send (up to ~7 s total), and the guard
+        # rejected WS2 with `session_already_open`. Clearing the key
+        # immediately removes that window — the next reconnect on the same
+        # triplet can claim cleanly.
+        if diagnostic_key is not None:
+            _active_diagnostic_keys.discard(diagnostic_key)
+            diagnostic_key = None
         # Drain pending mirror tasks before tearing down the session so a
         # fast WS close doesn't cancel a mirror mid-flight. Default budget
         # (settings.ma_session_drain_timeout_seconds) is 5 s.
@@ -922,9 +958,3 @@ async def run_diagnostic_session_managed(
             pass
         set_ws_emitter(None)
         set_validation_emitter(None)
-        # Release the single-WS guard claimed earlier (after
-        # ensure_conversation). Anonymous sessions never claimed one.
-        # discard() is no-op if already absent, so an unexpected
-        # mid-setup failure path that already released elsewhere is safe.
-        if diagnostic_key is not None:
-            _active_diagnostic_keys.discard(diagnostic_key)

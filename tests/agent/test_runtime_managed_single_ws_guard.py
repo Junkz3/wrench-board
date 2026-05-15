@@ -14,15 +14,24 @@ These tests pin that contract:
 """
 from __future__ import annotations
 
+import asyncio
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
 
 @pytest.fixture(autouse=True)
-def _clear_active_keys():
-    """Reset the module-level guard between tests so order doesn't leak."""
+def _clear_active_keys(monkeypatch):
+    """Reset the module-level guard between tests so order doesn't leak.
+
+    Also short-circuits `_GUARD_ACQUIRE_TIMEOUT_SECONDS` so the rejection
+    path tests don't pay the production 5 s wait budget. Individual tests
+    that exercise the wait-then-acquire behavior re-patch this to the
+    value they need.
+    """
     from api.agent import runtime_managed as rm
+    from api.agent.runtime import _aux as _aux_mod
+    monkeypatch.setattr(_aux_mod, "_GUARD_ACQUIRE_TIMEOUT_SECONDS", 0.1)
     rm._active_diagnostic_keys.clear()
     yield
     rm._active_diagnostic_keys.clear()
@@ -127,10 +136,13 @@ async def test_first_ws_claims_diagnostic_key_and_releases_on_close(
 async def test_second_ws_on_same_triplet_rejected_with_1008(
     monkeypatch, tmp_path,
 ):
-    """Pre-claim the key (simulating a still-open WS), then attempt to
-    open a second one. Must be rejected at handshake with close code
-    1008 (Policy Violation) and an explicit `session_already_open`
-    error frame so the frontend can surface a friendly message."""
+    """Pre-claim the key (simulating a still-open WS that never releases),
+    then attempt to open a second one. After the acquire-wait window
+    expires without a release, the second WS must be rejected at
+    handshake with close code 1008 (Policy Violation) and an explicit
+    `session_already_open` error frame so the frontend can surface a
+    friendly message. The `_clear_active_keys` fixture shortens the
+    wait window to 0.1 s so this test runs fast."""
     from api.agent import runtime_managed as rm
 
     _stale_settings(monkeypatch, rm)
@@ -164,6 +176,59 @@ async def test_second_ws_on_same_triplet_rejected_with_1008(
     # only the WS that successfully claimed releases on its own teardown.
     assert (
         ("demo", "rep_001", "conv_test_001") in rm._active_diagnostic_keys
+    )
+
+
+@pytest.mark.asyncio
+async def test_second_ws_waits_for_sibling_release_then_claims(
+    monkeypatch, tmp_path,
+):
+    """When the sibling WS releases its claim DURING the acquire-wait
+    window, the new WS proceeds and claims the guard cleanly — no
+    `session_already_open` frame. This is the page-reload / tier-
+    auto-align race path: WS1 enters its finally and releases shortly
+    after WS2 lands; without this wait, the user would see a spurious
+    rejection on every reload.
+    """
+    from api.agent import runtime_managed as rm
+    from api.agent.runtime import _aux as _aux_mod
+
+    _stale_settings(monkeypatch, rm)
+    _ma_bootstrap_mocks(monkeypatch, rm)
+
+    triplet = ("demo", "rep_001", "conv_test_001")
+    # Pre-claim the key (simulating WS1's in-flight teardown).
+    rm._active_diagnostic_keys.add(triplet)
+
+    # Give this test a slightly longer acquire budget so the scheduled
+    # release lands inside the wait loop. The default fixture sets 0.1 s
+    # for the rejection-path tests; we need ~0.5 s here.
+    monkeypatch.setattr(_aux_mod, "_GUARD_ACQUIRE_TIMEOUT_SECONDS", 0.5)
+
+    # Schedule the sibling's release for ~0.15 s in (after the first
+    # poll tick at 50 ms but before the 0.5 s deadline).
+    async def _release_after_delay():
+        await asyncio.sleep(0.15)
+        rm._active_diagnostic_keys.discard(triplet)
+    releaser = asyncio.create_task(_release_after_delay())
+
+    ws = MagicMock()
+    ws.accept = AsyncMock()
+    ws.send_json = AsyncMock()
+    ws.close = AsyncMock()
+
+    await rm.run_diagnostic_session_managed(
+        ws, "demo", tier="fast", repair_id="rep_001", conv_id="conv_test_001",
+    )
+
+    await releaser  # ensure the helper task is fully drained
+
+    # No rejection frame — the new WS waited and acquired cleanly.
+    sent = [c.args[0] for c in ws.send_json.await_args_list]
+    rejected = [p for p in sent if p.get("code") == "session_already_open"]
+    assert not rejected, (
+        f"WS should wait for sibling release and claim the guard, not be "
+        f"rejected. Frames: {sent!r}"
     )
 
 
@@ -237,6 +302,66 @@ async def test_session_create_failure_releases_claim(
     sent = [c.args[0] for c in ws.send_json.await_args_list]
     err = [p for p in sent if p.get("type") == "error"]
     assert err, f"expected an error frame on session create failure, got {sent!r}"
+
+
+@pytest.mark.asyncio
+async def test_key_released_before_slow_teardown(monkeypatch, tmp_path):
+    """The guard key must be released at the START of the finally, before
+    the slow teardown steps (wait_drain + events.send). Otherwise the
+    frontend's tier auto-align flow — `session_ready` arrives with a
+    `conv_tier` that doesn't match the default `currentTier="deep"`, so
+    `llm.js` closes WS1 and reconnects WS2 immediately on the right tier —
+    lands WS2 while WS1 is still inside its finally and gets rejected with
+    `session_already_open`. Validates by observing the guard set at the
+    moment `events.send` is awaited: the key must already be gone."""
+    from api.agent import runtime_managed as rm
+
+    _stale_settings(monkeypatch, rm)
+    _ma_bootstrap_mocks(monkeypatch, rm)
+
+    triplet = ("demo", "rep_001", "conv_test_001")
+    observed: dict = {}
+
+    fake_session = MagicMock()
+    fake_session.id = "sesn_test_001"
+
+    class FakeEvents:
+        async def send(self, *_a, **_kw):
+            observed["key_present_when_events_send_called"] = (
+                triplet in rm._active_diagnostic_keys
+            )
+            return None
+
+    class SpyingSessions:
+        def __init__(self):
+            self.events = FakeEvents()
+        async def create(self, **_kw):
+            return fake_session
+        async def retrieve(self, _sid):
+            raise Exception("none")
+
+    class FakeBeta:
+        sessions = SpyingSessions()
+    class FakeClient:
+        beta = FakeBeta()
+    monkeypatch.setattr(rm, "AsyncAnthropic", lambda **_kw: FakeClient())
+
+    ws = MagicMock()
+    ws.accept = AsyncMock()
+    ws.send_json = AsyncMock()
+    ws.close = AsyncMock()
+
+    await rm.run_diagnostic_session_managed(
+        ws, "demo", tier="fast", repair_id="rep_001", conv_id="conv_test_001",
+    )
+
+    assert observed.get("key_present_when_events_send_called") is False, (
+        "guard key must be released BEFORE client.beta.sessions.events.send "
+        "is awaited; otherwise a page-reload race in the frontend "
+        "(tier auto-align reconnect) lands while the key is still claimed"
+    )
+    # Sanity: the final state is also empty.
+    assert triplet not in rm._active_diagnostic_keys
 
 
 @pytest.mark.asyncio

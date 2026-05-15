@@ -103,6 +103,16 @@ def _build_log_id(
 # between awaits — no lock needed.
 _active_diagnostic_keys: set[tuple[str, str, str]] = set()
 
+# How long a contending WS waits for a sibling's teardown to release its
+# guard claim before bouncing the user with `session_already_open`. The
+# common contention path is the frontend's close+immediate-reconnect
+# (tier auto-align on session_ready, page reload mid-teardown), which
+# resolves in <100 ms; 5 s comfortably absorbs that without making a
+# truly concurrent double-open (two tabs) hang an unreasonable amount.
+# Exposed as a module-level constant so tests can monkeypatch it to a
+# small value and avoid sleeping the real budget.
+_GUARD_ACQUIRE_TIMEOUT_SECONDS: float = 5.0
+
 
 async def _sessions_create_with_retry(
     client: AsyncAnthropic,
