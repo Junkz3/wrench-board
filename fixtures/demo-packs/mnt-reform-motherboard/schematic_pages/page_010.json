@@ -1,0 +1,2839 @@
+{
+  "schema_version": "1.0",
+  "page": 10,
+  "sheet_name": "Reform 2 Audio Size",
+  "sheet_path": "/Reform 2 Audio/",
+  "page_kind": "schematic",
+  "orientation": "landscape",
+  "confidence": 0.82,
+  "nodes": [
+    {
+      "refdes": "U3",
+      "type": "ic",
+      "value": {
+        "raw": "WM8960",
+        "primary": "WM8960",
+        "package": null,
+        "mpn": "WM8960",
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": "Audio Codec"
+      },
+      "page": 10,
+      "pins": [
+        {
+          "number": "10",
+          "name": "DBVDD",
+          "role": "power_in",
+          "net_label": "DBVDD"
+        },
+        {
+          "number": "9",
+          "name": "DGND",
+          "role": "ground",
+          "net_label": "DGND"
+        },
+        {
+          "number": "8",
+          "name": "DCVDD",
+          "role": "power_in",
+          "net_label": "DCVDD"
+        },
+        {
+          "number": "2",
+          "name": "LINPUT3",
+          "role": "signal_in",
+          "net_label": "LINPUT3"
+        },
+        {
+          "number": "3",
+          "name": "LINPUT2",
+          "role": "signal_in",
+          "net_label": "LINPUT2"
+        },
+        {
+          "number": "4",
+          "name": "LINPUT1",
+          "role": "signal_in",
+          "net_label": "LINPUT1"
+        },
+        {
+          "number": "5",
+          "name": "RINPUT1",
+          "role": "signal_in",
+          "net_label": "RINPUT1"
+        },
+        {
+          "number": "6",
+          "name": "RINPUT2",
+          "role": "signal_in",
+          "net_label": "RINPUT2"
+        },
+        {
+          "number": "7",
+          "name": "RINPUT3",
+          "role": "signal_in",
+          "net_label": "RINPUT3"
+        },
+        {
+          "number": "14",
+          "name": "DACDAT",
+          "role": "signal_in",
+          "net_label": "DACDAT"
+        },
+        {
+          "number": "13",
+          "name": "DACLRC",
+          "role": "signal_in",
+          "net_label": "DACLRC"
+        },
+        {
+          "number": "16",
+          "name": "ADCDAT",
+          "role": "signal_out",
+          "net_label": "ADCDAT"
+        },
+        {
+          "number": "15",
+          "name": "ADCLRC",
+          "role": "signal_out",
+          "net_label": "ADCLRC"
+        },
+        {
+          "number": "12",
+          "name": "BCLK",
+          "role": "clock_in",
+          "net_label": "BCLK"
+        },
+        {
+          "number": "11",
+          "name": "MCLK",
+          "role": "clock_in",
+          "net_label": "MCLK"
+        },
+        {
+          "number": "17",
+          "name": "SCLK",
+          "role": "clock_in",
+          "net_label": "SCLK"
+        },
+        {
+          "number": "18",
+          "name": "SDIN",
+          "role": "signal_in",
+          "net_label": "SDIN"
+        },
+        {
+          "number": "1",
+          "name": "MICBIAS",
+          "role": "power_out",
+          "net_label": "MICBIAS"
+        },
+        {
+          "number": "29",
+          "name": "HP_R",
+          "role": "signal_out",
+          "net_label": "HP_R"
+        },
+        {
+          "number": "31",
+          "name": "HP_L",
+          "role": "signal_out",
+          "net_label": "HP_L"
+        },
+        {
+          "number": "25",
+          "name": "SPK_LP",
+          "role": "signal_out",
+          "net_label": "SPK_LP"
+        },
+        {
+          "number": "23",
+          "name": "SPK_LN",
+          "role": "signal_out",
+          "net_label": "SPK_LN"
+        },
+        {
+          "number": "22",
+          "name": "SPK_RP",
+          "role": "signal_out",
+          "net_label": "SPK_RP"
+        },
+        {
+          "number": "19",
+          "name": "SPK_RN",
+          "role": "signal_out",
+          "net_label": "SPK_RN"
+        },
+        {
+          "number": "32",
+          "name": "AVDD",
+          "role": "power_in",
+          "net_label": "AVDD"
+        },
+        {
+          "number": "28",
+          "name": "AGND",
+          "role": "ground",
+          "net_label": "AGND"
+        },
+        {
+          "number": "26",
+          "name": "SPKVDD1",
+          "role": "power_in",
+          "net_label": "SPKVDD1"
+        },
+        {
+          "number": "24",
+          "name": "SPKGND1",
+          "role": "ground",
+          "net_label": "SPKGND1"
+        },
+        {
+          "number": "30",
+          "name": "OUT3",
+          "role": "signal_out",
+          "net_label": "OUT3"
+        },
+        {
+          "number": "27",
+          "name": "VMID",
+          "role": "power_out",
+          "net_label": "VMID"
+        },
+        {
+          "number": "21",
+          "name": "SPKVDD2",
+          "role": "power_in",
+          "net_label": "SPKVDD2"
+        },
+        {
+          "number": "20",
+          "name": "SPKGND2",
+          "role": "ground",
+          "net_label": "SPKGND2"
+        },
+        {
+          "number": "33",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "J16",
+      "type": "connector",
+      "value": {
+        "raw": "LINE_IN",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": "Line In connector"
+      },
+      "page": 10,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "LINE_IN"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "LINE_IN"
+        },
+        {
+          "number": "3",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "J7",
+      "type": "connector",
+      "value": {
+        "raw": "SJ-43516-SMT",
+        "primary": null,
+        "package": null,
+        "mpn": "SJ-43516-SMT",
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": "CTIA standard TRRS headphone jack"
+      },
+      "page": 10,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "TRRS"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "3",
+          "name": null,
+          "role": "terminal",
+          "net_label": "TRRS"
+        },
+        {
+          "number": "4",
+          "name": null,
+          "role": "terminal",
+          "net_label": "TRRS"
+        },
+        {
+          "number": "5",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "6",
+          "name": null,
+          "role": "terminal",
+          "net_label": "TRRS"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "J21",
+      "type": "connector",
+      "value": {
+        "raw": "Conn_01x04",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 10,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "3",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "4",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "FB20",
+      "type": "ferrite",
+      "value": {
+        "raw": "100@100MHz 3A",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": "Ferrite bead on +3V3 to DBVDD"
+      },
+      "page": 10,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "+3V3"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "power_out",
+          "net_label": "DBVDD"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "FB18",
+      "type": "ferrite",
+      "value": {
+        "raw": "100@100MHz 3A",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": "Ferrite bead on +3V3 to DCVDD"
+      },
+      "page": 10,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "+3V3"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "power_out",
+          "net_label": "DCVDD"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "FB21",
+      "type": "ferrite",
+      "value": {
+        "raw": "100@100MHz 3A",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": "Ferrite bead on +3V3 to AVDD"
+      },
+      "page": 10,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "+3V3"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "power_out",
+          "net_label": "AVDD"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "FB19",
+      "type": "ferrite",
+      "value": {
+        "raw": "100@100MHz 3A",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": "Ferrite bead for SPK power"
+      },
+      "page": 10,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "+3V3"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "power_out",
+          "net_label": "SPKVDD1"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "FB10",
+      "type": "ferrite",
+      "value": {
+        "raw": "100@100MHz 3A",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 10,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "SPK_LP"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": "SPK_LP"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "FB11",
+      "type": "ferrite",
+      "value": {
+        "raw": "100@100MHz 3A",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 10,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "SPK_LN"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": "SPK_LN"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "FB16",
+      "type": "ferrite",
+      "value": {
+        "raw": "100@100MHz 3A",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 10,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "SPK_RP"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": "SPK_RP"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "FB17",
+      "type": "ferrite",
+      "value": {
+        "raw": "100@100MHz 3A",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 10,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "SPK_RN"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": "SPK_RN"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "L8",
+      "type": "inductor",
+      "value": {
+        "raw": "22.5uH",
+        "primary": "22.5uH",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 10,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "SPK_LP"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": "SPK_LP"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "L9",
+      "type": "inductor",
+      "value": {
+        "raw": "15uH",
+        "primary": "15uH",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 10,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "SPK_LN"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": "SPK_LN"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "L10",
+      "type": "inductor",
+      "value": {
+        "raw": "15uH",
+        "primary": "15uH",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 10,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "SPK_RP"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": "SPK_RP"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "L11",
+      "type": "inductor",
+      "value": {
+        "raw": "15uH",
+        "primary": "15uH",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 10,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "SPK_RN"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": "SPK_RN"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C143",
+      "type": "capacitor",
+      "value": {
+        "raw": "0.1uF",
+        "primary": "0.1uF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 10,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "DBVDD"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C144",
+      "type": "capacitor",
+      "value": {
+        "raw": "0.1uF",
+        "primary": "0.1uF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 10,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "DCVDD"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C142",
+      "type": "capacitor",
+      "value": {
+        "raw": "0.1uF",
+        "primary": "0.1uF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 10,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "AVDD"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C139",
+      "type": "capacitor",
+      "value": {
+        "raw": "4.7uF",
+        "primary": "4.7uF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 10,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "SPKVDD1"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C151",
+      "type": "capacitor",
+      "value": {
+        "raw": "4.7uF",
+        "primary": "4.7uF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 10,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "SPKVDD2"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C127",
+      "type": "capacitor",
+      "value": {
+        "raw": "220uF",
+        "primary": "220uF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 10,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "HP_L"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C147",
+      "type": "capacitor",
+      "value": {
+        "raw": "220uF",
+        "primary": "220uF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 10,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "HP_R"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C156",
+      "type": "capacitor",
+      "value": {
+        "raw": "0.1uF",
+        "primary": "0.1uF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 10,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "SPK_LP"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C157",
+      "type": "capacitor",
+      "value": {
+        "raw": "470nF",
+        "primary": "470nF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 10,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "SPK_LP"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C158",
+      "type": "capacitor",
+      "value": {
+        "raw": "0.1uF",
+        "primary": "0.1uF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 10,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "SPK_LN"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C165",
+      "type": "capacitor",
+      "value": {
+        "raw": "0.1uF",
+        "primary": "0.1uF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 10,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "SPK_RP"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C159",
+      "type": "capacitor",
+      "value": {
+        "raw": "470nF",
+        "primary": "470nF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 10,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "SPK_RP"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C166",
+      "type": "capacitor",
+      "value": {
+        "raw": "0.1uF",
+        "primary": "0.1uF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 10,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "SPK_RN"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C150",
+      "type": "capacitor",
+      "value": {
+        "raw": "10uF",
+        "primary": "10uF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 10,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "VMID"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C154",
+      "type": "capacitor",
+      "value": {
+        "raw": "0.1uF",
+        "primary": "0.1uF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 10,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "VMID"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C170",
+      "type": "capacitor",
+      "value": {
+        "raw": "4.7uF",
+        "primary": "4.7uF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 10,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "MICBIAS"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R140",
+      "type": "resistor",
+      "value": {
+        "raw": "680",
+        "primary": "680Ω",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 10,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "MICBIAS"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "terminal",
+          "net_label": "CTIA"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R142",
+      "type": "resistor",
+      "value": {
+        "raw": "47k",
+        "primary": "47kΩ",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 10,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "HP_L"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R143",
+      "type": "resistor",
+      "value": {
+        "raw": "47k",
+        "primary": "47kΩ",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 10,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "HP_R"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R144",
+      "type": "resistor",
+      "value": {
+        "raw": "47k",
+        "primary": "47kΩ",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": "Jack Detect pull-up"
+      },
+      "page": 10,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "+3V3"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": "CTIA"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R121",
+      "type": "resistor",
+      "value": {
+        "raw": "0",
+        "primary": "0Ω",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 10,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "DAC_DOUT"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "terminal",
+          "net_label": "DACDAT"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R151",
+      "type": "resistor",
+      "value": {
+        "raw": "0",
+        "primary": "0Ω",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 10,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "DAC_TXFS"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "terminal",
+          "net_label": "DACLRC"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R150",
+      "type": "resistor",
+      "value": {
+        "raw": "0",
+        "primary": "0Ω",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 10,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "DAC_DIN"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "terminal",
+          "net_label": "ADCDAT"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R139",
+      "type": "resistor",
+      "value": {
+        "raw": "0",
+        "primary": "0Ω",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 10,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "DAC_RXFS"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "terminal",
+          "net_label": "ADCLRC"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R138",
+      "type": "resistor",
+      "value": {
+        "raw": "0",
+        "primary": "0Ω",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 10,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "DAC_BCLK"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "terminal",
+          "net_label": "BCLK"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R114",
+      "type": "resistor",
+      "value": {
+        "raw": "0",
+        "primary": "0Ω",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 10,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "DAC_MCLK"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "terminal",
+          "net_label": "MCLK"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R66",
+      "type": "resistor",
+      "value": {
+        "raw": "4.7k",
+        "primary": "4.7kΩ",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 10,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "DAC_SCL"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "terminal",
+          "net_label": "SCLK"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R136",
+      "type": "resistor",
+      "value": {
+        "raw": "4.7k",
+        "primary": "4.7kΩ",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 10,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "+3V3"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "terminal",
+          "net_label": "DAC_SCL"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R135",
+      "type": "resistor",
+      "value": {
+        "raw": "4.7k",
+        "primary": "4.7kΩ",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 10,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "+3V3"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "terminal",
+          "net_label": "DAC_SDA"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R112",
+      "type": "resistor",
+      "value": {
+        "raw": "220",
+        "primary": "220Ω",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 10,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "DAC_SDA"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "terminal",
+          "net_label": "SDIN"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R152",
+      "type": "resistor",
+      "value": {
+        "raw": "0",
+        "primary": "0Ω",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 10,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "SPKVDD1"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "terminal",
+          "net_label": "SPKVDD2"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "D10",
+      "type": "diode",
+      "value": {
+        "raw": "SP0503BAHT",
+        "primary": null,
+        "package": null,
+        "mpn": "SP0503BAHT",
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": "ESD protection"
+      },
+      "page": 10,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "terminal",
+          "net_label": "CTIA"
+        },
+        {
+          "number": "3",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C157",
+      "type": "capacitor",
+      "value": {
+        "raw": "470nF",
+        "primary": "470nF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 10,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "SPK_LP"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    }
+  ],
+  "nets": [
+    {
+      "local_id": "net_3v3",
+      "label": "+3V3",
+      "is_power": true,
+      "is_global": true,
+      "connects": [
+        "FB20.1",
+        "FB18.1",
+        "FB21.1",
+        "FB19.1",
+        "R136.1",
+        "R135.1",
+        "R144.1"
+      ],
+      "page": 10
+    },
+    {
+      "local_id": "net_gnd",
+      "label": "GND",
+      "is_power": true,
+      "is_global": true,
+      "connects": [
+        "J16.3",
+        "C143.2",
+        "C144.2",
+        "C142.2",
+        "C139.2",
+        "C151.2",
+        "C127.2",
+        "C147.2",
+        "C156.2",
+        "C157.2",
+        "C158.2",
+        "C165.2",
+        "C159.2",
+        "C166.2",
+        "C150.2",
+        "C154.2",
+        "C170.2",
+        "R142.2",
+        "R143.2",
+        "U3.33",
+        "D10.1",
+        "D10.3",
+        "J7.2",
+        "J7.5",
+        "J21.1",
+        "J21.2",
+        "J21.3",
+        "J21.4"
+      ],
+      "page": 10
+    },
+    {
+      "local_id": "net_dbvdd",
+      "label": "DBVDD",
+      "is_power": true,
+      "is_global": false,
+      "connects": [
+        "FB20.2",
+        "U3.10",
+        "C143.1"
+      ],
+      "page": 10
+    },
+    {
+      "local_id": "net_dcvdd",
+      "label": "DCVDD",
+      "is_power": true,
+      "is_global": false,
+      "connects": [
+        "FB18.2",
+        "U3.8",
+        "C144.1"
+      ],
+      "page": 10
+    },
+    {
+      "local_id": "net_dgnd",
+      "label": "DGND",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U3.9"
+      ],
+      "page": 10
+    },
+    {
+      "local_id": "net_avdd",
+      "label": "AVDD",
+      "is_power": true,
+      "is_global": false,
+      "connects": [
+        "FB21.2",
+        "U3.32",
+        "C142.1"
+      ],
+      "page": 10
+    },
+    {
+      "local_id": "net_agnd",
+      "label": "AGND",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U3.28"
+      ],
+      "page": 10
+    },
+    {
+      "local_id": "net_spkvdd1",
+      "label": "SPKVDD1",
+      "is_power": true,
+      "is_global": false,
+      "connects": [
+        "FB19.2",
+        "U3.26",
+        "C139.1",
+        "R152.1"
+      ],
+      "page": 10
+    },
+    {
+      "local_id": "net_spkvdd2",
+      "label": "SPKVDD2",
+      "is_power": true,
+      "is_global": false,
+      "connects": [
+        "U3.21",
+        "C151.1",
+        "R152.2"
+      ],
+      "page": 10
+    },
+    {
+      "local_id": "net_spkgnd1",
+      "label": "SPKGND1",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U3.24"
+      ],
+      "page": 10
+    },
+    {
+      "local_id": "net_spkgnd2",
+      "label": "SPKGND2",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U3.20"
+      ],
+      "page": 10
+    },
+    {
+      "local_id": "net_dacdat",
+      "label": "DACDAT",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U3.14",
+        "R121.2"
+      ],
+      "page": 10
+    },
+    {
+      "local_id": "net_daclrc",
+      "label": "DACLRC",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U3.13",
+        "R151.2"
+      ],
+      "page": 10
+    },
+    {
+      "local_id": "net_adcdat",
+      "label": "ADCDAT",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U3.16",
+        "R150.2"
+      ],
+      "page": 10
+    },
+    {
+      "local_id": "net_adclrc",
+      "label": "ADCLRC",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U3.15",
+        "R139.2"
+      ],
+      "page": 10
+    },
+    {
+      "local_id": "net_bclk",
+      "label": "BCLK",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U3.12",
+        "R138.2"
+      ],
+      "page": 10
+    },
+    {
+      "local_id": "net_mclk",
+      "label": "MCLK",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U3.11",
+        "R114.2"
+      ],
+      "page": 10
+    },
+    {
+      "local_id": "net_sclk",
+      "label": "SCLK",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U3.17",
+        "R66.2"
+      ],
+      "page": 10
+    },
+    {
+      "local_id": "net_sdin",
+      "label": "SDIN",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U3.18",
+        "R112.2"
+      ],
+      "page": 10
+    },
+    {
+      "local_id": "net_dac_dout",
+      "label": "DAC_DOUT",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "R121.1"
+      ],
+      "page": 10
+    },
+    {
+      "local_id": "net_dac_txfs",
+      "label": "DAC_TXFS",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "R151.1"
+      ],
+      "page": 10
+    },
+    {
+      "local_id": "net_dac_din",
+      "label": "DAC_DIN",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "R150.1"
+      ],
+      "page": 10
+    },
+    {
+      "local_id": "net_dac_rxfs",
+      "label": "DAC_RXFS",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "R139.1"
+      ],
+      "page": 10
+    },
+    {
+      "local_id": "net_dac_bclk",
+      "label": "DAC_BCLK",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "R138.1"
+      ],
+      "page": 10
+    },
+    {
+      "local_id": "net_dac_mclk",
+      "label": "DAC_MCLK",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "R114.1"
+      ],
+      "page": 10
+    },
+    {
+      "local_id": "net_dac_scl",
+      "label": "DAC_SCL",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "R66.1",
+        "R136.2"
+      ],
+      "page": 10
+    },
+    {
+      "local_id": "net_dac_sda",
+      "label": "DAC_SDA",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "R112.1",
+        "R135.2"
+      ],
+      "page": 10
+    },
+    {
+      "local_id": "net_micbias",
+      "label": "MICBIAS",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U3.1",
+        "R140.1",
+        "C170.1"
+      ],
+      "page": 10
+    },
+    {
+      "local_id": "net_ctia",
+      "label": "CTIA",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "R140.2",
+        "R144.2",
+        "D10.2"
+      ],
+      "page": 10
+    },
+    {
+      "local_id": "net_hp_r",
+      "label": "HP_R",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U3.29",
+        "C147.1",
+        "R143.1"
+      ],
+      "page": 10
+    },
+    {
+      "local_id": "net_hp_l",
+      "label": "HP_L",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U3.31",
+        "C127.1",
+        "R142.1"
+      ],
+      "page": 10
+    },
+    {
+      "local_id": "net_spk_lp",
+      "label": "SPK_LP",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U3.25",
+        "FB10.1",
+        "L8.1",
+        "C156.1",
+        "C157.1"
+      ],
+      "page": 10
+    },
+    {
+      "local_id": "net_spk_ln",
+      "label": "SPK_LN",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U3.23",
+        "FB11.1",
+        "L9.1",
+        "C158.1"
+      ],
+      "page": 10
+    },
+    {
+      "local_id": "net_spk_rp",
+      "label": "SPK_RP",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U3.22",
+        "FB16.1",
+        "L10.1",
+        "C165.1",
+        "C159.1"
+      ],
+      "page": 10
+    },
+    {
+      "local_id": "net_spk_rn",
+      "label": "SPK_RN",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U3.19",
+        "FB17.1",
+        "L11.1",
+        "C166.1"
+      ],
+      "page": 10
+    },
+    {
+      "local_id": "net_vmid",
+      "label": "VMID",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U3.27",
+        "C150.1",
+        "C154.1"
+      ],
+      "page": 10
+    },
+    {
+      "local_id": "net_out3",
+      "label": "OUT3",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U3.30"
+      ],
+      "page": 10
+    },
+    {
+      "local_id": "net_linput1",
+      "label": "LINPUT1",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U3.4"
+      ],
+      "page": 10
+    },
+    {
+      "local_id": "net_linput2",
+      "label": "LINPUT2",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U3.3"
+      ],
+      "page": 10
+    },
+    {
+      "local_id": "net_linput3",
+      "label": "LINPUT3",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U3.2"
+      ],
+      "page": 10
+    },
+    {
+      "local_id": "net_rinput1",
+      "label": "RINPUT1",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U3.5"
+      ],
+      "page": 10
+    },
+    {
+      "local_id": "net_rinput2",
+      "label": "RINPUT2",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U3.6"
+      ],
+      "page": 10
+    },
+    {
+      "local_id": "net_rinput3",
+      "label": "RINPUT3",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U3.7"
+      ],
+      "page": 10
+    },
+    {
+      "local_id": "net_line_in",
+      "label": "LINE_IN",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "J16.1",
+        "J16.2"
+      ],
+      "page": 10
+    },
+    {
+      "local_id": "net_pwr_flag_1",
+      "label": "PWR_FLAG",
+      "is_power": false,
+      "is_global": false,
+      "connects": [],
+      "page": 10
+    },
+    {
+      "local_id": "net_pwr_flag_2",
+      "label": "PWR_FLAG",
+      "is_power": false,
+      "is_global": false,
+      "connects": [],
+      "page": 10
+    }
+  ],
+  "cross_page_refs": [
+    {
+      "label": "DAC_DOUT",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "DAC interface",
+      "page": 10
+    },
+    {
+      "label": "DAC_TXFS",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "DAC interface",
+      "page": 10
+    },
+    {
+      "label": "DAC_DIN",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "DAC interface",
+      "page": 10
+    },
+    {
+      "label": "DAC_RXFS",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "DAC interface",
+      "page": 10
+    },
+    {
+      "label": "DAC_BCLK",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "DAC interface",
+      "page": 10
+    },
+    {
+      "label": "DAC_MCLK",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "DAC interface",
+      "page": 10
+    },
+    {
+      "label": "DAC_SCL",
+      "direction": "bidir",
+      "at_pin": null,
+      "target_hint": "I2C bus",
+      "page": 10
+    },
+    {
+      "label": "DAC_SDA",
+      "direction": "bidir",
+      "at_pin": null,
+      "target_hint": "I2C bus",
+      "page": 10
+    },
+    {
+      "label": "+3V3",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "power page",
+      "page": 10
+    }
+  ],
+  "typed_edges": [
+    {
+      "src": "+3V3",
+      "dst": "FB20",
+      "kind": "powered_by",
+      "page": 10
+    },
+    {
+      "src": "FB20",
+      "dst": "DBVDD",
+      "kind": "powers",
+      "page": 10
+    },
+    {
+      "src": "+3V3",
+      "dst": "FB18",
+      "kind": "powered_by",
+      "page": 10
+    },
+    {
+      "src": "FB18",
+      "dst": "DCVDD",
+      "kind": "powers",
+      "page": 10
+    },
+    {
+      "src": "+3V3",
+      "dst": "FB21",
+      "kind": "powered_by",
+      "page": 10
+    },
+    {
+      "src": "FB21",
+      "dst": "AVDD",
+      "kind": "powers",
+      "page": 10
+    },
+    {
+      "src": "+3V3",
+      "dst": "FB19",
+      "kind": "powered_by",
+      "page": 10
+    },
+    {
+      "src": "FB19",
+      "dst": "SPKVDD1",
+      "kind": "powers",
+      "page": 10
+    },
+    {
+      "src": "DBVDD",
+      "dst": "U3",
+      "kind": "powers",
+      "page": 10
+    },
+    {
+      "src": "DCVDD",
+      "dst": "U3",
+      "kind": "powers",
+      "page": 10
+    },
+    {
+      "src": "AVDD",
+      "dst": "U3",
+      "kind": "powers",
+      "page": 10
+    },
+    {
+      "src": "SPKVDD1",
+      "dst": "U3",
+      "kind": "powers",
+      "page": 10
+    },
+    {
+      "src": "SPKVDD2",
+      "dst": "U3",
+      "kind": "powers",
+      "page": 10
+    },
+    {
+      "src": "C143",
+      "dst": "DBVDD",
+      "kind": "decouples",
+      "page": 10
+    },
+    {
+      "src": "C144",
+      "dst": "DCVDD",
+      "kind": "decouples",
+      "page": 10
+    },
+    {
+      "src": "C142",
+      "dst": "AVDD",
+      "kind": "decouples",
+      "page": 10
+    },
+    {
+      "src": "C139",
+      "dst": "SPKVDD1",
+      "kind": "decouples",
+      "page": 10
+    },
+    {
+      "src": "C151",
+      "dst": "SPKVDD2",
+      "kind": "decouples",
+      "page": 10
+    },
+    {
+      "src": "C150",
+      "dst": "VMID",
+      "kind": "decouples",
+      "page": 10
+    },
+    {
+      "src": "C154",
+      "dst": "VMID",
+      "kind": "decouples",
+      "page": 10
+    },
+    {
+      "src": "C170",
+      "dst": "MICBIAS",
+      "kind": "decouples",
+      "page": 10
+    },
+    {
+      "src": "C127",
+      "dst": "HP_L",
+      "kind": "filters",
+      "page": 10
+    },
+    {
+      "src": "C147",
+      "dst": "HP_R",
+      "kind": "filters",
+      "page": 10
+    },
+    {
+      "src": "FB10",
+      "dst": "SPK_LP",
+      "kind": "filters",
+      "page": 10
+    },
+    {
+      "src": "FB11",
+      "dst": "SPK_LN",
+      "kind": "filters",
+      "page": 10
+    },
+    {
+      "src": "FB16",
+      "dst": "SPK_RP",
+      "kind": "filters",
+      "page": 10
+    },
+    {
+      "src": "FB17",
+      "dst": "SPK_RN",
+      "kind": "filters",
+      "page": 10
+    },
+    {
+      "src": "L8",
+      "dst": "SPK_LP",
+      "kind": "filters",
+      "page": 10
+    },
+    {
+      "src": "L9",
+      "dst": "SPK_LN",
+      "kind": "filters",
+      "page": 10
+    },
+    {
+      "src": "L10",
+      "dst": "SPK_RP",
+      "kind": "filters",
+      "page": 10
+    },
+    {
+      "src": "L11",
+      "dst": "SPK_RN",
+      "kind": "filters",
+      "page": 10
+    },
+    {
+      "src": "C156",
+      "dst": "SPK_LP",
+      "kind": "filters",
+      "page": 10
+    },
+    {
+      "src": "C157",
+      "dst": "SPK_LP",
+      "kind": "filters",
+      "page": 10
+    },
+    {
+      "src": "C158",
+      "dst": "SPK_LN",
+      "kind": "filters",
+      "page": 10
+    },
+    {
+      "src": "C165",
+      "dst": "SPK_RP",
+      "kind": "filters",
+      "page": 10
+    },
+    {
+      "src": "C159",
+      "dst": "SPK_RP",
+      "kind": "filters",
+      "page": 10
+    },
+    {
+      "src": "C166",
+      "dst": "SPK_RN",
+      "kind": "filters",
+      "page": 10
+    },
+    {
+      "src": "D10",
+      "dst": "CTIA",
+      "kind": "filters",
+      "page": 10
+    },
+    {
+      "src": "DAC_DOUT",
+      "dst": "U3",
+      "kind": "produces_signal",
+      "page": 10
+    },
+    {
+      "src": "DAC_TXFS",
+      "dst": "U3",
+      "kind": "produces_signal",
+      "page": 10
+    },
+    {
+      "src": "U3",
+      "dst": "DAC_DIN",
+      "kind": "produces_signal",
+      "page": 10
+    },
+    {
+      "src": "DAC_RXFS",
+      "dst": "U3",
+      "kind": "consumes_signal",
+      "page": 10
+    },
+    {
+      "src": "DAC_BCLK",
+      "dst": "U3",
+      "kind": "clocks",
+      "page": 10
+    },
+    {
+      "src": "DAC_MCLK",
+      "dst": "U3",
+      "kind": "clocks",
+      "page": 10
+    },
+    {
+      "src": "DAC_SCL",
+      "dst": "U3",
+      "kind": "consumes_signal",
+      "page": 10
+    },
+    {
+      "src": "DAC_SDA",
+      "dst": "U3",
+      "kind": "consumes_signal",
+      "page": 10
+    },
+    {
+      "src": "R136",
+      "dst": "DAC_SCL",
+      "kind": "powers",
+      "page": 10
+    },
+    {
+      "src": "R135",
+      "dst": "DAC_SDA",
+      "kind": "powers",
+      "page": 10
+    }
+  ],
+  "designer_notes": [
+    {
+      "text": "Audio Codec",
+      "page": 10,
+      "attached_to_refdes": "U3",
+      "attached_to_net": null
+    },
+    {
+      "text": "NOTE: DCVDD could be 1.8v",
+      "page": 10,
+      "attached_to_refdes": null,
+      "attached_to_net": "DCVDD"
+    },
+    {
+      "text": "more bass!",
+      "page": 10,
+      "attached_to_refdes": "C147",
+      "attached_to_net": null
+    },
+    {
+      "text": "CTIA standard TRRS",
+      "page": 10,
+      "attached_to_refdes": "J7",
+      "attached_to_net": null
+    },
+    {
+      "text": "Jack Detect",
+      "page": 10,
+      "attached_to_refdes": "R144",
+      "attached_to_net": null
+    },
+    {
+      "text": "Speakers: PUI AS01808AO-3-R\n8 Ohm 1 W\nbutterworth filter with 40khz cutoff:\nspeaker ohms = 8\nL = 22.5uH\nC = 0.35uF",
+      "page": 10,
+      "attached_to_refdes": "L8",
+      "attached_to_net": null
+    },
+    {
+      "text": "License: CERN-OHL-S 2.0\nEngineer: Lukas F. Hartmann\nhttps://mntre.com\nMNT Research GmbH\nSheet: /Reform 2 Audio/\nFile: reform2-audio.kicad_sch",
+      "page": 10,
+      "attached_to_refdes": null,
+      "attached_to_net": null
+    }
+  ],
+  "ambiguities": [
+    {
+      "description": "C162 and C163 appear near J16 (LINE_IN connector) in the image but are not in the grounding refdes set; their values (~1uF each) are visible but refdes cannot be confirmed.",
+      "page": 10,
+      "related_refdes": [
+        "C162",
+        "C163"
+      ],
+      "related_nets": [
+        "LINE_IN",
+        "GND"
+      ]
+    },
+    {
+      "description": "C141 appears near RINPUT1/2 area of U3 with value 4.7uF but is not in the grounding refdes set.",
+      "page": 10,
+      "related_refdes": [
+        "C141"
+      ],
+      "related_nets": [
+        "RINPUT1",
+        "RINPUT2"
+      ]
+    },
+    {
+      "description": "R141 appears near the CTIA/Jack Detect area but cannot be confirmed from grounding set.",
+      "page": 10,
+      "related_refdes": [
+        "R141"
+      ],
+      "related_nets": [
+        "CTIA"
+      ]
+    },
+    {
+      "description": "The exact routing of LINE_IN signals to LINPUT1/2/3 and RINPUT1/2/3 on U3 cannot be fully traced from the image due to density.",
+      "page": 10,
+      "related_refdes": [],
+      "related_nets": [
+        "LINE_IN",
+        "LINPUT1",
+        "LINPUT2",
+        "LINPUT3",
+        "RINPUT1",
+        "RINPUT2",
+        "RINPUT3"
+      ]
+    },
+    {
+      "description": "J21 connector pinout and net connections are not fully readable; appears to connect to speaker outputs.",
+      "page": 10,
+      "related_refdes": [
+        "J21"
+      ],
+      "related_nets": [
+        "SPK_LP",
+        "SPK_LN",
+        "SPK_RP",
+        "SPK_RN",
+        "GND"
+      ]
+    },
+    {
+      "description": "L8 value reads as 22.5uH per designer note but other inductors L9-L11 read 15uH; the butterworth filter note gives L=22.5uH. L8 near SPK_LP may be the output filter inductor with the AS01808AO-3-R speaker.",
+      "page": 10,
+      "related_refdes": [
+        "L8",
+        "L9",
+        "L10",
+        "L11"
+      ],
+      "related_nets": [
+        "SPK_LP",
+        "SPK_LN",
+        "SPK_RP",
+        "SPK_RN"
+      ]
+    },
+    {
+      "description": "PWR_FLAG symbols appear multiple times on this page but their exact net connections could not all be resolved with certainty.",
+      "page": 10,
+      "related_refdes": [],
+      "related_nets": [
+        "PWR_FLAG",
+        "+3V3",
+        "AVDD",
+        "DBVDD"
+      ]
+    }
+  ]
+}

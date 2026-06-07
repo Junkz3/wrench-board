@@ -1,0 +1,63 @@
+{
+  "aria": {
+    "step_pin": "épingle d'étape",
+    "panel": "protocole de diagnostic",
+    "toggle": "Plier / déplier",
+    "abandon": "Abandonner le protocole"
+  },
+  "title": {
+    "default": "—"
+  },
+  "history": {
+    "summary": "historique"
+  },
+  "toggle": {
+    "collapse": "Plier",
+    "expand": "Déplier"
+  },
+  "step": {
+    "value_placeholder": "valeur",
+    "nominal_placeholder": "nominal {value}",
+    "observation_placeholder": "ce que tu observes…",
+    "yes": "Oui",
+    "no": "Non",
+    "done": "Fait",
+    "validate": "Valider",
+    "skip": "Skip",
+    "skip_prompt": "Pourquoi tu skip ce step ?",
+    "result": {
+      "yes": "oui",
+      "no": "non",
+      "done": "fait",
+      "empty": "—"
+    }
+  },
+  "abandon": {
+    "confirm": "Abandonner le protocole en cours ?",
+    "modal": {
+      "badge": "Abandon du protocole",
+      "title": "Abandonner le protocole en cours ?",
+      "body": "L'agent sera notifié et la séquence de diagnostic sera marquée comme abandonnée. Les résultats d'étapes déjà enregistrés restent dans l'historique du repair.",
+      "reason_label": "Raison (optionnelle, transmise à l'agent)",
+      "reason_placeholder": "Pourquoi abandonner — mauvaise hypothèse, impasse, client parti, …",
+      "cancel": "Annuler",
+      "confirm": "Oui, abandonner"
+    }
+  },
+  "system_event": {
+    "abandoned": "Protocole abandonné",
+    "completed": "Protocole complété"
+  },
+  "confirm": {
+    "badge": "Protocole proposé",
+    "step_count_placeholder": "— étapes",
+    "step_count": "{n} étapes",
+    "rationale_label": "Justification",
+    "steps_label": "Étapes",
+    "reject_reason_label": "Raison du refus (optionnel)",
+    "reject_reason_placeholder": "Pourquoi refuser ce protocole — l'agent en tiendra compte.",
+    "hint": "L'agent attend votre décision avant de pousser le protocole.",
+    "reject": "Refuser",
+    "accept": "Accepter"
+  }
+}

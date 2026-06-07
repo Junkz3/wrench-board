@@ -1,0 +1,191 @@
+{
+  "demo": {
+    "read_only": "Demo mode — the example device is read-only. Create your own diagnostic to ask the agent real questions."
+  },
+  "panel": {
+    "aria": "Diagnostic agent",
+    "badge": "Agent",
+    "title": "Diagnostic",
+    "subline_empty": "—"
+  },
+  "header": {
+    "camera_chip_title": "Camera for cam_capture (Flow B)",
+    "camera_chip_none": "— none —",
+    "camera_preview_title": "Show / hide camera preview",
+    "camera_preview_aria": "Toggle camera preview",
+    "tier_title": "Model tier",
+    "tier_fast": "Fast · Haiku 4.5",
+    "tier_normal": "Normal · Sonnet 4.6",
+    "tier_deep": "Deep · Opus 4.8",
+    "close_aria": "Close panel"
+  },
+  "status": {
+    "idle": "idle",
+    "connecting": "connecting · {slug} · {tier}",
+    "connected": "connected · {slug} · {tier}",
+    "closed": "closed",
+    "error_socket": "socket error",
+    "url_invalid": "invalid URL"
+  },
+  "conv": {
+    "title": "Conversations",
+    "label_empty": "CONV 0/0",
+    "label_count": "CONV {idx}/{total}",
+    "new": "New conversation",
+    "default_title": "Conversation {idx}",
+    "turns_one": "{n} turn",
+    "turns_many": "{n} turns",
+    "ago_seconds": "{n}s ago",
+    "ago_minutes": "{n}m ago",
+    "ago_hours": "{n}h ago",
+    "ago_days": "{n}d ago",
+    "ago_unknown": "—",
+    "switching": "→ switching conversation: {id}",
+    "delete_aria": "Delete conversation",
+    "delete_confirm": "Delete this conversation?\nMessage history and the linked agent session will be erased. This cannot be undone.",
+    "delete_failed": "Delete failed — try again."
+  },
+  "input": {
+    "placeholder": "Ask the agent… (Enter to send, Shift+Enter for newline)",
+    "upload_title": "Upload macro photo (PNG/JPEG, max 5MB)",
+    "upload_aria": "Upload macro",
+    "stop_title": "Interrupt the agent (Esc)",
+    "stop_aria": "Stop",
+    "send_title": "Send (Enter)",
+    "send_aria": "Send"
+  },
+  "dropzone": {
+    "label": "Drop the photo here"
+  },
+  "roles": {
+    "user": "You",
+    "agent": "Agent",
+    "replay_suffix": " · replay"
+  },
+  "pending": {
+    "thinking": "the agent is thinking"
+  },
+  "step": {
+    "expand_title": "View payload",
+    "no_result": "— result not rendered by the runtime"
+  },
+  "tool": {
+    "mb_get_component": "Looking up <span class=\"refdes\">{refdes}</span>",
+    "mb_get_rules_for_symptoms": "Reading rules for « {symptoms} »",
+    "mb_list_findings": "Reviewing findings",
+    "mb_list_findings_for": "Reviewing findings for <span class=\"refdes\">{device}</span>",
+    "mb_record_finding": "Recording a finding",
+    "mb_expand_knowledge": "Expanding the pack",
+    "mb_expand_knowledge_scope": "Expanding the pack — {scope}",
+    "mb_schematic_graph": "Reading the schematic graph",
+    "bv_highlight": "Highlighting <span class=\"refdes\">{refdes}</span>",
+    "bv_focus": "Focusing on <span class=\"refdes\">{refdes}</span>",
+    "bv_reset_view": "Resetting the view",
+    "bv_highlight_net": "Highlighting net <span class=\"net\">{net}</span>",
+    "bv_flip": "Flipping the board",
+    "bv_annotate_near": "Annotation near <span class=\"refdes\">{refdes}</span>",
+    "bv_annotate_at": "Annotation at ({x}, {y})",
+    "bv_annotate_blank": "Annotation",
+    "bv_filter_by_type": "Filtering by type — {prefix}",
+    "bv_draw_arrow": "Arrow from <span class=\"refdes\">{from}</span> to <span class=\"refdes\">{to}</span>",
+    "bv_measure": "Measure between <span class=\"refdes\">{a}</span> and <span class=\"refdes\">{b}</span>",
+    "bv_show_pin": "Pin {pin} of <span class=\"refdes\">{refdes}</span>",
+    "bv_dim_unrelated": "Dimming unrelated elements",
+    "bv_layer_visibility": "Layer visibility {layer}",
+    "bv_scene_empty": "Scene — empty",
+    "bv_scene": "Scene — {parts}",
+    "scene_highlight_one": "{n} highlight",
+    "scene_highlight_many": "{n} highlights",
+    "scene_annotation_one": "{n} annotation",
+    "scene_annotation_many": "{n} annotations",
+    "scene_arrow_one": "{n} arrow",
+    "scene_arrow_many": "{n} arrows",
+    "scene_focus": "focus <span class=\"refdes\">{refdes}</span>",
+    "scene_dim": "dim",
+    "scene_reset": "reset",
+    "stock_search": "Searching stock for <span class=\"refdes\">{type} {value}</span>",
+    "stock_search_minimal": "Searching stock",
+    "stock_consume": "Consuming <span class=\"refdes\">{refdes}</span> from <span class=\"refdes\">{donor_id}</span>",
+    "stock_mark_donor": "Marking <span class=\"refdes\">{device_slug}</span> as donor",
+    "stock_unmark_donor": "Removing donor <span class=\"refdes\">{donor_id}</span>",
+    "stock_list_donors": "Listing donors in stock"
+  },
+  "memtool": {
+    "read": "Memory read — {path}",
+    "write": "Memory write — {path}",
+    "edit": "Memory edit — {path}",
+    "view": "Memory view — {path}",
+    "grep": "grep <code class=\"mem-path\">{pattern}</code>",
+    "grep_in": "grep <code class=\"mem-path\">{pattern}</code> in {path}",
+    "glob": "glob <code class=\"mem-path\">{pattern}</code>",
+    "list": "Memory listing",
+    "list_at": "Memory listing — {path}"
+  },
+  "context_lost": {
+    "title": "Turn history lost",
+    "reason_ma_empty": "Previous session archived by the Managed Agents backend (events.list empty), and no local JSONL backup available.",
+    "reason_generic": "The previous session could not be restored and no summary could be generated.",
+    "preserved_label": "Recovered from disk and reinjected into the agent",
+    "preserved_none": "No persistent artefact found for this repair (no measurements, no protocol, no outcome).",
+    "context_reinject": "The device, the symptom and your profile are automatically reinjected below — the agent will know what you're working on.",
+    "lost_explainer": "What stays lost: the <strong>conversational thread</strong> (agent reasoning, hypotheses raised, free exchanges). If you discussed leads or made off-protocol decisions, restate them in one line so it can realign.",
+    "preserved_measurements_one": "{n} measurement",
+    "preserved_measurements_many": "{n} measurements",
+    "preserved_protocol": "protocol « {title} » ({completed}/{total})",
+    "preserved_outcome": "final outcome"
+  },
+  "resume": {
+    "title": "Session resume",
+    "meta_summary": "Haiku summary · {tok_in}→{tok_out} tok"
+  },
+  "session": {
+    "ready": "session ready — {mode} · {model}",
+    "ready_with_repair": "session ready — {mode} · {model} · repair {repair}",
+    "subline": "{model} · {mode}",
+    "subline_with_repair": "{model} · {mode} · repair {repair}",
+    "device_label_simple": "{slug}",
+    "device_label_with_repair": "{slug} · {repair}",
+    "tier_auto_align": "→ auto-aligning on this conv's tier: {tier}",
+    "tier_switch": "→ switching tier: {tier}. New conversation.",
+    "replay_count": "replay · {n} prior events",
+    "replay_done": "replay done — pick up where you left off",
+    "context_loaded": "device + symptom context loaded · the agent is waiting for your first message",
+    "session_resumed": "session resumed · history and agent memory restored",
+    "session_terminated": "session terminated",
+    "interrupt_sent": "interrupt sent · the agent is stopping"
+  },
+  "image_bubble": {
+    "alt": "macro",
+    "macro_caption": "Macro photo sent by the tech.",
+    "capture_caption": "Capture · {label}"
+  },
+  "capture": {
+    "no_camera": "agent requested a capture but no camera selected",
+    "requested": "capture requested by the agent · {reason}",
+    "no_reason": "no reason",
+    "failed": "capture failed: {error}"
+  },
+  "upload": {
+    "too_large": "photo too large ({size}MB > 5MB)",
+    "unsupported": "unsupported format: {mime} · PNG or JPEG only",
+    "socket_closed": "cannot upload: socket not open",
+    "failed": "upload failed: {error}",
+    "rejected": "upload rejected · {reason}"
+  },
+  "preview": {
+    "select_camera_first": "select a camera in the picker first",
+    "open_failed": "preview failed to open — check permissions"
+  },
+  "send": {
+    "socket_closed": "cannot send: socket not open",
+    "connect_failed": "connection failed: {error}"
+  },
+  "error": {
+    "generic": "error: {text}",
+    "unknown_reason": "unknown reason"
+  },
+  "fix": {
+    "validated_one": "Validated ({n} fix)",
+    "validated_many": "Validated ({n} fixes)"
+  }
+}

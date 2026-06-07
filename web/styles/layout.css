@@ -1,0 +1,82 @@
+/* ============ TOP BAR ============ */
+.topbar{position:fixed;top:0;left:0;right:0;height:48px;background:linear-gradient(180deg,var(--bg-2),var(--bg));border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:18px;z-index:20}
+.brand{display:flex;align-items:center;gap:10px;font-weight:600}
+/* Centered DEMO badge — only shown while exploring the example device
+   (body.wb-demo-mode, set by the dashboard header render). Absolute-centered so
+   it stays mid-topbar regardless of the flex children around it. */
+.topbar-demo-badge{
+  display:none;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  padding:2px 12px;border-radius:999px;
+  background:rgba(192,132,252,.16);border:1px solid rgba(192,132,252,.55);
+  color:var(--violet);font-family:var(--mono);font-size:11px;font-weight:700;
+  letter-spacing:1.5px;text-transform:uppercase;
+  box-shadow:0 0 0 0 rgba(192,132,252,.45);animation:wbDemoBadgePulse 2.2s ease-in-out infinite;
+  pointer-events:none;z-index:1;
+}
+body.wb-demo-mode .topbar-demo-badge{display:inline-flex}
+@keyframes wbDemoBadgePulse{0%,100%{box-shadow:0 0 0 0 rgba(192,132,252,0)}50%{box-shadow:0 0 10px 1px rgba(192,132,252,.35)}}
+.brand-mascot{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px}
+.brand .sub{color:var(--text-3);font-weight:400;margin-left:6px}
+.crumbs{display:flex;align-items:center;gap:8px;color:var(--text-3);font-size:12px}
+.crumbs .sep{opacity:.5}.crumbs .active{color:var(--text)}
+.topbar .spacer{flex:1}
+.mode-pill{display:flex;align-items:center;gap:8px;padding:5px 10px 5px 8px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.3);border-radius:6px;color:var(--amber);font-size:11px;font-family:var(--mono);letter-spacing:.3px}
+.mode-pill .dot{width:6px;height:6px;border-radius:50%;background:var(--amber);box-shadow:0 0 8px var(--amber);animation:pulse 2.4s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.top-btn{background:var(--panel);border:1px solid var(--border);color:var(--text-2);padding:6px 10px;border-radius:6px;font-size:12px;font-family:inherit;display:inline-flex;align-items:center;gap:6px;cursor:pointer;transition:all .15s}
+.top-btn:hover{color:var(--text);border-color:var(--border-hover);background:var(--panel-2)}
+
+/* ============ LEFT RAIL ============ */
+.rail{position:fixed;top:48px;bottom:0;left:0;width:52px;background:linear-gradient(180deg,var(--bg-2) 0%,var(--bg-deep) 100%);border-right:1px solid var(--border);display:flex;flex-direction:column;align-items:center;padding:12px 0;gap:6px;z-index:15}
+.rail-btn{width:38px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--text-3);background:transparent;border:1px solid transparent;cursor:pointer;transition:all .18s cubic-bezier(.2,.8,.2,1);position:relative}
+.rail-btn:hover{color:var(--text);background:var(--panel);border-color:var(--border-soft)}
+.rail-btn:active{transform:scale(.95)}
+.rail-btn.active{color:var(--cyan);background:linear-gradient(135deg,rgba(56,189,248,.14),rgba(56,189,248,.04));border-color:rgba(56,189,248,.35);box-shadow:inset 0 0 0 1px rgba(56,189,248,.08),0 2px 8px -2px rgba(56,189,248,.25)}
+.rail-btn.active::before{content:"";position:absolute;left:-12px;top:6px;bottom:6px;width:3px;background:var(--cyan);border-radius:2px;box-shadow:0 0 10px var(--cyan),0 0 2px var(--cyan)}
+.rail-btn .icon{transition:transform .18s cubic-bezier(.2,.8,.2,1)}
+.rail-btn:hover .icon{transform:scale(1.08)}
+.rail-sep{width:24px;height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);margin:6px 0}
+
+/* ============ METABAR ============ */
+.metabar{position:fixed;top:48px;left:52px;right:0;height:44px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px;padding:0 16px;z-index:10;font-size:12px}
+.metabar .device{display:flex;align-items:center;gap:8px;font-family:var(--mono);color:var(--text-2)}
+.tag{padding:3px 7px;border-radius:4px;background:var(--panel);border:1px solid var(--border);color:var(--text);font-size:11px}
+.warn{color:var(--amber);font-size:11.5px;display:flex;align-items:center;gap:6px}
+.filters{display:flex;gap:6px;margin-left:auto;align-items:center}
+.filter-chip{display:inline-flex;align-items:center;gap:7px;padding:5px 9px;border-radius:16px;background:var(--panel);border:1px solid var(--border);font-size:11.5px;color:var(--text-2);cursor:pointer;user-select:none;transition:all .15s}
+.filter-chip:hover{color:var(--text)}
+.filter-chip.off{opacity:.45;text-decoration:line-through}
+.filter-chip .swatch{width:9px;height:9px;border-radius:50%}
+.filter-chip[data-kind="symptom"] .swatch{background:var(--amber);box-shadow:0 0 6px var(--amber)}
+.filter-chip[data-kind="component"] .swatch{background:var(--cyan);box-shadow:0 0 6px var(--cyan);border-radius:2px}
+.filter-chip[data-kind="net"] .swatch{background:var(--emerald);box-shadow:0 0 6px var(--emerald);clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%);border-radius:0}
+.filter-chip[data-kind="action"] .swatch{background:var(--violet);box-shadow:0 0 6px var(--violet);clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);border-radius:0}
+.search{display:flex;align-items:center;gap:8px;padding:5px 10px;background:var(--panel);border:1px solid var(--border);border-radius:6px;width:220px}
+.search input{background:transparent;border:0;outline:0;color:var(--text);font-family:inherit;font-size:12px;width:100%}
+.search input::placeholder{color:var(--text-3)}
+.search kbd{font-family:var(--mono);font-size:10px;color:var(--text-3);padding:1px 5px;border-radius:3px;background:var(--bg-2);border:1px solid var(--border)}
+
+.status-dot{width:6px;height:6px;border-radius:50%;background:var(--emerald);box-shadow:0 0 6px var(--emerald)}
+
+.icon{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.icon-sm{width:12px;height:12px}
+
+/* =========== CHROME — dynamic state (topbar crumbs, mode pill, metabar) =========== */
+.mode-pill.cyan{background:rgba(56,189,248,.08);border-color:rgba(56,189,248,.3);color:var(--cyan)}
+.mode-pill.cyan .dot{background:var(--cyan);box-shadow:0 0 8px var(--cyan)}
+.mode-pill.violet{background:rgba(192,132,252,.08);border-color:rgba(192,132,252,.3);color:var(--violet)}
+.mode-pill.violet .dot{background:var(--violet);box-shadow:0 0 8px var(--violet)}
+.mode-pill.emerald{background:rgba(52,211,153,.08);border-color:rgba(52,211,153,.3);color:var(--emerald)}
+.mode-pill.emerald .dot{background:var(--emerald);box-shadow:0 0 8px var(--emerald)}
+
+.warn.ok{color:var(--emerald)}
+.warn.info{color:var(--cyan)}
+.warn.muted{color:var(--text-3)}
+
+/* metabar is Graphe-specific — hide it on every other section and pull content up */
+body.no-metabar .metabar{display:none}
+body.no-metabar .canvas{top:48px}
+body.no-metabar .home{top:48px}
+body.no-metabar .stub{top:48px}
+body.no-metabar .inspector{top:60px}
+body.no-metabar .tweaks{top:60px}

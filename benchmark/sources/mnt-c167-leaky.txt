@@ -1,0 +1,1 @@
+C167 is a bulk capacitor on +3V3. A resistive failure (typically 100-500 ohms after dielectric breakdown) causes the rail to sag without fully collapsing.

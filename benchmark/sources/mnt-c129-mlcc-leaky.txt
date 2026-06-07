@@ -1,0 +1,1 @@
+Multilayer ceramic capacitors develop resistive leakage (100 ohm to 1 kohm range) after repeated voltage overstress or mechanical cracking. The decoupled rail sags rather than collapsing, and the regulator's current limit usually lets it continue operating in degraded mode.

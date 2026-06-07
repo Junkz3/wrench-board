@@ -1,0 +1,63 @@
+{
+  "aria": {
+    "step_pin": "step pin",
+    "panel": "diagnostic protocol",
+    "toggle": "Collapse / expand",
+    "abandon": "Abandon protocol"
+  },
+  "title": {
+    "default": "—"
+  },
+  "history": {
+    "summary": "history"
+  },
+  "toggle": {
+    "collapse": "Collapse",
+    "expand": "Expand"
+  },
+  "step": {
+    "value_placeholder": "value",
+    "nominal_placeholder": "nominal {value}",
+    "observation_placeholder": "what you observe…",
+    "yes": "Yes",
+    "no": "No",
+    "done": "Done",
+    "validate": "Validate",
+    "skip": "Skip",
+    "skip_prompt": "Why are you skipping this step?",
+    "result": {
+      "yes": "yes",
+      "no": "no",
+      "done": "done",
+      "empty": "—"
+    }
+  },
+  "abandon": {
+    "confirm": "Abandon the running protocol?",
+    "modal": {
+      "badge": "Abandon protocol",
+      "title": "Abandon the running protocol?",
+      "body": "The agent will be notified and the diagnostic sequence will be marked as abandoned. Step results already recorded are kept in the repair history.",
+      "reason_label": "Reason (optional, surfaced to the agent)",
+      "reason_placeholder": "Why abandon — wrong hypothesis, dead end, customer left, …",
+      "cancel": "Cancel",
+      "confirm": "Yes, abandon"
+    }
+  },
+  "system_event": {
+    "abandoned": "Protocol abandoned",
+    "completed": "Protocol completed"
+  },
+  "confirm": {
+    "badge": "Proposed protocol",
+    "step_count_placeholder": "— steps",
+    "step_count": "{n} steps",
+    "rationale_label": "Rationale",
+    "steps_label": "Steps",
+    "reject_reason_label": "Reason for rejection (optional)",
+    "reject_reason_placeholder": "Why reject this protocol — the agent will take it into account.",
+    "hint": "The agent is waiting for your decision before pushing the protocol.",
+    "reject": "Reject",
+    "accept": "Accept"
+  }
+}

@@ -1,0 +1,1 @@
+AP22815 single-channel current-limited load switch. A dead AP22815 (gate-drive failure or channel open) leaves the PCIe 3.3V domain unpowered; the PCIe bridge enumerates no devices.

@@ -1,0 +1,330 @@
+"""`mb_*` custom tools for the diagnostic agent.
+
+Deliberately simple: prefix-letter closest-matches (no Levenshtein at this
+layer — the boardview validator keeps the distance-based version for refdes
+typos on a parsed board). Reads straight from disk on every call.
+
+mb_record_finding powers cross-session memory: every confirmed repair becomes
+a field report on disk, mirrored to the device's MA memory store mount under
+/mnt/memory/wrench-board-{slug}/field_reports/. The agent reads them via grep
+on the mount (with the layered MA memory architecture) — there is no
+mb_list_findings tool: that's a redundant API surface vs. the mount.
+"""
+
+from __future__ import annotations
+
+from pathlib import Path
+from typing import Any
+
+from api.agent.conversation_log import record_session_log
+from api.agent.field_reports import record_field_report
+from api.agent.owner_ref import current_owner_ref
+from api.board.validator import suggest_similar
+from api.pipeline.pack_migrate import migrate_pack_if_needed
+from api.pipeline.pack_storage import load_effective_pack
+from api.pipeline.schemas import COMPONENT_KINDS
+from api.session.state import SessionState
+
+
+def _unflatten_effective(eff: dict[str, Any]) -> dict[str, Any]:
+    """Convertit la forme effective T8 {kind: {items:[...]}} vers la forme
+    attendue par les tools mb_* : {registry:{components,signals}, dictionary:
+    {entries}, rules:{rules}}.
+
+    Registry : un item est un composant si kind (insensible à la casse) ∈
+    COMPONENT_KINDS, sinon un signal (couvre les packs legacy lowercase
+    'pmic'/'power_rail' aussi bien que le T8 uppercase).
+    """
+    reg_items = eff.get("registry", {}).get("items", [])
+    components = [it for it in reg_items if str(it.get("kind", "")).upper() in COMPONENT_KINDS]
+    signals = [it for it in reg_items if str(it.get("kind", "")).upper() not in COMPONENT_KINDS]
+    return {
+        "registry": {"components": components, "signals": signals},
+        "dictionary": {"entries": eff.get("dictionary", {}).get("items", [])},
+        "rules": {"rules": eff.get("rules", {}).get("items", [])},
+    }
+
+
+def _pack_max_mtime(memory_root: Path, slug: str) -> float:
+    """mtime max des couches lues (baseline + promoted) pour l'invalidation du
+    cache de session. 0.0 si rien sur disque (cache toujours considéré frais)."""
+    base = memory_root / slug
+    mtimes = [0.0]
+    for layer in ("baseline", "promoted"):
+        for fname in ("registry.json", "dictionary.json", "rules.json"):
+            p = base / layer / fname
+            if p.is_file():
+                mtimes.append(p.stat().st_mtime)
+    return max(mtimes)
+
+
+def _load_pack(
+    slug: str,
+    memory_root: Path,
+    session: SessionState | None = None,
+) -> dict[str, Any]:
+    # T8 : migration idempotente legacy → baseline/ au premier accès, puis lecture
+    # de la vue effective (baseline + promoted, résolution par clé canonique).
+    migrate_pack_if_needed(memory_root, slug)
+    owner_ref = current_owner_ref()
+
+    # Cache de session : clé logique (slug, owner_ref). owner_ref est constant
+    # sur une session — on le stocke dans la VALEUR (pas la clé) pour rester
+    # compatible avec invalidate_pack_cache(slug) qui pop par slug (str). Un autre
+    # owner_ref → cache-miss (anti-fuite cross-tenant + future-proof).
+    max_mtime = _pack_max_mtime(memory_root, slug)
+    if session is not None:
+        cached = session.pack_cache.get(slug)
+        if (
+            cached is not None
+            and len(cached) == 3
+            and cached[0] >= max_mtime
+            and cached[2] == owner_ref
+        ):
+            return cached[1]
+
+    eff = load_effective_pack(memory_root, slug, owner_ref=owner_ref)
+    pack = _unflatten_effective(eff)
+    if session is not None:
+        session.pack_cache[slug] = (max_mtime, pack, owner_ref)
+    return pack
+
+
+def mb_get_component(
+    *,
+    device_slug: str,
+    refdes: str,
+    memory_root: Path,
+    session: SessionState | None = None,
+) -> dict[str, Any]:
+    """Return component info, aggregated from memory bank + parsed board.
+
+    Response shape (cf. spec §5.1, 4 presence cases):
+      - case 1: {found: true, canonical_name, memory_bank: {...}, board: {...}}
+      - case 2: {found: true, canonical_name, memory_bank: {...}, board: null}
+      - case 3: {found: true, canonical_name, memory_bank: null, board: {...}}
+      - case 4: {found: false, closest_matches: [...]}  # no memory_bank/board keys
+    """
+    cache_key = (device_slug, refdes)
+    if session is not None:
+        cached = session.component_cache.get(cache_key)
+        if cached is not None:
+            session.component_cache.move_to_end(cache_key)
+            return cached
+
+    pack = _load_pack(device_slug, memory_root, session=session)
+    reg_by_name = {c["canonical_name"]: c for c in pack["registry"].get("components", [])}
+    dct_by_name = {e["canonical_name"]: e for e in pack["dictionary"].get("entries", [])}
+
+    memory_section: dict[str, Any] | None = None
+    if refdes in reg_by_name:
+        reg = reg_by_name[refdes]
+        dct = dct_by_name.get(refdes, {})
+        memory_section = {
+            "role": dct.get("role"),
+            "package": dct.get("package"),
+            "aliases": reg.get("aliases", []),
+            "kind": reg.get("kind", "unknown"),
+            "typical_failure_modes": dct.get("typical_failure_modes", []),
+            "description": reg.get("description", ""),
+        }
+
+    board_section: dict[str, Any] | None = None
+    if session is not None and session.board is not None:
+        part = session.board.part_by_refdes(refdes)
+        if part is not None:
+            pin_indexes = set(part.pin_refs)
+            connected_nets: list[str] = []
+            for net in session.board.nets:
+                if set(net.pin_refs) & pin_indexes:
+                    connected_nets.append(net.name)
+            side = "top" if part.layer & 1 else "bottom"
+            bbox = part.bbox
+            board_section = {
+                "side": side,
+                "pin_count": len(part.pin_refs),
+                "bbox": [[bbox[0].x, bbox[0].y], [bbox[1].x, bbox[1].y]],
+                "nets": connected_nets,
+            }
+
+    if memory_section is None and board_section is None:
+        # Case 4: unknown on both sides. Union of candidates.
+        prefix = refdes[0].upper() if refdes else ""
+        mem_candidates = sorted(c for c in reg_by_name if prefix and c.startswith(prefix))
+        board_candidates: list[str] = []
+        if session is not None and session.board is not None:
+            board_candidates = suggest_similar(session.board, refdes, k=5)
+        merged = list(dict.fromkeys(mem_candidates + board_candidates))[:5]
+        result: dict[str, Any] = {
+            "found": False,
+            "error": "not_found",
+            "queried_refdes": refdes,
+            "closest_matches": merged,
+            "hint": f"No refdes {refdes!r} on device {device_slug!r}.",
+        }
+    else:
+        result = {
+            "found": True,
+            "canonical_name": refdes,
+            "memory_bank": memory_section,
+            "board": board_section,
+        }
+
+    if session is not None:
+        session.component_cache[cache_key] = result
+        session.component_cache.move_to_end(cache_key)
+        if len(session.component_cache) > SessionState.COMPONENT_CACHE_MAX:
+            session.component_cache.popitem(last=False)
+
+    return result
+
+
+def mb_get_rules_for_symptoms(
+    *,
+    device_slug: str,
+    symptoms: list[str],
+    memory_root: Path,
+    max_results: int = 5,
+    session: SessionState | None = None,
+) -> dict[str, Any]:
+    """Return rules whose symptoms overlap the query, ranked by overlap + confidence."""
+    pack = _load_pack(device_slug, memory_root, session=session)
+    qset = {s.lower() for s in symptoms}
+    matches: list[dict[str, Any]] = []
+    for rule in pack["rules"].get("rules", []):
+        rset = {s.lower() for s in rule.get("symptoms", [])}
+        overlap = qset & rset
+        if not overlap:
+            continue
+        matches.append(
+            {
+                "rule_id": rule["id"],
+                "overlap_count": len(overlap),
+                "symptoms_matched": sorted(overlap),
+                "likely_causes": rule.get("likely_causes", []),
+                "diagnostic_steps": rule.get("diagnostic_steps", []),
+                "confidence": rule.get("confidence", 0.5),
+                "sources": rule.get("sources", []),
+            }
+        )
+    matches.sort(key=lambda m: (m["overlap_count"], m["confidence"]), reverse=True)
+    return {
+        "device_slug": device_slug,
+        "query_symptoms": symptoms,
+        "matches": matches[: max(max_results, 0)],
+        "total_available_rules": len(pack["rules"].get("rules", [])),
+    }
+
+
+async def mb_record_finding(
+    *,
+    client,  # AsyncAnthropic | None — typed loose to keep this import-light
+    device_slug: str,
+    refdes: str,
+    symptom: str,
+    confirmed_cause: str,
+    memory_root: Path,
+    mechanism: str | None = None,
+    notes: str | None = None,
+    session_id: str | None = None,
+) -> dict[str, Any]:
+    """Persist a confirmed repair finding for cross-session learning.
+
+    JSON-first write to `memory/{slug}/field_reports/*.md`. When the MA
+    memory_stores flag is on, the same content is mirrored to the device's
+    memory store so native `memory_search` can surface it too.
+    """
+    return await record_field_report(
+        client=client,
+        device_slug=device_slug,
+        refdes=refdes,
+        symptom=symptom,
+        confirmed_cause=confirmed_cause,
+        mechanism=mechanism,
+        notes=notes,
+        session_id=session_id,
+        memory_root=memory_root,
+    )
+
+
+async def mb_record_session_log(
+    *,
+    client,  # AsyncAnthropic | None
+    device_slug: str,
+    repair_id: str,
+    conv_id: str,
+    symptom: str,
+    outcome: str,
+    memory_root: Path,
+    tested: list[dict[str, str]] | None = None,
+    hypotheses: list[dict[str, str]] | None = None,
+    findings: list[str] | None = None,
+    next_steps: str | None = None,
+    lesson: str | None = None,
+) -> dict[str, Any]:
+    """Write a per-conversation narrative log for cross-repair recall.
+
+    Per-conv idempotent: re-call on the same (repair_id, conv_id) overwrites.
+    JSON-first to `memory/{slug}/conversation_log/{repair}_{conv}.md`,
+    flag-gated mirror to MA at `/conversation_log/{repair}_{conv}.md`.
+    """
+    return await record_session_log(
+        client=client,
+        device_slug=device_slug,
+        repair_id=repair_id,
+        conv_id=conv_id,
+        symptom=symptom,
+        outcome=outcome,
+        tested=tested,
+        hypotheses=hypotheses,
+        findings=findings,
+        next_steps=next_steps,
+        lesson=lesson,
+        memory_root=memory_root,
+        owner_ref=current_owner_ref(),  # tenant scope — private working memory
+    )
+
+
+async def mb_expand_knowledge(
+    *,
+    client,  # AsyncAnthropic — kept loose-typed for import hygiene
+    device_slug: str,
+    focus_symptoms: list[str],
+    focus_refdes: list[str] | None = None,
+    memory_root: Path | None = None,
+    session: SessionState | None = None,
+) -> dict[str, Any]:
+    """Grow the pack's memory bank around a focus symptom area.
+
+    Invoked when mb_get_rules_for_symptoms returns 0 matches and the
+    technician's symptom is worth researching. Triggers a targeted
+    Scout + Registry + Clinicien mini-pipeline and merges the output
+    into the on-disk pack. Costs ~$0.40 / ~30-60s. Returns a summary
+    the agent can relay to the tech, then the agent can re-call
+    mb_get_rules_for_symptoms to see the freshly added rules.
+    """
+    from api.pipeline.expansion import expand_pack
+
+    try:
+        summary = await expand_pack(
+            device_slug=device_slug,
+            focus_symptoms=focus_symptoms,
+            focus_refdes=focus_refdes or [],
+            client=client,
+            memory_root=memory_root,
+            # T8 : scope l'enrichissement au tenant (added_by_tenant dans la
+            # provenance). Ferme le résidu de fuite T6 — le cloud reste le
+            # gatekeeper, l'owner_ref est opaque côté moteur.
+            owner_ref=current_owner_ref(),
+        )
+        summary["ok"] = True
+        if session is not None:
+            session.invalidate_pack_cache(device_slug)
+        return summary
+    except Exception as exc:  # noqa: BLE001 — defensive: never crash the session
+        return {
+            "ok": False,
+            "expanded": False,
+            "reason": type(exc).__name__,
+            "error": str(exc)[:300],
+        }

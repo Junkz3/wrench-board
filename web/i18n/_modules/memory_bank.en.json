@@ -1,0 +1,98 @@
+{
+  "title": "Memory Bank",
+  "subtitle": "Deterministic knowledge pack produced by the V2 pipeline. Browse the registry, knowledge graph, diagnostic rules, component sheets, and audit verdict.",
+  "title_with_device": "Memory Bank <span class=\"sub\" style=\"color:var(--text-3);font-weight:400;font-size:14px;margin-left:10px\">· {device}</span>{form}",
+  "picker": {
+    "label": "Pack",
+    "empty_option": "— no pack —"
+  },
+  "search": {
+    "placeholder": "Filter the pack (refdes, symptom, mechanism…)",
+    "esc_hint": "ESC clears"
+  },
+  "blocks": {
+    "registry_heading": "Canonical vocabulary",
+    "graph_heading": "Knowledge graph",
+    "rules_heading": "Diagnostic rules",
+    "dictionary_heading": "Component sheets",
+    "audit_heading": "Audit verdict"
+  },
+  "empty": {
+    "title": "No pack available",
+    "body_default": "No knowledge pack is available. Run the pipeline to generate one.",
+    "load_failed": "Could not load pack « {slug} »."
+  },
+  "verdict": {
+    "none_title": "No audit has been written for this pack yet.",
+    "none_label": "AUDIT · not run",
+    "approved_label": "AUDIT · approved",
+    "needs_revision_label": "AUDIT · revision",
+    "rejected_label": "AUDIT · rejected",
+    "unknown_label": "AUDIT · unknown",
+    "consistency": "consistency"
+  },
+  "counts": {
+    "components": "components",
+    "signals": "signals",
+    "nodes": "nodes",
+    "edges": "edges",
+    "rules": "rules",
+    "sheets": "sheets",
+    "rules_count": "<b>{n}</b> rules",
+    "rules_count_zero": "<b>0</b> rules",
+    "sheets_count": "<b>{n}</b> sheets",
+    "sheets_count_zero": "<b>0</b> sheets",
+    "registry_count": "<b>{c}</b> components · <b>{s}</b> signals",
+    "graph_count": "<b>{n}</b> nodes · <b>{e}</b> edges"
+  },
+  "registry": {
+    "missing": "registry.json missing — pipeline not run.",
+    "components_heading": "Components ({n})",
+    "signals_heading": "Signals ({n})",
+    "no_components": "No components.",
+    "no_signals": "No signals.",
+    "th_refdes": "Refdes",
+    "th_type": "Type",
+    "th_aliases": "Aliases",
+    "th_description": "Description",
+    "th_canonical": "Canonical name",
+    "th_nominal_voltage": "Nominal voltage"
+  },
+  "graph": {
+    "missing": "knowledge_graph.json missing.",
+    "no_edges": "No edges in the graph.",
+    "stat_symptoms": "Symptoms",
+    "stat_components": "Components",
+    "stat_nets": "Nets",
+    "stat_edges": "Edges"
+  },
+  "rules": {
+    "missing": "rules.json missing.",
+    "none": "No diagnostic rules.",
+    "no_symptom": "(no symptom)",
+    "h_symptoms": "Symptoms",
+    "h_likely_causes": "Likely causes",
+    "h_diagnostic_steps": "Diagnostic steps",
+    "h_sources": "Sources",
+    "expected": "expected {value}",
+    "conf_label": "conf {value}"
+  },
+  "dictionary": {
+    "missing": "dictionary.json missing.",
+    "none": "No component sheets.",
+    "th_refdes": "Refdes",
+    "th_role": "Role",
+    "th_package": "Package",
+    "th_failure_modes": "Failure modes",
+    "th_notes": "Notes"
+  },
+  "audit": {
+    "missing": "audit_verdict.json missing — the pipeline has not audited this pack yet.",
+    "headline_approved": "Audit approved — the pack is consistent with the registry.",
+    "headline_needs_revision": "Audit requests revision — drift detected, fixes expected.",
+    "headline_rejected": "Audit rejected — pack inconsistent, unusable as-is.",
+    "headline_unknown": "Unknown audit status.",
+    "files_to_rewrite": "Files to rewrite",
+    "drift_heading": "Drift detected ({n})"
+  }
+}

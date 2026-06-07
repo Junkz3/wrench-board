@@ -1,0 +1,1674 @@
+{
+  "schema_version": "1.0",
+  "page": 7,
+  "sheet_name": "MNT Reform 2 External Display Size",
+  "sheet_path": "/Reform 2 HDMI/",
+  "page_kind": "schematic",
+  "orientation": "landscape",
+  "confidence": 0.82,
+  "nodes": [
+    {
+      "refdes": "U22",
+      "type": "ic",
+      "value": {
+        "raw": "TPD12S521",
+        "primary": "TPD12S521",
+        "package": null,
+        "mpn": "TPD12S521",
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": "Port Protection"
+      },
+      "page": 7,
+      "pins": [
+        {
+          "number": "1",
+          "name": "5V_SUPPLY",
+          "role": "power_in",
+          "net_label": "5V_SUPPLY"
+        },
+        {
+          "number": "2",
+          "name": "LV_SUPPLY",
+          "role": "power_in",
+          "net_label": "LV_SUPPLY"
+        },
+        {
+          "number": "38",
+          "name": "5V_OUT",
+          "role": "power_out",
+          "net_label": "5V_OUT"
+        },
+        {
+          "number": "37",
+          "name": "ESD_BYP",
+          "role": "signal_in",
+          "net_label": "ESD_BYP"
+        },
+        {
+          "number": "27",
+          "name": "DDC_CLK_IN",
+          "role": "signal_in",
+          "net_label": "DDC_CLK_IN"
+        },
+        {
+          "number": "22",
+          "name": "DDC_CLK_OUT",
+          "role": "signal_out",
+          "net_label": "DDC_CLK_OUT"
+        },
+        {
+          "number": "18",
+          "name": "DDC_DAT_IN",
+          "role": "signal_in",
+          "net_label": "DDC_DAT_IN"
+        },
+        {
+          "number": "21",
+          "name": "DDC_DAT_OUT",
+          "role": "signal_out",
+          "net_label": "DDC_DAT_OUT"
+        },
+        {
+          "number": "19",
+          "name": "HOTPLUG_DET_IN",
+          "role": "signal_in",
+          "net_label": "HOTPLUG_DET_IN"
+        },
+        {
+          "number": "20",
+          "name": "HOTPLUG_DET_OUT",
+          "role": "signal_out",
+          "net_label": "HOTPLUG_DET_OUT"
+        },
+        {
+          "number": "16",
+          "name": "CE_REMOTE_IN",
+          "role": "signal_in",
+          "net_label": "CE_REMOTE_IN"
+        },
+        {
+          "number": "23",
+          "name": "CE_REMOTE_OUT",
+          "role": "signal_out",
+          "net_label": "CE_REMOTE_OUT"
+        },
+        {
+          "number": "26",
+          "name": "TMDS_CK+",
+          "role": "signal_in",
+          "net_label": "HDMI_CLK"
+        },
+        {
+          "number": "24",
+          "name": "TMDS_CK-",
+          "role": "signal_in",
+          "net_label": "HDMI_CLK-"
+        },
+        {
+          "number": "29",
+          "name": "TMDS_D0+",
+          "role": "signal_in",
+          "net_label": "HDMI_D0"
+        },
+        {
+          "number": "27",
+          "name": "TMDS_D0-",
+          "role": "signal_in",
+          "net_label": "HDMI_D0-"
+        },
+        {
+          "number": "7",
+          "name": "TMDS_D1+",
+          "role": "signal_in",
+          "net_label": "HDMI_D1"
+        },
+        {
+          "number": "9",
+          "name": "TMDS_D1-",
+          "role": "signal_in",
+          "net_label": "HDMI_D1-"
+        },
+        {
+          "number": "4",
+          "name": "TMDS_D2+",
+          "role": "signal_in",
+          "net_label": "HDMI_D2"
+        },
+        {
+          "number": "6",
+          "name": "TMDS_D2-",
+          "role": "signal_in",
+          "net_label": "HDMI_D2-"
+        },
+        {
+          "number": "11",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "41",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "52",
+          "name": "TMDS_GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "82",
+          "name": "TMDS_GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "3",
+          "name": "TMDS_GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "13",
+          "name": "TMDS_GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "43",
+          "name": "TMDS_GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "63",
+          "name": "TMDS_GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "5",
+          "name": "TMDS_GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "8",
+          "name": "TMDS_GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "PWR_FLAG",
+          "name": "PWR_FLAG",
+          "role": "unknown",
+          "net_label": "PWR_FLAG"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "J4",
+      "type": "connector",
+      "value": {
+        "raw": "HDMI_A",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": "HDMI Connector"
+      },
+      "page": 7,
+      "pins": [
+        {
+          "number": "1",
+          "name": "D2+",
+          "role": "signal_inout",
+          "net_label": "TMDS_D2"
+        },
+        {
+          "number": "2",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "3",
+          "name": "D2-",
+          "role": "signal_inout",
+          "net_label": "TMDS_D2-"
+        },
+        {
+          "number": "4",
+          "name": "D1+",
+          "role": "signal_inout",
+          "net_label": "TMDS_D1"
+        },
+        {
+          "number": "5",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "6",
+          "name": "D1-",
+          "role": "signal_inout",
+          "net_label": "TMDS_D1-"
+        },
+        {
+          "number": "7",
+          "name": "D0+",
+          "role": "signal_inout",
+          "net_label": "TMDS_D0"
+        },
+        {
+          "number": "8",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "9",
+          "name": "D0-",
+          "role": "signal_inout",
+          "net_label": "TMDS_D0-"
+        },
+        {
+          "number": "10",
+          "name": "CK+",
+          "role": "signal_inout",
+          "net_label": "TMDS_CK"
+        },
+        {
+          "number": "11",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "12",
+          "name": "CK-",
+          "role": "signal_inout",
+          "net_label": "TMDS_CK-"
+        },
+        {
+          "number": "13",
+          "name": "CEC",
+          "role": "signal_inout",
+          "net_label": "CEC"
+        },
+        {
+          "number": "14",
+          "name": "UTILITY",
+          "role": "unknown",
+          "net_label": "UTILITY"
+        },
+        {
+          "number": "15",
+          "name": "SCL",
+          "role": "signal_inout",
+          "net_label": "SCL"
+        },
+        {
+          "number": "16",
+          "name": "SDA",
+          "role": "signal_inout",
+          "net_label": "SDA"
+        },
+        {
+          "number": "17",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "18",
+          "name": "5V",
+          "role": "power_in",
+          "net_label": "5V_SUPPLY"
+        },
+        {
+          "number": "19",
+          "name": "HPD",
+          "role": "signal_inout",
+          "net_label": "HPD"
+        },
+        {
+          "number": "S0D",
+          "name": "S0D",
+          "role": "unknown",
+          "net_label": "S0D"
+        },
+        {
+          "number": "S1D",
+          "name": "S1D",
+          "role": "unknown",
+          "net_label": "S1D"
+        },
+        {
+          "number": "S2D",
+          "name": "S2D",
+          "role": "unknown",
+          "net_label": "S2D"
+        },
+        {
+          "number": "SKC",
+          "name": "SKC",
+          "role": "unknown",
+          "net_label": "SKC"
+        },
+        {
+          "number": "SD0603S040S0R2",
+          "name": "SD0603S040S0R2",
+          "role": "unknown",
+          "net_label": null
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "D14",
+      "type": "diode",
+      "value": {
+        "raw": "SD0603S040S0R2",
+        "primary": "SD0603S040S0R2",
+        "package": "0603",
+        "mpn": "SD0603S040S0R2",
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 7,
+      "pins": [
+        {
+          "number": "A",
+          "name": "Anode",
+          "role": "signal_in",
+          "net_label": "USB_PWR"
+        },
+        {
+          "number": "K",
+          "name": "Cathode",
+          "role": "power_out",
+          "net_label": "+3V3"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C27",
+      "type": "capacitor",
+      "value": {
+        "raw": "0.1uF",
+        "primary": "100nF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 7,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "5V_OUT"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C28",
+      "type": "capacitor",
+      "value": {
+        "raw": "0.1uF",
+        "primary": "100nF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 7,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "+3V3"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C29",
+      "type": "capacitor",
+      "value": {
+        "raw": "0.1uF",
+        "primary": "100nF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 7,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "LV_SUPPLY"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C30",
+      "type": "capacitor",
+      "value": {
+        "raw": "0.1uF",
+        "primary": "100nF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 7,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "5V_SUPPLY"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R43",
+      "type": "resistor",
+      "value": {
+        "raw": "4.7k",
+        "primary": "4.7kΩ",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 7,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "DDC_CLK_OUT"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "terminal",
+          "net_label": "HDMI_SCL"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R44",
+      "type": "resistor",
+      "value": {
+        "raw": "4.7k",
+        "primary": "4.7kΩ",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 7,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "DDC_DAT_OUT"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "terminal",
+          "net_label": "HDMI_SDA"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R45",
+      "type": "resistor",
+      "value": {
+        "raw": "27k",
+        "primary": "27kΩ",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 7,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "HOTPLUG_DET_OUT"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R192",
+      "type": "resistor",
+      "value": {
+        "raw": "10k",
+        "primary": "10kΩ",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 7,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "LV_SUPPLY"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "terminal",
+          "net_label": "PWR_FLAG"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R161",
+      "type": "resistor",
+      "value": {
+        "raw": "10k",
+        "primary": "10kΩ",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 7,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "HOTPLUG_DET_IN"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R46",
+      "type": "resistor",
+      "value": {
+        "raw": "100k",
+        "primary": "100kΩ",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 7,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "+3V3"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": "HDMI_HPD"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R47",
+      "type": "resistor",
+      "value": {
+        "raw": "47k",
+        "primary": "47kΩ",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 7,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "+3V3"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": "HDMI_SCL"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R48",
+      "type": "resistor",
+      "value": {
+        "raw": "47k",
+        "primary": "47kΩ",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 7,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "+3V3"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": "HDMI_SDA"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R197",
+      "type": "resistor",
+      "value": {
+        "raw": "47k",
+        "primary": "47kΩ",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 7,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "+3V3"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": "HDMI_CEC"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "D0",
+      "type": "power_symbol",
+      "value": {
+        "raw": "GND",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 7,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "D1",
+      "type": "power_symbol",
+      "value": {
+        "raw": "GND",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 7,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "D2",
+      "type": "power_symbol",
+      "value": {
+        "raw": "GND",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 7,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    }
+  ],
+  "nets": [
+    {
+      "local_id": "net_GND",
+      "label": "GND",
+      "is_power": true,
+      "is_global": true,
+      "connects": [
+        "U22.11",
+        "U22.41",
+        "U22.52",
+        "U22.82",
+        "U22.3",
+        "U22.13",
+        "U22.43",
+        "U22.63",
+        "U22.5",
+        "U22.8",
+        "C27.2",
+        "C28.2",
+        "C29.2",
+        "C30.2",
+        "R45.2",
+        "R161.2",
+        "J4.2",
+        "J4.5",
+        "J4.8",
+        "J4.11",
+        "J4.17",
+        "D0.1",
+        "D1.1",
+        "D2.1"
+      ],
+      "page": 7
+    },
+    {
+      "local_id": "net_3V3",
+      "label": "+3V3",
+      "is_power": true,
+      "is_global": true,
+      "connects": [
+        "D14.K",
+        "C28.1",
+        "R46.1",
+        "R47.1",
+        "R48.1",
+        "R197.1"
+      ],
+      "page": 7
+    },
+    {
+      "local_id": "net_5V_SUPPLY",
+      "label": "5V_SUPPLY",
+      "is_power": true,
+      "is_global": false,
+      "connects": [
+        "U22.1",
+        "C30.1",
+        "J4.18"
+      ],
+      "page": 7
+    },
+    {
+      "local_id": "net_LV_SUPPLY",
+      "label": "LV_SUPPLY",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U22.2",
+        "C29.1",
+        "R192.1"
+      ],
+      "page": 7
+    },
+    {
+      "local_id": "net_5V_OUT",
+      "label": "5V_OUT",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U22.38",
+        "C27.1"
+      ],
+      "page": 7
+    },
+    {
+      "local_id": "net_ESD_BYP",
+      "label": "ESD_BYP",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U22.37"
+      ],
+      "page": 7
+    },
+    {
+      "local_id": "net_USB_PWR",
+      "label": "USB_PWR",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "D14.A"
+      ],
+      "page": 7
+    },
+    {
+      "local_id": "net_PWR_FLAG",
+      "label": "PWR_FLAG",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U22.PWR_FLAG",
+        "R192.2"
+      ],
+      "page": 7
+    },
+    {
+      "local_id": "net_DDC_CLK_IN",
+      "label": "DDC_CLK_IN",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U22.27"
+      ],
+      "page": 7
+    },
+    {
+      "local_id": "net_DDC_CLK_OUT",
+      "label": "DDC_CLK_OUT",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U22.22",
+        "R43.1"
+      ],
+      "page": 7
+    },
+    {
+      "local_id": "net_DDC_DAT_IN",
+      "label": "DDC_DAT_IN",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U22.18"
+      ],
+      "page": 7
+    },
+    {
+      "local_id": "net_DDC_DAT_OUT",
+      "label": "DDC_DAT_OUT",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U22.21",
+        "R44.1"
+      ],
+      "page": 7
+    },
+    {
+      "local_id": "net_HOTPLUG_DET_IN",
+      "label": "HOTPLUG_DET_IN",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U22.19",
+        "R161.1"
+      ],
+      "page": 7
+    },
+    {
+      "local_id": "net_HOTPLUG_DET_OUT",
+      "label": "HOTPLUG_DET_OUT",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U22.20",
+        "R45.1"
+      ],
+      "page": 7
+    },
+    {
+      "local_id": "net_CE_REMOTE_IN",
+      "label": "CE_REMOTE_IN",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U22.16"
+      ],
+      "page": 7
+    },
+    {
+      "local_id": "net_CE_REMOTE_OUT",
+      "label": "CE_REMOTE_OUT",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U22.23"
+      ],
+      "page": 7
+    },
+    {
+      "local_id": "net_HDMI_SCL",
+      "label": "HDMI_SCL",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "R43.2",
+        "R47.2"
+      ],
+      "page": 7
+    },
+    {
+      "local_id": "net_HDMI_SDA",
+      "label": "HDMI_SDA",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "R44.2",
+        "R48.2"
+      ],
+      "page": 7
+    },
+    {
+      "local_id": "net_HDMI_HPD",
+      "label": "HDMI_HPD",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "R46.2"
+      ],
+      "page": 7
+    },
+    {
+      "local_id": "net_HDMI_CEC",
+      "label": "HDMI_CEC",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "R197.2"
+      ],
+      "page": 7
+    },
+    {
+      "local_id": "net_HDMI_CLK",
+      "label": "HDMI_CLK",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U22.26",
+        "J4.10"
+      ],
+      "page": 7
+    },
+    {
+      "local_id": "net_HDMI_CLK-",
+      "label": "HDMI_CLK-",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U22.24",
+        "J4.12"
+      ],
+      "page": 7
+    },
+    {
+      "local_id": "net_HDMI_D0",
+      "label": "HDMI_D0",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U22.29",
+        "J4.7"
+      ],
+      "page": 7
+    },
+    {
+      "local_id": "net_HDMI_D0-",
+      "label": "HDMI_D0-",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U22.27",
+        "J4.9"
+      ],
+      "page": 7
+    },
+    {
+      "local_id": "net_HDMI_D1",
+      "label": "HDMI_D1",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U22.7",
+        "J4.4"
+      ],
+      "page": 7
+    },
+    {
+      "local_id": "net_HDMI_D1-",
+      "label": "HDMI_D1-",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U22.9",
+        "J4.6"
+      ],
+      "page": 7
+    },
+    {
+      "local_id": "net_HDMI_D2",
+      "label": "HDMI_D2",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U22.4",
+        "J4.1"
+      ],
+      "page": 7
+    },
+    {
+      "local_id": "net_HDMI_D2-",
+      "label": "HDMI_D2-",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U22.6",
+        "J4.3"
+      ],
+      "page": 7
+    },
+    {
+      "local_id": "net_CEC",
+      "label": "CEC",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "J4.13"
+      ],
+      "page": 7
+    },
+    {
+      "local_id": "net_HPD",
+      "label": "HPD",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "J4.19"
+      ],
+      "page": 7
+    },
+    {
+      "local_id": "net_SCL",
+      "label": "SCL",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "J4.15"
+      ],
+      "page": 7
+    },
+    {
+      "local_id": "net_SDA",
+      "label": "SDA",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "J4.16"
+      ],
+      "page": 7
+    },
+    {
+      "local_id": "net_UTILITY",
+      "label": "UTILITY",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "J4.14"
+      ],
+      "page": 7
+    }
+  ],
+  "cross_page_refs": [
+    {
+      "label": "HDMI_D2",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "HDMI D2+ input from SoC/iMX",
+      "page": 7
+    },
+    {
+      "label": "HDMI_D2-",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "HDMI D2- input from SoC/iMX",
+      "page": 7
+    },
+    {
+      "label": "HDMI_D1",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "HDMI D1+ input from SoC/iMX",
+      "page": 7
+    },
+    {
+      "label": "HDMI_D1-",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "HDMI D1- input from SoC/iMX",
+      "page": 7
+    },
+    {
+      "label": "HDMI_D0",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "HDMI D0+ input from SoC/iMX",
+      "page": 7
+    },
+    {
+      "label": "HDMI_D0-",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "HDMI D0- input from SoC/iMX",
+      "page": 7
+    },
+    {
+      "label": "HDMI_CLK",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "HDMI CLK+ input from SoC/iMX",
+      "page": 7
+    },
+    {
+      "label": "HDMI_CLK-",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "HDMI CLK- input from SoC/iMX",
+      "page": 7
+    },
+    {
+      "label": "USB_PWR",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "USB power input",
+      "page": 7
+    },
+    {
+      "label": "5V_SUPPLY",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "5V supply rail",
+      "page": 7
+    },
+    {
+      "label": "LV_SUPPLY",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "Low voltage supply rail",
+      "page": 7
+    },
+    {
+      "label": "DDC_CLK_IN",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "DDC clock to SoC",
+      "page": 7
+    },
+    {
+      "label": "DDC_DAT_IN",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "DDC data to SoC",
+      "page": 7
+    },
+    {
+      "label": "HOTPLUG_DET_IN",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "Hotplug detect to SoC",
+      "page": 7
+    },
+    {
+      "label": "CE_REMOTE_IN",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "CEC remote in to SoC",
+      "page": 7
+    },
+    {
+      "label": "HDMI_HPD",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "HDMI HPD signal to system",
+      "page": 7
+    },
+    {
+      "label": "HDMI_SCL",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "HDMI SCL to system",
+      "page": 7
+    },
+    {
+      "label": "HDMI_SDA",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "HDMI SDA to system",
+      "page": 7
+    },
+    {
+      "label": "HDMI_CEC",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "HDMI CEC to system",
+      "page": 7
+    },
+    {
+      "label": "DDC_CLK_OUT",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "DDC clock from SoC",
+      "page": 7
+    },
+    {
+      "label": "DDC_DAT_OUT",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "DDC data from SoC",
+      "page": 7
+    },
+    {
+      "label": "HOTPLUG_DET_OUT",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "Hotplug detect from SoC",
+      "page": 7
+    },
+    {
+      "label": "CE_REMOTE_OUT",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "CEC remote out from SoC",
+      "page": 7
+    }
+  ],
+  "typed_edges": [
+    {
+      "src": "D14",
+      "dst": "+3V3",
+      "kind": "powers",
+      "page": 7
+    },
+    {
+      "src": "U22",
+      "dst": "5V_OUT",
+      "kind": "powers",
+      "page": 7
+    },
+    {
+      "src": "5V_SUPPLY",
+      "dst": "U22",
+      "kind": "powers",
+      "page": 7
+    },
+    {
+      "src": "LV_SUPPLY",
+      "dst": "U22",
+      "kind": "powered_by",
+      "page": 7
+    },
+    {
+      "src": "C27",
+      "dst": "5V_OUT",
+      "kind": "decouples",
+      "page": 7
+    },
+    {
+      "src": "C28",
+      "dst": "+3V3",
+      "kind": "decouples",
+      "page": 7
+    },
+    {
+      "src": "C29",
+      "dst": "LV_SUPPLY",
+      "kind": "decouples",
+      "page": 7
+    },
+    {
+      "src": "C30",
+      "dst": "5V_SUPPLY",
+      "kind": "decouples",
+      "page": 7
+    },
+    {
+      "src": "+3V3",
+      "dst": "R46",
+      "kind": "powers",
+      "page": 7
+    },
+    {
+      "src": "+3V3",
+      "dst": "R47",
+      "kind": "powers",
+      "page": 7
+    },
+    {
+      "src": "+3V3",
+      "dst": "R48",
+      "kind": "powers",
+      "page": 7
+    },
+    {
+      "src": "+3V3",
+      "dst": "R197",
+      "kind": "powers",
+      "page": 7
+    },
+    {
+      "src": "R46",
+      "dst": "HDMI_HPD",
+      "kind": "produces_signal",
+      "page": 7
+    },
+    {
+      "src": "R47",
+      "dst": "HDMI_SCL",
+      "kind": "produces_signal",
+      "page": 7
+    },
+    {
+      "src": "R48",
+      "dst": "HDMI_SDA",
+      "kind": "produces_signal",
+      "page": 7
+    },
+    {
+      "src": "R197",
+      "dst": "HDMI_CEC",
+      "kind": "produces_signal",
+      "page": 7
+    },
+    {
+      "src": "R43",
+      "dst": "HDMI_SCL",
+      "kind": "produces_signal",
+      "page": 7
+    },
+    {
+      "src": "R44",
+      "dst": "HDMI_SDA",
+      "kind": "produces_signal",
+      "page": 7
+    },
+    {
+      "src": "R45",
+      "dst": "HOTPLUG_DET_OUT",
+      "kind": "filters",
+      "page": 7
+    },
+    {
+      "src": "R161",
+      "dst": "HOTPLUG_DET_IN",
+      "kind": "filters",
+      "page": 7
+    },
+    {
+      "src": "U22",
+      "dst": "J4",
+      "kind": "produces_signal",
+      "page": 7
+    }
+  ],
+  "designer_notes": [
+    {
+      "text": "Port Protection",
+      "page": 7,
+      "attached_to_refdes": "U22",
+      "attached_to_net": null
+    },
+    {
+      "text": "HDMI Connector",
+      "page": 7,
+      "attached_to_refdes": "J4",
+      "attached_to_net": null
+    },
+    {
+      "text": "License: CERN-OHL-S 2.0\nEngineer: Lukas F. Hartmann\nhttps://mntre.com\nMNT Research GmbH\nSheet: /Reform 2 HDMI/\nFile: reform2-hdmi.kicad_sch",
+      "page": 7,
+      "attached_to_refdes": null,
+      "attached_to_net": null
+    },
+    {
+      "text": "Title: MNT Reform 2 External Display",
+      "page": 7,
+      "attached_to_refdes": null,
+      "attached_to_net": null
+    },
+    {
+      "text": "Rev: 2.5D-2",
+      "page": 7,
+      "attached_to_refdes": null,
+      "attached_to_net": null
+    },
+    {
+      "text": "Id: 7/12",
+      "page": 7,
+      "attached_to_refdes": null,
+      "attached_to_net": null
+    }
+  ],
+  "ambiguities": [
+    {
+      "description": "Pin numbers on U22 (TPD12S521) for TMDS differential pairs are dense and partially overlapping; some pin assignments (e.g. TMDS_D0- vs DDC_CLK_IN both appearing at pin 27) may be incorrect due to image resolution.",
+      "page": 7,
+      "related_refdes": [
+        "U22"
+      ],
+      "related_nets": [
+        "HDMI_D0-",
+        "DDC_CLK_IN"
+      ]
+    },
+    {
+      "description": "GND bottom pins of U22 (TMDS_GND pins 3,5,8,13,43,52,63,82) are visible but exact pin-to-net assignments are difficult to confirm at this resolution.",
+      "page": 7,
+      "related_refdes": [
+        "U22"
+      ],
+      "related_nets": [
+        "GND"
+      ]
+    },
+    {
+      "description": "J4 shield/shell pins (S0D, S1D, S2D, SKC) visible but net labels not fully legible in image.",
+      "page": 7,
+      "related_refdes": [
+        "J4"
+      ],
+      "related_nets": [
+        "S0D",
+        "S1D",
+        "S2D",
+        "SKC"
+      ]
+    },
+    {
+      "description": "R161 refdes and value assignment (10k pulldown on HOTPLUG_DET_IN) inferred from net label; the refdes text is small and partially unclear.",
+      "page": 7,
+      "related_refdes": [
+        "R161"
+      ],
+      "related_nets": [
+        "HOTPLUG_DET_IN"
+      ]
+    },
+    {
+      "description": "D0, D1, D2 in the grounding refdes set appear to be power/GND flag symbols rather than diodes; treated as power_symbol type.",
+      "page": 7,
+      "related_refdes": [
+        "D0",
+        "D1",
+        "D2"
+      ],
+      "related_nets": [
+        "GND"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,102 @@
+{
+  "schema_version": "1.0",
+  "device_slug": "mnt-reform-motherboard",
+  "attributions": [
+    {
+      "canonical_name": "U18",
+      "refdes": "U18",
+      "confidence": 0.95,
+      "evidence_kind": "literal_refdes_in_quote",
+      "evidence_quote": "Always-on 3.3V regulator U14 failed or its output is shorted, starving the LPC11U24 (U18) of its supply rail LPC_VCC.",
+      "reasoning": "Dump literally mentions U18 alongside the LPC11U24 identifier, matching canonical U18 (LPC11U24 System Controller) in the graph."
+    },
+    {
+      "canonical_name": "U10",
+      "refdes": "U10",
+      "confidence": 0.95,
+      "evidence_kind": "literal_refdes_in_quote",
+      "evidence_quote": "the SN65DSI86 eDP bridge (U10) require 1.2 V to operate.",
+      "reasoning": "Dump literally mentions U10 next to SN65DSI86, matching canonical U10 (DSI-to-eDP bridge) in the graph."
+    },
+    {
+      "canonical_name": "U9",
+      "refdes": "U9",
+      "confidence": 0.95,
+      "evidence_kind": "literal_refdes_in_quote",
+      "evidence_quote": "the TUSB8041 USB hub (U9) and the SN65DSI86 eDP bridge (U10) require 1.2 V to operate.",
+      "reasoning": "Dump literally mentions U9 alongside TUSB8041, matching canonical U9 (USB hub) in the graph."
+    },
+    {
+      "canonical_name": "U28",
+      "refdes": "U28",
+      "confidence": 0.95,
+      "evidence_kind": "literal_refdes_in_quote",
+      "evidence_quote": "level shifters U28 and U8 require both 3.3 V and 1.8 V to operate, blocking the SD interface.",
+      "reasoning": "Dump literally mentions U28 as a level shifter, matching canonical U28 (SD level shifter) in the graph."
+    },
+    {
+      "canonical_name": "U8",
+      "refdes": "U28",
+      "confidence": 0.0,
+      "evidence_kind": "literal_refdes_in_quote",
+      "evidence_quote": "level shifters U28 and U8 require both 3.3 V and 1.8 V to operate, blocking the SD interface.",
+      "reasoning": "Skipped — U8 is not in the graph components list; only U28 is present for the level shifter."
+    },
+    {
+      "canonical_name": "U14",
+      "refdes": "U14",
+      "confidence": 0.95,
+      "evidence_kind": "literal_refdes_in_quote",
+      "evidence_quote": "Always-on 3.3V regulator U14 failed or its output is shorted, starving the LPC11U24 (U18) of its supply rail LPC_VCC.",
+      "reasoning": "Dump literally mentions U14 as the always-on 3.3V regulator, matching canonical U14 in the graph."
+    },
+    {
+      "canonical_name": "J24",
+      "refdes": "J24",
+      "confidence": 0.95,
+      "evidence_kind": "literal_refdes_in_quote",
+      "evidence_quote": "inspect J24 (30-pin, 0.5 mm pitch MIPI-DSI flex) for damaged contacts under the microscope",
+      "reasoning": "Dump literally mentions J24 as the 30-pin MIPI-DSI flex connector, matching canonical J24 in the graph."
+    },
+    {
+      "canonical_name": "F1",
+      "refdes": "F1",
+      "confidence": 0.95,
+      "evidence_kind": "literal_refdes_in_quote",
+      "evidence_quote": "Blown input fuse F1 on the main power-input path, or no voltage reaching sense resistor R49.",
+      "reasoning": "Dump literally mentions F1 as the input fuse, matching canonical F1 in the graph."
+    },
+    {
+      "canonical_name": "R49",
+      "refdes": "R49",
+      "confidence": 0.95,
+      "evidence_kind": "literal_refdes_in_quote",
+      "evidence_quote": "Blown input fuse F1 on the main power-input path, or no voltage reaching sense resistor R49.",
+      "reasoning": "Dump literally mentions R49 as the input sense resistor, matching canonical R49 in the graph."
+    },
+    {
+      "canonical_name": "J22",
+      "refdes": "J22",
+      "confidence": 0.95,
+      "evidence_kind": "literal_refdes_in_quote",
+      "evidence_quote": "LPC_VCC (3.3 V) at J22 pin 15; D11 illuminates when this rail is live.",
+      "reasoning": "Dump literally mentions J22 as the connector providing LPC_VCC access, matching canonical J22 in the graph."
+    },
+    {
+      "canonical_name": "D11",
+      "refdes": "D11",
+      "confidence": 0.95,
+      "evidence_kind": "literal_refdes_in_quote",
+      "evidence_quote": "White LED D11 absent; System Controller (LPC) unresponsive to SYSCTL UART commands.",
+      "reasoning": "Dump literally mentions D11 as the white LED indicator for the LPC_VCC 3.3V rail, matching canonical D11 in the graph."
+    },
+    {
+      "canonical_name": "D12",
+      "refdes": "D12",
+      "confidence": 0.95,
+      "evidence_kind": "literal_refdes_in_quote",
+      "evidence_quote": "5 V rail (D12 should illuminate); 3.3 V switched rail (D11).",
+      "reasoning": "Dump literally mentions D12 as the 5V USB_PWR rail indicator LED, matching canonical D12 in the graph."
+    }
+  ]
+}

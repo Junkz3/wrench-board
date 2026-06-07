@@ -1,0 +1,7654 @@
+{
+  "schema_version": "1.0",
+  "device_slug": "mnt-reform-motherboard",
+  "generated_at": "2026-05-08T02:19:51.050789Z",
+  "source_electrical_graph_hash": "2e9433df03f95f750f027857c2143ad1af8e792c3e2ce626dc139967bfabdb23",
+  "entries": {
+    "U1": {
+      "refdes": "U1",
+      "type": "ic",
+      "kind": "ic",
+      "value_canonical": "NitrogenBM_SOM",
+      "value_raw": "NitrogenBM_SOM",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "ic",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        1
+      ]
+    },
+    "J15": {
+      "refdes": "J15",
+      "type": "connector",
+      "kind": "ic",
+      "value_canonical": "Conn_01x33",
+      "value_raw": "Conn_01x33",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "connector",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        1
+      ]
+    },
+    "J18": {
+      "refdes": "J18",
+      "type": "connector",
+      "kind": "ic",
+      "value_canonical": null,
+      "value_raw": null,
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "connector",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        1
+      ]
+    },
+    "J20": {
+      "refdes": "J20",
+      "type": "connector",
+      "kind": "ic",
+      "value_canonical": null,
+      "value_raw": null,
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "connector",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        1
+      ]
+    },
+    "TP1": {
+      "refdes": "TP1",
+      "type": "test_point",
+      "kind": "ic",
+      "value_canonical": null,
+      "value_raw": null,
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": null,
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        1
+      ]
+    },
+    "TP8": {
+      "refdes": "TP8",
+      "type": "test_point",
+      "kind": "ic",
+      "value_canonical": null,
+      "value_raw": null,
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": null,
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        1
+      ]
+    },
+    "TP12": {
+      "refdes": "TP12",
+      "type": "test_point",
+      "kind": "ic",
+      "value_canonical": null,
+      "value_raw": null,
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": null,
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        1
+      ]
+    },
+    "R111": {
+      "refdes": "R111",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "R111",
+      "value_raw": "R111",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "damping",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        1
+      ]
+    },
+    "R113": {
+      "refdes": "R113",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "10k",
+      "value_raw": "10k",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "pull_up",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        1
+      ]
+    },
+    "R115": {
+      "refdes": "R115",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "10k",
+      "value_raw": "10k",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "pull_up",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        1
+      ]
+    },
+    "R117": {
+      "refdes": "R117",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "10k",
+      "value_raw": "10k",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "pull_down",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        1
+      ]
+    },
+    "R118": {
+      "refdes": "R118",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "0k",
+      "value_raw": "0k",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": null,
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        1
+      ]
+    },
+    "R119": {
+      "refdes": "R119",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "0k",
+      "value_raw": "0k",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": null,
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        1
+      ]
+    },
+    "R120": {
+      "refdes": "R120",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "100k",
+      "value_raw": "100k",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "pull_down",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        1
+      ]
+    },
+    "R154": {
+      "refdes": "R154",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": null,
+      "value_raw": null,
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "pull_down",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        1
+      ]
+    },
+    "R155": {
+      "refdes": "R155",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": null,
+      "value_raw": null,
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "damping",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        1
+      ]
+    },
+    "R168": {
+      "refdes": "R168",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": null,
+      "value_raw": null,
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "pull_down",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        1
+      ]
+    },
+    "R169": {
+      "refdes": "R169",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": null,
+      "value_raw": null,
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "pull_down",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        1
+      ]
+    },
+    "R170": {
+      "refdes": "R170",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": null,
+      "value_raw": null,
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "pull_down",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        1
+      ]
+    },
+    "R171": {
+      "refdes": "R171",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": null,
+      "value_raw": null,
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "pull_down",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        1
+      ]
+    },
+    "SW3": {
+      "refdes": "SW3",
+      "type": "switch",
+      "kind": "ic",
+      "value_canonical": "SW_DIP_x01",
+      "value_raw": "SW_DIP_x01",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": null,
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        1
+      ]
+    },
+    "SW6": {
+      "refdes": "SW6",
+      "type": "switch",
+      "kind": "ic",
+      "value_canonical": "SW_Push",
+      "value_raw": "SW_Push",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": null,
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        1
+      ]
+    },
+    "H1": {
+      "refdes": "H1",
+      "type": "mounting",
+      "kind": "ic",
+      "value_canonical": "NGFF-Mount1",
+      "value_raw": "NGFF-Mount1",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": null,
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        1
+      ]
+    },
+    "H2": {
+      "refdes": "H2",
+      "type": "mounting",
+      "kind": "ic",
+      "value_canonical": "NGFF-Mount2",
+      "value_raw": "NGFF-Mount2",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": null,
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        1
+      ]
+    },
+    "H3": {
+      "refdes": "H3",
+      "type": "mounting",
+      "kind": "ic",
+      "value_canonical": "NGFF-Mount3",
+      "value_raw": "NGFF-Mount3",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": null,
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        1
+      ]
+    },
+    "H5": {
+      "refdes": "H5",
+      "type": "mounting",
+      "kind": "ic",
+      "value_canonical": "MountingHole_Pad",
+      "value_raw": "MountingHole_Pad",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": null,
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        1
+      ]
+    },
+    "H6": {
+      "refdes": "H6",
+      "type": "mounting",
+      "kind": "ic",
+      "value_canonical": "MountingHole_Pad",
+      "value_raw": "MountingHole_Pad",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": null,
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        1
+      ]
+    },
+    "H7": {
+      "refdes": "H7",
+      "type": "mounting",
+      "kind": "ic",
+      "value_canonical": "MountingHole_Pad",
+      "value_raw": "MountingHole_Pad",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": null,
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        1
+      ]
+    },
+    "H8": {
+      "refdes": "H8",
+      "type": "mounting",
+      "kind": "ic",
+      "value_canonical": "MountingHole_Pad",
+      "value_raw": "MountingHole_Pad",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": null,
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        1
+      ]
+    },
+    "H9": {
+      "refdes": "H9",
+      "type": "mounting",
+      "kind": "ic",
+      "value_canonical": "OSHWA_DE17",
+      "value_raw": "OSHWA_DE17",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": null,
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        1
+      ]
+    },
+    "H10": {
+      "refdes": "H10",
+      "type": "mounting",
+      "kind": "ic",
+      "value_canonical": "LOGO_REFORM",
+      "value_raw": "LOGO_REFORM",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": null,
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        1
+      ]
+    },
+    "H11": {
+      "refdes": "H11",
+      "type": "mounting",
+      "kind": "ic",
+      "value_canonical": "LABEL_MPCIE1",
+      "value_raw": "LABEL_MPCIE1",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": null,
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        1
+      ]
+    },
+    "H12": {
+      "refdes": "H12",
+      "type": "mounting",
+      "kind": "ic",
+      "value_canonical": "LABEL_MPCIE2",
+      "value_raw": "LABEL_MPCIE2",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": null,
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        1
+      ]
+    },
+    "H13": {
+      "refdes": "H13",
+      "type": "mounting",
+      "kind": "ic",
+      "value_canonical": "LABEL_CPU",
+      "value_raw": "LABEL_CPU",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": null,
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        1
+      ]
+    },
+    "H14": {
+      "refdes": "H14",
+      "type": "mounting",
+      "kind": "ic",
+      "value_canonical": "BADGE",
+      "value_raw": "BADGE",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": null,
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        1
+      ]
+    },
+    "H15": {
+      "refdes": "H15",
+      "type": "mounting",
+      "kind": "ic",
+      "value_canonical": "NOTOUCH",
+      "value_raw": "NOTOUCH",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": null,
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        1
+      ]
+    },
+    "H22": {
+      "refdes": "H22",
+      "type": "mounting",
+      "kind": "ic",
+      "value_canonical": "MountingHole_Pad",
+      "value_raw": "MountingHole_Pad",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": null,
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        1
+      ]
+    },
+    "H24": {
+      "refdes": "H24",
+      "type": "mounting",
+      "kind": "ic",
+      "value_canonical": "MountingHole_Pad",
+      "value_raw": "MountingHole_Pad",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": null,
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        1
+      ]
+    },
+    "H25": {
+      "refdes": "H25",
+      "type": "mounting",
+      "kind": "ic",
+      "value_canonical": "MountingHole_Pad",
+      "value_raw": "MountingHole_Pad",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": null,
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        1
+      ]
+    },
+    "H27": {
+      "refdes": "H27",
+      "type": "mounting",
+      "kind": "ic",
+      "value_canonical": "MountingHole_Pad",
+      "value_raw": "MountingHole_Pad",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": null,
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        1
+      ]
+    },
+    "J1": {
+      "refdes": "J1",
+      "type": "connector",
+      "kind": "ic",
+      "value_canonical": "Jack-DC",
+      "value_raw": "Jack-DC",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "connector",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "F1": {
+      "refdes": "F1",
+      "type": "fuse",
+      "kind": "ic",
+      "value_canonical": "F1",
+      "value_raw": "F1",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": null,
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "F2": {
+      "refdes": "F2",
+      "type": "fuse",
+      "kind": "ic",
+      "value_canonical": "F2",
+      "value_raw": "F2",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": null,
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "D13": {
+      "refdes": "D13",
+      "type": "diode",
+      "kind": "passive_d",
+      "value_canonical": "SMAJ36CA-E3/5A",
+      "value_raw": "SMAJ36CA-E3/5A",
+      "package": null,
+      "mpn": "SMAJ36CA-E3/5A",
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "reverse_protection",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "D1": {
+      "refdes": "D1",
+      "type": "diode",
+      "kind": "passive_d",
+      "value_canonical": "BZT52C10",
+      "value_raw": "BZT52C10",
+      "package": null,
+      "mpn": "BZT52C10",
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "esd",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2,
+        7
+      ]
+    },
+    "R167": {
+      "refdes": "R167",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "0157004.DR",
+      "value_raw": "0157004.DR",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "series",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "C149": {
+      "refdes": "C149",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.1uF",
+      "value_raw": "0.1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "C160": {
+      "refdes": "C160",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "2.2uF",
+      "value_raw": "2.2uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "C161": {
+      "refdes": "C161",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "100uF",
+      "value_raw": "100uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "Q3": {
+      "refdes": "Q3",
+      "type": "transistor",
+      "kind": "passive_q",
+      "value_canonical": "SI7461DP",
+      "value_raw": "SI7461DP",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "load_switch",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "Q1": {
+      "refdes": "Q1",
+      "type": "transistor",
+      "kind": "passive_q",
+      "value_canonical": "SI7B500DP",
+      "value_raw": "SI7B500DP",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "flyback_switch",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "Q2": {
+      "refdes": "Q2",
+      "type": "transistor",
+      "kind": "passive_q",
+      "value_canonical": "SI7B500DP",
+      "value_raw": "SI7B500DP",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "flyback_switch",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "Q15": {
+      "refdes": "Q15",
+      "type": "transistor",
+      "kind": "passive_q",
+      "value_canonical": "SI7B500DP",
+      "value_raw": "SI7B500DP",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "flyback_switch",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "Q17": {
+      "refdes": "Q17",
+      "type": "transistor",
+      "kind": "passive_q",
+      "value_canonical": "SI7B500DP",
+      "value_raw": "SI7B500DP",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "flyback_switch",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "L1": {
+      "refdes": "L1",
+      "type": "inductor",
+      "kind": "ic",
+      "value_canonical": "22uH 5A",
+      "value_raw": "22uH 5A",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": null,
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "D4": {
+      "refdes": "D4",
+      "type": "diode",
+      "kind": "passive_d",
+      "value_canonical": "SBR0560S1",
+      "value_raw": "SBR0560S1",
+      "package": null,
+      "mpn": "SBR0560S1",
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "esd",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "C1": {
+      "refdes": "C1",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "1uF",
+      "value_raw": "1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "filter",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "C44": {
+      "refdes": "C44",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "2.2uF",
+      "value_raw": "2.2uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "C45": {
+      "refdes": "C45",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.033uF",
+      "value_raw": "0.033uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "bypass",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "R49": {
+      "refdes": "R49",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "0.01",
+      "value_raw": "0.01",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "series",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "R50": {
+      "refdes": "R50",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "0.01",
+      "value_raw": "0.01",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "series",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "U2": {
+      "refdes": "U2",
+      "type": "ic",
+      "kind": "ic",
+      "value_canonical": "LTC4020EUHFPBF",
+      "value_raw": "LTC4020EUHFPBF",
+      "package": null,
+      "mpn": "LTC4020EUHFPBF",
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "ic",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "C6": {
+      "refdes": "C6",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "4.7uF",
+      "value_raw": "4.7uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "filter",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "C122": {
+      "refdes": "C122",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "100uF",
+      "value_raw": "100uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "filter",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "C125": {
+      "refdes": "C125",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "2.2uF",
+      "value_raw": "2.2uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "filter",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "R3": {
+      "refdes": "R3",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "100k",
+      "value_raw": "100k",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "series",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "R94": {
+      "refdes": "R94",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "0",
+      "value_raw": "0",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "pull_down",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "R34": {
+      "refdes": "R34",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "150k",
+      "value_raw": "150k",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "feedback",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "R193": {
+      "refdes": "R193",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "0",
+      "value_raw": "0",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "pull_down",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "R51": {
+      "refdes": "R51",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "0",
+      "value_raw": "0",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "pull_down",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "R95": {
+      "refdes": "R95",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "10k",
+      "value_raw": "10k",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "feedback",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "R172": {
+      "refdes": "R172",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "10k",
+      "value_raw": "10k",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "pull_down",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "Q4": {
+      "refdes": "Q4",
+      "type": "transistor",
+      "kind": "passive_q",
+      "value_canonical": "PMV50ENEAR",
+      "value_raw": "PMV50ENEAR",
+      "package": null,
+      "mpn": "PMV50ENEAR",
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": null,
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "R4": {
+      "refdes": "R4",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "0",
+      "value_raw": "0",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "pull_up",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "R5": {
+      "refdes": "R5",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "0",
+      "value_raw": "0",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "pull_up",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "R8": {
+      "refdes": "R8",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "100k",
+      "value_raw": "100k",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "pull_down",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "R86": {
+      "refdes": "R86",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "100k",
+      "value_raw": "100k",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "damping",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "R78": {
+      "refdes": "R78",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "0",
+      "value_raw": "0",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "damping",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "R79": {
+      "refdes": "R79",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "0",
+      "value_raw": "0",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "damping",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "R80": {
+      "refdes": "R80",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "0",
+      "value_raw": "0",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "damping",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "C2": {
+      "refdes": "C2",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.1uF",
+      "value_raw": "0.1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "filter",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "C4": {
+      "refdes": "C4",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "1uF",
+      "value_raw": "1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "filter",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "C5": {
+      "refdes": "C5",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "1uF",
+      "value_raw": "1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "filter",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "U4": {
+      "refdes": "U4",
+      "type": "ic",
+      "kind": "ic",
+      "value_canonical": "LTC6803-4",
+      "value_raw": "LTC6803-4",
+      "package": null,
+      "mpn": "LTC6803-4",
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "ic",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "D2": {
+      "refdes": "D2",
+      "type": "diode",
+      "kind": "passive_d",
+      "value_canonical": "BAT46WJ,115",
+      "value_raw": "BAT46WJ,115",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "esd",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2,
+        7
+      ]
+    },
+    "D8": {
+      "refdes": "D8",
+      "type": "diode",
+      "kind": "passive_d",
+      "value_canonical": "BAT46WJ,115",
+      "value_raw": "BAT46WJ,115",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "esd",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "D9": {
+      "refdes": "D9",
+      "type": "diode",
+      "kind": "passive_d",
+      "value_canonical": "BAT46WJ,115",
+      "value_raw": "BAT46WJ,115",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "esd",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "L2": {
+      "refdes": "L2",
+      "type": "inductor",
+      "kind": "ic",
+      "value_canonical": "IMC1210ER100K",
+      "value_raw": "IMC1210ER100K",
+      "package": null,
+      "mpn": "IMC1210ER100K",
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": null,
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "C3": {
+      "refdes": "C3",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.33uF",
+      "value_raw": "0.33uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "filter",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2,
+        3
+      ]
+    },
+    "C7": {
+      "refdes": "C7",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.1uF",
+      "value_raw": "0.1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "ac_coupling",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2,
+        4
+      ]
+    },
+    "C8": {
+      "refdes": "C8",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "18pF",
+      "value_raw": "18pF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "ac_coupling",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2,
+        5
+      ]
+    },
+    "C9": {
+      "refdes": "C9",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.1uF",
+      "value_raw": "0.1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "filter",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2,
+        6
+      ]
+    },
+    "C10": {
+      "refdes": "C10",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "18pF",
+      "value_raw": "18pF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "filter",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2,
+        5
+      ]
+    },
+    "C11": {
+      "refdes": "C11",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.1uF",
+      "value_raw": "0.1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "filter",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2,
+        6
+      ]
+    },
+    "C12": {
+      "refdes": "C12",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.1uF",
+      "value_raw": "0.1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "filter",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2,
+        6
+      ]
+    },
+    "C64": {
+      "refdes": "C64",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.002uF",
+      "value_raw": "2nF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "filter",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "C65": {
+      "refdes": "C65",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.1uF",
+      "value_raw": "0.1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "filter",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "R6": {
+      "refdes": "R6",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "351R",
+      "value_raw": "351R",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "pull_up",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "R9": {
+      "refdes": "R9",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "10k",
+      "value_raw": "10k",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "pull_up",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "R10": {
+      "refdes": "R10",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "100",
+      "value_raw": "100",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "damping",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "R11": {
+      "refdes": "R11",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "100",
+      "value_raw": "100",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "damping",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "R12": {
+      "refdes": "R12",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "100",
+      "value_raw": "100",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "pull_down",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "R13": {
+      "refdes": "R13",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "100",
+      "value_raw": "100",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "pull_down",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "R14": {
+      "refdes": "R14",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "100",
+      "value_raw": "100",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "pull_down",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "R15": {
+      "refdes": "R15",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "100",
+      "value_raw": "100",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "pull_down",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "R16": {
+      "refdes": "R16",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "100",
+      "value_raw": "100",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "pull_up",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "R17": {
+      "refdes": "R17",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "3.3k",
+      "value_raw": "3.3k",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "damping",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "R18": {
+      "refdes": "R18",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "3.3k",
+      "value_raw": "3.3k",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "damping",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "R19": {
+      "refdes": "R19",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "3.3k",
+      "value_raw": "3.3k",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "damping",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "R20": {
+      "refdes": "R20",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "3.3k",
+      "value_raw": "3.3k",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "pull_up",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "R21": {
+      "refdes": "R21",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "3.3k",
+      "value_raw": "3.3k",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "pull_up",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "R22": {
+      "refdes": "R22",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "3.3k",
+      "value_raw": "3.3k",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "damping",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "R23": {
+      "refdes": "R23",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "3.3k",
+      "value_raw": "3.3k",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "damping",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "R24": {
+      "refdes": "R24",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "3.3k",
+      "value_raw": "3.3k",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "damping",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "D17": {
+      "refdes": "D17",
+      "type": "diode",
+      "kind": "passive_d",
+      "value_canonical": "PMEG60T10ELR",
+      "value_raw": "PMEG60T10ELR",
+      "package": null,
+      "mpn": "PMEG60T10ELR",
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "rectifier",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "D18": {
+      "refdes": "D18",
+      "type": "diode",
+      "kind": "passive_d",
+      "value_canonical": "PMEG60T10ELR",
+      "value_raw": "PMEG60T10ELR",
+      "package": null,
+      "mpn": "PMEG60T10ELR",
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "rectifier",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "D19": {
+      "refdes": "D19",
+      "type": "diode",
+      "kind": "passive_d",
+      "value_canonical": "PMEG60T10ELR",
+      "value_raw": "PMEG60T10ELR",
+      "package": null,
+      "mpn": "PMEG60T10ELR",
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "rectifier",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "D24": {
+      "refdes": "D24",
+      "type": "diode",
+      "kind": "passive_d",
+      "value_canonical": "PMEG60T10ELR",
+      "value_raw": "PMEG60T10ELR",
+      "package": null,
+      "mpn": "PMEG60T10ELR",
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "rectifier",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "D25": {
+      "refdes": "D25",
+      "type": "diode",
+      "kind": "passive_d",
+      "value_canonical": "PMEG60T10ELR",
+      "value_raw": "PMEG60T10ELR",
+      "package": null,
+      "mpn": "PMEG60T10ELR",
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "rectifier",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "D26": {
+      "refdes": "D26",
+      "type": "diode",
+      "kind": "passive_d",
+      "value_canonical": "PMEG60T10ELR",
+      "value_raw": "PMEG60T10ELR",
+      "package": null,
+      "mpn": "PMEG60T10ELR",
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "rectifier",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "D27": {
+      "refdes": "D27",
+      "type": "diode",
+      "kind": "passive_d",
+      "value_canonical": "PMEG60T10ELR",
+      "value_raw": "PMEG60T10ELR",
+      "package": null,
+      "mpn": "PMEG60T10ELR",
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "rectifier",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "D28": {
+      "refdes": "D28",
+      "type": "diode",
+      "kind": "passive_d",
+      "value_canonical": "PMEG60T10ELR",
+      "value_raw": "PMEG60T10ELR",
+      "package": null,
+      "mpn": "PMEG60T10ELR",
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "rectifier",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "Q5": {
+      "refdes": "Q5",
+      "type": "transistor",
+      "kind": "passive_q",
+      "value_canonical": "PMV50EPEAR",
+      "value_raw": "PMV50EPEAR",
+      "package": null,
+      "mpn": "PMV50EPEAR",
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "cell_protection",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "Q6": {
+      "refdes": "Q6",
+      "type": "transistor",
+      "kind": "passive_q",
+      "value_canonical": "PMV50EPEAR",
+      "value_raw": "PMV50EPEAR",
+      "package": null,
+      "mpn": "PMV50EPEAR",
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "cell_balancer",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "Q7": {
+      "refdes": "Q7",
+      "type": "transistor",
+      "kind": "passive_q",
+      "value_canonical": "PMV50EPEAR",
+      "value_raw": "PMV50EPEAR",
+      "package": null,
+      "mpn": "PMV50EPEAR",
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "cell_balancer",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "Q8": {
+      "refdes": "Q8",
+      "type": "transistor",
+      "kind": "passive_q",
+      "value_canonical": "PMV50EPEAR",
+      "value_raw": "PMV50EPEAR",
+      "package": null,
+      "mpn": "PMV50EPEAR",
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "cell_balancer",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "Q9": {
+      "refdes": "Q9",
+      "type": "transistor",
+      "kind": "passive_q",
+      "value_canonical": "PMV50EPEAR",
+      "value_raw": "PMV50EPEAR",
+      "package": null,
+      "mpn": "PMV50EPEAR",
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "cell_balancer",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "Q10": {
+      "refdes": "Q10",
+      "type": "transistor",
+      "kind": "passive_q",
+      "value_canonical": "PMV50EPEAR",
+      "value_raw": "PMV50EPEAR",
+      "package": null,
+      "mpn": "PMV50EPEAR",
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "cell_balancer",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "Q11": {
+      "refdes": "Q11",
+      "type": "transistor",
+      "kind": "passive_q",
+      "value_canonical": "PMV50EPEAR",
+      "value_raw": "PMV50EPEAR",
+      "package": null,
+      "mpn": "PMV50EPEAR",
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "cell_balancer",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "Q12": {
+      "refdes": "Q12",
+      "type": "transistor",
+      "kind": "passive_q",
+      "value_canonical": "PMV50EPEAR",
+      "value_raw": "PMV50EPEAR",
+      "package": null,
+      "mpn": "PMV50EPEAR",
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "cell_balancer",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "J2": {
+      "refdes": "J2",
+      "type": "connector",
+      "kind": "ic",
+      "value_canonical": "BATCON2",
+      "value_raw": "BATCON2",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "connector",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "J13": {
+      "refdes": "J13",
+      "type": "connector",
+      "kind": "ic",
+      "value_canonical": "BATCON1",
+      "value_raw": "BATCON1",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "connector",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "R173": {
+      "refdes": "R173",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "49.9k",
+      "value_raw": "49.9k",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "pull_up",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "R174": {
+      "refdes": "R174",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "4.7k",
+      "value_raw": "4.7k",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "feedback",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "R175": {
+      "refdes": "R175",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "0.02",
+      "value_raw": "0.02",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "damping",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "R176": {
+      "refdes": "R176",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "100",
+      "value_raw": "100",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "feedback",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "R177": {
+      "refdes": "R177",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "0.02",
+      "value_raw": "0.02",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "damping",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "C31": {
+      "refdes": "C31",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.33uF",
+      "value_raw": "0.33uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "filter",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "R182": {
+      "refdes": "R182",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "481R",
+      "value_raw": "481R",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "pull_up",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "SW1": {
+      "refdes": "SW1",
+      "type": "switch",
+      "kind": "ic",
+      "value_canonical": "SW1",
+      "value_raw": "SW1",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": null,
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2,
+        4
+      ]
+    },
+    "SW2": {
+      "refdes": "SW2",
+      "type": "switch",
+      "kind": "ic",
+      "value_canonical": "SW2",
+      "value_raw": "SW2",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": null,
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2,
+        4
+      ]
+    },
+    "M1": {
+      "refdes": "M1",
+      "type": "mounting",
+      "kind": "ic",
+      "value_canonical": "1-2199230-5",
+      "value_raw": "1-2199230-5",
+      "package": null,
+      "mpn": "1-2199230-5",
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": null,
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        2,
+        8
+      ]
+    },
+    "R183": {
+      "refdes": "R183",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "100",
+      "value_raw": "100",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "pull_up",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        2
+      ]
+    },
+    "U7": {
+      "refdes": "U7",
+      "type": "ic",
+      "kind": "ic",
+      "value_canonical": "LM2677SX-5",
+      "value_raw": "LM2677SX-5",
+      "package": null,
+      "mpn": "LM2677SX-5",
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "ic",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        3
+      ]
+    },
+    "U12": {
+      "refdes": "U12",
+      "type": "ic",
+      "kind": "ic",
+      "value_canonical": "LM2677SX-3.3",
+      "value_raw": "LM2677SX-3.3",
+      "package": null,
+      "mpn": "LM2677SX-3.3",
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "ic",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        3
+      ]
+    },
+    "U14": {
+      "refdes": "U14",
+      "type": "ic",
+      "kind": "ic",
+      "value_canonical": "LMR16006YQ3",
+      "value_raw": "LMR16006YQ3",
+      "package": null,
+      "mpn": "LMR16006YQ3",
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "ic",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        3
+      ]
+    },
+    "U17": {
+      "refdes": "U17",
+      "type": "ic",
+      "kind": "ic",
+      "value_canonical": "TLV1117-18",
+      "value_raw": "TLV1117-18",
+      "package": null,
+      "mpn": "TLV1117-18",
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "ic",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        3
+      ]
+    },
+    "U19": {
+      "refdes": "U19",
+      "type": "ic",
+      "kind": "ic",
+      "value_canonical": "TLV62568DBV",
+      "value_raw": "TLV62568DBV",
+      "package": null,
+      "mpn": "TLV62568DBV",
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "ic",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        3
+      ]
+    },
+    "U13": {
+      "refdes": "U13",
+      "type": "ic",
+      "kind": "ic",
+      "value_canonical": "TLV62568DBV",
+      "value_raw": "TLV62568DBV",
+      "package": null,
+      "mpn": "TLV62568DBV",
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "ic",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        3
+      ]
+    },
+    "C16": {
+      "refdes": "C16",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "100uF",
+      "value_raw": "100uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "bulk",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        3
+      ]
+    },
+    "C146": {
+      "refdes": "C146",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "1uF",
+      "value_raw": "1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        3
+      ]
+    },
+    "C148": {
+      "refdes": "C148",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.01uF",
+      "value_raw": "10nF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "bypass",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        3
+      ]
+    },
+    "L3": {
+      "refdes": "L3",
+      "type": "inductor",
+      "kind": "ic",
+      "value_canonical": "68uH",
+      "value_raw": "68uH",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": null,
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        3
+      ]
+    },
+    "C18": {
+      "refdes": "C18",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "220uF",
+      "value_raw": "220uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        3
+      ]
+    },
+    "D20": {
+      "refdes": "D20",
+      "type": "diode",
+      "kind": "passive_d",
+      "value_canonical": "SK54A-LTP",
+      "value_raw": "SK54A-LTP",
+      "package": null,
+      "mpn": "SK54A-LTP",
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "rectifier",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        3
+      ]
+    },
+    "D15": {
+      "refdes": "D15",
+      "type": "diode",
+      "kind": "passive_d",
+      "value_canonical": "BZX584C3V3-G3-08",
+      "value_raw": "BZX584C3V3-G3-08",
+      "package": null,
+      "mpn": "BZX584C3V3-G3-08",
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "esd",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        3
+      ]
+    },
+    "R1": {
+      "refdes": "R1",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "35",
+      "value_raw": "35R",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "series",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        3
+      ]
+    },
+    "C17": {
+      "refdes": "C17",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "100uF",
+      "value_raw": "100uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "bulk",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        3
+      ]
+    },
+    "C145": {
+      "refdes": "C145",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "1uF",
+      "value_raw": "1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        3
+      ]
+    },
+    "C128": {
+      "refdes": "C128",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.01uF",
+      "value_raw": "10nF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "bypass",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        3
+      ]
+    },
+    "L4": {
+      "refdes": "L4",
+      "type": "inductor",
+      "kind": "ic",
+      "value_canonical": "68uH",
+      "value_raw": "68uH",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": null,
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        3
+      ]
+    },
+    "C19": {
+      "refdes": "C19",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "220uF",
+      "value_raw": "220uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        3
+      ]
+    },
+    "D21": {
+      "refdes": "D21",
+      "type": "diode",
+      "kind": "passive_d",
+      "value_canonical": "SK54A-LTP",
+      "value_raw": "SK54A-LTP",
+      "package": null,
+      "mpn": "SK54A-LTP",
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "rectifier",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        3
+      ]
+    },
+    "D16": {
+      "refdes": "D16",
+      "type": "diode",
+      "kind": "passive_d",
+      "value_canonical": "BZX584C3V3-G3-08",
+      "value_raw": "BZX584C3V3-G3-08",
+      "package": null,
+      "mpn": "BZX584C3V3-G3-08",
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "esd",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        3
+      ]
+    },
+    "R188": {
+      "refdes": "R188",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "75",
+      "value_raw": "75R",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "series",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        3
+      ]
+    },
+    "L5": {
+      "refdes": "L5",
+      "type": "inductor",
+      "kind": "ic",
+      "value_canonical": "10uH",
+      "value_raw": "10uH",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": null,
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        3
+      ]
+    },
+    "D3": {
+      "refdes": "D3",
+      "type": "diode",
+      "kind": "passive_d",
+      "value_canonical": "SBR0560S1",
+      "value_raw": "SBR0560S1",
+      "package": null,
+      "mpn": "SBR0560S1",
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "rectifier",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        3
+      ]
+    },
+    "C129": {
+      "refdes": "C129",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "1uF",
+      "value_raw": "1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        3
+      ]
+    },
+    "C130": {
+      "refdes": "C130",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "1uF",
+      "value_raw": "1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        3
+      ]
+    },
+    "D11": {
+      "refdes": "D11",
+      "type": "led",
+      "kind": "ic",
+      "value_canonical": "LED3V",
+      "value_raw": "LED3V",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": null,
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        3
+      ]
+    },
+    "D12": {
+      "refdes": "D12",
+      "type": "led",
+      "kind": "ic",
+      "value_canonical": "LED5V",
+      "value_raw": "LED5V",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": null,
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        3
+      ]
+    },
+    "R189": {
+      "refdes": "R189",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "33",
+      "value_raw": "33R",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "pull_up",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        3
+      ]
+    },
+    "R181": {
+      "refdes": "R181",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "461",
+      "value_raw": "461R",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "pull_up",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        3
+      ]
+    },
+    "C33": {
+      "refdes": "C33",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "4.7uF",
+      "value_raw": "4.7uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        3
+      ]
+    },
+    "C34": {
+      "refdes": "C34",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "10uF",
+      "value_raw": "10uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        3
+      ]
+    },
+    "C38": {
+      "refdes": "C38",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "6.8pF",
+      "value_raw": "6.8pF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "tank",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        3
+      ]
+    },
+    "L6": {
+      "refdes": "L6",
+      "type": "inductor",
+      "kind": "ic",
+      "value_canonical": "2.2uH",
+      "value_raw": "2.2uH",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": null,
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        3
+      ]
+    },
+    "R180": {
+      "refdes": "R180",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "150k",
+      "value_raw": "150k",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "feedback",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        3
+      ]
+    },
+    "R179": {
+      "refdes": "R179",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "581",
+      "value_raw": "581R",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "feedback",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        3
+      ]
+    },
+    "R178": {
+      "refdes": "R178",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "100k",
+      "value_raw": "100k",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "pull_down",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        3
+      ]
+    },
+    "C35": {
+      "refdes": "C35",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "4.7uF",
+      "value_raw": "4.7uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        3
+      ]
+    },
+    "C37": {
+      "refdes": "C37",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "10uF",
+      "value_raw": "10uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        3
+      ]
+    },
+    "C36": {
+      "refdes": "C36",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "6.8pF",
+      "value_raw": "6.8pF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "tank",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        3
+      ]
+    },
+    "L7": {
+      "refdes": "L7",
+      "type": "inductor",
+      "kind": "ic",
+      "value_canonical": "2.2uH",
+      "value_raw": "2.2uH",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": null,
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        3
+      ]
+    },
+    "U18": {
+      "refdes": "U18",
+      "type": "ic",
+      "kind": "ic",
+      "value_canonical": "LPC11U24FBD48-301",
+      "value_raw": "LPC11U24FBD48-301",
+      "package": null,
+      "mpn": "LPC11U24FBD48-301",
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "ic",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        4
+      ]
+    },
+    "U6": {
+      "refdes": "U6",
+      "type": "ic",
+      "kind": "ic",
+      "value_canonical": "INA233",
+      "value_raw": "INA233",
+      "package": null,
+      "mpn": "INA233",
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "ic",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        4
+      ]
+    },
+    "U5": {
+      "refdes": "U5",
+      "type": "ic",
+      "kind": "ic",
+      "value_canonical": "PCF8523T",
+      "value_raw": "PCF8523T",
+      "package": null,
+      "mpn": "PCF8523T",
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "ic",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        4
+      ]
+    },
+    "Y2": {
+      "refdes": "Y2",
+      "type": "crystal",
+      "kind": "ic",
+      "value_canonical": "12MHz",
+      "value_raw": "12MHz",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": null,
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        4
+      ]
+    },
+    "Y4": {
+      "refdes": "Y4",
+      "type": "crystal",
+      "kind": "ic",
+      "value_canonical": "32.768kHz",
+      "value_raw": "32.768 kHz",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": null,
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        4
+      ]
+    },
+    "J8": {
+      "refdes": "J8",
+      "type": "connector",
+      "kind": "ic",
+      "value_canonical": "USB_C_Receptacle_USB2.0",
+      "value_raw": "USB_C_Receptacle_USB2.0",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "connector",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        4
+      ]
+    },
+    "J22": {
+      "refdes": "J22",
+      "type": "connector",
+      "kind": "ic",
+      "value_canonical": "LPC_IO",
+      "value_raw": "LPC_IO",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "connector",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        4
+      ]
+    },
+    "J23": {
+      "refdes": "J23",
+      "type": "connector",
+      "kind": "ic",
+      "value_canonical": "KDBSYSCTL",
+      "value_raw": "KDBSYSCTL",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "connector",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        4
+      ]
+    },
+    "BT1": {
+      "refdes": "BT1",
+      "type": "other",
+      "kind": "ic",
+      "value_canonical": "CR1220",
+      "value_raw": "CR1220",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": null,
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        4
+      ]
+    },
+    "R41": {
+      "refdes": "R41",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "0.02",
+      "value_raw": "0.02",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "series",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        4
+      ]
+    },
+    "R68": {
+      "refdes": "R68",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "4.7k",
+      "value_raw": "4.7k",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "pull_up",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        4
+      ]
+    },
+    "R69": {
+      "refdes": "R69",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "4.7k",
+      "value_raw": "4.7k",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "pull_up",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        4
+      ]
+    },
+    "R70": {
+      "refdes": "R70",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "33",
+      "value_raw": "33",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "damping",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        4
+      ]
+    },
+    "R71": {
+      "refdes": "R71",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "1.5k",
+      "value_raw": "1.5k",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "pull_up",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        4
+      ]
+    },
+    "R72": {
+      "refdes": "R72",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "33",
+      "value_raw": "33",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "damping",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        4
+      ]
+    },
+    "R73": {
+      "refdes": "R73",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "0",
+      "value_raw": "0",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "damping",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        4
+      ]
+    },
+    "R74": {
+      "refdes": "R74",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "0",
+      "value_raw": "0",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "damping",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        4
+      ]
+    },
+    "R75": {
+      "refdes": "R75",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "0",
+      "value_raw": "0",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "damping",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        4
+      ]
+    },
+    "R76": {
+      "refdes": "R76",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "0",
+      "value_raw": "0",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "damping",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        4
+      ]
+    },
+    "R124": {
+      "refdes": "R124",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "0",
+      "value_raw": "0",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "damping",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        4
+      ]
+    },
+    "R125": {
+      "refdes": "R125",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "0",
+      "value_raw": "0",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "damping",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        4
+      ]
+    },
+    "R126": {
+      "refdes": "R126",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "0",
+      "value_raw": "0",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "damping",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        4
+      ]
+    },
+    "R137": {
+      "refdes": "R137",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "0",
+      "value_raw": "0",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "damping",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        4
+      ]
+    },
+    "R157": {
+      "refdes": "R157",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "0",
+      "value_raw": "0",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "damping",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        4
+      ]
+    },
+    "R194": {
+      "refdes": "R194",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "0",
+      "value_raw": "0",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "damping",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        4
+      ]
+    },
+    "R195": {
+      "refdes": "R195",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "1.5k",
+      "value_raw": "1.5k",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "pull_up",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        4
+      ]
+    },
+    "C46": {
+      "refdes": "C46",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "10uF",
+      "value_raw": "10uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        4
+      ]
+    },
+    "C47": {
+      "refdes": "C47",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "10uF",
+      "value_raw": "10uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        4
+      ]
+    },
+    "C48": {
+      "refdes": "C48",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "18pF",
+      "value_raw": "18pF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "tank",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        4
+      ]
+    },
+    "C49": {
+      "refdes": "C49",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.1uF",
+      "value_raw": "0.1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        4
+      ]
+    },
+    "C50": {
+      "refdes": "C50",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.1uF",
+      "value_raw": "0.1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        4
+      ]
+    },
+    "C51": {
+      "refdes": "C51",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "18pF",
+      "value_raw": "18pF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "tank",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        4
+      ]
+    },
+    "C140": {
+      "refdes": "C140",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.1uF",
+      "value_raw": "0.1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        4
+      ]
+    },
+    "Y1": {
+      "refdes": "Y1",
+      "type": "crystal",
+      "kind": "ic",
+      "value_canonical": "24MHz",
+      "value_raw": "24MHz",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": null,
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        5
+      ]
+    },
+    "R61": {
+      "refdes": "R61",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "1M",
+      "value_raw": "1M",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": null,
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        5
+      ]
+    },
+    "R59": {
+      "refdes": "R59",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "9.09k",
+      "value_raw": "9.09K",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": "±1%",
+      "role_in_design": "feedback",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        5
+      ]
+    },
+    "R60": {
+      "refdes": "R60",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "90.9k",
+      "value_raw": "90.9K",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": "±1%",
+      "role_in_design": "pull_down",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        5
+      ]
+    },
+    "R62": {
+      "refdes": "R62",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "10k",
+      "value_raw": "10k",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "pull_down",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        5
+      ]
+    },
+    "R81": {
+      "refdes": "R81",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "100k",
+      "value_raw": "100k",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "pull_down",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        5
+      ]
+    },
+    "R103": {
+      "refdes": "R103",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "100k",
+      "value_raw": "100k",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "pull_down",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        5,
+        8
+      ]
+    },
+    "U9": {
+      "refdes": "U9",
+      "type": "ic",
+      "kind": "ic",
+      "value_canonical": "TUSB8040PFP",
+      "value_raw": "TUSB8040PFP",
+      "package": null,
+      "mpn": "TUSB8040PFP",
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "ic",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        5
+      ]
+    },
+    "U21": {
+      "refdes": "U21",
+      "type": "ic",
+      "kind": "ic",
+      "value_canonical": "SP3012-06UTG",
+      "value_raw": "SP3012-06UTG",
+      "package": null,
+      "mpn": "SP3012-06UTG",
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "ic",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        5
+      ]
+    },
+    "U25": {
+      "refdes": "U25",
+      "type": "ic",
+      "kind": "ic",
+      "value_canonical": "SP3012-06UTG",
+      "value_raw": "SP3012-06UTG",
+      "package": null,
+      "mpn": "SP3012-06UTG",
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "ic",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        5
+      ]
+    },
+    "U26": {
+      "refdes": "U26",
+      "type": "ic",
+      "kind": "ic",
+      "value_canonical": "SP3012-06UTG",
+      "value_raw": "SP3012-06UTG",
+      "package": null,
+      "mpn": "SP3012-06UTG",
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "ic",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        5
+      ]
+    },
+    "J12": {
+      "refdes": "J12",
+      "type": "connector",
+      "kind": "ic",
+      "value_canonical": "Conn_02x08_Odd_Even",
+      "value_raw": "Conn_02x08_Odd_Even",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "connector",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        5
+      ]
+    },
+    "J6": {
+      "refdes": "J6",
+      "type": "connector",
+      "kind": "ic",
+      "value_canonical": "USB3_A",
+      "value_raw": "USB3_A",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "connector",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        5
+      ]
+    },
+    "J5": {
+      "refdes": "J5",
+      "type": "connector",
+      "kind": "ic",
+      "value_canonical": "USB3_A",
+      "value_raw": "USB3_A",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "connector",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        5
+      ]
+    },
+    "J17": {
+      "refdes": "J17",
+      "type": "connector",
+      "kind": "ic",
+      "value_canonical": "USB3_A",
+      "value_raw": "USB3_A",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "connector",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        5
+      ]
+    },
+    "FB5": {
+      "refdes": "FB5",
+      "type": "ferrite",
+      "kind": "passive_fb",
+      "value_canonical": "220Ω@100MHz 1.4A",
+      "value_raw": "220@100MHz 1.4A",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "filter",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        5
+      ]
+    },
+    "FB8": {
+      "refdes": "FB8",
+      "type": "ferrite",
+      "kind": "passive_fb",
+      "value_canonical": "220Ω@100MHz 1.4A",
+      "value_raw": "220@100MHz 1.4A",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "filter",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        5
+      ]
+    },
+    "FB9": {
+      "refdes": "FB9",
+      "type": "ferrite",
+      "kind": "passive_fb",
+      "value_canonical": "220Ω@100MHz 1.4A",
+      "value_raw": "220@100MHz 1.4A",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "filter",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        5
+      ]
+    },
+    "C63": {
+      "refdes": "C63",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "10uF",
+      "value_raw": "10uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        5
+      ]
+    },
+    "C70": {
+      "refdes": "C70",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.1uF",
+      "value_raw": "0.1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        5
+      ]
+    },
+    "C81": {
+      "refdes": "C81",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "10uF",
+      "value_raw": "10uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        5
+      ]
+    },
+    "C85": {
+      "refdes": "C85",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.1uF",
+      "value_raw": "0.1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        5
+      ]
+    },
+    "C72": {
+      "refdes": "C72",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "10uF",
+      "value_raw": "10uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        5
+      ]
+    },
+    "C84": {
+      "refdes": "C84",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.1uF",
+      "value_raw": "0.1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        5
+      ]
+    },
+    "C67": {
+      "refdes": "C67",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.1uF",
+      "value_raw": "0.1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        5
+      ]
+    },
+    "C68": {
+      "refdes": "C68",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.002uF",
+      "value_raw": "2nF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "filter",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        5
+      ]
+    },
+    "C74": {
+      "refdes": "C74",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.1uF",
+      "value_raw": "0.1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        5
+      ]
+    },
+    "C78": {
+      "refdes": "C78",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.002uF",
+      "value_raw": "2nF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "filter",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        5
+      ]
+    },
+    "C75": {
+      "refdes": "C75",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.1uF",
+      "value_raw": "0.1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        5
+      ]
+    },
+    "C79": {
+      "refdes": "C79",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.002uF",
+      "value_raw": "2nF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "filter",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        5
+      ]
+    },
+    "R55": {
+      "refdes": "R55",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "1M",
+      "value_raw": "1M",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": null,
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        5
+      ]
+    },
+    "R96": {
+      "refdes": "R96",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "1M",
+      "value_raw": "1M",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": null,
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        5
+      ]
+    },
+    "R97": {
+      "refdes": "R97",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "1M",
+      "value_raw": "1M",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": null,
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        5
+      ]
+    },
+    "R84": {
+      "refdes": "R84",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "10k",
+      "value_raw": "10k",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": null,
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        5
+      ]
+    },
+    "R85": {
+      "refdes": "R85",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "10k",
+      "value_raw": "10k",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": null,
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        5
+      ]
+    },
+    "R90": {
+      "refdes": "R90",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "27",
+      "value_raw": "27",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "damping",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        5
+      ]
+    },
+    "R91": {
+      "refdes": "R91",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "27",
+      "value_raw": "27",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "damping",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        5
+      ]
+    },
+    "R92": {
+      "refdes": "R92",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "27",
+      "value_raw": "27",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "damping",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        5
+      ]
+    },
+    "R93": {
+      "refdes": "R93",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "27",
+      "value_raw": "27",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "damping",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        5
+      ]
+    },
+    "C69": {
+      "refdes": "C69",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "10uF",
+      "value_raw": "10uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        5
+      ]
+    },
+    "C76": {
+      "refdes": "C76",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.1uF",
+      "value_raw": "0.1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        5
+      ]
+    },
+    "C71": {
+      "refdes": "C71",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "10uF",
+      "value_raw": "10uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        5
+      ]
+    },
+    "C77": {
+      "refdes": "C77",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.1uF",
+      "value_raw": "0.1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        5
+      ]
+    },
+    "J9": {
+      "refdes": "J9",
+      "type": "connector",
+      "kind": "ic",
+      "value_canonical": "USB_INT1",
+      "value_raw": "USB_INT1",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "connector",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        5
+      ]
+    },
+    "J14": {
+      "refdes": "J14",
+      "type": "connector",
+      "kind": "ic",
+      "value_canonical": "USB_INT2",
+      "value_raw": "USB_INT2",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "connector",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        5
+      ]
+    },
+    "U27": {
+      "refdes": "U27",
+      "type": "ic",
+      "kind": "ic",
+      "value_canonical": "AP22815",
+      "value_raw": "AP22815",
+      "package": null,
+      "mpn": "AP22815",
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "ic",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        6
+      ]
+    },
+    "U24": {
+      "refdes": "U24",
+      "type": "ic",
+      "kind": "ic",
+      "value_canonical": "AP22815",
+      "value_raw": "AP22815",
+      "package": null,
+      "mpn": "AP22815",
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "ic",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        6
+      ]
+    },
+    "C167": {
+      "refdes": "C167",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "10uF",
+      "value_raw": "10uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        6
+      ]
+    },
+    "C164": {
+      "refdes": "C164",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "10uF",
+      "value_raw": "10uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        6
+      ]
+    },
+    "F3": {
+      "refdes": "F3",
+      "type": "fuse",
+      "kind": "ic",
+      "value_canonical": "0157004.DR",
+      "value_raw": "0157004.DR",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": null,
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        6
+      ]
+    },
+    "FB1": {
+      "refdes": "FB1",
+      "type": "ferrite",
+      "kind": "passive_fb",
+      "value_canonical": "2R",
+      "value_raw": "2R",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "filter",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        6
+      ]
+    },
+    "FB2": {
+      "refdes": "FB2",
+      "type": "ferrite",
+      "kind": "passive_fb",
+      "value_canonical": "38R",
+      "value_raw": "38R",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "filter",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        6
+      ]
+    },
+    "C14": {
+      "refdes": "C14",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.1uF",
+      "value_raw": "0.1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        6
+      ]
+    },
+    "C20": {
+      "refdes": "C20",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.1uF",
+      "value_raw": "0.1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        6
+      ]
+    },
+    "C43": {
+      "refdes": "C43",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.1uF",
+      "value_raw": "0.1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        6
+      ]
+    },
+    "C73": {
+      "refdes": "C73",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "1uF",
+      "value_raw": "1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        6
+      ]
+    },
+    "C86": {
+      "refdes": "C86",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "1uF",
+      "value_raw": "1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        6
+      ]
+    },
+    "C88": {
+      "refdes": "C88",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "1uF",
+      "value_raw": "1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        6
+      ]
+    },
+    "C13": {
+      "refdes": "C13",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.1uF",
+      "value_raw": "0.1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "filter",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        6
+      ]
+    },
+    "C15": {
+      "refdes": "C15",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.1uF",
+      "value_raw": "0.1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "filter",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        6
+      ]
+    },
+    "C21": {
+      "refdes": "C21",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.1uF",
+      "value_raw": "0.1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "filter",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        6
+      ]
+    },
+    "C66": {
+      "refdes": "C66",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.1uF",
+      "value_raw": "0.1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "filter",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        6
+      ]
+    },
+    "C80": {
+      "refdes": "C80",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.1uF",
+      "value_raw": "0.1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "filter",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        6
+      ]
+    },
+    "C87": {
+      "refdes": "C87",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.1uF",
+      "value_raw": "0.1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "filter",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        6
+      ]
+    },
+    "C89": {
+      "refdes": "C89",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.1uF",
+      "value_raw": "0.1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "filter",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        6
+      ]
+    },
+    "C90": {
+      "refdes": "C90",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "10uF",
+      "value_raw": "10uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "filter",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        6
+      ]
+    },
+    "C91": {
+      "refdes": "C91",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "10uF",
+      "value_raw": "10uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "filter",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        6
+      ]
+    },
+    "U22": {
+      "refdes": "U22",
+      "type": "ic",
+      "kind": "ic",
+      "value_canonical": "TPD12S521",
+      "value_raw": "TPD12S521",
+      "package": null,
+      "mpn": "TPD12S521",
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "ic",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        7
+      ]
+    },
+    "J4": {
+      "refdes": "J4",
+      "type": "connector",
+      "kind": "ic",
+      "value_canonical": "HDMI_A",
+      "value_raw": "HDMI_A",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "connector",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        7
+      ]
+    },
+    "D14": {
+      "refdes": "D14",
+      "type": "diode",
+      "kind": "passive_d",
+      "value_canonical": "SD0603S040S0R2",
+      "value_raw": "SD0603S040S0R2",
+      "package": "0603",
+      "mpn": "SD0603S040S0R2",
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "rectifier",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        7
+      ]
+    },
+    "C27": {
+      "refdes": "C27",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.1uF",
+      "value_raw": "0.1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "filter",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        7
+      ]
+    },
+    "C28": {
+      "refdes": "C28",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.1uF",
+      "value_raw": "0.1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        7
+      ]
+    },
+    "C29": {
+      "refdes": "C29",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.1uF",
+      "value_raw": "0.1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        7
+      ]
+    },
+    "C30": {
+      "refdes": "C30",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.1uF",
+      "value_raw": "0.1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        7
+      ]
+    },
+    "R43": {
+      "refdes": "R43",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "4.7k",
+      "value_raw": "4.7k",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "damping",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        7
+      ]
+    },
+    "R44": {
+      "refdes": "R44",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "4.7k",
+      "value_raw": "4.7k",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "damping",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        7
+      ]
+    },
+    "R45": {
+      "refdes": "R45",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "27k",
+      "value_raw": "27k",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "pull_down",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        7
+      ]
+    },
+    "R192": {
+      "refdes": "R192",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "10k",
+      "value_raw": "10k",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "damping",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        7
+      ]
+    },
+    "R161": {
+      "refdes": "R161",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "10k",
+      "value_raw": "10k",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "pull_down",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        7
+      ]
+    },
+    "R46": {
+      "refdes": "R46",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "100k",
+      "value_raw": "100k",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "pull_up",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        7
+      ]
+    },
+    "R47": {
+      "refdes": "R47",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "47k",
+      "value_raw": "47k",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "pull_up",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        7
+      ]
+    },
+    "R48": {
+      "refdes": "R48",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "47k",
+      "value_raw": "47k",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "pull_up",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        7
+      ]
+    },
+    "R197": {
+      "refdes": "R197",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "47k",
+      "value_raw": "47k",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "pull_up",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        7
+      ]
+    },
+    "D0": {
+      "refdes": "D0",
+      "type": "power_symbol",
+      "kind": "ic",
+      "value_canonical": "GND",
+      "value_raw": "GND",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": null,
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        7
+      ]
+    },
+    "U20": {
+      "refdes": "U20",
+      "type": "ic",
+      "kind": "ic",
+      "value_canonical": "AP22815",
+      "value_raw": "AP22815",
+      "package": null,
+      "mpn": "AP22815",
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "ic",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        8
+      ]
+    },
+    "C155": {
+      "refdes": "C155",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "10uF",
+      "value_raw": "10uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        8
+      ]
+    },
+    "FB3": {
+      "refdes": "FB3",
+      "type": "ferrite",
+      "kind": "passive_fb",
+      "value_canonical": "100@100MHz 3A",
+      "value_raw": "100@100MHz 3A",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "filter",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        8
+      ]
+    },
+    "C52": {
+      "refdes": "C52",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.01uF",
+      "value_raw": "10nF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        8
+      ]
+    },
+    "C53": {
+      "refdes": "C53",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.1uF",
+      "value_raw": "0.1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        8
+      ]
+    },
+    "C54": {
+      "refdes": "C54",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.1uF",
+      "value_raw": "0.1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        8
+      ]
+    },
+    "C55": {
+      "refdes": "C55",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.1uF",
+      "value_raw": "0.1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        8
+      ]
+    },
+    "C83": {
+      "refdes": "C83",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "47uF",
+      "value_raw": "47uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        8
+      ]
+    },
+    "C123": {
+      "refdes": "C123",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "47uF",
+      "value_raw": "47uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        8
+      ]
+    },
+    "C119": {
+      "refdes": "C119",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.1uF",
+      "value_raw": "0.1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        8
+      ]
+    },
+    "C120": {
+      "refdes": "C120",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "10uF",
+      "value_raw": "10uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        8
+      ]
+    },
+    "U11": {
+      "refdes": "U11",
+      "type": "ic",
+      "kind": "ic",
+      "value_canonical": "679105700",
+      "value_raw": "679105700",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "ic",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        8
+      ]
+    },
+    "R160": {
+      "refdes": "R160",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "100k",
+      "value_raw": "100k",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "series",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        8
+      ]
+    },
+    "D22": {
+      "refdes": "D22",
+      "type": "led",
+      "kind": "ic",
+      "value_canonical": "LED_WLAN1",
+      "value_raw": "LED_WLAN1",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": null,
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        8
+      ]
+    },
+    "R67": {
+      "refdes": "R67",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "1k",
+      "value_raw": "1k",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "pull_up",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        8
+      ]
+    },
+    "R123": {
+      "refdes": "R123",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "49.9",
+      "value_raw": "49.9",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "damping",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        8
+      ]
+    },
+    "R148": {
+      "refdes": "R148",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "49.9",
+      "value_raw": "49.9",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "damping",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        8
+      ]
+    },
+    "U23": {
+      "refdes": "U23",
+      "type": "ic",
+      "kind": "ic",
+      "value_canonical": "IDT5V41066",
+      "value_raw": "IDT5V41066",
+      "package": null,
+      "mpn": "IDT5V41066",
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "ic",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        8
+      ]
+    },
+    "C152": {
+      "refdes": "C152",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.01uF",
+      "value_raw": "10nF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        8
+      ]
+    },
+    "R36": {
+      "refdes": "R36",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "475",
+      "value_raw": "475",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "pull_down",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        8
+      ]
+    },
+    "R37": {
+      "refdes": "R37",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "0",
+      "value_raw": "0",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "damping",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        8
+      ]
+    },
+    "R38": {
+      "refdes": "R38",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "0",
+      "value_raw": "0",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "damping",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        8
+      ]
+    },
+    "R39": {
+      "refdes": "R39",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "0",
+      "value_raw": "0",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "damping",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        8
+      ]
+    },
+    "R40": {
+      "refdes": "R40",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "0",
+      "value_raw": "0",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": null,
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        8
+      ]
+    },
+    "R122": {
+      "refdes": "R122",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "0",
+      "value_raw": "0",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": null,
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        8
+      ]
+    },
+    "X1": {
+      "refdes": "X1",
+      "type": "crystal",
+      "kind": "ic",
+      "value_canonical": "25MHz",
+      "value_raw": "25MHz",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": null,
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        8
+      ]
+    },
+    "Y3": {
+      "refdes": "Y3",
+      "type": "crystal",
+      "kind": "ic",
+      "value_canonical": "25MHz",
+      "value_raw": "25MHz",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": null,
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        8
+      ]
+    },
+    "C62": {
+      "refdes": "C62",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "1.8pF",
+      "value_raw": "1.8pF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "tank",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        8
+      ]
+    },
+    "C98": {
+      "refdes": "C98",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "1.8pF",
+      "value_raw": "1.8pF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "tank",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        8
+      ]
+    },
+    "C153": {
+      "refdes": "C153",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.01uF",
+      "value_raw": "10nF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "filter",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        8
+      ]
+    },
+    "R198": {
+      "refdes": "R198",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "49.9",
+      "value_raw": "49.9",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "damping",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        8
+      ]
+    },
+    "R199": {
+      "refdes": "R199",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "49.9",
+      "value_raw": "49.9",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "damping",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        8
+      ]
+    },
+    "J11": {
+      "refdes": "J11",
+      "type": "connector",
+      "kind": "ic",
+      "value_canonical": "48099-5701",
+      "value_raw": "48099-5701",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "connector",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        8
+      ]
+    },
+    "FB4": {
+      "refdes": "FB4",
+      "type": "ferrite",
+      "kind": "passive_fb",
+      "value_canonical": "100@100MHz 3A",
+      "value_raw": "100@100MHz 3A",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "filter",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        8
+      ]
+    },
+    "C58": {
+      "refdes": "C58",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.01uF",
+      "value_raw": "10nF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        8
+      ]
+    },
+    "C59": {
+      "refdes": "C59",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.1uF",
+      "value_raw": "0.1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        8
+      ]
+    },
+    "C60": {
+      "refdes": "C60",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.1uF",
+      "value_raw": "0.1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        8
+      ]
+    },
+    "C61": {
+      "refdes": "C61",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.1uF",
+      "value_raw": "0.1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        8
+      ]
+    },
+    "C124": {
+      "refdes": "C124",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "47uF",
+      "value_raw": "47uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        8
+      ]
+    },
+    "C126": {
+      "refdes": "C126",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "47uF",
+      "value_raw": "47uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        8
+      ]
+    },
+    "J10": {
+      "refdes": "J10",
+      "type": "connector",
+      "kind": "ic",
+      "value_canonical": "1-2199230-6",
+      "value_raw": "1-2199230-6",
+      "package": null,
+      "mpn": "1-2199230-6",
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "connector",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        8
+      ]
+    },
+    "D23": {
+      "refdes": "D23",
+      "type": "led",
+      "kind": "ic",
+      "value_canonical": "LED_NVME",
+      "value_raw": "LED_NVME",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": null,
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        8
+      ]
+    },
+    "R110": {
+      "refdes": "R110",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "1k",
+      "value_raw": "1k",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "pull_up",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        8
+      ]
+    },
+    "R104": {
+      "refdes": "R104",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "0",
+      "value_raw": "0",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "damping",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        8
+      ]
+    },
+    "R105": {
+      "refdes": "R105",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "0",
+      "value_raw": "0",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "damping",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        8
+      ]
+    },
+    "R106": {
+      "refdes": "R106",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "0",
+      "value_raw": "0",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "damping",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        8
+      ]
+    },
+    "R107": {
+      "refdes": "R107",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "0",
+      "value_raw": "0",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "damping",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        8
+      ]
+    },
+    "R108": {
+      "refdes": "R108",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "0",
+      "value_raw": "0",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "damping",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        8
+      ]
+    },
+    "R109": {
+      "refdes": "R109",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "0",
+      "value_raw": "0",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "damping",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        8
+      ]
+    },
+    "X2": {
+      "refdes": "X2",
+      "type": "other",
+      "kind": "ic",
+      "value_canonical": "PWR_FLAG",
+      "value_raw": "PWR_FLAG",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": null,
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        8
+      ]
+    },
+    "R65": {
+      "refdes": "R65",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "0",
+      "value_raw": "0",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "series",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        9
+      ]
+    },
+    "FB22": {
+      "refdes": "FB22",
+      "type": "ferrite",
+      "kind": "passive_fb",
+      "value_canonical": "100Ω@100MHz 3A",
+      "value_raw": "100@100MHz 3A",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "filter",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        9
+      ]
+    },
+    "C57": {
+      "refdes": "C57",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.1uF",
+      "value_raw": "0.1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        9
+      ]
+    },
+    "C168": {
+      "refdes": "C168",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.1uF",
+      "value_raw": "0.1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        9
+      ]
+    },
+    "C169": {
+      "refdes": "C169",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.1uF",
+      "value_raw": "0.1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        9
+      ]
+    },
+    "R35": {
+      "refdes": "R35",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "1.5k",
+      "value_raw": "1.5k",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "pull_up",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        9
+      ]
+    },
+    "R42": {
+      "refdes": "R42",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "1.5k",
+      "value_raw": "1.5k",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "pull_up",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        9
+      ]
+    },
+    "U28": {
+      "refdes": "U28",
+      "type": "ic",
+      "kind": "ic",
+      "value_canonical": "SN74AVC1T45",
+      "value_raw": "SN74AVC1T45",
+      "package": null,
+      "mpn": "SN74AVC1T45",
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "ic",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        9
+      ]
+    },
+    "U3": {
+      "refdes": "U3",
+      "type": "ic",
+      "kind": "ic",
+      "value_canonical": "WM8960",
+      "value_raw": "WM8960",
+      "package": null,
+      "mpn": "WM8960",
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "ic",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        10
+      ]
+    },
+    "J16": {
+      "refdes": "J16",
+      "type": "connector",
+      "kind": "ic",
+      "value_canonical": "LINE_IN",
+      "value_raw": "LINE_IN",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "connector",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        10
+      ]
+    },
+    "J7": {
+      "refdes": "J7",
+      "type": "connector",
+      "kind": "ic",
+      "value_canonical": "SJ-43516-SMT",
+      "value_raw": "SJ-43516-SMT",
+      "package": null,
+      "mpn": "SJ-43516-SMT",
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "connector",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        10
+      ]
+    },
+    "J21": {
+      "refdes": "J21",
+      "type": "connector",
+      "kind": "ic",
+      "value_canonical": "Conn_01x04",
+      "value_raw": "Conn_01x04",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "connector",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        10
+      ]
+    },
+    "FB20": {
+      "refdes": "FB20",
+      "type": "ferrite",
+      "kind": "passive_fb",
+      "value_canonical": "100@100MHz 3A",
+      "value_raw": "100@100MHz 3A",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "filter",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        10
+      ]
+    },
+    "FB18": {
+      "refdes": "FB18",
+      "type": "ferrite",
+      "kind": "passive_fb",
+      "value_canonical": "100@100MHz 3A",
+      "value_raw": "100@100MHz 3A",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "filter",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        10
+      ]
+    },
+    "FB21": {
+      "refdes": "FB21",
+      "type": "ferrite",
+      "kind": "passive_fb",
+      "value_canonical": "100@100MHz 3A",
+      "value_raw": "100@100MHz 3A",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "filter",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        10
+      ]
+    },
+    "FB19": {
+      "refdes": "FB19",
+      "type": "ferrite",
+      "kind": "passive_fb",
+      "value_canonical": "100@100MHz 3A",
+      "value_raw": "100@100MHz 3A",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "filter",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        10
+      ]
+    },
+    "FB10": {
+      "refdes": "FB10",
+      "type": "ferrite",
+      "kind": "passive_fb",
+      "value_canonical": "100@100MHz 3A",
+      "value_raw": "100@100MHz 3A",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "filter",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        10
+      ]
+    },
+    "FB11": {
+      "refdes": "FB11",
+      "type": "ferrite",
+      "kind": "passive_fb",
+      "value_canonical": "100@100MHz 3A",
+      "value_raw": "100@100MHz 3A",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "filter",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        10
+      ]
+    },
+    "FB16": {
+      "refdes": "FB16",
+      "type": "ferrite",
+      "kind": "passive_fb",
+      "value_canonical": "100@100MHz 3A",
+      "value_raw": "100@100MHz 3A",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "filter",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        10
+      ]
+    },
+    "FB17": {
+      "refdes": "FB17",
+      "type": "ferrite",
+      "kind": "passive_fb",
+      "value_canonical": "100@100MHz 3A",
+      "value_raw": "100@100MHz 3A",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "filter",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        10
+      ]
+    },
+    "L8": {
+      "refdes": "L8",
+      "type": "inductor",
+      "kind": "ic",
+      "value_canonical": "22.5uH",
+      "value_raw": "22.5uH",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": null,
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        10
+      ]
+    },
+    "L9": {
+      "refdes": "L9",
+      "type": "inductor",
+      "kind": "ic",
+      "value_canonical": "15uH",
+      "value_raw": "15uH",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": null,
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        10
+      ]
+    },
+    "L10": {
+      "refdes": "L10",
+      "type": "inductor",
+      "kind": "ic",
+      "value_canonical": "15uH",
+      "value_raw": "15uH",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": null,
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        10
+      ]
+    },
+    "L11": {
+      "refdes": "L11",
+      "type": "inductor",
+      "kind": "ic",
+      "value_canonical": "15uH",
+      "value_raw": "15uH",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": null,
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        10
+      ]
+    },
+    "C143": {
+      "refdes": "C143",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.1uF",
+      "value_raw": "0.1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        10
+      ]
+    },
+    "C144": {
+      "refdes": "C144",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.1uF",
+      "value_raw": "0.1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        10
+      ]
+    },
+    "C142": {
+      "refdes": "C142",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.1uF",
+      "value_raw": "0.1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        10
+      ]
+    },
+    "C139": {
+      "refdes": "C139",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "4.7uF",
+      "value_raw": "4.7uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        10
+      ]
+    },
+    "C151": {
+      "refdes": "C151",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "4.7uF",
+      "value_raw": "4.7uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        10
+      ]
+    },
+    "C127": {
+      "refdes": "C127",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "220uF",
+      "value_raw": "220uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "ac_coupling",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        10
+      ]
+    },
+    "C147": {
+      "refdes": "C147",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "220uF",
+      "value_raw": "220uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "ac_coupling",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        10
+      ]
+    },
+    "C156": {
+      "refdes": "C156",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.1uF",
+      "value_raw": "0.1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "filter",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        10
+      ]
+    },
+    "C157": {
+      "refdes": "C157",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.47uF",
+      "value_raw": "470nF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "filter",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        10
+      ]
+    },
+    "C158": {
+      "refdes": "C158",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.1uF",
+      "value_raw": "0.1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "filter",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        10
+      ]
+    },
+    "C165": {
+      "refdes": "C165",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.1uF",
+      "value_raw": "0.1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "filter",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        10
+      ]
+    },
+    "C159": {
+      "refdes": "C159",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.47uF",
+      "value_raw": "470nF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "filter",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        10
+      ]
+    },
+    "C166": {
+      "refdes": "C166",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.1uF",
+      "value_raw": "0.1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "filter",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        10
+      ]
+    },
+    "C150": {
+      "refdes": "C150",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "10uF",
+      "value_raw": "10uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "bypass",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        10
+      ]
+    },
+    "C154": {
+      "refdes": "C154",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.1uF",
+      "value_raw": "0.1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "bypass",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        10
+      ]
+    },
+    "C170": {
+      "refdes": "C170",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "4.7uF",
+      "value_raw": "4.7uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "bypass",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        10
+      ]
+    },
+    "R140": {
+      "refdes": "R140",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "680",
+      "value_raw": "680",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "damping",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        10
+      ]
+    },
+    "R142": {
+      "refdes": "R142",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "47k",
+      "value_raw": "47k",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "pull_down",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        10
+      ]
+    },
+    "R143": {
+      "refdes": "R143",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "47k",
+      "value_raw": "47k",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "pull_down",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        10
+      ]
+    },
+    "R144": {
+      "refdes": "R144",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "47k",
+      "value_raw": "47k",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "pull_up",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        10
+      ]
+    },
+    "R121": {
+      "refdes": "R121",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "0",
+      "value_raw": "0",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "damping",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        10
+      ]
+    },
+    "R151": {
+      "refdes": "R151",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "0",
+      "value_raw": "0",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "damping",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        10
+      ]
+    },
+    "R150": {
+      "refdes": "R150",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "0",
+      "value_raw": "0",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "damping",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        10
+      ]
+    },
+    "R139": {
+      "refdes": "R139",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "0",
+      "value_raw": "0",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "damping",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        10
+      ]
+    },
+    "R138": {
+      "refdes": "R138",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "0",
+      "value_raw": "0",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "damping",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        10
+      ]
+    },
+    "R114": {
+      "refdes": "R114",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "0",
+      "value_raw": "0",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "damping",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        10
+      ]
+    },
+    "R66": {
+      "refdes": "R66",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "4.7k",
+      "value_raw": "4.7k",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "damping",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        10
+      ]
+    },
+    "R136": {
+      "refdes": "R136",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "4.7k",
+      "value_raw": "4.7k",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "pull_up",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        10
+      ]
+    },
+    "R135": {
+      "refdes": "R135",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "4.7k",
+      "value_raw": "4.7k",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "pull_up",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        10
+      ]
+    },
+    "R112": {
+      "refdes": "R112",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "220",
+      "value_raw": "220",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "damping",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        10
+      ]
+    },
+    "R152": {
+      "refdes": "R152",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "0",
+      "value_raw": "0",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "series",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        10
+      ]
+    },
+    "D10": {
+      "refdes": "D10",
+      "type": "diode",
+      "kind": "passive_d",
+      "value_canonical": "SP0503BAHT",
+      "value_raw": "SP0503BAHT",
+      "package": null,
+      "mpn": "SP0503BAHT",
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "esd",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        10
+      ]
+    },
+    "PP11": {
+      "refdes": "PP11",
+      "type": "connector",
+      "kind": "ic",
+      "value_canonical": "JOG-0003NL",
+      "value_raw": "JJ00GG--00000033NNLL",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "connector",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        11
+      ]
+    },
+    "CC2222": {
+      "refdes": "CC2222",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.1uF",
+      "value_raw": "0.1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        11
+      ]
+    },
+    "CC2233": {
+      "refdes": "CC2233",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.1uF",
+      "value_raw": "0.1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "ac_coupling",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        11
+      ]
+    },
+    "CC2244": {
+      "refdes": "CC2244",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.1uF",
+      "value_raw": "0.1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "ac_coupling",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        11
+      ]
+    },
+    "CC2255": {
+      "refdes": "CC2255",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.1uF",
+      "value_raw": "0.1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "ac_coupling",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        11
+      ]
+    },
+    "CC2266": {
+      "refdes": "CC2266",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.1uF",
+      "value_raw": "0.1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "ac_coupling",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        11
+      ]
+    },
+    "RR111166": {
+      "refdes": "RR111166",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "0",
+      "value_raw": "00",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "damping",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        11
+      ]
+    },
+    "RR114466": {
+      "refdes": "RR114466",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "0",
+      "value_raw": "00",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "damping",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        11
+      ]
+    },
+    "RR114477": {
+      "refdes": "RR114477",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "0",
+      "value_raw": "00",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "damping",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        11
+      ]
+    },
+    "SSHH11": {
+      "refdes": "SSHH11",
+      "type": "other",
+      "kind": "ic",
+      "value_canonical": "0.001uF",
+      "value_raw": "0.001uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": null,
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        11
+      ]
+    },
+    "U10": {
+      "refdes": "U10",
+      "type": "ic",
+      "kind": "ic",
+      "value_canonical": "SN65DSI86IPAPQ1",
+      "value_raw": "SN65DSI86IPAPQ1",
+      "package": null,
+      "mpn": "SN65DSI86IPAPQ1",
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "ic",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        12
+      ]
+    },
+    "FB12": {
+      "refdes": "FB12",
+      "type": "ferrite",
+      "kind": "passive_fb",
+      "value_canonical": "100Ω@100MHz 3A",
+      "value_raw": "100@100MHz 3A",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "filter",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        12
+      ]
+    },
+    "FB14": {
+      "refdes": "FB14",
+      "type": "ferrite",
+      "kind": "passive_fb",
+      "value_canonical": "100Ω@100MHz 3A",
+      "value_raw": "100@100MHz 3A",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "filter",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        12
+      ]
+    },
+    "FB15": {
+      "refdes": "FB15",
+      "type": "ferrite",
+      "kind": "passive_fb",
+      "value_canonical": "100Ω@100MHz 3A",
+      "value_raw": "100@100MHz 3A",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "filter",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        12
+      ]
+    },
+    "C99": {
+      "refdes": "C99",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "10uF",
+      "value_raw": "10uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "bulk",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        12
+      ]
+    },
+    "C100": {
+      "refdes": "C100",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "1uF",
+      "value_raw": "1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        12
+      ]
+    },
+    "C101": {
+      "refdes": "C101",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.1uF",
+      "value_raw": "0.1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        12
+      ]
+    },
+    "C102": {
+      "refdes": "C102",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.01uF",
+      "value_raw": "10nF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        12
+      ]
+    },
+    "C103": {
+      "refdes": "C103",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.1uF",
+      "value_raw": "0.1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        12
+      ]
+    },
+    "C104": {
+      "refdes": "C104",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.01uF",
+      "value_raw": "10nF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        12
+      ]
+    },
+    "C105": {
+      "refdes": "C105",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.1uF",
+      "value_raw": "0.1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        12
+      ]
+    },
+    "C106": {
+      "refdes": "C106",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.1uF",
+      "value_raw": "0.1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        12
+      ]
+    },
+    "C107": {
+      "refdes": "C107",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.1uF",
+      "value_raw": "0.1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        12
+      ]
+    },
+    "C108": {
+      "refdes": "C108",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.1uF",
+      "value_raw": "0.1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "ac_coupling",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        12
+      ]
+    },
+    "C109": {
+      "refdes": "C109",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.1uF",
+      "value_raw": "0.1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "ac_coupling",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        12
+      ]
+    },
+    "C110": {
+      "refdes": "C110",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.1uF",
+      "value_raw": "0.1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "ac_coupling",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        12
+      ]
+    },
+    "C111": {
+      "refdes": "C111",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "1uF",
+      "value_raw": "1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        12
+      ]
+    },
+    "C112": {
+      "refdes": "C112",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "10uF",
+      "value_raw": "10uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        12
+      ]
+    },
+    "C113": {
+      "refdes": "C113",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.1uF",
+      "value_raw": "0.1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        12
+      ]
+    },
+    "C114": {
+      "refdes": "C114",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "1uF",
+      "value_raw": "1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        12
+      ]
+    },
+    "C115": {
+      "refdes": "C115",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.1uF",
+      "value_raw": "0.1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        12
+      ]
+    },
+    "C116": {
+      "refdes": "C116",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.01uF",
+      "value_raw": "10nF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        12
+      ]
+    },
+    "C117": {
+      "refdes": "C117",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.01uF",
+      "value_raw": "10nF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        12
+      ]
+    },
+    "C118": {
+      "refdes": "C118",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "0.1uF",
+      "value_raw": "0.1uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        12
+      ]
+    },
+    "C131": {
+      "refdes": "C131",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "10uF",
+      "value_raw": "10uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        12
+      ]
+    },
+    "C133": {
+      "refdes": "C133",
+      "type": "capacitor",
+      "kind": "passive_c",
+      "value_canonical": "10uF",
+      "value_raw": "10uF",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "decoupling",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        12
+      ]
+    },
+    "J24": {
+      "refdes": "J24",
+      "type": "connector",
+      "kind": "ic",
+      "value_canonical": "EDP_HEADER",
+      "value_raw": "EDP_HEADER",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "connector",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        12
+      ]
+    },
+    "R77": {
+      "refdes": "R77",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "0",
+      "value_raw": "0",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "pull_down",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        12
+      ]
+    },
+    "R64": {
+      "refdes": "R64",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "51k",
+      "value_raw": "51k",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "damping",
+      "safety_class": "exact_only",
+      "criticality_in_design": "low",
+      "pages": [
+        12
+      ]
+    },
+    "R129": {
+      "refdes": "R129",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "131",
+      "value_raw": "131R",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "pull_up",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        12
+      ]
+    },
+    "R130": {
+      "refdes": "R130",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "231",
+      "value_raw": "231R",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "pull_up",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        12
+      ]
+    },
+    "R82": {
+      "refdes": "R82",
+      "type": "resistor",
+      "kind": "passive_r",
+      "value_canonical": "100k",
+      "value_raw": "100k",
+      "package": null,
+      "mpn": null,
+      "voltage_rating": null,
+      "tolerance": null,
+      "role_in_design": "pull_down",
+      "safety_class": "tolerant_with_warning",
+      "criticality_in_design": "low",
+      "pages": [
+        12
+      ]
+    }
+  }
+}

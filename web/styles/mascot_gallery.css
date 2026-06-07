@@ -1,0 +1,130 @@
+/* ============================================================
+   Mascot animation gallery — standalone workshop page.
+   Reuses the real mascot.css + template; this file only styles
+   the gallery chrome (header, controls, card grid).
+   Matches the workbench aesthetic: dark, dense, glass, mono labels.
+   ============================================================ */
+
+body{
+  /* override the app shell's overflow:hidden — this page scrolls */
+  overflow:auto;
+  background:
+    radial-gradient(1200px 600px at 50% -10%, rgba(56,189,248,.06), transparent 60%),
+    var(--bg-deep);
+  min-height:100vh;
+}
+
+.mg-wrap{max-width:1180px;margin:0 auto;padding:32px 28px 64px}
+
+/* ---------- header ---------- */
+.mg-head{
+  display:flex;align-items:flex-end;justify-content:space-between;
+  gap:24px;flex-wrap:wrap;margin-bottom:8px;
+}
+.mg-title{font-size:22px;font-weight:600;letter-spacing:-.2px;margin:0}
+.mg-title .mg-accent{color:var(--cyan)}
+.mg-sub{
+  margin:6px 0 0;color:var(--text-3);font-size:12.5px;max-width:60ch;line-height:1.5;
+}
+.mg-count{
+  font-family:var(--mono);font-size:10.5px;text-transform:uppercase;letter-spacing:.4px;
+  color:var(--text-3);
+}
+
+/* ---------- control bar ---------- */
+.mg-controls{
+  display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  margin:22px 0 26px;padding:12px 16px;
+  background:linear-gradient(180deg, rgba(26,40,61,.6), rgba(20,32,48,.6));
+  border:1px solid var(--border);border-radius:12px;
+  backdrop-filter:blur(8px);
+}
+.mg-ctl{display:flex;align-items:center;gap:8px}
+.mg-ctl-label{
+  font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.5px;
+  color:var(--text-3);
+}
+.mg-seg{display:inline-flex;border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.mg-seg button{
+  appearance:none;border:0;background:transparent;color:var(--text-2);
+  font-family:var(--mono);font-size:11px;padding:5px 11px;cursor:pointer;
+  transition:background .15s,color .15s;
+}
+.mg-seg button:hover{background:var(--panel-2);color:var(--text)}
+.mg-seg button.is-active{background:var(--cyan);color:var(--bg-deep);font-weight:600}
+.mg-spacer{flex:1 1 auto}
+
+.mg-range{accent-color:var(--cyan);width:120px}
+.mg-range-val{font-family:var(--mono);font-size:11px;color:var(--text-2);min-width:34px}
+
+.mg-btn{
+  appearance:none;display:inline-flex;align-items:center;gap:7px;
+  border:1px solid var(--border-hover);border-radius:8px;
+  background:var(--panel);color:var(--text);
+  font-size:12px;padding:6px 13px;cursor:pointer;transition:background .15s,border-color .15s;
+}
+.mg-btn:hover{background:var(--panel-2);border-color:var(--cyan)}
+.mg-btn svg{width:14px;height:14px}
+
+/* ---------- card grid ---------- */
+.mg-grid{
+  display:grid;gap:18px;
+  grid-template-columns:repeat(auto-fill, minmax(220px, 1fr));
+}
+.mg-card{
+  position:relative;display:flex;flex-direction:column;
+  border:1px solid var(--border);border-radius:14px;
+  background:linear-gradient(180deg, var(--panel), var(--bg-2));
+  overflow:hidden;transition:border-color .15s, transform .15s;
+}
+.mg-card:hover{border-color:var(--border-hover);transform:translateY(-2px)}
+
+.mg-stage{
+  position:relative;display:grid;place-items:center;
+  min-height:210px;padding:22px;
+  background:
+    linear-gradient(rgba(255,255,255,.015), rgba(255,255,255,.015)),
+    repeating-linear-gradient(45deg, transparent 0 11px, rgba(255,255,255,.012) 11px 12px);
+}
+/* light-stage mode for contrast checking */
+.mg-grid.is-light .mg-stage{background:#e9eef5}
+.mg-grid.is-light .mg-card{background:linear-gradient(180deg,#f4f7fb,#e4e9f1)}
+.mg-grid.is-light .mg-meta{background:rgba(255,255,255,.5);border-top-color:rgba(0,0,0,.08)}
+.mg-grid.is-light .mg-name{color:#0a1120}
+.mg-grid.is-light .mg-blurb{color:#3a475c}
+
+.mg-stage .mascot{width:var(--mg-size,140px);height:auto}
+
+.mg-kind{
+  position:absolute;top:10px;right:10px;
+  font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.5px;
+  padding:3px 7px;border-radius:6px;border:1px solid var(--border);
+  background:rgba(10,17,32,.7);backdrop-filter:blur(6px);
+}
+.mg-kind.kind-loop{color:var(--emerald)}
+.mg-kind.kind-oneshot{color:var(--amber)}
+
+.mg-meta{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:11px 14px;border-top:1px solid var(--border-soft);
+  background:rgba(10,17,32,.35);
+}
+.mg-meta-text{min-width:0}
+.mg-name{font-size:13.5px;font-weight:600;margin:0}
+.mg-blurb{font-size:11px;color:var(--text-3);margin:2px 0 0;line-height:1.35}
+.mg-id{font-family:var(--mono);font-size:9.5px;color:var(--text-3);text-transform:uppercase;letter-spacing:.4px}
+
+.mg-replay{
+  appearance:none;flex:0 0 auto;display:inline-flex;align-items:center;gap:5px;
+  border:1px solid var(--border-hover);border-radius:7px;
+  background:var(--panel-2);color:var(--text);
+  font-size:11px;padding:5px 9px;cursor:pointer;transition:background .15s,border-color .15s;
+}
+.mg-replay:hover{background:var(--cyan);color:var(--bg-deep);border-color:var(--cyan)}
+.mg-replay svg{width:12px;height:12px}
+.mg-replay[hidden]{display:none}
+
+.mg-foot{
+  margin-top:32px;text-align:center;color:var(--text-3);font-size:11.5px;line-height:1.6;
+}
+.mg-foot code{font-family:var(--mono);color:var(--text-2);font-size:11px}

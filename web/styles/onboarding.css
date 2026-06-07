@@ -1,0 +1,635 @@
+/* Onboarding — first-run guided tour + the always-present profile menu on the
+   landing cockpit. Warm-at-the-entrance: glass surfaces, accent borders, the
+   mascot speaking. Stays inside the pro-tool token system — no SaaS cards, no
+   decorative emoji (the mascot is the only "character"). Workspace chrome is
+   untouched. See spec 2026-06-01-onboarding-and-home-ux-design. */
+
+/* ============================================================
+   STAGED REVEAL — hero zones fade in one step at a time while
+   `.ob-running` is on the overlay. finish() drops the class and
+   everything returns to its normal, fully-visible state.
+   ============================================================ */
+.landing.ob-running [data-ob-reveal] {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity .45s cubic-bezier(.2, .8, .2, 1), transform .45s cubic-bezier(.2, .8, .2, 1);
+  pointer-events: none;
+}
+.landing.ob-running [data-ob-reveal].is-revealed {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+
+/* ============================================================
+   PROFILE PILL + MENU (top-right tools nav, always present)
+   ============================================================ */
+.landing-profile { position: relative; }
+
+.landing-profile-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 10px 5px 6px;
+  background: rgba(15, 26, 46, 0.55);
+  border: 1px solid var(--border-soft);
+  border-radius: 999px;
+  color: var(--text-2);
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  transition: color .15s, border-color .15s, background .15s;
+}
+.landing-profile-pill:hover {
+  color: var(--text);
+  border-color: var(--border-hover);
+  background: rgba(20, 32, 48, 0.7);
+}
+.landing-profile-avatar {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1;
+}
+.landing-profile-name {
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.landing-profile-name:empty { display: none; }
+
+/* Incomplete profile → gentle violet pulse on the avatar to draw the eye. */
+.landing-profile[data-incomplete="1"] .landing-profile-avatar {
+  border-color: color-mix(in oklch, var(--violet) 60%, transparent);
+  color: var(--violet);
+  animation: ob-pulse 2.4s ease-in-out infinite;
+}
+@keyframes ob-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in oklch, var(--violet) 40%, transparent); }
+  50%      { box-shadow: 0 0 0 5px transparent; }
+}
+
+/* Spotlight ring while the onboarding profile step is open. */
+.landing-profile.ob-spotlight .landing-profile-pill {
+  border-color: var(--violet);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--violet) 22%, transparent);
+}
+
+/* Language toggle (reused in the profile config modal). */
+.ob-lang-opts { display: flex; gap: 6px; }
+.landing-lang-opt {
+  flex: 1;
+  padding: 5px 8px;
+  font-size: 11.5px;
+  color: var(--text-2);
+  background: var(--panel);
+  border: 1px solid var(--border-soft);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: color .15s, border-color .15s, background .15s;
+}
+.landing-lang-opt:hover { color: var(--text); border-color: var(--border-hover); }
+.landing-lang-opt.is-active {
+  color: var(--cyan);
+  border-color: color-mix(in oklch, var(--cyan) 45%, transparent);
+  background: color-mix(in oklch, var(--cyan) 10%, transparent);
+}
+
+/* ============================================================
+   WELCOME MODAL + PROFILE PANEL (injected by onboarding.js)
+   ============================================================ */
+.ob-host { position: fixed; inset: 0; z-index: 2000; }
+
+.ob-backdrop {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(7, 16, 31, 0.72);
+  backdrop-filter: blur(4px);
+  animation: ob-fade-in .2s ease-out;
+}
+@keyframes ob-fade-in { from { opacity: 0; } to { opacity: 1; } }
+
+.ob-modal,
+.ob-panel {
+  width: 100%;
+  max-width: 440px;
+  background: linear-gradient(180deg, rgba(26, 40, 61, 0.97), rgba(20, 32, 48, 0.97));
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+  padding: 26px;
+  animation: ob-rise .28s cubic-bezier(.2, .8, .2, 1);
+}
+.ob-panel { max-width: 480px; position: relative; }
+@keyframes ob-rise {
+  from { opacity: 0; transform: translateY(14px) scale(.98); }
+  to   { opacity: 1; transform: none; }
+}
+
+.ob-modal { text-align: center; }
+/* Constrain the mascot to the modal: mountMascot('md') is 160px wide and would
+   otherwise overflow and cover the kicker. Width-only + auto height keeps the
+   aspect ratio; the box flows in normal order so the kicker sits below it. */
+.ob-modal-mascot {
+  width: 84px;
+  margin: 0 auto 10px;
+  line-height: 0;
+}
+.ob-modal-mascot .mascot { width: 100%; height: auto; }
+
+/* Language picker at the very top of the welcome modal (chosen first). */
+.ob-welcome-lang {
+  justify-content: center;
+  margin-bottom: 14px;
+}
+.ob-welcome-lang .landing-lang-opt { flex: 0 0 auto; padding: 5px 14px; }
+.ob-kicker {
+  display: inline-block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: var(--cyan);
+  margin-bottom: 8px;
+}
+.ob-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0 0 10px;
+  letter-spacing: -.01em;
+}
+.ob-body {
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--text-2);
+  margin: 0 0 20px;
+}
+
+.ob-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+.ob-modal .ob-actions { justify-content: center; }
+
+.ob-btn {
+  padding: 9px 16px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background .15s, border-color .15s, color .15s, transform .1s;
+}
+.ob-btn:active { transform: translateY(1px); }
+.ob-btn-primary {
+  color: var(--bg-deep);
+  background: var(--cyan);
+  border-color: var(--cyan);
+}
+.ob-btn-primary:hover { background: color-mix(in oklch, var(--cyan) 88%, white); }
+.ob-btn-primary:disabled { opacity: .55; cursor: default; }
+.ob-btn-ghost {
+  color: var(--text-2);
+  background: transparent;
+  border-color: var(--border);
+}
+.ob-btn-ghost:hover { color: var(--text); border-color: var(--border-hover); }
+
+/* ── Profile panel form ── */
+.ob-panel-intro {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-2);
+  margin: 0 0 14px;
+  padding-left: 12px;
+  border-left: 2px solid color-mix(in oklch, var(--violet) 55%, transparent);
+}
+/* Plain variant (no mascot-speech border) used by the standalone config modal. */
+.ob-panel-intro--plain {
+  padding-left: 0;
+  border-left: none;
+  color: var(--text-3);
+  margin-bottom: 18px;
+}
+
+/* Config-modal close button (top-right of the panel). */
+.ob-modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  color: var(--text-3);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: color .15s, background .15s, border-color .15s;
+}
+.ob-modal-close:hover { color: var(--text); background: var(--panel-2); border-color: var(--border-soft); }
+
+/* "Open full profile" link inside the config modal. */
+.ob-modal-fulllink {
+  display: inline-block;
+  font-size: 12px;
+  color: var(--cyan);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color .15s;
+}
+.ob-modal-fulllink:hover { border-bottom-color: color-mix(in oklch, var(--cyan) 45%, transparent); }
+.ob-panel-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0 0 16px;
+}
+.ob-form { display: flex; flex-direction: column; gap: 14px; }
+.ob-field { display: flex; flex-direction: column; gap: 5px; }
+.ob-field-row { display: flex; gap: 12px; }
+.ob-field-avatar { width: 120px; flex: none; }
+.ob-field-level { flex: 1; }
+.ob-field-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  color: var(--text-3);
+}
+.ob-input {
+  padding: 8px 10px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  color: var(--text);
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+}
+.ob-input:focus {
+  border-color: var(--cyan);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--cyan) 16%, transparent);
+}
+select.ob-input { cursor: pointer; }
+
+.ob-tools { border: none; padding: 0; margin: 0; }
+.ob-tools-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 7px;
+  margin-top: 7px;
+}
+.ob-tool {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 10px;
+  font-size: 12.5px;
+  color: var(--text-2);
+  background: var(--bg-2);
+  border: 1px solid var(--border-soft);
+  border-radius: 9px;
+  cursor: pointer;
+  transition: border-color .15s, color .15s, background .15s, box-shadow .15s;
+}
+/* The native checkbox drives :has() state but is visually hidden — the card,
+   the icon tile and the check pill carry the selected styling instead. */
+.ob-tool input { position: absolute; opacity: 0; pointer-events: none; }
+.ob-tool-ic {
+  flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px; border-radius: 7px;
+  background: var(--bg); border: 1px solid var(--border-soft);
+  color: var(--text-3); transition: color .15s, border-color .15s, background .15s;
+}
+.ob-tool-ic .ob-tool-svg { width: 18px; height: 18px; }
+.ob-tool-name { flex: 1 1 auto; line-height: 1.25; }
+.ob-tool-check {
+  flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center;
+  width: 18px; height: 18px; border-radius: 999px;
+  border: 1.5px solid var(--border-hover); color: transparent;
+  transition: background .15s, border-color .15s, color .15s;
+}
+.ob-tool:hover { border-color: var(--border-hover); color: var(--text); }
+.ob-tool:hover .ob-tool-ic { color: var(--text-2); }
+.ob-tool:has(input:checked) {
+  color: var(--text);
+  border-color: color-mix(in oklch, var(--emerald) 55%, transparent);
+  background: color-mix(in oklch, var(--emerald) 9%, var(--bg-2));
+}
+.ob-tool:has(input:checked) .ob-tool-ic {
+  color: var(--emerald);
+  border-color: color-mix(in oklch, var(--emerald) 45%, transparent);
+  background: color-mix(in oklch, var(--emerald) 12%, var(--bg));
+}
+.ob-tool:has(input:checked) .ob-tool-check {
+  background: var(--emerald);
+  border-color: var(--emerald);
+  color: var(--bg-deep);
+}
+.ob-tool:focus-within { box-shadow: 0 0 0 3px color-mix(in oklch, var(--cyan) 22%, transparent); }
+
+/* ── Custom (free-text) tools ─────────────────────────────────────────── */
+.ob-custom-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 7px; }
+.ob-custom-chips:empty { display: none; }
+.ob-custom-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 6px 5px 8px; border-radius: 999px;
+  background: color-mix(in oklch, var(--violet) 12%, var(--bg-2));
+  border: 1px solid color-mix(in oklch, var(--violet) 45%, transparent);
+  color: var(--text); font-size: 12px;
+}
+.ob-custom-chip .ob-tool-svg { width: 15px; height: 15px; color: var(--violet); }
+.ob-custom-chip-name { line-height: 1; }
+.ob-custom-rm {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 18px; height: 18px; padding: 0; border: 0; border-radius: 999px;
+  background: transparent; color: var(--text-3); cursor: pointer; transition: color .15s, background .15s;
+}
+.ob-custom-rm:hover { color: var(--text); background: color-mix(in oklch, var(--violet) 22%, transparent); }
+.ob-custom-add { display: flex; gap: 6px; margin-top: 8px; }
+.ob-custom-input {
+  flex: 1 1 auto; min-width: 0;
+  padding: 8px 10px; font-size: 12.5px; font-family: inherit;
+  color: var(--text); background: var(--bg); border: 1px solid var(--border-soft);
+  border-radius: 7px; outline: none; transition: border-color .15s, box-shadow .15s;
+}
+.ob-custom-input:focus { border-color: var(--cyan); box-shadow: 0 0 0 3px color-mix(in oklch, var(--cyan) 16%, transparent); }
+.ob-custom-input::placeholder { color: var(--text-3); }
+.ob-custom-addbtn { flex: 0 0 auto; white-space: nowrap; }
+
+/* ============================================================
+   PROFILE CONFIG PANEL — shared by the 3-step wizard (paginated)
+   and the single-scroll config modal (avatar pill).
+   ============================================================ */
+.ob-config {
+  max-width: 640px;
+  width: calc(100vw - 48px);
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  padding: 0;            /* head / body / foot own their padding */
+}
+.ob-config-head {
+  padding: 22px 26px 14px;
+  border-bottom: 1px solid var(--border-soft);
+}
+.ob-config-head .ob-panel-intro,
+.ob-config-head .ob-panel-intro--plain { margin-bottom: 0; }
+.ob-config-head .ob-panel-title { margin-bottom: 6px; }
+/* Wizard header: one compact row (short title + step counter) — the long
+   "let's set you up" blurb is redundant with each step's own title/hint. */
+.ob-config-head--wizard {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+  padding: 14px 26px;
+}
+.ob-wiz-title { font-size: 13px; font-weight: 600; color: var(--text); }
+.ob-progress {
+  display: inline-block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; text-transform: uppercase; letter-spacing: .4px;
+  color: var(--text-3); white-space: nowrap;
+}
+.ob-config-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 18px 26px;
+  gap: 18px;
+}
+.ob-config-body::-webkit-scrollbar { width: 6px; }
+.ob-config-body::-webkit-scrollbar-track { background: transparent; }
+.ob-config-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+.ob-config-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 26px;
+  border-top: 1px solid var(--border-soft);
+}
+.ob-foot-right { display: flex; gap: 10px; align-items: center; }
+
+/* Steps: one visible at a time in the wizard; all visible in the modal. */
+.ob-step { display: flex; flex-direction: column; gap: 14px; }
+.ob-step[hidden] { display: none; }
+.ob-config-body--all .ob-step + .ob-step {
+  margin-top: 4px; padding-top: 18px; border-top: 1px dashed var(--border-soft);
+}
+.ob-step-title { font-size: 14px; font-weight: 600; color: var(--text); margin: 0; }
+.ob-step-hint { font-size: 12px; color: var(--text-3); margin: -8px 0 2px; }
+
+/* Explained radio cards (level, verbosity). */
+.ob-radios { border: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
+.ob-radios legend { margin-bottom: 2px; padding: 0; }
+.ob-radio {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 10px;
+  padding: 10px 12px;
+  background: var(--bg-2);
+  border: 1px solid var(--border-soft);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+}
+.ob-radio:hover { border-color: var(--border-hover); }
+.ob-radio input { grid-row: 1 / span 2; align-self: center; accent-color: var(--cyan); }
+.ob-radio-main { font-size: 13px; font-weight: 500; color: var(--text); }
+.ob-radio-desc { font-size: 11.5px; color: var(--text-3); line-height: 1.4; }
+.ob-radio:has(input:checked) {
+  border-color: color-mix(in oklch, var(--cyan) 55%, transparent);
+  background: color-mix(in oklch, var(--cyan) 8%, transparent);
+}
+
+/* ============================================================
+   "?" EXPLAINER AFFORDANCE + INFO MODAL (info_modal.js)
+   ============================================================ */
+.ob-infohint {
+  display: inline-grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  flex: none;
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--text-3);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: color .15s, border-color .15s, background .15s;
+}
+.ob-infohint:hover {
+  color: var(--cyan);
+  border-color: color-mix(in oklch, var(--cyan) 45%, transparent);
+  background: color-mix(in oklch, var(--cyan) 8%, transparent);
+}
+
+.ob-info { max-width: 480px; }
+.ob-info-list {
+  list-style: none;
+  margin: 4px 0 20px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  text-align: left;
+}
+.ob-info-list li {
+  position: relative;
+  padding-left: 18px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-2);
+}
+.ob-info-list li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 7px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--cyan);
+}
+
+/* Workshop tool groups. */
+.ob-tool-group { display: flex; flex-direction: column; gap: 7px; }
+.ob-group-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; text-transform: uppercase; letter-spacing: .4px;
+  color: var(--text-3);
+}
+
+/* ============================================================
+   ONBOARDING SPOTLIGHT (created by mascot_bubble.js, spotlight:true)
+   A transparent box over the presented zone; the huge box-shadow dims
+   everything else. z-index sits under the bubble (1600) and the mascot
+   (1590) so both stay lit, above page content.
+   ============================================================ */
+.mascot-spotlight {
+  position: fixed;
+  z-index: 1480;
+  border-radius: 10px;
+  box-shadow: 0 0 0 9999px rgba(8, 12, 20, 0.66);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .22s ease,
+    left .28s cubic-bezier(.2,.8,.2,1), top .28s cubic-bezier(.2,.8,.2,1),
+    width .28s cubic-bezier(.2,.8,.2,1), height .28s cubic-bezier(.2,.8,.2,1);
+}
+.mascot-spotlight.is-shown { opacity: 1; }
+
+/* ============================================================
+   MASCOT SPEECH BUBBLE (created by mascot_bubble.js)
+   ============================================================ */
+.mascot-bubble {
+  position: fixed;
+  z-index: 1600;
+  max-width: 300px;
+  padding: 13px 15px;
+  background: rgba(20, 32, 48, 0.97);
+  border: 1px solid var(--border-hover);
+  border-radius: 12px;
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(12px);
+  animation: ob-rise .24s cubic-bezier(.2, .8, .2, 1);
+}
+.mascot-bubble-body {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text);
+}
+.mascot-bubble-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+}
+.mascot-bubble-skip {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 11.5px;
+  color: var(--text-3);
+  cursor: pointer;
+  transition: color .15s;
+}
+.mascot-bubble-skip:hover { color: var(--text-2); }
+.mascot-bubble-next {
+  padding: 6px 14px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--bg-deep);
+  background: var(--cyan);
+  border: 1px solid var(--cyan);
+  border-radius: 7px;
+  cursor: pointer;
+  transition: background .15s;
+}
+.mascot-bubble-next:hover { background: color-mix(in oklch, var(--cyan) 88%, white); }
+
+/* Arrow — a rotated square tab; sides driven by data-placement. */
+.mascot-bubble-arrow {
+  position: absolute;
+  width: 11px;
+  height: 11px;
+  background: rgba(20, 32, 48, 0.97);
+  border: 1px solid var(--border-hover);
+  transform: rotate(45deg);
+}
+.mascot-bubble[data-placement="bottom"] .mascot-bubble-arrow {
+  top: -6px; border-right: none; border-bottom: none;
+}
+.mascot-bubble[data-placement="top"] .mascot-bubble-arrow {
+  bottom: -6px; border-left: none; border-top: none;
+}
+.mascot-bubble[data-placement="right"] .mascot-bubble-arrow {
+  left: -6px; border-top: none; border-right: none;
+}
+.mascot-bubble[data-placement="left"] .mascot-bubble-arrow {
+  right: -6px; border-bottom: none; border-left: none;
+}
+
+/* ============================================================
+   FIRST-DIAGNOSTIC COACHING (workspace guided tour)
+   The tour itself reuses .mascot-bubble (z-index 1600); this is just the
+   small discreet mascot that accompanies it, parked in a fixed corner and
+   driven by setMascotState per step. Sits below the bubble so it never
+   covers the controls.
+   ============================================================ */
+.ob-coach-mascot {
+  position: fixed;
+  left: 20px;
+  bottom: 20px;
+  width: 76px;
+  height: auto;
+  z-index: 1590;
+  pointer-events: none;
+  animation: ob-rise .28s cubic-bezier(.2, .8, .2, 1);
+}
+.ob-coach-mascot svg { width: 100%; height: auto; display: block; }

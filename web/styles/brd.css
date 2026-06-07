@@ -1,0 +1,297 @@
+/* =========== BOARD VIEWER =========== */
+.brd-root{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--text-2);font-family:var(--mono);font-size:12px}
+.brd-root .summary-card{padding:24px 28px;background:rgba(20,32,48,.92);border:1px solid var(--border);border-radius:10px;backdrop-filter:blur(12px);box-shadow:0 20px 56px rgba(0,0,0,.45);min-width:320px;display:flex;flex-direction:column;gap:10px}
+.brd-root .sc-row{display:grid;grid-template-columns:110px 1fr;gap:8px;align-items:baseline}
+.brd-root .sc-label{font-family:var(--mono);font-size:10.5px;color:var(--text-3);text-transform:uppercase;letter-spacing:.4px}
+.brd-root .sc-value{font-family:var(--mono);font-size:13px;color:var(--text)}
+.brd-root .sc-status{margin-top:8px;padding-top:10px;border-top:1px solid var(--border-soft);font-family:var(--mono);font-size:11px;color:var(--text-3)}
+.brd-root .sc-status.sc-ok{color:var(--emerald)}
+.brd-root .error-card{padding:20px 24px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.35);border-radius:10px;backdrop-filter:blur(12px);box-shadow:0 20px 56px rgba(0,0,0,.45);min-width:280px;display:flex;flex-direction:column;gap:8px}
+.brd-root .ec-code{font-family:var(--mono);font-size:12px;color:var(--amber);font-weight:600;text-transform:uppercase;letter-spacing:.4px}
+.brd-root .ec-msg{font-family:var(--mono);font-size:12px;color:var(--text-2);line-height:1.5}
+
+/* =========== BOARD CANVAS RENDERER =========== */
+.brd-canvas{position:absolute;inset:0;display:block;width:100%;height:100%;z-index:1}
+
+/* Pointer-transparent host. The viewer measures its own client size off
+   this element while pointer events fall through to the canvas. */
+.brd-canvas-host{position:absolute;inset:0;pointer-events:none;z-index:0}
+
+/* glass floating toolbar — top-right */
+.brd-toolbar{position:absolute;top:12px;right:12px;display:flex;align-items:center;gap:8px;padding:6px 10px;background:rgba(20,32,48,.88);border:1px solid var(--border);border-radius:8px;backdrop-filter:blur(10px);z-index:5;user-select:none}
+
+/* glass corner badge — default bottom-left, [data-role="cursor"] swaps to bottom-right */
+.brd-badge{position:absolute;bottom:12px;left:12px;display:flex;flex-direction:row;gap:14px;padding:6px 10px;background:rgba(20,32,48,.88);border:1px solid var(--border);border-radius:8px;backdrop-filter:blur(10px);z-index:5;user-select:none;font-family:var(--mono);font-size:11px;color:var(--text-2);pointer-events:none}
+.brd-badge[data-role="cursor"]{left:auto;right:12px}
+.brd-badge-row{font-variant-numeric:tabular-nums;letter-spacing:.2px}
+.brd-badge-row > span{color:var(--text)}
+
+/* Empty state card — sits centred, glass styling consistent with the
+   loader card and toolbar so the PCB section never shows raw canvas. */
+.brd-empty-card{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:10px;padding:24px 28px;min-width:300px;background:rgba(20,32,48,.92);border:1px solid var(--border);border-radius:10px;backdrop-filter:blur(12px);box-shadow:0 20px 56px rgba(0,0,0,.45);z-index:6}
+.brd-empty-card.hidden{display:none}
+.brd-empty-glyph{width:48px;height:48px;display:flex;align-items:center;justify-content:center;color:var(--text-3);background:var(--bg-deep);border:1px solid var(--border-soft);border-radius:10px;margin-bottom:2px}
+.brd-empty-title{margin:0;font-size:13px;font-weight:500;color:var(--text)}
+.brd-empty-sub{margin:0;font-family:var(--mono);font-size:10.5px;color:var(--text-3);letter-spacing:.3px}
+
+/* segmented layer-flip button */
+.brd-seg{display:flex;background:var(--bg-deep);border:1px solid var(--border);border-radius:5px;overflow:hidden}
+.brd-seg-btn{border:0;background:transparent;color:var(--text-3);padding:4px 9px;font-size:11px;font-family:var(--mono);cursor:pointer;transition:background .12s,color .12s}
+.brd-seg-btn.active{background:var(--panel-2);color:var(--text)}
+.brd-seg-btn:not(.active):hover{color:var(--text-2)}
+
+/* icon button in toolbar (Fit) */
+.brd-btn{display:flex;align-items:center;justify-content:center;width:26px;height:26px;background:transparent;border:1px solid var(--border);border-radius:5px;color:var(--text-2);cursor:pointer;transition:background .12s,color .12s;padding:0}
+.brd-btn:hover{background:var(--panel-2);color:var(--text)}
+
+/* ================ Inspector panel ================ */
+/* [hidden] override — our explicit `display:flex` below would otherwise
+   win over the user-agent's `display:none` for [hidden], leaving an empty
+   panel frame on screen when no part is selected. */
+.brd-inspector[hidden]{display:none !important}
+.brd-inspector{
+  position:absolute;top:56px;right:12px;
+  width:320px;max-height:calc(100% - 76px);
+  display:flex;flex-direction:column;
+  padding:0;overflow:hidden;
+  background:linear-gradient(180deg, rgba(22,34,52,.96) 0%, rgba(16,26,44,.96) 100%);
+  border:1px solid var(--border);border-radius:10px;
+  backdrop-filter:blur(14px);
+  box-shadow:0 18px 48px rgba(0,0,0,.55), 0 0 0 1px rgba(56,189,248,.04);
+  z-index:6;
+  animation:brd-ins-in .22s cubic-bezier(.2,.8,.2,1);
+}
+@keyframes brd-ins-in{from{opacity:0;transform:translateX(8px)}to{opacity:1;transform:translateX(0)}}
+
+/* Scroll surface: only the content area scrolls, not the header */
+.brd-ins-scroll{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden}
+
+/* ---- Head: refdes + close ---- */
+.brd-ins-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 16px 10px;
+  border-bottom:1px solid var(--border-soft);
+  background:linear-gradient(180deg, rgba(56,189,248,.04), transparent);
+}
+.brd-ins-ref{font-family:var(--mono);font-size:18px;font-weight:600;color:var(--text);letter-spacing:.4px}
+.brd-ins-close{
+  width:24px;height:24px;display:flex;align-items:center;justify-content:center;
+  background:transparent;border:1px solid transparent;border-radius:5px;
+  color:var(--text-3);cursor:pointer;transition:all .12s;
+}
+.brd-ins-close:hover{color:var(--text);background:var(--panel-2);border-color:var(--border)}
+
+/* ---- Meta block: value + footprint + chips + size ---- */
+.brd-ins-body{
+  padding:10px 16px 12px;
+  display:flex;flex-direction:column;gap:8px;
+}
+.brd-ins-value{font-size:13.5px;color:var(--text);line-height:1.4;font-weight:500;word-break:break-word}
+.brd-ins-footprint{
+  font-family:var(--mono);font-size:10.5px;color:var(--text-3);
+  padding:5px 8px;background:var(--bg-deep);border-radius:4px;
+  border:1px solid var(--border-soft);
+  word-break:break-all;line-height:1.45;letter-spacing:.2px;
+}
+.brd-ins-meta{display:flex;flex-wrap:wrap;gap:5px;margin-top:2px}
+.brd-ins-meta span{
+  font-family:var(--mono);font-size:10px;
+  color:var(--text-2);background:var(--panel);
+  padding:3px 8px;border-radius:4px;
+  border:1px solid var(--border);
+  text-transform:uppercase;letter-spacing:.5px;
+}
+.brd-ins-size{
+  font-family:var(--mono);font-size:11px;color:var(--text-2);
+  margin-top:2px;padding-top:8px;border-top:1px dashed var(--border-soft);
+}
+
+/* ---- Section heading ---- */
+.brd-ins-section-label{
+  font-family:var(--mono);font-size:9.5px;color:var(--text-3);
+  text-transform:uppercase;letter-spacing:.6px;font-weight:500;
+  margin:10px 16px 4px;padding-bottom:4px;
+  border-bottom:1px solid var(--border-soft);
+}
+
+/* ---- List rows (shared for nets + linked parts) ---- */
+.brd-ins-netlist,.brd-ins-linklist{
+  list-style:none;margin:0;padding:2px 8px 8px;
+  display:flex;flex-direction:column;gap:1px;
+}
+
+.brd-ins-net,.brd-ins-link{
+  display:flex;align-items:center;gap:9px;
+  padding:6px 10px;border-radius:5px;
+  font-family:var(--mono);font-size:11.5px;
+  color:var(--text-2);
+  cursor:pointer;user-select:none;
+  transition:background .12s, color .12s, transform .06s;
+}
+.brd-ins-net:hover,.brd-ins-link:hover{
+  background:var(--panel-2);color:var(--text);
+}
+.brd-ins-net:active,.brd-ins-link:active{transform:translateX(1px)}
+
+/* Category dot badge — primary cue per row */
+.brd-ins-net::before{
+  content:"";flex:0 0 auto;
+  width:7px;height:7px;border-radius:50%;
+  background:var(--text-3);
+  box-shadow:0 0 6px currentColor;
+}
+.brd-ins-net[data-cat="power"]::before {background:var(--amber);color:var(--amber)}
+.brd-ins-net[data-cat="ground"]::before{background:var(--text-3);color:var(--text-3);box-shadow:none}
+.brd-ins-net[data-cat="signal"]::before{background:var(--emerald);color:var(--emerald)}
+.brd-ins-net[data-cat="clock"]::before {background:rgba(214,165,255,1);color:rgba(214,165,255,1)}
+.brd-ins-net[data-cat="reset"]::before {background:rgba(255,160,150,1);color:rgba(255,160,150,1)}
+
+.brd-ins-net[data-cat="power"] .brd-ins-net-name  {color:var(--amber)}
+.brd-ins-net[data-cat="ground"] .brd-ins-net-name {color:var(--text-3)}
+.brd-ins-net[data-cat="clock"] .brd-ins-net-name  {color:rgba(214,165,255,1)}
+.brd-ins-net[data-cat="reset"] .brd-ins-net-name  {color:rgba(255,160,150,1)}
+
+/* Selected row — strong background + subtle lift */
+.brd-ins-net.selected{background:var(--panel-2);box-shadow:inset 2px 0 0 currentColor}
+.brd-ins-net.selected[data-cat="signal"]{background:rgba(52,211,153,.13);color:var(--emerald)}
+.brd-ins-net.selected[data-cat="signal"] .brd-ins-net-name{color:var(--emerald);font-weight:500}
+.brd-ins-net.selected[data-cat="power"]{background:rgba(245,158,11,.13);color:var(--amber)}
+.brd-ins-net.selected[data-cat="power"] .brd-ins-net-name{color:var(--amber);font-weight:500}
+.brd-ins-net.selected[data-cat="ground"]{background:rgba(230,237,247,.08);color:var(--text)}
+.brd-ins-net.selected[data-cat="ground"] .brd-ins-net-name{color:var(--text);font-weight:500}
+.brd-ins-net.selected[data-cat="clock"]{background:rgba(192,132,252,.13);color:rgba(214,165,255,1)}
+.brd-ins-net.selected[data-cat="clock"] .brd-ins-net-name{color:rgba(214,165,255,1);font-weight:500}
+.brd-ins-net.selected[data-cat="reset"]{background:rgba(245,130,120,.13);color:rgba(255,160,150,1)}
+.brd-ins-net.selected[data-cat="reset"] .brd-ins-net-name{color:rgba(255,160,150,1);font-weight:500}
+
+.brd-ins-net-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.brd-ins-net-count{
+  color:var(--text-3);font-size:10px;flex-shrink:0;
+  padding:1px 6px;background:var(--bg-deep);border-radius:9px;
+  font-variant-numeric:tabular-nums;
+}
+
+/* Linked parts — cyan dot like "component" design semantic */
+.brd-ins-link::before{
+  content:"";flex:0 0 auto;
+  width:7px;height:7px;border-radius:2px;   /* square ~ component glyph */
+  background:var(--cyan);box-shadow:0 0 6px var(--cyan);
+}
+.brd-ins-link-ref{flex:1;color:var(--text)}
+.brd-ins-link-count{
+  color:var(--text-3);font-size:10px;flex-shrink:0;
+  padding:1px 6px;background:var(--bg-deep);border-radius:9px;
+}
+
+/* Custom thin glass scrollbars inside inspector (Chromium) */
+.brd-inspector ::-webkit-scrollbar{width:6px;height:6px}
+.brd-inspector ::-webkit-scrollbar-track{background:transparent}
+.brd-inspector ::-webkit-scrollbar-thumb{background:rgba(169,182,204,.18);border-radius:3px}
+.brd-inspector ::-webkit-scrollbar-thumb:hover{background:rgba(169,182,204,.35)}
+
+/* Boardview colour-config rows — only visible when #pcb is the active section */
+.tweak-row.pcb-only{display:none}
+body[data-section="pcb"] .tweak-row.pcb-only{display:flex;flex-direction:column;gap:8px}
+.brd-color-grid{display:flex;flex-direction:column;gap:4px}
+.brd-color-row{display:flex;align-items:center;gap:10px;padding:4px 6px;border-radius:4px;font-family:var(--mono);font-size:11px;color:var(--text-2)}
+.brd-color-row:hover{background:var(--panel-2)}
+.brd-color-row > span:first-child{flex:0 0 auto}
+.brd-color-row > span:nth-child(2){flex:1;color:var(--text)}
+/* Pin-count pill — populated by main.js from window.Boardview.getPinCounts(). */
+.brd-color-count{font-family:var(--mono);font-size:10px;color:var(--text-3);min-width:32px;text-align:right;padding-right:6px}
+.brd-color-count:empty{display:none}
+.brd-color-dot{width:8px;height:8px;border-radius:50%;background:var(--text-3);box-shadow:0 0 6px currentColor}
+.brd-color-dot[data-cat="power"]{background:var(--amber);color:var(--amber)}
+.brd-color-dot[data-cat="ground"]{background:var(--text-3);color:var(--text-3);box-shadow:none}
+.brd-color-dot[data-cat="signal"]{background:var(--emerald);color:var(--emerald)}
+.brd-color-dot[data-cat="clock"]{background:rgba(214,165,255,1);color:rgba(214,165,255,1)}
+.brd-color-dot[data-cat="reset"]{background:rgba(255,160,150,1);color:rgba(255,160,150,1)}
+.brd-color-dot[data-cat="no-net"]{background:transparent;box-shadow:inset 0 0 0 1.5px rgba(230,237,247,.6)}
+/* The dot doubles as both the swatch preview AND the Pickr trigger
+   (`useAsButton: true` in main.js). Sized + radius'd to read as a
+   proper button rather than a passive bullet. Pickr's popover is
+   anchored on the left of the panel via `position: 'left-middle'`
+   so it never clips off the screen edge. */
+.brd-color-row .brd-color-dot{cursor:pointer;width:14px;height:14px;border-radius:4px;border:1px solid rgba(255,255,255,.08);box-shadow:none;transition:transform .12s ease,border-color .12s}
+.brd-color-row .brd-color-dot:hover{transform:scale(1.15);border-color:var(--border-hover)}
+/* Pickr popover — keep it visually consistent with the diagnostic-
+   workbench dark palette instead of the default light Pickr classic. */
+.brd-pickr.pcr-app{background:var(--panel);border:1px solid var(--border);border-radius:6px;font-family:'Inter',system-ui,sans-serif}
+.brd-pickr.pcr-app .pcr-interaction input{background:var(--bg-deep);color:var(--text);border:1px solid var(--border);font-family:var(--mono);font-size:11px}
+.brd-pickr.pcr-app .pcr-interaction .pcr-result{flex-grow:1}
+/* Reset button — full-width, subtle but clearly clickable */
+.brd-color-reset{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:6px 10px;margin-top:4px;background:var(--bg-deep);color:var(--text-2);border:1px solid var(--border);border-radius:4px;font-family:var(--mono);font-size:10.5px;letter-spacing:.3px;cursor:pointer;transition:background .12s,color .12s,border-color .12s}
+.brd-color-reset:hover{background:var(--panel-2);color:var(--text);border-color:var(--border-hover)}
+.brd-color-reset:active{transform:translateY(1px)}
+
+/* ============ Boardview loader ============
+ * Shown during the first fetch + parse round-trip (renderSkeleton in
+ * brd_viewer.js). Spinner ring + shimmering placeholder bars so the
+ * canvas never feels frozen, even on a sub-second load. The .brd-root
+ * is already flex-centered, so the card sits in the middle naturally. */
+
+.brd-root .brd-loader-card{
+  padding:22px 26px;
+  background:rgba(20,32,48,.92);
+  border:1px solid var(--border);
+  border-radius:10px;
+  backdrop-filter:blur(12px);
+  box-shadow:0 20px 56px rgba(0,0,0,.45);
+  min-width:340px;
+  display:flex;flex-direction:column;gap:14px;
+  animation:brd-loader-rise .25s ease-out;
+}
+.brd-root .brd-loader-head{
+  display:flex;align-items:center;gap:12px;
+}
+.brd-root .brd-loader-spinner{
+  width:20px;height:20px;
+  border:2px solid var(--border);
+  border-top-color:var(--cyan);
+  border-radius:50%;
+  flex-shrink:0;
+  animation:brd-loader-spin .8s linear infinite;
+}
+.brd-root .brd-loader-status{
+  font-family:var(--mono);font-size:11px;
+  color:var(--text-2);
+  letter-spacing:.4px;text-transform:uppercase;
+}
+.brd-root .brd-loader-rows{
+  list-style:none;margin:0;padding:12px 0 0;
+  display:flex;flex-direction:column;gap:9px;
+  border-top:1px solid var(--border-soft);
+}
+.brd-root .brd-loader-rows li{
+  display:grid;grid-template-columns:90px 1fr;gap:14px;align-items:center;
+}
+.brd-root .brd-loader-label{
+  font-family:var(--mono);font-size:10px;
+  color:var(--text-3);letter-spacing:.4px;
+  text-transform:uppercase;
+}
+.brd-root .brd-loader-bar{
+  height:8px;border-radius:4px;
+  background:linear-gradient(90deg,
+    rgba(148,163,184,.10) 0%,
+    rgba(148,163,184,.24) 50%,
+    rgba(148,163,184,.10) 100%);
+  background-size:200% 100%;
+  animation:brd-loader-shimmer 1.2s ease-in-out infinite;
+}
+.brd-root .brd-loader-bar-short{width:55%}
+
+@keyframes brd-loader-spin{to{transform:rotate(360deg)}}
+@keyframes brd-loader-shimmer{
+  0%{background-position:200% 0}
+  100%{background-position:-200% 0}
+}
+@keyframes brd-loader-rise{
+  from{opacity:0;transform:translateY(6px)}
+  to{opacity:1;transform:translateY(0)}
+}
+@media (prefers-reduced-motion: reduce){
+  .brd-root .brd-loader-spinner,
+  .brd-root .brd-loader-bar,
+  .brd-root .brd-loader-card{animation:none}
+}

@@ -1,0 +1,21 @@
+{
+  "demo_symptom": "Won't power on — no power at all",
+  "device_kind": {
+    "label": "Board type (optional)",
+    "none": "— not declared",
+    "options": {
+      "gpu_card": "Graphics card (GPU)",
+      "laptop_logic_board": "Laptop logic board",
+      "phone_logic_board": "Smartphone logic board",
+      "desktop_motherboard": "Desktop motherboard",
+      "sbc_board": "Single-board computer (SBC)",
+      "power_charging_board": "Power / charging board",
+      "other": "Other"
+    }
+  },
+  "schematic": {
+    "label": "Schematic (optional — sharper pack)",
+    "cta": "Attach a schematic PDF",
+    "already_ingested": "Schematic already ingested ✓ — no need to attach"
+  }
+}

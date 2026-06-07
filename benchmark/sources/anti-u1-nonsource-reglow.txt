@@ -1,0 +1,1 @@
+The regulating_low failure mode is only meaningful for a component whose role is to regulate a power rail. Applied to an IC that does not source any rail (a consumer-only IC, an interface chip, a connector), it has no observable effect — the simulator must NOT fabricate a 'dead' status to break tie clusters in the scoring oracle.

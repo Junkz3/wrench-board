@@ -1,0 +1,109 @@
+"""Unit tests for the defensive unwrap in call_with_forced_tool.
+
+Opus 4.7/4.8 under forced tool_choice occasionally stringify nested structures.
+_try_unwrap must recover from both observed pathologies before we give up
+and retry (which is expensive and usually reproduces the same failure).
+"""
+
+from __future__ import annotations
+
+from api.pipeline.schemas import KnowledgeGraph, RulesSet
+from api.pipeline.tool_call import _try_unwrap
+
+
+def test_unwrap_recovers_stringified_nested_list():
+    """Case A — one field stringifies the nested list."""
+    payload = {
+        "schema_version": "1.0",
+        "rules": (
+            '[{"id":"R-001","symptoms":["x"],'
+            '"likely_causes":[{"refdes":"U7","probability":0.5,"mechanism":"short"}],'
+            '"diagnostic_steps":[],"confidence":0.6,"sources":[]}]'
+        ),
+    }
+    recovered = _try_unwrap(payload, RulesSet)
+    assert recovered is not None
+    assert isinstance(recovered, RulesSet)
+    assert len(recovered.rules) == 1
+    assert recovered.rules[0].id == "R-001"
+
+
+def test_unwrap_recovers_collapsed_payload():
+    """Case B — the whole target is wedged into one stringified field."""
+    inner = (
+        '{"schema_version":"1.0","rules":['
+        '{"id":"R-001","symptoms":["x"],'
+        '"likely_causes":[{"refdes":"U7","probability":0.5,"mechanism":"short"}],'
+        '"diagnostic_steps":[],"confidence":0.6,"sources":[]}'
+        "]}"
+    )
+    payload = {"rules": inner}
+    recovered = _try_unwrap(payload, RulesSet)
+    assert recovered is not None
+    assert len(recovered.rules) == 1
+
+
+def test_unwrap_returns_none_when_nothing_matches():
+    payload = {"rules": "this is just prose"}
+    assert _try_unwrap(payload, RulesSet) is None
+
+
+def test_unwrap_returns_none_on_non_dict():
+    assert _try_unwrap(["not", "a", "dict"], RulesSet) is None
+    assert _try_unwrap("prose", RulesSet) is None
+
+
+def test_unwrap_leaves_good_payload_alone_then_fails():
+    """A correct payload should validate at the top level — _try_unwrap isn't
+    called in that path. But when called directly with a good payload, it still
+    works because it re-validates after the no-op unwrap."""
+    payload = {"schema_version": "1.0", "nodes": [], "edges": []}
+    recovered = _try_unwrap(payload, KnowledgeGraph)
+    # No strings to unwrap, so changed=False → falls through to the value-level
+    # check which also won't find anything. Expected: None.
+    assert recovered is None
+
+
+def test_deep_unwrap_recovers_doubly_stringified_payload():
+    """Haiku-class pathology: a stringified list whose items contain another
+    stringified field. The original shallow unwrap couldn't recover this; the
+    deep walk must."""
+    inner_causes = (
+        '[{"refdes":"U7","probability":0.5,"mechanism":"short"}]'
+    )
+    payload = {
+        "schema_version": "1.0",
+        "rules": (
+            '[{"id":"R-001","symptoms":["x"],'
+            f'"likely_causes":{inner_causes!s},'
+            '"diagnostic_steps":[],"confidence":0.6,"sources":[]}]'
+        ),
+    }
+    recovered = _try_unwrap(payload, RulesSet)
+    assert recovered is not None
+    assert len(recovered.rules) == 1
+    assert recovered.rules[0].likely_causes[0].refdes == "U7"
+
+
+def test_deep_unwrap_handles_stringified_inside_nested_dict():
+    """A nested dict has a stringified list field — unwrap must recurse into
+    the dict and not just look at top-level string values."""
+    payload = {
+        "schema_version": "1.0",
+        "rules": [
+            {
+                # T8 : Rule.id suit le pattern R-[A-Z0-9_-]{1,48}
+                "id": "R-001",
+                "symptoms": '["x","y"]',  # stringified list, nested
+                "likely_causes": [
+                    {"refdes": "U7", "probability": 0.5, "mechanism": "short"}
+                ],
+                "diagnostic_steps": [],
+                "confidence": 0.6,
+                "sources": [],
+            }
+        ],
+    }
+    recovered = _try_unwrap(payload, RulesSet)
+    assert recovered is not None
+    assert recovered.rules[0].symptoms == ["x", "y"]

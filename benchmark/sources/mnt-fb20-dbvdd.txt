@@ -1,0 +1,1 @@
+DBVDD on the MNT Reform 2 audio codec is supplied through ferrite bead FB20 from the +3V3 rail. An open-circuit ferrite bead leaves the codec without supply.

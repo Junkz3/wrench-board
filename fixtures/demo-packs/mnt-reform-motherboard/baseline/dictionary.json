@@ -1,0 +1,409 @@
+{
+  "items": [
+    {
+      "canonical_name": "U14",
+      "role": "Always-on 3.3 V linear regulator — sources the LPC_VCC rail that powers the System Controller before any other rail is enabled; loss of this output leaves the entire board dead with no UART response.",
+      "package": null,
+      "typical_failure_modes": [
+        "output shorted to GND (leaky die)",
+        "open output — LPC_VCC absent, D11 never illuminates",
+        "input–output short under overvoltage event",
+        "cold joint causing intermittent LPC_VCC dropout"
+      ],
+      "notes": "Probe output in diode-mode for short before replacing; if output reads low-ohms to GND, isolate downstream loads (U18 and others on LPC_VCC) by lifting the output side to determine whether short is in U14 itself or a downstream consumer. Sources: https://mntre.com/documentation/reform-handbook/advanced.html",
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "canonical_name": "U18",
+      "role": "NXP LPC11U24 ARM Cortex-M0 System Controller MCU — sequences all power rails via GPIO, monitors battery cells over SPI, and exposes a UART command interface; GPIO damage or loss of LPC_VCC supply prevents any rail from turning on.",
+      "package": null,
+      "typical_failure_modes": [
+        "GPIO output damaged by reversed-battery overvoltage — rails fail to switch on",
+        "SPI bus corruption causing incorrect cell-voltage readings",
+        "cold joint on supply pins causing intermittent boot failure",
+        "latch-up on I/O pins from ESD during rework"
+      ],
+      "notes": "Confirm LPC_VCC = 3.3 V at J22 pin 15 before suspecting U18 itself. UART responsiveness and D11 LED state are the primary in-circuit health checks. Sources: https://mntre.com/documentation/reform-handbook/advanced.html, https://community.mnt.re/t/debugging-dead-motherboard/970",
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "canonical_name": "U9",
+      "role": "Texas Instruments TUSB8041 4-port USB 3.0 hub IC — expands CPU-module USB controllers to five external ports; requires 1.2 V supply to enumerate; loss of VCC_1V2 kills all USB ports.",
+      "package": null,
+      "typical_failure_modes": [
+        "non-functional when VCC_1V2 rail is absent or low",
+        "BGA/QFN cold joint causing intermittent USB enumeration failures",
+        "ESD damage on USB data lines — one or more ports dead"
+      ],
+      "notes": "Probe C37 for 1.2 V as a first step before suspecting U9 die failure. If 1.2 V is present and USB is still dead, inspect solder joints under microscope. Sources: https://mntre.com/reform2/handbook/advanced.html",
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "canonical_name": "U10",
+      "role": "Texas Instruments SN65DSI86 MIPI-DSI to eDP bridge IC — converts DSI signals from the CPU SOM to eDP for the internal display panel; requires 1.2 V supply and a seated J24 flex; failure causes dark or flickering internal display while HDMI remains unaffected.",
+      "package": null,
+      "typical_failure_modes": [
+        "cold joint on supply or signal pins — intermittent or dead display",
+        "non-functional when VCC_1V2 rail is absent",
+        "BGA/QFN ball crack under thermal cycling causing permanent display loss",
+        "ESD damage on DSI lanes from hot-plugging flex cable"
+      ],
+      "notes": "Reflow U10 with flux if cold joint is suspected. Verify 1.2 V at C37 and 3V3_PWR_AUX before reflowing. Also inspect J24 ZIF pads under microscope for lifted contacts — a mis-seated flex is more common than a failed IC. Sources: https://mntre.com/reform2/handbook/advanced.html, https://community.mnt.re/t/edp-cable-or-board-issue/3898",
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "canonical_name": "U11",
+      "role": "Mini-PCIe slot connector — carries the primary PCIe interface from the i.MX8M SOM to a Wi-Fi or other PCIe card; PCIE1_PWR_EN GPIO from U18 must be asserted to power the slot.",
+      "package": null,
+      "typical_failure_modes": [
+        "mechanical wear on connector pins causing intermittent PCIe card detection",
+        "cold joint on connector through-hole or SMD feet after board flex",
+        "PCIE1_PWR absent if U18 GPIO damaged — card never powers up"
+      ],
+      "notes": "PCIE1_PWR is controlled by U18; confirm the System Controller is functional before blaming U11 connector hardware. Sources: https://mntre.com/documentation/reform-handbook/hardware.html",
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "canonical_name": "U28",
+      "role": "Voltage level translator for the SD card interface — bridges 3.3 V and 1.8 V logic domains; completely non-functional if VCC_1V8 is absent, blocking SD boot.",
+      "package": null,
+      "typical_failure_modes": [
+        "non-functional when VCC_1V8 rail is absent — SD interface blocked",
+        "ESD damage on data lines — SD reads fail with rails present",
+        "cold joint on supply pins causing intermittent SD errors"
+      ],
+      "notes": "Probe C130 for 1.8 V before suspecting U28 die failure. If 1.8 V is absent, trace back to the 1.8 V buck regulator output and check in diode-mode for a short on the output rail. Sources: https://mntre.com/reform2/handbook/advanced.html",
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "canonical_name": "U8",
+      "role": "Voltage level translator for the SD card interface — bridges 3.3 V and 1.8 V logic domains alongside U28; completely non-functional if VCC_1V8 is absent, blocking SD boot.",
+      "package": null,
+      "typical_failure_modes": [
+        "non-functional when VCC_1V8 rail is absent — SD interface blocked",
+        "ESD damage on data lines — SD reads fail with rails present",
+        "cold joint on supply pins causing intermittent SD errors"
+      ],
+      "notes": "Probe C130 for 1.8 V before suspecting U8 die failure. If 1.8 V is absent, diode-mode probe nearby decoupling caps to detect short on the rail before reflowing or replacing the 1.8 V regulator. Sources: https://mntre.com/reform2/handbook/advanced.html",
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "canonical_name": "LTC4020",
+      "role": "Analog Devices LTC4020 buck/boost regulator and LiFePO4 charger — produces the ~29 V main system bus from a 9–32 V barrel-jack input and manages charging/balancing of eight LiFePO4 cells; failure or misconfiguration kills the entire system bus.",
+      "package": null,
+      "typical_failure_modes": [
+        "hardware-level balancing path defect on R-2 boards — cells charge unevenly (requires component-level rework modification)",
+        "output short to GND — main 29 V bus collapses",
+        "cold joint on high-current switching pins under thermal cycling",
+        "open bootstrap or feedback resistor causing regulator drop-out"
+      ],
+      "notes": "R-2 production boards had a known hardware balancing issue; consult MNT R-2 motherboard update from April 2021 (https://community.mnt.re/t/mnt-reform-r-2-motherboard-update-2021-04-19/177) for the specific component modification. LTC6803 SPI data should be verified if balancing readings appear incorrect.",
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "canonical_name": "LTC6803IG-4#PBF",
+      "role": "Linear Technology LTC6803 multicell battery stack monitor — measures individual LiFePO4 cell voltages over SPI and reports to U18 (System Controller); SPI signal integrity issues can corrupt cell-voltage readings.",
+      "package": null,
+      "typical_failure_modes": [
+        "SPI bus fault causing corrupted or stuck cell-voltage readings",
+        "cold joint on SPI or cell-sense pins after board flex",
+        "ESD damage on sense inputs from improper battery connection"
+      ],
+      "notes": "Confirm SPI signal integrity between LTC6803IG-4#PBF and U18 if balancing data appears wrong. No widespread die-level failures reported in community sources. Sources: https://community.mnt.re/t/mnt-reform-r-2-motherboard-update-2021-04-19/177",
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "canonical_name": "LM62460",
+      "role": "Main downstream buck regulators on the v3.0 motherboard — replace the older 5 V and 3.3 V converters to power the CPU SOM and system rails; instability on feedback pin or cold joints can cause rail hiccup after SOM swap.",
+      "package": null,
+      "typical_failure_modes": [
+        "feedback pin instability causing oscillating or low output voltage",
+        "cold joint on inductor or output capacitor pads after rework",
+        "hiccup-mode triggering from excess capacitance on 5 V USB rail if output caps incorrectly specified"
+      ],
+      "notes": "Scope the feedback pin for oscillation if rail is low or unstable. The v3.0 board increased capacitance on 5 V USB rails — verify no cold joints on the new converters after SOM swap. Sources: https://mntre.com/documentation/reform-handbook/hardware.html",
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "canonical_name": "F1",
+      "role": "SMD input fuse — over-current protection in series on the barrel-jack input rail before R49; if blown, the board shows no rail activity whatsoever.",
+      "package": "SMD fuse",
+      "typical_failure_modes": [
+        "open (blown) fuse from input over-current or reverse-polarity event — board completely dead",
+        "cracked fuse body from mechanical stress — intermittent open",
+        "cold joint on fuse pads causing resistive contact and voltage drop"
+      ],
+      "notes": "Check F1 in diode-mode or resistance mode; an open reading confirms blown fuse. If fuse is confirmed open, investigate root cause (short on input rail) before fitting replacement to avoid immediate re-blow. Sources: https://mntre.com/reform2/handbook/advanced.html",
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "canonical_name": "R49",
+      "role": "Sense resistor on the main power-input path — primary test point for measuring the incoming 9–32 V rail; probing across R49 with a DMM confirms whether input voltage has passed F1.",
+      "package": null,
+      "typical_failure_modes": [
+        "open resistor from over-current event — input voltage absent downstream of F1",
+        "cold joint causing intermittent voltage reading at test point",
+        "pad lift after mechanical stress near barrel jack"
+      ],
+      "notes": "Probe R49 for input voltage (9–32 V nominal 24 V) with a DMM as the first step in a no-power diagnosis. If absent at R49, check F1 for continuity. Sources: https://mntre.com/reform2/handbook/advanced.html",
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "canonical_name": "J1",
+      "role": "Barrel-jack input connector — accepts 9–32 V (nominal 24 V) supply from the wall adapter; the entry point for all board power.",
+      "package": null,
+      "typical_failure_modes": [
+        "cold joint on through-hole or SMD pins causing intermittent power loss",
+        "pad lift or cracked solder from mechanical stress of connector insertion",
+        "internal spring contact wear causing high-resistance connection"
+      ],
+      "notes": "If input voltage is absent at R49, visually inspect J1 solder joints and probe the connector pins directly before tracing further. Sources: https://mntre.com/reform2/handbook/advanced.html",
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "canonical_name": "J22",
+      "role": "Debug/UART connector — exposes LPC_VCC at pin 15 (key test point for 3.3 V always-on rail) and UART for System Controller command communication.",
+      "package": null,
+      "typical_failure_modes": [
+        "cold joint on connector pins causing intermittent UART loss",
+        "damaged pin 15 contact giving false low LPC_VCC reading",
+        "connector body stress crack from repeated cable insertion"
+      ],
+      "notes": "Measure LPC_VCC at J22 pin 15 with a DMM (expected 3.3 V) as an early diagnostic step for System Controller issues. Sources: https://mntre.com/documentation/reform-handbook/advanced.html",
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "canonical_name": "J24",
+      "role": "30-pin 0.5 mm pitch ZIF flex connector — carries MIPI-DSI signals from the CPU SOM to U10 (SN65DSI86 eDP bridge); pad lift or mis-seating causes intermittent or absent internal display.",
+      "package": "30-pin ZIF, 0.5 mm pitch",
+      "typical_failure_modes": [
+        "pad lift on ZIF pads after repeated cable reseating — intermittent display",
+        "torn or cracked flex contacts from improper cable removal",
+        "intermittent open after reassembly from mis-seated locking latch",
+        "ESD damage on DSI lanes from hot-plugging"
+      ],
+      "notes": "Inspect J24 ZIF pads under stereo microscope for lifted contacts after any reassembly. Re-seat or reflow as needed. Route Wi-Fi antenna cable away from DSI flex run to avoid interference. Sources: https://community.mnt.re/t/edp-cable-or-board-issue/3898, https://mntre.com/reform2/handbook/advanced.html",
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "canonical_name": "D11",
+      "role": "White LED status indicator — illuminates when LPC_VCC 3.3 V always-on rail is live; primary visual health indicator for the System Controller power domain.",
+      "package": null,
+      "typical_failure_modes": [
+        "LED never lights — LPC_VCC absent (suspect U14 or short on rail)",
+        "LED extinguishes immediately after '1P' command — short on switched 3.3 V rail",
+        "open LED or cold joint giving false 'rail dead' impression"
+      ],
+      "notes": "D11 state is the primary first-pass indicator: lit = LPC_VCC present; extinguishes on '1P' = likely short on switched 3.3 V rail. Sources: https://mntre.com/documentation/reform-handbook/advanced.html, https://community.mnt.re/t/debugging-dead-motherboard/970",
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "canonical_name": "D12",
+      "role": "LED status indicator — illuminates when USB_PWR 5 V switched rail is active; key visual check for whether U18 has successfully enabled the 5 V path.",
+      "package": null,
+      "typical_failure_modes": [
+        "LED never lights after '1P' command — 5 V switched rail absent (trace path from LTC4020 through switching FETs enabled by U18)",
+        "open LED or cold joint giving false 'rail dead' impression"
+      ],
+      "notes": "If D12 never illuminates after '1P' command, trace the 5 V path from LTC4020 output through the switching FETs controlled by U18. Sources: https://community.mnt.re/t/debugging-dead-motherboard/970",
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "canonical_name": "C130",
+      "role": "Decoupling capacitor on the 1.8 V rail — primary test point for measuring VCC_1V8; diode-mode probe on this cap detects shorts on the 1.8 V rail.",
+      "package": null,
+      "typical_failure_modes": [
+        "shorted MLCC (X7R ceramic fracture) pulling VCC_1V8 to GND",
+        "cold joint on cap pads causing false low voltage reading at test point"
+      ],
+      "notes": "Probe C130 for 1.8 V as the first step in SD boot failure diagnosis. If rail is absent, diode-mode probe on C130 itself to check for a shorted cap. Sources: https://mntre.com/reform2/handbook/advanced.html",
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "canonical_name": "C37",
+      "role": "Decoupling capacitor on the 1.2 V rail — primary test point for measuring VCC_1V2; diode-mode probe on this cap detects shorts on the 1.2 V rail.",
+      "package": null,
+      "typical_failure_modes": [
+        "shorted MLCC (ceramic fracture) pulling VCC_1V2 to GND — kills U9 and U10",
+        "cold joint on cap pads causing false low voltage reading at test point"
+      ],
+      "notes": "Probe C37 for 1.2 V as the first step when internal display is dark or USB ports are dead. If absent, diode-mode probe on nearby decoupling caps to locate the short before replacing the 1.2 V buck regulator. Sources: https://mntre.com/reform2/handbook/advanced.html",
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "canonical_name": "microHDMI connector",
+      "role": "Micro-HDMI output connector on the Pocket Reform motherboard — provides external video output; susceptible to PCB pad lift under repeated mechanical stress from plug/unplug cycles.",
+      "package": "microHDMI SMD connector",
+      "typical_failure_modes": [
+        "pad lift on solder joints from mechanical stress of repeated plug/unplug cycles",
+        "torn PCB pads leaving connector pins floating — no video output",
+        "cold joint under fine-pitch pins cracking after thermal cycling"
+      ],
+      "notes": "Under stereo microscope, clean lifted pads and reflow connector with flux and a fine-tip iron. If pads are torn, scrape clearance coat from exposed trace stubs and run 30 AWG jumpers from stubs to connector pins. Sources: https://community.mnt.re/t/tragedy-microhdmi-port-has-detached/4240",
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    }
+  ],
+  "_meta": {
+    "schema_version": "1.0"
+  }
+}

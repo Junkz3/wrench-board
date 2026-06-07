@@ -1,0 +1,231 @@
+{
+  "schema_version": "1.0",
+  "device_slug": "mnt-reform-motherboard",
+  "phases": [
+    {
+      "index": 0,
+      "name": "Always-on standby (battery + LPC_VCC + RTC)",
+      "kind": "always-on",
+      "rails_stable": [
+        "VIN",
+        "LPC_VCC",
+        "24V_IN"
+      ],
+      "components_entering": [
+        "U14",
+        "U5",
+        "U18",
+        "F1"
+      ],
+      "triggers_next": [
+        {
+          "net_label": "R3",
+          "from_refdes": "R3",
+          "rationale": "VOUT enable on U2 comes from R3 divider (edge: R3 --enables--> U2), latching the charger/booster on once battery VIN is present."
+        }
+      ],
+      "evidence": [
+        "designer note p3 U14: 'Standby always-on 3V3 power rail'",
+        "designer note p4 U5: 'Powered by main batteries in standby'",
+        "LPC_VCC produced by U14 and consumed by U18 (LPC MCU) — enables it to run before any EN is asserted"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "index": 1,
+      "name": "Charger/booster + inrush limiter bring up VIN stage",
+      "kind": "sequenced",
+      "rails_stable": [
+        "VIN",
+        "LPC_VCC",
+        "VOUT",
+        "5V_OUT",
+        "INTVCC"
+      ],
+      "components_entering": [
+        "U2",
+        "Q3",
+        "Q1",
+        "Q2",
+        "Q15",
+        "Q17"
+      ],
+      "triggers_next": [
+        {
+          "net_label": "power_button/LPC wake",
+          "from_refdes": "U18",
+          "rationale": "Once VIN/LPC_VCC are stable, the LPC MCU (U18) decides to assert the main-rail EN lines — per designer note p3 U7 'enabled by LPC'."
+        }
+      ],
+      "evidence": [
+        "designer note p2 U2: 'Charger/Booster'",
+        "designer note p2 Q3: 'Inrush Current Limiter by Zoe'",
+        "edge: U2 --enables--> Q1/Q2/Q15/Q17 (battery-path FETs)",
+        "edge: 30V_GATE --enables--> Q3"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "index": 2,
+      "name": "LPC asserts main +5V and +3V3 rails",
+      "kind": "sequenced",
+      "rails_stable": [
+        "VIN",
+        "LPC_VCC",
+        "VOUT",
+        "+5V",
+        "+3V3"
+      ],
+      "components_entering": [
+        "U7",
+        "U12"
+      ],
+      "triggers_next": [
+        {
+          "net_label": "1V5_PWR_EN",
+          "from_refdes": "U18",
+          "rationale": "LPC next asserts the SoC core rails once +5V/+3V3 are up (U19 and U13 are both fed from +5V)."
+        },
+        {
+          "net_label": "1V2_PWR_EN",
+          "from_refdes": "U18",
+          "rationale": "LPC drives 1V2_PWR_EN into U13 per edge U18 --> 1V2_PWR_EN --> U13."
+        }
+      ],
+      "evidence": [
+        "designer note p3 U7: 'Main system power converters, enabled by LPC'",
+        "edge: U18 --produces_signal--> 5V_PWR_EN; 5V_PWR_EN --enables--> U7",
+        "edge: U18 --produces_signal--> 3V3_PWR_EN; 3V3_PWR_EN --enables--> U12"
+      ],
+      "confidence": 0.92
+    },
+    {
+      "index": 3,
+      "name": "LPC brings up +1V5 and +1V2 SoC rails",
+      "kind": "sequenced",
+      "rails_stable": [
+        "+5V",
+        "+3V3",
+        "+1V5",
+        "+1V2",
+        "VCC"
+      ],
+      "components_entering": [
+        "U19",
+        "U13"
+      ],
+      "triggers_next": [
+        {
+          "net_label": "AUX_PWR_EN",
+          "from_refdes": "U18",
+          "rationale": "With core rails up, LPC asserts AUX_PWR_EN to U27 (designer note p6 U27 '3V3 Aux Power Switch')."
+        },
+        {
+          "net_label": "USB_PWR_EN",
+          "from_refdes": "U18",
+          "rationale": "LPC then gates USB power via U24 (edge USB_PWR_EN --enables--> U24)."
+        }
+      ],
+      "evidence": [
+        "edge: U18 --produces_signal--> 1V5_PWR_EN; 1V5_PWR_EN --enables--> U19",
+        "edge: U18 --produces_signal--> 1V2_PWR_EN; 1V2_PWR_EN --enables--> U13",
+        "U19 and U13 are both powered from +5V (consumers list), so they must come after phase 2"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "index": 4,
+      "name": "LPC enables AUX 3V3 switch and USB power",
+      "kind": "sequenced",
+      "rails_stable": [
+        "+5V",
+        "+3V3",
+        "+1V5",
+        "+1V2",
+        "3V3_PWR_AUX",
+        "USB_PWR",
+        "AVDD",
+        "DBVDD",
+        "DCVDD",
+        "SPKVDD1"
+      ],
+      "components_entering": [
+        "U27",
+        "U24",
+        "U1"
+      ],
+      "triggers_next": [
+        {
+          "net_label": "PCIE1_PWR_EN",
+          "from_refdes": "U18",
+          "rationale": "LPC gates PCIe power last (edge PCIE1_PWR_EN --enables--> U20), after the SoC has booted and requested it."
+        }
+      ],
+      "evidence": [
+        "designer note p6 U27: '3V3 Aux Power Switch'",
+        "edge: AUX_PWR_EN --enables--> U27",
+        "edge: USB_PWR_EN --enables--> U24",
+        "U1 (i.MX SoC) drives PMIC_ON_REQ / IMX_FBOOT / DSI lanes — comes up once core + aux rails are stable"
+      ],
+      "confidence": 0.8
+    },
+    {
+      "index": 5,
+      "name": "SoC-driven PCIe power + backlight",
+      "kind": "on-demand",
+      "rails_stable": [
+        "PCIE1_PWR",
+        "EDP_BL_VCC",
+        "EDP_LCD_VCC"
+      ],
+      "components_entering": [
+        "U20",
+        "U11",
+        "U23",
+        "J10"
+      ],
+      "triggers_next": [],
+      "evidence": [
+        "edge: PCIE1_PWR_EN --enables--> U20",
+        "edge: U1 --produces_signal--> BACKLIGHT_EN / BACKLIGHT_PWM",
+        "edge: BACKLIGHT_EN --produces_signal--> EDP_BL_ENABLE (p12)"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "index": 6,
+      "name": "On-demand peripherals (USB hub, HDMI, audio codec, DP)",
+      "kind": "on-demand",
+      "rails_stable": [
+        "PCIE1_PWR",
+        "EDP_BL_VCC",
+        "EDP_LCD_VCC"
+      ],
+      "components_entering": [
+        "U9",
+        "U22",
+        "U3",
+        "U10",
+        "U21",
+        "U25",
+        "U26"
+      ],
+      "triggers_next": [],
+      "evidence": [
+        "designer note p5 U9: 'TODO: possibly control by LPC' — USB hub brought up on demand",
+        "U3 audio codec driven by DAC_DOUT/DAC_TXFS from SoC (SoC driver brings it up)",
+        "U10 eDP bridge driven by U1 DSI lanes (phase 12 edges)"
+      ],
+      "confidence": 0.6
+    }
+  ],
+  "sequencer_refdes": "U18",
+  "global_confidence": 0.82,
+  "ambiguities": [
+    "Exact ordering between Q3 inrush limiter, U2 charger turn-on, and VOUT stabilization is not fully specified by the notes — treated as a single 'VIN stage' phase.",
+    "Whether U18 (LPC MCU) asserts 5V_PWR_EN before or concurrently with 3V3_PWR_EN is not stated; grouped together in phase 2.",
+    "U1 (i.MX SoC) entry point is approximate — it boots from 1V1_HBSU/3V3_HBSU which are marked 'external'; placed in phase 4 when core + aux rails are all stable.",
+    "U9 USB hub sequencing is explicitly unresolved per designer note p5 'TODO: possibly control by LPC'."
+  ],
+  "model_used": "claude-opus-4-7"
+}

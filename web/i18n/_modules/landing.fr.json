@@ -1,0 +1,91 @@
+{
+  "sidebar": {
+    "title": "Récents",
+    "aria": "Réparations récentes",
+    "delete_aria": "Supprimer cette réparation",
+    "delete_title": "Supprimer",
+    "count_one": "{n} réparation",
+    "count_many": "{n} réparations"
+  },
+  "hero": {
+    "title": "Ton assistant de réparation hardware.",
+    "sub": "Donne-moi ton appareil et le symptôme — je construis la connaissance et j'ouvre le diagnostic.",
+    "device_placeholder": "Appareil (ex. MNT Reform motherboard, iPhone 11, Framework 13)",
+    "device_aria": "Quel appareil",
+    "symptom_placeholder": "Symptôme (ex. ne s'allume plus, pas de charge, écran noir)",
+    "symptom_aria": "Quel est le symptôme",
+    "submit": "Lancer le diagnostic"
+  },
+  "chips": {
+    "mnt_label": "MNT Reform — pas de boot",
+    "mnt_symptom": "pas de boot, écran noir",
+    "iphone_label": "iPhone 11 — pas de charge",
+    "iphone_symptom": "ne charge plus",
+    "framework_label": "Framework — écran noir",
+    "framework_symptom": "écran noir au démarrage"
+  },
+  "timeline": {
+    "title_default": "Construction de la fiche…",
+    "title_build": "Construction de la fiche · {device}",
+    "title_expand": "Enrichissement ciblé · {device}",
+    "title_loading": "Chargement de la fiche · {device}",
+    "title_ready": "Fiche prête · {status}",
+    "title_failed": "Pipeline échoué",
+    "elapsed": "Écoulé · {n}s",
+    "phase_scout": "Scout · recherche web",
+    "phase_registry": "Registry · vocabulaire canonique",
+    "phase_mapper": "Mapper · refdes ↔ graphe",
+    "phase_writers": "Writers · graphe + règles + glossaire",
+    "phase_audit": "Auditor · validation",
+    "phase_schematic_ingest": "Schéma · vision page par page",
+    "phase_device_kind": "Type de carte · classification",
+    "phase_expand": "Recherche ciblée sur ton symptôme"
+  },
+  "status": {
+    "pipeline_started": "Pipeline démarré sur {device}.",
+    "checking": "J'enregistre ta réparation et je vérifie si je connais déjà cet appareil…",
+    "rule_match": "Je connais déjà ce cas ({rule_id}). J'ouvre le diagnostic…",
+    "device_known": "Je connais déjà {device}. J'ouvre le diagnostic…",
+    "expand": "Je connais {device}. J'ajoute ton symptôme spécifique (~3 min).",
+    "build_new": "Nouveau pour moi — je construis la fiche en arrière-plan. Tu peux regarder.",
+    "ready": "C'est prêt. J'ouvre le diagnostic…",
+    "ws_lost": "Connexion au pipeline interrompue. Recharge la page si rien ne bouge.",
+    "error_create": "Échec de la création : {error}",
+    "error_pipeline": "Erreur : {error}.",
+    "error_unknown": "inconnue",
+    "error_invalid_response": "réponse invalide du serveur",
+    "error_delete": "Échec de la suppression : {error}",
+    "validation_device": "Précise l'appareil — au moins quelques mots.",
+    "validation_symptom": "Décris un peu plus le symptôme."
+  },
+  "delete": {
+    "confirm": "Supprimer cette réparation ? La conversation et les notes de l'agent seront effacées définitivement."
+  },
+  "kind": {
+    "none": "— type de carte (optionnel)",
+    "aria": "Type de carte"
+  },
+  "knowledge": {
+    "button": "Connaissance",
+    "aria": "Ajouter de la connaissance sur l'appareil",
+    "badge": "Optionnel",
+    "title": "Ajouter de la connaissance sur l'appareil",
+    "close": "Fermer",
+    "intro": "Plus de contexte affine le pack. Tout ici est optionnel.",
+    "done": "OK"
+  },
+  "schematic": {
+    "cta": "Joindre un PDF de schéma (optionnel)",
+    "aria": "Schéma PDF",
+    "already_ingested": "Schéma déjà ingéré ✓ — pas besoin de joindre"
+  },
+  "suggest": {
+    "aria": "Suggestions d'appareils",
+    "draft": "brouillon",
+    "graph_label": "graphe",
+    "graph_title": "Graphe électrique prêt"
+  },
+  "tools": {
+    "stock": "Stock"
+  }
+}

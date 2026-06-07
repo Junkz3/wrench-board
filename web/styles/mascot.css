@@ -1,0 +1,389 @@
+/* ============================================================
+   Wrench Board mascot — sizes, palette, animation states.
+   The mascot SVG is defined inline in `web/index.html` as
+   <template id="tpl-mascot"> and cloned at insertion time by
+   `web/js/mascot.js`. No external asset is fetched.
+   ============================================================ */
+
+/* ---------- sizes & layout ---------- */
+.mascot{display:inline-block;vertical-align:middle;line-height:0;color:var(--text);overflow:visible}
+.mascot-xs{width:32px;height:auto}
+.mascot-sm{width:80px;height:auto}
+.mascot-md{width:160px;height:auto}
+.mascot-lg{width:320px;height:auto}
+
+/* ---------- chat panel companion ----------
+   Pinned to the bottom-right of the diagnostic panel, hovering above the
+   composer. The parent <aside class="llm-panel"> is already position:fixed,
+   which is enough to anchor an absolute child — do NOT override it.
+   pointer-events:none so clicks fall through to the form. */
+.llm-mascot{position:absolute;right:12px;bottom:128px;width:48px;pointer-events:none;z-index:6;opacity:.92;filter:drop-shadow(0 3px 10px rgba(0,0,0,.35));transition:opacity .25s ease}
+.llm-mascot .mascot{width:100%}
+
+/* ---------- palette ----------
+   Body = brand cyan. Face details (eyes, mouth) sit on the cyan body
+   so they get the dark contrast. Limbs (legs, arms, wrench) sit on the
+   dark app bg so they take a soft light tint. */
+.mascot-body{fill:var(--cyan)}
+.mascot-body-shade{fill:rgba(0,0,0,.10)}
+.mascot-detail-fill{fill:var(--text)}
+.mascot-detail-stroke{fill:none;stroke:var(--text);stroke-linecap:round;stroke-linejoin:round}
+
+/* face overrides — dark on the cyan body */
+.mascot-eye-ball{fill:var(--bg-deep)}
+.mascot-eye-shine{fill:var(--text)}
+.mascot-mouth-smile,.mascot-mouth-grin{stroke:var(--bg-deep)}
+
+/* mouth: smile is the resting state, grin is shown only on success */
+.mascot-mouth-grin{display:none}
+
+/* ---------- per-element transform anchors ----------
+   SVG groups need transform-box:view-box so transform-origin reads in
+   the SVG user-coordinate system (the viewBox), letting us pivot around
+   precise points like the wrench wrist. */
+.mascot #body,
+.mascot #face,
+.mascot .mascot-eye,
+.mascot .mascot-wrench,
+.mascot #arm-left,
+.mascot #arm-right,
+.mascot .mascot-loupe{transform-box:view-box}
+
+.mascot #arm-left{transform-origin:115px 200px}
+.mascot #arm-right{transform-origin:285px 200px}
+
+/* self-pivoting bits (rotate/scale around their own centre, not the viewBox) */
+.mascot .mascot-zzz-z,
+.mascot .mascot-confetti-bit{transform-box:fill-box;transform-origin:center}
+
+.mascot #body,
+.mascot #face{transform-origin:200px 210px}
+
+.mascot .mascot-eye-left{transform-origin:172px 205px}
+.mascot .mascot-eye-right{transform-origin:228px 205px}
+
+.mascot .mascot-wrench{transform-origin:335px 145px}
+
+/* ---------- state-only overlay elements (hidden until a state shows them) ----------
+   Added to the template for scanning / sleeping / danger / celebrating. */
+.mascot-eye-closed,
+.mascot-eye-happy,
+.mascot-eye-cross,
+.mascot-mouth-o,
+.mascot-think-dots,
+.mascot-keyboard,
+.mascot-loupe,
+.mascot-zzz,
+.mascot-confetti{display:none}
+
+/* thinking "..." dots — amber, the warm "I'm chewing on it" colour */
+.mascot-think-dot{fill:var(--amber)}
+
+/* typing keyboard */
+.mascot-kbd-base{fill:#0e1827;stroke:var(--text);stroke-width:2.5}
+.mascot-kbd-key{fill:var(--text);opacity:.5}
+
+.mascot-eye-closed,
+.mascot-eye-happy{fill:none;stroke:var(--bg-deep);stroke-linecap:round}
+.mascot-eye-cross path{fill:none;stroke:var(--bg-deep);stroke-linecap:round}
+.mascot-mouth-o{fill:var(--bg-deep)}
+
+/* scan loupe */
+.mascot-loupe-glass{fill:var(--cyan);opacity:.18}
+.mascot-loupe-lens{fill:none;stroke:var(--text);stroke-width:7}
+.mascot-loupe-handle{stroke:var(--text);stroke-width:9;stroke-linecap:round}
+
+/* sleep Zzz */
+.mascot-zzz-z{fill:var(--text);font-family:var(--mono),'JetBrains Mono',monospace;font-weight:700;opacity:0}
+.mascot-zzz-1{font-size:18px}
+.mascot-zzz-2{font-size:26px}
+.mascot-zzz-3{font-size:36px}
+
+/* celebration confetti — multicolour via the semantic tokens (decorative) */
+.mascot-confetti-bit{opacity:0}
+.cf-a{fill:var(--cyan)}
+.cf-b{fill:var(--amber)}
+.cf-c{fill:var(--emerald)}
+.cf-d{fill:var(--violet)}
+
+/* the inner <g class="mascot-wrench-base"> keeps the static 20° lean of
+   the wrench in SVG-attribute form (set inline in the SVG file) so CSS
+   animations on .mascot-wrench compose as a delta on top of it. */
+
+/* ============================================================
+   IDLE — always on. Subtle breathing + eye-blinks.
+   Targeted at .mascot directly so it runs in every context unless
+   a more specific state class overrides it.
+   ============================================================ */
+@keyframes mascot-breathe{
+  0%,100%{transform:scale(1)}
+  50%{transform:scale(1.015)}
+}
+@keyframes mascot-blink{
+  0%,90%,100%{transform:scaleY(1)}
+  94%,97%{transform:scaleY(.08)}
+}
+
+.mascot #body,
+.mascot #face{animation:mascot-breathe 4s ease-in-out infinite}
+
+.mascot .mascot-eye-left{animation:mascot-blink 5.2s ease-in-out infinite}
+.mascot .mascot-eye-right{animation:mascot-blink 5.2s ease-in-out infinite -.03s}
+
+/* ============================================================
+   THINKING — agent reasoning. Wrench taps slowly, eyes drift.
+   ============================================================ */
+@keyframes mascot-wrench-tap{
+  0%,100%{transform:rotate(0deg)}
+  50%{transform:rotate(-8deg)}
+}
+@keyframes mascot-eye-drift{
+  0%,100%{transform:translateX(0)}
+  50%{transform:translateX(1.5px)}
+}
+/* body warms to amber and back — "thinking / chewing on it" */
+@keyframes mascot-body-think{
+  0%,100%{fill:var(--cyan)}
+  50%{fill:var(--amber)}
+}
+/* the "..." dots: each lifts + brightens in turn (typing-indicator wave) */
+@keyframes mascot-think-dot{
+  0%,100%{opacity:.25;transform:translateY(0)}
+  30%{opacity:1;transform:translateY(-3px)}
+}
+
+.mascot.is-thinking .mascot-wrench{animation:mascot-wrench-tap 1.4s ease-in-out infinite}
+.mascot.is-thinking .mascot-eye-ball{animation:mascot-eye-drift 2.2s ease-in-out infinite}
+.mascot.is-thinking .mascot-body{animation:mascot-body-think 2.2s ease-in-out infinite}
+.mascot.is-thinking .mascot-think-dots{display:block}
+.mascot.is-thinking .mascot-think-dot{animation:mascot-think-dot 1.1s ease-in-out infinite}
+.mascot.is-thinking .td-2{animation-delay:.18s}
+.mascot.is-thinking .td-3{animation-delay:.36s}
+
+/* ============================================================
+   WORKING — pipeline running. Wrench cranks like a ratchet,
+   breathing speeds up to convey effort.
+   ============================================================ */
+@keyframes mascot-wrench-ratchet{
+  0%{transform:rotate(-14deg)}
+  50%{transform:rotate(14deg)}
+  100%{transform:rotate(-14deg)}
+}
+
+.mascot.is-working .mascot-wrench{animation:mascot-wrench-ratchet .75s ease-in-out infinite}
+.mascot.is-working #body,
+.mascot.is-working #face{animation-duration:2s}
+
+/* ============================================================
+   TYPING — agent streaming text. A keyboard appears, both arms
+   swing down onto it (the wrench lowers with the right arm) and the
+   hands peck in alternation; keys flash in a wave. The base poses are
+   set directly so the figure still reads as "typing" with motion off.
+   ============================================================ */
+@keyframes mascot-type-left{
+  0%,100%{transform:rotate(-44deg)}
+  50%{transform:rotate(-50deg)}
+}
+@keyframes mascot-type-right{
+  0%,100%{transform:rotate(150deg)}
+  50%{transform:rotate(156deg)}
+}
+@keyframes mascot-key-flash{
+  0%,100%{opacity:.45}
+  40%{opacity:1}
+}
+/* drop the wrench to the floor once, then it rests there (free right hand) */
+@keyframes mascot-wrench-drop{
+  0%{transform:translate(0,0) rotate(0deg)}
+  55%{transform:translate(-26px,176px) rotate(108deg)}
+  72%{transform:translate(-26px,166px) rotate(100deg)}  /* little bounce */
+  100%{transform:translate(-26px,173px) rotate(104deg)}
+}
+.mascot-hand-right{display:none}
+.mascot.is-typing .mascot-keyboard{display:block}
+.mascot.is-typing .mascot-hand-right{display:block}
+.mascot.is-typing .mascot-wrench{animation:mascot-wrench-drop .7s cubic-bezier(.4,1.1,.6,1) 1 forwards}
+.mascot.is-typing #arm-left{transform:rotate(-44deg);animation:mascot-type-left .5s ease-in-out infinite}
+.mascot.is-typing #arm-right{transform:rotate(150deg);animation:mascot-type-right .5s ease-in-out infinite -.25s}
+.mascot.is-typing .mascot-eye-ball{transform:translateY(2px)}
+.mascot.is-typing .mascot-kbd-key{animation:mascot-key-flash .6s ease-in-out infinite}
+.mascot.is-typing .kk-2{animation-delay:.12s}
+.mascot.is-typing .kk-3{animation-delay:.24s}
+.mascot.is-typing .kk-4{animation-delay:.36s}
+.mascot.is-typing .kk-5{animation-delay:.18s}
+
+/* ============================================================
+   SUCCESS — one-shot celebration. Wrench thrust, grin appears.
+   The class can be left in place permanently; the wrench rests
+   raised after the animation finishes via animation-fill-mode.
+   ============================================================ */
+@keyframes mascot-wrench-cheer{
+  0%{transform:rotate(0deg)}
+  30%{transform:rotate(-32deg)}
+  55%{transform:rotate(-32deg)}
+  75%{transform:rotate(-26deg)}
+  100%{transform:rotate(-22deg)}
+}
+
+.mascot.is-success .mascot-wrench{
+  animation:mascot-wrench-cheer 1.2s cubic-bezier(.2,.8,.2,1) 1 forwards;
+}
+.mascot.is-success .mascot-mouth-smile{display:none}
+.mascot.is-success .mascot-mouth-grin{display:block}
+
+/* Happy ^_^ eyes for the first ~1.2s, then cross-fade back to normal eyes.
+   The grin + raised wrench stay; only the eyes revert. */
+@keyframes mascot-eye-happy-in{
+  0%,72%{opacity:1}
+  100%{opacity:0}
+}
+@keyframes mascot-eye-happy-out{
+  0%,72%{opacity:0}
+  100%{opacity:1}
+}
+.mascot.is-success .mascot-eye-left,
+.mascot.is-success .mascot-eye-right{animation:none}
+.mascot.is-success .mascot-eye-happy{
+  display:block;animation:mascot-eye-happy-in 1.7s ease-in-out 1 forwards;
+}
+.mascot.is-success .mascot-eye-ball,
+.mascot.is-success .mascot-eye-shine{
+  animation:mascot-eye-happy-out 1.7s ease-in-out 1 forwards;
+}
+
+/* ============================================================
+   ERROR — red flash + a quick shake, wrench droops.
+   Eyes and body briefly flash --mascot-danger then settle back;
+   the whole figure jolts once. Stronger than the old amber blink.
+   ============================================================ */
+@keyframes mascot-eye-flash{
+  0%,100%{fill:var(--bg-deep)}
+  20%,60%{fill:var(--mascot-danger)}
+}
+@keyframes mascot-body-flash-red{
+  0%,100%{fill:var(--cyan)}
+  25%,55%{fill:var(--mascot-danger)}
+}
+@keyframes mascot-wrench-droop{
+  0%{transform:rotate(0deg)}
+  100%{transform:rotate(18deg)}
+}
+@keyframes mascot-shake{
+  0%,100%{transform:translateX(0)}
+  20%{transform:translateX(-4px)}
+  40%{transform:translateX(4px)}
+  60%{transform:translateX(-3px)}
+  80%{transform:translateX(3px)}
+}
+
+.mascot.is-error{animation:mascot-shake .4s ease-in-out 1}
+.mascot.is-error .mascot-eye-ball{animation:mascot-eye-flash 1.6s ease-in-out 1 forwards}
+.mascot.is-error .mascot-body{animation:mascot-body-flash-red 1.6s ease-in-out 1}
+.mascot.is-error .mascot-wrench{animation:mascot-wrench-droop .5s ease-out 1 forwards}
+
+/* ============================================================
+   DANGER — escalated alert. Body turns scarlet and stays, eyes
+   become crosses, mouth drops to a shocked "O", figure shakes hard.
+   The red fill is set directly (not only via keyframe) so it holds
+   even under prefers-reduced-motion.
+   ============================================================ */
+@keyframes mascot-body-red{
+  0%{fill:var(--cyan)}
+  18%,100%{fill:var(--mascot-danger)}
+}
+.mascot.is-danger{animation:mascot-shake .4s ease-in-out 3}
+.mascot.is-danger .mascot-body{fill:var(--mascot-danger);animation:mascot-body-red .35s ease-out}
+.mascot.is-danger .mascot-eye-ball,
+.mascot.is-danger .mascot-eye-shine{display:none}
+.mascot.is-danger .mascot-eye-cross{display:block}
+.mascot.is-danger .mascot-mouth-smile,
+.mascot.is-danger .mascot-mouth-grin{display:none}
+.mascot.is-danger .mascot-mouth-o{display:block}
+
+/* ============================================================
+   SCANNING — inspecting. Loupe sweeps across the face, head tilts,
+   eyes track side to side.
+   ============================================================ */
+@keyframes mascot-loupe-sweep{
+  0%,100%{transform:translate(-34px,6px)}
+  50%{transform:translate(34px,-4px)}
+}
+@keyframes mascot-head-tilt{
+  0%,100%{transform:rotate(-4deg)}
+  50%{transform:rotate(4deg)}
+}
+@keyframes mascot-eye-scan{
+  0%,100%{transform:translateX(-2px)}
+  50%{transform:translateX(2px)}
+}
+.mascot.is-scanning .mascot-loupe{display:block;animation:mascot-loupe-sweep 2.4s ease-in-out infinite}
+.mascot.is-scanning #face{animation:mascot-head-tilt 3s ease-in-out infinite}
+.mascot.is-scanning .mascot-eye-ball{animation:mascot-eye-scan 2.4s ease-in-out infinite}
+
+/* ============================================================
+   SLEEPING — eyes shut, slow breathing, Zzz drift up and fade.
+   ============================================================ */
+@keyframes mascot-zzz-float{
+  0%{opacity:0;transform:translate(0,0) scale(.7)}
+  20%{opacity:1}
+  100%{opacity:0;transform:translate(10px,-26px) scale(1.1)}
+}
+@keyframes mascot-breathe-slow{
+  0%,100%{transform:scale(1)}
+  50%{transform:scale(1.025)}
+}
+.mascot.is-sleeping .mascot-eye-left,
+.mascot.is-sleeping .mascot-eye-right{animation:none}
+.mascot.is-sleeping .mascot-eye-ball,
+.mascot.is-sleeping .mascot-eye-shine{display:none}
+.mascot.is-sleeping .mascot-eye-closed{display:block}
+.mascot.is-sleeping #body,
+.mascot.is-sleeping #face{animation:mascot-breathe-slow 5.5s ease-in-out infinite}
+.mascot.is-sleeping .mascot-zzz{display:block}
+.mascot.is-sleeping .mascot-zzz-1{animation:mascot-zzz-float 3s ease-in-out infinite}
+.mascot.is-sleeping .mascot-zzz-2{animation:mascot-zzz-float 3s ease-in-out infinite .5s}
+.mascot.is-sleeping .mascot-zzz-3{animation:mascot-zzz-float 3s ease-in-out infinite 1s}
+
+/* ============================================================
+   CELEBRATING — a hop, grin, wrench raised, confetti rains down.
+   One-shot: confetti fades out, wrench rests raised, grin stays.
+   ============================================================ */
+@keyframes mascot-jump{
+  0%,100%{transform:translateY(0)}
+  30%{transform:translateY(-22px)}
+  50%{transform:translateY(0)}
+  65%{transform:translateY(-10px)}
+  80%{transform:translateY(0)}
+}
+@keyframes mascot-confetti-fall{
+  0%{opacity:0;transform:translateY(-10px) rotate(0deg)}
+  12%{opacity:1}
+  100%{opacity:0;transform:translateY(125px) rotate(220deg)}
+}
+.mascot.is-celebrating{animation:mascot-jump 1.1s cubic-bezier(.3,.7,.4,1) 1}
+.mascot.is-celebrating .mascot-wrench{animation:mascot-wrench-cheer 1.2s cubic-bezier(.2,.8,.2,1) 1 forwards}
+.mascot.is-celebrating .mascot-mouth-smile{display:none}
+.mascot.is-celebrating .mascot-mouth-grin{display:block}
+.mascot.is-celebrating .mascot-confetti{display:block}
+.mascot.is-celebrating .mascot-confetti-bit{animation:mascot-confetti-fall 1.5s ease-in 1 forwards}
+.mascot.is-celebrating .mascot-confetti-bit:nth-child(1){animation-delay:0s}
+.mascot.is-celebrating .mascot-confetti-bit:nth-child(2){animation-delay:.12s}
+.mascot.is-celebrating .mascot-confetti-bit:nth-child(3){animation-delay:.05s}
+.mascot.is-celebrating .mascot-confetti-bit:nth-child(4){animation-delay:.2s}
+.mascot.is-celebrating .mascot-confetti-bit:nth-child(5){animation-delay:.1s}
+.mascot.is-celebrating .mascot-confetti-bit:nth-child(6){animation-delay:.28s}
+.mascot.is-celebrating .mascot-confetti-bit:nth-child(7){animation-delay:.16s}
+.mascot.is-celebrating .mascot-confetti-bit:nth-child(8){animation-delay:.34s}
+
+/* ============================================================
+   Reduced-motion respect — keep the figure visible, drop motion.
+   ============================================================ */
+@media (prefers-reduced-motion: reduce){
+  .mascot *,.mascot{animation:none!important}
+  /* with no animation the happy/normal eyes would both show; keep normal */
+  .mascot.is-success .mascot-eye-happy{display:none}
+  .mascot.is-success .mascot-eye-ball,
+  .mascot.is-success .mascot-eye-shine{opacity:1}
+  /* the wrench-drop can't play, so just hide the wrench while typing */
+  .mascot.is-typing .mascot-wrench{display:none}
+}

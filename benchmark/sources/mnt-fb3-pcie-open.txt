@@ -1,0 +1,1 @@
+FB3 is the ferrite bead in series between +3V3 and the PCIe 3.3V input filter. An open-circuit ferrite (cracked from board flexing or overcurrent) leaves the downstream PCIe controller without supply while the upstream +3V3 rail remains healthy.

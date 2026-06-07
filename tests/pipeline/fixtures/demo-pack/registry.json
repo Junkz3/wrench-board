@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0",
+  "device_label": "Demo Pi",
+  "components": [
+    {"canonical_name": "U7", "logical_alias": null, "aliases": ["PMIC"],
+     "kind": "pmic", "description": "Main PMIC."},
+    {"canonical_name": "C29", "logical_alias": null, "aliases": [],
+     "kind": "capacitor", "description": "3V3 rail decoupling."}
+  ],
+  "signals": [
+    {"canonical_name": "3V3_RAIL", "aliases": ["3.3V"],
+     "kind": "power_rail", "nominal_voltage": 3.3}
+  ]
+}

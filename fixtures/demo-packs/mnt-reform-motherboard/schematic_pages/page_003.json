@@ -1,0 +1,2288 @@
+{
+  "schema_version": "1.0",
+  "page": 3,
+  "sheet_name": "Reform 2 Regulators",
+  "sheet_path": "/Reform 2 Power/Reform 2 Regulators/",
+  "page_kind": "schematic",
+  "orientation": "landscape",
+  "confidence": 0.82,
+  "nodes": [
+    {
+      "refdes": "U7",
+      "type": "ic",
+      "value": {
+        "raw": "LM2677SX-5",
+        "primary": "LM2677SX-5",
+        "package": null,
+        "mpn": "LM2677SX-5",
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 3,
+      "pins": [
+        {
+          "number": "2",
+          "name": "VIN",
+          "role": "power_in",
+          "net_label": "30V_GATE"
+        },
+        {
+          "number": "7",
+          "name": "ON/OFF",
+          "role": "enable_in",
+          "net_label": "5V_PWR_EN"
+        },
+        {
+          "number": "5",
+          "name": "SYNC",
+          "role": "signal_in",
+          "net_label": null
+        },
+        {
+          "number": "4",
+          "name": "PAD",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "8",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "6",
+          "name": "FB",
+          "role": "feedback_in",
+          "net_label": null
+        },
+        {
+          "number": "3",
+          "name": "CB",
+          "role": "signal_in",
+          "net_label": null
+        },
+        {
+          "number": "1",
+          "name": "VSW",
+          "role": "switch_node",
+          "net_label": "VSW"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "U12",
+      "type": "ic",
+      "value": {
+        "raw": "LM2677SX-3.3",
+        "primary": "LM2677SX-3.3",
+        "package": null,
+        "mpn": "LM2677SX-3.3",
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 3,
+      "pins": [
+        {
+          "number": "2",
+          "name": "VIN",
+          "role": "power_in",
+          "net_label": "30V_GATE"
+        },
+        {
+          "number": "7",
+          "name": "ON/OFF",
+          "role": "enable_in",
+          "net_label": "3V3_PWR_EN"
+        },
+        {
+          "number": "5",
+          "name": "SYNC",
+          "role": "signal_in",
+          "net_label": null
+        },
+        {
+          "number": "4",
+          "name": "PAD",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "8",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "6",
+          "name": "FB",
+          "role": "feedback_in",
+          "net_label": null
+        },
+        {
+          "number": "3",
+          "name": "CB",
+          "role": "signal_in",
+          "net_label": null
+        },
+        {
+          "number": "1",
+          "name": "VSW",
+          "role": "switch_node",
+          "net_label": "VSW"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "U14",
+      "type": "ic",
+      "value": {
+        "raw": "LMR16006YQ3",
+        "primary": "LMR16006YQ3",
+        "package": null,
+        "mpn": "LMR16006YQ3",
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 3,
+      "pins": [
+        {
+          "number": "5",
+          "name": "VIN",
+          "role": "power_in",
+          "net_label": "30V_GATE"
+        },
+        {
+          "number": "4",
+          "name": "EN",
+          "role": "enable_in",
+          "net_label": null
+        },
+        {
+          "number": "0",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "2",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "1",
+          "name": "BOOST",
+          "role": "signal_in",
+          "net_label": "BOOST"
+        },
+        {
+          "number": "6",
+          "name": "SW",
+          "role": "switch_node",
+          "net_label": null
+        },
+        {
+          "number": "3",
+          "name": "FB",
+          "role": "feedback_in",
+          "net_label": null
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "U17",
+      "type": "ic",
+      "value": {
+        "raw": "TLV1117-18",
+        "primary": "TLV1117-18",
+        "package": null,
+        "mpn": "TLV1117-18",
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 3,
+      "pins": [
+        {
+          "number": "3",
+          "name": "VI",
+          "role": "power_in",
+          "net_label": "+5V"
+        },
+        {
+          "number": "2",
+          "name": "VO",
+          "role": "power_out",
+          "net_label": "+1VB"
+        },
+        {
+          "number": "1",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "U19",
+      "type": "ic",
+      "value": {
+        "raw": "TLV62568DBV",
+        "primary": "TLV62568DBV",
+        "package": null,
+        "mpn": "TLV62568DBV",
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 3,
+      "pins": [
+        {
+          "number": "4",
+          "name": "VIN",
+          "role": "power_in",
+          "net_label": "+5V"
+        },
+        {
+          "number": "2",
+          "name": "EN",
+          "role": "enable_in",
+          "net_label": "1V5_PWR_EN"
+        },
+        {
+          "number": "3",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "1",
+          "name": "SW",
+          "role": "switch_node",
+          "net_label": null
+        },
+        {
+          "number": "5",
+          "name": "FB",
+          "role": "feedback_in",
+          "net_label": null
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "U13",
+      "type": "ic",
+      "value": {
+        "raw": "TLV62568DBV",
+        "primary": "TLV62568DBV",
+        "package": null,
+        "mpn": "TLV62568DBV",
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 3,
+      "pins": [
+        {
+          "number": "4",
+          "name": "VIN",
+          "role": "power_in",
+          "net_label": "+5V"
+        },
+        {
+          "number": "2",
+          "name": "EN",
+          "role": "enable_in",
+          "net_label": "1V2_PWR_EN"
+        },
+        {
+          "number": "3",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "1",
+          "name": "SW",
+          "role": "switch_node",
+          "net_label": null
+        },
+        {
+          "number": "5",
+          "name": "FB",
+          "role": "feedback_in",
+          "net_label": null
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C16",
+      "type": "capacitor",
+      "value": {
+        "raw": "100uF",
+        "primary": "100uF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 3,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "30V_GATE"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C146",
+      "type": "capacitor",
+      "value": {
+        "raw": "1uF",
+        "primary": "1uF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 3,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "30V_GATE"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C148",
+      "type": "capacitor",
+      "value": {
+        "raw": "10nF",
+        "primary": "10nF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 3,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "BOOST"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "unknown",
+          "net_label": null
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "L3",
+      "type": "inductor",
+      "value": {
+        "raw": "68uH",
+        "primary": "68uH",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 3,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "switch_node",
+          "net_label": null
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "power_out",
+          "net_label": "+5V"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C18",
+      "type": "capacitor",
+      "value": {
+        "raw": "220uF",
+        "primary": "220uF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 3,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "+5V"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "D20",
+      "type": "diode",
+      "value": {
+        "raw": "SK54A-LTP",
+        "primary": "SK54A-LTP",
+        "package": null,
+        "mpn": "SK54A-LTP",
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 3,
+      "pins": [
+        {
+          "number": "A",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "K",
+          "name": null,
+          "role": "power_out",
+          "net_label": "+5V"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "D15",
+      "type": "diode",
+      "value": {
+        "raw": "BZX584C3V3-G3-08",
+        "primary": "BZX584C3V3-G3-08",
+        "package": null,
+        "mpn": "BZX584C3V3-G3-08",
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 3,
+      "pins": [
+        {
+          "number": "A",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "K",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "5V_PWR_EN"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R1",
+      "type": "resistor",
+      "value": {
+        "raw": "35R",
+        "primary": "35Ω",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 3,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "5V_PWR_EN"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": null
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C17",
+      "type": "capacitor",
+      "value": {
+        "raw": "100uF",
+        "primary": "100uF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 3,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "30V_GATE"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C145",
+      "type": "capacitor",
+      "value": {
+        "raw": "1uF",
+        "primary": "1uF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 3,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "30V_GATE"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C128",
+      "type": "capacitor",
+      "value": {
+        "raw": "10nF",
+        "primary": "10nF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 3,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "BOOST"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "unknown",
+          "net_label": null
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "L4",
+      "type": "inductor",
+      "value": {
+        "raw": "68uH",
+        "primary": "68uH",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 3,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "switch_node",
+          "net_label": null
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "power_out",
+          "net_label": "+3V3"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C19",
+      "type": "capacitor",
+      "value": {
+        "raw": "220uF",
+        "primary": "220uF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 3,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "+3V3"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "D21",
+      "type": "diode",
+      "value": {
+        "raw": "SK54A-LTP",
+        "primary": "SK54A-LTP",
+        "package": null,
+        "mpn": "SK54A-LTP",
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 3,
+      "pins": [
+        {
+          "number": "A",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "K",
+          "name": null,
+          "role": "power_out",
+          "net_label": "+3V3"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "D16",
+      "type": "diode",
+      "value": {
+        "raw": "BZX584C3V3-G3-08",
+        "primary": "BZX584C3V3-G3-08",
+        "package": null,
+        "mpn": "BZX584C3V3-G3-08",
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 3,
+      "pins": [
+        {
+          "number": "A",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "K",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "3V3_PWR_EN"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R188",
+      "type": "resistor",
+      "value": {
+        "raw": "75R",
+        "primary": "75Ω",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 3,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "3V3_PWR_EN"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": null
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C3",
+      "type": "capacitor",
+      "value": {
+        "raw": "0.33uF",
+        "primary": "0.33uF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 3,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "30V_GATE"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "L5",
+      "type": "inductor",
+      "value": {
+        "raw": "10uH",
+        "primary": "10uH",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 3,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "switch_node",
+          "net_label": null
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "power_out",
+          "net_label": "LPC_VCC"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "D3",
+      "type": "diode",
+      "value": {
+        "raw": "SBR0560S1",
+        "primary": "SBR0560S1",
+        "package": null,
+        "mpn": "SBR0560S1",
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 3,
+      "pins": [
+        {
+          "number": "A",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "K",
+          "name": null,
+          "role": "power_out",
+          "net_label": "LPC_VCC"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C129",
+      "type": "capacitor",
+      "value": {
+        "raw": "1uF",
+        "primary": "1uF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 3,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "+5V"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C130",
+      "type": "capacitor",
+      "value": {
+        "raw": "1uF",
+        "primary": "1uF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 3,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_out",
+          "net_label": "VCCIO"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "D11",
+      "type": "led",
+      "value": {
+        "raw": "LED3V",
+        "primary": "LED3V",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 3,
+      "pins": [
+        {
+          "number": "A",
+          "name": null,
+          "role": "power_in",
+          "net_label": "+3V3"
+        },
+        {
+          "number": "K",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "D12",
+      "type": "led",
+      "value": {
+        "raw": "LED5V",
+        "primary": "LED5V",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 3,
+      "pins": [
+        {
+          "number": "A",
+          "name": null,
+          "role": "power_in",
+          "net_label": "+5V"
+        },
+        {
+          "number": "K",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R189",
+      "type": "resistor",
+      "value": {
+        "raw": "33R",
+        "primary": "33Ω",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 3,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "+3V3"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": "LED3V"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R181",
+      "type": "resistor",
+      "value": {
+        "raw": "461R",
+        "primary": "461Ω",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 3,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "+5V"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": "LED5V"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C33",
+      "type": "capacitor",
+      "value": {
+        "raw": "4.7uF",
+        "primary": "4.7uF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 3,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "+5V"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C34",
+      "type": "capacitor",
+      "value": {
+        "raw": "10uF",
+        "primary": "10uF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 3,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_out",
+          "net_label": "+1V5"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C38",
+      "type": "capacitor",
+      "value": {
+        "raw": "6.8pF",
+        "primary": "6.8pF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 3,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "feedback_in",
+          "net_label": null
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "L6",
+      "type": "inductor",
+      "value": {
+        "raw": "2.2uH",
+        "primary": "2.2uH",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 3,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "switch_node",
+          "net_label": null
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "power_out",
+          "net_label": "+1V5"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R180",
+      "type": "resistor",
+      "value": {
+        "raw": "150k",
+        "primary": "150kΩ",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 3,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "feedback_in",
+          "net_label": "+1V5"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "feedback_in",
+          "net_label": null
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R181",
+      "type": "resistor",
+      "value": {
+        "raw": "100k",
+        "primary": "100kΩ",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 3,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "feedback_in",
+          "net_label": null
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R179",
+      "type": "resistor",
+      "value": {
+        "raw": "581R",
+        "primary": "581Ω",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 3,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "feedback_in",
+          "net_label": "+1V2"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "feedback_in",
+          "net_label": null
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R178",
+      "type": "resistor",
+      "value": {
+        "raw": "100k",
+        "primary": "100kΩ",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 3,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "feedback_in",
+          "net_label": null
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C35",
+      "type": "capacitor",
+      "value": {
+        "raw": "4.7uF",
+        "primary": "4.7uF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 3,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "+5V"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C37",
+      "type": "capacitor",
+      "value": {
+        "raw": "10uF",
+        "primary": "10uF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 3,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_out",
+          "net_label": "+1V2"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C36",
+      "type": "capacitor",
+      "value": {
+        "raw": "6.8pF",
+        "primary": "6.8pF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 3,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "feedback_in",
+          "net_label": null
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "L7",
+      "type": "inductor",
+      "value": {
+        "raw": "2.2uH",
+        "primary": "2.2uH",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 3,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "switch_node",
+          "net_label": null
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "power_out",
+          "net_label": "+1V2"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R1",
+      "type": "resistor",
+      "value": {
+        "raw": "100k",
+        "primary": "100kΩ",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 3,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "30V_GATE"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": null
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C33",
+      "type": "capacitor",
+      "value": {
+        "raw": "4.7uF",
+        "primary": "4.7uF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 3,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "+5V"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    }
+  ],
+  "nets": [
+    {
+      "local_id": "net_GND",
+      "label": "GND",
+      "is_power": true,
+      "is_global": true,
+      "connects": [
+        "U7.8",
+        "U7.4",
+        "U12.8",
+        "U12.4",
+        "C16.2",
+        "C146.2",
+        "C17.2",
+        "C145.2",
+        "C18.2",
+        "C19.2",
+        "D20.A",
+        "D21.A",
+        "D15.A",
+        "D16.A",
+        "C128.2",
+        "C148.2",
+        "U14.0",
+        "U14.2",
+        "D3.A",
+        "C129.2",
+        "C130.2",
+        "D11.K",
+        "D12.K",
+        "C33.2",
+        "C34.2",
+        "C35.2",
+        "C37.2",
+        "C38.2",
+        "C36.2",
+        "R180.2",
+        "R178.2",
+        "R181.2",
+        "R179.2",
+        "U19.3",
+        "U13.3",
+        "U17.1",
+        "C3.2"
+      ],
+      "page": 3
+    },
+    {
+      "local_id": "net_30V_GATE",
+      "label": "30V_GATE",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U7.2",
+        "U12.2",
+        "U14.5",
+        "C16.1",
+        "C146.1",
+        "C17.1",
+        "C145.1",
+        "C3.1",
+        "R1.1"
+      ],
+      "page": 3
+    },
+    {
+      "local_id": "net_5V_PWR_EN",
+      "label": "5V_PWR_EN",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U7.7",
+        "D15.K",
+        "R1.1"
+      ],
+      "page": 3
+    },
+    {
+      "local_id": "net_3V3_PWR_EN",
+      "label": "3V3_PWR_EN",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U12.7",
+        "D16.K",
+        "R188.1"
+      ],
+      "page": 3
+    },
+    {
+      "local_id": "net_p5V",
+      "label": "+5V",
+      "is_power": true,
+      "is_global": true,
+      "connects": [
+        "L3.2",
+        "C18.1",
+        "D20.K",
+        "U17.3",
+        "C129.1",
+        "D12.A",
+        "R181.1",
+        "U19.4",
+        "C33.1",
+        "U13.4",
+        "C35.1"
+      ],
+      "page": 3
+    },
+    {
+      "local_id": "net_p3V3",
+      "label": "+3V3",
+      "is_power": true,
+      "is_global": true,
+      "connects": [
+        "L4.2",
+        "C19.1",
+        "D21.K",
+        "D11.A",
+        "R189.1"
+      ],
+      "page": 3
+    },
+    {
+      "local_id": "net_BOOST",
+      "label": "BOOST",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U14.1",
+        "C148.1",
+        "C3.1"
+      ],
+      "page": 3
+    },
+    {
+      "local_id": "net_LPC_VCC",
+      "label": "LPC_VCC",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "L5.2",
+        "D3.K"
+      ],
+      "page": 3
+    },
+    {
+      "local_id": "net_VCCIO",
+      "label": "VCCIO",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U17.2",
+        "C130.1"
+      ],
+      "page": 3
+    },
+    {
+      "local_id": "net_p1V5",
+      "label": "+1V5",
+      "is_power": true,
+      "is_global": true,
+      "connects": [
+        "L6.2",
+        "C34.1",
+        "R180.1"
+      ],
+      "page": 3
+    },
+    {
+      "local_id": "net_p1V2",
+      "label": "+1V2",
+      "is_power": true,
+      "is_global": true,
+      "connects": [
+        "L7.2",
+        "C37.1",
+        "R179.1"
+      ],
+      "page": 3
+    },
+    {
+      "local_id": "net_1V5_PWR_EN",
+      "label": "1V5_PWR_EN",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U19.2"
+      ],
+      "page": 3
+    },
+    {
+      "local_id": "net_1V2_PWR_EN",
+      "label": "1V2_PWR_EN",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U13.2"
+      ],
+      "page": 3
+    },
+    {
+      "local_id": "net_LED3V",
+      "label": "LED3V",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "R189.2",
+        "D11.A"
+      ],
+      "page": 3
+    },
+    {
+      "local_id": "net_LED5V",
+      "label": "LED5V",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "R181.2",
+        "D12.A"
+      ],
+      "page": 3
+    },
+    {
+      "local_id": "net_PWR_FLAG",
+      "label": "PWR_FLAG",
+      "is_power": false,
+      "is_global": false,
+      "connects": [],
+      "page": 3
+    },
+    {
+      "local_id": "net_3V3",
+      "label": "3V3",
+      "is_power": true,
+      "is_global": false,
+      "connects": [
+        "U14.3"
+      ],
+      "page": 3
+    }
+  ],
+  "cross_page_refs": [
+    {
+      "label": "30V_GATE",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "power input rail",
+      "page": 3
+    },
+    {
+      "label": "5V_PWR_EN",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "LPC enable signal",
+      "page": 3
+    },
+    {
+      "label": "3V3_PWR_EN",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "LPC enable signal",
+      "page": 3
+    },
+    {
+      "label": "+5V",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "global +5V rail",
+      "page": 3
+    },
+    {
+      "label": "+3V3",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "global +3V3 rail",
+      "page": 3
+    },
+    {
+      "label": "LPC_VCC",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "LPC power",
+      "page": 3
+    },
+    {
+      "label": "VCCIO",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "VCCIO for DSI/SD",
+      "page": 3
+    },
+    {
+      "label": "+1V5",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "+1V5 rail",
+      "page": 3
+    },
+    {
+      "label": "+1V2",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "+1V2 rail",
+      "page": 3
+    },
+    {
+      "label": "1V5_PWR_EN",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "enable for U19",
+      "page": 3
+    },
+    {
+      "label": "1V2_PWR_EN",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "enable for U13",
+      "page": 3
+    },
+    {
+      "label": "3V3_PWR_AUX",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "AUX 3V3 for U17",
+      "page": 3
+    }
+  ],
+  "typed_edges": [
+    {
+      "src": "U7",
+      "dst": "+5V",
+      "kind": "powers",
+      "page": 3
+    },
+    {
+      "src": "U12",
+      "dst": "+3V3",
+      "kind": "powers",
+      "page": 3
+    },
+    {
+      "src": "U14",
+      "dst": "LPC_VCC",
+      "kind": "powers",
+      "page": 3
+    },
+    {
+      "src": "U17",
+      "dst": "VCCIO",
+      "kind": "powers",
+      "page": 3
+    },
+    {
+      "src": "U19",
+      "dst": "+1V5",
+      "kind": "powers",
+      "page": 3
+    },
+    {
+      "src": "U13",
+      "dst": "+1V2",
+      "kind": "powers",
+      "page": 3
+    },
+    {
+      "src": "+5V",
+      "dst": "U7",
+      "kind": "powered_by",
+      "page": 3
+    },
+    {
+      "src": "+3V3",
+      "dst": "U12",
+      "kind": "powered_by",
+      "page": 3
+    },
+    {
+      "src": "LPC_VCC",
+      "dst": "U14",
+      "kind": "powered_by",
+      "page": 3
+    },
+    {
+      "src": "5V_PWR_EN",
+      "dst": "U7",
+      "kind": "enables",
+      "page": 3
+    },
+    {
+      "src": "3V3_PWR_EN",
+      "dst": "U12",
+      "kind": "enables",
+      "page": 3
+    },
+    {
+      "src": "1V5_PWR_EN",
+      "dst": "U19",
+      "kind": "enables",
+      "page": 3
+    },
+    {
+      "src": "1V2_PWR_EN",
+      "dst": "U13",
+      "kind": "enables",
+      "page": 3
+    },
+    {
+      "src": "C16",
+      "dst": "30V_GATE",
+      "kind": "decouples",
+      "page": 3
+    },
+    {
+      "src": "C146",
+      "dst": "30V_GATE",
+      "kind": "decouples",
+      "page": 3
+    },
+    {
+      "src": "C17",
+      "dst": "30V_GATE",
+      "kind": "decouples",
+      "page": 3
+    },
+    {
+      "src": "C145",
+      "dst": "30V_GATE",
+      "kind": "decouples",
+      "page": 3
+    },
+    {
+      "src": "C3",
+      "dst": "30V_GATE",
+      "kind": "decouples",
+      "page": 3
+    },
+    {
+      "src": "C18",
+      "dst": "+5V",
+      "kind": "decouples",
+      "page": 3
+    },
+    {
+      "src": "C19",
+      "dst": "+3V3",
+      "kind": "decouples",
+      "page": 3
+    },
+    {
+      "src": "C34",
+      "dst": "+1V5",
+      "kind": "decouples",
+      "page": 3
+    },
+    {
+      "src": "C37",
+      "dst": "+1V2",
+      "kind": "decouples",
+      "page": 3
+    },
+    {
+      "src": "C33",
+      "dst": "+5V",
+      "kind": "decouples",
+      "page": 3
+    },
+    {
+      "src": "C35",
+      "dst": "+5V",
+      "kind": "decouples",
+      "page": 3
+    },
+    {
+      "src": "C129",
+      "dst": "+5V",
+      "kind": "decouples",
+      "page": 3
+    },
+    {
+      "src": "C130",
+      "dst": "VCCIO",
+      "kind": "decouples",
+      "page": 3
+    },
+    {
+      "src": "L3",
+      "dst": "+5V",
+      "kind": "filters",
+      "page": 3
+    },
+    {
+      "src": "L4",
+      "dst": "+3V3",
+      "kind": "filters",
+      "page": 3
+    },
+    {
+      "src": "L5",
+      "dst": "LPC_VCC",
+      "kind": "filters",
+      "page": 3
+    },
+    {
+      "src": "L6",
+      "dst": "+1V5",
+      "kind": "filters",
+      "page": 3
+    },
+    {
+      "src": "L7",
+      "dst": "+1V2",
+      "kind": "filters",
+      "page": 3
+    },
+    {
+      "src": "+5V",
+      "dst": "U17",
+      "kind": "powers",
+      "page": 3
+    },
+    {
+      "src": "+5V",
+      "dst": "U19",
+      "kind": "powers",
+      "page": 3
+    },
+    {
+      "src": "+5V",
+      "dst": "U13",
+      "kind": "powers",
+      "page": 3
+    }
+  ],
+  "designer_notes": [
+    {
+      "text": "Main system power converters, enabled by LPC",
+      "page": 3,
+      "attached_to_refdes": "U7",
+      "attached_to_net": null
+    },
+    {
+      "text": "Up to 5A @ 5V",
+      "page": 3,
+      "attached_to_refdes": "U7",
+      "attached_to_net": null
+    },
+    {
+      "text": "Up to 5A @ 3.3V",
+      "page": 3,
+      "attached_to_refdes": "U12",
+      "attached_to_net": null
+    },
+    {
+      "text": "Standby always-on 3V3 power rail",
+      "page": 3,
+      "attached_to_refdes": "U14",
+      "attached_to_net": null
+    },
+    {
+      "text": "Power LEDs",
+      "page": 3,
+      "attached_to_refdes": null,
+      "attached_to_net": null
+    },
+    {
+      "text": "VCCIO supply for DSI + SD",
+      "page": 3,
+      "attached_to_refdes": "U17",
+      "attached_to_net": null
+    },
+    {
+      "text": "Up to 40mA consumed by DSI bridge and SD card level shifter",
+      "page": 3,
+      "attached_to_refdes": "U17",
+      "attached_to_net": null
+    },
+    {
+      "text": "Up to 1A (peak) 375mA normal from mPCIe",
+      "page": 3,
+      "attached_to_refdes": "U19",
+      "attached_to_net": null
+    },
+    {
+      "text": "Up to 70mA consumed by DSI bridge",
+      "page": 3,
+      "attached_to_refdes": null,
+      "attached_to_net": "+1V5"
+    },
+    {
+      "text": "Up to 780mA (!) consumed by USB hub",
+      "page": 3,
+      "attached_to_refdes": null,
+      "attached_to_net": "+1V2"
+    },
+    {
+      "text": "License: CERN-OHL-S 2.0",
+      "page": 3,
+      "attached_to_refdes": null,
+      "attached_to_net": null
+    },
+    {
+      "text": "Engineer: Lukas F. Hartmann",
+      "page": 3,
+      "attached_to_refdes": null,
+      "attached_to_net": null
+    },
+    {
+      "text": "https://mntre.com",
+      "page": 3,
+      "attached_to_refdes": null,
+      "attached_to_net": null
+    },
+    {
+      "text": "MNT Research GmbH",
+      "page": 3,
+      "attached_to_refdes": null,
+      "attached_to_net": null
+    }
+  ],
+  "ambiguities": [
+    {
+      "description": "R181 refdes appears to be used for two different resistors (461R for LED5V series resistor and 100k for U19 feedback divider). The grounding data only lists R181 once; one may be R179 or another refdes.",
+      "page": 3,
+      "related_refdes": [
+        "R181",
+        "R179",
+        "R180"
+      ],
+      "related_nets": [
+        "+1V5",
+        "LED5V"
+      ]
+    },
+    {
+      "description": "The exact EN pin net label for U14 (LMR16006YQ3) is not clearly readable; it appears to be always-on (tied high or to LPC_VCC) but could not be confirmed.",
+      "page": 3,
+      "related_refdes": [
+        "U14"
+      ],
+      "related_nets": [
+        "LPC_VCC"
+      ]
+    },
+    {
+      "description": "Net label '3V3_PWR_AUX' appears on the left side connected to U17/R188 area but is not in the grounding NET_LABELS set; it may be 'XUA_RWP_3V3' or a local variant.",
+      "page": 3,
+      "related_refdes": [
+        "U17"
+      ],
+      "related_nets": [
+        "XUA_RWP_3V3",
+        "3V3_PWR_EN"
+      ]
+    },
+    {
+      "description": "PWR_FLAG symbols are present on multiple rails (+5V, +3V3, LPC_VCC, +1V5, +1V2) but their exact pin connections to nets could not all be individually traced.",
+      "page": 3,
+      "related_refdes": [],
+      "related_nets": [
+        "PWR_FLAG",
+        "+5V",
+        "+3V3",
+        "LPC_VCC",
+        "+1V5",
+        "+1V2"
+      ]
+    },
+    {
+      "description": "C128/C148 CB bypass capacitors for U7/U12 boost pins — exact net connection between CB pin and VSW could not be fully traced on this page.",
+      "page": 3,
+      "related_refdes": [
+        "C128",
+        "C148",
+        "U7",
+        "U12"
+      ],
+      "related_nets": [
+        "BOOST"
+      ]
+    },
+    {
+      "description": "R1 refdes from grounding set may correspond to the 100k resistor near U14 EN pin; the 35R near U7 is associated with R53 visually but R53 is not in the grounding refdes set.",
+      "page": 3,
+      "related_refdes": [
+        "R1"
+      ],
+      "related_nets": [
+        "30V_GATE",
+        "5V_PWR_EN"
+      ]
+    }
+  ]
+}

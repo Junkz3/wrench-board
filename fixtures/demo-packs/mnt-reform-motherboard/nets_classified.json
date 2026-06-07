@@ -1,0 +1,3998 @@
+{
+  "schema_version": "1.0",
+  "device_slug": "mnt-reform-motherboard",
+  "nets": {
+    "+1V2": {
+      "label": "+1V2",
+      "domain": "power_rail",
+      "description": "1.2V DC rail supplying USB hub and other 1.2V loads via ferrite beads and bulk capacitors.",
+      "voltage_level": "rail 1.2V",
+      "confidence": 0.98
+    },
+    "+1V5": {
+      "label": "+1V5",
+      "domain": "power_rail",
+      "description": "1.5V DC rail supplying DSI bridge (up to 70mA) and U11 mPCIe VCCIO.",
+      "voltage_level": "rail 1.5V",
+      "confidence": 0.98
+    },
+    "+1V8": {
+      "label": "+1V8",
+      "domain": "power_rail",
+      "description": "1.8V DC rail supplying VCCIO of DSI-to-eDP bridge U10 and associated logic.",
+      "voltage_level": "rail 1.8V",
+      "confidence": 0.97
+    },
+    "+3V3": {
+      "label": "+3V3",
+      "domain": "power_rail",
+      "description": "Main 3.3V system rail distributed across multiple pages powering logic, LEDs, and pull-ups.",
+      "voltage_level": "rail 3.3V",
+      "confidence": 0.99
+    },
+    "+5V": {
+      "label": "+5V",
+      "domain": "power_rail",
+      "description": "Main 5V system rail powering USB power switch, converters, and various ICs.",
+      "voltage_level": "rail 5V",
+      "confidence": 0.99
+    },
+    "1V1_HBSU": {
+      "label": "1V1_HBSU",
+      "domain": "power_rail",
+      "description": "1.1V power supply pin (VDD11) for USB hub bootstrap/holdover supply.",
+      "voltage_level": "rail 1.1V",
+      "confidence": 0.88
+    },
+    "1V2_PWR_EN": {
+      "label": "1V2_PWR_EN",
+      "domain": "power_seq",
+      "description": "Enable signal for the 1.2V power rail converter U13, controlled by LPC sequencing.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.96
+    },
+    "1V5_PWR_EN": {
+      "label": "1V5_PWR_EN",
+      "domain": "power_seq",
+      "description": "Enable signal for the 1.5V power rail converter U19.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.96
+    },
+    "24V_IN": {
+      "label": "24V_IN",
+      "domain": "power_rail",
+      "description": "24V DC input from barrel jack J1 through fuse F1, the main input supply.",
+      "voltage_level": "rail 24V",
+      "confidence": 0.99
+    },
+    "30V_GATE": {
+      "label": "30V_GATE",
+      "domain": "power_seq",
+      "description": "Boosted gate drive voltage (~30V) for main power MOSFETs in the system power path.",
+      "voltage_level": "~30V gate drive",
+      "confidence": 0.9
+    },
+    "3V3": {
+      "label": "3V3",
+      "domain": "power_rail",
+      "description": "Local 3.3V rail at U14 input/output node in power converter circuitry.",
+      "voltage_level": "rail 3.3V",
+      "confidence": 0.9
+    },
+    "3V3_HBSU": {
+      "label": "3V3_HBSU",
+      "domain": "power_rail",
+      "description": "3.3V hold-up/bootstrap supply for USB hub logic.",
+      "voltage_level": "rail 3.3V",
+      "confidence": 0.85
+    },
+    "3V3_PWR_AUX": {
+      "label": "3V3_PWR_AUX",
+      "domain": "power_rail",
+      "description": "Auxiliary 3.3V rail from U27 for always-on or secondary 3.3V consumers via ferrite beads.",
+      "voltage_level": "rail 3.3V",
+      "confidence": 0.95
+    },
+    "3V3_PWR_EN": {
+      "label": "3V3_PWR_EN",
+      "domain": "power_seq",
+      "description": "Enable signal for the main 3.3V power rail converter U12.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.96
+    },
+    "5V_OUT": {
+      "label": "5V_OUT",
+      "domain": "power_rail",
+      "description": "5V output from HDMI/display logic U22 for downstream supply.",
+      "voltage_level": "rail 5V",
+      "confidence": 0.85
+    },
+    "5V_PWR_EN": {
+      "label": "5V_PWR_EN",
+      "domain": "power_seq",
+      "description": "Enable signal for the main 5V power rail converter U7.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.96
+    },
+    "5V_SUPPLY": {
+      "label": "5V_SUPPLY",
+      "domain": "power_rail",
+      "description": "5V supply rail feeding HDMI connector J4 pin 18 and U22 logic.",
+      "voltage_level": "rail 5V",
+      "confidence": 0.92
+    },
+    "ADCDAT": {
+      "label": "ADCDAT",
+      "domain": "audio",
+      "description": "I2S ADC data output from audio codec U3 to SoC (microphone/line-in capture).",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.97
+    },
+    "ADCLRC": {
+      "label": "ADCLRC",
+      "domain": "audio",
+      "description": "I2S ADC left/right clock (word select) from audio codec U3.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.97
+    },
+    "ADDR": {
+      "label": "ADDR",
+      "domain": "display",
+      "description": "Address configuration pin of DSI-to-eDP bridge U10.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.8
+    },
+    "AGND": {
+      "label": "AGND",
+      "domain": "ground",
+      "description": "Analog ground reference for audio codec U3.",
+      "voltage_level": "0V",
+      "confidence": 0.99
+    },
+    "AUX_PWR_EN": {
+      "label": "AUX_PWR_EN",
+      "domain": "power_seq",
+      "description": "Enable signal for auxiliary power rail controlled by U27.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.93
+    },
+    "AVDD": {
+      "label": "AVDD",
+      "domain": "audio",
+      "description": "Analog supply voltage (AVDD) for audio codec U3, filtered through ferrite bead FB21.",
+      "voltage_level": "rail 3.3V",
+      "confidence": 0.97
+    },
+    "BACKLIGHT_EN": {
+      "label": "BACKLIGHT_EN",
+      "domain": "display",
+      "description": "Backlight enable signal from SoC U1 to control display backlight circuit.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.98
+    },
+    "BACKLIGHT_PWM": {
+      "label": "BACKLIGHT_PWM",
+      "domain": "display",
+      "description": "PWM signal from SoC U1 to control display backlight brightness.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.98
+    },
+    "BAT": {
+      "label": "BAT",
+      "domain": "power_rail",
+      "description": "Battery stack voltage sense/connection at charger IC U2.",
+      "voltage_level": "rail ~16-33V",
+      "confidence": 0.88
+    },
+    "BAT1": {
+      "label": "BAT1",
+      "domain": "power_rail",
+      "description": "Battery cell 1 positive terminal connected via fuse F2 and MOSFET Q5.",
+      "voltage_level": "rail ~3.6-4.2V",
+      "confidence": 0.95
+    },
+    "BAT1FUSED": {
+      "label": "BAT1FUSED",
+      "domain": "power_rail",
+      "description": "Fused battery cell 1 node feeding balancing and charger circuitry.",
+      "voltage_level": "rail ~3.6-4.2V",
+      "confidence": 0.93
+    },
+    "BAT2": {
+      "label": "BAT2",
+      "domain": "power_rail",
+      "description": "Battery cell 2 terminal with balancing resistors and protection diode.",
+      "voltage_level": "rail ~3.6-4.2V",
+      "confidence": 0.95
+    },
+    "BAT3": {
+      "label": "BAT3",
+      "domain": "power_rail",
+      "description": "Battery cell 3 terminal with balancing resistors and protection diode.",
+      "voltage_level": "rail ~3.6-4.2V",
+      "confidence": 0.95
+    },
+    "BAT4": {
+      "label": "BAT4",
+      "domain": "power_rail",
+      "description": "Battery cell 4 terminal with balancing resistors and protection diode.",
+      "voltage_level": "rail ~3.6-4.2V",
+      "confidence": 0.95
+    },
+    "BAT5": {
+      "label": "BAT5",
+      "domain": "power_rail",
+      "description": "Battery cell 5 terminal connected to J2 and balancing circuit.",
+      "voltage_level": "rail ~3.6-4.2V",
+      "confidence": 0.95
+    },
+    "BAT6": {
+      "label": "BAT6",
+      "domain": "power_rail",
+      "description": "Battery cell 6 terminal connected to J2 and balancing circuit.",
+      "voltage_level": "rail ~3.6-4.2V",
+      "confidence": 0.95
+    },
+    "BAT7": {
+      "label": "BAT7",
+      "domain": "power_rail",
+      "description": "Battery cell 7 terminal connected to J2 and balancing circuit.",
+      "voltage_level": "rail ~3.6-4.2V",
+      "confidence": 0.95
+    },
+    "BAT8": {
+      "label": "BAT8",
+      "domain": "power_rail",
+      "description": "Battery cell 8 terminal connected to J2 and balancing circuit.",
+      "voltage_level": "rail ~3.6-4.2V",
+      "confidence": 0.95
+    },
+    "BCLK": {
+      "label": "BCLK",
+      "domain": "audio",
+      "description": "I2S bit clock from audio codec U3 to SoC for audio data serialization.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.97
+    },
+    "BG1": {
+      "label": "BG1",
+      "domain": "power_seq",
+      "description": "Bottom gate drive signal 1 for synchronous rectifier MOSFET in charger IC U2.",
+      "voltage_level": "gate drive signal",
+      "confidence": 0.82
+    },
+    "BG2": {
+      "label": "BG2",
+      "domain": "power_seq",
+      "description": "Bottom gate drive signal 2 for synchronous rectifier MOSFET in charger IC U2.",
+      "voltage_level": "gate drive signal",
+      "confidence": 0.82
+    },
+    "BGATE": {
+      "label": "BGATE",
+      "domain": "power_seq",
+      "description": "Battery FET gate control signal from charger IC U2 for battery disconnect.",
+      "voltage_level": "gate drive signal",
+      "confidence": 0.88
+    },
+    "BMON_CS": {
+      "label": "BMON_CS",
+      "domain": "control",
+      "description": "SPI chip select for battery monitor IC (active-low).",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.92
+    },
+    "BMON_SCK": {
+      "label": "BMON_SCK",
+      "domain": "control",
+      "description": "SPI clock for battery monitor IC communication.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.92
+    },
+    "BMON_SDI": {
+      "label": "BMON_SDI",
+      "domain": "control",
+      "description": "SPI data input (MOSI) to battery monitor IC.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.92
+    },
+    "BMON_SDO": {
+      "label": "BMON_SDO",
+      "domain": "control",
+      "description": "SPI data output (MISO) from battery monitor IC.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.92
+    },
+    "BOOST": {
+      "label": "BOOST",
+      "domain": "power_seq",
+      "description": "Bootstrap capacitor node for high-side gate driver in power converter U14.",
+      "voltage_level": "bootstrap ~35V",
+      "confidence": 0.88
+    },
+    "BOOTCFG_0": {
+      "label": "BOOTCFG_0",
+      "domain": "debug",
+      "description": "SoC U1 boot configuration pin 0 for selecting boot media/mode.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.92
+    },
+    "BOOTCFG_1": {
+      "label": "BOOTCFG_1",
+      "domain": "debug",
+      "description": "SoC U1 boot configuration pin 1 for selecting boot media/mode.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.92
+    },
+    "BOOTCFG_10": {
+      "label": "BOOTCFG_10",
+      "domain": "debug",
+      "description": "SoC U1 boot config pin 10: selects eSDHC1 (0) or eSDHC2 (1) interface.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.93
+    },
+    "BOOTCFG_11": {
+      "label": "BOOTCFG_11",
+      "domain": "debug",
+      "description": "SoC U1 boot configuration pin 11 for selecting boot media/mode.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.92
+    },
+    "BOOTCFG_12": {
+      "label": "BOOTCFG_12",
+      "domain": "debug",
+      "description": "SoC U1 boot config pin 12: eMMC boot mode selection.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.93
+    },
+    "BOOTCFG_13": {
+      "label": "BOOTCFG_13",
+      "domain": "debug",
+      "description": "SoC U1 boot configuration pin 13 for boot mode selection.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.92
+    },
+    "BOOTCFG_14": {
+      "label": "BOOTCFG_14",
+      "domain": "debug",
+      "description": "SoC U1 boot configuration pin 14 for boot mode selection.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.92
+    },
+    "BOOTCFG_15": {
+      "label": "BOOTCFG_15",
+      "domain": "debug",
+      "description": "SoC U1 boot config pin 15: SD boot mode selection (01=SD).",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.93
+    },
+    "BOOTCFG_4": {
+      "label": "BOOTCFG_4",
+      "domain": "debug",
+      "description": "SoC U1 boot config pin 4: SD bus width selection (0=1-bit, 1=4-bit).",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.93
+    },
+    "BOOTCFG_7": {
+      "label": "BOOTCFG_7",
+      "domain": "debug",
+      "description": "SoC U1 boot configuration pin 7 for boot mode selection.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.92
+    },
+    "BOOTCFG_8": {
+      "label": "BOOTCFG_8",
+      "domain": "debug",
+      "description": "SoC U1 boot configuration pin 8 for boot mode selection.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.92
+    },
+    "BOOTCFG_9": {
+      "label": "BOOTCFG_9",
+      "domain": "debug",
+      "description": "SoC U1 boot configuration pin 9 for boot mode selection.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.92
+    },
+    "BST1": {
+      "label": "BST1",
+      "domain": "power_seq",
+      "description": "Bootstrap capacitor node 1 for high-side MOSFET gate driver in charger IC U2.",
+      "voltage_level": "bootstrap ~5V above SW",
+      "confidence": 0.85
+    },
+    "BST2": {
+      "label": "BST2",
+      "domain": "power_seq",
+      "description": "Bootstrap capacitor node 2 for high-side MOSFET gate driver in charger IC U2.",
+      "voltage_level": "bootstrap ~5V above SW",
+      "confidence": 0.85
+    },
+    "BT_EN": {
+      "label": "BT_EN",
+      "domain": "control",
+      "description": "Bluetooth enable signal from SoC U1 to enable the BT portion of the wireless module.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.93
+    },
+    "BT_HOST_WAKE": {
+      "label": "BT_HOST_WAKE",
+      "domain": "control",
+      "description": "Bluetooth host wake interrupt signal from wireless module to SoC U1.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.93
+    },
+    "CAMERA_CLK": {
+      "label": "CAMERA_CLK",
+      "domain": "clock",
+      "description": "Master clock output from SoC U1 to camera module.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.9
+    },
+    "CC1": {
+      "label": "CC1",
+      "domain": "usb",
+      "description": "USB Type-C CC1 configuration channel pin on connector J8 for orientation and role detection.",
+      "voltage_level": "open-drain pull-up",
+      "confidence": 0.97
+    },
+    "CC110000": {
+      "label": "CC110000",
+      "domain": "power_rail",
+      "description": "Decoupling capacitor bank node on the 1.2V rail (likely a local decoupled supply node).",
+      "voltage_level": "rail 1.2V",
+      "confidence": 0.65
+    },
+    "CC2": {
+      "label": "CC2",
+      "domain": "usb",
+      "description": "USB Type-C CC2 configuration channel pin on connector J8 for orientation and role detection.",
+      "voltage_level": "open-drain pull-up",
+      "confidence": 0.97
+    },
+    "CCAARRDD__DDEETTEECCTT": {
+      "label": "CCAARRDD__DDEETTEECCTT",
+      "domain": "storage",
+      "description": "SD card detect signal (doubled characters suggest schematic text artifact) for SD card slot.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.72
+    },
+    "CCDD//DDAATT33": {
+      "label": "CCDD//DDAATT33",
+      "domain": "storage",
+      "description": "SD card data line 3 / command-data signal (doubled characters are schematic artifact).",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.7
+    },
+    "CCLLKK": {
+      "label": "CCLLKK",
+      "domain": "storage",
+      "description": "SD card clock signal through ESD protection U28 (doubled chars are schematic artifact).",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.72
+    },
+    "CCMMDD": {
+      "label": "CCMMDD",
+      "domain": "storage",
+      "description": "SD card command signal (doubled characters are schematic artifact).",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.72
+    },
+    "CEC": {
+      "label": "CEC",
+      "domain": "hdmi",
+      "description": "HDMI Consumer Electronics Control (CEC) bus on connector J4 pin 13.",
+      "voltage_level": "open-drain 3V3",
+      "confidence": 0.99
+    },
+    "CE_REMOTE_IN": {
+      "label": "CE_REMOTE_IN",
+      "domain": "hdmi",
+      "description": "Consumer Electronics remote control input signal to HDMI controller U22.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.85
+    },
+    "CE_REMOTE_OUT": {
+      "label": "CE_REMOTE_OUT",
+      "domain": "hdmi",
+      "description": "Consumer Electronics remote control output signal from HDMI controller U22.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.85
+    },
+    "CHGBAT": {
+      "label": "CHGBAT",
+      "domain": "power_rail",
+      "description": "Charge current sense/battery charging node between charger U6 and sense resistor R41.",
+      "voltage_level": "rail ~12-16V",
+      "confidence": 0.85
+    },
+    "CHG_INTVCC": {
+      "label": "CHG_INTVCC",
+      "domain": "power_rail",
+      "description": "Internal VCC supply of charger IC U2, regulated gate-drive supply (~5V).",
+      "voltage_level": "rail ~5V",
+      "confidence": 0.88
+    },
+    "CHG_RNG": {
+      "label": "CHG_RNG",
+      "domain": "control",
+      "description": "Charge current range programming resistor connection for charger IC.",
+      "voltage_level": "analog signal",
+      "confidence": 0.8
+    },
+    "CHG_STAT1": {
+      "label": "CHG_STAT1",
+      "domain": "power_seq",
+      "description": "Charger IC U2 status output 1 indicating charge state (e.g., charging/full).",
+      "voltage_level": "open-drain",
+      "confidence": 0.88
+    },
+    "CHG_STAT2": {
+      "label": "CHG_STAT2",
+      "domain": "power_seq",
+      "description": "Charger IC U2 status output 2 indicating charge state.",
+      "voltage_level": "open-drain",
+      "confidence": 0.88
+    },
+    "CLKA_N": {
+      "label": "CLKA_N",
+      "domain": "pcie",
+      "description": "PCIe/mPCIe differential reference clock negative from U23 to mPCIe connector.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.88
+    },
+    "CLKA_P": {
+      "label": "CLKA_P",
+      "domain": "pcie",
+      "description": "PCIe/mPCIe differential reference clock positive from U23 to mPCIe connector.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.88
+    },
+    "COEX1": {
+      "label": "COEX1",
+      "domain": "control",
+      "description": "Coexistence signal 1 on mPCIe module U11 for WiFi/BT RF coexistence management.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.85
+    },
+    "COEX2": {
+      "label": "COEX2",
+      "domain": "control",
+      "description": "Coexistence signal 2 on mPCIe module U11 for WiFi/BT RF coexistence management.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.85
+    },
+    "COM": {
+      "label": "COM",
+      "domain": "ethernet",
+      "description": "Common/center-tap pin of Ethernet magnetics on Gigabit Ethernet port PP11.",
+      "voltage_level": "rail ~2.5V bias",
+      "confidence": 0.82
+    },
+    "CR1220": {
+      "label": "CR1220",
+      "domain": "power_rail",
+      "description": "CR1220 coin cell positive terminal supplying RTC backup voltage via U5.",
+      "voltage_level": "rail ~3V",
+      "confidence": 0.92
+    },
+    "CSI_P2_CK_N": {
+      "label": "CSI_P2_CK_N",
+      "domain": "display",
+      "description": "MIPI CSI-2 port 2 differential clock negative from SoC U1 (camera/display interface).",
+      "voltage_level": "differential ±200mV",
+      "confidence": 0.88
+    },
+    "CSI_P2_CK_P": {
+      "label": "CSI_P2_CK_P",
+      "domain": "display",
+      "description": "MIPI CSI-2 port 2 differential clock positive from SoC U1 (camera/display interface).",
+      "voltage_level": "differential ±200mV",
+      "confidence": 0.88
+    },
+    "CSI_P2_D0_N": {
+      "label": "CSI_P2_D0_N",
+      "domain": "display",
+      "description": "MIPI CSI-2 port 2 data lane 0 negative from SoC U1.",
+      "voltage_level": "differential ±200mV",
+      "confidence": 0.87
+    },
+    "CSI_P2_D0_P": {
+      "label": "CSI_P2_D0_P",
+      "domain": "display",
+      "description": "MIPI CSI-2 port 2 data lane 0 positive from SoC U1.",
+      "voltage_level": "differential ±200mV",
+      "confidence": 0.87
+    },
+    "CSI_P2_D1_N": {
+      "label": "CSI_P2_D1_N",
+      "domain": "display",
+      "description": "MIPI CSI-2 port 2 data lane 1 negative from SoC U1.",
+      "voltage_level": "differential ±200mV",
+      "confidence": 0.87
+    },
+    "CSI_P2_D1_P": {
+      "label": "CSI_P2_D1_P",
+      "domain": "display",
+      "description": "MIPI CSI-2 port 2 data lane 1 positive from SoC U1.",
+      "voltage_level": "differential ±200mV",
+      "confidence": 0.87
+    },
+    "CSI_P2_D2_N": {
+      "label": "CSI_P2_D2_N",
+      "domain": "display",
+      "description": "MIPI CSI-2 port 2 data lane 2 negative from SoC U1.",
+      "voltage_level": "differential ±200mV",
+      "confidence": 0.87
+    },
+    "CSI_P2_D2_P": {
+      "label": "CSI_P2_D2_P",
+      "domain": "display",
+      "description": "MIPI CSI-2 port 2 data lane 2 positive from SoC U1.",
+      "voltage_level": "differential ±200mV",
+      "confidence": 0.87
+    },
+    "CSI_P2_D3_N": {
+      "label": "CSI_P2_D3_N",
+      "domain": "display",
+      "description": "MIPI CSI-2 port 2 data lane 3 negative from SoC U1.",
+      "voltage_level": "differential ±200mV",
+      "confidence": 0.87
+    },
+    "CSI_P2_D3_P": {
+      "label": "CSI_P2_D3_P",
+      "domain": "display",
+      "description": "MIPI CSI-2 port 2 data lane 3 positive from SoC U1.",
+      "voltage_level": "differential ±200mV",
+      "confidence": 0.87
+    },
+    "CSN": {
+      "label": "CSN",
+      "domain": "control",
+      "description": "Current sense negative input to charger IC U2 for battery current monitoring.",
+      "voltage_level": "analog mV-level",
+      "confidence": 0.82
+    },
+    "CSOUT": {
+      "label": "CSOUT",
+      "domain": "control",
+      "description": "Current sense amplifier output from charger IC U2.",
+      "voltage_level": "analog 0-5V",
+      "confidence": 0.82
+    },
+    "CSP": {
+      "label": "CSP",
+      "domain": "control",
+      "description": "Current sense positive input to charger IC U2 for battery current monitoring.",
+      "voltage_level": "analog mV-level",
+      "confidence": 0.82
+    },
+    "CTIA": {
+      "label": "CTIA",
+      "domain": "audio",
+      "description": "CTIA headset microphone bias/detect node connecting to audio codec and detection diode D10.",
+      "voltage_level": "analog bias ~1-2V",
+      "confidence": 0.85
+    },
+    "DACDAT": {
+      "label": "DACDAT",
+      "domain": "audio",
+      "description": "I2S DAC data input to audio codec U3 from SoC (playback audio data).",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.97
+    },
+    "DACLRC": {
+      "label": "DACLRC",
+      "domain": "audio",
+      "description": "I2S DAC left/right clock (word select) to audio codec U3.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.97
+    },
+    "DAC_BCLK": {
+      "label": "DAC_BCLK",
+      "domain": "audio",
+      "description": "I2S bit clock routed to audio codec DAC section via R138.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.95
+    },
+    "DAC_DIN": {
+      "label": "DAC_DIN",
+      "domain": "audio",
+      "description": "I2S DAC data input signal routed via R150 to audio codec.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.95
+    },
+    "DAC_DOUT": {
+      "label": "DAC_DOUT",
+      "domain": "audio",
+      "description": "Audio DAC data output line from codec (U3) via resistor R121",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.9
+    },
+    "DAC_MCLK": {
+      "label": "DAC_MCLK",
+      "domain": "audio",
+      "description": "Master clock input to audio DAC codec (U3) via resistor R114",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.95
+    },
+    "DAC_RXFS": {
+      "label": "DAC_RXFS",
+      "domain": "audio",
+      "description": "Audio DAC receive frame sync (I2S LRCLK) signal via R139",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.9
+    },
+    "DAC_SCL": {
+      "label": "DAC_SCL",
+      "domain": "audio",
+      "description": "I2C clock line for audio DAC codec (U3/U5) control interface, pulled up to 3V3",
+      "voltage_level": "open-drain pull-up",
+      "confidence": 0.9
+    },
+    "DAC_SDA": {
+      "label": "DAC_SDA",
+      "domain": "audio",
+      "description": "I2C data line for audio DAC codec (U3/U5) control interface, pulled up to 3V3",
+      "voltage_level": "open-drain pull-up",
+      "confidence": 0.9
+    },
+    "DAC_TXFS": {
+      "label": "DAC_TXFS",
+      "domain": "audio",
+      "description": "Audio DAC transmit frame sync (I2S LRCLK) signal via R151",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.9
+    },
+    "DBVDD": {
+      "label": "DBVDD",
+      "domain": "audio",
+      "description": "Digital buffer supply rail for audio codec U3 (DBVDD pin), filtered via FB20",
+      "voltage_level": "rail 3V3",
+      "confidence": 0.95
+    },
+    "DCVDD": {
+      "label": "DCVDD",
+      "domain": "audio",
+      "description": "Digital core supply rail for audio codec U3 (DCVDD pin), filtered via FB18",
+      "voltage_level": "rail 1V8",
+      "confidence": 0.9
+    },
+    "DDAATT00": {
+      "label": "DDAATT00",
+      "domain": "storage",
+      "description": "SD card data bit 0 signal on SD card interface (page 9)",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.6
+    },
+    "DDAATT11": {
+      "label": "DDAATT11",
+      "domain": "storage",
+      "description": "SD card data bit 1 signal on SD card interface (page 9)",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.6
+    },
+    "DDAATT22": {
+      "label": "DDAATT22",
+      "domain": "storage",
+      "description": "SD card data bit 2 signal on SD card interface (page 9)",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.6
+    },
+    "DDC_CLK_IN": {
+      "label": "DDC_CLK_IN",
+      "domain": "hdmi",
+      "description": "DDC clock input to HDMI repeater/level-shifter U22 from upstream source",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.9
+    },
+    "DDC_CLK_OUT": {
+      "label": "DDC_CLK_OUT",
+      "domain": "hdmi",
+      "description": "DDC clock output from HDMI repeater U22 toward connector, with pull-up via R43",
+      "voltage_level": "open-drain pull-up",
+      "confidence": 0.9
+    },
+    "DDC_DAT_IN": {
+      "label": "DDC_DAT_IN",
+      "domain": "hdmi",
+      "description": "DDC data input to HDMI repeater/level-shifter U22 from upstream source",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.9
+    },
+    "DDC_DAT_OUT": {
+      "label": "DDC_DAT_OUT",
+      "domain": "hdmi",
+      "description": "DDC data output from HDMI repeater U22 toward connector, with pull-up via R44",
+      "voltage_level": "open-drain pull-up",
+      "confidence": 0.9
+    },
+    "DGND": {
+      "label": "DGND",
+      "domain": "ground",
+      "description": "Digital ground reference for audio codec U3 (DGND pin)",
+      "voltage_level": "0V",
+      "confidence": 0.95
+    },
+    "DIR": {
+      "label": "DIR",
+      "domain": "storage",
+      "description": "Direction control signal for ESD protection device U28 on SD card interface",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.75
+    },
+    "DSI_CLK_N": {
+      "label": "DSI_CLK_N",
+      "domain": "display",
+      "description": "MIPI DSI differential clock negative lane from SoC U1 to DSI-to-eDP bridge U10 via J15",
+      "voltage_level": "differential ±200mV",
+      "confidence": 0.98
+    },
+    "DSI_CLK_P": {
+      "label": "DSI_CLK_P",
+      "domain": "display",
+      "description": "MIPI DSI differential clock positive lane from SoC U1 to DSI-to-eDP bridge U10 via J15",
+      "voltage_level": "differential ±200mV",
+      "confidence": 0.98
+    },
+    "DSI_D0_N": {
+      "label": "DSI_D0_N",
+      "domain": "display",
+      "description": "MIPI DSI data lane 0 negative from SoC U1 to DSI-to-eDP bridge U10 via J15",
+      "voltage_level": "differential ±200mV",
+      "confidence": 0.98
+    },
+    "DSI_D0_P": {
+      "label": "DSI_D0_P",
+      "domain": "display",
+      "description": "MIPI DSI data lane 0 positive from SoC U1 to DSI-to-eDP bridge U10 via J15",
+      "voltage_level": "differential ±200mV",
+      "confidence": 0.98
+    },
+    "DSI_D1_N": {
+      "label": "DSI_D1_N",
+      "domain": "display",
+      "description": "MIPI DSI data lane 1 negative from SoC U1 to DSI-to-eDP bridge U10 via J15",
+      "voltage_level": "differential ±200mV",
+      "confidence": 0.98
+    },
+    "DSI_D1_P": {
+      "label": "DSI_D1_P",
+      "domain": "display",
+      "description": "MIPI DSI data lane 1 positive from SoC U1 to DSI-to-eDP bridge U10 via J15",
+      "voltage_level": "differential ±200mV",
+      "confidence": 0.98
+    },
+    "DSI_D2_N": {
+      "label": "DSI_D2_N",
+      "domain": "display",
+      "description": "MIPI DSI data lane 2 negative from SoC U1 to DSI-to-eDP bridge U10 via J15",
+      "voltage_level": "differential ±200mV",
+      "confidence": 0.98
+    },
+    "DSI_D2_P": {
+      "label": "DSI_D2_P",
+      "domain": "display",
+      "description": "MIPI DSI data lane 2 positive from SoC U1 to DSI-to-eDP bridge U10 via J15",
+      "voltage_level": "differential ±200mV",
+      "confidence": 0.98
+    },
+    "DSI_D3_N": {
+      "label": "DSI_D3_N",
+      "domain": "display",
+      "description": "MIPI DSI data lane 3 negative from SoC U1 to DSI-to-eDP bridge U10 via J15",
+      "voltage_level": "differential ±200mV",
+      "confidence": 0.98
+    },
+    "DSI_D3_P": {
+      "label": "DSI_D3_P",
+      "domain": "display",
+      "description": "MIPI DSI data lane 3 positive from SoC U1 to DSI-to-eDP bridge U10 via J15",
+      "voltage_level": "differential ±200mV",
+      "confidence": 0.98
+    },
+    "ECSPI2_MISO": {
+      "label": "ECSPI2_MISO",
+      "domain": "control",
+      "description": "Enhanced CSPI2 MISO data line from SoC U1 peripheral SPI bus",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.85
+    },
+    "ECSPI2_MOSI": {
+      "label": "ECSPI2_MOSI",
+      "domain": "control",
+      "description": "Enhanced CSPI2 MOSI data line from SoC U1 peripheral SPI bus",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.85
+    },
+    "ECSPI2_SCLK": {
+      "label": "ECSPI2_SCLK",
+      "domain": "control",
+      "description": "Enhanced CSPI2 clock line from SoC U1 peripheral SPI bus",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.85
+    },
+    "ECSPI2_SS0": {
+      "label": "ECSPI2_SS0",
+      "domain": "control",
+      "description": "Enhanced CSPI2 chip select 0 from SoC U1 peripheral SPI bus",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.85
+    },
+    "EDAUXN": {
+      "label": "EDAUXN",
+      "domain": "display",
+      "description": "eDP AUX channel negative at DSI-to-eDP bridge U10, AC-coupled via C107",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.95
+    },
+    "EDAUXP": {
+      "label": "EDAUXP",
+      "domain": "display",
+      "description": "eDP AUX channel positive at DSI-to-eDP bridge U10, AC-coupled via C110",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.95
+    },
+    "EDP_AUX_DN": {
+      "label": "EDP_AUX_DN",
+      "domain": "display",
+      "description": "eDP AUX channel negative to panel connector J24 pin 10",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.95
+    },
+    "EDP_AUX_DP": {
+      "label": "EDP_AUX_DP",
+      "domain": "display",
+      "description": "eDP AUX channel positive to panel connector J24 pin 9, AC-coupled via C110",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.95
+    },
+    "EDP_BL_ENABLE": {
+      "label": "EDP_BL_ENABLE",
+      "domain": "display",
+      "description": "Backlight enable signal to panel connector J24 for LCD backlight control",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.95
+    },
+    "EDP_BL_PWM": {
+      "label": "EDP_BL_PWM",
+      "domain": "display",
+      "description": "Backlight PWM brightness control signal to panel connector J24",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.95
+    },
+    "EDP_BL_VCC": {
+      "label": "EDP_BL_VCC",
+      "domain": "display",
+      "description": "Backlight power supply rail to panel connector J24, filtered via FB15",
+      "voltage_level": "rail 5V",
+      "confidence": 0.9
+    },
+    "EDP_HPD": {
+      "label": "EDP_HPD",
+      "domain": "display",
+      "description": "eDP hot-plug detect signal from panel connector J24 via pull-up R64",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.9
+    },
+    "EDP_IRQ": {
+      "label": "EDP_IRQ",
+      "domain": "display",
+      "description": "Interrupt request from DSI-to-eDP bridge U10 to SoC U1",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.9
+    },
+    "EDP_LCD_TEST": {
+      "label": "EDP_LCD_TEST",
+      "domain": "display",
+      "description": "LCD test mode signal on panel connector J24 pin 14",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.8
+    },
+    "EDP_LCD_VCC": {
+      "label": "EDP_LCD_VCC",
+      "domain": "display",
+      "description": "LCD panel power supply rail to panel connector J24, filtered via FB14",
+      "voltage_level": "rail 3V3",
+      "confidence": 0.9
+    },
+    "EDP_RESETn": {
+      "label": "EDP_RESETn",
+      "domain": "display",
+      "description": "Active-low reset to DSI-to-eDP bridge U10 via pull-up R82",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.95
+    },
+    "EDP_SCL": {
+      "label": "EDP_SCL",
+      "domain": "display",
+      "description": "I2C clock for DSI-to-eDP bridge U10 configuration, pulled up via R129",
+      "voltage_level": "open-drain pull-up",
+      "confidence": 0.9
+    },
+    "EDP_SDA": {
+      "label": "EDP_SDA",
+      "domain": "display",
+      "description": "I2C data for DSI-to-eDP bridge U10 configuration, from SoC U1 via R130",
+      "voltage_level": "open-drain pull-up",
+      "confidence": 0.9
+    },
+    "EDP_TX0_DN": {
+      "label": "EDP_TX0_DN",
+      "domain": "display",
+      "description": "eDP transmit lane 0 negative to panel connector J24, AC-coupled via C109",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.95
+    },
+    "EDP_TX0_DP": {
+      "label": "EDP_TX0_DP",
+      "domain": "display",
+      "description": "eDP transmit lane 0 positive to panel connector J24 pin 7",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.95
+    },
+    "EDP_TX1_DN": {
+      "label": "EDP_TX1_DN",
+      "domain": "display",
+      "description": "eDP transmit lane 1 negative to panel connector J24, AC-coupled via C108",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.95
+    },
+    "EDP_TX1_DP": {
+      "label": "EDP_TX1_DP",
+      "domain": "display",
+      "description": "eDP transmit lane 1 positive to panel connector J24 pin 4",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.95
+    },
+    "ESD_BYP": {
+      "label": "ESD_BYP",
+      "domain": "hdmi",
+      "description": "ESD bypass control signal on HDMI repeater U22, used to bypass ESD clamping",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.8
+    },
+    "ETH0_A": {
+      "label": "ETH0_A",
+      "domain": "ethernet",
+      "description": "Gigabit Ethernet pair A positive (TX/RX) at RJ45 port PP11",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.95
+    },
+    "ETH0_A-": {
+      "label": "ETH0_A-",
+      "domain": "ethernet",
+      "description": "Gigabit Ethernet pair A negative (TX/RX) at RJ45 port PP11",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.95
+    },
+    "ETH0_B": {
+      "label": "ETH0_B",
+      "domain": "ethernet",
+      "description": "Gigabit Ethernet pair B positive (TX/RX) at RJ45 port PP11",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.95
+    },
+    "ETH0_B-": {
+      "label": "ETH0_B-",
+      "domain": "ethernet",
+      "description": "Gigabit Ethernet pair B negative (TX/RX) at RJ45 port PP11",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.95
+    },
+    "ETH0_C": {
+      "label": "ETH0_C",
+      "domain": "ethernet",
+      "description": "Gigabit Ethernet pair C positive (TX/RX) at RJ45 port PP11",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.95
+    },
+    "ETH0_C-": {
+      "label": "ETH0_C-",
+      "domain": "ethernet",
+      "description": "Gigabit Ethernet pair C negative (TX/RX) at RJ45 port PP11",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.95
+    },
+    "ETH0_D": {
+      "label": "ETH0_D",
+      "domain": "ethernet",
+      "description": "Gigabit Ethernet pair D positive (TX/RX) at RJ45 port PP11",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.95
+    },
+    "ETH0_D-": {
+      "label": "ETH0_D-",
+      "domain": "ethernet",
+      "description": "Gigabit Ethernet pair D negative (TX/RX) at RJ45 port PP11",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.95
+    },
+    "ETH0_LED_LINK1": {
+      "label": "ETH0_LED_LINK1",
+      "domain": "ethernet",
+      "description": "Ethernet link status LED 1 indicator signal driving resistor RR114477",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.9
+    },
+    "ETH0_LED_LINK2": {
+      "label": "ETH0_LED_LINK2",
+      "domain": "ethernet",
+      "description": "Ethernet link status LED 2 indicator signal driving resistor RR114466",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.9
+    },
+    "ETH0_LED_RX": {
+      "label": "ETH0_LED_RX",
+      "domain": "ethernet",
+      "description": "Ethernet receive activity LED indicator signal driving resistor RR111166",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.9
+    },
+    "EXT_RESET_N": {
+      "label": "EXT_RESET_N",
+      "domain": "reset",
+      "description": "External system reset active-low signal from SoC U1 and pushbutton SW6 via pull-up R115",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.95
+    },
+    "FAST_BOOT": {
+      "label": "FAST_BOOT",
+      "domain": "misc",
+      "description": "Fast boot configuration signal on SoC U1 pin 124, selects accelerated boot mode",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.7
+    },
+    "FBG": {
+      "label": "FBG",
+      "domain": "power_rail",
+      "description": "Feedback ground reference node of power converter U2 for output regulation",
+      "voltage_level": "null",
+      "confidence": 0.65
+    },
+    "FLG": {
+      "label": "FLG",
+      "domain": "power_seq",
+      "description": "Flag/fault output from mPCIe power management IC U20 indicating power status",
+      "voltage_level": "open-drain pull-up",
+      "confidence": 0.7
+    },
+    "GGNNDD": {
+      "label": "GGNNDD",
+      "domain": "ground",
+      "description": "Global ground net for Ethernet port area connecting decoupling caps and shield",
+      "voltage_level": "0V",
+      "confidence": 0.9
+    },
+    "GND": {
+      "label": "GND",
+      "domain": "ground",
+      "description": "Main system ground reference connecting to SoC U1 and throughout the board",
+      "voltage_level": "0V",
+      "confidence": 1.0
+    },
+    "GNDODA": {
+      "label": "GNDODA",
+      "domain": "ground",
+      "description": "Analog ground reference for PCIe-related device U23 pin 15",
+      "voltage_level": "0V",
+      "confidence": 0.8
+    },
+    "GNDXD": {
+      "label": "GNDXD",
+      "domain": "ground",
+      "description": "Crystal/oscillator ground reference for PCIe device U23 pin 20",
+      "voltage_level": "0V",
+      "confidence": 0.75
+    },
+    "GPIO1": {
+      "label": "GPIO1",
+      "domain": "control",
+      "description": "General purpose I/O 1 from SoC module U4 to DSI-to-eDP bridge U10 via pull-up R4",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.8
+    },
+    "GPIO1_IO10": {
+      "label": "GPIO1_IO10",
+      "domain": "control",
+      "description": "SoC U1 GPIO bank 1 pin 10 general-purpose I/O signal",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.8
+    },
+    "GPIO1_IO3": {
+      "label": "GPIO1_IO3",
+      "domain": "control",
+      "description": "SoC U1 GPIO bank 1 pin 3 general-purpose I/O signal",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.8
+    },
+    "GPIO2": {
+      "label": "GPIO2",
+      "domain": "control",
+      "description": "General purpose I/O 2 from SoC module U4 to DSI-to-eDP bridge U10 via pull-up R5",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.8
+    },
+    "GPIO3": {
+      "label": "GPIO3",
+      "domain": "control",
+      "description": "General purpose I/O 3 connected to DSI-to-eDP bridge U10 pin 54",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.8
+    },
+    "GPIO4": {
+      "label": "GPIO4",
+      "domain": "control",
+      "description": "General purpose I/O 4 connected to DSI-to-eDP bridge U10 pin 57",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.8
+    },
+    "GP_M4_NMI": {
+      "label": "GP_M4_NMI",
+      "domain": "debug",
+      "description": "Non-maskable interrupt signal for M4 co-processor core on SoC U1 pin 132",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.8
+    },
+    "GRN-": {
+      "label": "GRN-",
+      "domain": "ethernet",
+      "description": "Green LED cathode for Ethernet link indicator at RJ45 port PP11 via resistor RR114477",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.85
+    },
+    "HDMI_AUX_N": {
+      "label": "HDMI_AUX_N",
+      "domain": "hdmi",
+      "description": "HDMI auxiliary channel negative signal from SoC U1 pin 159",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.85
+    },
+    "HDMI_AUX_P": {
+      "label": "HDMI_AUX_P",
+      "domain": "hdmi",
+      "description": "HDMI auxiliary channel positive signal from SoC U1 pin 160",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.85
+    },
+    "HDMI_CEC": {
+      "label": "HDMI_CEC",
+      "domain": "hdmi",
+      "description": "HDMI Consumer Electronics Control bus line from SoC U1 to connector via R197",
+      "voltage_level": "open-drain pull-up",
+      "confidence": 0.98
+    },
+    "HDMI_CLK": {
+      "label": "HDMI_CLK",
+      "domain": "hdmi",
+      "description": "HDMI TMDS clock positive lane from repeater U22 to HDMI connector J4 pin 10",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.95
+    },
+    "HDMI_CLK-": {
+      "label": "HDMI_CLK-",
+      "domain": "hdmi",
+      "description": "HDMI TMDS clock negative lane from repeater U22 to HDMI connector J4 pin 12",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.95
+    },
+    "HDMI_CLK_N": {
+      "label": "HDMI_CLK_N",
+      "domain": "hdmi",
+      "description": "HDMI TMDS clock negative from SoC U1 internal HDMI transmitter",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.95
+    },
+    "HDMI_CLK_P": {
+      "label": "HDMI_CLK_P",
+      "domain": "hdmi",
+      "description": "HDMI TMDS clock positive from SoC U1 internal HDMI transmitter",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.95
+    },
+    "HDMI_D0": {
+      "label": "HDMI_D0",
+      "domain": "hdmi",
+      "description": "HDMI TMDS data lane 0 positive from repeater U22 to HDMI connector J4 pin 7",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.95
+    },
+    "HDMI_D0-": {
+      "label": "HDMI_D0-",
+      "domain": "hdmi",
+      "description": "HDMI TMDS data lane 0 negative from repeater U22 to HDMI connector J4 pin 9",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.95
+    },
+    "HDMI_D1": {
+      "label": "HDMI_D1",
+      "domain": "hdmi",
+      "description": "HDMI TMDS data lane 1 positive from repeater U22 to HDMI connector J4 pin 4",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.95
+    },
+    "HDMI_D1-": {
+      "label": "HDMI_D1-",
+      "domain": "hdmi",
+      "description": "HDMI TMDS data lane 1 negative from repeater U22 to HDMI connector J4 pin 6",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.95
+    },
+    "HDMI_D2": {
+      "label": "HDMI_D2",
+      "domain": "hdmi",
+      "description": "HDMI TMDS data lane 2 positive from repeater U22 to HDMI connector J4 pin 1",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.95
+    },
+    "HDMI_D2-": {
+      "label": "HDMI_D2-",
+      "domain": "hdmi",
+      "description": "HDMI TMDS data lane 2 negative from repeater U22 to HDMI connector J4 pin 3",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.95
+    },
+    "HDMI_DDC_SCL": {
+      "label": "HDMI_DDC_SCL",
+      "domain": "hdmi",
+      "description": "HDMI DDC I2C clock from SoC U1 internal HDMI transmitter for EDID read",
+      "voltage_level": "open-drain pull-up",
+      "confidence": 0.95
+    },
+    "HDMI_DDC_SDA": {
+      "label": "HDMI_DDC_SDA",
+      "domain": "hdmi",
+      "description": "HDMI DDC I2C data from SoC U1 internal HDMI transmitter for EDID read",
+      "voltage_level": "open-drain pull-up",
+      "confidence": 0.95
+    },
+    "HDMI_HPD": {
+      "label": "HDMI_HPD",
+      "domain": "hdmi",
+      "description": "HDMI Hot Plug Detect — logic high when a monitor is connected, from SoC U1 and U22",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.98
+    },
+    "HDMI_SCL": {
+      "label": "HDMI_SCL",
+      "domain": "hdmi",
+      "description": "HDMI DDC SCL from SoC U1 to HDMI repeater U22 with pull-ups R43/R47",
+      "voltage_level": "open-drain pull-up",
+      "confidence": 0.95
+    },
+    "HDMI_SDA": {
+      "label": "HDMI_SDA",
+      "domain": "hdmi",
+      "description": "HDMI DDC SDA from SoC U1 to HDMI repeater U22 with pull-ups R44/R48",
+      "voltage_level": "open-drain pull-up",
+      "confidence": 0.95
+    },
+    "HDMI_TX0_N": {
+      "label": "HDMI_TX0_N",
+      "domain": "hdmi",
+      "description": "HDMI TMDS data lane 0 negative from SoC U1 internal HDMI transmitter",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.95
+    },
+    "HDMI_TX0_P": {
+      "label": "HDMI_TX0_P",
+      "domain": "hdmi",
+      "description": "HDMI TMDS data lane 0 positive from SoC U1 internal HDMI transmitter",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.95
+    },
+    "HDMI_TX1_N": {
+      "label": "HDMI_TX1_N",
+      "domain": "hdmi",
+      "description": "HDMI TMDS data lane 1 negative from SoC U1 internal HDMI transmitter",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.95
+    },
+    "HDMI_TX1_P": {
+      "label": "HDMI_TX1_P",
+      "domain": "hdmi",
+      "description": "HDMI TMDS data lane 1 positive from SoC U1 internal HDMI transmitter",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.95
+    },
+    "HDMI_TX2_N": {
+      "label": "HDMI_TX2_N",
+      "domain": "hdmi",
+      "description": "HDMI TMDS data lane 2 negative from SoC U1 internal HDMI transmitter",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.95
+    },
+    "HDMI_TX2_P": {
+      "label": "HDMI_TX2_P",
+      "domain": "hdmi",
+      "description": "HDMI TMDS channel 2 positive differential data lane from iMX SoC.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.99
+    },
+    "HOTPLUG_DET_IN": {
+      "label": "HOTPLUG_DET_IN",
+      "domain": "hdmi",
+      "description": "HDMI hot-plug detect input signal into level-shift/buffer (U22).",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.95
+    },
+    "HOTPLUG_DET_OUT": {
+      "label": "HOTPLUG_DET_OUT",
+      "domain": "hdmi",
+      "description": "HDMI hot-plug detect output from level-shift/buffer (U22) toward SoC.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.95
+    },
+    "HPD": {
+      "label": "HPD",
+      "domain": "hdmi",
+      "description": "HDMI Hot Plug Detect — logic high when a monitor is connected at J4.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.97
+    },
+    "HP_L": {
+      "label": "HP_L",
+      "domain": "audio",
+      "description": "Headphone left-channel analog output from audio codec U3.",
+      "voltage_level": "AC audio signal ~1Vrms",
+      "confidence": 0.97
+    },
+    "HP_R": {
+      "label": "HP_R",
+      "domain": "audio",
+      "description": "Headphone right-channel analog output from audio codec U3.",
+      "voltage_level": "AC audio signal ~1Vrms",
+      "confidence": 0.97
+    },
+    "HS_SUSPEND": {
+      "label": "HS_SUSPEND",
+      "domain": "usb",
+      "description": "USB high-speed suspend signal at USB hub U9.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.88
+    },
+    "I2C3_SCL": {
+      "label": "I2C3_SCL",
+      "domain": "control",
+      "description": "I2C bus 3 clock line from iMX SoC (two pins bridged).",
+      "voltage_level": "open-drain pull-up 3V3",
+      "confidence": 0.93
+    },
+    "I2C3_SDA": {
+      "label": "I2C3_SDA",
+      "domain": "control",
+      "description": "I2C bus 3 data line from iMX SoC (two pins bridged).",
+      "voltage_level": "open-drain pull-up 3V3",
+      "confidence": 0.93
+    },
+    "I2C4_SCL": {
+      "label": "I2C4_SCL",
+      "domain": "control",
+      "description": "I2C bus 4 clock line from iMX SoC.",
+      "voltage_level": "open-drain pull-up 3V3",
+      "confidence": 0.93
+    },
+    "ILIMIT": {
+      "label": "ILIMIT",
+      "domain": "power_seq",
+      "description": "Battery charger (U2) input current limit set resistor node.",
+      "voltage_level": null,
+      "confidence": 0.82
+    },
+    "IMX_FBOOT": {
+      "label": "IMX_FBOOT",
+      "domain": "debug",
+      "description": "iMX forced-boot mode select signal tied to SW3 button.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.88
+    },
+    "IMX_JTAG_TCK": {
+      "label": "IMX_JTAG_TCK",
+      "domain": "debug",
+      "description": "JTAG test clock for iMX SoC debug interface.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.99
+    },
+    "IMX_JTAG_TDI": {
+      "label": "IMX_JTAG_TDI",
+      "domain": "debug",
+      "description": "JTAG test data input for iMX SoC debug interface.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.99
+    },
+    "IMX_JTAG_TDO": {
+      "label": "IMX_JTAG_TDO",
+      "domain": "debug",
+      "description": "JTAG test data output from iMX SoC debug interface.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.99
+    },
+    "IMX_JTAG_TMS": {
+      "label": "IMX_JTAG_TMS",
+      "domain": "debug",
+      "description": "JTAG test mode select for iMX SoC debug interface.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.99
+    },
+    "IMX_PWM4": {
+      "label": "IMX_PWM4",
+      "domain": "control",
+      "description": "PWM channel 4 output from iMX SoC, routed to test point TP1.",
+      "voltage_level": "3V3 logic PWM",
+      "confidence": 0.85
+    },
+    "IMX_RTC_IRQ": {
+      "label": "IMX_RTC_IRQ",
+      "domain": "control",
+      "description": "RTC interrupt request line from RTC U5 to iMX SoC.",
+      "voltage_level": "open-drain pull-up 3V3",
+      "confidence": 0.9
+    },
+    "IMX_UART1_RX": {
+      "label": "IMX_UART1_RX",
+      "domain": "debug",
+      "description": "iMX UART1 receive — boot/debug UART (SER1) at J18.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.97
+    },
+    "IMX_UART1_TX": {
+      "label": "IMX_UART1_TX",
+      "domain": "debug",
+      "description": "iMX UART1 transmit — boot/debug UART (SER1) at J18.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.97
+    },
+    "IMX_UART2_RX": {
+      "label": "IMX_UART2_RX",
+      "domain": "debug",
+      "description": "iMX UART2 receive — auxiliary UART (SER2) at J20.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.93
+    },
+    "IMX_UART2_TX": {
+      "label": "IMX_UART2_TX",
+      "domain": "debug",
+      "description": "iMX UART2 transmit — auxiliary UART (SER2) at J20.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.93
+    },
+    "IMX_WAKE": {
+      "label": "IMX_WAKE",
+      "domain": "power_seq",
+      "description": "Wake signal from iMX SoC to trigger system wakeup.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.85
+    },
+    "INA_SCL": {
+      "label": "INA_SCL",
+      "domain": "control",
+      "description": "I2C clock for current-sense amplifier U6 (INA-series).",
+      "voltage_level": "open-drain pull-up 3V3",
+      "confidence": 0.9
+    },
+    "INA_SDA": {
+      "label": "INA_SDA",
+      "domain": "control",
+      "description": "I2C data for current-sense amplifier U6 (INA-series).",
+      "voltage_level": "open-drain pull-up 3V3",
+      "confidence": 0.9
+    },
+    "INTVCC": {
+      "label": "INTVCC",
+      "domain": "power_rail",
+      "description": "Charger IC (U2) internal VCC rail powering gate drivers and control logic.",
+      "voltage_level": "rail ~5V",
+      "confidence": 0.9
+    },
+    "IREF": {
+      "label": "IREF",
+      "domain": "control",
+      "description": "Current reference resistor node for PCIe clock generator U23.",
+      "voltage_level": null,
+      "confidence": 0.8
+    },
+    "IRQ": {
+      "label": "IRQ",
+      "domain": "control",
+      "description": "Generic interrupt request line at DSI-to-eDP bridge U10.",
+      "voltage_level": "open-drain pull-up 3V3",
+      "confidence": 0.82
+    },
+    "ITH": {
+      "label": "ITH",
+      "domain": "power_seq",
+      "description": "Charger IC (U2) loop compensation/threshold RC network node.",
+      "voltage_level": null,
+      "confidence": 0.8
+    },
+    "JTAG_MOD": {
+      "label": "JTAG_MOD",
+      "domain": "debug",
+      "description": "JTAG mode select input on iMX SoC to configure JTAG boundary.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.9
+    },
+    "JTAG_TCK": {
+      "label": "JTAG_TCK",
+      "domain": "debug",
+      "description": "JTAG test clock for USB hub U9 debug interface.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.97
+    },
+    "JTAG_TDI": {
+      "label": "JTAG_TDI",
+      "domain": "debug",
+      "description": "JTAG test data input for USB hub U9 debug interface.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.97
+    },
+    "JTAG_TDO": {
+      "label": "JTAG_TDO",
+      "domain": "debug",
+      "description": "JTAG test data output from USB hub U9 debug interface.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.97
+    },
+    "JTAG_TMS": {
+      "label": "JTAG_TMS",
+      "domain": "debug",
+      "description": "JTAG test mode select for USB hub U9 debug interface.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.97
+    },
+    "LED3V": {
+      "label": "LED3V",
+      "domain": "power_seq",
+      "description": "3.3V power LED anode drive — indicates 3V rail active.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.88
+    },
+    "LED5V": {
+      "label": "LED5V",
+      "domain": "power_seq",
+      "description": "5V power LED anode drive — indicates 5V rail active.",
+      "voltage_level": "rail 5V",
+      "confidence": 0.88
+    },
+    "LED_NVME": {
+      "label": "LED_NVME",
+      "domain": "pcie",
+      "description": "Activity LED anode for NVMe/M.2 slot (J10) storage indicator.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.87
+    },
+    "LED_WLAN1": {
+      "label": "LED_WLAN1",
+      "domain": "pcie",
+      "description": "Activity LED anode for WLAN mPCIe card U11 indicator.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.87
+    },
+    "LINE_IN": {
+      "label": "LINE_IN",
+      "domain": "audio",
+      "description": "Analog line-level input at connector J16 (stereo combined net).",
+      "voltage_level": "AC audio signal ~1Vrms",
+      "confidence": 0.92
+    },
+    "LINPUT1": {
+      "label": "LINPUT1",
+      "domain": "audio",
+      "description": "Audio codec U3 left differential input pin 1.",
+      "voltage_level": "AC audio signal",
+      "confidence": 0.95
+    },
+    "LINPUT2": {
+      "label": "LINPUT2",
+      "domain": "audio",
+      "description": "Audio codec U3 left differential input pin 2.",
+      "voltage_level": "AC audio signal",
+      "confidence": 0.95
+    },
+    "LINPUT3": {
+      "label": "LINPUT3",
+      "domain": "audio",
+      "description": "Audio codec U3 left differential input pin 3.",
+      "voltage_level": "AC audio signal",
+      "confidence": 0.95
+    },
+    "LPCUD_N": {
+      "label": "LPCUD_N",
+      "domain": "usb",
+      "description": "USB D− differential line to/from LPC microcontroller U18.",
+      "voltage_level": "differential USB ±400mV",
+      "confidence": 0.9
+    },
+    "LPCUD_P": {
+      "label": "LPCUD_P",
+      "domain": "usb",
+      "description": "USB D+ differential line to/from LPC microcontroller U18.",
+      "voltage_level": "differential USB ±400mV",
+      "confidence": 0.9
+    },
+    "LPC_MISO": {
+      "label": "LPC_MISO",
+      "domain": "control",
+      "description": "SPI MISO from LPC microcontroller to iMX SoC.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.9
+    },
+    "LPC_MISO0": {
+      "label": "LPC_MISO0",
+      "domain": "control",
+      "description": "SPI MISO channel 0 — data out from LPC SPI peripheral.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.88
+    },
+    "LPC_MOSI": {
+      "label": "LPC_MOSI",
+      "domain": "control",
+      "description": "SPI MOSI from iMX SoC to LPC microcontroller.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.9
+    },
+    "LPC_MOSI0": {
+      "label": "LPC_MOSI0",
+      "domain": "control",
+      "description": "SPI MOSI channel 0 — data in to LPC SPI peripheral.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.88
+    },
+    "LPC_PIO0_20": {
+      "label": "LPC_PIO0_20",
+      "domain": "control",
+      "description": "LPC microcontroller GPIO port 0 pin 20 — function unspecified.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.7
+    },
+    "LPC_PIO1_16": {
+      "label": "LPC_PIO1_16",
+      "domain": "control",
+      "description": "LPC microcontroller GPIO port 1 pin 16 — function unspecified.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.7
+    },
+    "LPC_PIO1_25": {
+      "label": "LPC_PIO1_25",
+      "domain": "control",
+      "description": "LPC microcontroller GPIO port 1 pin 25 — function unspecified.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.7
+    },
+    "LPC_PIO1_31": {
+      "label": "LPC_PIO1_31",
+      "domain": "control",
+      "description": "LPC microcontroller GPIO port 1 pin 31 — function unspecified.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.7
+    },
+    "LPC_SCK": {
+      "label": "LPC_SCK",
+      "domain": "control",
+      "description": "SPI clock between iMX SoC and LPC microcontroller.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.9
+    },
+    "LPC_SCL": {
+      "label": "LPC_SCL",
+      "domain": "control",
+      "description": "I2C clock line on LPC microcontroller side.",
+      "voltage_level": "open-drain pull-up 3V3",
+      "confidence": 0.88
+    },
+    "LPC_SDA": {
+      "label": "LPC_SDA",
+      "domain": "control",
+      "description": "I2C data line on LPC microcontroller side.",
+      "voltage_level": "open-drain pull-up 3V3",
+      "confidence": 0.88
+    },
+    "LPC_SS0": {
+      "label": "LPC_SS0",
+      "domain": "control",
+      "description": "SPI chip-select 0 from iMX SoC to LPC microcontroller.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.9
+    },
+    "LPC_SSEL0": {
+      "label": "LPC_SSEL0",
+      "domain": "control",
+      "description": "SPI slave select 0 input at LPC microcontroller U18.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.9
+    },
+    "LPC_UART2_RX": {
+      "label": "LPC_UART2_RX",
+      "domain": "debug",
+      "description": "UART2 receive between iMX SoC and LPC microcontroller, exposed at J23.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.88
+    },
+    "LPC_UART2_TX": {
+      "label": "LPC_UART2_TX",
+      "domain": "debug",
+      "description": "UART2 transmit between iMX SoC and LPC microcontroller, exposed at J23.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.88
+    },
+    "LPC_UVBUS": {
+      "label": "LPC_UVBUS",
+      "domain": "usb",
+      "description": "VBUS sense/control signal for LPC USB port at U18.",
+      "voltage_level": "5V logic",
+      "confidence": 0.83
+    },
+    "LPC_VCC": {
+      "label": "LPC_VCC",
+      "domain": "power_rail",
+      "description": "3.3V power rail supplying LPC microcontroller U18 and associated peripherals.",
+      "voltage_level": "rail 3V3",
+      "confidence": 0.97
+    },
+    "LV_SUPPLY": {
+      "label": "LV_SUPPLY",
+      "domain": "hdmi",
+      "description": "Low-voltage supply for HDMI level-shifter/buffer U22 on HDMI sheet.",
+      "voltage_level": "rail 3V3",
+      "confidence": 0.85
+    },
+    "M2_SMB_CLK": {
+      "label": "M2_SMB_CLK",
+      "domain": "control",
+      "description": "SMBus clock to M.2 slot J10 for NVMe management.",
+      "voltage_level": "open-drain pull-up 3V3",
+      "confidence": 0.9
+    },
+    "M2_SMB_DATA": {
+      "label": "M2_SMB_DATA",
+      "domain": "control",
+      "description": "SMBus data to M.2 slot J10 for NVMe management.",
+      "voltage_level": "open-drain pull-up 3V3",
+      "confidence": 0.9
+    },
+    "MCLK": {
+      "label": "MCLK",
+      "domain": "audio",
+      "description": "Master clock output from iMX SoC to audio codec U3.",
+      "voltage_level": "3V3 logic clock",
+      "confidence": 0.95
+    },
+    "MICBIAS": {
+      "label": "MICBIAS",
+      "domain": "audio",
+      "description": "Microphone bias voltage from audio codec U3 for condenser mics.",
+      "voltage_level": "rail ~2.5V",
+      "confidence": 0.97
+    },
+    "ML0N": {
+      "label": "ML0N",
+      "domain": "display",
+      "description": "eDP main-link lane 0 negative differential signal from DSI-to-eDP bridge U10.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.95
+    },
+    "ML0P": {
+      "label": "ML0P",
+      "domain": "display",
+      "description": "eDP main-link lane 0 positive differential signal from DSI-to-eDP bridge U10.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.95
+    },
+    "ML1N": {
+      "label": "ML1N",
+      "domain": "display",
+      "description": "eDP main-link lane 1 negative differential signal from DSI-to-eDP bridge U10.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.95
+    },
+    "ML1P": {
+      "label": "ML1P",
+      "domain": "display",
+      "description": "eDP main-link lane 1 positive differential signal from DSI-to-eDP bridge U10.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.95
+    },
+    "ML2N": {
+      "label": "ML2N",
+      "domain": "display",
+      "description": "eDP main-link lane 2 negative differential signal from DSI-to-eDP bridge U10.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.95
+    },
+    "ML2P": {
+      "label": "ML2P",
+      "domain": "display",
+      "description": "eDP main-link lane 2 positive differential signal from DSI-to-eDP bridge U10.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.95
+    },
+    "ML3N": {
+      "label": "ML3N",
+      "domain": "display",
+      "description": "eDP main-link lane 3 negative differential signal from DSI-to-eDP bridge U10.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.95
+    },
+    "ML3P": {
+      "label": "ML3P",
+      "domain": "display",
+      "description": "eDP main-link lane 3 positive differential signal from DSI-to-eDP bridge U10.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.95
+    },
+    "MODE": {
+      "label": "MODE",
+      "domain": "power_seq",
+      "description": "Charger IC (U2) mode selection pin — sets charge/operation mode.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.8
+    },
+    "NAND_CLE": {
+      "label": "NAND_CLE",
+      "domain": "storage",
+      "description": "NAND Flash command latch enable signal from iMX SoC.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.97
+    },
+    "NAND_DATA05": {
+      "label": "NAND_DATA05",
+      "domain": "storage",
+      "description": "NAND Flash data bus bit 5 from iMX SoC.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.97
+    },
+    "NAND_DQS": {
+      "label": "NAND_DQS",
+      "domain": "storage",
+      "description": "NAND Flash data strobe signal from iMX SoC.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.97
+    },
+    "NAND_NCE1": {
+      "label": "NAND_NCE1",
+      "domain": "storage",
+      "description": "NAND Flash chip enable 1 (active low) from iMX SoC.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.97
+    },
+    "NAND_NCE3": {
+      "label": "NAND_NCE3",
+      "domain": "storage",
+      "description": "NAND Flash chip enable 3 (active low) from iMX SoC.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.97
+    },
+    "NAND_NREADY": {
+      "label": "NAND_NREADY",
+      "domain": "storage",
+      "description": "NAND Flash ready/busy (active low) signal to iMX SoC.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.97
+    },
+    "NAND_NWP": {
+      "label": "NAND_NWP",
+      "domain": "storage",
+      "description": "NAND Flash write-protect (active low) signal from iMX SoC.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.97
+    },
+    "NTC": {
+      "label": "NTC",
+      "domain": "power_seq",
+      "description": "NTC thermistor input to battery charger U2 for temperature monitoring.",
+      "voltage_level": null,
+      "confidence": 0.9
+    },
+    "ORN-": {
+      "label": "ORN-",
+      "domain": "ethernet",
+      "description": "Ethernet orange pair negative signal at RJ45 port PP11.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.85
+    },
+    "OSCI": {
+      "label": "OSCI",
+      "domain": "clock",
+      "description": "RTC crystal oscillator input to U5 from crystal Y4.",
+      "voltage_level": "32.768kHz oscillator",
+      "confidence": 0.93
+    },
+    "OSCO": {
+      "label": "OSCO",
+      "domain": "clock",
+      "description": "RTC crystal oscillator output from U5 to crystal Y4.",
+      "voltage_level": "32.768kHz oscillator",
+      "confidence": 0.93
+    },
+    "OUT3": {
+      "label": "OUT3",
+      "domain": "audio",
+      "description": "Audio codec U3 output 3 — mono/line output channel.",
+      "voltage_level": "AC audio signal",
+      "confidence": 0.88
+    },
+    "PCICLKGEN_XI": {
+      "label": "PCICLKGEN_XI",
+      "domain": "clock",
+      "description": "Crystal/reference clock input to PCIe clock generator U23.",
+      "voltage_level": "differential or single-ended 25MHz",
+      "confidence": 0.92
+    },
+    "PCICLKGEN_XO": {
+      "label": "PCICLKGEN_XO",
+      "domain": "clock",
+      "description": "Crystal oscillator output from PCIe clock generator U23.",
+      "voltage_level": "25MHz oscillator",
+      "confidence": 0.92
+    },
+    "PCIE1_CLK_N": {
+      "label": "PCIE1_CLK_N",
+      "domain": "pcie",
+      "description": "PCIe1 reference clock negative — from iMX internal oscillator to mPCIe U11.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.99
+    },
+    "PCIE1_CLK_P": {
+      "label": "PCIE1_CLK_P",
+      "domain": "pcie",
+      "description": "PCIe1 reference clock positive — from iMX internal oscillator to mPCIe U11.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.99
+    },
+    "PCIE1_PWR": {
+      "label": "PCIE1_PWR",
+      "domain": "power_rail",
+      "description": "PCIe1 / mPCIe slot power rail supplying U11 and associated decoupling.",
+      "voltage_level": "rail 3V3",
+      "confidence": 0.97
+    },
+    "PCIE1_PWR_EN": {
+      "label": "PCIE1_PWR_EN",
+      "domain": "power_seq",
+      "description": "Enable signal for PCIe1 power regulator U20.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.97
+    },
+    "PCIE1_REFCLK_N": {
+      "label": "PCIE1_REFCLK_N",
+      "domain": "pcie",
+      "description": "PCIe1 reference clock input negative (PAD_CLK) at iMX SoC.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.97
+    },
+    "PCIE1_REFCLK_P": {
+      "label": "PCIE1_REFCLK_P",
+      "domain": "pcie",
+      "description": "PCIe1 reference clock input positive (PAD_CLK) at iMX SoC.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.97
+    },
+    "PCIE1_RX_N": {
+      "label": "PCIE1_RX_N",
+      "domain": "pcie",
+      "description": "PCIe1 receive lane negative differential signal from mPCIe U11 to iMX SoC.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.99
+    },
+    "PCIE1_RX_P": {
+      "label": "PCIE1_RX_P",
+      "domain": "pcie",
+      "description": "PCIe1 receive lane positive differential signal from mPCIe U11 to iMX SoC.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.99
+    },
+    "PCIE1_TX_N": {
+      "label": "PCIE1_TX_N",
+      "domain": "pcie",
+      "description": "PCIe1 transmit lane negative differential signal from iMX SoC to mPCIe U11.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.99
+    },
+    "PCIE1_TX_P": {
+      "label": "PCIE1_TX_P",
+      "domain": "pcie",
+      "description": "PCIe1 transmit lane positive differential signal from iMX SoC to mPCIe U11.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.99
+    },
+    "PCIE2_CLK_N": {
+      "label": "PCIE2_CLK_N",
+      "domain": "pcie",
+      "description": "PCIe2 reference clock negative — routed to M.2 slot J10 and clock generator U23.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.97
+    },
+    "PCIE2_CLK_P": {
+      "label": "PCIE2_CLK_P",
+      "domain": "pcie",
+      "description": "PCIe2 clock positive differential lane to mPCIe slot and SoC",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.99
+    },
+    "PCIE2_REFCLK_N": {
+      "label": "PCIE2_REFCLK_N",
+      "domain": "pcie",
+      "description": "PCIe2 reference clock negative input (PAD_CLK) to SoC U1",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.99
+    },
+    "PCIE2_REFCLK_P": {
+      "label": "PCIE2_REFCLK_P",
+      "domain": "pcie",
+      "description": "PCIe2 reference clock positive input (PAD_CLK) to SoC U1",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.99
+    },
+    "PCIE2_RX_N": {
+      "label": "PCIE2_RX_N",
+      "domain": "pcie",
+      "description": "PCIe2 receive negative differential lane from mPCIe slot to SoC",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.99
+    },
+    "PCIE2_RX_P": {
+      "label": "PCIE2_RX_P",
+      "domain": "pcie",
+      "description": "PCIe2 receive positive differential lane from mPCIe slot to SoC",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.99
+    },
+    "PCIE2_TXC_N": {
+      "label": "PCIE2_TXC_N",
+      "domain": "pcie",
+      "description": "PCIe2 transmit clock negative differential lane to mPCIe slot",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.97
+    },
+    "PCIE2_TXC_P": {
+      "label": "PCIE2_TXC_P",
+      "domain": "pcie",
+      "description": "PCIe2 transmit clock positive differential lane to mPCIe slot",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.97
+    },
+    "PCIE2_TX_N": {
+      "label": "PCIE2_TX_N",
+      "domain": "pcie",
+      "description": "PCIe2 transmit negative differential lane from SoC to mPCIe slot",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.99
+    },
+    "PCIE2_TX_P": {
+      "label": "PCIE2_TX_P",
+      "domain": "pcie",
+      "description": "PCIe2 transmit positive differential lane from SoC to mPCIe slot",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.99
+    },
+    "PCIE_DIS_B": {
+      "label": "PCIE_DIS_B",
+      "domain": "pcie",
+      "description": "PCIe disable active-low signal from SoC U1 to control PCIe interface",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.95
+    },
+    "PCIE_RST_B": {
+      "label": "PCIE_RST_B",
+      "domain": "reset",
+      "description": "PCIe reset active-low signal from SoC U1 to mPCIe slot",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.97
+    },
+    "PGND": {
+      "label": "PGND",
+      "domain": "ground",
+      "description": "Power ground for switching regulator U2 and associated FETs and diode",
+      "voltage_level": "0V",
+      "confidence": 0.99
+    },
+    "PMIC_ON_REQ": {
+      "label": "PMIC_ON_REQ",
+      "domain": "power_seq",
+      "description": "PMIC power-on request signal from SoC U1 to enable system power sequencing",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.97
+    },
+    "PVIN": {
+      "label": "PVIN",
+      "domain": "power_rail",
+      "description": "Power input voltage rail feeding switching regulator U2 and pass FETs",
+      "voltage_level": "rail 5V",
+      "confidence": 0.95
+    },
+    "PWR_FLAG": {
+      "label": "PWR_FLAG",
+      "domain": "power_seq",
+      "description": "KiCad power flag net spanning multiple pages to indicate powered rails to ERC",
+      "voltage_level": null,
+      "confidence": 0.85
+    },
+    "QSPIA_CLK": {
+      "label": "QSPIA_CLK",
+      "domain": "storage",
+      "description": "Quad-SPI A clock output from SoC U1 for flash memory interface",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.95
+    },
+    "QSPIA_DATA0": {
+      "label": "QSPIA_DATA0",
+      "domain": "storage",
+      "description": "Quad-SPI A data lane 0 from SoC U1 for flash memory interface",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.95
+    },
+    "QSPIA_DATA1": {
+      "label": "QSPIA_DATA1",
+      "domain": "storage",
+      "description": "Quad-SPI A data lane 1 from SoC U1 for flash memory interface",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.95
+    },
+    "QSPIA_DATA2": {
+      "label": "QSPIA_DATA2",
+      "domain": "storage",
+      "description": "Quad-SPI A data lane 2 from SoC U1 for flash memory interface",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.95
+    },
+    "QSPIA_DATA3": {
+      "label": "QSPIA_DATA3",
+      "domain": "storage",
+      "description": "Quad-SPI A data lane 3 from SoC U1 for flash memory interface",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.95
+    },
+    "QSPIA_DATA4": {
+      "label": "QSPIA_DATA4",
+      "domain": "storage",
+      "description": "Quad-SPI A data lane 4 from SoC U1 for flash memory interface",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.93
+    },
+    "QSPIA_NSS0": {
+      "label": "QSPIA_NSS0",
+      "domain": "storage",
+      "description": "Quad-SPI A chip select 0 from SoC U1 for flash memory interface",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.95
+    },
+    "RCLKC_N": {
+      "label": "RCLKC_N",
+      "domain": "pcie",
+      "description": "Receive clock negative differential signal on mPCIe page connected to U23",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.88
+    },
+    "RCLKC_P": {
+      "label": "RCLKC_P",
+      "domain": "pcie",
+      "description": "Receive clock positive differential signal on mPCIe page connected to U23",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.88
+    },
+    "REFCLK": {
+      "label": "REFCLK",
+      "domain": "clock",
+      "description": "Reference clock signal for DSI-to-eDP bridge U10 on display page",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.88
+    },
+    "RINPUT1": {
+      "label": "RINPUT1",
+      "domain": "audio",
+      "description": "Right channel analog input 1 to audio codec U3",
+      "voltage_level": null,
+      "confidence": 0.9
+    },
+    "RINPUT2": {
+      "label": "RINPUT2",
+      "domain": "audio",
+      "description": "Right channel analog input 2 to audio codec U3",
+      "voltage_level": null,
+      "confidence": 0.9
+    },
+    "RINPUT3": {
+      "label": "RINPUT3",
+      "domain": "audio",
+      "description": "Right channel analog input 3 to audio codec U3",
+      "voltage_level": null,
+      "confidence": 0.9
+    },
+    "RNG/SS": {
+      "label": "RNG/SS",
+      "domain": "control",
+      "description": "SPI slave select or range signal for switching regulator U2 control interface",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.75
+    },
+    "RTC_IRQ": {
+      "label": "RTC_IRQ",
+      "domain": "control",
+      "description": "Real-time clock interrupt request signal from RTC to SoC U1",
+      "voltage_level": "open-drain pull-up",
+      "confidence": 0.93
+    },
+    "SAI1_MCLK": {
+      "label": "SAI1_MCLK",
+      "domain": "audio",
+      "description": "SAI1 master clock output from SoC U1 for audio interface 1",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.99
+    },
+    "SAI1_RXC": {
+      "label": "SAI1_RXC",
+      "domain": "audio",
+      "description": "SAI1 receive bit clock from SoC U1 audio interface 1",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.99
+    },
+    "SAI1_RXD0": {
+      "label": "SAI1_RXD0",
+      "domain": "audio",
+      "description": "SAI1 receive data lane 0 from SoC U1 audio interface 1",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.99
+    },
+    "SAI1_RXD1": {
+      "label": "SAI1_RXD1",
+      "domain": "audio",
+      "description": "SAI1 receive data lane 1 from SoC U1 audio interface 1",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.99
+    },
+    "SAI1_RXD2": {
+      "label": "SAI1_RXD2",
+      "domain": "audio",
+      "description": "SAI1 receive data lane 2 from SoC U1 audio interface 1",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.99
+    },
+    "SAI1_RXD3": {
+      "label": "SAI1_RXD3",
+      "domain": "audio",
+      "description": "SAI1 receive data lane 3 from SoC U1 audio interface 1",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.99
+    },
+    "SAI1_RXD4": {
+      "label": "SAI1_RXD4",
+      "domain": "audio",
+      "description": "SAI1 receive data lane 4 from SoC U1 audio interface 1",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.99
+    },
+    "SAI1_RXD5": {
+      "label": "SAI1_RXD5",
+      "domain": "audio",
+      "description": "SAI1 receive data lane 5 from SoC U1 audio interface 1",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.99
+    },
+    "SAI1_RXD6": {
+      "label": "SAI1_RXD6",
+      "domain": "audio",
+      "description": "SAI1 receive data lane 6 from SoC U1 audio interface 1",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.99
+    },
+    "SAI1_RXD7": {
+      "label": "SAI1_RXD7",
+      "domain": "audio",
+      "description": "SAI1 receive data lane 7 from SoC U1 audio interface 1",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.99
+    },
+    "SAI1_RXFS": {
+      "label": "SAI1_RXFS",
+      "domain": "audio",
+      "description": "SAI1 receive frame sync from SoC U1 audio interface 1",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.99
+    },
+    "SAI1_TXC": {
+      "label": "SAI1_TXC",
+      "domain": "audio",
+      "description": "SAI1 transmit bit clock from SoC U1 audio interface 1",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.99
+    },
+    "SAI1_TXD0": {
+      "label": "SAI1_TXD0",
+      "domain": "audio",
+      "description": "SAI1 transmit data lane 0 from SoC U1 audio interface 1",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.99
+    },
+    "SAI1_TXD1": {
+      "label": "SAI1_TXD1",
+      "domain": "audio",
+      "description": "SAI1 transmit data lane 1 from SoC U1 audio interface 1",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.99
+    },
+    "SAI1_TXD2": {
+      "label": "SAI1_TXD2",
+      "domain": "audio",
+      "description": "SAI1 transmit data lane 2 from SoC U1 audio interface 1",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.99
+    },
+    "SAI1_TXD3": {
+      "label": "SAI1_TXD3",
+      "domain": "audio",
+      "description": "SAI1 transmit data lane 3 from SoC U1 audio interface 1",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.99
+    },
+    "SAI1_TXD4": {
+      "label": "SAI1_TXD4",
+      "domain": "audio",
+      "description": "SAI1 transmit data lane 4 from SoC U1 audio interface 1",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.99
+    },
+    "SAI1_TXD5": {
+      "label": "SAI1_TXD5",
+      "domain": "audio",
+      "description": "SAI1 transmit data lane 5 from SoC U1 audio interface 1",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.99
+    },
+    "SAI1_TXD6": {
+      "label": "SAI1_TXD6",
+      "domain": "audio",
+      "description": "SAI1 transmit data lane 6 from SoC U1 audio interface 1",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.99
+    },
+    "SAI1_TXD7": {
+      "label": "SAI1_TXD7",
+      "domain": "audio",
+      "description": "SAI1 transmit data lane 7 from SoC U1 audio interface 1",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.99
+    },
+    "SAI1_TXFS": {
+      "label": "SAI1_TXFS",
+      "domain": "audio",
+      "description": "SAI1 transmit frame sync from SoC U1 audio interface 1",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.99
+    },
+    "SAI2_MCLK": {
+      "label": "SAI2_MCLK",
+      "domain": "audio",
+      "description": "SAI2 master clock output from SoC U1 for audio interface 2",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.99
+    },
+    "SAI2_RXC": {
+      "label": "SAI2_RXC",
+      "domain": "audio",
+      "description": "SAI2 receive bit clock from SoC U1 audio interface 2, test point TP12",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.99
+    },
+    "SAI2_RXD": {
+      "label": "SAI2_RXD",
+      "domain": "audio",
+      "description": "SAI2 receive data from SoC U1 audio interface 2",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.99
+    },
+    "SAI2_RXFS": {
+      "label": "SAI2_RXFS",
+      "domain": "audio",
+      "description": "SAI2 receive frame sync from SoC U1 audio interface 2",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.99
+    },
+    "SAI2_TXC": {
+      "label": "SAI2_TXC",
+      "domain": "audio",
+      "description": "SAI2 transmit bit clock from SoC U1 audio interface 2",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.99
+    },
+    "SAI2_TXD": {
+      "label": "SAI2_TXD",
+      "domain": "audio",
+      "description": "SAI2 transmit data from SoC U1 audio interface 2",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.99
+    },
+    "SAI2_TXFS": {
+      "label": "SAI2_TXFS",
+      "domain": "audio",
+      "description": "SAI2 transmit frame sync from SoC U1 audio interface 2",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.99
+    },
+    "SAI3_MCLK/PWM4": {
+      "label": "SAI3_MCLK/PWM4",
+      "domain": "audio",
+      "description": "SAI3 master clock or PWM4 output from SoC U1, shared pin function",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.92
+    },
+    "SAI3_RXC": {
+      "label": "SAI3_RXC",
+      "domain": "audio",
+      "description": "SAI3 receive bit clock from SoC U1 audio interface 3",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.99
+    },
+    "SAI3_RXD": {
+      "label": "SAI3_RXD",
+      "domain": "audio",
+      "description": "SAI3 receive data from SoC U1 audio interface 3",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.99
+    },
+    "SAI3_RXFS": {
+      "label": "SAI3_RXFS",
+      "domain": "audio",
+      "description": "SAI3 receive frame sync from SoC U1 audio interface 3",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.99
+    },
+    "SAI3_TXC": {
+      "label": "SAI3_TXC",
+      "domain": "audio",
+      "description": "SAI3 transmit bit clock from SoC U1 audio interface 3",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.99
+    },
+    "SAI3_TXD": {
+      "label": "SAI3_TXD",
+      "domain": "audio",
+      "description": "SAI3 transmit data from SoC U1 audio interface 3",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.99
+    },
+    "SAI3_TXFS": {
+      "label": "SAI3_TXFS",
+      "domain": "audio",
+      "description": "SAI3 transmit frame sync from SoC U1 audio interface 3",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.99
+    },
+    "SBU1": {
+      "label": "SBU1",
+      "domain": "usb",
+      "description": "USB Type-C SBU1 sideband use pin on USB-C connector J8 for alternate modes",
+      "voltage_level": null,
+      "confidence": 0.95
+    },
+    "SBU2": {
+      "label": "SBU2",
+      "domain": "usb",
+      "description": "USB Type-C SBU2 sideband use pin on USB-C connector J8 for alternate modes",
+      "voltage_level": null,
+      "confidence": 0.95
+    },
+    "SCKI": {
+      "label": "SCKI",
+      "domain": "audio",
+      "description": "Serial clock input to audio-related component U4, likely codec or DAC",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.82
+    },
+    "SCL": {
+      "label": "SCL",
+      "domain": "hdmi",
+      "description": "I2C clock line to HDMI connector J4 and DSI-to-eDP bridge U10 (DDC)",
+      "voltage_level": "open-drain pull-up",
+      "confidence": 0.88
+    },
+    "SCL/SMBCLK": {
+      "label": "SCL/SMBCLK",
+      "domain": "control",
+      "description": "I2C/SMBus clock line for USB sub-system component U9 on USB sheet",
+      "voltage_level": "open-drain pull-up",
+      "confidence": 0.9
+    },
+    "SCLK": {
+      "label": "SCLK",
+      "domain": "audio",
+      "description": "Serial clock for audio codec U3 SPI or I2S control interface",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.82
+    },
+    "SD2_CD": {
+      "label": "SD2_CD",
+      "domain": "storage",
+      "description": "SD card 2 card-detect signal from SoC U1",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.99
+    },
+    "SD2_CLK": {
+      "label": "SD2_CLK",
+      "domain": "storage",
+      "description": "SD card 2 clock signal from SoC U1 to SD slot through ESD protector U28",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.99
+    },
+    "SD2_CMD": {
+      "label": "SD2_CMD",
+      "domain": "storage",
+      "description": "SD card 2 command line from SoC U1 to SD card slot",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.99
+    },
+    "SD2_DATA0": {
+      "label": "SD2_DATA0",
+      "domain": "storage",
+      "description": "SD card 2 data lane 0 from SoC U1 to SD card slot",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.99
+    },
+    "SD2_DATA1": {
+      "label": "SD2_DATA1",
+      "domain": "storage",
+      "description": "SD card 2 data lane 1 from SoC U1 to SD card slot",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.99
+    },
+    "SD2_DATA2": {
+      "label": "SD2_DATA2",
+      "domain": "storage",
+      "description": "SD card 2 data lane 2 from SoC U1 to SD card slot",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.99
+    },
+    "SD2_DATA3": {
+      "label": "SD2_DATA3",
+      "domain": "storage",
+      "description": "SD card 2 data lane 3 from SoC U1 to SD card slot",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.99
+    },
+    "SDA": {
+      "label": "SDA",
+      "domain": "hdmi",
+      "description": "I2C data line to HDMI connector J4 and DSI-to-eDP bridge U10 (DDC)",
+      "voltage_level": "open-drain pull-up",
+      "confidence": 0.88
+    },
+    "SDA/SMBDAT": {
+      "label": "SDA/SMBDAT",
+      "domain": "control",
+      "description": "I2C/SMBus data line for USB sub-system component U9 on USB sheet",
+      "voltage_level": "open-drain pull-up",
+      "confidence": 0.9
+    },
+    "SDI": {
+      "label": "SDI",
+      "domain": "control",
+      "description": "SPI data input (MOSI) for switching regulator or power controller U4",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.78
+    },
+    "SDIN": {
+      "label": "SDIN",
+      "domain": "audio",
+      "description": "Serial data input to audio codec U3 for digital audio stream",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.88
+    },
+    "SDO": {
+      "label": "SDO",
+      "domain": "control",
+      "description": "SPI data output (MISO) from switching regulator or power controller U4",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.78
+    },
+    "SENSBOT": {
+      "label": "SENSBOT",
+      "domain": "power_seq",
+      "description": "Bottom current sense signal to switching regulator U2 for inductor current monitoring",
+      "voltage_level": null,
+      "confidence": 0.88
+    },
+    "SENSGND": {
+      "label": "SENSGND",
+      "domain": "ground",
+      "description": "Sense ground reference for switching regulator U2 sensing circuit",
+      "voltage_level": "0V",
+      "confidence": 0.92
+    },
+    "SENSTOP": {
+      "label": "SENSTOP",
+      "domain": "power_seq",
+      "description": "Top current sense signal to switching regulator U2 for inductor current monitoring",
+      "voltage_level": null,
+      "confidence": 0.88
+    },
+    "SENSVIN": {
+      "label": "SENSVIN",
+      "domain": "power_seq",
+      "description": "Input voltage sense signal to switching regulator U2 for voltage monitoring",
+      "voltage_level": null,
+      "confidence": 0.88
+    },
+    "SHIELD": {
+      "label": "SHIELD",
+      "domain": "ground",
+      "description": "Connector shield ground for mPCIe slot J10",
+      "voltage_level": "0V",
+      "confidence": 0.95
+    },
+    "SLOW_CLK": {
+      "label": "SLOW_CLK",
+      "domain": "clock",
+      "description": "Slow clock signal from SoC U1, typically 32kHz or low-speed oscillator output",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.9
+    },
+    "SMB_CLK": {
+      "label": "SMB_CLK",
+      "domain": "control",
+      "description": "SMBus clock line for mPCIe controller U11 on PCIe page",
+      "voltage_level": "open-drain pull-up",
+      "confidence": 0.92
+    },
+    "SMB_DATA": {
+      "label": "SMB_DATA",
+      "domain": "control",
+      "description": "SMBus data line for mPCIe controller U11 on PCIe page",
+      "voltage_level": "open-drain pull-up",
+      "confidence": 0.92
+    },
+    "SPDIF_EXT_CLK": {
+      "label": "SPDIF_EXT_CLK",
+      "domain": "audio",
+      "description": "S/PDIF external clock input to SoC U1 for digital audio synchronization",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.95
+    },
+    "SPDIF_RX/PWM2": {
+      "label": "SPDIF_RX/PWM2",
+      "domain": "audio",
+      "description": "S/PDIF receive or PWM2 shared pin from SoC U1",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.9
+    },
+    "SPKGND1": {
+      "label": "SPKGND1",
+      "domain": "audio",
+      "description": "Speaker ground 1 output from audio codec U3 for differential speaker driver",
+      "voltage_level": "0V",
+      "confidence": 0.97
+    },
+    "SPKGND2": {
+      "label": "SPKGND2",
+      "domain": "audio",
+      "description": "Speaker ground 2 output from audio codec U3 for differential speaker driver",
+      "voltage_level": "0V",
+      "confidence": 0.97
+    },
+    "SPKVDD1": {
+      "label": "SPKVDD1",
+      "domain": "audio",
+      "description": "Speaker amplifier supply rail 1 for audio codec U3 power stage",
+      "voltage_level": "rail 5V",
+      "confidence": 0.97
+    },
+    "SPKVDD2": {
+      "label": "SPKVDD2",
+      "domain": "audio",
+      "description": "Speaker amplifier supply rail 2 for audio codec U3 power stage",
+      "voltage_level": "rail 5V",
+      "confidence": 0.97
+    },
+    "SPK_LN": {
+      "label": "SPK_LN",
+      "domain": "audio",
+      "description": "Speaker left negative output from audio codec U3 through filter to speaker",
+      "voltage_level": null,
+      "confidence": 0.95
+    },
+    "SPK_LP": {
+      "label": "SPK_LP",
+      "domain": "audio",
+      "description": "Speaker left positive output from audio codec U3 through filter to speaker",
+      "voltage_level": null,
+      "confidence": 0.95
+    },
+    "SPK_PWR": {
+      "label": "SPK_PWR",
+      "domain": "power_seq",
+      "description": "Speaker power enable signal controlling speaker amplifier supply",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.88
+    },
+    "SPK_RN": {
+      "label": "SPK_RN",
+      "domain": "audio",
+      "description": "Speaker right channel negative output from audio codec, routed through ferrite bead and inductor.",
+      "voltage_level": "differential analog",
+      "confidence": 0.95
+    },
+    "SPK_RP": {
+      "label": "SPK_RP",
+      "domain": "audio",
+      "description": "Speaker right channel positive output from audio codec, routed through ferrite bead and inductor.",
+      "voltage_level": "differential analog",
+      "confidence": 0.95
+    },
+    "SSHH11": {
+      "label": "SSHH11",
+      "domain": "ethernet",
+      "description": "Ethernet connector shield/shielding pin 16 on the gigabit Ethernet port connector PP11.",
+      "voltage_level": null,
+      "confidence": 0.6
+    },
+    "SSHHEELLLL11": {
+      "label": "SSHHEELLLL11",
+      "domain": "ethernet",
+      "description": "Ethernet SHELL 1 shield ground connection on Gigabit Ethernet port, likely chassis ground via resistor R35.",
+      "voltage_level": null,
+      "confidence": 0.65
+    },
+    "SSHHEELLLL22": {
+      "label": "SSHHEELLLL22",
+      "domain": "ethernet",
+      "description": "Ethernet SHELL 2 shield ground connection on Gigabit Ethernet port, likely chassis ground via resistor R42.",
+      "voltage_level": null,
+      "confidence": 0.65
+    },
+    "SS_SUSPEND": {
+      "label": "SS_SUSPEND",
+      "domain": "usb",
+      "description": "SuperSpeed USB suspend signal to USB hub U9, indicating SS link is in suspend state.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.8
+    },
+    "STAT1": {
+      "label": "STAT1",
+      "domain": "power_seq",
+      "description": "Battery charger status output 1 (CHG_STAT1) from charger IC U2, indicating charge state.",
+      "voltage_level": "open-drain pull-up",
+      "confidence": 0.9
+    },
+    "STAT2": {
+      "label": "STAT2",
+      "domain": "power_seq",
+      "description": "Battery charger status output 2 (CHG_STAT2) from charger IC U2, indicating charge state.",
+      "voltage_level": "open-drain pull-up",
+      "confidence": 0.9
+    },
+    "SW1": {
+      "label": "SW1",
+      "domain": "power_rail",
+      "description": "Switching node of buck converter 1 in charger/power IC U2, connected to inductor L1 and MOSFETs Q1/Q2.",
+      "voltage_level": "switching node",
+      "confidence": 0.9
+    },
+    "SW2": {
+      "label": "SW2",
+      "domain": "power_rail",
+      "description": "Switching node of buck converter 2 in charger/power IC U2, connected to MOSFETs Q15/Q17 and cap C8.",
+      "voltage_level": "switching node",
+      "confidence": 0.9
+    },
+    "TDR1": {
+      "label": "TDR1",
+      "domain": "ethernet",
+      "description": "Gigabit Ethernet differential pair RD1 positive pin on connector PP11 (receive data pair 1).",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.85
+    },
+    "TDR1-": {
+      "label": "TDR1-",
+      "domain": "ethernet",
+      "description": "Gigabit Ethernet differential pair RD1 negative pin on connector PP11 (receive data pair 1).",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.85
+    },
+    "TEST1": {
+      "label": "TEST1",
+      "domain": "debug",
+      "description": "Test point on DSI-to-eDP bridge U10 (pin 60), used for manufacturing or debug testing.",
+      "voltage_level": null,
+      "confidence": 0.7
+    },
+    "TEST2": {
+      "label": "TEST2",
+      "domain": "debug",
+      "description": "Test point on DSI-to-eDP bridge U10 (pin 55), used for manufacturing or debug testing.",
+      "voltage_level": null,
+      "confidence": 0.7
+    },
+    "TEST3": {
+      "label": "TEST3",
+      "domain": "debug",
+      "description": "Test point on DSI-to-eDP bridge U10 (pin 50), used for manufacturing or debug testing.",
+      "voltage_level": null,
+      "confidence": 0.7
+    },
+    "TG1": {
+      "label": "TG1",
+      "domain": "power_seq",
+      "description": "Top-gate drive signal for high-side MOSFET in buck converter 1 of charger IC U2.",
+      "voltage_level": "gate drive pulse",
+      "confidence": 0.85
+    },
+    "TG2": {
+      "label": "TG2",
+      "domain": "power_seq",
+      "description": "Top-gate drive signal for high-side MOSFET in buck converter 2 of charger IC U2.",
+      "voltage_level": "gate drive pulse",
+      "confidence": 0.85
+    },
+    "TIMER": {
+      "label": "TIMER",
+      "domain": "power_seq",
+      "description": "Timer pin on battery charger IC U2, sets charge safety timer duration via external capacitor.",
+      "voltage_level": null,
+      "confidence": 0.85
+    },
+    "TRCT1": {
+      "label": "TRCT1",
+      "domain": "ethernet",
+      "description": "Ethernet center tap 1 on connector PP11, connected to center tap capacitor CC2266.",
+      "voltage_level": null,
+      "confidence": 0.8
+    },
+    "TRCT2": {
+      "label": "TRCT2",
+      "domain": "ethernet",
+      "description": "Ethernet center tap 2 on connector PP11, connected to center tap capacitor CC2255.",
+      "voltage_level": null,
+      "confidence": 0.8
+    },
+    "TRCT3": {
+      "label": "TRCT3",
+      "domain": "ethernet",
+      "description": "Ethernet center tap 3 on connector PP11, connected to center tap capacitor CC2244.",
+      "voltage_level": null,
+      "confidence": 0.8
+    },
+    "TRCT4": {
+      "label": "TRCT4",
+      "domain": "ethernet",
+      "description": "Ethernet center tap 4 on connector PP11, connected to center tap capacitor CC2233.",
+      "voltage_level": null,
+      "confidence": 0.8
+    },
+    "TRD2": {
+      "label": "TRD2",
+      "domain": "ethernet",
+      "description": "Gigabit Ethernet transmit/receive data pair 2 positive on connector PP11.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.85
+    },
+    "TRD2-": {
+      "label": "TRD2-",
+      "domain": "ethernet",
+      "description": "Gigabit Ethernet transmit/receive data pair 2 negative on connector PP11.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.85
+    },
+    "TRD3": {
+      "label": "TRD3",
+      "domain": "ethernet",
+      "description": "Gigabit Ethernet transmit/receive data pair 3 positive on connector PP11.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.85
+    },
+    "TRD3-": {
+      "label": "TRD3-",
+      "domain": "ethernet",
+      "description": "Gigabit Ethernet transmit/receive data pair 3 negative on connector PP11.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.85
+    },
+    "TRD4": {
+      "label": "TRD4",
+      "domain": "ethernet",
+      "description": "Gigabit Ethernet transmit/receive data pair 4 positive on connector PP11.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.85
+    },
+    "TRD4-": {
+      "label": "TRD4-",
+      "domain": "ethernet",
+      "description": "Gigabit Ethernet transmit/receive data pair 4 negative on connector PP11.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.85
+    },
+    "TRP1+": {
+      "label": "TRP1+",
+      "domain": "ethernet",
+      "description": "Gigabit Ethernet RJ45 connector pair 1 positive pin (PP11.1), part of 1000BASE-T interface.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.85
+    },
+    "TRP1-": {
+      "label": "TRP1-",
+      "domain": "ethernet",
+      "description": "Gigabit Ethernet RJ45 connector pair 1 negative pin (PP11.2), part of 1000BASE-T interface.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.85
+    },
+    "TRP2+": {
+      "label": "TRP2+",
+      "domain": "ethernet",
+      "description": "Gigabit Ethernet RJ45 connector pair 2 positive pin (PP11.3), part of 1000BASE-T interface.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.85
+    },
+    "TRP2-": {
+      "label": "TRP2-",
+      "domain": "ethernet",
+      "description": "Gigabit Ethernet RJ45 connector pair 2 negative pin (PP11.6), part of 1000BASE-T interface.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.85
+    },
+    "TRP3+": {
+      "label": "TRP3+",
+      "domain": "ethernet",
+      "description": "Gigabit Ethernet RJ45 connector pair 3 positive pin (PP11.4), part of 1000BASE-T interface.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.85
+    },
+    "TRP3-": {
+      "label": "TRP3-",
+      "domain": "ethernet",
+      "description": "Gigabit Ethernet RJ45 connector pair 3 negative pin (PP11.5), part of 1000BASE-T interface.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.85
+    },
+    "TRP4+": {
+      "label": "TRP4+",
+      "domain": "ethernet",
+      "description": "Gigabit Ethernet RJ45 connector pair 4 positive pin (PP11.7), part of 1000BASE-T interface.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.85
+    },
+    "TRP4-": {
+      "label": "TRP4-",
+      "domain": "ethernet",
+      "description": "Gigabit Ethernet RJ45 connector pair 4 negative pin (PP11.8), part of 1000BASE-T interface.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.85
+    },
+    "T_PMIC_ON_REQ": {
+      "label": "T_PMIC_ON_REQ",
+      "domain": "power_seq",
+      "description": "Test point for PMIC power-on request signal, used to trigger or monitor PMIC startup sequence.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.85
+    },
+    "UART3_CTS": {
+      "label": "UART3_CTS",
+      "domain": "debug",
+      "description": "UART3 Clear-To-Send hardware flow control input on SoC U1.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.85
+    },
+    "UART3_RTS": {
+      "label": "UART3_RTS",
+      "domain": "debug",
+      "description": "UART3 Request-To-Send hardware flow control output on SoC U1.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.85
+    },
+    "UART4_RXD": {
+      "label": "UART4_RXD",
+      "domain": "debug",
+      "description": "UART4 receive data line on SoC U1 (auxiliary serial port).",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.8
+    },
+    "UART4_TXD": {
+      "label": "UART4_TXD",
+      "domain": "debug",
+      "description": "UART4 transmit data line on SoC U1 (auxiliary serial port).",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.8
+    },
+    "UIM_C4": {
+      "label": "UIM_C4",
+      "domain": "pcie",
+      "description": "UIM/SIM card C4 contact (Reserved/USIM) for mPCIe slot U11, used by cellular modem.",
+      "voltage_level": "1V8 or 3V logic",
+      "confidence": 0.8
+    },
+    "UIM_C8": {
+      "label": "UIM_C8",
+      "domain": "pcie",
+      "description": "UIM/SIM card C8 contact (SIM Data 2) for mPCIe slot U11, used by cellular modem.",
+      "voltage_level": "1V8 or 3V logic",
+      "confidence": 0.8
+    },
+    "UIM_CLK": {
+      "label": "UIM_CLK",
+      "domain": "pcie",
+      "description": "UIM/SIM card clock signal for mPCIe slot U11 cellular modem interface.",
+      "voltage_level": "1V8 or 3V logic",
+      "confidence": 0.85
+    },
+    "UIM_DATA": {
+      "label": "UIM_DATA",
+      "domain": "pcie",
+      "description": "UIM/SIM card data (I/O) signal for mPCIe slot U11 cellular modem interface.",
+      "voltage_level": "1V8 or 3V logic",
+      "confidence": 0.85
+    },
+    "UIM_PWR": {
+      "label": "UIM_PWR",
+      "domain": "pcie",
+      "description": "UIM/SIM card power supply voltage for mPCIe slot U11 cellular modem interface.",
+      "voltage_level": "1V8 or 3V rail",
+      "confidence": 0.85
+    },
+    "UIM_RESET": {
+      "label": "UIM_RESET",
+      "domain": "pcie",
+      "description": "UIM/SIM card reset signal for mPCIe slot U11 cellular modem interface.",
+      "voltage_level": "1V8 or 3V logic",
+      "confidence": 0.85
+    },
+    "UIM_VPP": {
+      "label": "UIM_VPP",
+      "domain": "pcie",
+      "description": "UIM/SIM card programming voltage (VPP) pin for mPCIe slot U11, typically unused/NC.",
+      "voltage_level": null,
+      "confidence": 0.75
+    },
+    "USB1_DN": {
+      "label": "USB1_DN",
+      "domain": "usb",
+      "description": "USB1 full-speed/high-speed D- differential data line between SoC U1 and USB hub U9.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.98
+    },
+    "USB1_DP": {
+      "label": "USB1_DP",
+      "domain": "usb",
+      "description": "USB1 full-speed/high-speed D+ differential data line between SoC U1 and USB hub U9.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.98
+    },
+    "USB1_OC": {
+      "label": "USB1_OC",
+      "domain": "usb",
+      "description": "USB1 over-current detect input to SoC U1, asserted when port exceeds current limit.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.95
+    },
+    "USB1_OTG_ID": {
+      "label": "USB1_OTG_ID",
+      "domain": "usb",
+      "description": "USB1 OTG ID pin on SoC U1, determines host/device role (grounded=host, floating=device).",
+      "voltage_level": "open-drain pull-up",
+      "confidence": 0.95
+    },
+    "USB1_OTG_PWR_EN": {
+      "label": "USB1_OTG_PWR_EN",
+      "domain": "usb",
+      "description": "USB1 OTG port power enable output from SoC U1, enables VBUS power to the port.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.95
+    },
+    "USB1_RX_N": {
+      "label": "USB1_RX_N",
+      "domain": "usb",
+      "description": "USB1 SuperSpeed receive differential pair negative between SoC U1 and USB hub U9.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.95
+    },
+    "USB1_RX_P": {
+      "label": "USB1_RX_P",
+      "domain": "usb",
+      "description": "USB1 SuperSpeed receive differential pair positive between SoC U1 and USB hub U9.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.95
+    },
+    "USB1_TX_N": {
+      "label": "USB1_TX_N",
+      "domain": "usb",
+      "description": "USB1 SuperSpeed transmit differential pair negative between SoC U1 and USB hub U9.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.95
+    },
+    "USB1_TX_P": {
+      "label": "USB1_TX_P",
+      "domain": "usb",
+      "description": "USB1 SuperSpeed transmit differential pair positive between SoC U1 and USB hub U9.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.95
+    },
+    "USB1_VBUS": {
+      "label": "USB1_VBUS",
+      "domain": "usb",
+      "description": "USB1 VBUS sense/power line on SoC U1, monitors bus voltage presence.",
+      "voltage_level": "rail 5V",
+      "confidence": 0.9
+    },
+    "USB2_DN": {
+      "label": "USB2_DN",
+      "domain": "usb",
+      "description": "USB2 D- differential data line from SoC U1 through hub U21 to connector J17.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.98
+    },
+    "USB2_DP": {
+      "label": "USB2_DP",
+      "domain": "usb",
+      "description": "USB2 D+ differential data line from SoC U1 through hub U21 to connector J17.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.98
+    },
+    "USB2_RX_N": {
+      "label": "USB2_RX_N",
+      "domain": "usb",
+      "description": "USB2 SuperSpeed receive differential pair negative between SoC U1 and USB hub U21.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.95
+    },
+    "USB2_RX_P": {
+      "label": "USB2_RX_P",
+      "domain": "usb",
+      "description": "USB2 SuperSpeed receive differential pair positive between SoC U1 and USB hub U21.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.95
+    },
+    "USB2_TX_N": {
+      "label": "USB2_TX_N",
+      "domain": "usb",
+      "description": "USB2 SuperSpeed transmit differential pair negative between SoC U1 and USB hub U21.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.95
+    },
+    "USB2_TX_P": {
+      "label": "USB2_TX_P",
+      "domain": "usb",
+      "description": "USB2 SuperSpeed transmit differential pair positive between SoC U1 and USB hub U21.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.95
+    },
+    "USB3_1_DN": {
+      "label": "USB3_1_DN",
+      "domain": "usb",
+      "description": "USB 3.1 port 1 D- HS data line through hub U25 to connector J6.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.95
+    },
+    "USB3_1_DP": {
+      "label": "USB3_1_DP",
+      "domain": "usb",
+      "description": "USB 3.1 port 1 D+ HS data line through hub U25 to connector J6.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.95
+    },
+    "USB3_1_SSRXN": {
+      "label": "USB3_1_SSRXN",
+      "domain": "usb",
+      "description": "USB 3.1 port 1 SuperSpeed receive pair negative on hub U25.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.95
+    },
+    "USB3_1_SSRXP": {
+      "label": "USB3_1_SSRXP",
+      "domain": "usb",
+      "description": "USB 3.1 port 1 SuperSpeed receive pair positive on hub U25.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.95
+    },
+    "USB3_1_SSTXCN": {
+      "label": "USB3_1_SSTXCN",
+      "domain": "usb",
+      "description": "USB 3.1 port 1 SuperSpeed transmit complement negative on hub U25.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.9
+    },
+    "USB3_1_SSTXCP": {
+      "label": "USB3_1_SSTXCP",
+      "domain": "usb",
+      "description": "USB 3.1 port 1 SuperSpeed transmit complement positive on hub U25.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.9
+    },
+    "USB3_1_SSTXN": {
+      "label": "USB3_1_SSTXN",
+      "domain": "usb",
+      "description": "USB 3.1 port 1 SuperSpeed transmit pair negative (no connects listed, possibly stub/NC).",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.85
+    },
+    "USB3_1_SSTXP": {
+      "label": "USB3_1_SSTXP",
+      "domain": "usb",
+      "description": "USB 3.1 port 1 SuperSpeed transmit pair positive (no connects listed, possibly stub/NC).",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.85
+    },
+    "USB3_2_DN": {
+      "label": "USB3_2_DN",
+      "domain": "usb",
+      "description": "USB 3.2 port 2 D- HS data line through hub U26 to connector J5.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.95
+    },
+    "USB3_2_DP": {
+      "label": "USB3_2_DP",
+      "domain": "usb",
+      "description": "USB 3.2 port 2 D+ HS data line through hub U26 to connector J5.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.95
+    },
+    "USB3_2_SSRXN": {
+      "label": "USB3_2_SSRXN",
+      "domain": "usb",
+      "description": "USB 3.2 port 2 SuperSpeed receive pair negative on hub U26.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.95
+    },
+    "USB3_2_SSRXP": {
+      "label": "USB3_2_SSRXP",
+      "domain": "usb",
+      "description": "USB 3.2 port 2 SuperSpeed receive pair positive on hub U26.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.95
+    },
+    "USB3_2_SSTXCN": {
+      "label": "USB3_2_SSTXCN",
+      "domain": "usb",
+      "description": "USB 3.2 port 2 SuperSpeed transmit complement negative on hub U26.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.9
+    },
+    "USB3_2_SSTXCP": {
+      "label": "USB3_2_SSTXCP",
+      "domain": "usb",
+      "description": "USB 3.2 port 2 SuperSpeed transmit complement positive on hub U26.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.9
+    },
+    "USB3_3_DN": {
+      "label": "USB3_3_DN",
+      "domain": "usb",
+      "description": "USB 3.3 port 3 D- HS data line to connector J9 via resistor R90.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.95
+    },
+    "USB3_3_DP": {
+      "label": "USB3_3_DP",
+      "domain": "usb",
+      "description": "USB 3.3 port 3 D+ HS data line to connector J9 via resistor R91.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.95
+    },
+    "USB3_3_SSRXN": {
+      "label": "USB3_3_SSRXN",
+      "domain": "usb",
+      "description": "USB 3.3 port 3 SuperSpeed receive pair negative to connector J12.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.95
+    },
+    "USB3_3_SSRXP": {
+      "label": "USB3_3_SSRXP",
+      "domain": "usb",
+      "description": "USB 3.3 port 3 SuperSpeed receive pair positive to connector J12.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.95
+    },
+    "USB3_3_SSTXN": {
+      "label": "USB3_3_SSTXN",
+      "domain": "usb",
+      "description": "USB 3.3 port 3 SuperSpeed transmit pair negative to connector J12.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.95
+    },
+    "USB3_3_SSTXP": {
+      "label": "USB3_3_SSTXP",
+      "domain": "usb",
+      "description": "USB 3.3 port 3 SuperSpeed transmit pair positive to connector J12.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.95
+    },
+    "USB3_4_DN": {
+      "label": "USB3_4_DN",
+      "domain": "usb",
+      "description": "USB 3.4 port 4 D- HS data line to connector J14 via resistor R92.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.95
+    },
+    "USB3_4_DP": {
+      "label": "USB3_4_DP",
+      "domain": "usb",
+      "description": "USB 3.4 port 4 D+ HS data line to connector J14 via resistor R93.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.95
+    },
+    "USB3_4_SSRXN": {
+      "label": "USB3_4_SSRXN",
+      "domain": "usb",
+      "description": "USB 3.4 port 4 SuperSpeed receive pair negative to connector J12.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.95
+    },
+    "USB3_4_SSRXP": {
+      "label": "USB3_4_SSRXP",
+      "domain": "usb",
+      "description": "USB 3.4 port 4 SuperSpeed receive pair positive to connector J12.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.95
+    },
+    "USB3_4_SSTXN": {
+      "label": "USB3_4_SSTXN",
+      "domain": "usb",
+      "description": "USB 3.4 port 4 SuperSpeed transmit pair negative to connector J12.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.95
+    },
+    "USB3_4_SSTXP": {
+      "label": "USB3_4_SSTXP",
+      "domain": "usb",
+      "description": "USB 3.4 port 4 SuperSpeed transmit pair positive to connector J12.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.95
+    },
+    "USBH_1V1": {
+      "label": "USBH_1V1",
+      "domain": "power_rail",
+      "description": "1.1V power rail for USB hub circuitry, distributed to hub ICs and decoupling capacitors.",
+      "voltage_level": "rail 1V1",
+      "confidence": 0.95
+    },
+    "USBH_3V3": {
+      "label": "USBH_3V3",
+      "domain": "power_rail",
+      "description": "3.3V power rail for USB hub circuitry, supplies hub ICs U9 and ferrite-filtered sub-rails.",
+      "voltage_level": "rail 3V3",
+      "confidence": 0.95
+    },
+    "USB_D": {
+      "label": "USB_D",
+      "domain": "usb",
+      "description": "USB D+ data line for mPCIe slot U11 (cellular modem USB interface).",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.9
+    },
+    "USB_D-": {
+      "label": "USB_D-",
+      "domain": "usb",
+      "description": "USB D- data line for mPCIe slot U11 (cellular modem USB interface).",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.9
+    },
+    "USB_DM": {
+      "label": "USB_DM",
+      "domain": "usb",
+      "description": "USB D- data line on USB-C connector J8 (pins A7/B7), part of USB 2.0 high-speed path.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.95
+    },
+    "USB_DM_DN0": {
+      "label": "USB_DM_DN0",
+      "domain": "usb",
+      "description": "USB hub U9 downstream port 0 D- line (high-speed differential data).",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.95
+    },
+    "USB_DM_DN1": {
+      "label": "USB_DM_DN1",
+      "domain": "usb",
+      "description": "USB hub U9 downstream port 1 D- line (high-speed differential data).",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.95
+    },
+    "USB_DM_DN2": {
+      "label": "USB_DM_DN2",
+      "domain": "usb",
+      "description": "USB hub U9 downstream port 2 D- line (high-speed differential data).",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.95
+    },
+    "USB_DM_DN3": {
+      "label": "USB_DM_DN3",
+      "domain": "usb",
+      "description": "USB hub U9 downstream port 3 D- line (high-speed differential data).",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.95
+    },
+    "USB_DM_UP": {
+      "label": "USB_DM_UP",
+      "domain": "usb",
+      "description": "USB hub U9 upstream port D- line connecting to host SoC (high-speed differential data).",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.95
+    },
+    "USB_DP": {
+      "label": "USB_DP",
+      "domain": "usb",
+      "description": "USB 2.0 full-speed D+ data line at USB-C connector J8 with series resistors.",
+      "voltage_level": "3V3 logic / differential",
+      "confidence": 0.97
+    },
+    "USB_DP_DN0": {
+      "label": "USB_DP_DN0",
+      "domain": "usb",
+      "description": "USB 2.0 D+ downstream port 0 on USB hub U9.",
+      "voltage_level": "differential 3V3",
+      "confidence": 0.97
+    },
+    "USB_DP_DN1": {
+      "label": "USB_DP_DN1",
+      "domain": "usb",
+      "description": "USB 2.0 D+ downstream port 1 on USB hub U9.",
+      "voltage_level": "differential 3V3",
+      "confidence": 0.97
+    },
+    "USB_DP_DN2": {
+      "label": "USB_DP_DN2",
+      "domain": "usb",
+      "description": "USB 2.0 D+ downstream port 2 on USB hub U9.",
+      "voltage_level": "differential 3V3",
+      "confidence": 0.97
+    },
+    "USB_DP_DN3": {
+      "label": "USB_DP_DN3",
+      "domain": "usb",
+      "description": "USB 2.0 D+ downstream port 3 on USB hub U9.",
+      "voltage_level": "differential 3V3",
+      "confidence": 0.97
+    },
+    "USB_DP_UP": {
+      "label": "USB_DP_UP",
+      "domain": "usb",
+      "description": "USB 2.0 D+ upstream port on USB hub U9 toward host.",
+      "voltage_level": "differential 3V3",
+      "confidence": 0.97
+    },
+    "USB_HUB_RESET": {
+      "label": "USB_HUB_RESET",
+      "domain": "reset",
+      "description": "Active-low reset signal for USB hub controller U1.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.97
+    },
+    "USB_INT1": {
+      "label": "USB_INT1",
+      "domain": "usb",
+      "description": "USB interrupt signal 1 from connector J9, likely overcurrent or attach event.",
+      "voltage_level": "3V3 logic, open-drain",
+      "confidence": 0.85
+    },
+    "USB_INT2": {
+      "label": "USB_INT2",
+      "domain": "usb",
+      "description": "USB interrupt signal 2 from connector J14, likely overcurrent or attach event.",
+      "voltage_level": "3V3 logic, open-drain",
+      "confidence": 0.85
+    },
+    "USB_PWR": {
+      "label": "USB_PWR",
+      "domain": "power_rail",
+      "description": "USB 5V power rail distributed to hub, connectors and ferrite beads from USB power switch.",
+      "voltage_level": "rail 5V",
+      "confidence": 0.97
+    },
+    "USB_PWR_EN": {
+      "label": "USB_PWR_EN",
+      "domain": "power_seq",
+      "description": "Enable signal for USB power switch U24, controls USB_PWR rail.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.97
+    },
+    "USB_R1": {
+      "label": "USB_R1",
+      "domain": "usb",
+      "description": "USB hub U9 R1 impedance tuning pin connection.",
+      "voltage_level": null,
+      "confidence": 0.8
+    },
+    "USB_R1RTN": {
+      "label": "USB_R1RTN",
+      "domain": "usb",
+      "description": "USB hub U9 R1 return reference pin for impedance calibration.",
+      "voltage_level": null,
+      "confidence": 0.8
+    },
+    "USB_SSRXM_DN0": {
+      "label": "USB_SSRXM_DN0",
+      "domain": "usb",
+      "description": "USB 3.0 SuperSpeed RX- (negative) downstream port 0 on USB hub U9.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.97
+    },
+    "USB_SSRXM_DN1": {
+      "label": "USB_SSRXM_DN1",
+      "domain": "usb",
+      "description": "USB 3.0 SuperSpeed RX- (negative) downstream port 1 on USB hub U9.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.97
+    },
+    "USB_SSRXM_DN2": {
+      "label": "USB_SSRXM_DN2",
+      "domain": "usb",
+      "description": "USB 3.0 SuperSpeed RX- (negative) downstream port 2 on USB hub U9.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.97
+    },
+    "USB_SSRXM_DN3": {
+      "label": "USB_SSRXM_DN3",
+      "domain": "usb",
+      "description": "USB 3.0 SuperSpeed RX- (negative) downstream port 3 on USB hub U9.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.97
+    },
+    "USB_SSRXM_UP": {
+      "label": "USB_SSRXM_UP",
+      "domain": "usb",
+      "description": "USB 3.0 SuperSpeed RX- (negative) upstream port on USB hub U9.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.97
+    },
+    "USB_SSRXP_DN0": {
+      "label": "USB_SSRXP_DN0",
+      "domain": "usb",
+      "description": "USB 3.0 SuperSpeed RX+ (positive) downstream port 0 on USB hub U9.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.97
+    },
+    "USB_SSRXP_DN1": {
+      "label": "USB_SSRXP_DN1",
+      "domain": "usb",
+      "description": "USB 3.0 SuperSpeed RX+ (positive) downstream port 1 on USB hub U9.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.97
+    },
+    "USB_SSRXP_DN2": {
+      "label": "USB_SSRXP_DN2",
+      "domain": "usb",
+      "description": "USB 3.0 SuperSpeed RX+ (positive) downstream port 2 on USB hub U9.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.97
+    },
+    "USB_SSRXP_DN3": {
+      "label": "USB_SSRXP_DN3",
+      "domain": "usb",
+      "description": "USB 3.0 SuperSpeed RX+ (positive) downstream port 3 on USB hub U9.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.97
+    },
+    "USB_SSRXP_UP": {
+      "label": "USB_SSRXP_UP",
+      "domain": "usb",
+      "description": "USB 3.0 SuperSpeed RX+ (positive) upstream port on USB hub U9.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.97
+    },
+    "USB_SSTXM_DN0": {
+      "label": "USB_SSTXM_DN0",
+      "domain": "usb",
+      "description": "USB 3.0 SuperSpeed TX- (negative) downstream port 0 on USB hub U9.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.97
+    },
+    "USB_SSTXM_DN1": {
+      "label": "USB_SSTXM_DN1",
+      "domain": "usb",
+      "description": "USB 3.0 SuperSpeed TX- (negative) downstream port 1 on USB hub U9.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.97
+    },
+    "USB_SSTXM_DN2": {
+      "label": "USB_SSTXM_DN2",
+      "domain": "usb",
+      "description": "USB 3.0 SuperSpeed TX- (negative) downstream port 2 on USB hub U9.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.97
+    },
+    "USB_SSTXM_DN3": {
+      "label": "USB_SSTXM_DN3",
+      "domain": "usb",
+      "description": "USB 3.0 SuperSpeed TX- (negative) downstream port 3 on USB hub U9.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.97
+    },
+    "USB_SSTXM_UP": {
+      "label": "USB_SSTXM_UP",
+      "domain": "usb",
+      "description": "USB 3.0 SuperSpeed TX- (negative) upstream port on USB hub U9.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.97
+    },
+    "USB_SSTXP_DN0": {
+      "label": "USB_SSTXP_DN0",
+      "domain": "usb",
+      "description": "USB 3.0 SuperSpeed TX+ (positive) downstream port 0 on USB hub U9.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.97
+    },
+    "USB_SSTXP_DN1": {
+      "label": "USB_SSTXP_DN1",
+      "domain": "usb",
+      "description": "USB 3.0 SuperSpeed TX+ (positive) downstream port 1 on USB hub U9.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.97
+    },
+    "USB_SSTXP_DN2": {
+      "label": "USB_SSTXP_DN2",
+      "domain": "usb",
+      "description": "USB 3.0 SuperSpeed TX+ (positive) downstream port 2 on USB hub U9.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.97
+    },
+    "USB_SSTXP_DN3": {
+      "label": "USB_SSTXP_DN3",
+      "domain": "usb",
+      "description": "USB 3.0 SuperSpeed TX+ (positive) downstream port 3 on USB hub U9.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.97
+    },
+    "USB_SSTXP_UP": {
+      "label": "USB_SSTXP_UP",
+      "domain": "usb",
+      "description": "USB 3.0 SuperSpeed TX+ (positive) upstream port on USB hub U9.",
+      "voltage_level": "differential ±500mV",
+      "confidence": 0.97
+    },
+    "USB_VBUS": {
+      "label": "USB_VBUS",
+      "domain": "usb",
+      "description": "VBUS sense pin on USB hub U9 for bus power detection.",
+      "voltage_level": "rail 5V",
+      "confidence": 0.92
+    },
+    "UTILITY": {
+      "label": "UTILITY",
+      "domain": "misc",
+      "description": "Utility/spare signal on J4 HDMI connector, purpose not clearly defined.",
+      "voltage_level": null,
+      "confidence": 0.4
+    },
+    "VBUS": {
+      "label": "VBUS",
+      "domain": "usb",
+      "description": "USB VBUS 5V power rail at USB-C connector J8 and USB connectors J5, J6, J17.",
+      "voltage_level": "rail 5V",
+      "confidence": 0.95
+    },
+    "VCC": {
+      "label": "VCC",
+      "domain": "power_rail",
+      "description": "Main VCC power rail supplying DSI-to-eDP bridge U10 and associated decoupling capacitors.",
+      "voltage_level": "rail 3V3",
+      "confidence": 0.88
+    },
+    "VCCA": {
+      "label": "VCCA",
+      "domain": "power_rail",
+      "description": "Analog supply (VCCA) for level-shifter U28 on SD card page.",
+      "voltage_level": "rail 3V3",
+      "confidence": 0.88
+    },
+    "VCCB": {
+      "label": "VCCB",
+      "domain": "power_rail",
+      "description": "I/O supply (VCCB) for level-shifter U28 on SD card page, sets card interface voltage.",
+      "voltage_level": "rail 1V8 or 3V3",
+      "confidence": 0.85
+    },
+    "VCCIO": {
+      "label": "VCCIO",
+      "domain": "power_rail",
+      "description": "VCCIO supply rail for DSI bridge U10 and SD card level shifter U17, up to 40 mA.",
+      "voltage_level": "rail 1V8",
+      "confidence": 0.9
+    },
+    "VDDODA": {
+      "label": "VDDODA",
+      "domain": "power_rail",
+      "description": "VDD_ODA supply pin for PCIe mPCIe component U23.",
+      "voltage_level": "rail 3V3",
+      "confidence": 0.75
+    },
+    "VDDXD": {
+      "label": "VDDXD",
+      "domain": "power_rail",
+      "description": "VDD_XD crystal/oscillator supply for PCIe component U23.",
+      "voltage_level": "rail 1V8 or 3V3",
+      "confidence": 0.75
+    },
+    "VFB": {
+      "label": "VFB",
+      "domain": "power_seq",
+      "description": "Feedback voltage node of main DC-DC converter U2 for output voltage regulation.",
+      "voltage_level": "analog ~0.8V reference",
+      "confidence": 0.9
+    },
+    "VFBMAX": {
+      "label": "VFBMAX",
+      "domain": "power_seq",
+      "description": "Maximum feedback limit node for DC-DC converter U2 output voltage ceiling.",
+      "voltage_level": "analog reference",
+      "confidence": 0.88
+    },
+    "VFBMIN": {
+      "label": "VFBMIN",
+      "domain": "power_seq",
+      "description": "Minimum feedback limit node for DC-DC converter U2 output voltage floor.",
+      "voltage_level": "analog reference",
+      "confidence": 0.88
+    },
+    "VIN": {
+      "label": "VIN",
+      "domain": "power_rail",
+      "description": "Main DC input rail from power input fuse F1 and protection diodes to DC-DC converter.",
+      "voltage_level": "rail ~5V–20V (battery/adapter)",
+      "confidence": 0.97
+    },
+    "VIN_REG": {
+      "label": "VIN_REG",
+      "domain": "power_seq",
+      "description": "Input voltage regulation sense pin on DC-DC converter U2 for input voltage monitoring.",
+      "voltage_level": "analog input sense",
+      "confidence": 0.85
+    },
+    "VMID": {
+      "label": "VMID",
+      "domain": "audio",
+      "description": "Audio codec U3 VMID mid-rail bias reference with decoupling capacitors.",
+      "voltage_level": "analog ~1V65 mid-rail",
+      "confidence": 0.95
+    },
+    "VOUT": {
+      "label": "VOUT",
+      "domain": "power_rail",
+      "description": "DC-DC converter output rail from inductor L1 with bulk capacitors and feedback resistors.",
+      "voltage_level": "rail ~3V3 or 5V",
+      "confidence": 0.93
+    },
+    "VPLL": {
+      "label": "VPLL",
+      "domain": "power_rail",
+      "description": "PLL supply voltage pin on DSI-to-eDP bridge U10.",
+      "voltage_level": "rail 1V8",
+      "confidence": 0.85
+    },
+    "VREG": {
+      "label": "VREG",
+      "domain": "power_rail",
+      "description": "Internal regulator output of U4 with decoupling capacitors and bias resistors.",
+      "voltage_level": "rail ~1V8 or 3V3",
+      "confidence": 0.82
+    },
+    "VSSOSC": {
+      "label": "VSSOSC",
+      "domain": "ground",
+      "description": "USB hub U9 oscillator ground return pins.",
+      "voltage_level": "0V ground",
+      "confidence": 0.9
+    },
+    "VVDDDD": {
+      "label": "VVDDDD",
+      "domain": "power_rail",
+      "description": "SD card page supply rail (obfuscated net name, likely VVDD digital supply).",
+      "voltage_level": null,
+      "confidence": 0.5
+    },
+    "VVSSSS": {
+      "label": "VVSSSS",
+      "domain": "ground",
+      "description": "SD card page ground net (obfuscated net name, likely VSS/ground reference).",
+      "voltage_level": "0V ground",
+      "confidence": 0.5
+    },
+    "WIFI_RESET": {
+      "label": "WIFI_RESET",
+      "domain": "reset",
+      "description": "Active-low reset signal to Wi-Fi module controlled via U1.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.95
+    },
+    "WL_EN": {
+      "label": "WL_EN",
+      "domain": "control",
+      "description": "Wi-Fi module enable signal from U1 to enable wireless LAN.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.93
+    },
+    "WL_IRQ": {
+      "label": "WL_IRQ",
+      "domain": "control",
+      "description": "Wi-Fi module interrupt request signal to host via U1.",
+      "voltage_level": "3V3 logic, open-drain",
+      "confidence": 0.9
+    },
+    "WWRRIITTEE__PPRROOTTEECCTT": {
+      "label": "WWRRIITTEE__PPRROOTTEECCTT",
+      "domain": "storage",
+      "description": "Write-protect signal for SD card slot on SD card page (doubled-char net name artifact).",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.75
+    },
+    "XTALIN": {
+      "label": "XTALIN",
+      "domain": "clock",
+      "description": "Crystal oscillator input to USB PHY U18 from crystal Y2.",
+      "voltage_level": "differential/sinusoidal ~1V",
+      "confidence": 0.95
+    },
+    "XTALOUT": {
+      "label": "XTALOUT",
+      "domain": "clock",
+      "description": "Crystal oscillator output from USB PHY U18 back to crystal Y2.",
+      "voltage_level": "differential/sinusoidal ~1V",
+      "confidence": 0.95
+    },
+    "YEL": {
+      "label": "YEL",
+      "domain": "ethernet",
+      "description": "Ethernet magnetics yellow LED anode signal on Gigabit Ethernet port PP11 (activity/link).",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.85
+    },
+    "YEL-": {
+      "label": "YEL-",
+      "domain": "ethernet",
+      "description": "Ethernet magnetics yellow LED cathode return signal on Gigabit Ethernet port PP11.",
+      "voltage_level": "3V3 logic",
+      "confidence": 0.85
+    }
+  },
+  "domain_summary": {
+    "power_rail": 47,
+    "power_seq": 40,
+    "audio": 78,
+    "display": 49,
+    "ground": 11,
+    "control": 56,
+    "debug": 36,
+    "clock": 9,
+    "usb": 91,
+    "storage": 30,
+    "hdmi": 38,
+    "pcie": 32,
+    "ethernet": 39,
+    "reset": 4,
+    "misc": 2
+  },
+  "ambiguities": [
+    "CC110000: Net label appears to be a schematic artifact or decoupling node label on the 1.2V rail; classified as power_rail but meaning is ambiguous.",
+    "CCAARRDD__DDEETTEECCTT / CCDD//DDAATT33 / CCLLKK / CCMMDD: All four nets have doubled characters in their labels, strongly suggesting a schematic font/rendering artifact for SD card signals (CARD_DETECT, CD/DAT3, CLK, CMD). Classified as storage with reduced confidence.",
+    "ADDR: Only connects to DSI-to-eDP bridge U10 pin 1; likely an I2C address select or config strapping pin — classified as display with moderate confidence.",
+    "COM: Connects to Ethernet magnetics PP11 pin 16; likely transformer center-tap bias node — classified as ethernet with moderate confidence.",
+    "CSI_P2_*: These nets are labeled CSI (camera serial interface) but on the MNT Reform the SoC's MIPI lanes serve the DSI-to-eDP bridge; classified as display but could be camera-related misc.",
+    "DDAATT00/DDAATT11/DDAATT22 — obfuscated net names on page 9 (SD card sheet); classified as storage based on sheet context and double-letter naming pattern, but no connects listed to confirm.",
+    "DIR — direction control on U28 (ESD protection for SD card, page 9); classified storage but could be a generic control signal.",
+    "FAST_BOOT — SoC boot configuration pin; classified misc as it is a boot-mode strap rather than a clear domain-specific signal.",
+    "FBG — feedback ground node of power converter U2; may be a power_rail internal node; classified power_rail with low confidence.",
+    "FLG — flag/fault output from U20 (mPCIe sheet, page 8); classified power_seq as it likely indicates power good/fault, but could be misc.",
+    "GNDODA / GNDXD — specialty ground variants on U23 (PCIe oscillator area); classified ground but names suggest analog/crystal sub-domains.",
+    "GP_M4_NMI — non-maskable interrupt for M4 core; classified debug as NMI is often used during firmware debug, but it could be control.",
+    "GPIO1/GPIO2/GPIO3/GPIO4 — general-purpose I/Os routed to eDP bridge U10; classified control, but purpose depends on firmware.",
+    "ESD_BYP — on HDMI repeater U22; classified hdmi since the context is the HDMI sheet, but it is a control/bypass pin.",
+    "LPC_PIO0_20, LPC_PIO1_16, LPC_PIO1_25, LPC_PIO1_31: GPIO pins on LPC microcontroller with no net connects listed and no designer note hinting at their specific function — classified as 'control' with low confidence 0.70.",
+    "IREF: current reference node for PCIe clock generator; electrical level unclear without schematic values — voltage_level set to null.",
+    "ITH: loop compensation node on charger IC U2; not a true power rail or sequencing signal but closest to power_seq — moderate confidence 0.80.",
+    "LV_SUPPLY: named on HDMI sheet for U22 level-shifter; could be a power_rail sub-domain but placed in hdmi context — classified hdmi with confidence 0.85.",
+    "ORN-: Ethernet RJ45 net name abbreviated; classified ethernet based on PP11 Gigabit Ethernet Port context.",
+    "RNG/SS (page 2, U2.15/R51.1): Label suggests SPI slave-select or a range-setting pin on switching regulator U2; classified as 'control' but could be 'power_seq' depending on U2 function.",
+    "SCKI (page 2, U4.41/R86.2): U4 role is unclear; likely audio-related DAC/codec clock input but could be SPI clock for a power controller.",
+    "SCLK (page 10, U3.17/R66.2): On audio page connected to codec U3; could be SPI control clock or I2S bit clock — classified as audio.",
+    "SDI/SDO (page 2, U4.42-43): U4 identity unclear; could be power controller SPI or audio DAC SPI — classified as control due to page context.",
+    "SCL/SDA (pages 7,12): Connected to both HDMI connector J4 (DDC) and DSI bridge U10 — classified as hdmi due to connector presence, but also serves display bridge I2C.",
+    "REFCLK (page 12, U10.54): On DSI-to-eDP bridge page; classified as clock but is display-subsystem specific.",
+    "PWR_FLAG: KiCad ERC artefact net spanning many pages — not a real signal; classified as power_seq with low confidence.",
+    "SSHH11: Net name appears to be a garbled/encoded form of 'SH1' (shield 1) on Ethernet connector PP11 — likely a mechanical shield/drain pin.",
+    "SSHHEELLLL11 / SSHHEELLLL22: Names appear to be character-doubled encodings of 'SHELL1'/'SHELL2' — Ethernet RJ45 connector chassis shield connections via R35/R42.",
+    "TDR1 / TDR1-: Net name prefix 'TDR' is ambiguous between 'Transformer Differential Receive' and other mnemonics; classified as Ethernet based on page 11 Ethernet context.",
+    "TRCT1-4: Center-tap nets on Ethernet magnetics; 'CT' interpreted as center-tap — confident Ethernet but voltage level is biased DC (typ 1.8V through resistor) not a simple rail.",
+    "UIM_* nets: SIM/UIM signals are part of the mPCIe cellular modem interface on U11; classified under 'pcie' domain as they are mPCIe card peripheral signals rather than a standalone cellular domain.",
+    "TEST1/TEST2/TEST3 on DSI-to-eDP bridge U10: Could be display-domain test pins rather than debug; classified debug due to generic TEST name.",
+    "USB3_1_SSTXN / USB3_1_SSTXP: No connected components listed — may be NC/stub nets or internal routing names.",
+    "UTILITY connects only to J4 pin 14 (HDMI connector) but the signal name 'UTILITY' gives no strong functional hint; classified misc with low confidence.",
+    "VVDDDD and VVSSSS on the SD card page have doubled-character net names that appear to be rendering artifacts; classified as power_rail and ground respectively with reduced confidence.",
+    "WWRRIITTEE__PPRROOTTEECCTT is clearly a write-protect signal from context (SD card page) but the doubled-character name is an artifact; classified storage.",
+    "USB_INT1 and USB_INT2 connect to single-pin connectors J9/J14 whose roles aren't fully described — assumed USB overcurrent/attach interrupt.",
+    "VCCA/VCCB voltages depend on SD card interface mode (1V8 vs 3V3); exact level flagged as ambiguous."
+  ],
+  "model_used": "claude-sonnet-4-6"
+}

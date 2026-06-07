@@ -1,0 +1,121 @@
+{
+  "minimap": {
+    "title": "Relations",
+    "close": "Close",
+    "empty_click": "Click a board component.",
+    "no_device": "No device in URL.",
+    "no_schematic": "No schematic ingested for this device.",
+    "unknown_in_schematic": "Unknown in schematic: {refdes}",
+    "loading": "Loading…",
+    "loading_short": "loading…",
+    "kind": {
+      "comp": "COMP",
+      "net": "NET"
+    },
+    "subhead": {
+      "rail": "rail",
+      "ground": "ground",
+      "signal": "signal",
+      "voltage": "{volt} V",
+      "pins_count": "{n} pins",
+      "pin_count": "{n} pin",
+      "nostuff": "NOSTUFF"
+    },
+    "tooltip": {
+      "open_rail_with_voltage": "{label} · {volt} V — open in schematic",
+      "open_rail": "{label} — open in schematic",
+      "decouple_cap": "{label} — decoupling cap on this rail",
+      "open_rail_focus": "Open in schematic with rail focus",
+      "pin_role_type": "{refdes}.{pin} · {role}",
+      "pin_role_type_full": "{refdes}.{pin} · {role} · {type}",
+      "comp_type": "{refdes} · {type}",
+      "comp_type_mpn": "{refdes} · {type} · {mpn}",
+      "pins_of_ref": "{refdes} · {type} — pins {pins}",
+      "pin_of_ref": "{refdes} · {type} — pin {pins}",
+      "pins_of_ref_no_type": "{refdes} — pins {pins}",
+      "pin_of_ref_no_type": "{refdes} — pin {pins}"
+    },
+    "rail": {
+      "label": "Rail",
+      "open_in_schematic": "Open in schematic",
+      "source": "src: {refdes}",
+      "no_peers": "no peer listed",
+      "no_power_role": "No power role identified",
+      "more_pins_on_net": "+{n} more pins on {net}"
+    },
+    "section": {
+      "pins": "Pins ({n})",
+      "powered_by": "Powered by",
+      "powers": "Powers",
+      "decouples": "Decouples ({n})",
+      "more": "+{n}",
+      "more_others": "({n} others)"
+    },
+    "spof": "powers {n} consumers",
+    "spof_one": "powers {n} consumer",
+    "pin": {
+      "ground_count": "{n} pins",
+      "ground_count_one": "{n} pin",
+      "ground_list": "({pins})",
+      "no_net": "(no-net)"
+    }
+  },
+  "loader": {
+    "status": "Loading board",
+    "row": {
+      "board_id": "board_id",
+      "format": "format",
+      "components": "components",
+      "pins": "pins",
+      "nets": "nets"
+    }
+  },
+  "error": {
+    "default_code": "ERROR",
+    "default_msg": "Unknown error",
+    "fetch_failed_msg": "HTTP {status} on {url}"
+  },
+  "empty": {
+    "code": "NO BOARDVIEW",
+    "msg_with_slug": "No boardview is loaded for {slug}. Upload a .brd / .kicad_pcb / .fz file from the repair page to enable the PCB view.",
+    "msg_no_slug": "No boardview loaded. Upload a .brd / .kicad_pcb / .fz file from the repair page to enable the PCB view."
+  },
+  "toolbar": {
+    "side_top": "Top",
+    "side_bottom": "Bottom",
+    "annot_title": "Show / hide silkscreen annotations",
+    "fit_title": "Fit to view",
+    "minimap_title": "Schematic relations minimap on click"
+  },
+  "badge": {
+    "summary": "{parts} components · {pins} pins"
+  },
+  "inspector": {
+    "close": "Close",
+    "value_dash": "—",
+    "footprint_dash": "—",
+    "rotation": "rot {deg}",
+    "rotation_dash": "—",
+    "smd": "SMD",
+    "tht": "THT",
+    "layer_top": "TOP",
+    "layer_bottom": "BOTTOM",
+    "layer_both": "BOTH",
+    "size": "{w} × {h} mm · {n} pins",
+    "size_one": "{w} × {h} mm · {n} pin",
+    "nets_section": "Component nets ({n})",
+    "linked_section": "Linked components ({n})",
+    "net_count": "×{n}",
+    "link_count": "{n} nets",
+    "link_count_one": "{n} net"
+  },
+  "net": {
+    "no_net_pin": "{refdes}.{pin} · no-net",
+    "with_count": "{net} · {n} pins",
+    "with_count_one": "{net} · {n} pin"
+  },
+  "cursor": {
+    "empty": "—",
+    "xy": "x: {x}  y: {y}"
+  }
+}

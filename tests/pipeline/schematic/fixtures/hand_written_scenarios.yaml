@@ -1,0 +1,123 @@
+# Phase 4 hand-written scenarios — anti-auto-referential corpus.
+# Each scenario encodes an observation shape a technician would report,
+# with a physically-motivated ground truth. If the named refdes is absent
+# from the compiled graph, the scenario is SKIPPED (warning, not failure)
+# so the file remains valid across graph regenerations.
+#
+# Scenarios calibrated against the MNT Reform v2 motherboard electrical
+# graph (449 components, 27 rails). When adapting to a new device, verify
+# the topology matches — these assume +3V3 is sourced by U12, DBVDD is
+# sourced by FB20, etc.
+
+scenarios:
+  - id: mnt-reform-c-decoupling-short-on-3v3
+    description: |
+      +3V3 rail measures shorted to GND, one downstream consumer dead.
+      A decoupling cap on +3V3 is the likely root cause. Ground truth:
+      any passive_c with role=decoupling connected to +3V3.
+      MNT candidates: C19, C167, C28, C155, CC2222, and others.
+    device_slug: mnt-reform-motherboard
+    observations:
+      state_rails: { "+3V3": "shorted" }
+      state_comps: { "U20": "dead" }
+    ground_truth_match:
+      kind: passive_c
+      role: decoupling
+      expected_mode: short
+    accept_in_top_n: 15
+
+  - id: mnt-reform-fb20-filter-open-dbvdd
+    description: |
+      DBVDD audio codec rail entirely dead, U3 (audio codec) dead.
+      A ferrite bead between +3V3 and DBVDD is the likely root cause.
+      MNT: DBVDD is sourced by FB20 specifically — this scenario tests
+      that FB20 open surfaces as the top candidate.
+    device_slug: mnt-reform-motherboard
+    observations:
+      state_rails: { "DBVDD": "dead" }
+      state_comps: { "U3": "dead" }
+    ground_truth_match:
+      kind: passive_fb
+      role: filter
+      expected_mode: open
+    accept_in_top_n: 5
+
+  - id: mnt-reform-fb3-filter-open-pcie
+    description: |
+      PCIE1_PWR rail dead (PCIe card not detected on boot).
+      FB3 or FB4 (ferrite bead +3V3 → PCIE1_PWR) is the likely root cause.
+      Weaker observation (no corroborating IC dead) so we accept top-10
+      rather than top-5.
+    device_slug: mnt-reform-motherboard
+    observations:
+      state_rails: { "PCIE1_PWR": "dead" }
+    ground_truth_match:
+      kind: passive_fb
+      role: filter
+      expected_mode: open
+    accept_in_top_n: 10
+
+  - id: mnt-reform-q-load-switch-stuck-on-pvin
+    description: |
+      The board never fully powers down — PVIN stays at VIN level even
+      when the sequencer drives Q3's gate off. Ground truth: Q3, the
+      VIN → PVIN pass-FET load switch, has D-S shorted (stuck_on).
+      Pre-promotion this scenario could not run because PVIN wasn't
+      registered as a power_rail; net_classifier now promotes it so
+      the cascade fires.
+    device_slug: mnt-reform-motherboard
+    observations:
+      state_rails: { "PVIN": "stuck_on" }
+    ground_truth_match:
+      kind: passive_q
+      role: load_switch
+      expected_mode: short
+    accept_in_top_n: 5
+
+  - id: mnt-reform-q-inrush-limiter-open
+    description: |
+      Main VIN reaches the board but no rail ever powers up on cold
+      boot. Inrush limiter MOSFET open (burned from cold-inrush at
+      first power-on). Ground truth: any passive_q with
+      role=inrush_limiter in series with the main VIN path.
+    device_slug: mnt-reform-motherboard
+    observations:
+      state_rails: { "VIN": "dead" }
+    ground_truth_match:
+      kind: passive_q
+      role: inrush_limiter
+      expected_mode: open
+    accept_in_top_n: 10
+
+  - id: mnt-reform-q-cell-protection-open-bat1fused
+    description: |
+      BAT1FUSED rail measures dead while the raw BAT1 cell tap reads
+      nominal cell voltage (~3.7V). The series cell_protection FET
+      between cell 1 and its fused output has gone open-channel
+      (over-current trip latched, or channel burned from an inrush
+      event). Ground truth: any passive_q with role=cell_protection
+      whose downstream rail is BAT1FUSED.
+    device_slug: mnt-reform-motherboard
+    observations:
+      state_rails: { "BAT1FUSED": "dead" }
+    ground_truth_match:
+      kind: passive_q
+      role: cell_protection
+      expected_mode: open
+    accept_in_top_n: 5
+
+  - id: mnt-reform-q-cell-protection-stuck-off-bat1fused
+    description: |
+      Same observable rail-dead symptom as the open variant, but the
+      failure is described as stuck_off in the tech's vocabulary
+      («le FET ne passe plus, gate drive OK mais canal mort»). The
+      engine treats open and stuck_off as the same cascade — this
+      scenario pins the stuck_off branch of the dispatch table.
+    device_slug: mnt-reform-motherboard
+    observations:
+      state_rails: { "BAT1FUSED": "dead" }
+    ground_truth_match:
+      kind: passive_q
+      role: cell_protection
+      expected_mode: stuck_off
+    accept_in_top_n: 5

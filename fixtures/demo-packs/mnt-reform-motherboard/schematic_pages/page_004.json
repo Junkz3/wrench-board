@@ -1,0 +1,2787 @@
+{
+  "schema_version": "1.0",
+  "page": 4,
+  "sheet_name": "Reform 2 LPC Size",
+  "sheet_path": "/Reform 2 Power/Reform 2 LPC/",
+  "page_kind": "schematic",
+  "orientation": "landscape",
+  "confidence": 0.82,
+  "nodes": [
+    {
+      "refdes": "U18",
+      "type": "ic",
+      "value": {
+        "raw": "LPC11U24FBD48-301",
+        "primary": "LPC11U24FBD48-301",
+        "package": null,
+        "mpn": "LPC11U24FBD48-301",
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 4,
+      "pins": [
+        {
+          "number": "3",
+          "name": "LPC_RESET",
+          "role": "reset_in",
+          "net_label": "PIO0_0"
+        },
+        {
+          "number": "4",
+          "name": "LPC_UFTOGG",
+          "role": "signal_out",
+          "net_label": "PIO0_1"
+        },
+        {
+          "number": "10",
+          "name": "LPC_SSEL0",
+          "role": "signal_inout",
+          "net_label": "PIO0_2"
+        },
+        {
+          "number": "14",
+          "name": "LPC_UVBUS",
+          "role": "signal_in",
+          "net_label": "PIO0_3"
+        },
+        {
+          "number": "16",
+          "name": "LPC_SDA",
+          "role": "signal_inout",
+          "net_label": "PIO0_4"
+        },
+        {
+          "number": "22",
+          "name": "LPC_USBCON",
+          "role": "signal_out",
+          "net_label": "PIO0_5"
+        },
+        {
+          "number": "23",
+          "name": "LPC_CTS",
+          "role": "signal_in",
+          "net_label": "PIO0_6"
+        },
+        {
+          "number": "27",
+          "name": "LPC_MISO",
+          "role": "signal_in",
+          "net_label": "PIO0_7"
+        },
+        {
+          "number": "28",
+          "name": "LPC_MOSI",
+          "role": "signal_out",
+          "net_label": "PIO0_8"
+        },
+        {
+          "number": "29",
+          "name": "LPC_SCK0a",
+          "role": "signal_out",
+          "net_label": "PIO0_9"
+        },
+        {
+          "number": "32",
+          "name": "LPC_TDI",
+          "role": "signal_in",
+          "net_label": "PIO0_10"
+        },
+        {
+          "number": "33",
+          "name": "LPC_TMS",
+          "role": "signal_in",
+          "net_label": "PIO0_11"
+        },
+        {
+          "number": "34",
+          "name": "LPC_TDO",
+          "role": "signal_out",
+          "net_label": "PIO0_12"
+        },
+        {
+          "number": "35",
+          "name": "LPC_TRST",
+          "role": "signal_in",
+          "net_label": "PIO0_13"
+        },
+        {
+          "number": "39",
+          "name": "LPC_SWDIO",
+          "role": "signal_inout",
+          "net_label": "PIO0_14"
+        },
+        {
+          "number": "40",
+          "name": "LPC_AD5",
+          "role": "signal_in",
+          "net_label": "PIO0_15"
+        },
+        {
+          "number": "45",
+          "name": "LPC_SCLKa",
+          "role": "signal_out",
+          "net_label": "PIO0_16"
+        },
+        {
+          "number": "46",
+          "name": "LPC_RX0a",
+          "role": "signal_in",
+          "net_label": "PIO0_17"
+        },
+        {
+          "number": "47",
+          "name": "LPC_TXDa",
+          "role": "signal_out",
+          "net_label": "PIO0_18"
+        },
+        {
+          "number": "17",
+          "name": "LPC_MISIo1a",
+          "role": "signal_in",
+          "net_label": "PIO0_19"
+        },
+        {
+          "number": "19",
+          "name": "LPC_PIO0_20",
+          "role": "signal_inout",
+          "net_label": "PIO0_20"
+        },
+        {
+          "number": "30",
+          "name": "LPC_MISO1a",
+          "role": "signal_in",
+          "net_label": "PIO0_21"
+        },
+        {
+          "number": "42",
+          "name": "LPC_AD7",
+          "role": "signal_in",
+          "net_label": "PIO0_22"
+        },
+        {
+          "number": "43",
+          "name": "LPC_AD8",
+          "role": "signal_in",
+          "net_label": "PIO0_23"
+        },
+        {
+          "number": "36",
+          "name": "LPC_TXDb",
+          "role": "signal_out",
+          "net_label": "LPC_UART2_TX"
+        },
+        {
+          "number": "37",
+          "name": "LPC_RXDb",
+          "role": "signal_in",
+          "net_label": "LPC_UART2_RX"
+        },
+        {
+          "number": "43",
+          "name": "LPC_SCK1a",
+          "role": "signal_out",
+          "net_label": "PIO1_13"
+        },
+        {
+          "number": "48",
+          "name": "LPC_SCK1b",
+          "role": "signal_out",
+          "net_label": "PIO1_14"
+        },
+        {
+          "number": "2",
+          "name": "LPC_DTR",
+          "role": "signal_out",
+          "net_label": "PIO1_15"
+        },
+        {
+          "number": "4B",
+          "name": "LPC_PIO1_16",
+          "role": "signal_inout",
+          "net_label": "PIO1_16"
+        },
+        {
+          "number": "13",
+          "name": "LPC_SCK1b",
+          "role": "signal_out",
+          "net_label": "PIO1_19"
+        },
+        {
+          "number": "26",
+          "name": "LPC_MISO1b",
+          "role": "signal_in",
+          "net_label": "PIO1_20"
+        },
+        {
+          "number": "38",
+          "name": "LPC_MOSI1b",
+          "role": "signal_out",
+          "net_label": "PIO1_21"
+        },
+        {
+          "number": "18",
+          "name": "LPC_SSEL1",
+          "role": "signal_out",
+          "net_label": "PIO1_22"
+        },
+        {
+          "number": "21",
+          "name": "LPC_PIO1_24",
+          "role": "signal_inout",
+          "net_label": "PIO1_23"
+        },
+        {
+          "number": "1",
+          "name": "LPC_PIO1_25",
+          "role": "signal_inout",
+          "net_label": "PIO1_24"
+        },
+        {
+          "number": "11",
+          "name": "LPC_RXDc",
+          "role": "signal_in",
+          "net_label": "PIO1_25"
+        },
+        {
+          "number": "12",
+          "name": "LPC_TXDc",
+          "role": "signal_out",
+          "net_label": "LPC_UART2_TX"
+        },
+        {
+          "number": "24",
+          "name": "LPC_SCLKc",
+          "role": "signal_out",
+          "net_label": "PIO1_26"
+        },
+        {
+          "number": "31",
+          "name": "LPC_SCK0b",
+          "role": "signal_out",
+          "net_label": "PIO1_27"
+        },
+        {
+          "number": "25",
+          "name": "LPC_PIO1_31",
+          "role": "signal_inout",
+          "net_label": "PIO1_28"
+        },
+        {
+          "number": "20",
+          "name": "LPC_USBP",
+          "role": "signal_inout",
+          "net_label": "LPCUD_P"
+        },
+        {
+          "number": "19",
+          "name": "LPC_USBM",
+          "role": "signal_inout",
+          "net_label": "LPCUD_N"
+        },
+        {
+          "number": "6",
+          "name": "XTALIN",
+          "role": "clock_in",
+          "net_label": "XTALIN"
+        },
+        {
+          "number": "7",
+          "name": "XTALOUT",
+          "role": "clock_out",
+          "net_label": "XTALOUT"
+        },
+        {
+          "number": "8",
+          "name": "VDD",
+          "role": "power_in",
+          "net_label": "LPC_VCC"
+        },
+        {
+          "number": "44",
+          "name": "VDD",
+          "role": "power_in",
+          "net_label": "LPC_VCC"
+        },
+        {
+          "number": "5",
+          "name": "VSS",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "41",
+          "name": "VSS",
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "U6",
+      "type": "ic",
+      "value": {
+        "raw": "INA233",
+        "primary": "INA233",
+        "package": null,
+        "mpn": "INA233",
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": "I2C ADDR 1000_000"
+      },
+      "page": 4,
+      "pins": [
+        {
+          "number": "6",
+          "name": "Vbus",
+          "role": "power_in",
+          "net_label": "VBUS"
+        },
+        {
+          "number": "1",
+          "name": "A1",
+          "role": "signal_in",
+          "net_label": "GND"
+        },
+        {
+          "number": "2",
+          "name": "A0",
+          "role": "signal_in",
+          "net_label": "GND"
+        },
+        {
+          "number": "4",
+          "name": "SDA",
+          "role": "signal_inout",
+          "net_label": "INA_SDA"
+        },
+        {
+          "number": "5",
+          "name": "SCL",
+          "role": "clock_in",
+          "net_label": "INA_SCL"
+        },
+        {
+          "number": "8",
+          "name": "Vin+",
+          "role": "power_in",
+          "net_label": "BAT1FUSED"
+        },
+        {
+          "number": "9",
+          "name": "Vin-",
+          "role": "power_in",
+          "net_label": "CHGBAT"
+        },
+        {
+          "number": "3",
+          "name": "Alert",
+          "role": "signal_out",
+          "net_label": "GND"
+        },
+        {
+          "number": "7",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "10",
+          "name": "VCC",
+          "role": "power_in",
+          "net_label": "LPC_VCC"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "U5",
+      "type": "ic",
+      "value": {
+        "raw": "PCF8523T",
+        "primary": "PCF8523T",
+        "package": null,
+        "mpn": "PCF8523T",
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 4,
+      "pins": [
+        {
+          "number": "6",
+          "name": "SCL",
+          "role": "clock_in",
+          "net_label": "DAC_SCL"
+        },
+        {
+          "number": "5",
+          "name": "SDA",
+          "role": "signal_inout",
+          "net_label": "DAC_SDA"
+        },
+        {
+          "number": "7",
+          "name": "VDD",
+          "role": "power_in",
+          "net_label": "LPC_VCC"
+        },
+        {
+          "number": "8",
+          "name": "VBAT",
+          "role": "power_in",
+          "net_label": "CR1220"
+        },
+        {
+          "number": "4",
+          "name": "INT1/CLKOUT",
+          "role": "signal_out",
+          "net_label": "IMX_RTC_IRQ"
+        },
+        {
+          "number": "3",
+          "name": "OSCI",
+          "role": "clock_in",
+          "net_label": "OSCI"
+        },
+        {
+          "number": "2",
+          "name": "OSCO",
+          "role": "clock_out",
+          "net_label": "OSCO"
+        },
+        {
+          "number": "1",
+          "name": "VSS",
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "Y2",
+      "type": "crystal",
+      "value": {
+        "raw": "12MHz",
+        "primary": "12MHz",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 4,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "clock_in",
+          "net_label": "XTALIN"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "clock_out",
+          "net_label": "XTALOUT"
+        },
+        {
+          "number": "3",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "4",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "Y4",
+      "type": "crystal",
+      "value": {
+        "raw": "32.768 kHz",
+        "primary": "32.768kHz",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 4,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "clock_in",
+          "net_label": "OSCI"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "clock_out",
+          "net_label": "OSCO"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "J8",
+      "type": "connector",
+      "value": {
+        "raw": "USB_C_Receptacle_USB2.0",
+        "primary": "USB_C_Receptacle_USB2.0",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": "LPC Flashing Port"
+      },
+      "page": 4,
+      "pins": [
+        {
+          "number": "A4",
+          "name": "VBUS",
+          "role": "power_in",
+          "net_label": "VBUS"
+        },
+        {
+          "number": "B4",
+          "name": "VBUS",
+          "role": "power_in",
+          "net_label": "VBUS"
+        },
+        {
+          "number": "A5",
+          "name": "CC1",
+          "role": "signal_in",
+          "net_label": "CC1"
+        },
+        {
+          "number": "B5",
+          "name": "CC2",
+          "role": "signal_in",
+          "net_label": "CC2"
+        },
+        {
+          "number": "A7",
+          "name": "D-",
+          "role": "signal_inout",
+          "net_label": "USB_DM"
+        },
+        {
+          "number": "B7",
+          "name": "D-",
+          "role": "signal_inout",
+          "net_label": "USB_DM"
+        },
+        {
+          "number": "A6",
+          "name": "D+",
+          "role": "signal_inout",
+          "net_label": "USB_DP"
+        },
+        {
+          "number": "B6",
+          "name": "D+",
+          "role": "signal_inout",
+          "net_label": "USB_DP"
+        },
+        {
+          "number": "A8",
+          "name": "SBU1",
+          "role": "signal_inout",
+          "net_label": "SBU1"
+        },
+        {
+          "number": "B8",
+          "name": "SBU2",
+          "role": "signal_inout",
+          "net_label": "SBU2"
+        },
+        {
+          "number": "S",
+          "name": "SHIELD",
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "J22",
+      "type": "connector",
+      "value": {
+        "raw": "LPC_IO",
+        "primary": "LPC_IO",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": "Expansion Port"
+      },
+      "page": 4,
+      "pins": [
+        {
+          "number": "1",
+          "name": "LPC_SCK0b",
+          "role": "signal_out",
+          "net_label": "LPC_SCK"
+        },
+        {
+          "number": "2",
+          "name": "LPC_MISO1a",
+          "role": "signal_in",
+          "net_label": "LPC_MISO0"
+        },
+        {
+          "number": "3",
+          "name": "LPC_TMS",
+          "role": "signal_inout",
+          "net_label": "LPC_TMS"
+        },
+        {
+          "number": "4",
+          "name": "LPC_TDI",
+          "role": "signal_in",
+          "net_label": "LPC_TDI"
+        },
+        {
+          "number": "5",
+          "name": "LPC_TRST",
+          "role": "signal_out",
+          "net_label": "LPC_SSEL0"
+        },
+        {
+          "number": "6",
+          "name": "LPC_TDO",
+          "role": "signal_out",
+          "net_label": "LPC_TDO"
+        },
+        {
+          "number": "7",
+          "name": "LPC_AD7",
+          "role": "signal_in",
+          "net_label": "LPC_AD7"
+        },
+        {
+          "number": "8",
+          "name": "LPC_SWDIO",
+          "role": "signal_inout",
+          "net_label": "LPC_SWDIO"
+        },
+        {
+          "number": "9",
+          "name": "LPC_SCLKa",
+          "role": "signal_out",
+          "net_label": "LPC_SCK"
+        },
+        {
+          "number": "10",
+          "name": "LPC_AD7",
+          "role": "signal_in",
+          "net_label": "LPC_AD7"
+        },
+        {
+          "number": "11",
+          "name": "LPC_AD5",
+          "role": "signal_in",
+          "net_label": "LPC_AD5"
+        },
+        {
+          "number": "12",
+          "name": "LPC_RX0a",
+          "role": "signal_in",
+          "net_label": "LPC_SCL"
+        },
+        {
+          "number": "13",
+          "name": "LPC_USBCON",
+          "role": "signal_out",
+          "net_label": "LPC_SSEL1"
+        },
+        {
+          "number": "14",
+          "name": "LPC_MOSI1a",
+          "role": "signal_out",
+          "net_label": "LPC_MOSI0"
+        },
+        {
+          "number": "15",
+          "name": "LPC_VCC",
+          "role": "power_out",
+          "net_label": "LPC_VCC"
+        },
+        {
+          "number": "16",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "J23",
+      "type": "connector",
+      "value": {
+        "raw": "KDBSYSCTL",
+        "primary": "KDBSYSCTL",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": "Keyboard System Control Port (SYSCTL)"
+      },
+      "page": 4,
+      "pins": [
+        {
+          "number": "1",
+          "name": "LPC_VCC",
+          "role": "power_out",
+          "net_label": "LPC_VCC"
+        },
+        {
+          "number": "2",
+          "name": "LPC_TXDc",
+          "role": "signal_out",
+          "net_label": "LPC_UART2_TX"
+        },
+        {
+          "number": "3",
+          "name": "LPC_RXDc",
+          "role": "signal_in",
+          "net_label": "LPC_UART2_RX"
+        },
+        {
+          "number": "4",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "BT1",
+      "type": "other",
+      "value": {
+        "raw": "CR1220",
+        "primary": "CR1220",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": "Coin cell battery"
+      },
+      "page": 4,
+      "pins": [
+        {
+          "number": "+",
+          "name": null,
+          "role": "power_out",
+          "net_label": "CR1220"
+        },
+        {
+          "number": "-",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "SW1",
+      "type": "switch",
+      "value": {
+        "raw": "SW_DIP_x01",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 4,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_inout",
+          "net_label": "LPC_SS0"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "SW2",
+      "type": "switch",
+      "value": {
+        "raw": "SW_Push",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 4,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "LPC_VCC"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R41",
+      "type": "resistor",
+      "value": {
+        "raw": "0.02",
+        "primary": "0.02Ω",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 4,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "BAT1FUSED"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "terminal",
+          "net_label": "CHGBAT"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R68",
+      "type": "resistor",
+      "value": {
+        "raw": "4.7k",
+        "primary": "4.7kΩ",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 4,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "LPC_VCC"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": "LPC_SCL"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R69",
+      "type": "resistor",
+      "value": {
+        "raw": "4.7k",
+        "primary": "4.7kΩ",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 4,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "LPC_VCC"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": "LPC_SDA"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R70",
+      "type": "resistor",
+      "value": {
+        "raw": "33",
+        "primary": "33Ω",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 4,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "LPCUD_P"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "terminal",
+          "net_label": "USB_DP"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R71",
+      "type": "resistor",
+      "value": {
+        "raw": "1.5k",
+        "primary": "1.5kΩ",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 4,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "LPC_VCC"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": "USB_DP"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R72",
+      "type": "resistor",
+      "value": {
+        "raw": "33",
+        "primary": "33Ω",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 4,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "LPCUD_N"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "terminal",
+          "net_label": "USB_DM"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R73",
+      "type": "resistor",
+      "value": {
+        "raw": "0",
+        "primary": "0Ω",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 4,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "BMON_SCK"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "terminal",
+          "net_label": "PIO1_20"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R74",
+      "type": "resistor",
+      "value": {
+        "raw": "0",
+        "primary": "0Ω",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 4,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "BMON_SDO"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "terminal",
+          "net_label": "PIO1_21"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R75",
+      "type": "resistor",
+      "value": {
+        "raw": "0",
+        "primary": "0Ω",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 4,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "BMON_SDI"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "terminal",
+          "net_label": "PIO1_22"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R76",
+      "type": "resistor",
+      "value": {
+        "raw": "0",
+        "primary": "0Ω",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 4,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "BMON_CS"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "terminal",
+          "net_label": "PIO1_23"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R124",
+      "type": "resistor",
+      "value": {
+        "raw": "0",
+        "primary": "0Ω",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 4,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "LPC_MISO"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "terminal",
+          "net_label": "LPC_MISO0"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R125",
+      "type": "resistor",
+      "value": {
+        "raw": "0",
+        "primary": "0Ω",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 4,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "LPC_MOSI"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "terminal",
+          "net_label": "LPC_MOSI0"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R126",
+      "type": "resistor",
+      "value": {
+        "raw": "0",
+        "primary": "0Ω",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 4,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "LPC_SCK"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "terminal",
+          "net_label": "LPC_SCK"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R137",
+      "type": "resistor",
+      "value": {
+        "raw": "0",
+        "primary": "0Ω",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 4,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "IMX_RTC_IRQ"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "terminal",
+          "net_label": "IMX_RTC_IRQ"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R157",
+      "type": "resistor",
+      "value": {
+        "raw": "0",
+        "primary": "0Ω",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 4,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "LPC_SSEL0"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "terminal",
+          "net_label": "LPC_SS0"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R194",
+      "type": "resistor",
+      "value": {
+        "raw": "0",
+        "primary": "0Ω",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 4,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "IMX_WAKE"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "terminal",
+          "net_label": "CHG_RNG"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R195",
+      "type": "resistor",
+      "value": {
+        "raw": "1.5k",
+        "primary": "1.5kΩ",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 4,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "LPC_VCC"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": "LPC_UVBUS"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C7",
+      "type": "capacitor",
+      "value": {
+        "raw": "0.1uF",
+        "primary": "100nF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 4,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "LPC_VCC"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C46",
+      "type": "capacitor",
+      "value": {
+        "raw": "10uF",
+        "primary": "10µF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 4,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "LPC_VCC"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C47",
+      "type": "capacitor",
+      "value": {
+        "raw": "10uF",
+        "primary": "10µF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 4,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "LPC_VCC"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C48",
+      "type": "capacitor",
+      "value": {
+        "raw": "18pF",
+        "primary": "18pF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 4,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "XTALIN"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C49",
+      "type": "capacitor",
+      "value": {
+        "raw": "0.1uF",
+        "primary": "100nF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 4,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "LPC_VCC"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C50",
+      "type": "capacitor",
+      "value": {
+        "raw": "0.1uF",
+        "primary": "100nF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 4,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "LPC_VCC"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C51",
+      "type": "capacitor",
+      "value": {
+        "raw": "18pF",
+        "primary": "18pF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 4,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "XTALOUT"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C140",
+      "type": "capacitor",
+      "value": {
+        "raw": "0.1uF",
+        "primary": "100nF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 4,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "LPC_VCC"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    }
+  ],
+  "nets": [
+    {
+      "local_id": "net_GND",
+      "label": "GND",
+      "is_power": true,
+      "is_global": true,
+      "connects": [
+        "U18.5",
+        "U18.41",
+        "U6.7",
+        "U6.1",
+        "U6.2",
+        "U6.3",
+        "U5.1",
+        "Y2.3",
+        "Y2.4",
+        "BT1.-",
+        "J8.S",
+        "C7.2",
+        "C46.2",
+        "C47.2",
+        "C48.2",
+        "C49.2",
+        "C50.2",
+        "C51.2",
+        "C140.2",
+        "SW1.2",
+        "J22.16"
+      ],
+      "page": 4
+    },
+    {
+      "local_id": "net_LPC_VCC",
+      "label": "LPC_VCC",
+      "is_power": true,
+      "is_global": false,
+      "connects": [
+        "U18.8",
+        "U18.44",
+        "U6.10",
+        "U5.7",
+        "C7.1",
+        "C46.1",
+        "C47.1",
+        "C49.1",
+        "C50.1",
+        "C140.1",
+        "R68.1",
+        "R69.1",
+        "R71.1",
+        "R195.1",
+        "J22.15",
+        "J23.1",
+        "SW2.1"
+      ],
+      "page": 4
+    },
+    {
+      "local_id": "net_VBUS",
+      "label": "VBUS",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U6.6",
+        "J8.A4",
+        "J8.B4"
+      ],
+      "page": 4
+    },
+    {
+      "local_id": "net_BAT1FUSED",
+      "label": "BAT1FUSED",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U6.8",
+        "R41.1"
+      ],
+      "page": 4
+    },
+    {
+      "local_id": "net_CHGBAT",
+      "label": "CHGBAT",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U6.9",
+        "R41.2"
+      ],
+      "page": 4
+    },
+    {
+      "local_id": "net_INA_SDA",
+      "label": "INA_SDA",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U6.4"
+      ],
+      "page": 4
+    },
+    {
+      "local_id": "net_INA_SCL",
+      "label": "INA_SCL",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U6.5"
+      ],
+      "page": 4
+    },
+    {
+      "local_id": "net_DAC_SCL",
+      "label": "DAC_SCL",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U5.6"
+      ],
+      "page": 4
+    },
+    {
+      "local_id": "net_DAC_SDA",
+      "label": "DAC_SDA",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U5.5"
+      ],
+      "page": 4
+    },
+    {
+      "local_id": "net_CR1220",
+      "label": "CR1220",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U5.8",
+        "BT1.+"
+      ],
+      "page": 4
+    },
+    {
+      "local_id": "net_IMX_RTC_IRQ",
+      "label": "IMX_RTC_IRQ",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U5.4",
+        "R137.1"
+      ],
+      "page": 4
+    },
+    {
+      "local_id": "net_OSCI",
+      "label": "OSCI",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U5.3",
+        "Y4.1"
+      ],
+      "page": 4
+    },
+    {
+      "local_id": "net_OSCO",
+      "label": "OSCO",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U5.2",
+        "Y4.2"
+      ],
+      "page": 4
+    },
+    {
+      "local_id": "net_XTALIN",
+      "label": "XTALIN",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U18.6",
+        "Y2.1",
+        "C48.1"
+      ],
+      "page": 4
+    },
+    {
+      "local_id": "net_XTALOUT",
+      "label": "XTALOUT",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U18.7",
+        "Y2.2",
+        "C51.1"
+      ],
+      "page": 4
+    },
+    {
+      "local_id": "net_LPC_UART2_TX",
+      "label": "LPC_UART2_TX",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U18.36",
+        "J23.2"
+      ],
+      "page": 4
+    },
+    {
+      "local_id": "net_LPC_UART2_RX",
+      "label": "LPC_UART2_RX",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U18.37",
+        "J23.3"
+      ],
+      "page": 4
+    },
+    {
+      "local_id": "net_LPCUD_P",
+      "label": "LPCUD_P",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U18.20",
+        "R70.1"
+      ],
+      "page": 4
+    },
+    {
+      "local_id": "net_LPCUD_N",
+      "label": "LPCUD_N",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U18.19",
+        "R72.1"
+      ],
+      "page": 4
+    },
+    {
+      "local_id": "net_USB_DP",
+      "label": "USB_DP",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "J8.A6",
+        "J8.B6",
+        "R70.2",
+        "R71.2"
+      ],
+      "page": 4
+    },
+    {
+      "local_id": "net_USB_DM",
+      "label": "USB_DM",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "J8.A7",
+        "J8.B7",
+        "R72.2"
+      ],
+      "page": 4
+    },
+    {
+      "local_id": "net_CC1",
+      "label": "CC1",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "J8.A5"
+      ],
+      "page": 4
+    },
+    {
+      "local_id": "net_CC2",
+      "label": "CC2",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "J8.B5"
+      ],
+      "page": 4
+    },
+    {
+      "local_id": "net_SBU1",
+      "label": "SBU1",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "J8.A8"
+      ],
+      "page": 4
+    },
+    {
+      "local_id": "net_SBU2",
+      "label": "SBU2",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "J8.B8"
+      ],
+      "page": 4
+    },
+    {
+      "local_id": "net_BMON_SCK",
+      "label": "BMON_SCK",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "R73.1"
+      ],
+      "page": 4
+    },
+    {
+      "local_id": "net_BMON_SDO",
+      "label": "BMON_SDO",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "R74.1"
+      ],
+      "page": 4
+    },
+    {
+      "local_id": "net_BMON_SDI",
+      "label": "BMON_SDI",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "R75.1"
+      ],
+      "page": 4
+    },
+    {
+      "local_id": "net_BMON_CS",
+      "label": "BMON_CS",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "R76.1"
+      ],
+      "page": 4
+    },
+    {
+      "local_id": "net_IMX_WAKE",
+      "label": "IMX_WAKE",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "R194.1"
+      ],
+      "page": 4
+    },
+    {
+      "local_id": "net_CHG_RNG",
+      "label": "CHG_RNG",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "R194.2"
+      ],
+      "page": 4
+    },
+    {
+      "local_id": "net_LPC_MISO0",
+      "label": "LPC_MISO0",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "R124.2"
+      ],
+      "page": 4
+    },
+    {
+      "local_id": "net_LPC_MOSI0",
+      "label": "LPC_MOSI0",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "R125.2"
+      ],
+      "page": 4
+    },
+    {
+      "local_id": "net_LPC_SCK",
+      "label": "LPC_SCK",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "R126.1",
+        "R126.2"
+      ],
+      "page": 4
+    },
+    {
+      "local_id": "net_LPC_UVBUS",
+      "label": "LPC_UVBUS",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "R195.2",
+        "U18.14"
+      ],
+      "page": 4
+    },
+    {
+      "local_id": "net_5V_PWR_EN",
+      "label": "5V_PWR_EN",
+      "is_power": false,
+      "is_global": false,
+      "connects": [],
+      "page": 4
+    },
+    {
+      "local_id": "net_3V3_PWR_EN",
+      "label": "3V3_PWR_EN",
+      "is_power": false,
+      "is_global": false,
+      "connects": [],
+      "page": 4
+    },
+    {
+      "local_id": "net_1V2_PWR_EN",
+      "label": "1V2_PWR_EN",
+      "is_power": false,
+      "is_global": false,
+      "connects": [],
+      "page": 4
+    },
+    {
+      "local_id": "net_USB_PWR_EN",
+      "label": "USB_PWR_EN",
+      "is_power": false,
+      "is_global": false,
+      "connects": [],
+      "page": 4
+    },
+    {
+      "local_id": "net_AUX_PWR_EN",
+      "label": "AUX_PWR_EN",
+      "is_power": false,
+      "is_global": false,
+      "connects": [],
+      "page": 4
+    },
+    {
+      "local_id": "net_PCIE1_PWR_EN",
+      "label": "PCIE1_PWR_EN",
+      "is_power": false,
+      "is_global": false,
+      "connects": [],
+      "page": 4
+    },
+    {
+      "local_id": "net_PWR_FLAG",
+      "label": "PWR_FLAG",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "BT1.+"
+      ],
+      "page": 4
+    },
+    {
+      "local_id": "net_LPC_SCL",
+      "label": "LPC_SCL",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "R68.2"
+      ],
+      "page": 4
+    },
+    {
+      "local_id": "net_LPC_SDA",
+      "label": "LPC_SDA",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "R69.2",
+        "U18.16"
+      ],
+      "page": 4
+    },
+    {
+      "local_id": "net_LPC_SS0",
+      "label": "LPC_SS0",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "SW1.1",
+        "R157.2"
+      ],
+      "page": 4
+    },
+    {
+      "local_id": "net_LPC_SSEL0",
+      "label": "LPC_SSEL0",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U18.10",
+        "R157.1"
+      ],
+      "page": 4
+    },
+    {
+      "local_id": "net_LPC_PIO1_16",
+      "label": "LPC_PIO1_16",
+      "is_power": false,
+      "is_global": false,
+      "connects": [],
+      "page": 4
+    },
+    {
+      "local_id": "net_LPC_PIO1_25",
+      "label": "LPC_PIO1_25",
+      "is_power": false,
+      "is_global": false,
+      "connects": [],
+      "page": 4
+    },
+    {
+      "local_id": "net_LPC_PIO1_31",
+      "label": "LPC_PIO1_31",
+      "is_power": false,
+      "is_global": false,
+      "connects": [],
+      "page": 4
+    },
+    {
+      "local_id": "net_LPC_PIO0_20",
+      "label": "LPC_PIO0_20",
+      "is_power": false,
+      "is_global": false,
+      "connects": [],
+      "page": 4
+    }
+  ],
+  "cross_page_refs": [
+    {
+      "label": "LPC_VCC",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "power rail from another page",
+      "page": 4
+    },
+    {
+      "label": "INA_SDA",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "to IMX I2C bus",
+      "page": 4
+    },
+    {
+      "label": "INA_SCL",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "to IMX I2C bus",
+      "page": 4
+    },
+    {
+      "label": "BAT1FUSED",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "from battery fuse",
+      "page": 4
+    },
+    {
+      "label": "CHGBAT",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "to battery charger",
+      "page": 4
+    },
+    {
+      "label": "VBUS",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "from USB VBUS",
+      "page": 4
+    },
+    {
+      "label": "5V_PWR_EN",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "to 5V regulator enable",
+      "page": 4
+    },
+    {
+      "label": "3V3_PWR_EN",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "to 3.3V regulator enable",
+      "page": 4
+    },
+    {
+      "label": "1V2_PWR_EN",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "to 1.2V regulator enable",
+      "page": 4
+    },
+    {
+      "label": "USB_PWR_EN",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "to USB power enable",
+      "page": 4
+    },
+    {
+      "label": "AUX_PWR_EN",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "to auxiliary power enable",
+      "page": 4
+    },
+    {
+      "label": "PCIE1_PWR_EN",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "to PCIe power enable",
+      "page": 4
+    },
+    {
+      "label": "IMX_RTC_IRQ",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "to iMX RTC IRQ",
+      "page": 4
+    },
+    {
+      "label": "IMX_WAKE",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "to iMX wake signal",
+      "page": 4
+    },
+    {
+      "label": "BMON_SCK",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "to battery monitor SPI SCK",
+      "page": 4
+    },
+    {
+      "label": "BMON_SDO",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "to battery monitor SPI SDO",
+      "page": 4
+    },
+    {
+      "label": "BMON_SDI",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "to battery monitor SPI SDI",
+      "page": 4
+    },
+    {
+      "label": "BMON_CS",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "to battery monitor SPI CS",
+      "page": 4
+    },
+    {
+      "label": "CHG_RNG",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "to charger range signal",
+      "page": 4
+    },
+    {
+      "label": "LPC_UART2_TX",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "to keyboard UART TX",
+      "page": 4
+    },
+    {
+      "label": "LPC_UART2_RX",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "from keyboard UART RX",
+      "page": 4
+    },
+    {
+      "label": "LPC_MISO0",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "expansion SPI MISO",
+      "page": 4
+    },
+    {
+      "label": "LPC_MOSI0",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "expansion SPI MOSI",
+      "page": 4
+    },
+    {
+      "label": "LPC_SCK",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "expansion SPI SCK",
+      "page": 4
+    },
+    {
+      "label": "DAC_SCL",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "to DAC I2C SCL",
+      "page": 4
+    },
+    {
+      "label": "DAC_SDA",
+      "direction": "bidir",
+      "at_pin": null,
+      "target_hint": "to DAC I2C SDA",
+      "page": 4
+    },
+    {
+      "label": "LPC_SCL",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "LPC I2C SCL",
+      "page": 4
+    },
+    {
+      "label": "INA_SCL",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "INA233 I2C SCL",
+      "page": 4
+    }
+  ],
+  "typed_edges": [
+    {
+      "src": "U18",
+      "dst": "LPC_VCC",
+      "kind": "powered_by",
+      "page": 4
+    },
+    {
+      "src": "U6",
+      "dst": "LPC_VCC",
+      "kind": "powered_by",
+      "page": 4
+    },
+    {
+      "src": "U5",
+      "dst": "LPC_VCC",
+      "kind": "powered_by",
+      "page": 4
+    },
+    {
+      "src": "C7",
+      "dst": "LPC_VCC",
+      "kind": "decouples",
+      "page": 4
+    },
+    {
+      "src": "C46",
+      "dst": "LPC_VCC",
+      "kind": "decouples",
+      "page": 4
+    },
+    {
+      "src": "C47",
+      "dst": "LPC_VCC",
+      "kind": "decouples",
+      "page": 4
+    },
+    {
+      "src": "C49",
+      "dst": "LPC_VCC",
+      "kind": "decouples",
+      "page": 4
+    },
+    {
+      "src": "C50",
+      "dst": "LPC_VCC",
+      "kind": "decouples",
+      "page": 4
+    },
+    {
+      "src": "C140",
+      "dst": "LPC_VCC",
+      "kind": "decouples",
+      "page": 4
+    },
+    {
+      "src": "C48",
+      "dst": "XTALIN",
+      "kind": "decouples",
+      "page": 4
+    },
+    {
+      "src": "C51",
+      "dst": "XTALOUT",
+      "kind": "decouples",
+      "page": 4
+    },
+    {
+      "src": "Y2",
+      "dst": "U18",
+      "kind": "clocks",
+      "page": 4
+    },
+    {
+      "src": "Y4",
+      "dst": "U5",
+      "kind": "clocks",
+      "page": 4
+    },
+    {
+      "src": "R41",
+      "dst": "U6",
+      "kind": "produces_signal",
+      "page": 4
+    },
+    {
+      "src": "U18",
+      "dst": "5V_PWR_EN",
+      "kind": "produces_signal",
+      "page": 4
+    },
+    {
+      "src": "U18",
+      "dst": "3V3_PWR_EN",
+      "kind": "produces_signal",
+      "page": 4
+    },
+    {
+      "src": "U18",
+      "dst": "1V2_PWR_EN",
+      "kind": "produces_signal",
+      "page": 4
+    },
+    {
+      "src": "U18",
+      "dst": "USB_PWR_EN",
+      "kind": "produces_signal",
+      "page": 4
+    },
+    {
+      "src": "U18",
+      "dst": "AUX_PWR_EN",
+      "kind": "produces_signal",
+      "page": 4
+    },
+    {
+      "src": "U18",
+      "dst": "PCIE1_PWR_EN",
+      "kind": "produces_signal",
+      "page": 4
+    },
+    {
+      "src": "U18",
+      "dst": "IMX_RTC_IRQ",
+      "kind": "consumes_signal",
+      "page": 4
+    },
+    {
+      "src": "R68",
+      "dst": "LPC_SCL",
+      "kind": "produces_signal",
+      "page": 4
+    },
+    {
+      "src": "R69",
+      "dst": "LPC_SDA",
+      "kind": "produces_signal",
+      "page": 4
+    },
+    {
+      "src": "R71",
+      "dst": "USB_DP",
+      "kind": "produces_signal",
+      "page": 4
+    },
+    {
+      "src": "R70",
+      "dst": "USB_DP",
+      "kind": "filters",
+      "page": 4
+    },
+    {
+      "src": "R72",
+      "dst": "USB_DM",
+      "kind": "filters",
+      "page": 4
+    },
+    {
+      "src": "U5",
+      "dst": "IMX_RTC_IRQ",
+      "kind": "produces_signal",
+      "page": 4
+    },
+    {
+      "src": "BT1",
+      "dst": "U5",
+      "kind": "powers",
+      "page": 4
+    }
+  ],
+  "designer_notes": [
+    {
+      "text": "Keyboard System Control Port (SYSCTL)",
+      "page": 4,
+      "attached_to_refdes": "J23",
+      "attached_to_net": null
+    },
+    {
+      "text": "Power Switches",
+      "page": 4,
+      "attached_to_refdes": null,
+      "attached_to_net": null
+    },
+    {
+      "text": "Expansion Port",
+      "page": 4,
+      "attached_to_refdes": "J22",
+      "attached_to_net": null
+    },
+    {
+      "text": "Realtime Clock",
+      "page": 4,
+      "attached_to_refdes": "U5",
+      "attached_to_net": null
+    },
+    {
+      "text": "Powered by main batteries in standby",
+      "page": 4,
+      "attached_to_refdes": "U5",
+      "attached_to_net": null
+    },
+    {
+      "text": "I2C lines pulled up by SYS 3v3 power near DAC",
+      "page": 4,
+      "attached_to_refdes": "U5",
+      "attached_to_net": null
+    },
+    {
+      "text": "Powered by coin cell when batteries removed",
+      "page": 4,
+      "attached_to_refdes": "BT1",
+      "attached_to_net": null
+    },
+    {
+      "text": "System Controller",
+      "page": 4,
+      "attached_to_refdes": "U18",
+      "attached_to_net": null
+    },
+    {
+      "text": "Voltage / Current Monitor",
+      "page": 4,
+      "attached_to_refdes": "U6",
+      "attached_to_net": null
+    },
+    {
+      "text": "LPC Flashing Port",
+      "page": 4,
+      "attached_to_refdes": "J8",
+      "attached_to_net": null
+    },
+    {
+      "text": "I2C ADDR 1000_000",
+      "page": 4,
+      "attached_to_refdes": "U6",
+      "attached_to_net": null
+    },
+    {
+      "text": "License: CERN-OHL-S 2.0",
+      "page": 4,
+      "attached_to_refdes": null,
+      "attached_to_net": null
+    },
+    {
+      "text": "Engineer: Lukas F. Hartmann",
+      "page": 4,
+      "attached_to_refdes": null,
+      "attached_to_net": null
+    },
+    {
+      "text": "https://mntre.com",
+      "page": 4,
+      "attached_to_refdes": null,
+      "attached_to_net": null
+    },
+    {
+      "text": "MNT Research GmbH",
+      "page": 4,
+      "attached_to_refdes": null,
+      "attached_to_net": null
+    },
+    {
+      "text": "Sheet: /Reform 2 Power/Reform 2 LPC/",
+      "page": 4,
+      "attached_to_refdes": null,
+      "attached_to_net": null
+    },
+    {
+      "text": "File: reform2-lpc.kicad_sch",
+      "page": 4,
+      "attached_to_refdes": null,
+      "attached_to_net": null
+    }
+  ],
+  "ambiguities": [
+    {
+      "description": "Many U18 pin-to-net assignments are dense and some pin numbers/labels in the LPC11U24FBD48 may be misread due to image resolution; PIO1_xx assignments on the right side of the IC are particularly uncertain.",
+      "page": 4,
+      "related_refdes": [
+        "U18"
+      ],
+      "related_nets": [
+        "PIO1_13",
+        "PIO1_14",
+        "PIO1_15",
+        "PIO1_16",
+        "PIO1_19",
+        "PIO1_20",
+        "PIO1_21",
+        "PIO1_22",
+        "PIO1_23",
+        "PIO1_24",
+        "PIO1_25",
+        "PIO1_26",
+        "PIO1_27",
+        "PIO1_28",
+        "PIO1_29",
+        "PIO1_31"
+      ]
+    },
+    {
+      "description": "J22 (Expansion Port) connector pin assignments are partially obscured by dense label routing; some net-to-pin mappings may be incorrect.",
+      "page": 4,
+      "related_refdes": [
+        "J22"
+      ],
+      "related_nets": [
+        "LPC_SCK",
+        "LPC_MISO0",
+        "LPC_TMS",
+        "LPC_TDI",
+        "LPC_SSEL0",
+        "LPC_TDO",
+        "LPC_AD7",
+        "LPC_SWDIO",
+        "LPC_AD5",
+        "LPC_SCL",
+        "LPC_SSEL1",
+        "LPC_MOSI0"
+      ]
+    },
+    {
+      "description": "R137 appears to be a zero-ohm series resistor on the IMX_RTC_IRQ line; exact connectivity including the downstream net name after R137 could not be fully traced.",
+      "page": 4,
+      "related_refdes": [
+        "R137"
+      ],
+      "related_nets": [
+        "IMX_RTC_IRQ"
+      ]
+    },
+    {
+      "description": "R194 routes IMX_WAKE to CHG_RNG but both sides of the net are partially obscured; the routing may differ from what was captured.",
+      "page": 4,
+      "related_refdes": [
+        "R194"
+      ],
+      "related_nets": [
+        "IMX_WAKE",
+        "CHG_RNG"
+      ]
+    },
+    {
+      "description": "LPC_SCL net label appears near R68 output connecting to INA_SCL label; the exact split/merge of these net labels could not be unambiguously resolved.",
+      "page": 4,
+      "related_refdes": [
+        "R68"
+      ],
+      "related_nets": [
+        "LPC_SCL",
+        "INA_SCL"
+      ]
+    }
+  ]
+}

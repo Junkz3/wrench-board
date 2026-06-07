@@ -1,0 +1,1 @@
+Q3 is a P-channel load switch on the VIN -> PVIN path. A drain-source short keeps PVIN powered even when the sequencer pulls the gate high to disable.

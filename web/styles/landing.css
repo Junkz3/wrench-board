@@ -1,0 +1,875 @@
+/* Landing hero — visible when body has class .show-landing.
+ * Pure presentation: visibility is driven by JS toggling the body class.
+ * Reuses tokens.css; introduces no new colors. */
+
+.landing[hidden] { display: none !important; }
+
+/* `pending-landing` is set synchronously by an inline script at the top of
+   <body> (see index.html) when the page loads on `/` with no params. It
+   bridges the gap between first paint and showLanding() removing the
+   overlay's `hidden` — without it the chrome (topbar / rail / metabar /
+   statusbar) would flash for one frame before the landing covers it. */
+body.pending-landing .topbar,
+body.pending-landing .rail,
+body.pending-landing .metabar,
+body.pending-landing .statusbar { display: none !important; }
+
+/* Top-right tools nav — stock & other repair-independent utilities.
+ * Sits above the hero grid so it doesn't shift the centered content. */
+.landing-tools {
+  position: absolute;
+  top: 20px;
+  right: 24px;
+  z-index: 1001;
+  display: flex;
+  gap: 8px;
+}
+.landing-tool-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  color: var(--text-2);
+  background: rgba(15, 26, 46, 0.55);
+  border: 1px solid var(--border-soft);
+  border-radius: 6px;
+  text-decoration: none;
+  backdrop-filter: blur(8px);
+  transition: color .15s, border-color .15s, background .15s;
+}
+.landing-tool-link:hover {
+  color: var(--cyan);
+  border-color: rgba(56, 189, 248, .35);
+  background: rgba(56, 189, 248, .08);
+}
+
+.landing {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: var(--bg-deep);
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  /* Reserve the left rail for the recent-repairs sidebar — the centering
+     applies to the remaining space, so the hero feels centered between
+     the sidebar and the right edge (Claude / GPT pattern). */
+  padding-left: 300px;
+}
+
+/* When there are no recent repairs, landing.js hides the sidebar
+   (sets `hidden`). Drop the reservation so the hero is centered in
+   the full viewport instead of pushed +150px right of true center. */
+.landing:has(.landing-sidebar[hidden]) {
+  padding-left: 0;
+}
+
+/* The sidebar lives at the viewport's left edge (position: absolute on
+   .landing); the .landing-shell wrapper is layout-transparent so the hero
+   participates in .landing's centering grid as a direct child. */
+.landing-shell { display: contents; }
+
+/* Below 1000px, the sidebar disappears and the landing collapses back to
+   a single-column hero centered on the full viewport. */
+@media (max-width: 999px) {
+  .landing { padding-left: 0; }
+  .landing-sidebar { display: none !important; }
+}
+
+.landing-bg {
+  position: absolute;
+  inset: -10%;
+  background:
+    radial-gradient(ellipse at 30% 30%, rgba(125, 211, 252, 0.10), transparent 55%),
+    radial-gradient(ellipse at 70% 60%, rgba(167, 139, 250, 0.06), transparent 55%),
+    var(--bg-deep);
+  filter: blur(40px);
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+.landing-hero {
+  position: relative;
+  width: min(640px, 92vw);
+  padding: 32px;
+  text-align: center;
+  animation: landing-rise .35s cubic-bezier(.2, .8, .2, 1);
+}
+
+@keyframes landing-rise {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.landing-mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-2);
+  font-size: 13px;
+  letter-spacing: 0.5px;
+  margin-bottom: 32px;
+}
+
+.landing-mark svg { color: var(--cyan); }
+
+.landing-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 32px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--text);
+  margin: 0 0 12px 0;
+  letter-spacing: -0.5px;
+}
+
+.landing-sub {
+  font-size: 15px;
+  color: var(--text-2);
+  margin: 0 0 32px 0;
+}
+
+.landing-form {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+/* Stack variant — two text inputs above the submit button. */
+.landing-form--stack {
+  flex-direction: column;
+  align-items: stretch;
+}
+.landing-form--stack .landing-submit {
+  /* Full-width primary CTA in the stack form — visually anchors the
+     hero (matches the inputs above) and reads as a clear next-step
+     instead of a small button floating right of the form. */
+  align-self: stretch;
+  justify-content: center;
+  padding: 14px 20px;
+  font-size: 15px;
+  margin-top: 4px;
+}
+
+.landing-input {
+  flex: 1;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-size: 15px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  font-family: inherit;
+  transition: border-color .15s, background .15s;
+}
+
+.landing-input:focus {
+  outline: none;
+  border-color: var(--border-hover);
+  background: var(--panel-2);
+}
+
+.landing-input::placeholder { color: var(--text-3); }
+
+/* ============ Device autocomplete ============
+ * Lazy-loaded list of packs already on disk, surfaced under the device
+ * input as the tech types. Glass panel style matching the rest of the
+ * floating overlays (inspector, legend, tooltip — shared glass-panel
+ * convention across the workbench). */
+.landing-input-wrap {
+  position: relative;
+  width: 100%;
+}
+
+.landing-suggest {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 100;
+  max-height: 240px;
+  overflow-y: auto;
+  background: rgba(20, 32, 48, 0.96);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+.landing-suggest[hidden] { display: none; }
+.landing-suggest::-webkit-scrollbar { width: 6px; }
+.landing-suggest::-webkit-scrollbar-track { background: transparent; }
+.landing-suggest::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+
+.landing-suggest-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text);
+  border-bottom: 1px solid var(--border-soft);
+  transition: background .15s;
+}
+.landing-suggest-item:last-child { border-bottom: none; }
+.landing-suggest-item:hover,
+.landing-suggest-item.is-active {
+  background: var(--panel-2);
+}
+
+/* ✓ for complete packs (4 writers present), • for partial.
+   Cyan = component-status semantic accent; amber = the project's warning
+   grammar (see tokens.css / pipeline_progress.css). */
+.landing-suggest-icon {
+  display: inline-block;
+  width: 14px;
+  text-align: center;
+  font-size: 12px;
+  line-height: 1;
+  flex: 0 0 auto;
+}
+.landing-suggest-icon.is-complete { color: var(--cyan); }
+.landing-suggest-icon.is-partial  { color: var(--amber); }
+
+.landing-suggest-label {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.landing-suggest-meta {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  color: var(--text-3);
+  letter-spacing: 0.2px;
+  text-transform: uppercase;
+  flex: 0 0 auto;
+}
+
+/* Landing CTA uses --cyan (component) instead of --violet (action) to match
+ * the brand-mark accent on the hero — the landing page is the only place
+ * where the brand chrome and the primary button share the visual frame.
+ * This is the only --cyan-as-CTA in the app; every other action button in
+ * the workspace stays on --violet. */
+.landing-submit {
+  background: var(--cyan);
+  color: var(--bg-deep);
+  border: none;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 0 20px;
+  border-radius: 10px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: filter .15s, transform .05s;
+  font-family: inherit;
+}
+
+.landing-submit:hover { filter: brightness(1.1); }
+.landing-submit:active { transform: translateY(1px); }
+.landing-submit:disabled { opacity: 0.5; cursor: progress; }
+
+/* ============ Actions row — "+ knowledge" trigger + primary CTA ============
+ * The board-type select + schematic picker moved into a modal (see
+ * #landingKnowledgeBackdrop) so the hero stays a clean device+symptom form.
+ * The submit keeps its prominent full-width-ish CTA look; the knowledge
+ * trigger is a compact secondary button to its left. */
+.landing-actions {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+  margin-top: 4px;
+}
+.landing-actions .landing-submit {
+  flex: 1;
+  margin-top: 0;
+  justify-content: center;
+}
+
+.landing-knowledge-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  color: var(--text-2);
+  font-family: inherit;
+  font-size: 13px;
+  padding: 0 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color .15s, background .15s, color .15s;
+}
+.landing-knowledge-btn:hover {
+  border-color: var(--border-hover);
+  background: var(--panel-2);
+  color: var(--text);
+}
+/* Added-knowledge state: tint the edge with the hero's cyan CTA accent. */
+.landing-knowledge-btn.has-knowledge {
+  border-color: color-mix(in oklch, var(--cyan) 50%, var(--border));
+  color: var(--text);
+}
+.landing-knowledge-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--cyan);
+  color: var(--bg-deep);
+  font-size: 10px;
+  font-weight: 600;
+}
+.landing-knowledge-badge[hidden] { display: none; }
+
+/* Summary chips: one per added item (board type, schematic file). The whole
+ * chip is the remove control — click clears that piece of state. */
+.landing-knowledge-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+  margin-top: 10px;
+}
+.landing-knowledge-chips[hidden] { display: none; }
+.landing-knowledge-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 240px;
+  background: var(--panel);
+  border: 1px solid var(--border-soft);
+  color: var(--text-2);
+  font-family: inherit;
+  font-size: 11px;
+  padding: 4px 8px 4px 10px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: border-color .15s, background .15s, color .15s;
+}
+.landing-knowledge-chip > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.landing-knowledge-chip svg { flex-shrink: 0; opacity: .6; }
+.landing-knowledge-chip:hover {
+  border-color: var(--border-hover);
+  color: var(--text);
+}
+.landing-knowledge-chip:hover svg { opacity: 1; }
+
+/* The knowledge modal opens over the landing hero — a fixed overlay at
+ * z-index 1000 (.landing) with its tools nav at 1001. The shared
+ * .modal-backdrop z-index (100) is meant for the chrome-level home view, so
+ * lift this one above the hero or it opens invisibly behind it. */
+#landingKnowledgeBackdrop { z-index: 1100; }
+
+.landing-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.landing-chip {
+  background: transparent;
+  border: 1px solid var(--border-soft);
+  color: var(--text-2);
+  font-size: 12px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color .15s, background .15s, color .15s;
+}
+
+.landing-chip:hover {
+  border-color: var(--border-hover);
+  color: var(--text);
+  background: var(--panel);
+}
+
+.landing-status {
+  font-size: 12px;
+  color: var(--text-3);
+  min-height: 18px;
+}
+
+.landing-status.error { color: var(--amber); }
+
+/* ============ Pipeline timeline (revealed after submit) ============ */
+
+.landing-timeline {
+  margin-top: 24px;
+  padding: 16px 18px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  text-align: left;
+  animation: landing-rise .25s cubic-bezier(.2, .8, .2, 1);
+}
+
+.landing-timeline[hidden] { display: none; }
+
+.landing-timeline-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 14px;
+  font-size: 12px;
+  color: var(--text-2);
+}
+
+.landing-timeline-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--text-3);
+}
+
+.landing-timeline-eta {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--cyan);
+}
+
+.landing-phase-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  position: relative;
+}
+
+/* Vertical thread connecting all dots */
+.landing-phase-list::before {
+  content: "";
+  position: absolute;
+  left: 5px;
+  top: 6px;
+  bottom: 6px;
+  width: 1px;
+  background: var(--border-soft);
+}
+
+.landing-phase {
+  position: relative;
+  padding-left: 22px;
+  font-size: 13px;
+  color: var(--text-3);
+  transition: color .2s;
+}
+
+.landing-phase[hidden] { display: none; }
+
+.landing-phase-dot {
+  position: absolute;
+  left: 0;
+  top: 5px;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--bg-deep);
+  border: 2px solid var(--border-soft);
+  transition: border-color .2s, background .2s, box-shadow .2s;
+}
+
+.landing-phase-label {
+  font-weight: 500;
+}
+
+.landing-phase-narration {
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--text-2);
+  line-height: 1.55;
+  min-height: 0;
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height .35s cubic-bezier(.2,.8,.2,1), opacity .25s ease-out, margin-top .2s;
+}
+
+.landing-phase.has-narration .landing-phase-narration {
+  max-height: 200px;
+  opacity: 1;
+  margin-top: 6px;
+}
+
+/* In-progress: dot pulses cyan */
+.landing-phase.is-running { color: var(--text-2); }
+.landing-phase.is-running .landing-phase-dot {
+  border-color: var(--cyan);
+  background: var(--cyan);
+  box-shadow: 0 0 0 4px rgba(125, 211, 252, 0.10);
+  animation: landing-pulse 1.4s ease-in-out infinite;
+}
+
+/* Done: dot solid cyan, no pulse */
+.landing-phase.is-done { color: var(--text); }
+.landing-phase.is-done .landing-phase-dot {
+  border-color: var(--cyan);
+  background: var(--cyan);
+}
+
+/* Failed: amber per project warning grammar (cf. pipeline_progress.css). */
+.landing-phase.is-failed .landing-phase-dot {
+  border-color: var(--amber);
+  background: var(--amber);
+}
+.landing-phase.is-failed { color: var(--amber); }
+
+@keyframes landing-pulse {
+  0%, 100% { box-shadow: 0 0 0 4px rgba(125, 211, 252, 0.10); }
+  50%      { box-shadow: 0 0 0 8px rgba(125, 211, 252, 0.04); }
+}
+
+/* ============ Sidebar — recent repairs library ============
+ * Hidden by default; web/js/landing.js shows it once /pipeline/repairs
+ * resolves to ≥1 entry. Click on an item navigates to that repair's
+ * dashboard (same target as the journal cards). */
+
+.landing-sidebar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 280px;
+  background: rgba(15, 26, 46, 0.85);
+  border-right: 1px solid var(--border-soft);
+  padding: 18px 14px 14px;
+  display: flex;
+  flex-direction: column;
+  backdrop-filter: blur(10px);
+  animation: landing-rise .4s cubic-bezier(.2, .8, .2, 1);
+  z-index: 2;
+}
+
+.landing-sidebar[hidden] { display: none; }
+
+.landing-sidebar-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 0 6px 10px;
+  border-bottom: 1px solid var(--border-soft);
+  margin-bottom: 8px;
+}
+
+.landing-sidebar-title {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.landing-sidebar-count {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  color: var(--text-3);
+}
+
+.landing-sidebar-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+.landing-sidebar-list::-webkit-scrollbar { width: 6px; }
+.landing-sidebar-list::-webkit-scrollbar-track { background: transparent; }
+.landing-sidebar-list::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+
+.landing-sidebar-item {
+  position: relative;
+  border-radius: 8px;
+  transition: background .15s;
+}
+.landing-sidebar-item:hover { background: var(--panel-2); }
+
+/* No left-rail accent on hover. The cyan in tokens.css is locked to
+   component semantics; using it as a generic hover affordance was a
+   semantic violation AND read as stock-SaaS-sidebar. Hover = background
+   lift + symptom/meta brightening + the × button reveal — that's enough
+   signal. */
+.landing-sidebar-link {
+  display: block;
+  padding: 9px 30px 9px 12px;
+  border-radius: 8px;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}
+.landing-sidebar-link:focus-visible {
+  outline: 1px solid var(--border-hover);
+  outline-offset: -1px;
+}
+
+.landing-sidebar-delete {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  transform: translateY(-50%);
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  color: var(--text-3);
+  font-size: 16px;
+  font-family: inherit;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity .15s, background .15s, color .15s, border-color .15s;
+}
+.landing-sidebar-item:hover .landing-sidebar-delete,
+.landing-sidebar-delete:focus-visible {
+  opacity: 1;
+}
+.landing-sidebar-delete:hover {
+  background: var(--panel);
+  color: var(--amber);
+  border-color: rgba(245, 158, 11, .35);
+}
+.landing-sidebar-delete:disabled {
+  opacity: .4;
+  cursor: progress;
+}
+
+.landing-sidebar-device {
+  display: block;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.landing-sidebar-symptom {
+  display: block;
+  margin-top: 2px;
+  font-size: 11.5px;
+  color: var(--text-2);
+  line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color .15s;
+}
+.landing-sidebar-meta {
+  display: block;
+  margin-top: 4px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  color: var(--text-3);
+  letter-spacing: 0.2px;
+  transition: color .15s;
+}
+.landing-sidebar-item:hover .landing-sidebar-symptom { color: var(--text); }
+.landing-sidebar-item:hover .landing-sidebar-meta { color: var(--text-2); }
+
+/* ============ Hero mascot ============
+ * Mounted by web/js/landing.js. State follows the pipeline: idle by
+ * default, working during the build, success on completion, error on
+ * pipeline_failed. */
+.landing-mascot {
+  display: flex;
+  justify-content: center;
+  margin: 0 0 10px;
+}
+.landing-mascot .mascot { width: 150px; }
+
+/* ============ Device-kind pause panel ============
+ * Injected into #landingTimeline by renderLandingKindConfirm() when the
+ * orchestrator pauses on a device-kind disagreement. Neutral "needs action"
+ * treatment — a plain panel surface + border, NOT --amber (symptom) or
+ * --cyan (component), per the locked semantic palette. */
+
+.landing-kind-panel {
+  margin-top: 14px;
+  padding: 14px 16px;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  animation: landing-rise .3s cubic-bezier(.2, .8, .2, 1);
+}
+
+.landing-kind-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 12px;
+  color: var(--text-3);
+}
+
+.landing-kind-row b.mono {
+  font-family: var(--mono, "JetBrains Mono", monospace);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text);
+  text-transform: uppercase;
+  letter-spacing: .4px;
+}
+
+.landing-kind-evidence {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-2);
+  padding: 6px 8px;
+  background: var(--panel);
+  border-left: 2px solid var(--border-soft);
+  border-radius: 4px;
+}
+
+.landing-kind-opts {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 4px 0 6px;
+}
+
+.landing-kind-opt {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.landing-kind-opt input { accent-color: var(--cyan); }
+
+.landing-kind-opt em {
+  font-style: normal;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  color: var(--text-3);
+}
+
+/* Confirm button mirrors .landing-submit (cyan CTA, see note above). */
+.landing-kind-confirm {
+  align-self: flex-start;
+  background: var(--cyan);
+  color: var(--bg-deep);
+  border: none;
+  font-weight: 600;
+  font-size: 13px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: filter .15s, transform .05s;
+}
+
+.landing-kind-confirm:hover { filter: brightness(1.1); }
+.landing-kind-confirm:active { transform: translateY(1px); }
+
+/* Paused/attention treatment on the device_kind phase row — neutral dot,
+ * no semantic-color repurpose. */
+.landing-phase[data-phase="device_kind"].is-running .landing-phase-dot {
+  border-color: var(--text-3);
+  background: var(--panel-2);
+}
+
+/* ============ Device-kind readiness badges (suggest meta) ============
+ * Inline chips trailing a suggestion's mono meta. Two flavours, emitted by
+ * landing.js _renderSuggest():
+ *   - graph badge — dim by default, lit (.is-on) in --emerald when the
+ *     device already has a compiled electrical graph (the "ready" signal);
+ *   - .mono kind chip — short device-kind code (GPU / PORTABLE / …) as a
+ *     neutral classification chip, monospace uppercase.
+ * Tints use color-mix(in oklch, …) to match the OKLCH semantic tokens
+ * (cf. profile.css / protocol.css) — rgba literals can't tint OKLCH. */
+.landing-suggest-badge {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 6px;
+  border: 1px solid var(--border-soft);
+  border-radius: 9px;
+  font-size: 9.5px;
+  letter-spacing: .3px;
+  color: var(--text-3);
+  opacity: .6;
+  vertical-align: middle;
+}
+.landing-suggest-badge.is-on {
+  opacity: 1;
+  color: var(--emerald);
+  border-color: color-mix(in oklch, var(--emerald) 35%, transparent);
+  background: color-mix(in oklch, var(--emerald) 10%, transparent);
+}
+.landing-suggest-badge.mono {
+  font-family: var(--mono);
+  text-transform: uppercase;
+  opacity: 1;
+  color: var(--text-2);
+}
+
+/* ============ Schematic upload field (optional PDF) ============
+ * #landingSchematicField wraps a pick button (.landing-schematic-pick,
+ * which reuses .landing-input for its base look) + a mono filename span.
+ * The pick button reads as a left-aligned field, not a centered submit —
+ * .landing-input doesn't set text-align so the button default (center)
+ * needs overriding. In the is-ingested state the field collapses: the
+ * picker hides and the filename greens to mark the attachment as taken. */
+.landing-schematic {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.landing-schematic-pick {
+  text-align: left;
+  cursor: pointer;
+}
+.landing-schematic-pick:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+.landing-schematic-name {
+  font-size: 11px;
+  color: var(--text-3);
+  font-family: var(--mono);
+}
+#landingSchematicField.is-ingested .landing-schematic-pick { display: none; }
+#landingSchematicField.is-ingested .landing-schematic-name { color: var(--emerald); }
+

@@ -1,0 +1,555 @@
+{
+  "items": [
+    {
+      "id": "rule-vin-dead-001",
+      "symptoms": [
+        "No power at all — no LEDs, no rail activity after connecting wall or battery power.",
+        "D9 power-input LED dark even with adapter plugged in."
+      ],
+      "likely_causes": [
+        {
+          "refdes": "F1",
+          "probability": 0.5,
+          "mechanism": "blown SMD input fuse — open circuit, no VIN downstream of fuse"
+        },
+        {
+          "refdes": "VIN",
+          "probability": 0.25,
+          "mechanism": "short-to-ground on input bus pulling adapter into current limit"
+        },
+        {
+          "refdes": "J1",
+          "probability": 0.1,
+          "mechanism": "cold joint or pad-lift on barrel-jack solder tabs from mechanical stress"
+        }
+      ],
+      "diagnostic_steps": [
+        {
+          "action": "Probe VIN at R49 with DMM in DC mode, adapter plugged in, batteries removed",
+          "expected": "9–32 V (nominal 24 V); <1 V indicates open input path"
+        },
+        {
+          "action": "Continuity / resistance check across F1 in DMM resistance mode",
+          "expected": "<1 Ω closed; OL = blown fuse"
+        },
+        {
+          "action": "Diode-mode VIN to GND on bulk input cap (probe at R49 input side)",
+          "expected": ">0.3 V or OL; <0.05 V indicates dead short on VIN bus — short-hunt before replacing F1"
+        },
+        {
+          "action": "If F1 open and no downstream short found: replace F1 with same-rating SMD fuse, hot air 350°C with flux",
+          "expected": null
+        }
+      ],
+      "confidence": 0.8,
+      "sources": [
+        "https://mntre.com/reform2/handbook/advanced.html",
+        "https://community.mnt.re/t/debugging-power-related-firmware/1657"
+      ],
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "id": "rule-lpc-vcc-dead-002",
+      "symptoms": [
+        "D11 LED is dark.",
+        "System Controller (LPC) does not respond to SYSCTL UART commands.",
+        "OLED status display blank with adapter connected."
+      ],
+      "likely_causes": [
+        {
+          "refdes": "U14",
+          "probability": 0.55,
+          "mechanism": "always-on 3.3 V regulator failed open or shorted output, starving U18 of LPC_VCC"
+        },
+        {
+          "refdes": "LPC_VCC",
+          "probability": 0.2,
+          "mechanism": "downstream short on LPC_VCC rail (leaky MLCC) collapsing U14 output"
+        },
+        {
+          "refdes": "U18",
+          "probability": 0.1,
+          "mechanism": "shorted LPC11U24 supply pin pulling LPC_VCC to GND"
+        }
+      ],
+      "diagnostic_steps": [
+        {
+          "action": "Probe LPC_VCC at J22 pin 15 with DMM",
+          "expected": "3.3 V ± 5%; <0.2 V indicates dead rail"
+        },
+        {
+          "action": "Diode-mode LPC_VCC to GND at J22 pin 15",
+          "expected": ">0.4 V; <0.05 V = short-to-ground on rail, isolate U18 before replacing U14"
+        },
+        {
+          "action": "Probe U14 input pin for VIN / pre-regulator supply, then U14 output pin",
+          "expected": "input present, output 3.3 V; input present + output 0 V = U14 dead"
+        },
+        {
+          "action": "If U14 output shorted with U18 lifted: replace U14, hot air 360°C with flux, reflow 30 s",
+          "expected": null
+        }
+      ],
+      "confidence": 0.78,
+      "sources": [
+        "https://mntre.com/documentation/reform-handbook/advanced.html"
+      ],
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "id": "rule-3v3-switched-short-003",
+      "symptoms": [
+        "LPC UART responds and D11 is lit, but on '1P' power-on command D11 extinguishes immediately.",
+        "Nothing further happens; CPU module does not start."
+      ],
+      "likely_causes": [
+        {
+          "refdes": "3V3_PWR_AUX",
+          "probability": 0.5,
+          "mechanism": "short-to-ground on 3.3 V switched rail (leaky MLCC bypass cap) trips LPC overcurrent shutdown"
+        },
+        {
+          "refdes": "USB_PWR",
+          "probability": 0.15,
+          "mechanism": "short on 5 V switched rail collapses sequence; D12 never lights"
+        },
+        {
+          "refdes": "U18",
+          "probability": 0.1,
+          "mechanism": "damaged LPC GPIO line to power-rail switch FET (overvoltage / reversed-battery damage)"
+        }
+      ],
+      "diagnostic_steps": [
+        {
+          "action": "With board off, diode-mode 3V3_PWR_AUX to GND at any decoupling cap on the rail",
+          "expected": ">0.4 V or OL; <0.05 V = direct short to GND, cap-walk to find leaky MLCC"
+        },
+        {
+          "action": "Diode-mode USB_PWR (5 V) to GND at D12 pad",
+          "expected": ">0.4 V or OL; <0.05 V = 5 V rail shorted"
+        },
+        {
+          "action": "Cap-walk along 3V3_PWR_AUX MLCCs with hot air at 250 °C, identify warming cap, lift and re-test",
+          "expected": "rail short clears once leaky cap removed"
+        },
+        {
+          "action": "If no rail short found: probe U18 GPIO output for 3V3_PWR_EN under '1P' command with scope/DMM",
+          "expected": "logic high (~3.3 V) for at least 100 ms before LPC shuts down"
+        }
+      ],
+      "confidence": 0.7,
+      "sources": [
+        "https://community.mnt.re/t/debugging-dead-motherboard/970"
+      ],
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "id": "rule-vcc1v8-dead-004",
+      "symptoms": [
+        "SD card boot fails.",
+        "System won't read SD card even though LPC and 3.3 V main rail are confirmed live."
+      ],
+      "likely_causes": [
+        {
+          "refdes": "VCC_1V8",
+          "probability": 0.55,
+          "mechanism": "1.8 V rail dead — buck regulator output absent or rail shorted to GND"
+        },
+        {
+          "refdes": "U28",
+          "probability": 0.1,
+          "mechanism": "level shifter U28 with shorted VCCB pin pulling VCC_1V8 to GND"
+        },
+        {
+          "refdes": "U8",
+          "probability": 0.1,
+          "mechanism": "level shifter U8 with shorted supply pulling VCC_1V8 to GND"
+        }
+      ],
+      "diagnostic_steps": [
+        {
+          "action": "Probe VCC_1V8 at C130 with DMM",
+          "expected": "1.8 V ± 5%; <0.1 V indicates dead rail"
+        },
+        {
+          "action": "Diode-mode C130 to GND",
+          "expected": ">0.4 V or OL; <0.05 V = rail shorted"
+        },
+        {
+          "action": "If rail shorted: lift U28 then U8 in turn; re-diode-mode after each removal to identify the shorted level shifter",
+          "expected": "diode value rises to >0.4 V once offending IC removed"
+        },
+        {
+          "action": "If rail open with no short: locate 1.8 V buck on Power schematic, probe its enable and feedback pins",
+          "expected": "EN high, FB ≈ internal reference (typ. 0.6–0.8 V) when rail is alive"
+        }
+      ],
+      "confidence": 0.7,
+      "sources": [
+        "https://mntre.com/reform2/handbook/advanced.html"
+      ],
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "id": "rule-vcc1v2-dead-005",
+      "symptoms": [
+        "Internal display dark or no video.",
+        "USB ports also dead.",
+        "External HDMI may or may not work."
+      ],
+      "likely_causes": [
+        {
+          "refdes": "VCC_1V2",
+          "probability": 0.5,
+          "mechanism": "1.2 V supply dead — both U9 (TUSB8041) and U10 (SN65DSI86) require 1.2 V to operate"
+        },
+        {
+          "refdes": "U9",
+          "probability": 0.15,
+          "mechanism": "TUSB8041 internal short on VCC_1V2 pin pulling rail to GND"
+        },
+        {
+          "refdes": "U10",
+          "probability": 0.15,
+          "mechanism": "SN65DSI86 internal short on VCC_1V2 pin pulling rail to GND"
+        }
+      ],
+      "diagnostic_steps": [
+        {
+          "action": "Probe VCC_1V2 at C37 with DMM",
+          "expected": "1.2 V ± 5%; <0.1 V indicates dead rail"
+        },
+        {
+          "action": "Diode-mode C37 to GND",
+          "expected": ">0.3 V or OL; <0.05 V = rail shorted"
+        },
+        {
+          "action": "If shorted: hot-air-lift U9 first, re-test; then lift U10 if still shorted",
+          "expected": "rail diode value recovers to >0.3 V after offending IC lifted"
+        },
+        {
+          "action": "If VCC_1V2 present but display still dark: probe 3V3_PWR_AUX and USB_PWR at D11/D12, then inspect U10 BGA/QFN joints under microscope",
+          "expected": "rails present; cold joint visible on U10 → reflow at 360 °C with flux"
+        }
+      ],
+      "confidence": 0.78,
+      "sources": [
+        "https://mntre.com/reform2/handbook/advanced.html",
+        "https://community.mnt.re/t/edp-cable-or-board-issue/3898"
+      ],
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "id": "rule-j24-pad-lift-006",
+      "symptoms": [
+        "Internal display flickers intermittently or goes blank after reassembly.",
+        "HDMI output unaffected.",
+        "Display image present but backlight failing intermittently."
+      ],
+      "likely_causes": [
+        {
+          "refdes": "J24",
+          "probability": 0.5,
+          "mechanism": "lifted ZIF pad / fractured contact on 0.5 mm pitch DSI flex connector"
+        },
+        {
+          "refdes": "U10",
+          "probability": 0.2,
+          "mechanism": "cold joint on SN65DSI86 BGA/QFN balls after thermal stress"
+        },
+        {
+          "refdes": "TPD12S521",
+          "probability": 0.1,
+          "mechanism": "cold joint or shorted ESD cell on backlight signal line"
+        }
+      ],
+      "diagnostic_steps": [
+        {
+          "action": "Inspect J24 ZIF pads under stereo microscope at 20–40×",
+          "expected": "all 30 pads flat, tinned, no liftoff or solder bridging"
+        },
+        {
+          "action": "Diode-mode each TPD12S521 pin to GND",
+          "expected": ">0.3 V or OL; any <0.05 V indicates blown ESD cell — replace TPD12S521"
+        },
+        {
+          "action": "Reflow J24 pads with iron + flux at 350 °C; if pad lifted, scrape mask off trace stub and run 38 AWG jumper to connector pin",
+          "expected": null
+        },
+        {
+          "action": "If J24 mechanically intact: reflow U10 with hot air 360 °C, pre-heat 150 °C, 45 s",
+          "expected": "display restored after reflow"
+        }
+      ],
+      "confidence": 0.7,
+      "sources": [
+        "https://community.mnt.re/t/edp-cable-or-board-issue/3898"
+      ],
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "id": "rule-microhdmi-pad-lift-007",
+      "symptoms": [
+        "microHDMI connector physically detached from Pocket Reform motherboard.",
+        "External display goes black and cannot be reconnected.",
+        "Visible mechanical damage at HDMI port."
+      ],
+      "likely_causes": [
+        {
+          "refdes": "micro-HDMI connector",
+          "probability": 0.85,
+          "mechanism": "connector pads torn from PCB after repeated plug/unplug cycles, mechanical anchor failed"
+        }
+      ],
+      "diagnostic_steps": [
+        {
+          "action": "Inspect connector footprint under microscope; identify which signal pads remain on PCB and which are torn",
+          "expected": "intact pads = reflowable; torn pads = need scraping back to trace and jumpering"
+        },
+        {
+          "action": "Continuity test from each surviving signal pad to its first via/cap downstream",
+          "expected": "<1 Ω; OL = trace damaged inside laminate"
+        },
+        {
+          "action": "Clean and re-tin pads, tack new connector with low-temp paste on signal pins, hot air 320 °C",
+          "expected": null
+        },
+        {
+          "action": "For torn pads: scrape mask off trace stub, run 36–38 AWG jumper from stub to connector pin; reinforce mechanical anchor with two-part epoxy fillet",
+          "expected": null
+        }
+      ],
+      "confidence": 0.8,
+      "sources": [
+        "https://community.mnt.re/t/tragedy-microhdmi-port-has-detached/4240"
+      ],
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "id": "rule-lm62460-v3-misbehave-008",
+      "symptoms": [
+        "v3.0 motherboard: 5 V or 3.3 V main rails at incorrect voltage.",
+        "D11 or D12 indicator dim, oscillating, or off."
+      ],
+      "likely_causes": [
+        {
+          "refdes": "LM62460",
+          "probability": 0.45,
+          "mechanism": "cold joint on LM62460 thermal pad or feedback pin causing hiccup / output droop"
+        },
+        {
+          "refdes": "USB_PWR",
+          "probability": 0.2,
+          "mechanism": "short / leaky output cap on 5 V rail loading regulator into hiccup"
+        },
+        {
+          "refdes": "3V3_PWR_AUX",
+          "probability": 0.15,
+          "mechanism": "short / leaky output cap on 3.3 V rail loading regulator into hiccup"
+        }
+      ],
+      "diagnostic_steps": [
+        {
+          "action": "Probe USB_PWR at D12 pad and 3V3_PWR_AUX at D11 pad with DMM",
+          "expected": "5.0 V and 3.3 V ± 5%; oscillating reading = hiccup mode"
+        },
+        {
+          "action": "Diode-mode each rail to GND on the LM62460 output cap",
+          "expected": ">0.3 V or OL; <0.1 V = leaky cap / shorted load on rail"
+        },
+        {
+          "action": "Scope LM62460 feedback pin (FB) for stability",
+          "expected": "DC level near internal reference (~1 V); ringing or sawtooth = instability"
+        },
+        {
+          "action": "Inspect LM62460 solder joints under microscope; reflow with hot air 360 °C and flux if cold joint suspected",
+          "expected": null
+        }
+      ],
+      "confidence": 0.6,
+      "sources": [
+        "https://mntre.com/documentation/reform-handbook/hardware.html"
+      ],
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "id": "rule-sodimm-pad-009",
+      "symptoms": [
+        "LPC serial responsive, batteries healthy, '1P' executes (LEDs change), but main LCD stays dark and no CPU UART (Serial 1) output.",
+        "Onset after SOM was knocked or after eMMC DIP switch operation."
+      ],
+      "likely_causes": [
+        {
+          "refdes": "SOM SODIMM connector",
+          "probability": 0.5,
+          "mechanism": "lifted / fractured SODIMM edge pad on motherboard side after mechanical impact"
+        },
+        {
+          "refdes": "VCC_1V8",
+          "probability": 0.15,
+          "mechanism": "open SODIMM 1.8 V power pin not delivering rail to SOM PMIC"
+        },
+        {
+          "refdes": "SOM_PWRON",
+          "probability": 0.15,
+          "mechanism": "open SODIMM contact on PWRON line — LPC asserts but SOM never sees the signal"
+        }
+      ],
+      "diagnostic_steps": [
+        {
+          "action": "Remove SOM and inspect SODIMM connector under microscope at 20–40× for lifted pads, bent contacts, oxidation",
+          "expected": "all contacts clean and coplanar"
+        },
+        {
+          "action": "With SOM out, probe SODIMM 3.3 V and 1.8 V power pins on motherboard side under '1P' sequence",
+          "expected": "3.3 V and 1.8 V present at motherboard SODIMM pins after LPC enable"
+        },
+        {
+          "action": "Continuity from SODIMM SOM_PWRON pin back to U18 GPIO source pin",
+          "expected": "<5 Ω; OL = broken trace, jumper required"
+        },
+        {
+          "action": "Reflow motherboard SODIMM connector pins with iron + flux at 350 °C; if pads lifted, jumper from trace stub to contact",
+          "expected": null
+        }
+      ],
+      "confidence": 0.6,
+      "sources": [
+        "https://community.mnt.re/t/debugging-dead-motherboard/970",
+        "https://community.mnt.re/t/reform-will-not-boot-probably-damaged-i-mx8m-som/1136"
+      ],
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "id": "rule-tpd12s521-backlight-010",
+      "symptoms": [
+        "Built-in display image present but backlight fails or flickers intermittently.",
+        "HDMI works fine.",
+        "Toggling backlight intensity in OS sometimes triggers or kills the backlight."
+      ],
+      "likely_causes": [
+        {
+          "refdes": "TPD12S521",
+          "probability": 0.45,
+          "mechanism": "shorted ESD cell on backlight PWM line clamping BL_PWM signal"
+        },
+        {
+          "refdes": "BL_PWM",
+          "probability": 0.2,
+          "mechanism": "cold joint on backlight PWM trace at eDP FPC connector pin"
+        },
+        {
+          "refdes": "eDP FPC connector",
+          "probability": 0.15,
+          "mechanism": "lifted pad on backlight pin of FPC connector after flex-cable stress"
+        }
+      ],
+      "diagnostic_steps": [
+        {
+          "action": "Diode-mode each TPD12S521 pin to GND",
+          "expected": ">0.3 V or OL on all pins; <0.05 V on any pin = blown ESD cell"
+        },
+        {
+          "action": "Probe BL_PWM at eDP FPC connector pin with scope while toggling OS backlight",
+          "expected": "PWM waveform 0–3.3 V at brightness-dependent duty cycle"
+        },
+        {
+          "action": "Inspect eDP FPC connector pads and TPD12S521 joints under microscope",
+          "expected": "no lifted pads, no cold joints; reflow at 350 °C if cold joint visible"
+        },
+        {
+          "action": "If TPD12S521 has shorted pin: replace IC with hot air 360 °C, pre-heat 130 °C, flux + low-temp paste",
+          "expected": null
+        }
+      ],
+      "confidence": 0.6,
+      "sources": [
+        "https://community.mnt.re/t/edp-cable-or-board-issue/3898"
+      ],
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    }
+  ],
+  "_meta": {
+    "schema_version": "1.0"
+  }
+}

@@ -1,0 +1,3662 @@
+{
+  "schema_version": "1.0",
+  "page": 8,
+  "sheet_name": "MNT Reform 2 PCIe Size",
+  "sheet_path": "/Reform 2 PCIe/reform2-pcie.kicad_sch",
+  "page_kind": "schematic",
+  "orientation": "landscape",
+  "confidence": 0.82,
+  "nodes": [
+    {
+      "refdes": "U20",
+      "type": "ic",
+      "value": {
+        "raw": "AP22815",
+        "primary": null,
+        "package": null,
+        "mpn": "AP22815",
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": "WiFi Kili Switch"
+      },
+      "page": 8,
+      "pins": [
+        {
+          "number": "1",
+          "name": "IN",
+          "role": "power_in",
+          "net_label": "+3V3"
+        },
+        {
+          "number": "2",
+          "name": "OUT",
+          "role": "power_out",
+          "net_label": "PCIE1_PWR"
+        },
+        {
+          "number": "4",
+          "name": "EN",
+          "role": "enable_in",
+          "net_label": "PCIE1_PWR_EN"
+        },
+        {
+          "number": "5",
+          "name": "FLG",
+          "role": "signal_out",
+          "net_label": "FLG"
+        },
+        {
+          "number": "3",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C155",
+      "type": "capacitor",
+      "value": {
+        "raw": "10uF",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 8,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "+3V3"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "FB3",
+      "type": "ferrite",
+      "value": {
+        "raw": "100@100MHz 3A",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 8,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "+3V3"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "power_out",
+          "net_label": "PCIE1_PWR"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C52",
+      "type": "capacitor",
+      "value": {
+        "raw": "10nF",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 8,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "PCIE1_PWR"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C53",
+      "type": "capacitor",
+      "value": {
+        "raw": "0.1uF",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 8,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "PCIE1_PWR"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C54",
+      "type": "capacitor",
+      "value": {
+        "raw": "0.1uF",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 8,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "PCIE1_PWR"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C55",
+      "type": "capacitor",
+      "value": {
+        "raw": "0.1uF",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 8,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "PCIE1_PWR"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C83",
+      "type": "capacitor",
+      "value": {
+        "raw": "47uF",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 8,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "PCIE1_PWR"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C123",
+      "type": "capacitor",
+      "value": {
+        "raw": "47uF",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 8,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "+1V5"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C119",
+      "type": "capacitor",
+      "value": {
+        "raw": "0.1uF",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 8,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "+1V5"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C120",
+      "type": "capacitor",
+      "value": {
+        "raw": "10uF",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 8,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "+1V5"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "U11",
+      "type": "ic",
+      "value": {
+        "raw": "679105700",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": "mPCIe connector IC"
+      },
+      "page": 8,
+      "pins": [
+        {
+          "number": "52",
+          "name": "+3.3Vaux",
+          "role": "power_in",
+          "net_label": "PCIE1_PWR"
+        },
+        {
+          "number": "50",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "48",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "46",
+          "name": "LED_WPAN",
+          "role": "signal_out",
+          "net_label": "LED_WLAN1"
+        },
+        {
+          "number": "44",
+          "name": "LED_WLAN",
+          "role": "signal_out",
+          "net_label": null
+        },
+        {
+          "number": "42",
+          "name": "+3.3Aux",
+          "role": "power_in",
+          "net_label": "PCIE1_PWR"
+        },
+        {
+          "number": "40",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "38",
+          "name": "USB_D+",
+          "role": "signal_inout",
+          "net_label": "USB_D"
+        },
+        {
+          "number": "36",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "34",
+          "name": "USB_D-",
+          "role": "signal_inout",
+          "net_label": "USB_D-"
+        },
+        {
+          "number": "32",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "30",
+          "name": "SMB_DATA",
+          "role": "signal_inout",
+          "net_label": "SMB_DATA"
+        },
+        {
+          "number": "28",
+          "name": "SMB_CLK",
+          "role": "clock_in",
+          "net_label": "SMB_CLK"
+        },
+        {
+          "number": "26",
+          "name": "+1.5V",
+          "role": "power_in",
+          "net_label": "+1V5"
+        },
+        {
+          "number": "24",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "22",
+          "name": "PERST#",
+          "role": "reset_in",
+          "net_label": "PCIE1_PWR"
+        },
+        {
+          "number": "20",
+          "name": "W_DISABLE",
+          "role": "signal_in",
+          "net_label": null
+        },
+        {
+          "number": "18",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "16",
+          "name": "UIM_VPP",
+          "role": "signal_inout",
+          "net_label": "UIM_VPP"
+        },
+        {
+          "number": "14",
+          "name": "UIM_RESET",
+          "role": "reset_in",
+          "net_label": "UIM_RESET"
+        },
+        {
+          "number": "12",
+          "name": "UIM_CLK",
+          "role": "clock_in",
+          "net_label": "UIM_CLK"
+        },
+        {
+          "number": "10",
+          "name": "UIM_DATA",
+          "role": "signal_inout",
+          "net_label": "UIM_DATA"
+        },
+        {
+          "number": "8",
+          "name": "UIM_PWR",
+          "role": "power_in",
+          "net_label": "UIM_PWR"
+        },
+        {
+          "number": "6",
+          "name": "COEX2",
+          "role": "signal_inout",
+          "net_label": "COEX2"
+        },
+        {
+          "number": "4",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "2",
+          "name": "+3.3Vaux",
+          "role": "power_in",
+          "net_label": "PCIE1_PWR"
+        },
+        {
+          "number": "51",
+          "name": "Reserved",
+          "role": "no_connect",
+          "net_label": null
+        },
+        {
+          "number": "49",
+          "name": "Reserved",
+          "role": "no_connect",
+          "net_label": null
+        },
+        {
+          "number": "47",
+          "name": "Reserved",
+          "role": "no_connect",
+          "net_label": null
+        },
+        {
+          "number": "45",
+          "name": "Reserved",
+          "role": "no_connect",
+          "net_label": null
+        },
+        {
+          "number": "43",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "41",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "39",
+          "name": "+3.3Aux",
+          "role": "power_in",
+          "net_label": "PCIE1_PWR"
+        },
+        {
+          "number": "37",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "35",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "33",
+          "name": "PETp0",
+          "role": "signal_out",
+          "net_label": "PCIE1_TX_P"
+        },
+        {
+          "number": "31",
+          "name": "PETn0",
+          "role": "signal_out",
+          "net_label": "PCIE1_TX_N"
+        },
+        {
+          "number": "29",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "27",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "25",
+          "name": "PERp0",
+          "role": "signal_in",
+          "net_label": "PCIE1_RX_P"
+        },
+        {
+          "number": "23",
+          "name": "PERn0",
+          "role": "signal_in",
+          "net_label": "PCIE1_RX_N"
+        },
+        {
+          "number": "21",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "19",
+          "name": "UIM_C4",
+          "role": "signal_inout",
+          "net_label": "UIM_C4"
+        },
+        {
+          "number": "17",
+          "name": "UIM_C8",
+          "role": "signal_inout",
+          "net_label": "UIM_C8"
+        },
+        {
+          "number": "15",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "13",
+          "name": "RefClk+",
+          "role": "clock_in",
+          "net_label": "PCIE1_CLK_P"
+        },
+        {
+          "number": "11",
+          "name": "RefClk-",
+          "role": "clock_in",
+          "net_label": "PCIE1_CLK_N"
+        },
+        {
+          "number": "9",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "7",
+          "name": "CLKREQ",
+          "role": "signal_out",
+          "net_label": null
+        },
+        {
+          "number": "5",
+          "name": "COEX1",
+          "role": "signal_inout",
+          "net_label": "COEX1"
+        },
+        {
+          "number": "3",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "1",
+          "name": "WAKE",
+          "role": "signal_out",
+          "net_label": null
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R160",
+      "type": "resistor",
+      "value": {
+        "raw": "100k",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 8,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "PCIE1_PWR"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": "PCIE1_PWR"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "D22",
+      "type": "led",
+      "value": {
+        "raw": "LED_WLAN1",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 8,
+      "pins": [
+        {
+          "number": "A",
+          "name": null,
+          "role": "power_in",
+          "net_label": "LED_WLAN1"
+        },
+        {
+          "number": "K",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R67",
+      "type": "resistor",
+      "value": {
+        "raw": "1k",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 8,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "PCIE1_PWR"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": "LED_WLAN1"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R103",
+      "type": "resistor",
+      "value": {
+        "raw": "0",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 8,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": null
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": null
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R123",
+      "type": "resistor",
+      "value": {
+        "raw": "49.9",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 8,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "PCIE1_CLK_P"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": "RCLKC_P"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R148",
+      "type": "resistor",
+      "value": {
+        "raw": "49.9",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 8,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "PCIE1_CLK_N"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": "RCLKC_N"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "U23",
+      "type": "ic",
+      "value": {
+        "raw": "IDT5V41066",
+        "primary": null,
+        "package": null,
+        "mpn": "IDT5V41066",
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": "Refclk Generator"
+      },
+      "page": 8,
+      "pins": [
+        {
+          "number": "1",
+          "name": "VDDXD",
+          "role": "power_in",
+          "net_label": "VDDXD"
+        },
+        {
+          "number": "2",
+          "name": "S0",
+          "role": "signal_in",
+          "net_label": null
+        },
+        {
+          "number": "3",
+          "name": "S1",
+          "role": "signal_in",
+          "net_label": null
+        },
+        {
+          "number": "4",
+          "name": "S2",
+          "role": "signal_in",
+          "net_label": null
+        },
+        {
+          "number": "5",
+          "name": "X1",
+          "role": "clock_in",
+          "net_label": "PCICLKGEN_XI"
+        },
+        {
+          "number": "6",
+          "name": "X2",
+          "role": "clock_out",
+          "net_label": "PCICLKGEN_XO"
+        },
+        {
+          "number": "7",
+          "name": "PD",
+          "role": "signal_in",
+          "net_label": null
+        },
+        {
+          "number": "8",
+          "name": "OE",
+          "role": "enable_in",
+          "net_label": null
+        },
+        {
+          "number": "9",
+          "name": "CLKC_P",
+          "role": "clock_out",
+          "net_label": "PCIE2_CLK_P"
+        },
+        {
+          "number": "10",
+          "name": "IREF",
+          "role": "signal_in",
+          "net_label": "IREF"
+        },
+        {
+          "number": "11",
+          "name": "CLKD_P",
+          "role": "clock_out",
+          "net_label": null
+        },
+        {
+          "number": "12",
+          "name": "CLKD_N",
+          "role": "clock_out",
+          "net_label": null
+        },
+        {
+          "number": "13",
+          "name": "CLKC_N",
+          "role": "clock_out",
+          "net_label": "PCIE2_CLK_N"
+        },
+        {
+          "number": "14",
+          "name": "VDDODA",
+          "role": "power_in",
+          "net_label": "VDDODA"
+        },
+        {
+          "number": "15",
+          "name": "GNDODA",
+          "role": "ground",
+          "net_label": "GNDODA"
+        },
+        {
+          "number": "16",
+          "name": "CLKB_N",
+          "role": "clock_out",
+          "net_label": null
+        },
+        {
+          "number": "17",
+          "name": "CLKB_P",
+          "role": "clock_out",
+          "net_label": null
+        },
+        {
+          "number": "18",
+          "name": "CLKA_N",
+          "role": "clock_out",
+          "net_label": "RCLKC_N"
+        },
+        {
+          "number": "19",
+          "name": "CLKA_P",
+          "role": "clock_out",
+          "net_label": "RCLKC_P"
+        },
+        {
+          "number": "20",
+          "name": "GNDXD",
+          "role": "ground",
+          "net_label": "GNDXD"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C152",
+      "type": "capacitor",
+      "value": {
+        "raw": "10nF",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 8,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "VDDXD"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R36",
+      "type": "resistor",
+      "value": {
+        "raw": "475",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 8,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "IREF"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R37",
+      "type": "resistor",
+      "value": {
+        "raw": "0",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 8,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": null
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": "CLKA_P"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R38",
+      "type": "resistor",
+      "value": {
+        "raw": "0",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 8,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": null
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": "CLKA_N"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R39",
+      "type": "resistor",
+      "value": {
+        "raw": "0",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 8,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "PCICLKGEN_XI"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": null
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R40",
+      "type": "resistor",
+      "value": {
+        "raw": "0",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 8,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": null
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": null
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R122",
+      "type": "resistor",
+      "value": {
+        "raw": "0",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 8,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": null
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": null
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "X1",
+      "type": "crystal",
+      "value": {
+        "raw": "25MHz",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 8,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "clock_out",
+          "net_label": "PCICLKGEN_XI"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "3",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "4",
+          "name": null,
+          "role": "clock_in",
+          "net_label": "PCICLKGEN_XO"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "Y3",
+      "type": "crystal",
+      "value": {
+        "raw": "25MHz",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 8,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "clock_out",
+          "net_label": "PCICLKGEN_XI"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "3",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "4",
+          "name": null,
+          "role": "clock_in",
+          "net_label": "PCICLKGEN_XO"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C62",
+      "type": "capacitor",
+      "value": {
+        "raw": "1.8pF",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 8,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "PCICLKGEN_XI"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C98",
+      "type": "capacitor",
+      "value": {
+        "raw": "1.8pF",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 8,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "PCICLKGEN_XO"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C153",
+      "type": "capacitor",
+      "value": {
+        "raw": "10nF",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 8,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "PCIE2_CLK_P"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R198",
+      "type": "resistor",
+      "value": {
+        "raw": "49.9",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 8,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "PCIE2_CLK_P"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": null
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R199",
+      "type": "resistor",
+      "value": {
+        "raw": "49.9",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 8,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "PCIE2_CLK_N"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": null
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "J11",
+      "type": "connector",
+      "value": {
+        "raw": "48099-5701",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": "mPCIe mechanical key connector"
+      },
+      "page": 8,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": null
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "terminal",
+          "net_label": null
+        },
+        {
+          "number": "3",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "4",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "FB4",
+      "type": "ferrite",
+      "value": {
+        "raw": "100@100MHz 3A",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 8,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "+3V3"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "power_out",
+          "net_label": "PCIE1_PWR"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C58",
+      "type": "capacitor",
+      "value": {
+        "raw": "10nF",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 8,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "PCIE1_PWR"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C59",
+      "type": "capacitor",
+      "value": {
+        "raw": "0.1uF",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 8,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "PCIE1_PWR"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C60",
+      "type": "capacitor",
+      "value": {
+        "raw": "0.1uF",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 8,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "PCIE1_PWR"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C61",
+      "type": "capacitor",
+      "value": {
+        "raw": "0.1uF",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 8,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "PCIE1_PWR"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C124",
+      "type": "capacitor",
+      "value": {
+        "raw": "47uF",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 8,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "PCIE1_PWR"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C126",
+      "type": "capacitor",
+      "value": {
+        "raw": "47uF",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 8,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "PCIE1_PWR"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "J10",
+      "type": "connector",
+      "value": {
+        "raw": "1-2199230-6",
+        "primary": null,
+        "package": null,
+        "mpn": "1-2199230-6",
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": "M Key M.2 2280 formfactor"
+      },
+      "page": 8,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "power_in",
+          "net_label": "PCIE1_PWR"
+        },
+        {
+          "number": "3",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "4",
+          "name": null,
+          "role": "power_in",
+          "net_label": "PCIE1_PWR"
+        },
+        {
+          "number": "5",
+          "name": null,
+          "role": "signal_in",
+          "net_label": null
+        },
+        {
+          "number": "6",
+          "name": null,
+          "role": "signal_in",
+          "net_label": null
+        },
+        {
+          "number": "7",
+          "name": null,
+          "role": "signal_in",
+          "net_label": null
+        },
+        {
+          "number": "8",
+          "name": null,
+          "role": "signal_in",
+          "net_label": null
+        },
+        {
+          "number": "9",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "10",
+          "name": null,
+          "role": "signal_inout",
+          "net_label": "M2_SMB_CLK"
+        },
+        {
+          "number": "11",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "12",
+          "name": null,
+          "role": "signal_inout",
+          "net_label": "M2_SMB_DATA"
+        },
+        {
+          "number": "13",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "17",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "18",
+          "name": null,
+          "role": "power_in",
+          "net_label": "PCIE1_PWR"
+        },
+        {
+          "number": "19",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "20",
+          "name": null,
+          "role": "power_in",
+          "net_label": "PCIE1_PWR"
+        },
+        {
+          "number": "21",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "22",
+          "name": null,
+          "role": "signal_out",
+          "net_label": "LED_NVME"
+        },
+        {
+          "number": "23",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "29",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "31",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "32",
+          "name": null,
+          "role": "signal_out",
+          "net_label": "PCIE2_TX_P"
+        },
+        {
+          "number": "33",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "34",
+          "name": null,
+          "role": "signal_out",
+          "net_label": "PCIE2_TX_N"
+        },
+        {
+          "number": "35",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "36",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "PCIE2_RX_P"
+        },
+        {
+          "number": "37",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "38",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "PCIE2_RX_N"
+        },
+        {
+          "number": "39",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "40",
+          "name": null,
+          "role": "signal_out",
+          "net_label": "PCIE2_TXC_P"
+        },
+        {
+          "number": "41",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "42",
+          "name": null,
+          "role": "signal_out",
+          "net_label": "PCIE2_TXC_N"
+        },
+        {
+          "number": "43",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "44",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "PCIE2_CLK_P"
+        },
+        {
+          "number": "45",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "46",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "PCIE2_CLK_N"
+        },
+        {
+          "number": "47",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "49",
+          "name": null,
+          "role": "reset_in",
+          "net_label": "PCIE1_PWR"
+        },
+        {
+          "number": "50",
+          "name": null,
+          "role": "signal_in",
+          "net_label": null
+        },
+        {
+          "number": "51",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "52",
+          "name": null,
+          "role": "signal_in",
+          "net_label": null
+        },
+        {
+          "number": "53",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "55",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "57",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "67",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "69",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "71",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "73",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "75",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "S1",
+          "name": "SHIELD",
+          "role": "ground",
+          "net_label": "SHIELD"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "D23",
+      "type": "led",
+      "value": {
+        "raw": "LED_NVME",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 8,
+      "pins": [
+        {
+          "number": "A",
+          "name": null,
+          "role": "power_in",
+          "net_label": "LED_NVME"
+        },
+        {
+          "number": "K",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R110",
+      "type": "resistor",
+      "value": {
+        "raw": "1k",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 8,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "PCIE1_PWR"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": "LED_NVME"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R104",
+      "type": "resistor",
+      "value": {
+        "raw": "0",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 8,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": null
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": "PCIE2_TX_P"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R105",
+      "type": "resistor",
+      "value": {
+        "raw": "0",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 8,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": null
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": "PCIE2_TX_N"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R106",
+      "type": "resistor",
+      "value": {
+        "raw": "0",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 8,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": null
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": "PCIE2_TXC_P"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R107",
+      "type": "resistor",
+      "value": {
+        "raw": "0",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 8,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": null
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": "PCIE2_TXC_N"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R108",
+      "type": "resistor",
+      "value": {
+        "raw": "0",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 8,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": null
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": "PCIE2_RX_P"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R109",
+      "type": "resistor",
+      "value": {
+        "raw": "0",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 8,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": null
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": "PCIE2_RX_N"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "M1",
+      "type": "mounting",
+      "value": {
+        "raw": "1-2199230-5",
+        "primary": null,
+        "package": null,
+        "mpn": "1-2199230-5",
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": "M Key 42H M.2 2280 formfactor"
+      },
+      "page": 8,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "X2",
+      "type": "other",
+      "value": {
+        "raw": "PWR_FLAG",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 8,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "PWR_FLAG"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    }
+  ],
+  "nets": [
+    {
+      "local_id": "net_3v3",
+      "label": "+3V3",
+      "is_power": true,
+      "is_global": true,
+      "connects": [
+        "U20.1",
+        "C155.1",
+        "FB3.1",
+        "FB4.1"
+      ],
+      "page": 8
+    },
+    {
+      "local_id": "net_1v5",
+      "label": "+1V5",
+      "is_power": true,
+      "is_global": true,
+      "connects": [
+        "C119.1",
+        "C120.1",
+        "C123.1",
+        "U11.26"
+      ],
+      "page": 8
+    },
+    {
+      "local_id": "net_pcie1_pwr",
+      "label": "PCIE1_PWR",
+      "is_power": true,
+      "is_global": false,
+      "connects": [
+        "U20.2",
+        "FB3.2",
+        "FB4.2",
+        "C52.1",
+        "C53.1",
+        "C54.1",
+        "C55.1",
+        "C83.1",
+        "C58.1",
+        "C59.1",
+        "C60.1",
+        "C61.1",
+        "C124.1",
+        "C126.1",
+        "U11.52",
+        "U11.42",
+        "U11.39",
+        "U11.2",
+        "R67.1",
+        "R110.1",
+        "R160.1"
+      ],
+      "page": 8
+    },
+    {
+      "local_id": "net_pcie1_pwr_en",
+      "label": "PCIE1_PWR_EN",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U20.4"
+      ],
+      "page": 8
+    },
+    {
+      "local_id": "net_flg",
+      "label": "FLG",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U20.5"
+      ],
+      "page": 8
+    },
+    {
+      "local_id": "net_gnd",
+      "label": "GND",
+      "is_power": true,
+      "is_global": true,
+      "connects": [
+        "U20.3",
+        "C155.2",
+        "C52.2",
+        "C53.2",
+        "C54.2",
+        "C55.2",
+        "C83.2",
+        "C58.2",
+        "C59.2",
+        "C60.2",
+        "C61.2",
+        "C119.2",
+        "C120.2",
+        "C123.2",
+        "C124.2",
+        "C126.2",
+        "C152.2",
+        "C153.2",
+        "C62.2",
+        "C98.2",
+        "R36.2",
+        "U11.50",
+        "U11.48",
+        "U11.43",
+        "U11.41",
+        "U11.40",
+        "U11.37",
+        "U11.36",
+        "U11.35",
+        "U11.32",
+        "U11.29",
+        "U11.27",
+        "U11.24",
+        "U11.21",
+        "U11.18",
+        "U11.15",
+        "U11.9",
+        "U11.4",
+        "U11.3",
+        "U23.20",
+        "U23.15",
+        "J10.1",
+        "J10.3",
+        "J10.9",
+        "J10.11",
+        "J10.13",
+        "J10.17",
+        "J10.19",
+        "J10.21",
+        "J10.23",
+        "J10.29",
+        "J10.31",
+        "J10.33",
+        "J10.35",
+        "J10.37",
+        "J10.39",
+        "J10.41",
+        "J10.43",
+        "J10.45",
+        "J10.47",
+        "J10.51",
+        "J10.53",
+        "J10.55",
+        "J10.57",
+        "J10.67",
+        "J10.69",
+        "J10.71",
+        "J10.73",
+        "J10.75",
+        "J11.3",
+        "J11.4",
+        "D22.K",
+        "D23.K",
+        "X1.2",
+        "X1.3",
+        "Y3.2",
+        "Y3.3",
+        "M1.1",
+        "X2.2"
+      ],
+      "page": 8
+    },
+    {
+      "local_id": "net_pcie1_tx_p",
+      "label": "PCIE1_TX_P",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U11.33"
+      ],
+      "page": 8
+    },
+    {
+      "local_id": "net_pcie1_tx_n",
+      "label": "PCIE1_TX_N",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U11.31"
+      ],
+      "page": 8
+    },
+    {
+      "local_id": "net_pcie1_rx_p",
+      "label": "PCIE1_RX_P",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U11.25"
+      ],
+      "page": 8
+    },
+    {
+      "local_id": "net_pcie1_rx_n",
+      "label": "PCIE1_RX_N",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U11.23"
+      ],
+      "page": 8
+    },
+    {
+      "local_id": "net_pcie1_clk_p",
+      "label": "PCIE1_CLK_P",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U11.13",
+        "R123.1"
+      ],
+      "page": 8
+    },
+    {
+      "local_id": "net_pcie1_clk_n",
+      "label": "PCIE1_CLK_N",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U11.11",
+        "R148.1"
+      ],
+      "page": 8
+    },
+    {
+      "local_id": "net_pcie2_clk_p",
+      "label": "PCIE2_CLK_P",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U23.9",
+        "C153.1",
+        "R198.1",
+        "J10.44"
+      ],
+      "page": 8
+    },
+    {
+      "local_id": "net_pcie2_clk_n",
+      "label": "PCIE2_CLK_N",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U23.13",
+        "R199.1",
+        "J10.46"
+      ],
+      "page": 8
+    },
+    {
+      "local_id": "net_pcie2_tx_p",
+      "label": "PCIE2_TX_P",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "J10.32",
+        "R104.2"
+      ],
+      "page": 8
+    },
+    {
+      "local_id": "net_pcie2_tx_n",
+      "label": "PCIE2_TX_N",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "J10.34",
+        "R105.2"
+      ],
+      "page": 8
+    },
+    {
+      "local_id": "net_pcie2_txc_p",
+      "label": "PCIE2_TXC_P",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "J10.40",
+        "R106.2"
+      ],
+      "page": 8
+    },
+    {
+      "local_id": "net_pcie2_txc_n",
+      "label": "PCIE2_TXC_N",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "J10.42",
+        "R107.2"
+      ],
+      "page": 8
+    },
+    {
+      "local_id": "net_pcie2_rx_p",
+      "label": "PCIE2_RX_P",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "J10.36",
+        "R108.2"
+      ],
+      "page": 8
+    },
+    {
+      "local_id": "net_pcie2_rx_n",
+      "label": "PCIE2_RX_N",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "J10.38",
+        "R109.2"
+      ],
+      "page": 8
+    },
+    {
+      "local_id": "net_rclkc_p",
+      "label": "RCLKC_P",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "R123.2",
+        "U23.19"
+      ],
+      "page": 8
+    },
+    {
+      "local_id": "net_rclkc_n",
+      "label": "RCLKC_N",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "R148.2",
+        "U23.18"
+      ],
+      "page": 8
+    },
+    {
+      "local_id": "net_pciclkgen_xi",
+      "label": "PCICLKGEN_XI",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U23.5",
+        "X1.1",
+        "Y3.1",
+        "C62.1",
+        "R39.1"
+      ],
+      "page": 8
+    },
+    {
+      "local_id": "net_pciclkgen_xo",
+      "label": "PCICLKGEN_XO",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U23.6",
+        "X1.4",
+        "Y3.4",
+        "C98.1"
+      ],
+      "page": 8
+    },
+    {
+      "local_id": "net_iref",
+      "label": "IREF",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U23.10",
+        "R36.1"
+      ],
+      "page": 8
+    },
+    {
+      "local_id": "net_vddxd",
+      "label": "VDDXD",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U23.1",
+        "C152.1"
+      ],
+      "page": 8
+    },
+    {
+      "local_id": "net_vddoda",
+      "label": "VDDODA",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U23.14"
+      ],
+      "page": 8
+    },
+    {
+      "local_id": "net_gndoda",
+      "label": "GNDODA",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U23.15"
+      ],
+      "page": 8
+    },
+    {
+      "local_id": "net_gndxd",
+      "label": "GNDXD",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U23.20"
+      ],
+      "page": 8
+    },
+    {
+      "local_id": "net_led_wlan1",
+      "label": "LED_WLAN1",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "R67.2",
+        "D22.A",
+        "U11.46"
+      ],
+      "page": 8
+    },
+    {
+      "local_id": "net_led_nvme",
+      "label": "LED_NVME",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "R110.2",
+        "D23.A",
+        "J10.22"
+      ],
+      "page": 8
+    },
+    {
+      "local_id": "net_usb_d_plus",
+      "label": "USB_D",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U11.38"
+      ],
+      "page": 8
+    },
+    {
+      "local_id": "net_usb_d_minus",
+      "label": "USB_D-",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U11.34"
+      ],
+      "page": 8
+    },
+    {
+      "local_id": "net_smb_clk",
+      "label": "SMB_CLK",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U11.28"
+      ],
+      "page": 8
+    },
+    {
+      "local_id": "net_smb_data",
+      "label": "SMB_DATA",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U11.30"
+      ],
+      "page": 8
+    },
+    {
+      "local_id": "net_uim_vpp",
+      "label": "UIM_VPP",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U11.16"
+      ],
+      "page": 8
+    },
+    {
+      "local_id": "net_uim_reset",
+      "label": "UIM_RESET",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U11.14"
+      ],
+      "page": 8
+    },
+    {
+      "local_id": "net_uim_clk",
+      "label": "UIM_CLK",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U11.12"
+      ],
+      "page": 8
+    },
+    {
+      "local_id": "net_uim_data",
+      "label": "UIM_DATA",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U11.10"
+      ],
+      "page": 8
+    },
+    {
+      "local_id": "net_uim_pwr",
+      "label": "UIM_PWR",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U11.8"
+      ],
+      "page": 8
+    },
+    {
+      "local_id": "net_uim_c4",
+      "label": "UIM_C4",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U11.19"
+      ],
+      "page": 8
+    },
+    {
+      "local_id": "net_uim_c8",
+      "label": "UIM_C8",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U11.17"
+      ],
+      "page": 8
+    },
+    {
+      "local_id": "net_coex1",
+      "label": "COEX1",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U11.5"
+      ],
+      "page": 8
+    },
+    {
+      "local_id": "net_coex2",
+      "label": "COEX2",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U11.6"
+      ],
+      "page": 8
+    },
+    {
+      "local_id": "net_m2_smb_clk",
+      "label": "M2_SMB_CLK",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "J10.10"
+      ],
+      "page": 8
+    },
+    {
+      "local_id": "net_m2_smb_data",
+      "label": "M2_SMB_DATA",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "J10.12"
+      ],
+      "page": 8
+    },
+    {
+      "local_id": "net_shield",
+      "label": "SHIELD",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "J10.S1"
+      ],
+      "page": 8
+    },
+    {
+      "local_id": "net_pwr_flag",
+      "label": "PWR_FLAG",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "X2.1"
+      ],
+      "page": 8
+    },
+    {
+      "local_id": "net_clka_p",
+      "label": "CLKA_P",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U23.19",
+        "R37.2"
+      ],
+      "page": 8
+    },
+    {
+      "local_id": "net_clka_n",
+      "label": "CLKA_N",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U23.18",
+        "R38.2"
+      ],
+      "page": 8
+    }
+  ],
+  "cross_page_refs": [
+    {
+      "label": "PCIE1_PWR_EN",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "power enable from IMX page",
+      "page": 8
+    },
+    {
+      "label": "+3V3",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "global +3V3 rail",
+      "page": 8
+    },
+    {
+      "label": "+1V5",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "global +1.5V rail",
+      "page": 8
+    },
+    {
+      "label": "PCIE1_TX_P",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "to SoM/IMX PCIe",
+      "page": 8
+    },
+    {
+      "label": "PCIE1_TX_N",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "to SoM/IMX PCIe",
+      "page": 8
+    },
+    {
+      "label": "PCIE1_RX_P",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "from SoM/IMX PCIe",
+      "page": 8
+    },
+    {
+      "label": "PCIE1_RX_N",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "from SoM/IMX PCIe",
+      "page": 8
+    },
+    {
+      "label": "RCLKA_P",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "refclk from SoM",
+      "page": 8
+    },
+    {
+      "label": "RCLKA_N",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "refclk from SoM",
+      "page": 8
+    },
+    {
+      "label": "PCIE2_TX_N",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "to SoM/IMX PCIe2",
+      "page": 8
+    },
+    {
+      "label": "PCIE2_TX_P",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "to SoM/IMX PCIe2",
+      "page": 8
+    },
+    {
+      "label": "PCIE2_TXC_N",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "to SoM/IMX PCIe2",
+      "page": 8
+    },
+    {
+      "label": "PCIE2_TXC_P",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "to SoM/IMX PCIe2",
+      "page": 8
+    },
+    {
+      "label": "PCIE2_RX_P",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "from SoM/IMX PCIe2",
+      "page": 8
+    },
+    {
+      "label": "PCIE2_RX_N",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "from SoM/IMX PCIe2",
+      "page": 8
+    },
+    {
+      "label": "PCIE2_RESETn",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "to M.2 J10",
+      "page": 8
+    },
+    {
+      "label": "PCIE1_RESETn",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "to mPCIe J11",
+      "page": 8
+    },
+    {
+      "label": "SMB_CLK",
+      "direction": "bidir",
+      "at_pin": null,
+      "target_hint": "system SMBus",
+      "page": 8
+    },
+    {
+      "label": "SMB_DATA",
+      "direction": "bidir",
+      "at_pin": null,
+      "target_hint": "system SMBus",
+      "page": 8
+    },
+    {
+      "label": "M2_SMB_CLK",
+      "direction": "bidir",
+      "at_pin": null,
+      "target_hint": "M.2 SMBus",
+      "page": 8
+    },
+    {
+      "label": "M2_SMB_DATA",
+      "direction": "bidir",
+      "at_pin": null,
+      "target_hint": "M.2 SMBus",
+      "page": 8
+    },
+    {
+      "label": "UIM_C4",
+      "direction": "bidir",
+      "at_pin": null,
+      "target_hint": null,
+      "page": 8
+    },
+    {
+      "label": "UIM_C8",
+      "direction": "bidir",
+      "at_pin": null,
+      "target_hint": null,
+      "page": 8
+    },
+    {
+      "label": "UIM_CLK",
+      "direction": "bidir",
+      "at_pin": null,
+      "target_hint": null,
+      "page": 8
+    },
+    {
+      "label": "UIM_DATA",
+      "direction": "bidir",
+      "at_pin": null,
+      "target_hint": null,
+      "page": 8
+    },
+    {
+      "label": "UIM_PWR",
+      "direction": "bidir",
+      "at_pin": null,
+      "target_hint": null,
+      "page": 8
+    },
+    {
+      "label": "UIM_RESET",
+      "direction": "bidir",
+      "at_pin": null,
+      "target_hint": null,
+      "page": 8
+    },
+    {
+      "label": "UIM_VPP",
+      "direction": "bidir",
+      "at_pin": null,
+      "target_hint": null,
+      "page": 8
+    },
+    {
+      "label": "COEX1",
+      "direction": "bidir",
+      "at_pin": null,
+      "target_hint": null,
+      "page": 8
+    },
+    {
+      "label": "COEX2",
+      "direction": "bidir",
+      "at_pin": null,
+      "target_hint": null,
+      "page": 8
+    },
+    {
+      "label": "USB_D",
+      "direction": "bidir",
+      "at_pin": null,
+      "target_hint": null,
+      "page": 8
+    },
+    {
+      "label": "USB_D-",
+      "direction": "bidir",
+      "at_pin": null,
+      "target_hint": null,
+      "page": 8
+    }
+  ],
+  "typed_edges": [
+    {
+      "src": "U20",
+      "dst": "PCIE1_PWR",
+      "kind": "powers",
+      "page": 8
+    },
+    {
+      "src": "+3V3",
+      "dst": "U20",
+      "kind": "powered_by",
+      "page": 8
+    },
+    {
+      "src": "PCIE1_PWR_EN",
+      "dst": "U20",
+      "kind": "enables",
+      "page": 8
+    },
+    {
+      "src": "FB3",
+      "dst": "PCIE1_PWR",
+      "kind": "filters",
+      "page": 8
+    },
+    {
+      "src": "FB4",
+      "dst": "PCIE1_PWR",
+      "kind": "filters",
+      "page": 8
+    },
+    {
+      "src": "C52",
+      "dst": "PCIE1_PWR",
+      "kind": "decouples",
+      "page": 8
+    },
+    {
+      "src": "C53",
+      "dst": "PCIE1_PWR",
+      "kind": "decouples",
+      "page": 8
+    },
+    {
+      "src": "C54",
+      "dst": "PCIE1_PWR",
+      "kind": "decouples",
+      "page": 8
+    },
+    {
+      "src": "C55",
+      "dst": "PCIE1_PWR",
+      "kind": "decouples",
+      "page": 8
+    },
+    {
+      "src": "C83",
+      "dst": "PCIE1_PWR",
+      "kind": "decouples",
+      "page": 8
+    },
+    {
+      "src": "C58",
+      "dst": "PCIE1_PWR",
+      "kind": "decouples",
+      "page": 8
+    },
+    {
+      "src": "C59",
+      "dst": "PCIE1_PWR",
+      "kind": "decouples",
+      "page": 8
+    },
+    {
+      "src": "C60",
+      "dst": "PCIE1_PWR",
+      "kind": "decouples",
+      "page": 8
+    },
+    {
+      "src": "C61",
+      "dst": "PCIE1_PWR",
+      "kind": "decouples",
+      "page": 8
+    },
+    {
+      "src": "C124",
+      "dst": "PCIE1_PWR",
+      "kind": "decouples",
+      "page": 8
+    },
+    {
+      "src": "C126",
+      "dst": "PCIE1_PWR",
+      "kind": "decouples",
+      "page": 8
+    },
+    {
+      "src": "C119",
+      "dst": "+1V5",
+      "kind": "decouples",
+      "page": 8
+    },
+    {
+      "src": "C120",
+      "dst": "+1V5",
+      "kind": "decouples",
+      "page": 8
+    },
+    {
+      "src": "C123",
+      "dst": "+1V5",
+      "kind": "decouples",
+      "page": 8
+    },
+    {
+      "src": "C152",
+      "dst": "VDDXD",
+      "kind": "decouples",
+      "page": 8
+    },
+    {
+      "src": "C153",
+      "dst": "PCIE2_CLK_P",
+      "kind": "decouples",
+      "page": 8
+    },
+    {
+      "src": "U23",
+      "dst": "PCIE2_CLK_P",
+      "kind": "produces_signal",
+      "page": 8
+    },
+    {
+      "src": "U23",
+      "dst": "PCIE2_CLK_N",
+      "kind": "produces_signal",
+      "page": 8
+    },
+    {
+      "src": "U23",
+      "dst": "RCLKC_P",
+      "kind": "produces_signal",
+      "page": 8
+    },
+    {
+      "src": "U23",
+      "dst": "RCLKC_N",
+      "kind": "produces_signal",
+      "page": 8
+    },
+    {
+      "src": "R123",
+      "dst": "PCIE1_CLK_P",
+      "kind": "filters",
+      "page": 8
+    },
+    {
+      "src": "R148",
+      "dst": "PCIE1_CLK_N",
+      "kind": "filters",
+      "page": 8
+    },
+    {
+      "src": "R36",
+      "dst": "U23",
+      "kind": "depends_on",
+      "page": 8
+    },
+    {
+      "src": "Y3",
+      "dst": "U23",
+      "kind": "clocks",
+      "page": 8
+    },
+    {
+      "src": "R67",
+      "dst": "D22",
+      "kind": "powers",
+      "page": 8
+    },
+    {
+      "src": "R110",
+      "dst": "D23",
+      "kind": "powers",
+      "page": 8
+    },
+    {
+      "src": "PCIE1_PWR",
+      "dst": "J10",
+      "kind": "powers",
+      "page": 8
+    },
+    {
+      "src": "U11",
+      "dst": "PCIE1_TX_P",
+      "kind": "produces_signal",
+      "page": 8
+    },
+    {
+      "src": "U11",
+      "dst": "PCIE1_TX_N",
+      "kind": "produces_signal",
+      "page": 8
+    },
+    {
+      "src": "U11",
+      "dst": "PCIE1_RX_P",
+      "kind": "consumes_signal",
+      "page": 8
+    },
+    {
+      "src": "U11",
+      "dst": "PCIE1_RX_N",
+      "kind": "consumes_signal",
+      "page": 8
+    }
+  ],
+  "designer_notes": [
+    {
+      "text": "WiFi Kili Switch",
+      "page": 8,
+      "attached_to_refdes": "U20",
+      "attached_to_net": null
+    },
+    {
+      "text": "mPCIe",
+      "page": 8,
+      "attached_to_refdes": "U11",
+      "attached_to_net": null
+    },
+    {
+      "text": "Controlled by PCIE1_PWR",
+      "page": 8,
+      "attached_to_refdes": null,
+      "attached_to_net": "PCIE1_PWR"
+    },
+    {
+      "text": "TX caps are on the SoM",
+      "page": 8,
+      "attached_to_refdes": "U11",
+      "attached_to_net": null
+    },
+    {
+      "text": "TX caps are on the SoM",
+      "page": 8,
+      "attached_to_refdes": "J10",
+      "attached_to_net": null
+    },
+    {
+      "text": "Refclk Generator",
+      "page": 8,
+      "attached_to_refdes": "U23",
+      "attached_to_net": null
+    },
+    {
+      "text": "1-2199230-5\nM Key 42H M.2\n2280 formfactor",
+      "page": 8,
+      "attached_to_refdes": "M1",
+      "attached_to_net": null
+    },
+    {
+      "text": "1-2199230-6",
+      "page": 8,
+      "attached_to_refdes": "J10",
+      "attached_to_net": null
+    },
+    {
+      "text": "Thanks to Austin @ ZII for lane wrangling info!",
+      "page": 8,
+      "attached_to_refdes": "J10",
+      "attached_to_net": null
+    },
+    {
+      "text": "M.2 footprint by takigama https://github.com/takigama/KiCADComponents",
+      "page": 8,
+      "attached_to_refdes": null,
+      "attached_to_net": null
+    },
+    {
+      "text": "License: CERN-OHL-S 2.0\nEngineer: Lukas F. Hartmann\nhttps://mntre.com\nMNT Research GmbH\nSheet: /Reform 2 PCIe/\nFile: reform2-pcie.kicad_sch",
+      "page": 8,
+      "attached_to_refdes": null,
+      "attached_to_net": null
+    },
+    {
+      "text": "Title: MNT Reform 2 PCIe\nSize: A4\nDate: 2023-02-13\nKiCad E.D.A. kicad 7.0.6+dfsg-1\nRev: 2.5D-2\nId: 8/12",
+      "page": 8,
+      "attached_to_refdes": null,
+      "attached_to_net": null
+    }
+  ],
+  "ambiguities": [
+    {
+      "description": "R103/R107 exact net connections on the PCIE1 TX/RX series resistors (some zero-ohm resistors) are partially obscured by dense routing; some connections inferred from context.",
+      "page": 8,
+      "related_refdes": [
+        "R103",
+        "R104",
+        "R105",
+        "R106",
+        "R107",
+        "R108",
+        "R109"
+      ],
+      "related_nets": [
+        "PCIE2_TX_P",
+        "PCIE2_TX_N",
+        "PCIE2_TXC_P",
+        "PCIE2_TXC_N",
+        "PCIE2_RX_P",
+        "PCIE2_RX_N"
+      ]
+    },
+    {
+      "description": "R160 (100k) on PCIE1_RESETn net - exact pin connections partially unclear from image; associated with PERST# signal.",
+      "page": 8,
+      "related_refdes": [
+        "R160"
+      ],
+      "related_nets": [
+        "PCIE1_PWR"
+      ]
+    },
+    {
+      "description": "Y3 crystal label - the refdes shown may be X1 or Y3 (25MHz crystal near U23); both X1 and Y3 appear in the refdes set but the image shows one crystal at this location.",
+      "page": 8,
+      "related_refdes": [
+        "X1",
+        "Y3"
+      ],
+      "related_nets": [
+        "PCICLKGEN_XI",
+        "PCICLKGEN_XO"
+      ]
+    },
+    {
+      "description": "Several J10 M.2 connector pins in the 60-75 range have net labels that are partially illegible or show as GND stub symbols - exact net assignments for pins 68, 70, 72, 74 uncertain.",
+      "page": 8,
+      "related_refdes": [
+        "J10"
+      ],
+      "related_nets": [
+        "GND"
+      ]
+    },
+    {
+      "description": "R37, R38 zero-ohm resistors on CLKA_P/CLKA_N lines - source side net labels unclear, may be from SoM or left unconnected.",
+      "page": 8,
+      "related_refdes": [
+        "R37",
+        "R38"
+      ],
+      "related_nets": [
+        "CLKA_P",
+        "CLKA_N",
+        "RCLKC_P",
+        "RCLKC_N"
+      ]
+    },
+    {
+      "description": "Several M.2 J10 connector pins labeled with PERn/PERp/PETn/PETp signals (high-speed pairs) have resistors R104-R109 in series but exact pin number assignments on J10 side are partially obscured.",
+      "page": 8,
+      "related_refdes": [
+        "J10",
+        "R104",
+        "R105",
+        "R106",
+        "R107",
+        "R108",
+        "R109"
+      ],
+      "related_nets": []
+    }
+  ]
+}

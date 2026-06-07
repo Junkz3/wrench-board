@@ -1,0 +1,33 @@
+{
+  "page_title": "Wrench Board — Intro",
+  "mascot": {
+    "aria": "Wrench Board mascot"
+  },
+  "sidebar": {
+    "aria": "Recent repairs",
+    "title": "Recent",
+    "item1_symptom": "won't turn on",
+    "item1_meta": "2 h ago",
+    "item2_symptom": "no boot, black screen",
+    "item2_meta": "yesterday",
+    "item3_symptom": "black screen on startup",
+    "item3_meta": "3 d ago"
+  },
+  "hero": {
+    "mark": "Wrench Board",
+    "title": "Your hardware repair assistant.",
+    "sub": "Give me your device and the symptom — I build the knowledge and open the diagnostic."
+  },
+  "form": {
+    "device_placeholder": "Device (e.g. MNT Reform motherboard, iPhone 11, Framework 13)",
+    "device_aria": "Which device",
+    "symptom_placeholder": "Symptom (e.g. won't turn on, no charge, black screen)",
+    "symptom_aria": "What is the symptom",
+    "submit": "Start diagnostic"
+  },
+  "chips": {
+    "chip1": "MNT Reform — no boot",
+    "chip2": "iPhone 11 — no charge",
+    "chip3": "Framework — black screen"
+  }
+}

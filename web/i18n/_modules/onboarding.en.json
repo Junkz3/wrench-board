@@ -1,0 +1,179 @@
+{
+  "skip": "Skip",
+  "next": "Next",
+  "back": "Back",
+  "done": "Let's go",
+  "welcome": {
+    "kicker": "First time here",
+    "title": "Welcome to Wrench Board.",
+    "body": "I'm your bench assistant. Tell me a device and a symptom, and I'll build the knowledge sheet, then walk the diagnostic with you: board view, schematic, causal reasoning, the lot.",
+    "cta": "Show me around",
+    "skip": "Skip, I'll explore on my own"
+  },
+  "profile": {
+    "bubble": "First, let's set you up. A couple of quick steps so I can match my help to you and your bench.",
+    "panel_title": "Your technician profile",
+    "field_name": "Name",
+    "name_placeholder": "How should I call you?",
+    "field_avatar": "Avatar",
+    "avatar_placeholder": "2 letters or an emoji",
+    "field_level": "Experience level",
+    "level_auto": "Let me infer it",
+    "level_beginner": "Beginner",
+    "level_intermediate": "Intermediate",
+    "level_confirmed": "Confirmed",
+    "level_expert": "Expert",
+    "field_specialties": "Specialties",
+    "specialties_placeholder": "apple, consoles, laptops",
+    "field_tools": "Bench tools",
+    "tool_soldering_iron": "Soldering iron",
+    "tool_hot_air": "Hot air",
+    "tool_bga_rework": "BGA rework",
+    "tool_preheater": "Preheater",
+    "tool_microscope": "Microscope",
+    "tool_thermal_camera": "Thermal camera",
+    "tool_uv_lamp": "UV lamp",
+    "tool_multimeter": "Multimeter",
+    "tool_oscilloscope": "Oscilloscope",
+    "tool_bench_psu": "Bench PSU",
+    "tool_reballing_kit": "Reballing kit",
+    "tool_stencil_printer": "Stencil printer",
+    "save": "Save & continue",
+    "skip_step": "Skip for now",
+    "save_failed": "Could not save your profile: {error}"
+  },
+  "wizard": {
+    "config_title": "Setup",
+    "step_identity": "About you",
+    "step_workshop": "Your workshop",
+    "step_posture": "How I should help",
+    "identity_intro": "So I can match my tone to your level.",
+    "workshop_intro": "Tick what you have. I'll only suggest moves your bench can do.",
+    "posture_intro": "Set how much I explain. You can change this anytime.",
+    "progress": "Step {n} of {total}"
+  },
+  "level": {
+    "desc_auto": "I'll infer your level from the skills you log over time."
+  },
+  "workshop": {
+    "group_soldering": "Soldering",
+    "group_rework": "Rework",
+    "group_inspection": "Inspection",
+    "group_measurement": "Measurement",
+    "group_power": "Power",
+    "group_supplies": "Supplies",
+    "group_custom": "My other tools",
+    "custom_placeholder": "e.g. glue gun, stereo microscope…",
+    "custom_add": "Add",
+    "custom_remove": "Remove this tool"
+  },
+  "posture": {
+    "verbosity_label": "Explanation depth",
+    "mode_auto": "Auto",
+    "mode_concise": "Concise",
+    "mode_normal": "Normal",
+    "mode_teaching": "Teaching",
+    "desc_auto": "I adapt the depth to your level.",
+    "desc_concise": "Short answers, just the next move.",
+    "desc_normal": "Balanced reasoning and steps.",
+    "desc_teaching": "I explain the why behind every step, like a mentor."
+  },
+  "concept": {
+    "bubble": "Here's the idea: each repair is a persistent session, like a ticket you can leave and come back to. When you name a device, I research it, build its knowledge sheet, then open the diagnostic right here."
+  },
+  "example": {
+    "bubble": "Want to see it on a real board first? I've got a full example on hand — the MNT Reform motherboard. Let me give you a quick tour, then you'll run your own.",
+    "cta": "Show me the example"
+  },
+  "firstdiag": {
+    "bubble_device": "Let's try one. Drop a device here. A model name is enough, I'll find the rest.",
+    "bubble_symptom": "Now the symptom: what's the board doing wrong?",
+    "bubble_launch": "That's all I need. Hit start and watch me learn the device, phase by phase. Or tap a suggestion below."
+  },
+  "finish": {
+    "bubble": "You're set. I'll be right here whenever you open a repair. Good luck on the bench."
+  },
+  "menu": {
+    "open_aria": "Open profile settings",
+    "incomplete": "Set up your profile",
+    "view_profile": "View profile",
+    "level_label": "Level",
+    "language": "Language",
+    "lang_en": "English",
+    "lang_fr": "Français"
+  },
+  "modal": {
+    "title": "Your profile",
+    "subtitle": "Tune how I work with you.",
+    "section_identity": "Identity",
+    "section_workshop": "Workshop",
+    "section_posture": "Agent posture",
+    "full_profile": "Open full profile (progress & skills)",
+    "save": "Save",
+    "cancel": "Cancel"
+  },
+  "infohint": "What's this?",
+  "info": {
+    "cta": "Got it",
+    "knowledge": {
+      "title": "Add knowledge",
+      "intro": "Feed the device its own sources so the agent can reason about the real board, not just generic knowledge.",
+      "p1": "Schematic PDF: parsed page by page into an electrical graph. Unlocks the simulator, mb_hypothesize and rail-level causal reasoning.",
+      "p2": "Boardview (.brd / .kicad_pcb / .fz): unlocks pad-level highlighting, net tracing and component focus on the 3D board.",
+      "p3": "Without them the agent still helps, but it can't reason about this board's causality. Add what you have, even just one."
+    },
+    "stock": {
+      "title": "Donor stock",
+      "intro": "Search replacement parts across your donor boards instead of ordering, with the agent picking only safe equivalents.",
+      "p1": "Works on devices with an analyzed pack (an electrical graph): parts are typed, valued and safety-classified into a searchable index.",
+      "p2": "Mark dead boards as donors. Their parts become searchable; consuming a part logs it so your inventory stays accurate.",
+      "p3": "Potential gain: reuse a part you already own in seconds, find equivalents you didn't think of, cut order delays.",
+      "p4": "With the agent: once a root cause needs a replacement, it calls stock_search under a hard safety filter (refuses tuned / feedback / RF / SMPS / IC roles) and proposes donor matches."
+    },
+    "repair": {
+      "title": "How a repair works",
+      "intro": "A repair is a persistent session: I learn your device, then walk the diagnostic with you.",
+      "p1": "Knowledge sheet: when you name a device I research it and build its electrical knowledge base — that's the timeline you saw on launch.",
+      "p2": "Views: the rail on the left switches between the diagnostic dashboard, the PCB boardview, the schematic and the knowledge graph.",
+      "p3": "Capabilities grow with data: load a schematic or boardview and I unlock the simulator, hypotheses and pad-level reasoning.",
+      "p4": "Diagnose by talking: describe the symptom and your measurements in the chat — I propose protocols, suspects and the next step, logging findings as we go."
+    }
+  },
+  "tour": {
+    "knowledge": "See this? Add a schematic or board file here to unlock the simulator and pad-level reasoning. Tap the ? anytime.",
+    "stock": "And up here: your donor stock. Reuse parts from dead boards instead of ordering. Tap the ? to see how."
+  },
+  "coach": {
+    "skip": "Skip the tour",
+    "done": "Got it",
+    "demo_done": "Got it, my turn",
+    "session": "You're in a repair now — a session that sticks around; leave it and come back anytime. I've just analyzed this device: schematic, components, power rails, all in memory.",
+    "cap": "Here's what I can do on this board right now. The more you give me — a schematic, a boardview — the higher the score climbs and the more tools unlock.",
+    "cards": "The device data I've gathered. You can add to it — a schematic or a boardview — to go deeper.",
+    "pcb": "PCB view: your actual board. Highlight a part and I isolate its pads, its net and what sits around it.",
+    "demo_pcb": "PCB view — the real MNT Reform. I've lit up U14, the regulator that puts out the standby 3V3 rail: typically the first part you probe when a board won't power on.",
+    "schematic": "Schematic view: the navigable electrical schematic — the base for the simulator and fault hypotheses.",
+    "demo_schematic": "Schematic view: I click the LPC_VCC rail (the standby supply) — the schematic isolates the rail and its whole cascade. That's how I trace a fault back to its cause.",
+    "graph": "Memory view: the whole board as a graph — components, links and the rules I've inferred.",
+    "demo_graph": "Memory view: everything I know about this board, as a graph. I click a node — the right-hand panel unfolds the detail: what it is, the confidence, and how it links to the rest.",
+    "demo_graph_raw": "And the Raw tab: the same memory as text — rules, facts, observations. That's my raw material: this is what I reason over to diagnose.",
+    "chat": "To diagnose, just talk to me: describe the symptom and your measurements, and I'll guide you step by step.",
+    "demo_chat": "The heart of it: you describe your fault, the agent diagnoses. Watch a real case — step by step.",
+    "demo_play": "Watch the agent work",
+    "demo_q1": "Walk me through this board's power-up sequence: which rails come up, in what order. Show it on the board.",
+    "demo_c1_explore": "You ask your question. The agent reads what it already knows about this board — schematic, components, power rails.",
+    "demo_c1_board": "It draws the sequence right on the board: the power cascade, from the input connector all the way to the CPU module, with arrows and labels.",
+    "demo_c1_done": "And it explains it phase by phase — which regulator wakes which rail, in what order. That's what knowing a board looks like.",
+    "demo_switch": "Now watch: I open the conversation switcher and create a new one. The previous thread is set aside and the board clears — but the agent keeps this device in memory.",
+    "demo_conv1_title": "MNT Reform — power-up sequence",
+    "demo_new_conv_title": "New conversation",
+    "demo_q2": "The board is dead — no rail, no LED. Diagnose it and give me a measurement protocol.",
+    "demo_c2_diag": "New conversation, new fault: \"dead board\". The agent explores the memory, validates the components, and lays out its reasoning: the input chain J1 → F1 → VIN → U14.",
+    "demo_c2_protocol": "It draws the chain on the board and proposes a 6-step measurement protocol — safety first: we start cold, nothing plugged in.",
+    "demo_c2_cold": "Cold and risk-free: fuse F1 is good, and there's no short on VIN. Two leads ruled out.",
+    "demo_c2_power": "Now powered: the 24 V from the adapter does reach the board.",
+    "demo_c2_u14": "VIN is healthy all the way to the system bus → the agent pivots its suspect to U14, the 3.3 V standby regulator, and shows you where to probe.",
+    "demo_c2_verdict": "The twist: U14 does output 3.3 V. Every supply rail is healthy! It's not a dead board — it's a sequencing issue. Measure, then revise the hypothesis: that's a good diagnostic.",
+    "demo_after": "That's a full diagnostic — reasoning, board annotations, a measurement protocol, a verdict. Your turn: describe your fault and I'll do the same on your board."
+  }
+}

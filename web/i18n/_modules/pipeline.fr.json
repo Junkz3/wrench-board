@@ -1,0 +1,60 @@
+{
+  "drawer": {
+    "header_label": "Construction de la mémoire",
+    "device_placeholder": "—",
+    "close_aria": "Fermer le panneau de progression"
+  },
+  "phase": {
+    "scout": {
+      "label": "Scout",
+      "sub": "Recherche web"
+    },
+    "registry": {
+      "label": "Registry",
+      "sub": "Vocabulaire canonique"
+    },
+    "writers": {
+      "label": "Writers",
+      "sub": "Graphe · Règles · Dictionnaire"
+    },
+    "audit": {
+      "label": "Auditor",
+      "sub": "QA & cohérence"
+    },
+    "schematic_ingest": {
+      "label": "Schéma ingéré",
+      "sub": "Vision page par page"
+    },
+    "device_kind": {
+      "label": "Type de carte",
+      "sub": "Classification du graphe"
+    }
+  },
+  "step": {
+    "time_placeholder": "—",
+    "in_progress": "en cours…",
+    "failed": "échec"
+  },
+  "status": {
+    "waiting": "En attente des premiers événements…",
+    "connecting": "Connexion au pipeline…",
+    "started": "Pipeline démarré…",
+    "phase_running": "Phase en cours · <b>{phase}</b>",
+    "ready": "Mémoire prête · audit <b>{status}</b> · cohérence <b>{score}</b>",
+    "failed": "Pipeline en échec · <b>{status}</b>",
+    "lost_connection": "Connexion perdue au flux de progression.",
+    "closed_early": "Connexion fermée avant la fin du pipeline."
+  },
+  "cta": {
+    "view_memory_bank": "Voir la Memory Bank",
+    "close": "Fermer"
+  },
+  "kind": {
+    "declared": "Déclaré",
+    "detected": "Détecté",
+    "recommended": "recommandé",
+    "confirm": "Confirmer et reprendre",
+    "confirmed": "confirmé",
+    "undeclared": "non déclaré"
+  }
+}

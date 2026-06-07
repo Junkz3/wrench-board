@@ -1,0 +1,1382 @@
+{
+  "schema_version": "1.0",
+  "page": 6,
+  "sheet_name": "Reform 2 USB Power Size",
+  "sheet_path": "/Reform 2 USB/Reform 2 USB Power/",
+  "page_kind": "schematic",
+  "orientation": "landscape",
+  "confidence": 0.87,
+  "nodes": [
+    {
+      "refdes": "U27",
+      "type": "ic",
+      "value": {
+        "raw": "AP22815",
+        "primary": "AP22815",
+        "package": null,
+        "mpn": "AP22815",
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": "3V3 Aux Power Switch"
+      },
+      "page": 6,
+      "pins": [
+        {
+          "number": "5",
+          "name": "IN",
+          "role": "power_in",
+          "net_label": "+3V3"
+        },
+        {
+          "number": "1",
+          "name": "OUT",
+          "role": "power_out",
+          "net_label": "3V3_PWR_AUX"
+        },
+        {
+          "number": "3",
+          "name": "FLG",
+          "role": "signal_out",
+          "net_label": null
+        },
+        {
+          "number": "4",
+          "name": "EN",
+          "role": "enable_in",
+          "net_label": "AUX_PWR_EN"
+        },
+        {
+          "number": "2",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "U24",
+      "type": "ic",
+      "value": {
+        "raw": "AP22815",
+        "primary": "AP22815",
+        "package": null,
+        "mpn": "AP22815",
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": "USB Power Switch"
+      },
+      "page": 6,
+      "pins": [
+        {
+          "number": "5",
+          "name": "IN",
+          "role": "power_in",
+          "net_label": "+5V"
+        },
+        {
+          "number": "1",
+          "name": "OUT",
+          "role": "power_out",
+          "net_label": null
+        },
+        {
+          "number": "3",
+          "name": "FLG",
+          "role": "signal_out",
+          "net_label": null
+        },
+        {
+          "number": "4",
+          "name": "EN",
+          "role": "enable_in",
+          "net_label": "USB_PWR_EN"
+        },
+        {
+          "number": "2",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C167",
+      "type": "capacitor",
+      "value": {
+        "raw": "10uF",
+        "primary": "10uF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 6,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "+3V3"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C164",
+      "type": "capacitor",
+      "value": {
+        "raw": "10uF",
+        "primary": "10uF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 6,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "+5V"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "F3",
+      "type": "fuse",
+      "value": {
+        "raw": "0157004.DR",
+        "primary": "0157004.DR",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 6,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": null
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "terminal",
+          "net_label": "USB_PWR"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "FB1",
+      "type": "ferrite",
+      "value": {
+        "raw": "2R",
+        "primary": "2R",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": "220@100MHz 1.4A"
+      },
+      "page": 6,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "3V3_PWR_AUX"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "power_out",
+          "net_label": "USBH_3V3"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "FB2",
+      "type": "ferrite",
+      "value": {
+        "raw": "38R",
+        "primary": "38R",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": "220@100MHz 1.4A"
+      },
+      "page": 6,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "+1V2"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "power_out",
+          "net_label": "USBH_1V1"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C14",
+      "type": "capacitor",
+      "value": {
+        "raw": "0.1uF",
+        "primary": "0.1uF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 6,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "USBH_3V3"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C20",
+      "type": "capacitor",
+      "value": {
+        "raw": "0.1uF",
+        "primary": "0.1uF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 6,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "USBH_3V3"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C43",
+      "type": "capacitor",
+      "value": {
+        "raw": "0.1uF",
+        "primary": "0.1uF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 6,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "USBH_3V3"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C73",
+      "type": "capacitor",
+      "value": {
+        "raw": "1uF",
+        "primary": "1uF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 6,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "USBH_3V3"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C86",
+      "type": "capacitor",
+      "value": {
+        "raw": "1uF",
+        "primary": "1uF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 6,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "USBH_3V3"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C88",
+      "type": "capacitor",
+      "value": {
+        "raw": "1uF",
+        "primary": "1uF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 6,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "USBH_3V3"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C9",
+      "type": "capacitor",
+      "value": {
+        "raw": "0.1uF",
+        "primary": "0.1uF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 6,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "USBH_1V1"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C11",
+      "type": "capacitor",
+      "value": {
+        "raw": "0.1uF",
+        "primary": "0.1uF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 6,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "USBH_1V1"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C12",
+      "type": "capacitor",
+      "value": {
+        "raw": "0.1uF",
+        "primary": "0.1uF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 6,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "USBH_1V1"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C13",
+      "type": "capacitor",
+      "value": {
+        "raw": "0.1uF",
+        "primary": "0.1uF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 6,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "USBH_1V1"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C15",
+      "type": "capacitor",
+      "value": {
+        "raw": "0.1uF",
+        "primary": "0.1uF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 6,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "USBH_1V1"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C21",
+      "type": "capacitor",
+      "value": {
+        "raw": "0.1uF",
+        "primary": "0.1uF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 6,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "USBH_1V1"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C66",
+      "type": "capacitor",
+      "value": {
+        "raw": "0.1uF",
+        "primary": "0.1uF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 6,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "USBH_1V1"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C80",
+      "type": "capacitor",
+      "value": {
+        "raw": "0.1uF",
+        "primary": "0.1uF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 6,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "USBH_1V1"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C87",
+      "type": "capacitor",
+      "value": {
+        "raw": "0.1uF",
+        "primary": "0.1uF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 6,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "USBH_1V1"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C89",
+      "type": "capacitor",
+      "value": {
+        "raw": "0.1uF",
+        "primary": "0.1uF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 6,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "USBH_1V1"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C90",
+      "type": "capacitor",
+      "value": {
+        "raw": "10uF",
+        "primary": "10uF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 6,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "USBH_1V1"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C91",
+      "type": "capacitor",
+      "value": {
+        "raw": "10uF",
+        "primary": "10uF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 6,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "USBH_1V1"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    }
+  ],
+  "nets": [
+    {
+      "local_id": "net_3v3_in",
+      "label": "+3V3",
+      "is_power": true,
+      "is_global": true,
+      "connects": [
+        "U27.5",
+        "C167.1"
+      ],
+      "page": 6
+    },
+    {
+      "local_id": "net_5v_in",
+      "label": "+5V",
+      "is_power": true,
+      "is_global": true,
+      "connects": [
+        "U24.5",
+        "C164.1"
+      ],
+      "page": 6
+    },
+    {
+      "local_id": "net_3v3_pwr_aux",
+      "label": "3V3_PWR_AUX",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U27.1",
+        "FB1.1"
+      ],
+      "page": 6
+    },
+    {
+      "local_id": "net_aux_pwr_en",
+      "label": "AUX_PWR_EN",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U27.4"
+      ],
+      "page": 6
+    },
+    {
+      "local_id": "net_usb_pwr_en",
+      "label": "USB_PWR_EN",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U24.4"
+      ],
+      "page": 6
+    },
+    {
+      "local_id": "net_usb_pwr",
+      "label": "USB_PWR",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "F3.2"
+      ],
+      "page": 6
+    },
+    {
+      "local_id": "net_spk_pwr",
+      "label": "SPK_PWR",
+      "is_power": false,
+      "is_global": false,
+      "connects": [],
+      "page": 6
+    },
+    {
+      "local_id": "net_usbh_3v3",
+      "label": "USBH_3V3",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "FB1.2",
+        "C14.1",
+        "C20.1",
+        "C43.1",
+        "C73.1",
+        "C86.1",
+        "C88.1"
+      ],
+      "page": 6
+    },
+    {
+      "local_id": "net_1v2_in",
+      "label": "+1V2",
+      "is_power": true,
+      "is_global": true,
+      "connects": [
+        "FB2.1"
+      ],
+      "page": 6
+    },
+    {
+      "local_id": "net_usbh_1v1",
+      "label": "USBH_1V1",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "FB2.2",
+        "C9.1",
+        "C11.1",
+        "C12.1",
+        "C13.1",
+        "C15.1",
+        "C21.1",
+        "C66.1",
+        "C80.1",
+        "C87.1",
+        "C89.1",
+        "C90.1",
+        "C91.1"
+      ],
+      "page": 6
+    },
+    {
+      "local_id": "net_gnd",
+      "label": "GND",
+      "is_power": true,
+      "is_global": true,
+      "connects": [
+        "U27.2",
+        "U24.2",
+        "C167.2",
+        "C164.2",
+        "C14.2",
+        "C20.2",
+        "C43.2",
+        "C73.2",
+        "C86.2",
+        "C88.2",
+        "C9.2",
+        "C11.2",
+        "C12.2",
+        "C13.2",
+        "C15.2",
+        "C21.2",
+        "C66.2",
+        "C80.2",
+        "C87.2",
+        "C89.2",
+        "C90.2",
+        "C91.2"
+      ],
+      "page": 6
+    },
+    {
+      "local_id": "net_pwr_flag_3v3",
+      "label": "PWR_FLAG",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "C88.1"
+      ],
+      "page": 6
+    },
+    {
+      "local_id": "net_pwr_flag_1v1",
+      "label": "PWR_FLAG",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "C91.1"
+      ],
+      "page": 6
+    }
+  ],
+  "cross_page_refs": [
+    {
+      "label": "+3V3",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "power rail from another page",
+      "page": 6
+    },
+    {
+      "label": "+5V",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "power rail from another page",
+      "page": 6
+    },
+    {
+      "label": "+1V2",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "power rail from another page",
+      "page": 6
+    },
+    {
+      "label": "3V3_PWR_AUX",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "off-page to other consumers",
+      "page": 6
+    },
+    {
+      "label": "AUX_PWR_EN",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "enable signal from another page",
+      "page": 6
+    },
+    {
+      "label": "USB_PWR_EN",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "enable signal from another page",
+      "page": 6
+    },
+    {
+      "label": "USB_PWR",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "USB power output to connectors",
+      "page": 6
+    },
+    {
+      "label": "SPK_PWR",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "speaker power output",
+      "page": 6
+    },
+    {
+      "label": "USBH_3V3",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "USB host 3V3 rail",
+      "page": 6
+    },
+    {
+      "label": "USBH_1V1",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "USB host 1V1 rail",
+      "page": 6
+    }
+  ],
+  "typed_edges": [
+    {
+      "src": "+3V3",
+      "dst": "U27",
+      "kind": "powers",
+      "page": 6
+    },
+    {
+      "src": "U27",
+      "dst": "3V3_PWR_AUX",
+      "kind": "powers",
+      "page": 6
+    },
+    {
+      "src": "+5V",
+      "dst": "U24",
+      "kind": "powers",
+      "page": 6
+    },
+    {
+      "src": "U24",
+      "dst": "USB_PWR",
+      "kind": "powers",
+      "page": 6
+    },
+    {
+      "src": "AUX_PWR_EN",
+      "dst": "U27",
+      "kind": "enables",
+      "page": 6
+    },
+    {
+      "src": "USB_PWR_EN",
+      "dst": "U24",
+      "kind": "enables",
+      "page": 6
+    },
+    {
+      "src": "3V3_PWR_AUX",
+      "dst": "FB1",
+      "kind": "powered_by",
+      "page": 6
+    },
+    {
+      "src": "FB1",
+      "dst": "USBH_3V3",
+      "kind": "filters",
+      "page": 6
+    },
+    {
+      "src": "+1V2",
+      "dst": "FB2",
+      "kind": "powered_by",
+      "page": 6
+    },
+    {
+      "src": "FB2",
+      "dst": "USBH_1V1",
+      "kind": "filters",
+      "page": 6
+    },
+    {
+      "src": "C167",
+      "dst": "+3V3",
+      "kind": "decouples",
+      "page": 6
+    },
+    {
+      "src": "C164",
+      "dst": "+5V",
+      "kind": "decouples",
+      "page": 6
+    },
+    {
+      "src": "C14",
+      "dst": "USBH_3V3",
+      "kind": "decouples",
+      "page": 6
+    },
+    {
+      "src": "C20",
+      "dst": "USBH_3V3",
+      "kind": "decouples",
+      "page": 6
+    },
+    {
+      "src": "C43",
+      "dst": "USBH_3V3",
+      "kind": "decouples",
+      "page": 6
+    },
+    {
+      "src": "C73",
+      "dst": "USBH_3V3",
+      "kind": "decouples",
+      "page": 6
+    },
+    {
+      "src": "C86",
+      "dst": "USBH_3V3",
+      "kind": "decouples",
+      "page": 6
+    },
+    {
+      "src": "C88",
+      "dst": "USBH_3V3",
+      "kind": "decouples",
+      "page": 6
+    },
+    {
+      "src": "C9",
+      "dst": "USBH_1V1",
+      "kind": "decouples",
+      "page": 6
+    },
+    {
+      "src": "C11",
+      "dst": "USBH_1V1",
+      "kind": "decouples",
+      "page": 6
+    },
+    {
+      "src": "C12",
+      "dst": "USBH_1V1",
+      "kind": "decouples",
+      "page": 6
+    },
+    {
+      "src": "C13",
+      "dst": "USBH_1V1",
+      "kind": "decouples",
+      "page": 6
+    },
+    {
+      "src": "C15",
+      "dst": "USBH_1V1",
+      "kind": "decouples",
+      "page": 6
+    },
+    {
+      "src": "C21",
+      "dst": "USBH_1V1",
+      "kind": "decouples",
+      "page": 6
+    },
+    {
+      "src": "C66",
+      "dst": "USBH_1V1",
+      "kind": "decouples",
+      "page": 6
+    },
+    {
+      "src": "C80",
+      "dst": "USBH_1V1",
+      "kind": "decouples",
+      "page": 6
+    },
+    {
+      "src": "C87",
+      "dst": "USBH_1V1",
+      "kind": "decouples",
+      "page": 6
+    },
+    {
+      "src": "C89",
+      "dst": "USBH_1V1",
+      "kind": "decouples",
+      "page": 6
+    },
+    {
+      "src": "C90",
+      "dst": "USBH_1V1",
+      "kind": "decouples",
+      "page": 6
+    },
+    {
+      "src": "C91",
+      "dst": "USBH_1V1",
+      "kind": "decouples",
+      "page": 6
+    },
+    {
+      "src": "U24",
+      "dst": "F3",
+      "kind": "powers",
+      "page": 6
+    },
+    {
+      "src": "F3",
+      "dst": "USB_PWR",
+      "kind": "produces_signal",
+      "page": 6
+    }
+  ],
+  "designer_notes": [
+    {
+      "text": "3V3 Aux Power Switch",
+      "page": 6,
+      "attached_to_refdes": "U27",
+      "attached_to_net": null
+    },
+    {
+      "text": "USB Power Switch",
+      "page": 6,
+      "attached_to_refdes": "U24",
+      "attached_to_net": null
+    },
+    {
+      "text": "220@100MHz 1.4A",
+      "page": 6,
+      "attached_to_refdes": "FB1",
+      "attached_to_net": "3V3_PWR_AUX"
+    },
+    {
+      "text": "Up to 780mA load!",
+      "page": 6,
+      "attached_to_refdes": null,
+      "attached_to_net": "USBH_3V3"
+    },
+    {
+      "text": "220@100MHz 1.4A",
+      "page": 6,
+      "attached_to_refdes": "FB2",
+      "attached_to_net": "+1V2"
+    },
+    {
+      "text": "1V1 is slightly overdriven by 1.2V. Datasheet says 1.26V max.",
+      "page": 6,
+      "attached_to_refdes": null,
+      "attached_to_net": "USBH_1V1"
+    },
+    {
+      "text": "License: CERN-OHL-S 2.0\nEngineer: Lukas F. Hartmann\nhttps://mntre.com\nMNT Research GmbH\nSheet: /Reform 2 USB/Reform 2 USB Power/\nFile: reform2-usbpwr.kicad_sch",
+      "page": 6,
+      "attached_to_refdes": null,
+      "attached_to_net": null
+    }
+  ],
+  "ambiguities": [
+    {
+      "description": "U24 OUT pin net label is unclear — it feeds F3 input but the intermediate net label between U24.OUT and F3.1 is not distinctly labelled; assumed unlabelled local wire.",
+      "page": 6,
+      "related_refdes": [
+        "U24",
+        "F3"
+      ],
+      "related_nets": [
+        "USB_PWR"
+      ]
+    },
+    {
+      "description": "SPK_PWR net appears as an off-page label near U24 output area but its exact connection point (whether from U24 OUT or from F3) is ambiguous from the image.",
+      "page": 6,
+      "related_refdes": [
+        "U24",
+        "F3"
+      ],
+      "related_nets": [
+        "SPK_PWR"
+      ]
+    },
+    {
+      "description": "FB1 value token '2R' at position (149,127) and FB2 value token '38R' at (319,126) — the ferrite bead values read from the image; '220@100MHz' description is from adjacent annotation text. Physical assignment of 2R vs 38R to FB1 vs FB2 should be verified against the BOM.",
+      "page": 6,
+      "related_refdes": [
+        "FB1",
+        "FB2"
+      ],
+      "related_nets": []
+    },
+    {
+      "description": "PWR_FLAG symbols on USBH_3V3 and USBH_1V1 nets are KiCad power-flag pseudo-components; no refdes visible in grounding set for these, so they were not emitted as nodes.",
+      "page": 6,
+      "related_refdes": [],
+      "related_nets": [
+        "USBH_3V3",
+        "USBH_1V1"
+      ]
+    },
+    {
+      "description": "C88 may connect to PWR_FLAG net on USBH_3V3 rather than directly to USBH_3V3 bus — position of PWR_FLAG symbol relative to C88 is ambiguous.",
+      "page": 6,
+      "related_refdes": [
+        "C88"
+      ],
+      "related_nets": [
+        "USBH_3V3",
+        "PWR_FLAG"
+      ]
+    }
+  ]
+}

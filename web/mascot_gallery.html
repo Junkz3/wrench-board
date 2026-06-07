@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mascotte — Galerie d'animations</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles/tokens.css">
+<link rel="stylesheet" href="styles/mascot.css">
+<link rel="stylesheet" href="styles/mascot_gallery.css">
+<!-- mascot.js calls the global t() for the SVG aria-label; the app provides it
+     via i18n.js, but this standalone page just needs a stub. -->
+<script>window.t = function () { return "Wrench Board mascot"; };</script>
+</head>
+<body>
+<div class="mg-wrap">
+  <header class="mg-head">
+    <div>
+      <h1 class="mg-title">Mascotte · <span class="mg-accent">galerie d'animations</span></h1>
+      <p class="mg-sub">Chaque état de la mascotte joue en live. Les boucles tournent en continu ; les one-shots ont un bouton « rejouer ». Source unique : ajouter une anim dans <code>js/mascot_states.js</code> + ses keyframes dans <code>styles/mascot.css</code> la fait apparaître ici automatiquement.</p>
+    </div>
+    <span class="mg-count" id="mgCount"></span>
+  </header>
+
+  <div class="mg-controls">
+    <div class="mg-ctl">
+      <span class="mg-ctl-label">Taille</span>
+      <div class="mg-seg" id="mgSize">
+        <button data-size="80">S</button>
+        <button data-size="120">M</button>
+        <button data-size="160" class="is-active">L</button>
+        <button data-size="220">XL</button>
+      </div>
+    </div>
+
+    <div class="mg-ctl">
+      <span class="mg-ctl-label">Vitesse</span>
+      <input type="range" class="mg-range" id="mgSpeed" min="0.25" max="2" step="0.05" value="1">
+      <span class="mg-range-val mono" id="mgSpeedVal">1.0×</span>
+    </div>
+
+    <div class="mg-spacer"></div>
+
+    <button class="mg-btn" id="mgLight" type="button">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="8" cy="8" r="3.2"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.3 3.3l1.4 1.4M11.3 11.3l1.4 1.4M3.3 12.7l1.4-1.4M11.3 4.7l1.4-1.4"/>
+      </svg>
+      <span id="mgLightLabel">Fond clair</span>
+    </button>
+
+    <button class="mg-btn" id="mgReplayAll" type="button">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M13.5 8a5.5 5.5 0 1 1-1.6-3.9"/><path d="M13.5 2v3h-3"/>
+      </svg>
+      Tout rejouer
+    </button>
+  </div>
+
+  <div class="mg-grid" id="mgGrid"></div>
+
+  <footer class="mg-foot">
+    <p>Pour ajouter une animation : une ligne dans <code>web/js/mascot_states.js</code>, ses <code>@keyframes</code> + une règle <code>.mascot.is-&lt;id&gt;</code> dans <code>web/styles/mascot.css</code>.<br>
+    Servir via <code>make run</code> puis ouvrir <code>http://localhost:8000/mascot_gallery.html</code>.</p>
+  </footer>
+</div>
+
+<script type="module" src="js/mascot_gallery.js"></script>
+</body>
+</html>

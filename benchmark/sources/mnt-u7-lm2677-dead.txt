@@ -1,0 +1,1 @@
+LM2677 SIMPLE SWITCHER 5-A step-down voltage regulator. Catastrophic failure (internal FET short or thermal runaway) puts the output to zero and propagates through every downstream buck that derives its input from this rail.

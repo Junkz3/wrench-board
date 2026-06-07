@@ -1,0 +1,9 @@
+{
+  "schema_version": "1.0",
+  "entries": [
+    {"canonical_name": "U7",  "role": "PMIC", "package": "QFN-24",
+     "typical_failure_modes": ["dead PMIC"], "notes": null},
+    {"canonical_name": "C29", "role": "decoupling cap", "package": "0402",
+     "typical_failure_modes": ["short-to-ground"], "notes": "adjacent to U7"}
+  ]
+}

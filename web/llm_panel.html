@@ -1,0 +1,120 @@
+<!-- Chat panel fragment — mounted by web/js/llm.js into #llmRoot at boot.
+     Lives here so edits to the panel markup don't collide with parallel
+     work on web/index.html. -->
+<aside class="llm-panel" id="llmPanel" aria-hidden="true"
+       data-i18n-attr="aria-label:chat.panel.aria">
+  <header class="llm-head">
+    <span class="type-badge action" data-i18n="chat.panel.badge">Agent</span>
+    <div class="title-col">
+      <h3 id="llmTitle" data-i18n="chat.panel.title">Diagnostic</h3>
+      <div class="llm-subline" id="llmSubline" data-i18n="chat.panel.subline_empty">—</div>
+    </div>
+    <div class="llm-head-actions">
+      <div class="llm-camera-wrap">
+        <button class="llm-camera-chip" id="cameraChip" type="button"
+                aria-haspopup="menu" aria-expanded="false"
+                data-i18n-attr="title:chat.header.camera_chip_title"
+                title="Camera for cam_capture (Flow B)">
+          <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 7h3l2-2h8l2 2h3v12H3z"/>
+            <circle cx="12" cy="13" r="4"/>
+          </svg>
+          <span class="camera-label" id="cameraChipLabel"
+                data-i18n="chat.header.camera_chip_none">— none —</span>
+          <svg class="chevron-down" width="9" height="9" viewBox="0 0 24 24"
+               fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </button>
+        <div class="llm-camera-popover" id="cameraPopover" role="menu" hidden></div>
+      </div>
+      <button class="icon-btn llm-camera-preview-btn" id="cameraPreviewBtn"
+              type="button"
+              data-i18n-attr="title:chat.header.camera_preview_title,aria-label:chat.header.camera_preview_aria"
+              title="Show / hide camera preview"
+              aria-label="Toggle camera preview" aria-pressed="false">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none"
+             stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/>
+          <circle cx="12" cy="12" r="3"/>
+        </svg>
+      </button>
+      <button class="llm-tier-chip" id="llmTierChip" data-tier="deep"
+              aria-haspopup="menu" aria-expanded="false"
+              data-i18n-attr="title:chat.header.tier_title"
+              title="Model tier">
+        <span class="tier-label">DEEP</span>
+        <svg class="chevron-down" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div class="llm-tier-popover" id="llmTierPopover" role="menu" hidden>
+        <button role="menuitem" data-tier="fast" data-i18n="chat.header.tier_fast">Fast · Haiku 4.5</button>
+        <button role="menuitem" data-tier="normal" data-i18n="chat.header.tier_normal">Normal · Sonnet 4.6</button>
+        <button role="menuitem" data-tier="deep" class="on" data-i18n="chat.header.tier_deep">Deep · Opus 4.8</button>
+      </div>
+      <button class="close-x" id="llmClose"
+              data-i18n-attr="aria-label:chat.header.close_aria"
+              aria-label="Close panel" type="button">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+  </header>
+  <div class="llm-status" id="llmStatus">
+    <span class="dot"></span>
+    <span id="llmStatusText" data-i18n="chat.status.idle">idle</span>
+    <span class="device-tag" id="llmDevice" style="display:none"></span>
+
+    <div class="conv-wrap">
+      <button class="conv-chip" id="llmConvChip" aria-haspopup="menu" aria-expanded="false"
+              data-i18n-attr="title:chat.conv.title"
+              title="Conversations">
+        <span class="conv-label" id="llmConvLabel">CONV 1/1</span>
+        <svg class="chevron-down" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div class="conv-popover" id="llmConvPopover" role="menu" hidden>
+        <div class="conv-list" id="llmConvList"></div>
+        <div class="conv-popover-sep"></div>
+        <button class="conv-new" id="llmConvNew" type="button">
+          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+          <span data-i18n="chat.conv.new">New conversation</span>
+        </button>
+      </div>
+    </div>
+
+    <span class="cost-total" id="llmCostTotal" style="display:none">$0.00</span>
+  </div>
+  <div class="llm-log" id="llmLog" aria-live="polite"></div>
+  <form class="llm-input" id="llmForm">
+    <textarea id="llmInput" rows="3"
+              data-i18n-attr="placeholder:chat.input.placeholder"
+              placeholder="Ask the agent… (Enter to send, Shift+Enter for newline)"
+              autocomplete="off" spellcheck="false"></textarea>
+    <div class="llm-input-actions">
+      <input type="file" id="llmUploadInput" accept="image/png,image/jpeg" hidden>
+      <button type="button" class="icon-btn llm-upload-btn" id="llmUploadBtn"
+              data-i18n-attr="title:chat.input.upload_title,aria-label:chat.input.upload_aria"
+              title="Upload macro photo (PNG/JPEG, max 5MB)" aria-label="Upload macro">
+        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="17 8 12 3 7 8"/>
+          <line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+      </button>
+      <button type="button" class="llm-stop icon-btn" id="llmStop"
+              data-i18n-attr="title:chat.input.stop_title,aria-label:chat.input.stop_aria"
+              title="Interrupt the agent (Esc)" aria-label="Stop" disabled>
+        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="7" width="10" height="10" rx="1.5"/></svg>
+      </button>
+      <button type="submit" class="icon-btn llm-send" id="llmSend"
+              data-i18n-attr="title:chat.input.send_title,aria-label:chat.input.send_aria"
+              title="Send (Enter)" aria-label="Send" disabled>
+        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l17-8L4 4l3 8-3 8zM7 12h14"/></svg>
+      </button>
+    </div>
+  </form>
+  <div class="llm-dropzone" id="llmDropzone" hidden>
+    <span data-i18n="chat.dropzone.label">Drop the photo here</span>
+  </div>
+  <div class="llm-mascot" id="llmMascot" aria-hidden="true"></div>
+</aside>

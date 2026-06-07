@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="50 30 360 330">
+  <g fill="#e6edf7">
+    <rect x="135" y="285" width="14" height="38" rx="3"/>
+    <rect x="175" y="285" width="14" height="38" rx="3"/>
+    <rect x="215" y="285" width="14" height="38" rx="3"/>
+    <rect x="255" y="285" width="14" height="38" rx="3"/>
+  </g>
+  <g>
+    <path fill="none" stroke="#e6edf7" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" d="M 115 200 Q 95 240, 95 275"/>
+    <circle fill="#e6edf7" cx="95" cy="282" r="11"/>
+  </g>
+  <g>
+    <path fill="none" stroke="#e6edf7" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" d="M 285 200 Q 320 175, 335 145"/>
+    <g transform="rotate(20 335 145)">
+      <path fill="#e6edf7" d="M 322 145 L 322 88 Q 322 82, 317 80 L 305 76 Q 300 74, 300 68 L 300 51 Q 300 44, 307 44 L 324 44 Q 327 44, 327 47 L 327 60 Q 327 64, 331 64 L 339 64 Q 343 64, 343 60 L 343 47 Q 343 44, 346 44 L 363 44 Q 370 44, 370 51 L 370 68 Q 370 74, 365 76 L 353 80 Q 348 82, 348 88 L 348 145 Z"/>
+    </g>
+  </g>
+  <g>
+    <rect fill="#3ec5dd" x="115" y="125" width="170" height="170" rx="28" ry="28"/>
+    <rect fill="rgba(0,0,0,0.10)" x="135" y="145" width="130" height="130" rx="18" ry="18"/>
+  </g>
+  <g>
+    <circle fill="#07101f" cx="172" cy="205" r="13"/>
+    <circle fill="#e6edf7" cx="176" cy="201" r="3.5"/>
+    <circle fill="#07101f" cx="228" cy="205" r="13"/>
+    <circle fill="#e6edf7" cx="232" cy="201" r="3.5"/>
+    <path fill="none" stroke="#07101f" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" d="M 188 240 Q 200 252, 212 240"/>
+  </g>
+</svg>

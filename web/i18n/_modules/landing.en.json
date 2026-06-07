@@ -1,0 +1,91 @@
+{
+  "sidebar": {
+    "title": "Recent",
+    "aria": "Recent repairs",
+    "delete_aria": "Delete this repair",
+    "delete_title": "Delete",
+    "count_one": "{n} repair",
+    "count_many": "{n} repairs"
+  },
+  "hero": {
+    "title": "Your hardware repair assistant.",
+    "sub": "Give me your device and the symptom — I'll build the knowledge and open the diagnostic.",
+    "device_placeholder": "Device (e.g. MNT Reform motherboard, iPhone 11, Framework 13)",
+    "device_aria": "Which device",
+    "symptom_placeholder": "Symptom (e.g. won't power on, no charge, black screen)",
+    "symptom_aria": "What is the symptom",
+    "submit": "Start diagnostic"
+  },
+  "chips": {
+    "mnt_label": "MNT Reform — no boot",
+    "mnt_symptom": "no boot, black screen",
+    "iphone_label": "iPhone 11 — no charge",
+    "iphone_symptom": "won't charge",
+    "framework_label": "Framework — black screen",
+    "framework_symptom": "black screen on boot"
+  },
+  "timeline": {
+    "title_default": "Building the knowledge sheet…",
+    "title_build": "Building the sheet · {device}",
+    "title_expand": "Targeted enrichment · {device}",
+    "title_loading": "Loading sheet · {device}",
+    "title_ready": "Sheet ready · {status}",
+    "title_failed": "Pipeline failed",
+    "elapsed": "Elapsed · {n}s",
+    "phase_scout": "Scout · web research",
+    "phase_registry": "Registry · canonical vocabulary",
+    "phase_mapper": "Mapper · refdes ↔ graph",
+    "phase_writers": "Writers · graph + rules + glossary",
+    "phase_audit": "Auditor · validation",
+    "phase_schematic_ingest": "Schematic · page-by-page vision",
+    "phase_device_kind": "Device type · classification",
+    "phase_expand": "Targeted research on your symptom"
+  },
+  "status": {
+    "pipeline_started": "Pipeline started on {device}.",
+    "checking": "Saving your repair and checking whether I already know this device…",
+    "rule_match": "I already know this case ({rule_id}). Opening the diagnostic…",
+    "device_known": "I already know {device}. Opening the diagnostic…",
+    "expand": "I know {device}. Adding your specific symptom (~3 min).",
+    "build_new": "New to me — building the sheet in the background. Feel free to watch.",
+    "ready": "All set. Opening the diagnostic…",
+    "ws_lost": "Pipeline connection lost. Reload the page if nothing moves.",
+    "error_create": "Creation failed: {error}",
+    "error_pipeline": "Error: {error}.",
+    "error_unknown": "unknown",
+    "error_invalid_response": "invalid server response",
+    "error_delete": "Delete failed: {error}",
+    "validation_device": "Be more specific about the device — at least a few words.",
+    "validation_symptom": "Describe the symptom a bit more."
+  },
+  "delete": {
+    "confirm": "Delete this repair? The conversation and the agent's notes will be permanently erased."
+  },
+  "kind": {
+    "none": "— device type (optional)",
+    "aria": "Device type"
+  },
+  "knowledge": {
+    "button": "Add knowledge",
+    "aria": "Add knowledge about the device",
+    "badge": "Optional",
+    "title": "Add knowledge about the device",
+    "close": "Close",
+    "intro": "More context builds a sharper pack. Everything here is optional.",
+    "done": "Done"
+  },
+  "schematic": {
+    "cta": "Attach a schematic PDF (optional)",
+    "aria": "Schematic PDF",
+    "already_ingested": "Schematic already ingested ✓ — no need to attach"
+  },
+  "suggest": {
+    "aria": "Device suggestions",
+    "draft": "draft",
+    "graph_label": "graph",
+    "graph_title": "Electrical graph ready"
+  },
+  "tools": {
+    "stock": "Stock"
+  }
+}

@@ -1,0 +1,250 @@
+/* ============ CANVAS ============ */
+.canvas{position:fixed;top:92px;left:52px;right:0;bottom:0;background:var(--bg);overflow:hidden;cursor:grab}
+.canvas:active{cursor:grabbing}
+.canvas svg{width:100%;height:100%;display:block}
+.canvas.hidden{display:none}
+
+/* subtle workshop grid */
+.grid-bg{position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(rgba(45,70,110,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(45,70,110,.06) 1px,transparent 1px);background-size:48px 48px}
+
+/* =========== LINKS & NODES =========== */
+.link{fill:none;stroke-linecap:round;transition:stroke-opacity .25s,stroke .25s}
+.link.causes{stroke:oklch(0.70 0.15 70);stroke-opacity:.55;stroke-dasharray:5 4}
+.link.powers{stroke:oklch(0.70 0.13 155);stroke-opacity:.7}
+.link.connected_to{stroke:#3a5680;stroke-opacity:.45}
+.link.resolves{stroke:oklch(0.72 0.14 295);stroke-opacity:.65;stroke-dasharray:2 5}
+.link-label{font-family:var(--mono);font-size:9.5px;fill:var(--text-3);text-anchor:middle;pointer-events:none;paint-order:stroke;stroke:var(--bg);stroke-width:3px;transition:opacity .2s;opacity:0}
+.graph.has-focus .link-label.active-label{opacity:1}
+
+.node{cursor:pointer}
+.node-shape{transition:filter .2s,stroke-width .2s}
+.node-label{font-family:'Inter',sans-serif;font-size:11px;font-weight:500;fill:var(--text);text-anchor:middle;pointer-events:none;paint-order:stroke;stroke:var(--bg);stroke-width:3.5px}
+.graph.has-focus .node:not(.focus):not(.neighbor){opacity:.15}
+.graph.has-focus .link:not(.active-link){stroke-opacity:.06}
+.node.selected .node-shape{stroke-width:2.4px}
+
+/* =========== ZOOM CONTROLS =========== */
+.controls{position:absolute;right:16px;bottom:16px;display:flex;flex-direction:column;gap:6px;background:rgba(20,32,48,.85);border:1px solid var(--border);backdrop-filter:blur(8px);border-radius:8px;padding:6px;z-index:5}
+.ctrl-btn{width:34px;height:34px;border-radius:5px;background:transparent;border:0;color:var(--text-2);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s}
+.ctrl-btn:hover{background:var(--panel-2);color:var(--text)}
+.ctrl-sep{height:1px;background:var(--border);margin:2px 4px}
+.ctrl-label{font-family:var(--mono);font-size:10px;color:var(--text-3);text-align:center;padding:4px 0 2px}
+
+/* =========== RELATION LEGEND =========== */
+.legend{position:absolute;left:16px;bottom:16px;background:rgba(20,32,48,.85);border:1px solid var(--border);backdrop-filter:blur(8px);border-radius:8px;padding:10px 12px;z-index:5;font-size:11px;min-width:220px}
+.legend h4{margin:0 0 8px 0;font-size:10px;font-family:var(--mono);color:var(--text-3);font-weight:500;letter-spacing:.5px;text-transform:uppercase}
+.legend-row{display:flex;align-items:center;gap:10px;padding:3px 0;color:var(--text-2)}
+.legend-line{width:28px;height:0;border-top:2px solid;flex:0 0 28px}
+
+/* =========== INSPECTOR =========== */
+.inspector{position:fixed;top:104px;right:16px;bottom:40px;width:380px;background:linear-gradient(180deg,rgba(20,32,48,.96),rgba(15,26,46,.96));border:1px solid var(--border);border-radius:10px;box-shadow:0 20px 60px rgba(0,0,0,.5),0 0 0 1px rgba(56,189,248,.05);backdrop-filter:blur(14px);z-index:30;display:flex;flex-direction:column;transform:translateX(calc(100% + 24px));transition:transform .28s cubic-bezier(.2,.8,.2,1);overflow:hidden}
+.inspector.open{transform:translateX(0)}
+.insp-head{padding:14px 16px 12px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:8px;position:relative}
+.insp-head .type-row{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:10px;color:var(--text-3);letter-spacing:.4px;text-transform:uppercase}
+.type-badge{padding:2px 7px;border-radius:10px;font-size:10px;display:inline-flex;align-items:center;gap:6px}
+.type-badge.symptom{background:rgba(245,158,11,.12);color:var(--amber);border:1px solid rgba(245,158,11,.3)}
+.type-badge.component{background:rgba(56,189,248,.12);color:var(--cyan);border:1px solid rgba(56,189,248,.3)}
+.type-badge.net{background:rgba(52,211,153,.12);color:var(--emerald);border:1px solid rgba(52,211,153,.3)}
+.type-badge.action{background:rgba(192,132,252,.12);color:var(--violet);border:1px solid rgba(192,132,252,.3)}
+.close-x{position:absolute;top:10px;right:10px;background:transparent;border:0;color:var(--text-3);cursor:pointer;width:26px;height:26px;border-radius:4px;display:flex;align-items:center;justify-content:center}
+.close-x:hover{background:var(--panel-2);color:var(--text)}
+.insp-head h2{margin:0;font-size:20px;font-weight:600;letter-spacing:-.2px}
+.insp-id{font-family:var(--mono);font-size:10.5px;color:var(--text-3)}
+.insp-body{flex:1;overflow:auto;padding:14px 16px 20px}
+.insp-body::-webkit-scrollbar{width:6px}.insp-body::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+.insp-section{padding-bottom:14px;margin-bottom:14px;border-bottom:1px solid var(--border-soft)}
+.insp-section:last-child{border-bottom:0;margin-bottom:0}
+.insp-section h3{margin:0 0 8px 0;font-family:var(--mono);font-size:10px;color:var(--text-3);font-weight:500;letter-spacing:.5px;text-transform:uppercase}
+.insp-desc{color:var(--text);line-height:1.55;font-size:12.5px}
+.conf-row{display:flex;align-items:center;gap:10px}
+.conf-bar{flex:1;height:6px;background:var(--bg-deep);border-radius:3px;overflow:hidden;position:relative;border:1px solid var(--border)}
+.conf-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--amber),var(--cyan));box-shadow:0 0 8px rgba(56,189,248,.4)}
+.conf-value{font-family:var(--mono);font-size:13px;color:var(--text);min-width:44px;text-align:right}
+.meta-grid{display:grid;grid-template-columns:100px 1fr;gap:6px 10px;font-size:12px}
+.meta-grid dt{color:var(--text-3);font-family:var(--mono);font-size:11px}
+.meta-grid dd{margin:0;color:var(--text)}
+.edge-list{display:flex;flex-direction:column;gap:6px}
+.edge-item{display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--bg-2);border:1px solid var(--border-soft);border-radius:6px;cursor:pointer;transition:all .15s}
+.edge-item:hover{border-color:oklch(0.55 0.10 210);background:var(--panel)}
+.edge-item .arrow{font-family:var(--mono);color:var(--text-3);font-size:11px}
+.edge-item .rel{font-family:var(--mono);font-size:10px;padding:1px 6px;border-radius:3px;background:var(--bg-deep);color:var(--text-2);border:1px solid var(--border)}
+.edge-item .rel.powers{color:var(--emerald);border-color:rgba(52,211,153,.3)}
+.edge-item .rel.causes{color:var(--amber);border-color:rgba(245,158,11,.3)}
+.edge-item .rel.resolves{color:var(--violet);border-color:rgba(192,132,252,.3)}
+.edge-item .edge-target{flex:1;font-size:12px}
+.edge-item .edge-sub{font-size:10.5px;color:var(--text-3);font-family:var(--mono)}
+.btn{flex:1;padding:8px 10px;border-radius:6px;background:var(--panel);border:1px solid var(--border);color:var(--text);font-family:inherit;font-size:12px;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.btn:hover{border-color:oklch(0.55 0.10 210);background:var(--panel-2)}
+.btn.primary{background:rgba(56,189,248,.12);color:var(--cyan);border-color:rgba(56,189,248,.35)}
+.btn.primary:hover{background:rgba(56,189,248,.18)}
+
+/* =========== EMPTY STATE =========== */
+.empty-state{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:3;pointer-events:none}
+.empty-state-card{max-width:480px;padding:26px 30px;background:rgba(20,32,48,.94);border:1px solid var(--border);border-radius:12px;backdrop-filter:blur(12px);text-align:center;pointer-events:auto;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.empty-state-card .glyph{width:44px;height:44px;margin:0 auto 10px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 30% 30%,rgba(56,189,248,.35),transparent 60%);border:1px solid rgba(56,189,248,.25);color:var(--cyan)}
+.empty-state-card h3{margin:6px 0 6px;font-size:15px;font-weight:600;color:var(--text)}
+.empty-state-card p{margin:0 0 14px;font-size:12.5px;color:var(--text-2);line-height:1.55}
+.empty-state-card code{display:block;font-family:var(--mono);font-size:11px;color:var(--cyan);padding:10px 12px;background:var(--bg-deep);border:1px solid var(--border);border-radius:6px;text-align:left;overflow-x:auto;white-space:pre;margin-top:4px}
+.empty-state.hidden{display:none}
+
+/* =========== TOOLTIP =========== */
+.tooltip{position:fixed;pointer-events:none;background:rgba(10,17,32,.95);border:1px solid var(--border);border-radius:6px;padding:8px 10px;font-size:11.5px;color:var(--text);backdrop-filter:blur(6px);box-shadow:0 8px 20px rgba(0,0,0,.4);max-width:260px;z-index:40;opacity:0;transform:translateY(3px);transition:opacity .12s,transform .12s}
+.tooltip.show{opacity:1;transform:translateY(0)}
+.tt-type{font-family:var(--mono);font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px}
+.tt-label{font-weight:600;margin-bottom:4px}
+.tt-desc{color:var(--text-2);line-height:1.4;font-size:11px}
+.tt-meta{display:flex;justify-content:space-between;margin-top:6px;padding-top:6px;border-top:1px solid var(--border);font-family:var(--mono);font-size:10px;color:var(--text-3)}
+
+/* =========== TWEAKS =========== */
+.tweaks{position:fixed;right:16px;top:104px;width:260px;background:rgba(20,32,48,.95);border:1px solid var(--border);border-radius:8px;backdrop-filter:blur(10px);z-index:50;font-size:12px;display:none}
+.tweaks.show{display:block}
+.tweaks h5{margin:0;padding:10px 12px;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:11px;color:var(--text-3);letter-spacing:.4px;text-transform:uppercase;display:flex;justify-content:space-between;align-items:center}
+.tweaks-body{padding:10px 12px;display:flex;flex-direction:column;gap:10px}
+.tweak-row{display:flex;flex-direction:column;gap:5px}
+.tweak-row label{font-size:11px;color:var(--text-2);display:flex;justify-content:space-between}
+.tweak-row input[type=range]{width:100%;accent-color:oklch(0.82 0.14 210)}
+.segmented{display:flex;background:var(--bg-deep);border:1px solid var(--border);border-radius:5px;overflow:hidden}
+.segmented button{flex:1;border:0;background:transparent;color:var(--text-3);padding:5px 6px;font-size:11px;cursor:pointer;font-family:inherit}
+.segmented button.on{background:var(--panel-2);color:var(--text)}
+
+/* -------- Subsystem swimlanes --------
+   Horizontal bands behind the 4-column grid, keyed by node subsystem.
+   Rendered inside #layerBands, below every other graph element. */
+.band-bg {
+  fill: var(--panel-2);
+  fill-opacity: .35;
+  stroke: var(--border-soft);
+  stroke-width: 1;
+}
+
+.band-label {
+  fill: var(--text-3);
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: .4px;
+  text-transform: uppercase;
+  dominant-baseline: middle;
+  pointer-events: none;
+}
+
+/* connected_to edges are low-signal relative to causes/powers/resolves —
+   dim by default, bring back to full opacity only when a focused node's
+   neighborhood highlights them. */
+.link.connected_to { opacity: .25; }
+.link.connected_to.active-link { opacity: 1; }
+
+/* Collapsed-action ×N badge (rendered as a <text> inside the node group). */
+.collapse-badge {
+  fill: var(--violet);
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 9px;
+  font-weight: 600;
+  text-anchor: middle;
+  pointer-events: none;
+}
+
+/* ---- Bubble map refactor ---- */
+/* Subsystem bubble backdrop (replaces the horizontal .band-bg rect). */
+.bubble-bg {
+  fill: var(--panel-2);
+  fill-opacity: .18;
+  stroke: var(--border-soft);
+  stroke-width: 1;
+  pointer-events: none;
+}
+
+/* Edges hidden by default, shown only when a node is focused/hovered.
+   Overrides earlier `.link.connected_to { opacity: .25 }` so that rule
+   still applies when active. */
+.link { opacity: .04; transition: opacity .2s; }
+.link.active-link { opacity: 1; }
+.link.connected_to { opacity: .02; }
+.link.connected_to.active-link { opacity: .8; }
+
+/* Edge labels (the per-edge mechanism text) are too verbose in the bubble
+   view — they overlap each other the moment two edges to different
+   neighbours share a similar mechanism string. Kept in DOM so inspector
+   logic still sees them, but hidden from the canvas. Relation type is
+   already encoded by the edge's colour/style (see legend at bottom). */
+.link-label { display: none; }
+
+/* Particles on "powers" edges are too noisy in the bubble view — hide
+   them entirely. (The animation loop keeps running but with 0 opacity.) */
+.particle { opacity: 0 !important; }
+
+/* Labels hidden by default in the bubble map — the constellation view is
+   clean. Only the focused/selected node reveals its label. Neighbors stay
+   visually highlighted (colour/opacity) but their text stays hidden to
+   avoid the 5-10-labels-at-once overlap mess. The tooltip (#tooltip) is
+   the authoritative place for "read the full label of what I'm hovering". */
+.node-label { opacity: 0; transition: opacity .15s; }
+.node:hover .node-label,
+.node.focus .node-label,
+.node.selected .node-label { opacity: 1; }
+
+/* Legend panel — unified types + relations section. */
+.legend h4.legend-sub { margin-top: 12px; }
+.legend-row.type-row { gap: 8px; }
+.type-dot {
+  width: 10px; height: 10px; flex: 0 0 10px;
+  border-radius: 50%;
+  box-shadow: 0 0 6px currentColor;
+  opacity: .85;
+}
+.type-count {
+  margin-left: auto;
+  font-size: 10px;
+  color: var(--text-3);
+  background: rgba(255,255,255,.04);
+  padding: 1px 6px;
+  border-radius: 3px;
+  min-width: 20px;
+  text-align: center;
+}
+
+/* When a label does appear, give it a wider bg-coloured stroke halo so the
+   text doesn't blend into neighbours that happen to be behind it. Overrides
+   the default 3.5px stroke in the base .node-label rule above. */
+.node:hover .node-label,
+.node.focus .node-label,
+.node.selected .node-label {
+  stroke-width: 5px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* -------- View-mode toggle (Visuel | Brut) --------
+   Lives in the metabar, swaps between #canvas (bubble map) and
+   #memoryBank (raw artefact browser) on the merged Mémoire section. */
+.view-toggle {
+  display: inline-flex;
+  gap: 0;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--panel);
+  margin-right: 12px;
+  align-self: center;
+}
+.view-toggle-btn {
+  font-family: inherit;
+  font-size: 11px;
+  letter-spacing: .3px;
+  color: var(--text-2);
+  background: transparent;
+  border: 0;
+  padding: 5px 12px;
+  cursor: pointer;
+  transition: background .12s, color .12s;
+}
+.view-toggle-btn:hover { color: var(--text); background: var(--panel-2); }
+.view-toggle-btn.active {
+  color: var(--text);
+  background: var(--panel-2);
+  box-shadow: inset 0 -2px 0 var(--cyan);
+}
+.view-toggle-btn + .view-toggle-btn { border-left: 1px solid var(--border); }
+
+/* Hide the metabar's .filters block when in Brut mode — the memory bank
+   owns its own search; having two search inputs stacked is confusing. */
+.metabar .filters.hidden { display: none; }

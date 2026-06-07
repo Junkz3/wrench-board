@@ -1,0 +1,5505 @@
+{
+  "schema_version": "1.0",
+  "page": 2,
+  "sheet_name": "MNT Reform 2 Power System",
+  "sheet_path": "/Reform 2 Power/",
+  "page_kind": "schematic",
+  "orientation": "landscape",
+  "confidence": 0.72,
+  "nodes": [
+    {
+      "refdes": "J1",
+      "type": "connector",
+      "value": {
+        "raw": "Jack-DC",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": "12-24VDC Input"
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "24V_IN"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "3",
+          "name": null,
+          "role": "power_in",
+          "net_label": "24V_IN"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "F1",
+      "type": "fuse",
+      "value": {
+        "raw": "F1",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "24V_IN"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "power_out",
+          "net_label": "VIN"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "F2",
+      "type": "fuse",
+      "value": {
+        "raw": "F2",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "BAT1FUSED"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "power_out",
+          "net_label": "BAT1"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "D13",
+      "type": "diode",
+      "value": {
+        "raw": "SMAJ36CA-E3/5A",
+        "primary": null,
+        "package": null,
+        "mpn": "SMAJ36CA-E3/5A",
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": "TVS"
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "A",
+          "name": "A",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "K",
+          "name": "K",
+          "role": "signal_in",
+          "net_label": "VIN"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "D1",
+      "type": "diode",
+      "value": {
+        "raw": "BZT52C10",
+        "primary": null,
+        "package": null,
+        "mpn": "BZT52C10",
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "A",
+          "name": "A",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "K",
+          "name": "K",
+          "role": "signal_in",
+          "net_label": "VIN"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R167",
+      "type": "resistor",
+      "value": {
+        "raw": "0157004.DR",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "VIN"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": "VIN"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C149",
+      "type": "capacitor",
+      "value": {
+        "raw": "0.1uF",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "VIN"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C160",
+      "type": "capacitor",
+      "value": {
+        "raw": "2.2uF",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "VIN"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C161",
+      "type": "capacitor",
+      "value": {
+        "raw": "100uF",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "VIN"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "Q3",
+      "type": "transistor",
+      "value": {
+        "raw": "SI7461DP",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": "G",
+          "role": "signal_in",
+          "net_label": "VIN"
+        },
+        {
+          "number": "2",
+          "name": "S",
+          "role": "power_in",
+          "net_label": "VIN"
+        },
+        {
+          "number": "3",
+          "name": "D",
+          "role": "power_out",
+          "net_label": "PVIN"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "Q1",
+      "type": "transistor",
+      "value": {
+        "raw": "SI7B500DP",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": "G",
+          "role": "signal_in",
+          "net_label": null
+        },
+        {
+          "number": "2",
+          "name": "S",
+          "role": "ground",
+          "net_label": "PGND"
+        },
+        {
+          "number": "3",
+          "name": "D",
+          "role": "switch_node",
+          "net_label": "SW1"
+        },
+        {
+          "number": "4",
+          "name": null,
+          "role": "unknown",
+          "net_label": null
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "Q2",
+      "type": "transistor",
+      "value": {
+        "raw": "SI7B500DP",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": "G",
+          "role": "signal_in",
+          "net_label": null
+        },
+        {
+          "number": "2",
+          "name": "S",
+          "role": "ground",
+          "net_label": "PGND"
+        },
+        {
+          "number": "3",
+          "name": "D",
+          "role": "switch_node",
+          "net_label": "SW1"
+        },
+        {
+          "number": "4",
+          "name": null,
+          "role": "unknown",
+          "net_label": null
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "Q15",
+      "type": "transistor",
+      "value": {
+        "raw": "SI7B500DP",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": "G",
+          "role": "signal_in",
+          "net_label": null
+        },
+        {
+          "number": "2",
+          "name": "S",
+          "role": "power_in",
+          "net_label": "PVIN"
+        },
+        {
+          "number": "3",
+          "name": "D",
+          "role": "switch_node",
+          "net_label": "SW2"
+        },
+        {
+          "number": "4",
+          "name": null,
+          "role": "unknown",
+          "net_label": null
+        }
+      ],
+      "populated": false
+    },
+    {
+      "refdes": "Q17",
+      "type": "transistor",
+      "value": {
+        "raw": "SI7B500DP",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": "G",
+          "role": "signal_in",
+          "net_label": null
+        },
+        {
+          "number": "2",
+          "name": "S",
+          "role": "power_in",
+          "net_label": "PVIN"
+        },
+        {
+          "number": "3",
+          "name": "D",
+          "role": "switch_node",
+          "net_label": "SW2"
+        },
+        {
+          "number": "4",
+          "name": null,
+          "role": "unknown",
+          "net_label": null
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "L1",
+      "type": "inductor",
+      "value": {
+        "raw": "22uH 5A",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "SW1"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "power_out",
+          "net_label": "VOUT"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "D4",
+      "type": "diode",
+      "value": {
+        "raw": "SBR0560S1",
+        "primary": null,
+        "package": null,
+        "mpn": "SBR0560S1",
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "A",
+          "name": "A",
+          "role": "ground",
+          "net_label": "PGND"
+        },
+        {
+          "number": "K",
+          "name": "K",
+          "role": "signal_in",
+          "net_label": "SW1"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C1",
+      "type": "capacitor",
+      "value": {
+        "raw": "1uF",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "SW1"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C44",
+      "type": "capacitor",
+      "value": {
+        "raw": "2.2uF",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "PVIN"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C45",
+      "type": "capacitor",
+      "value": {
+        "raw": "0.033uF",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "SENSGND"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R49",
+      "type": "resistor",
+      "value": {
+        "raw": "0.01",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "VIN"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": "PVIN"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R50",
+      "type": "resistor",
+      "value": {
+        "raw": "0.01",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "VOUT"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": "VOUT"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "U2",
+      "type": "ic",
+      "value": {
+        "raw": "LTC4020EUHFPBF",
+        "primary": null,
+        "package": null,
+        "mpn": "LTC4020EUHFPBF",
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "35",
+          "name": "PGND",
+          "role": "ground",
+          "net_label": "PGND"
+        },
+        {
+          "number": "34",
+          "name": "INTVCC",
+          "role": "power_out",
+          "net_label": "INTVCC"
+        },
+        {
+          "number": "36",
+          "name": "PVIN",
+          "role": "power_in",
+          "net_label": "PVIN"
+        },
+        {
+          "number": "37",
+          "name": "BG1",
+          "role": "signal_out",
+          "net_label": "BG1"
+        },
+        {
+          "number": "38",
+          "name": "SW1",
+          "role": "switch_node",
+          "net_label": "SW1"
+        },
+        {
+          "number": "1",
+          "name": "TG1",
+          "role": "signal_out",
+          "net_label": "TG1"
+        },
+        {
+          "number": "2",
+          "name": "BST1",
+          "role": "power_in",
+          "net_label": "BST1"
+        },
+        {
+          "number": "33",
+          "name": "BG2",
+          "role": "signal_out",
+          "net_label": "BG2"
+        },
+        {
+          "number": "32",
+          "name": "SW2",
+          "role": "switch_node",
+          "net_label": "SW2"
+        },
+        {
+          "number": "31",
+          "name": "TG2",
+          "role": "signal_out",
+          "net_label": "TG2"
+        },
+        {
+          "number": "30",
+          "name": "BST2",
+          "role": "power_in",
+          "net_label": "BST2"
+        },
+        {
+          "number": "28",
+          "name": "VC",
+          "role": "signal_out",
+          "net_label": "ITH"
+        },
+        {
+          "number": "27",
+          "name": "SENSBOT",
+          "role": "signal_in",
+          "net_label": "SENSBOT"
+        },
+        {
+          "number": "26",
+          "name": "VFBMAX",
+          "role": "feedback_in",
+          "net_label": "VFBMAX"
+        },
+        {
+          "number": "25",
+          "name": "ILIMIT",
+          "role": "signal_in",
+          "net_label": "ILIMIT"
+        },
+        {
+          "number": "24",
+          "name": "CSOUT",
+          "role": "signal_out",
+          "net_label": "CSOUT"
+        },
+        {
+          "number": "23",
+          "name": "CSP",
+          "role": "signal_in",
+          "net_label": "CSP"
+        },
+        {
+          "number": "8",
+          "name": "RT",
+          "role": "signal_in",
+          "net_label": null
+        },
+        {
+          "number": "9",
+          "name": "SHDN",
+          "role": "enable_in",
+          "net_label": "CHG_INTVCC"
+        },
+        {
+          "number": "22",
+          "name": "CSN",
+          "role": "signal_in",
+          "net_label": "CSN"
+        },
+        {
+          "number": "21",
+          "name": "VIN_REG",
+          "role": "signal_in",
+          "net_label": "VIN_REG"
+        },
+        {
+          "number": "20",
+          "name": "BAT",
+          "role": "power_in",
+          "net_label": "BAT"
+        },
+        {
+          "number": "19",
+          "name": "VFBMIN",
+          "role": "feedback_in",
+          "net_label": "VFBMIN"
+        },
+        {
+          "number": "18",
+          "name": "FBG",
+          "role": "feedback_in",
+          "net_label": "FBG"
+        },
+        {
+          "number": "17",
+          "name": "VFB",
+          "role": "feedback_in",
+          "net_label": "VFB"
+        },
+        {
+          "number": "16",
+          "name": "NTC",
+          "role": "signal_in",
+          "net_label": "NTC"
+        },
+        {
+          "number": "15",
+          "name": "RNG/SS",
+          "role": "signal_in",
+          "net_label": "RNG/SS"
+        },
+        {
+          "number": "14",
+          "name": "TIMER",
+          "role": "signal_in",
+          "net_label": "TIMER"
+        },
+        {
+          "number": "13",
+          "name": "STAT2",
+          "role": "signal_out",
+          "net_label": "STAT2"
+        },
+        {
+          "number": "12",
+          "name": "STAT1",
+          "role": "signal_out",
+          "net_label": "STAT1"
+        },
+        {
+          "number": "11",
+          "name": "MODE",
+          "role": "signal_in",
+          "net_label": "MODE"
+        },
+        {
+          "number": "10",
+          "name": "BGATE",
+          "role": "signal_out",
+          "net_label": "BGATE"
+        },
+        {
+          "number": "29",
+          "name": "SENSTOP",
+          "role": "signal_in",
+          "net_label": "SENSTOP"
+        },
+        {
+          "number": "7",
+          "name": "SENSBOT",
+          "role": "signal_in",
+          "net_label": "SENSBOT"
+        },
+        {
+          "number": "6",
+          "name": "SENSVIN",
+          "role": "signal_in",
+          "net_label": "SENSVIN"
+        },
+        {
+          "number": "5",
+          "name": "SENSGND",
+          "role": "ground",
+          "net_label": "SENSGND"
+        },
+        {
+          "number": "39",
+          "name": "PGND",
+          "role": "ground",
+          "net_label": "PGND"
+        },
+        {
+          "number": "40",
+          "name": "PGND",
+          "role": "ground",
+          "net_label": "PGND"
+        },
+        {
+          "number": "72",
+          "name": "TABGHC",
+          "role": "ground",
+          "net_label": "TABGHC"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C6",
+      "type": "capacitor",
+      "value": {
+        "raw": "4.7uF",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "INTVCC"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C122",
+      "type": "capacitor",
+      "value": {
+        "raw": "100uF",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "VOUT"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C125",
+      "type": "capacitor",
+      "value": {
+        "raw": "2.2uF",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "VOUT"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R3",
+      "type": "resistor",
+      "value": {
+        "raw": "100k",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "INTVCC"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": "CHG_INTVCC"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R94",
+      "type": "resistor",
+      "value": {
+        "raw": "0",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "CHG_INTVCC"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R34",
+      "type": "resistor",
+      "value": {
+        "raw": "150k",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "INTVCC"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": null
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R193",
+      "type": "resistor",
+      "value": {
+        "raw": "0",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "CHG_INTVCC"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R51",
+      "type": "resistor",
+      "value": {
+        "raw": "0",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "RNG/SS"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R95",
+      "type": "resistor",
+      "value": {
+        "raw": "10k",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "INTVCC"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": null
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R172",
+      "type": "resistor",
+      "value": {
+        "raw": "10k",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": null
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "Q4",
+      "type": "transistor",
+      "value": {
+        "raw": "PMV50ENEAR",
+        "primary": null,
+        "package": null,
+        "mpn": "PMV50ENEAR",
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": "G",
+          "role": "signal_in",
+          "net_label": null
+        },
+        {
+          "number": "2",
+          "name": "S",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "3",
+          "name": "D",
+          "role": "signal_out",
+          "net_label": null
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R4",
+      "type": "resistor",
+      "value": {
+        "raw": "0",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "VREG"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": "GPIO1"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R5",
+      "type": "resistor",
+      "value": {
+        "raw": "0",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "VREG"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": "GPIO2"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R8",
+      "type": "resistor",
+      "value": {
+        "raw": "100k",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "VREG"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R86",
+      "type": "resistor",
+      "value": {
+        "raw": "100k",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "BMON_SCK"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": "SCKI"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R78",
+      "type": "resistor",
+      "value": {
+        "raw": "0",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "BMON_SDI"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": "SDI"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R79",
+      "type": "resistor",
+      "value": {
+        "raw": "0",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "SDO"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": "BMON_SDO"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R80",
+      "type": "resistor",
+      "value": {
+        "raw": "0",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "BMON_CS"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": "CSN"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C2",
+      "type": "capacitor",
+      "value": {
+        "raw": "0.1uF",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "VREG"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C4",
+      "type": "capacitor",
+      "value": {
+        "raw": "1uF",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "VREG"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C5",
+      "type": "capacitor",
+      "value": {
+        "raw": "1uF",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "VREG"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "U4",
+      "type": "ic",
+      "value": {
+        "raw": "LTC6803-4",
+        "primary": null,
+        "package": null,
+        "mpn": "LTC6803-4",
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "31",
+          "name": "Vref",
+          "role": "power_out",
+          "net_label": "VREG"
+        },
+        {
+          "number": "32",
+          "name": "Vreg",
+          "role": "power_out",
+          "net_label": "VREG"
+        },
+        {
+          "number": "37",
+          "name": "A0",
+          "role": "signal_in",
+          "net_label": null
+        },
+        {
+          "number": "38",
+          "name": "A1",
+          "role": "signal_in",
+          "net_label": null
+        },
+        {
+          "number": "39",
+          "name": "A2",
+          "role": "signal_in",
+          "net_label": null
+        },
+        {
+          "number": "40",
+          "name": "A3",
+          "role": "signal_in",
+          "net_label": null
+        },
+        {
+          "number": "35",
+          "name": "GPIO1",
+          "role": "signal_inout",
+          "net_label": "GPIO1"
+        },
+        {
+          "number": "36",
+          "name": "GPIO2",
+          "role": "signal_inout",
+          "net_label": "GPIO2"
+        },
+        {
+          "number": "41",
+          "name": "SCKI",
+          "role": "clock_in",
+          "net_label": "SCKI"
+        },
+        {
+          "number": "42",
+          "name": "SDI",
+          "role": "signal_in",
+          "net_label": "SDI"
+        },
+        {
+          "number": "43",
+          "name": "SDO",
+          "role": "signal_out",
+          "net_label": "SDO"
+        },
+        {
+          "number": "44",
+          "name": "CSBI",
+          "role": "signal_in",
+          "net_label": "CSN"
+        },
+        {
+          "number": "29",
+          "name": "Vtemp1",
+          "role": "signal_out",
+          "net_label": null
+        },
+        {
+          "number": "30",
+          "name": "Vtemp2",
+          "role": "signal_out",
+          "net_label": null
+        },
+        {
+          "number": "34",
+          "name": "WDTB",
+          "role": "signal_out",
+          "net_label": null
+        },
+        {
+          "number": "26",
+          "name": "C0",
+          "role": "terminal",
+          "net_label": null
+        },
+        {
+          "number": "1",
+          "name": "S12",
+          "role": "terminal",
+          "net_label": "S12"
+        },
+        {
+          "number": "2",
+          "name": "S11",
+          "role": "terminal",
+          "net_label": "S11"
+        },
+        {
+          "number": "3",
+          "name": "S10",
+          "role": "terminal",
+          "net_label": "S10"
+        },
+        {
+          "number": "4",
+          "name": "S9",
+          "role": "terminal",
+          "net_label": null
+        },
+        {
+          "number": "5",
+          "name": "S8",
+          "role": "terminal",
+          "net_label": null
+        },
+        {
+          "number": "6",
+          "name": "S7",
+          "role": "terminal",
+          "net_label": null
+        },
+        {
+          "number": "7",
+          "name": "S6",
+          "role": "terminal",
+          "net_label": null
+        },
+        {
+          "number": "8",
+          "name": "S5",
+          "role": "terminal",
+          "net_label": null
+        },
+        {
+          "number": "9",
+          "name": "S4",
+          "role": "terminal",
+          "net_label": null
+        },
+        {
+          "number": "10",
+          "name": "S3",
+          "role": "terminal",
+          "net_label": null
+        },
+        {
+          "number": "11",
+          "name": "S2",
+          "role": "terminal",
+          "net_label": null
+        },
+        {
+          "number": "12",
+          "name": "S1",
+          "role": "terminal",
+          "net_label": null
+        },
+        {
+          "number": "13",
+          "name": "S0",
+          "role": "terminal",
+          "net_label": null
+        },
+        {
+          "number": "25",
+          "name": "C0",
+          "role": "terminal",
+          "net_label": null
+        },
+        {
+          "number": "24",
+          "name": "C1",
+          "role": "terminal",
+          "net_label": null
+        },
+        {
+          "number": "23",
+          "name": "C2",
+          "role": "terminal",
+          "net_label": null
+        },
+        {
+          "number": "22",
+          "name": "C3",
+          "role": "terminal",
+          "net_label": null
+        },
+        {
+          "number": "21",
+          "name": "C4",
+          "role": "terminal",
+          "net_label": null
+        },
+        {
+          "number": "20",
+          "name": "C5",
+          "role": "terminal",
+          "net_label": null
+        },
+        {
+          "number": "19",
+          "name": "C6",
+          "role": "terminal",
+          "net_label": null
+        },
+        {
+          "number": "18",
+          "name": "C7",
+          "role": "terminal",
+          "net_label": null
+        },
+        {
+          "number": "17",
+          "name": "C8",
+          "role": "terminal",
+          "net_label": null
+        },
+        {
+          "number": "16",
+          "name": "C9",
+          "role": "terminal",
+          "net_label": null
+        },
+        {
+          "number": "15",
+          "name": "C10",
+          "role": "terminal",
+          "net_label": null
+        },
+        {
+          "number": "14",
+          "name": "C11",
+          "role": "terminal",
+          "net_label": null
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "D2",
+      "type": "diode",
+      "value": {
+        "raw": "BAT46WJ,115",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "A",
+          "name": "A",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "K",
+          "name": "K",
+          "role": "signal_in",
+          "net_label": "VREG"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "D8",
+      "type": "diode",
+      "value": {
+        "raw": "BAT46WJ,115",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "A",
+          "name": "A",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "K",
+          "name": "K",
+          "role": "signal_in",
+          "net_label": "VREG"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "D9",
+      "type": "diode",
+      "value": {
+        "raw": "BAT46WJ,115",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "A",
+          "name": "A",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "K",
+          "name": "K",
+          "role": "signal_in",
+          "net_label": "VREG"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "L2",
+      "type": "inductor",
+      "value": {
+        "raw": "IMC1210ER100K",
+        "primary": null,
+        "package": null,
+        "mpn": "IMC1210ER100K",
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": "10uH"
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "VOUT"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": "BAT1FUSED"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C3",
+      "type": "capacitor",
+      "value": {
+        "raw": "0.1uF",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "INTVCC"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C7",
+      "type": "capacitor",
+      "value": {
+        "raw": "1uF",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "BST1"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "SW1"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C8",
+      "type": "capacitor",
+      "value": {
+        "raw": "1uF",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "BST2"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "SW2"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C9",
+      "type": "capacitor",
+      "value": {
+        "raw": "2nF",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "ITH"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C10",
+      "type": "capacitor",
+      "value": {
+        "raw": "680pF",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "ITH"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C11",
+      "type": "capacitor",
+      "value": {
+        "raw": "100uF",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "VOUT"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C12",
+      "type": "capacitor",
+      "value": {
+        "raw": "2.2uF",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "VOUT"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C64",
+      "type": "capacitor",
+      "value": {
+        "raw": "2nF",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "VFBMAX"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C65",
+      "type": "capacitor",
+      "value": {
+        "raw": "0.1uF",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "CHG_INTVCC"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R6",
+      "type": "resistor",
+      "value": {
+        "raw": "351R",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "INTVCC"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": "VFB"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R9",
+      "type": "resistor",
+      "value": {
+        "raw": "10k",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "BAT1FUSED"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": "SENSVIN"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R10",
+      "type": "resistor",
+      "value": {
+        "raw": "100",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "BAT2"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": null
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R11",
+      "type": "resistor",
+      "value": {
+        "raw": "100",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "BAT3"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": null
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R12",
+      "type": "resistor",
+      "value": {
+        "raw": "100",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "BAT4"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": null
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R13",
+      "type": "resistor",
+      "value": {
+        "raw": "100",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "BAT5"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": null
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R14",
+      "type": "resistor",
+      "value": {
+        "raw": "100",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "BAT6"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": null
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R15",
+      "type": "resistor",
+      "value": {
+        "raw": "100",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "BAT7"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": null
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R16",
+      "type": "resistor",
+      "value": {
+        "raw": "100",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "BAT8"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": null
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R17",
+      "type": "resistor",
+      "value": {
+        "raw": "3.3k",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "BAT1FUSED"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": null
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R18",
+      "type": "resistor",
+      "value": {
+        "raw": "3.3k",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "BAT2"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": null
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R19",
+      "type": "resistor",
+      "value": {
+        "raw": "3.3k",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "BAT3"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": null
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R20",
+      "type": "resistor",
+      "value": {
+        "raw": "3.3k",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "BAT4"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": null
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R21",
+      "type": "resistor",
+      "value": {
+        "raw": "3.3k",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "BAT5"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": null
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R22",
+      "type": "resistor",
+      "value": {
+        "raw": "3.3k",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "BAT6"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": null
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R23",
+      "type": "resistor",
+      "value": {
+        "raw": "3.3k",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "BAT7"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": null
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R24",
+      "type": "resistor",
+      "value": {
+        "raw": "3.3k",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "BAT8"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": null
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "D17",
+      "type": "diode",
+      "value": {
+        "raw": "PMEG60T10ELR",
+        "primary": null,
+        "package": null,
+        "mpn": "PMEG60T10ELR",
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "A",
+          "name": "A",
+          "role": "signal_in",
+          "net_label": "BAT1FUSED"
+        },
+        {
+          "number": "K",
+          "name": "K",
+          "role": "signal_out",
+          "net_label": "BAT1FUSED"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "D18",
+      "type": "diode",
+      "value": {
+        "raw": "PMEG60T10ELR",
+        "primary": null,
+        "package": null,
+        "mpn": "PMEG60T10ELR",
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "A",
+          "name": "A",
+          "role": "signal_in",
+          "net_label": "BAT2"
+        },
+        {
+          "number": "K",
+          "name": "K",
+          "role": "signal_out",
+          "net_label": "BAT2"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "D19",
+      "type": "diode",
+      "value": {
+        "raw": "PMEG60T10ELR",
+        "primary": null,
+        "package": null,
+        "mpn": "PMEG60T10ELR",
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "A",
+          "name": "A",
+          "role": "signal_in",
+          "net_label": "BAT3"
+        },
+        {
+          "number": "K",
+          "name": "K",
+          "role": "signal_out",
+          "net_label": "BAT3"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "D24",
+      "type": "diode",
+      "value": {
+        "raw": "PMEG60T10ELR",
+        "primary": null,
+        "package": null,
+        "mpn": "PMEG60T10ELR",
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "A",
+          "name": "A",
+          "role": "signal_in",
+          "net_label": "BAT4"
+        },
+        {
+          "number": "K",
+          "name": "K",
+          "role": "signal_out",
+          "net_label": "BAT4"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "D25",
+      "type": "diode",
+      "value": {
+        "raw": "PMEG60T10ELR",
+        "primary": null,
+        "package": null,
+        "mpn": "PMEG60T10ELR",
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "A",
+          "name": "A",
+          "role": "signal_in",
+          "net_label": "BAT5"
+        },
+        {
+          "number": "K",
+          "name": "K",
+          "role": "signal_out",
+          "net_label": "BAT5"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "D26",
+      "type": "diode",
+      "value": {
+        "raw": "PMEG60T10ELR",
+        "primary": null,
+        "package": null,
+        "mpn": "PMEG60T10ELR",
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "A",
+          "name": "A",
+          "role": "signal_in",
+          "net_label": "BAT6"
+        },
+        {
+          "number": "K",
+          "name": "K",
+          "role": "signal_out",
+          "net_label": "BAT6"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "D27",
+      "type": "diode",
+      "value": {
+        "raw": "PMEG60T10ELR",
+        "primary": null,
+        "package": null,
+        "mpn": "PMEG60T10ELR",
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "A",
+          "name": "A",
+          "role": "signal_in",
+          "net_label": "BAT7"
+        },
+        {
+          "number": "K",
+          "name": "K",
+          "role": "signal_out",
+          "net_label": "BAT7"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "D28",
+      "type": "diode",
+      "value": {
+        "raw": "PMEG60T10ELR",
+        "primary": null,
+        "package": null,
+        "mpn": "PMEG60T10ELR",
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "A",
+          "name": "A",
+          "role": "signal_in",
+          "net_label": "BAT8"
+        },
+        {
+          "number": "K",
+          "name": "K",
+          "role": "signal_out",
+          "net_label": "BAT8"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "Q5",
+      "type": "transistor",
+      "value": {
+        "raw": "PMV50EPEAR",
+        "primary": null,
+        "package": null,
+        "mpn": "PMV50EPEAR",
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": "G",
+          "role": "signal_in",
+          "net_label": null
+        },
+        {
+          "number": "2",
+          "name": "S",
+          "role": "signal_in",
+          "net_label": "BAT1FUSED"
+        },
+        {
+          "number": "3",
+          "name": "D",
+          "role": "signal_out",
+          "net_label": "BAT1"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "Q6",
+      "type": "transistor",
+      "value": {
+        "raw": "PMV50EPEAR",
+        "primary": null,
+        "package": null,
+        "mpn": "PMV50EPEAR",
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": "G",
+          "role": "signal_in",
+          "net_label": null
+        },
+        {
+          "number": "2",
+          "name": "S",
+          "role": "signal_in",
+          "net_label": "BAT2"
+        },
+        {
+          "number": "3",
+          "name": "D",
+          "role": "signal_out",
+          "net_label": "BAT2"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "Q7",
+      "type": "transistor",
+      "value": {
+        "raw": "PMV50EPEAR",
+        "primary": null,
+        "package": null,
+        "mpn": "PMV50EPEAR",
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": "G",
+          "role": "signal_in",
+          "net_label": null
+        },
+        {
+          "number": "2",
+          "name": "S",
+          "role": "signal_in",
+          "net_label": "BAT3"
+        },
+        {
+          "number": "3",
+          "name": "D",
+          "role": "signal_out",
+          "net_label": "BAT3"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "Q8",
+      "type": "transistor",
+      "value": {
+        "raw": "PMV50EPEAR",
+        "primary": null,
+        "package": null,
+        "mpn": "PMV50EPEAR",
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": "G",
+          "role": "signal_in",
+          "net_label": null
+        },
+        {
+          "number": "2",
+          "name": "S",
+          "role": "signal_in",
+          "net_label": "BAT4"
+        },
+        {
+          "number": "3",
+          "name": "D",
+          "role": "signal_out",
+          "net_label": "BAT4"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "Q9",
+      "type": "transistor",
+      "value": {
+        "raw": "PMV50EPEAR",
+        "primary": null,
+        "package": null,
+        "mpn": "PMV50EPEAR",
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": "G",
+          "role": "signal_in",
+          "net_label": null
+        },
+        {
+          "number": "2",
+          "name": "S",
+          "role": "signal_in",
+          "net_label": "BAT5"
+        },
+        {
+          "number": "3",
+          "name": "D",
+          "role": "signal_out",
+          "net_label": "BAT5"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "Q10",
+      "type": "transistor",
+      "value": {
+        "raw": "PMV50EPEAR",
+        "primary": null,
+        "package": null,
+        "mpn": "PMV50EPEAR",
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": "G",
+          "role": "signal_in",
+          "net_label": null
+        },
+        {
+          "number": "2",
+          "name": "S",
+          "role": "signal_in",
+          "net_label": "BAT6"
+        },
+        {
+          "number": "3",
+          "name": "D",
+          "role": "signal_out",
+          "net_label": "BAT6"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "Q11",
+      "type": "transistor",
+      "value": {
+        "raw": "PMV50EPEAR",
+        "primary": null,
+        "package": null,
+        "mpn": "PMV50EPEAR",
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": "G",
+          "role": "signal_in",
+          "net_label": null
+        },
+        {
+          "number": "2",
+          "name": "S",
+          "role": "signal_in",
+          "net_label": "BAT7"
+        },
+        {
+          "number": "3",
+          "name": "D",
+          "role": "signal_out",
+          "net_label": "BAT7"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "Q12",
+      "type": "transistor",
+      "value": {
+        "raw": "PMV50EPEAR",
+        "primary": null,
+        "package": null,
+        "mpn": "PMV50EPEAR",
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": "G",
+          "role": "signal_in",
+          "net_label": null
+        },
+        {
+          "number": "2",
+          "name": "S",
+          "role": "signal_in",
+          "net_label": "BAT8"
+        },
+        {
+          "number": "3",
+          "name": "D",
+          "role": "signal_out",
+          "net_label": "BAT8"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "J2",
+      "type": "connector",
+      "value": {
+        "raw": "BATCON2",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "BAT5"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "terminal",
+          "net_label": "BAT6"
+        },
+        {
+          "number": "3",
+          "name": null,
+          "role": "terminal",
+          "net_label": "BAT7"
+        },
+        {
+          "number": "4",
+          "name": null,
+          "role": "terminal",
+          "net_label": "BAT8"
+        },
+        {
+          "number": "5",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "J13",
+      "type": "connector",
+      "value": {
+        "raw": "BATCON1",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "BAT1"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "terminal",
+          "net_label": "BAT2"
+        },
+        {
+          "number": "3",
+          "name": null,
+          "role": "terminal",
+          "net_label": "BAT3"
+        },
+        {
+          "number": "4",
+          "name": null,
+          "role": "terminal",
+          "net_label": "BAT4"
+        },
+        {
+          "number": "5",
+          "name": null,
+          "role": "terminal",
+          "net_label": "BAT5"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R173",
+      "type": "resistor",
+      "value": {
+        "raw": "49.9k",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "VOUT"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": "VFB"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R174",
+      "type": "resistor",
+      "value": {
+        "raw": "4.7k",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "VFB"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R175",
+      "type": "resistor",
+      "value": {
+        "raw": "0.02",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "SENSTOP"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": "SENSBOT"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R176",
+      "type": "resistor",
+      "value": {
+        "raw": "100",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "CSOUT"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": null
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R177",
+      "type": "resistor",
+      "value": {
+        "raw": "0.02",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "CSP"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": "CSN"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C31",
+      "type": "capacitor",
+      "value": {
+        "raw": "0.33uF",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "ILIMIT"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R12",
+      "type": "resistor",
+      "value": {
+        "raw": "100k",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "VFBMAX"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R182",
+      "type": "resistor",
+      "value": {
+        "raw": "481R",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "VOUT"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": "VFBMAX"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R13",
+      "type": "resistor",
+      "value": {
+        "raw": "381R",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "VFBMAX"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R14",
+      "type": "resistor",
+      "value": {
+        "raw": "100k",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "VFBMIN"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R15",
+      "type": "resistor",
+      "value": {
+        "raw": "1M",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "VFBMIN"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R16",
+      "type": "resistor",
+      "value": {
+        "raw": "1M",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "GPIO1"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": "VFBMIN"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R20",
+      "type": "resistor",
+      "value": {
+        "raw": "1M",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "GPIO2"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": "VFBMAX"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R21",
+      "type": "resistor",
+      "value": {
+        "raw": "47k",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "INTVCC"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": "ITH"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "SW1",
+      "type": "switch",
+      "value": {
+        "raw": "SW1",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": null
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "terminal",
+          "net_label": null
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "SW2",
+      "type": "switch",
+      "value": {
+        "raw": "SW2",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": null
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "terminal",
+          "net_label": null
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "M1",
+      "type": "mounting",
+      "value": {
+        "raw": "M1",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "D25",
+      "type": "led",
+      "value": {
+        "raw": "D25",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": "CHG_STAT1 LED"
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "A",
+          "name": "A",
+          "role": "power_in",
+          "net_label": "CHG_INTVCC"
+        },
+        {
+          "number": "K",
+          "name": "K",
+          "role": "signal_in",
+          "net_label": "CHG_STAT1"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "D26",
+      "type": "led",
+      "value": {
+        "raw": "D26",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": "CHG_STAT2 LED"
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "A",
+          "name": "A",
+          "role": "power_in",
+          "net_label": "CHG_INTVCC"
+        },
+        {
+          "number": "K",
+          "name": "K",
+          "role": "signal_in",
+          "net_label": "CHG_STAT2"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R182",
+      "type": "resistor",
+      "value": {
+        "raw": "100",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "CHG_INTVCC"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": "CHG_STAT1"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R183",
+      "type": "resistor",
+      "value": {
+        "raw": "100",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 2,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "CHG_INTVCC"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": "CHG_STAT2"
+        }
+      ],
+      "populated": true
+    }
+  ],
+  "nets": [
+    {
+      "local_id": "net_GND",
+      "label": "GND",
+      "is_power": true,
+      "is_global": true,
+      "connects": [
+        "J1.2",
+        "D13.A",
+        "D1.A",
+        "C160.2",
+        "C161.2",
+        "C149.2",
+        "C44.2",
+        "C45.2",
+        "C6.2",
+        "C122.2",
+        "C125.2",
+        "C9.2",
+        "C10.2",
+        "C2.2",
+        "C4.2",
+        "C5.2",
+        "C64.2",
+        "C65.2",
+        "R174.2",
+        "R51.2",
+        "R8.2",
+        "D2.A",
+        "D8.A",
+        "D9.A",
+        "R94.2",
+        "R193.2",
+        "R172.2",
+        "C31.2",
+        "C1.2",
+        "Q4.2",
+        "J2.5"
+      ],
+      "page": 2
+    },
+    {
+      "local_id": "net_24V_IN",
+      "label": "24V_IN",
+      "is_power": true,
+      "is_global": false,
+      "connects": [
+        "J1.1",
+        "J1.3",
+        "F1.1"
+      ],
+      "page": 2
+    },
+    {
+      "local_id": "net_VIN",
+      "label": "VIN",
+      "is_power": true,
+      "is_global": false,
+      "connects": [
+        "F1.2",
+        "D13.K",
+        "D1.K",
+        "R49.1",
+        "C160.1",
+        "C161.1",
+        "C149.1",
+        "Q3.2"
+      ],
+      "page": 2
+    },
+    {
+      "local_id": "net_PVIN",
+      "label": "PVIN",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "R49.2",
+        "Q3.3",
+        "C44.1",
+        "U2.36",
+        "Q15.2",
+        "Q17.2"
+      ],
+      "page": 2
+    },
+    {
+      "local_id": "net_PGND",
+      "label": "PGND",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U2.35",
+        "U2.39",
+        "U2.40",
+        "Q1.2",
+        "Q2.2",
+        "D4.A"
+      ],
+      "page": 2
+    },
+    {
+      "local_id": "net_VOUT",
+      "label": "VOUT",
+      "is_power": true,
+      "is_global": false,
+      "connects": [
+        "L1.2",
+        "C122.1",
+        "C125.1",
+        "C11.1",
+        "C12.1",
+        "R50.1",
+        "R173.1",
+        "R182.1"
+      ],
+      "page": 2
+    },
+    {
+      "local_id": "net_SW1",
+      "label": "SW1",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U2.38",
+        "Q1.3",
+        "Q2.3",
+        "L1.1",
+        "D4.K",
+        "C1.1",
+        "C7.2"
+      ],
+      "page": 2
+    },
+    {
+      "local_id": "net_SW2",
+      "label": "SW2",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U2.32",
+        "Q15.3",
+        "Q17.3",
+        "C8.2"
+      ],
+      "page": 2
+    },
+    {
+      "local_id": "net_INTVCC",
+      "label": "INTVCC",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U2.34",
+        "C6.1",
+        "C3.1",
+        "R3.1",
+        "R6.1",
+        "R34.1",
+        "R21.1"
+      ],
+      "page": 2
+    },
+    {
+      "local_id": "net_CHG_INTVCC",
+      "label": "CHG_INTVCC",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "R3.2",
+        "U2.9",
+        "C65.1",
+        "R193.1",
+        "R94.1"
+      ],
+      "page": 2
+    },
+    {
+      "local_id": "net_TG1",
+      "label": "TG1",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U2.1"
+      ],
+      "page": 2
+    },
+    {
+      "local_id": "net_BST1",
+      "label": "BST1",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U2.2",
+        "C7.1"
+      ],
+      "page": 2
+    },
+    {
+      "local_id": "net_BST2",
+      "label": "BST2",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U2.30",
+        "C8.1"
+      ],
+      "page": 2
+    },
+    {
+      "local_id": "net_TG2",
+      "label": "TG2",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U2.31"
+      ],
+      "page": 2
+    },
+    {
+      "local_id": "net_BG1",
+      "label": "BG1",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U2.37"
+      ],
+      "page": 2
+    },
+    {
+      "local_id": "net_BG2",
+      "label": "BG2",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U2.33"
+      ],
+      "page": 2
+    },
+    {
+      "local_id": "net_ITH",
+      "label": "ITH",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U2.28",
+        "C9.1",
+        "C10.1",
+        "R21.2"
+      ],
+      "page": 2
+    },
+    {
+      "local_id": "net_SENSBOT",
+      "label": "SENSBOT",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U2.27",
+        "R175.2"
+      ],
+      "page": 2
+    },
+    {
+      "local_id": "net_SENSTOP",
+      "label": "SENSTOP",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U2.29",
+        "R175.1"
+      ],
+      "page": 2
+    },
+    {
+      "local_id": "net_VFBMAX",
+      "label": "VFBMAX",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U2.26",
+        "C64.1",
+        "R182.2",
+        "R20.2"
+      ],
+      "page": 2
+    },
+    {
+      "local_id": "net_ILIMIT",
+      "label": "ILIMIT",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U2.25",
+        "C31.1"
+      ],
+      "page": 2
+    },
+    {
+      "local_id": "net_CSOUT",
+      "label": "CSOUT",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U2.24",
+        "R176.1"
+      ],
+      "page": 2
+    },
+    {
+      "local_id": "net_CSP",
+      "label": "CSP",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U2.23",
+        "R177.1"
+      ],
+      "page": 2
+    },
+    {
+      "local_id": "net_CSN",
+      "label": "CSN",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U2.22",
+        "R177.2",
+        "R80.2"
+      ],
+      "page": 2
+    },
+    {
+      "local_id": "net_VIN_REG",
+      "label": "VIN_REG",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U2.21"
+      ],
+      "page": 2
+    },
+    {
+      "local_id": "net_BAT",
+      "label": "BAT",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U2.20"
+      ],
+      "page": 2
+    },
+    {
+      "local_id": "net_VFBMIN",
+      "label": "VFBMIN",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U2.19",
+        "R14.1",
+        "R15.1",
+        "R16.2"
+      ],
+      "page": 2
+    },
+    {
+      "local_id": "net_FBG",
+      "label": "FBG",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U2.18"
+      ],
+      "page": 2
+    },
+    {
+      "local_id": "net_VFB",
+      "label": "VFB",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U2.17",
+        "R6.2",
+        "R173.2",
+        "R174.1"
+      ],
+      "page": 2
+    },
+    {
+      "local_id": "net_NTC",
+      "label": "NTC",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U2.16"
+      ],
+      "page": 2
+    },
+    {
+      "local_id": "net_RNG_SS",
+      "label": "RNG/SS",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U2.15",
+        "R51.1"
+      ],
+      "page": 2
+    },
+    {
+      "local_id": "net_TIMER",
+      "label": "TIMER",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U2.14"
+      ],
+      "page": 2
+    },
+    {
+      "local_id": "net_STAT2",
+      "label": "STAT2",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U2.13",
+        "CHG_STAT2"
+      ],
+      "page": 2
+    },
+    {
+      "local_id": "net_STAT1",
+      "label": "STAT1",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U2.12",
+        "CHG_STAT1"
+      ],
+      "page": 2
+    },
+    {
+      "local_id": "net_MODE",
+      "label": "MODE",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U2.11"
+      ],
+      "page": 2
+    },
+    {
+      "local_id": "net_BGATE",
+      "label": "BGATE",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U2.10"
+      ],
+      "page": 2
+    },
+    {
+      "local_id": "net_SENSVIN",
+      "label": "SENSVIN",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U2.6",
+        "R9.2"
+      ],
+      "page": 2
+    },
+    {
+      "local_id": "net_SENSGND",
+      "label": "SENSGND",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U2.5",
+        "C45.1"
+      ],
+      "page": 2
+    },
+    {
+      "local_id": "net_VREG",
+      "label": "VREG",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U4.31",
+        "U4.32",
+        "C2.1",
+        "C4.1",
+        "C5.1",
+        "R4.1",
+        "R5.1",
+        "R8.1"
+      ],
+      "page": 2
+    },
+    {
+      "local_id": "net_GPIO1",
+      "label": "GPIO1",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U4.35",
+        "R4.2",
+        "R16.1"
+      ],
+      "page": 2
+    },
+    {
+      "local_id": "net_GPIO2",
+      "label": "GPIO2",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U4.36",
+        "R5.2",
+        "R20.1"
+      ],
+      "page": 2
+    },
+    {
+      "local_id": "net_SCKI",
+      "label": "SCKI",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U4.41",
+        "R86.2"
+      ],
+      "page": 2
+    },
+    {
+      "local_id": "net_SDI",
+      "label": "SDI",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U4.42",
+        "R78.2"
+      ],
+      "page": 2
+    },
+    {
+      "local_id": "net_SDO",
+      "label": "SDO",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U4.43",
+        "R79.1"
+      ],
+      "page": 2
+    },
+    {
+      "local_id": "net_BMON_SCK",
+      "label": "BMON_SCK",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "R86.1"
+      ],
+      "page": 2
+    },
+    {
+      "local_id": "net_BMON_SDI",
+      "label": "BMON_SDI",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "R78.1"
+      ],
+      "page": 2
+    },
+    {
+      "local_id": "net_BMON_SDO",
+      "label": "BMON_SDO",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "R79.2"
+      ],
+      "page": 2
+    },
+    {
+      "local_id": "net_BMON_CS",
+      "label": "BMON_CS",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "R80.1"
+      ],
+      "page": 2
+    },
+    {
+      "local_id": "net_BAT1FUSED",
+      "label": "BAT1FUSED",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "L2.2",
+        "F2.1",
+        "R9.1",
+        "R17.1",
+        "D17.A",
+        "Q5.2"
+      ],
+      "page": 2
+    },
+    {
+      "local_id": "net_BAT1",
+      "label": "BAT1",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "F2.2",
+        "J13.1",
+        "Q5.3"
+      ],
+      "page": 2
+    },
+    {
+      "local_id": "net_BAT2",
+      "label": "BAT2",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "J13.2",
+        "R10.1",
+        "R18.1",
+        "D18.A",
+        "Q6.2",
+        "Q6.3"
+      ],
+      "page": 2
+    },
+    {
+      "local_id": "net_BAT3",
+      "label": "BAT3",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "J13.3",
+        "R11.1",
+        "R19.1",
+        "D19.A",
+        "Q7.2",
+        "Q7.3"
+      ],
+      "page": 2
+    },
+    {
+      "local_id": "net_BAT4",
+      "label": "BAT4",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "J13.4",
+        "R12.1",
+        "R20.1",
+        "D24.A",
+        "Q8.2",
+        "Q8.3"
+      ],
+      "page": 2
+    },
+    {
+      "local_id": "net_BAT5",
+      "label": "BAT5",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "J2.1",
+        "J13.5",
+        "R13.1",
+        "R21.1",
+        "D25.A",
+        "Q9.2",
+        "Q9.3"
+      ],
+      "page": 2
+    },
+    {
+      "local_id": "net_BAT6",
+      "label": "BAT6",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "J2.2",
+        "R14.1",
+        "R22.1",
+        "D26.A",
+        "Q10.2",
+        "Q10.3"
+      ],
+      "page": 2
+    },
+    {
+      "local_id": "net_BAT7",
+      "label": "BAT7",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "J2.3",
+        "R15.1",
+        "R23.1",
+        "D27.A",
+        "Q11.2",
+        "Q11.3"
+      ],
+      "page": 2
+    },
+    {
+      "local_id": "net_BAT8",
+      "label": "BAT8",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "J2.4",
+        "R16.1",
+        "R24.1",
+        "D28.A",
+        "Q12.2",
+        "Q12.3"
+      ],
+      "page": 2
+    },
+    {
+      "local_id": "net_30V_GATE",
+      "label": "30V_GATE",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "Q3.1"
+      ],
+      "page": 2
+    },
+    {
+      "local_id": "net_CHG_STAT1",
+      "label": "CHG_STAT1",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U2.12"
+      ],
+      "page": 2
+    },
+    {
+      "local_id": "net_CHG_STAT2",
+      "label": "CHG_STAT2",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U2.13"
+      ],
+      "page": 2
+    }
+  ],
+  "cross_page_refs": [
+    {
+      "label": "30V_GATE",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "Battery system VOUT / 30V_GATE",
+      "page": 2
+    },
+    {
+      "label": "VOUT",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "Battery system VOUT output",
+      "page": 2
+    },
+    {
+      "label": "BMON_SCK",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "LPC / SPI bus",
+      "page": 2
+    },
+    {
+      "label": "BMON_SDI",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "LPC / SPI bus",
+      "page": 2
+    },
+    {
+      "label": "BMON_SDO",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "LPC / SPI bus",
+      "page": 2
+    },
+    {
+      "label": "BMON_CS",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "LPC / SPI bus",
+      "page": 2
+    },
+    {
+      "label": "BAT1",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "Battery outputs to system",
+      "page": 2
+    },
+    {
+      "label": "BAT2",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "Battery outputs to system",
+      "page": 2
+    },
+    {
+      "label": "BAT3",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "Battery outputs to system",
+      "page": 2
+    },
+    {
+      "label": "BAT4",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "Battery outputs to system",
+      "page": 2
+    },
+    {
+      "label": "BAT5",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "Battery outputs to system",
+      "page": 2
+    },
+    {
+      "label": "BAT6",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "Battery outputs to system",
+      "page": 2
+    },
+    {
+      "label": "BAT7",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "Battery outputs to system",
+      "page": 2
+    },
+    {
+      "label": "BAT8",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "Battery outputs to system",
+      "page": 2
+    },
+    {
+      "label": "CHG_STAT1",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "Status to LPC",
+      "page": 2
+    },
+    {
+      "label": "CHG_STAT2",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "Status to LPC",
+      "page": 2
+    },
+    {
+      "label": "Reform 2 Regulators",
+      "direction": "subsheet",
+      "at_pin": null,
+      "target_hint": "File: reform2-regulators.kicad_sch",
+      "page": 2
+    },
+    {
+      "label": "Reform 2 LPC",
+      "direction": "subsheet",
+      "at_pin": null,
+      "target_hint": "File: reform2-lpc.kicad_sch",
+      "page": 2
+    }
+  ],
+  "typed_edges": [
+    {
+      "src": "J1",
+      "dst": "F1",
+      "kind": "powers",
+      "page": 2
+    },
+    {
+      "src": "F1",
+      "dst": "VIN",
+      "kind": "powers",
+      "page": 2
+    },
+    {
+      "src": "U2",
+      "dst": "VOUT",
+      "kind": "powers",
+      "page": 2
+    },
+    {
+      "src": "VOUT",
+      "dst": "L2",
+      "kind": "filters",
+      "page": 2
+    },
+    {
+      "src": "L2",
+      "dst": "BAT1FUSED",
+      "kind": "powers",
+      "page": 2
+    },
+    {
+      "src": "F2",
+      "dst": "BAT1",
+      "kind": "powers",
+      "page": 2
+    },
+    {
+      "src": "C160",
+      "dst": "VIN",
+      "kind": "decouples",
+      "page": 2
+    },
+    {
+      "src": "C161",
+      "dst": "VIN",
+      "kind": "decouples",
+      "page": 2
+    },
+    {
+      "src": "C149",
+      "dst": "VIN",
+      "kind": "decouples",
+      "page": 2
+    },
+    {
+      "src": "C6",
+      "dst": "INTVCC",
+      "kind": "decouples",
+      "page": 2
+    },
+    {
+      "src": "C122",
+      "dst": "VOUT",
+      "kind": "decouples",
+      "page": 2
+    },
+    {
+      "src": "C125",
+      "dst": "VOUT",
+      "kind": "decouples",
+      "page": 2
+    },
+    {
+      "src": "C44",
+      "dst": "PVIN",
+      "kind": "decouples",
+      "page": 2
+    },
+    {
+      "src": "C2",
+      "dst": "VREG",
+      "kind": "decouples",
+      "page": 2
+    },
+    {
+      "src": "C4",
+      "dst": "VREG",
+      "kind": "decouples",
+      "page": 2
+    },
+    {
+      "src": "C5",
+      "dst": "VREG",
+      "kind": "decouples",
+      "page": 2
+    },
+    {
+      "src": "U2",
+      "dst": "INTVCC",
+      "kind": "powers",
+      "page": 2
+    },
+    {
+      "src": "U4",
+      "dst": "VREG",
+      "kind": "powers",
+      "page": 2
+    },
+    {
+      "src": "R3",
+      "dst": "U2",
+      "kind": "enables",
+      "page": 2
+    },
+    {
+      "src": "D13",
+      "dst": "VIN",
+      "kind": "filters",
+      "page": 2
+    },
+    {
+      "src": "D1",
+      "dst": "VIN",
+      "kind": "filters",
+      "page": 2
+    },
+    {
+      "src": "L1",
+      "dst": "VOUT",
+      "kind": "filters",
+      "page": 2
+    },
+    {
+      "src": "R173",
+      "dst": "U2",
+      "kind": "feedback_in",
+      "page": 2
+    },
+    {
+      "src": "R175",
+      "dst": "U2",
+      "kind": "consumes_signal",
+      "page": 2
+    },
+    {
+      "src": "R177",
+      "dst": "U2",
+      "kind": "consumes_signal",
+      "page": 2
+    },
+    {
+      "src": "D17",
+      "dst": "BAT1FUSED",
+      "kind": "filters",
+      "page": 2
+    },
+    {
+      "src": "D18",
+      "dst": "BAT2",
+      "kind": "filters",
+      "page": 2
+    },
+    {
+      "src": "D19",
+      "dst": "BAT3",
+      "kind": "filters",
+      "page": 2
+    },
+    {
+      "src": "D24",
+      "dst": "BAT4",
+      "kind": "filters",
+      "page": 2
+    },
+    {
+      "src": "D25",
+      "dst": "BAT5",
+      "kind": "filters",
+      "page": 2
+    },
+    {
+      "src": "D26",
+      "dst": "BAT6",
+      "kind": "filters",
+      "page": 2
+    },
+    {
+      "src": "D27",
+      "dst": "BAT7",
+      "kind": "filters",
+      "page": 2
+    },
+    {
+      "src": "D28",
+      "dst": "BAT8",
+      "kind": "filters",
+      "page": 2
+    },
+    {
+      "src": "U2",
+      "dst": "Q1",
+      "kind": "enables",
+      "page": 2
+    },
+    {
+      "src": "U2",
+      "dst": "Q2",
+      "kind": "enables",
+      "page": 2
+    },
+    {
+      "src": "U2",
+      "dst": "Q15",
+      "kind": "enables",
+      "page": 2
+    },
+    {
+      "src": "U2",
+      "dst": "Q17",
+      "kind": "enables",
+      "page": 2
+    },
+    {
+      "src": "Q3",
+      "dst": "PVIN",
+      "kind": "powers",
+      "page": 2
+    },
+    {
+      "src": "30V_GATE",
+      "dst": "Q3",
+      "kind": "enables",
+      "page": 2
+    }
+  ],
+  "designer_notes": [
+    {
+      "text": "Inrush Current Limiter by Zoe",
+      "page": 2,
+      "attached_to_refdes": "Q3",
+      "attached_to_net": null
+    },
+    {
+      "text": "Close to PVIN",
+      "page": 2,
+      "attached_to_refdes": "C44",
+      "attached_to_net": null
+    },
+    {
+      "text": "Charger/Booster",
+      "page": 2,
+      "attached_to_refdes": "U2",
+      "attached_to_net": null
+    },
+    {
+      "text": "Csensb",
+      "page": 2,
+      "attached_to_refdes": "C45",
+      "attached_to_net": null
+    },
+    {
+      "text": "Oscillator free running 10k - 250kHz",
+      "page": 2,
+      "attached_to_refdes": null,
+      "attached_to_net": "TIMER"
+    },
+    {
+      "text": "selective charger turn-off (via NTC input)",
+      "page": 2,
+      "attached_to_refdes": "Q4",
+      "attached_to_net": null
+    },
+    {
+      "text": "Prevent backpowering",
+      "page": 2,
+      "attached_to_refdes": null,
+      "attached_to_net": null
+    },
+    {
+      "text": "LiFePO4 Battery Stack",
+      "page": 2,
+      "attached_to_refdes": null,
+      "attached_to_net": "BAT8"
+    },
+    {
+      "text": "Status LEDs",
+      "page": 2,
+      "attached_to_refdes": null,
+      "attached_to_net": null
+    },
+    {
+      "text": "Balancer",
+      "page": 2,
+      "attached_to_refdes": "U4",
+      "attached_to_net": null
+    },
+    {
+      "text": "Charge Voltage = 2.75*(1+(100/10)) = 29.04V / 8 = 3.63V",
+      "page": 2,
+      "attached_to_refdes": null,
+      "attached_to_net": "VFBMAX"
+    },
+    {
+      "text": "License: CERN-OHL-S 2.0\nEngineer: Lukas F. Hartmann\nhttps://mntre.com\nMNT Research GmbH\nSheet: /Reform 2 Power/\nFile: reform2-power.kicad_sch",
+      "page": 2,
+      "attached_to_refdes": null,
+      "attached_to_net": null
+    }
+  ],
+  "ambiguities": [
+    {
+      "description": "The exact pin assignments of Q1, Q2, Q15, Q17 gate connections to U2 BG1/TG1/BG2/TG2 could not be fully traced due to density; assignments inferred from LTC4020 typical circuit topology.",
+      "page": 2,
+      "related_refdes": [
+        "Q1",
+        "Q2",
+        "Q15",
+        "Q17",
+        "U2"
+      ],
+      "related_nets": []
+    },
+    {
+      "description": "R182, R183 LED current limiting resistors for CHG_STAT LEDs — refdes R183 not in grounding set; may be R182 for one and an alternate refdes for other. Possibly R184 not in set.",
+      "page": 2,
+      "related_refdes": [
+        "R182"
+      ],
+      "related_nets": []
+    },
+    {
+      "description": "Multiple resistor refdes (R10-R24) appear duplicated in grounding list and image — some are Vgs gate resistors for battery balancer FETs (Q5-Q12) and some are battery voltage dividers; exact refdes mapping for each is uncertain due to density.",
+      "page": 2,
+      "related_refdes": [
+        "R10",
+        "R11",
+        "R12",
+        "R13",
+        "R14",
+        "R15",
+        "R16",
+        "R17",
+        "R18",
+        "R19",
+        "R20",
+        "R21",
+        "R22",
+        "R23",
+        "R24"
+      ],
+      "related_nets": []
+    },
+    {
+      "description": "U4 LTC6803-4 cell voltage sense pins (S0-S12, C0-C11) routing to battery cell nodes not fully traceable in this image due to density — partial net labels only.",
+      "page": 2,
+      "related_refdes": [
+        "U4"
+      ],
+      "related_nets": []
+    },
+    {
+      "description": "SW1 and SW2 net connections (charge mode selection) not clearly readable from image — pins left without net labels.",
+      "page": 2,
+      "related_refdes": [
+        "SW1",
+        "SW2"
+      ],
+      "related_nets": []
+    },
+    {
+      "description": "Q4 PMV50ENEAR gate resistor network and connection to NTC/SHDN not fully traceable; R95 and R172 connections uncertain.",
+      "page": 2,
+      "related_refdes": [
+        "Q4",
+        "R95",
+        "R172"
+      ],
+      "related_nets": []
+    },
+    {
+      "description": "The D25/D26 LED refdes in grounding set clash with D25/D26 PMEG60T10ELR diodes also in the grounding set — schematic appears to use both, page is dense; only PMEG diodes and separate LED symbols can be confirmed but their exact refdes are ambiguous at this scale.",
+      "page": 2,
+      "related_refdes": [
+        "D25",
+        "D26"
+      ],
+      "related_nets": []
+    }
+  ]
+}

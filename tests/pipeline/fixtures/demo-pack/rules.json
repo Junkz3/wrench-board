@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0",
+  "rules": [
+    {
+      "id": "rule-demo-001",
+      "symptoms": ["3V3 rail dead", "device doesn't boot"],
+      "likely_causes": [
+        {"refdes": "C29", "probability": 0.78, "mechanism": "short-to-ground"},
+        {"refdes": "U7",  "probability": 0.25, "mechanism": "dead PMIC"}
+      ],
+      "diagnostic_steps": [
+        {"action": "measure 3V3_RAIL at TP18", "expected": "3.3V ± 5%"}
+      ],
+      "confidence": 0.82,
+      "sources": ["fixture"]
+    }
+  ]
+}

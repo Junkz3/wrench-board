@@ -1,0 +1,1 @@
+TLV62568 2-A step-down converter in SOT-23. Under prolonged overcurrent the internal switch shorts or opens, zeroing the output rail. Downstream logic loses its supply cleanly.

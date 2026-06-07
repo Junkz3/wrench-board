@@ -1,0 +1,826 @@
+{
+  "items": [
+    {
+      "canonical_name": "U14",
+      "logical_alias": null,
+      "aliases": [
+        "always-on 3.3V regulator"
+      ],
+      "kind": "pmic",
+      "description": "Always-on 3.3 V linear regulator providing LPC_VCC to the System Controller before any other rails are enabled.",
+      "refdes_candidates": null,
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "canonical_name": "U18",
+      "logical_alias": null,
+      "aliases": [
+        "LPC11U24",
+        "System Controller",
+        "LPC"
+      ],
+      "kind": "ic",
+      "description": "NXP LPC11U24 ARM Cortex-M0 MCU that sequences all power rails, monitors battery cells via SPI, and accepts UART commands for power-on/off.",
+      "refdes_candidates": null,
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "canonical_name": "U9",
+      "logical_alias": null,
+      "aliases": [
+        "TUSB8041",
+        "USB hub"
+      ],
+      "kind": "ic",
+      "description": "Texas Instruments TUSB8041 4-port USB 3.0 hub; expands CPU-module USB controllers to five total ports.",
+      "refdes_candidates": null,
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "canonical_name": "U10",
+      "logical_alias": null,
+      "aliases": [
+        "SN65DSI86",
+        "DSI-to-eDP bridge",
+        "MIPI bridge"
+      ],
+      "kind": "ic",
+      "description": "Texas Instruments SN65DSI86 chip converting MIPI-DSI from the CPU SOM to eDP for the internal display panel.",
+      "refdes_candidates": null,
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "canonical_name": "U11",
+      "logical_alias": null,
+      "aliases": [
+        "mPCIe socket"
+      ],
+      "kind": "connector",
+      "description": "Mini-PCIe slot connected to the primary PCIe controller from the i.MX8M; used for Wi-Fi card.",
+      "refdes_candidates": null,
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "canonical_name": "U28",
+      "logical_alias": null,
+      "aliases": [
+        "level shifter U28"
+      ],
+      "kind": "ic",
+      "description": "Voltage level translator for SD card interface between 3.3 V and 1.8 V logic domains.",
+      "refdes_candidates": null,
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "canonical_name": "U8",
+      "logical_alias": null,
+      "aliases": [
+        "level shifter U8"
+      ],
+      "kind": "ic",
+      "description": "Voltage level translator for SD card interface between 3.3 V and 1.8 V logic domains.",
+      "refdes_candidates": null,
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "canonical_name": "LTC4020",
+      "logical_alias": "LTC4020 charger",
+      "aliases": [
+        "charger",
+        "buck-boost",
+        "LTC4020 charger"
+      ],
+      "kind": "pmic",
+      "description": "Analog Devices/Linear Technology buck/boost regulator and LiFePO4 charger producing ~29 V main system bus from 9–32 V input.",
+      "refdes_candidates": null,
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "canonical_name": "LTC6803IG-4#PBF",
+      "logical_alias": "battery monitor IC",
+      "aliases": [
+        "battery monitor",
+        "cell monitor",
+        "LTC6803"
+      ],
+      "kind": "ic",
+      "description": "Monitors individual LiFePO4 cell voltages over SPI and reports to the System Controller (U18).",
+      "refdes_candidates": null,
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "canonical_name": "LM62460",
+      "logical_alias": "LM62460 buck regulator",
+      "aliases": [
+        "5 V buck",
+        "3.3 V buck",
+        "LM62460 regulator"
+      ],
+      "kind": "pmic",
+      "description": "Main downstream buck regulators on v3.0 motherboard replacing older 5 V and 3.3 V converters.",
+      "refdes_candidates": null,
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "canonical_name": "F1",
+      "logical_alias": null,
+      "aliases": [
+        "input fuse"
+      ],
+      "kind": "fuse",
+      "description": "SMD over-current protection fuse on the barrel-jack input rail, in series before sense resistor R49.",
+      "refdes_candidates": null,
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "canonical_name": "R49",
+      "logical_alias": null,
+      "aliases": [
+        "input sense resistor"
+      ],
+      "kind": "resistor",
+      "description": "Sense resistor on the main input power path; used as a voltage probe point to confirm input rail presence.",
+      "refdes_candidates": null,
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "canonical_name": "J1",
+      "logical_alias": null,
+      "aliases": [
+        "barrel jack",
+        "DC input connector"
+      ],
+      "kind": "connector",
+      "description": "DC barrel-jack input connector accepting the 9–32 V wall adapter.",
+      "refdes_candidates": null,
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "canonical_name": "J22",
+      "logical_alias": null,
+      "aliases": [
+        "LPC header",
+        "J22 connector"
+      ],
+      "kind": "connector",
+      "description": "Header connector; pin 15 carries LPC_VCC (3.3 V) and is used as a test point for the always-on rail.",
+      "refdes_candidates": null,
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "canonical_name": "J24",
+      "logical_alias": null,
+      "aliases": [
+        "MIPI-DSI flex connector",
+        "DSI ZIF connector",
+        "display flat-cable connector"
+      ],
+      "kind": "connector",
+      "description": "30-pin, 0.5 mm pitch ZIF connector carrying MIPI-DSI signal from the CPU SOM to U10 (SN65DSI86).",
+      "refdes_candidates": null,
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "canonical_name": "D9",
+      "logical_alias": null,
+      "aliases": [
+        "power input LED",
+        "input indicator LED"
+      ],
+      "kind": "unknown",
+      "description": "Indicator LED on the DC input power bus used as a primary probe point to confirm adapter voltage is reaching the board.",
+      "refdes_candidates": null,
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "canonical_name": "D11",
+      "logical_alias": null,
+      "aliases": [
+        "3.3 V indicator LED",
+        "LPC_VCC LED"
+      ],
+      "kind": "unknown",
+      "description": "LED that illuminates when the LPC_VCC / 3.3 V switched rail is live; used as a visual rail indicator.",
+      "refdes_candidates": null,
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "canonical_name": "D12",
+      "logical_alias": null,
+      "aliases": [
+        "5 V indicator LED",
+        "USB_PWR LED"
+      ],
+      "kind": "unknown",
+      "description": "LED that illuminates when the USB_PWR 5 V switched rail is live; used as a visual rail indicator.",
+      "refdes_candidates": null,
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "canonical_name": "C130",
+      "logical_alias": null,
+      "aliases": [
+        "1.8 V decoupling cap"
+      ],
+      "kind": "capacitor",
+      "description": "Decoupling capacitor on the 1.8 V rail; used as a test point to probe VCC_1V8 presence.",
+      "refdes_candidates": null,
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "canonical_name": "C37",
+      "logical_alias": null,
+      "aliases": [
+        "1.2 V decoupling cap"
+      ],
+      "kind": "capacitor",
+      "description": "Decoupling capacitor on the 1.2 V rail; used as a test point to probe VCC_1V2 presence.",
+      "refdes_candidates": null,
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "canonical_name": "TPD12S521",
+      "logical_alias": "TPD12S521 ESD IC",
+      "aliases": [
+        "eDP/HDMI interface IC",
+        "ESD protection IC"
+      ],
+      "kind": "ic",
+      "description": "ESD protection and signal conditioning IC on the eDP/HDMI path near the display ZIF connector and HDMI connector; sits on the backlight signal routing path.",
+      "refdes_candidates": null,
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "canonical_name": "LPC_RST button",
+      "logical_alias": "LPC reset button",
+      "aliases": [
+        "LPC reset button",
+        "reset button near battery connector"
+      ],
+      "kind": "switch",
+      "description": "Physical pushbutton on the motherboard asserting the hardware reset line of the STM32 System Controller.",
+      "refdes_candidates": null,
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "canonical_name": "SOM SODIMM connector",
+      "logical_alias": "SOM SODIMM connector",
+      "aliases": [
+        "DIMM slot",
+        "CPU module connector",
+        "compute module socket",
+        "SODIMM slot"
+      ],
+      "kind": "connector",
+      "description": "SODIMM-format edge connector mating the i.MX8M Processor Module to the motherboard; carries all power, DDR, display (DSI), PCIe, UART, and USB signals.",
+      "refdes_candidates": null,
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "canonical_name": "eDP FPC connector",
+      "logical_alias": "eDP FPC connector",
+      "aliases": [
+        "DSI ZIF connector",
+        "display FPC connector",
+        "flat-cable display connector",
+        "FPC latch",
+        "eDP/DSI ZIF connector"
+      ],
+      "kind": "connector",
+      "description": "Zero-insertion-force connector on the motherboard mating the display flat-flex cable carrying eDP/DSI video and backlight PWM to the built-in panel.",
+      "refdes_candidates": null,
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "canonical_name": "micro-HDMI connector",
+      "logical_alias": "micro-HDMI connector",
+      "aliases": [
+        "microHDMI",
+        "µHDMI",
+        "micro-HDMI port"
+      ],
+      "kind": "connector",
+      "description": "Micro-HDMI external video output port on the Pocket Reform; susceptible to pad-lift from repeated mechanical stress.",
+      "refdes_candidates": null,
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "canonical_name": "LiFePO4 18650 cells",
+      "logical_alias": "LiFePO4 18650 cells",
+      "aliases": [
+        "battery cells",
+        "pack cells",
+        "18650 cells"
+      ],
+      "kind": "unknown",
+      "description": "Eight cylindrical LiFePO4 18650 cells forming the primary power source; individually monitored by the LPC battery balance circuit.",
+      "refdes_candidates": null,
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "canonical_name": "i.MX8M SOM",
+      "logical_alias": "i.MX8M SOM",
+      "aliases": [
+        "i.MX8MQ SOM",
+        "CPU module",
+        "Processor Module",
+        "compute module",
+        "i.MX8M Quad SOM"
+      ],
+      "kind": "ic",
+      "description": "SODIMM-format System-On-Module carrying the NXP i.MX8M Quad SoC with 4 GB RAM; plugs into the motherboard SODIMM connector.",
+      "refdes_candidates": null,
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "canonical_name": "OLED status display",
+      "logical_alias": "OLED status display",
+      "aliases": [
+        "LPC OLED",
+        "status OLED",
+        "OLED menu"
+      ],
+      "kind": "unknown",
+      "description": "Small OLED/LCD display driven by the LPC System Controller showing power status and wake-up progress.",
+      "refdes_candidates": null,
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "canonical_name": "LPC_VCC",
+      "aliases": [
+        "always-on 3.3 V",
+        "STM32 VCC"
+      ],
+      "kind": "power_rail",
+      "nominal_voltage": 3.3,
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "canonical_name": "29V_BUS",
+      "aliases": [
+        "~29 V main bus",
+        "system bus",
+        "LTC4020 output"
+      ],
+      "kind": "power_rail",
+      "nominal_voltage": 29.0,
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "canonical_name": "VCC_1V8",
+      "aliases": [
+        "1.8 V",
+        "SOM 1.8 V rail"
+      ],
+      "kind": "power_rail",
+      "nominal_voltage": 1.8,
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "canonical_name": "VCC_1V2",
+      "aliases": [
+        "1.2 V"
+      ],
+      "kind": "power_rail",
+      "nominal_voltage": 1.2,
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "canonical_name": "3V3_PWR_AUX",
+      "aliases": [
+        "switched 3.3 V auxiliary",
+        "3.3 V switched rail"
+      ],
+      "kind": "power_rail",
+      "nominal_voltage": 3.3,
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "canonical_name": "USB_PWR",
+      "aliases": [
+        "5 V switched",
+        "VBUS",
+        "5 V rail"
+      ],
+      "kind": "power_rail",
+      "nominal_voltage": 5.0,
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "canonical_name": "PCIE1_PWR",
+      "aliases": [
+        "mPCIe power",
+        "PCIE1_PWR_EN"
+      ],
+      "kind": "power_rail",
+      "nominal_voltage": 3.3,
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "canonical_name": "VIN",
+      "aliases": [
+        "Input rail",
+        "barrel jack input",
+        "main input bus",
+        "adapter rail"
+      ],
+      "kind": "power_rail",
+      "nominal_voltage": 24.0,
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "canonical_name": "BATTERY_CELL_VOLTAGE",
+      "aliases": [
+        "cell voltage",
+        "BAT",
+        "BAT0",
+        "battery rails"
+      ],
+      "kind": "power_rail",
+      "nominal_voltage": 3.2,
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "canonical_name": "BL_PWM",
+      "aliases": [
+        "backlight PWM line",
+        "backlight enable",
+        "backlight intensity signal"
+      ],
+      "kind": "signal",
+      "nominal_voltage": null,
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "canonical_name": "LPC_UART",
+      "aliases": [
+        "LPC serial",
+        "SYSCTL UART",
+        "LPC UART header"
+      ],
+      "kind": "data_bus",
+      "nominal_voltage": null,
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "canonical_name": "SPI_BUS",
+      "aliases": [
+        "LPC SPI",
+        "battery monitor SPI"
+      ],
+      "kind": "data_bus",
+      "nominal_voltage": null,
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "canonical_name": "SOM_PWRON",
+      "aliases": [
+        "PWRON",
+        "SOM power-on line",
+        "SOM main power-on rail"
+      ],
+      "kind": "signal",
+      "nominal_voltage": null,
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    }
+  ],
+  "_meta": {
+    "schema_version": "1.0",
+    "device_label": "MNT Reform motherboard",
+    "taxonomy": {
+      "brand": "MNT",
+      "model": "Reform",
+      "version": null,
+      "form_factor": "motherboard",
+      "device_kind": "sbc_board"
+    }
+  }
+}

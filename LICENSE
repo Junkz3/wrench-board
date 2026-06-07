@@ -1,0 +1,79 @@
+WRENCH BOARD - PROPRIETARY SOURCE-AVAILABLE LICENSE
+Copyright (c) 2026 Alexis Chapellier
+All rights reserved.
+
+This software and its source code (the "Software") are made publicly
+available for the purposes of evaluation, education, academic research,
+personal study, and use as a working tool by independent electronics
+repair professionals, in connection with the Anthropic "Built with
+Opus 4.7" hackathon submission and beyond.
+
+PERMITTED USES
+You may:
+  (a) view and read the source code;
+  (b) clone the repository for personal evaluation and study;
+  (c) run the Software locally on your own hardware for personal,
+      educational, or evaluation purposes;
+  (d) reference the Software in academic publications, blog posts,
+      or technical write-ups, provided proper attribution is given
+      to the copyright holder and the project.
+
+PERMITTED USE BY END USERS
+Notwithstanding the restrictions below, You are granted a
+non-exclusive, non-transferable, royalty-free license to use the
+Software as an internal tool in the course of providing electronics
+diagnostic, repair, or refurbishment services to your own clients,
+including for commercial remuneration, provided that:
+
+  (a) You do not redistribute, sublicense, sell, rent, lease, or
+      otherwise transfer the Software or any modified version
+      thereof to any third party;
+
+  (b) You do not offer the Software, or any service substantially
+      based on the Software, as a hosted, managed, software-as-a-
+      service, or application-as-a-service offering to third parties;
+
+  (c) You do not use the Software to develop, train, or improve a
+      competing product or service, including but not limited to
+      training machine learning or artificial intelligence models;
+
+  (d) You retain all copyright notices, license texts, and
+      attributions contained in the Software.
+
+This grant covers individual technicians, repair shops, and repair
+businesses using the Software as a working tool. It does not authorize
+resale, redistribution, or hosting of the Software itself.
+
+PROHIBITED USES
+Without prior written permission from the copyright holder, you may NOT:
+  (a) redistribute the Software, in source or binary form, modified
+      or unmodified;
+  (b) use the Software for redistribution, hosting as a service,
+      sublicensing, or to develop a competing product, except as
+      expressly permitted in the "PERMITTED USE BY END USERS"
+      section above;
+  (c) create derivative works intended for redistribution or
+      commercial exploitation beyond the scope of "PERMITTED USE BY
+      END USERS";
+  (d) host a publicly accessible instance of the Software for use by
+      third parties;
+  (e) remove or alter any copyright, license, or attribution notices.
+
+CONTRIBUTIONS
+Pull requests and contributions are welcome but require the contributor
+to agree that any submitted code becomes the property of the copyright
+holder under this same license, unless a separate written agreement
+is reached.
+
+COMMERCIAL LICENSING
+For commercial use beyond the scope of "PERMITTED USE BY END USERS"
+(including resale, sublicensing, hosted SaaS deployment, OEM bundling,
+or integration into a commercial product), contact:
+alexis@repairmind.co.uk
+
+NO WARRANTY
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+OTHER LIABILITY ARISING FROM THE USE OF THE SOFTWARE.

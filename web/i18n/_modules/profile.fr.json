@@ -1,0 +1,77 @@
+{
+  "title": "Profil technicien",
+  "head": {
+    "tag": "technicien",
+    "no_name": "Sans nom",
+    "no_specialty": "Aucune spécialité",
+    "edit_identity": "Éditer l'identité",
+    "years_one": "{n} an d'XP",
+    "years_other": "{n} ans d'XP",
+    "years_zero": "0 an",
+    "updated": "MAJ {date}"
+  },
+  "ribbon": {
+    "tag": "progression",
+    "title": "Niveau {level}",
+    "default_blurb": "Le niveau est dérivé du nombre de compétences pratiquées.",
+    "blurbs": {
+      "beginner": "Tu débutes. L'agent expliquera chaque étape avant de te demander d'intervenir.",
+      "intermediate": "Tu progresses. L'agent allègera les explications et te laissera mener davantage.",
+      "confirmed": "Tu es confirmé. L'agent te confie les décisions et confirme tes hypothèses.",
+      "expert": "Tu es expert. L'agent reste concis et te suit sur les pannes complexes."
+    },
+    "rungs": {
+      "beginner": "Débutant",
+      "intermediate": "Intermédiaire",
+      "confirmed": "Confirmé",
+      "expert": "Expert"
+    }
+  },
+  "stats": {
+    "tag_mastered": "maîtrisées",
+    "tag_practiced": "pratiquées",
+    "tag_learning": "apprentissage",
+    "tag_tools": "outillage",
+    "sub_skills": "sur {total} compétences cataloguées",
+    "sub_tools": "sur {total} outils du catalogue",
+    "block_skills_total": "{n} compétences",
+    "block_tools_total": "{on} / {total} actifs"
+  },
+  "blocks": {
+    "skills_tag": "compétences",
+    "skills_heading": "Profil opérationnel",
+    "tools_tag": "outillage",
+    "tools_heading": "Atelier déclaré",
+    "prefs_tag": "préférences diag",
+    "prefs_heading": "Posture de l'agent"
+  },
+  "status": {
+    "mastered": "Maîtrisées",
+    "practiced": "Pratiquées",
+    "learning": "En apprentissage",
+    "unlearned": "Non pratiquées"
+  },
+  "drawer": {
+    "close": "Fermer",
+    "no_history": "Aucun historique pour cette compétence — elle sera tracée dès que l'agent détectera une utilisation confirmée."
+  },
+  "prefs": {
+    "verbosity": "Verbosité",
+    "language": "Langue"
+  },
+  "modal": {
+    "kicker": "Profil technicien",
+    "title": "Éditer ton identité",
+    "close": "Fermer",
+    "field_name": "Nom",
+    "field_avatar": "Avatar (2 lettres ou emoji)",
+    "field_years": "Années d'expérience",
+    "field_specialties": "Spécialités (séparées par virgule)",
+    "specialties_placeholder": "apple, consoles, laptops",
+    "field_level": "Forcer le niveau (optionnel)",
+    "level_auto": "(dérivé automatiquement)",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "save_failed": "Impossible d'enregistrer : {error}"
+  }
+}

@@ -1,0 +1,219 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# --- Virtual envs ---
+.venv/
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# --- Testing / coverage ---
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# --- Tooling caches ---
+.ruff_cache/
+.mypy_cache/
+.pyre/
+.pytype/
+
+# --- Jupyter ---
+.ipynb_checkpoints
+*.ipynb
+
+# --- Frontend (if a build step is ever added) ---
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+.parcel-cache/
+dist-frontend/
+
+# --- Env / secrets ---
+.env
+.env.*
+!.env.example
+*.secret
+secrets/
+credentials.json
+
+# Bootstrap output — tenant-specific Anthropic Managed Agents resource IDs
+managed_ids.json
+
+# --- Editors / IDEs ---
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.zed/
+.claude/scheduled_tasks.lock
+.claude/*.lock
+.claude/worktrees/
+
+# --- OS ---
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# --- Logs / runtime ---
+*.log
+logs/
+pids/
+*.pid
+*.seed
+
+# --- Project-specific: local-only working files ---
+brain_dump_hackathon.md
+notes_perso/
+ref_repairmind/
+scratch/
+TODO.local.md
+
+# --- Superpowers brainstorming (visual companion mockups) ---
+.superpowers/
+
+# --- Project-specific: artifacts ---
+data/
+downloads/
+board_assets/*.pdf
+!board_assets/.gitkeep
+# Runtime data — technician's working data, never committed (any device, any brand)
+memory/*
+!memory/.gitkeep
+
+# Demo packs are SHIPPED fixtures (curated, sanitized) — opposite of memory/.
+!fixtures/
+!fixtures/**
+
+# --- Binary boardview / schematic dumps (local-only) ---
+# The product runs on any board at runtime. Binary dumps (encrypted .pcb,
+# .fz, anything dropped in `private/`) stay on the local disk and never
+# enter git history. Drop files anywhere under one of these patterns and
+# the parser will still pick them up via `parser_for(path)`.
+board_assets/private/
+tests/board/fixtures/private/
+*.pcb
+*.fz
+
+# Evolve loop state — locally-managed per-machine, do not version
+# Path itself (covers symlink case when evolve→archive-evolve-runs/sim)
+/evolve
+evolve/*
+!evolve/.gitkeep
+!evolve/reports
+evolve/reports/*
+!evolve/reports/.gitkeep
+
+# Pipeline-evolve loop — runtime state + private infra + private skills.
+# scripts/eval_pipeline.py and scripts/eval_pipeline_vision.py are TRACKED
+# because eval_all.py references them.
+evolve-pipeline/
+evolve-pipeline-vision/
+scripts/pipeline-evolve-bootstrap.sh
+scripts/pipeline-evolve-runner.sh
+scripts/pipeline-evolve-vision-bootstrap.sh
+scripts/pipeline-evolve-vision-runner.sh
+.claude/skills/microsolder-pipeline-evolve/
+.claude/skills/microsolder-pipeline-evolve-monitor/
+.claude/skills/microsolder-pipeline-evolve-vision/
+
+# Agent-evolve loop — runtime state + private infra + private skills.
+# scripts/eval_diagnostic_agent.py and benchmark/agent_scenarios.jsonl are
+# TRACKED (eval_all.py / docs / tests reference them); the rest stays local.
+evolve-agent/
+scripts/agent-evolve-bootstrap.sh
+scripts/agent-evolve-runner.sh
+scripts/agent_baseline_report.py
+scripts/clean_memory_store.py
+.claude/skills/microsolder-agent-evolve/
+
+# Local-only dev scratch (format-exploration harnesses worked out from sample
+# files). Never part of the shipped product; archived outside the repo. Prefix
+# such scratch with `_` so this guard keeps it out of an accidental `git add`.
+scripts/_*.py
+
+# --- Demo / offline fallback ---
+# Vendored CDN assets pulled by `make pin-cdn` (D3, marked, DOMPurify).
+# Regenerated on demand; not tracked.
+web/vendor/*.js
+
+# Demo video intro page — recorded once for the hackathon submission,
+# not a runtime route. Kept out of history; regenerate locally as needed.
+web/intro.html
+web/assets/
+
+# Bench-generator per-run artefacts (auto_proposals_*) — research output of
+# scripts/generate_bench_from_pack.py. The frozen oracle lives in
+# benchmark/scenarios.jsonl; per-run dumps are local-only.
+benchmark/auto_proposals/
+benchmark/auto_proposals_*/
+benchmark/poc_multi_agent/
+
+# Bench research staging files (e.g. agent_scenarios_research.jsonl carry
+# upstream URLs / provenance evidence). The promoted oracle is the *.jsonl
+# without the _research suffix; staging copies stay local.
+benchmark/*_research.jsonl
+
+# Per-run eval outputs (timestamped JSON snapshots) — they grow without
+# bound, the meaningful baseline lives in code/tests, not in artefacts.
+benchmark/eval_runs/
+
+# --- Internal docs / specs / plans / notes ---
+# Design specs, implementation plans, and internal architecture notes
+# stay on the local disk only — they are not part of the source-available
+# distribution. Public-facing assets referenced by README.md (mascot SVG,
+# screenshots) live under docs/assets/ and remain tracked.
+.codex
+docs/ARCHITECTURE.md
+docs/EVOLVE.md
+docs/tools.md
+docs/archive/
+docs/notes/
+docs/superpowers/
+
+# Archived state of overnight evolve loops (worktree backups)
+archive-evolve-runs/
+tests/fixtures/macro_devboard_synthetic.png
+.gstack/
+
+# Draft release notes — pasted into the GitHub Release, not tracked
+RELEASE_NOTES-*.md

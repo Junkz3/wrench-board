@@ -1,0 +1,67 @@
+{
+  "empty": {
+    "title": "No graph loaded",
+    "body": "Run the generation pipeline on a device — the graph will be built from the resulting pack."
+  },
+  "legend": {
+    "types_heading": "Types",
+    "type_symptom": "Symptom",
+    "type_symptom_desc": "what the client observes",
+    "type_net": "Net / Rail",
+    "type_net_desc": "signal or supply",
+    "type_component": "Component",
+    "type_component_desc": "chip, connector",
+    "type_action": "Action",
+    "type_action_desc": "possible repair",
+    "relations_heading": "Relations",
+    "rel_causes": "causes",
+    "rel_causes_desc": "causal link",
+    "rel_powers": "powers",
+    "rel_powers_desc": "power flow",
+    "rel_connected": "connected to",
+    "rel_connected_desc": "bus / ground",
+    "rel_resolves": "resolves",
+    "rel_resolves_desc": "corrective action"
+  },
+  "controls": {
+    "zoom_in": "Zoom in",
+    "zoom_out": "Zoom out",
+    "fit": "Fit"
+  },
+  "inspector": {
+    "type_inferred": "· model inference",
+    "id_label": "id: {id}",
+    "confidence": "Confidence",
+    "description": "Description",
+    "metadata": "Metadata",
+    "relations": "Relations",
+    "edge_weight": "{label} · weight {weight}",
+    "edge_outgoing": "→",
+    "edge_incoming": "←",
+    "rules_field": "rules",
+    "conf_high": "High confidence — corroborated by multiple sources.",
+    "conf_low": "Low confidence — single source or indirect inference.",
+    "conf_medium": "Moderate confidence — partial cross-reference."
+  },
+  "tooltip": {
+    "conf_pct": "conf. {pct}%"
+  },
+  "subsystem": {
+    "fallback_label": "OTHER"
+  },
+  "type_label": {
+    "component": "Component",
+    "symptom": "Symptom",
+    "net": "Net / Rail",
+    "action": "Action"
+  },
+  "rel_label": {
+    "causes": "causes",
+    "powers": "powers",
+    "connected_to": "connected to",
+    "resolves": "resolves"
+  },
+  "stats": {
+    "summary": "{n} nodes · {e} edges"
+  }
+}

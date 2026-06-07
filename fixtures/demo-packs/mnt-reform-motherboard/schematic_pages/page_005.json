@@ -1,0 +1,3919 @@
+{
+  "schema_version": "1.0",
+  "page": 5,
+  "sheet_name": "MNT Reform 2 USB File",
+  "sheet_path": "/Reform 2 USB/",
+  "page_kind": "schematic",
+  "orientation": "landscape",
+  "confidence": 0.72,
+  "nodes": [
+    {
+      "refdes": "Y1",
+      "type": "crystal",
+      "value": {
+        "raw": "24MHz",
+        "primary": "24MHz",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 5,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": null
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "terminal",
+          "net_label": null
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C8",
+      "type": "capacitor",
+      "value": {
+        "raw": "18pF",
+        "primary": "18pF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 5,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": null
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C10",
+      "type": "capacitor",
+      "value": {
+        "raw": "18pF",
+        "primary": "18pF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 5,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": null
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R61",
+      "type": "resistor",
+      "value": {
+        "raw": "1M",
+        "primary": "1MΩ",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 5,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": null
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "terminal",
+          "net_label": null
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R59",
+      "type": "resistor",
+      "value": {
+        "raw": "9.09K",
+        "primary": "9.09kΩ",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": "±1%",
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 5,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "USB_PWR"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "terminal",
+          "net_label": null
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R60",
+      "type": "resistor",
+      "value": {
+        "raw": "90.9K",
+        "primary": "90.9kΩ",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": "±1%",
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 5,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": null
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R62",
+      "type": "resistor",
+      "value": {
+        "raw": "10k",
+        "primary": "10kΩ",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 5,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": null
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R81",
+      "type": "resistor",
+      "value": {
+        "raw": "100k",
+        "primary": "100kΩ",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 5,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": null
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R103",
+      "type": "resistor",
+      "value": {
+        "raw": "100k",
+        "primary": "100kΩ",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 5,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "USB_RESETn"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "U9",
+      "type": "ic",
+      "value": {
+        "raw": "TUSB8040PFP",
+        "primary": null,
+        "package": null,
+        "mpn": "TUSB8040PFP",
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 5,
+      "pins": [
+        {
+          "number": "76",
+          "name": "XI",
+          "role": "clock_in",
+          "net_label": null
+        },
+        {
+          "number": "74",
+          "name": "XO",
+          "role": "clock_out",
+          "net_label": "VSSOSC"
+        },
+        {
+          "number": "75",
+          "name": "VSSOSC",
+          "role": "ground",
+          "net_label": "VSSOSC"
+        },
+        {
+          "number": "63",
+          "name": "USB1_RX_P",
+          "role": "signal_in",
+          "net_label": "USB1_RX_P"
+        },
+        {
+          "number": "62",
+          "name": "USB1_RX_N",
+          "role": "signal_in",
+          "net_label": "USB1_RX_N"
+        },
+        {
+          "number": "66",
+          "name": "USB1_TX_P",
+          "role": "signal_out",
+          "net_label": "USB1_TX_P"
+        },
+        {
+          "number": "65",
+          "name": "USB1_TX_N",
+          "role": "signal_out",
+          "net_label": "USB1_TX_N"
+        },
+        {
+          "number": "70",
+          "name": "USB1_DP",
+          "role": "signal_inout",
+          "net_label": "USB1_DP"
+        },
+        {
+          "number": "69",
+          "name": "USB1_DN",
+          "role": "signal_inout",
+          "net_label": "USB1_DN"
+        },
+        {
+          "number": "78",
+          "name": "USB_SSTXP_UP",
+          "role": "signal_out",
+          "net_label": "USB_SSTXP_UP"
+        },
+        {
+          "number": "79",
+          "name": "USB_SSTXM_UP",
+          "role": "signal_out",
+          "net_label": "USB_SSTXM_UP"
+        },
+        {
+          "number": "73",
+          "name": "USB_SSRXP_UP",
+          "role": "signal_in",
+          "net_label": "USB_SSRXP_UP"
+        },
+        {
+          "number": "55",
+          "name": "USB_DP_UP",
+          "role": "signal_inout",
+          "net_label": "USB_DP_UP"
+        },
+        {
+          "number": "56",
+          "name": "USB_DM_UP",
+          "role": "signal_inout",
+          "net_label": "USB_DM_UP"
+        },
+        {
+          "number": "53",
+          "name": "USB_R1",
+          "role": "signal_out",
+          "net_label": "USB_R1"
+        },
+        {
+          "number": "54",
+          "name": "USB_R1RTN",
+          "role": "signal_in",
+          "net_label": "USB_R1RTN"
+        },
+        {
+          "number": "60",
+          "name": "USB_SSRXM_UP",
+          "role": "signal_in",
+          "net_label": "USB_SSRXM_UP"
+        },
+        {
+          "number": "59",
+          "name": "USB_VBUS",
+          "role": "power_in",
+          "net_label": "USB_VBUS"
+        },
+        {
+          "number": "33",
+          "name": "GRSTz",
+          "role": "reset_in",
+          "net_label": null
+        },
+        {
+          "number": "41",
+          "name": "SCL/SMBCLK",
+          "role": "signal_inout",
+          "net_label": "SCL/SMBCLK"
+        },
+        {
+          "number": "34",
+          "name": "SDA/SMBDAT",
+          "role": "signal_inout",
+          "net_label": "SDA/SMBDAT"
+        },
+        {
+          "number": "36",
+          "name": "JTAG_TCK",
+          "role": "clock_in",
+          "net_label": "JTAG_TCK"
+        },
+        {
+          "number": "35",
+          "name": "JTAG_TDI",
+          "role": "signal_in",
+          "net_label": "JTAG_TDI"
+        },
+        {
+          "number": "27",
+          "name": "JTAG_TDO",
+          "role": "signal_out",
+          "net_label": "JTAG_TDO"
+        },
+        {
+          "number": "31",
+          "name": "JTAG_TMS",
+          "role": "signal_in",
+          "net_label": "JTAG_TMS"
+        },
+        {
+          "number": "29",
+          "name": "OVERCUR0z",
+          "role": "signal_in",
+          "net_label": null
+        },
+        {
+          "number": "28",
+          "name": "PWRGND0z_BATENz",
+          "role": "signal_in",
+          "net_label": null
+        },
+        {
+          "number": "30",
+          "name": "FULLPWRMGMT_SMBA1",
+          "role": "signal_in",
+          "net_label": null
+        },
+        {
+          "number": "39",
+          "name": "PWROND2_BATENz",
+          "role": "signal_out",
+          "net_label": null
+        },
+        {
+          "number": "24",
+          "name": "HS_SUSPEND",
+          "role": "signal_out",
+          "net_label": "HS_SUSPEND"
+        },
+        {
+          "number": "25",
+          "name": "SS_SUSPEND",
+          "role": "signal_out",
+          "net_label": "SS_SUSPEND"
+        },
+        {
+          "number": "64",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "81",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "14",
+          "name": "USB_SSTXP_DN0",
+          "role": "signal_out",
+          "net_label": "USB_SSTXP_DN0"
+        },
+        {
+          "number": "15",
+          "name": "USB_SSTXM_DN0",
+          "role": "signal_out",
+          "net_label": "USB_SSTXM_DN0"
+        },
+        {
+          "number": "12",
+          "name": "USB_SSRXP_DN0",
+          "role": "signal_in",
+          "net_label": "USB_SSRXP_DN0"
+        },
+        {
+          "number": "13",
+          "name": "USB_SSRXM_DN0",
+          "role": "signal_in",
+          "net_label": "USB_SSRXM_DN0"
+        },
+        {
+          "number": "17",
+          "name": "USB_DP_DN0",
+          "role": "signal_inout",
+          "net_label": "USB_DP_DN0"
+        },
+        {
+          "number": "18",
+          "name": "USB_DM_DN0",
+          "role": "signal_inout",
+          "net_label": "USB_DM_DN0"
+        },
+        {
+          "number": "49",
+          "name": "USB_SSTXP_DN1",
+          "role": "signal_out",
+          "net_label": "USB_SSTXP_DN1"
+        },
+        {
+          "number": "50",
+          "name": "USB_SSTXM_DN1",
+          "role": "signal_out",
+          "net_label": "USB_SSTXM_DN1"
+        },
+        {
+          "number": "47",
+          "name": "USB_SSRXP_DN1",
+          "role": "signal_in",
+          "net_label": "USB_SSRXP_DN1"
+        },
+        {
+          "number": "48",
+          "name": "USB_SSRXM_DN1",
+          "role": "signal_in",
+          "net_label": "USB_SSRXM_DN1"
+        },
+        {
+          "number": "45",
+          "name": "USB_DP_DN1",
+          "role": "signal_inout",
+          "net_label": "USB_DP_DN1"
+        },
+        {
+          "number": "44",
+          "name": "USB_DM_DN1",
+          "role": "signal_inout",
+          "net_label": "USB_DM_DN1"
+        },
+        {
+          "number": "8",
+          "name": "USB_SSTXP_DN2",
+          "role": "signal_out",
+          "net_label": "USB_SSTXP_DN2"
+        },
+        {
+          "number": "9",
+          "name": "USB_SSTXM_DN2",
+          "role": "signal_out",
+          "net_label": "USB_SSTXM_DN2"
+        },
+        {
+          "number": "6",
+          "name": "USB_SSRXP_DN2",
+          "role": "signal_in",
+          "net_label": "USB_SSRXP_DN2"
+        },
+        {
+          "number": "7",
+          "name": "USB_SSRXM_DN2",
+          "role": "signal_in",
+          "net_label": "USB_SSRXM_DN2"
+        },
+        {
+          "number": "2",
+          "name": "USB_DP_DN2",
+          "role": "signal_inout",
+          "net_label": "USB_DP_DN2"
+        },
+        {
+          "number": "3",
+          "name": "USB_DM_DN2",
+          "role": "signal_inout",
+          "net_label": "USB_DM_DN2"
+        },
+        {
+          "number": "40",
+          "name": "USB_SSTXP_DN3",
+          "role": "signal_out",
+          "net_label": "USB_SSTXP_DN3"
+        },
+        {
+          "number": "41",
+          "name": "USB_SSTXM_DN3",
+          "role": "signal_out",
+          "net_label": "USB_SSTXM_DN3"
+        },
+        {
+          "number": "47",
+          "name": "USB_SSRXP_DN3",
+          "role": "signal_in",
+          "net_label": "USB_SSRXP_DN3"
+        },
+        {
+          "number": "48",
+          "name": "USB_SSRXM_DN3",
+          "role": "signal_in",
+          "net_label": "USB_SSRXM_DN3"
+        },
+        {
+          "number": "43",
+          "name": "USB_DP_DN3",
+          "role": "signal_inout",
+          "net_label": "USB_DP_DN3"
+        },
+        {
+          "number": "42",
+          "name": "USB_DM_DN3",
+          "role": "signal_inout",
+          "net_label": "USB_DM_DN3"
+        },
+        {
+          "number": "USBH_3V3",
+          "name": "VDD33",
+          "role": "power_in",
+          "net_label": "USBH_3V3"
+        },
+        {
+          "number": "VDD11",
+          "name": "VDD11",
+          "role": "power_in",
+          "net_label": "1V1_HBSU"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "U21",
+      "type": "ic",
+      "value": {
+        "raw": "SP3012-06UTG",
+        "primary": null,
+        "package": null,
+        "mpn": "SP3012-06UTG",
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 5,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "USB2_TX_P"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "terminal",
+          "net_label": "USB2_TX_N"
+        },
+        {
+          "number": "3",
+          "name": null,
+          "role": "terminal",
+          "net_label": "USB2_DN"
+        },
+        {
+          "number": "4",
+          "name": null,
+          "role": "terminal",
+          "net_label": "USB2_DP"
+        },
+        {
+          "number": "5",
+          "name": null,
+          "role": "terminal",
+          "net_label": null
+        },
+        {
+          "number": "6",
+          "name": null,
+          "role": "terminal",
+          "net_label": "USB2_RX_P"
+        },
+        {
+          "number": "7",
+          "name": null,
+          "role": "terminal",
+          "net_label": "USB2_RX_N"
+        },
+        {
+          "number": "8",
+          "name": null,
+          "role": "terminal",
+          "net_label": null
+        },
+        {
+          "number": "9",
+          "name": null,
+          "role": "terminal",
+          "net_label": "USB2_RX_N"
+        },
+        {
+          "number": "10",
+          "name": null,
+          "role": "terminal",
+          "net_label": "USB2_DP"
+        },
+        {
+          "number": "11",
+          "name": null,
+          "role": "terminal",
+          "net_label": "USB2_DN"
+        },
+        {
+          "number": "12",
+          "name": null,
+          "role": "terminal",
+          "net_label": "USB2_TX_N"
+        },
+        {
+          "number": "13",
+          "name": null,
+          "role": "terminal",
+          "net_label": "USB2_TX_P"
+        },
+        {
+          "number": "14",
+          "name": null,
+          "role": "terminal",
+          "net_label": null
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "U25",
+      "type": "ic",
+      "value": {
+        "raw": "SP3012-06UTG",
+        "primary": null,
+        "package": null,
+        "mpn": "SP3012-06UTG",
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 5,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "USB3_1_SSTXCP"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "terminal",
+          "net_label": "USB3_1_SSTXCN"
+        },
+        {
+          "number": "3",
+          "name": null,
+          "role": "terminal",
+          "net_label": "USB3_1_DN"
+        },
+        {
+          "number": "4",
+          "name": null,
+          "role": "terminal",
+          "net_label": "USB3_1_DP"
+        },
+        {
+          "number": "5",
+          "name": null,
+          "role": "terminal",
+          "net_label": null
+        },
+        {
+          "number": "6",
+          "name": null,
+          "role": "terminal",
+          "net_label": "USB3_1_SSRXP"
+        },
+        {
+          "number": "7",
+          "name": null,
+          "role": "terminal",
+          "net_label": "USB3_1_SSRXN"
+        },
+        {
+          "number": "8",
+          "name": null,
+          "role": "terminal",
+          "net_label": null
+        },
+        {
+          "number": "9",
+          "name": null,
+          "role": "terminal",
+          "net_label": "USB3_1_SSRXN"
+        },
+        {
+          "number": "10",
+          "name": null,
+          "role": "terminal",
+          "net_label": "USB3_1_DP"
+        },
+        {
+          "number": "11",
+          "name": null,
+          "role": "terminal",
+          "net_label": "USB3_1_DN"
+        },
+        {
+          "number": "12",
+          "name": null,
+          "role": "terminal",
+          "net_label": "USB3_1_SSTXCN"
+        },
+        {
+          "number": "13",
+          "name": null,
+          "role": "terminal",
+          "net_label": "USB3_1_SSTXCP"
+        },
+        {
+          "number": "14",
+          "name": null,
+          "role": "terminal",
+          "net_label": null
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "U26",
+      "type": "ic",
+      "value": {
+        "raw": "SP3012-06UTG",
+        "primary": null,
+        "package": null,
+        "mpn": "SP3012-06UTG",
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 5,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "USB3_2_SSTXCP"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "terminal",
+          "net_label": "USB3_2_SSTXCN"
+        },
+        {
+          "number": "3",
+          "name": null,
+          "role": "terminal",
+          "net_label": "USB3_2_DN"
+        },
+        {
+          "number": "4",
+          "name": null,
+          "role": "terminal",
+          "net_label": "USB3_2_DP"
+        },
+        {
+          "number": "5",
+          "name": null,
+          "role": "terminal",
+          "net_label": null
+        },
+        {
+          "number": "6",
+          "name": null,
+          "role": "terminal",
+          "net_label": "USB3_2_SSRXP"
+        },
+        {
+          "number": "7",
+          "name": null,
+          "role": "terminal",
+          "net_label": "USB3_2_SSRXN"
+        },
+        {
+          "number": "8",
+          "name": null,
+          "role": "terminal",
+          "net_label": null
+        },
+        {
+          "number": "9",
+          "name": null,
+          "role": "terminal",
+          "net_label": "USB3_2_SSRXN"
+        },
+        {
+          "number": "10",
+          "name": null,
+          "role": "terminal",
+          "net_label": "USB3_2_DP"
+        },
+        {
+          "number": "11",
+          "name": null,
+          "role": "terminal",
+          "net_label": "USB3_2_DN"
+        },
+        {
+          "number": "12",
+          "name": null,
+          "role": "terminal",
+          "net_label": "USB3_2_SSTXCN"
+        },
+        {
+          "number": "13",
+          "name": null,
+          "role": "terminal",
+          "net_label": "USB3_2_SSTXCP"
+        },
+        {
+          "number": "14",
+          "name": null,
+          "role": "terminal",
+          "net_label": null
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "J12",
+      "type": "connector",
+      "value": {
+        "raw": "Conn_02x08_Odd_Even",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": "Conn_02x08_Odd_Even"
+      },
+      "page": 5,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "USB3_3_SSTXP"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "terminal",
+          "net_label": "USB3_4_SSTXP"
+        },
+        {
+          "number": "3",
+          "name": null,
+          "role": "terminal",
+          "net_label": "USB3_3_SSTXN"
+        },
+        {
+          "number": "4",
+          "name": null,
+          "role": "terminal",
+          "net_label": "USB3_4_SSTXN"
+        },
+        {
+          "number": "5",
+          "name": null,
+          "role": "terminal",
+          "net_label": "USB3_3_SSRXP"
+        },
+        {
+          "number": "6",
+          "name": null,
+          "role": "terminal",
+          "net_label": "USB3_4_SSRXP"
+        },
+        {
+          "number": "7",
+          "name": null,
+          "role": "terminal",
+          "net_label": "USB3_3_SSRXN"
+        },
+        {
+          "number": "8",
+          "name": null,
+          "role": "terminal",
+          "net_label": "USB3_4_SSRXN"
+        },
+        {
+          "number": "9",
+          "name": null,
+          "role": "terminal",
+          "net_label": "USB3_3_DN"
+        },
+        {
+          "number": "10",
+          "name": null,
+          "role": "terminal",
+          "net_label": "USB3_3_DP"
+        },
+        {
+          "number": "11",
+          "name": null,
+          "role": "terminal",
+          "net_label": null
+        },
+        {
+          "number": "12",
+          "name": null,
+          "role": "terminal",
+          "net_label": null
+        },
+        {
+          "number": "13",
+          "name": null,
+          "role": "terminal",
+          "net_label": "USB_PWR"
+        },
+        {
+          "number": "14",
+          "name": null,
+          "role": "terminal",
+          "net_label": "USB_PWR"
+        },
+        {
+          "number": "15",
+          "name": null,
+          "role": "terminal",
+          "net_label": "USB_PWR"
+        },
+        {
+          "number": "16",
+          "name": null,
+          "role": "terminal",
+          "net_label": "USB_PWR"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "J6",
+      "type": "connector",
+      "value": {
+        "raw": "USB3_A",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 5,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "VBUS"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_inout",
+          "net_label": "USB3_1_DN"
+        },
+        {
+          "number": "3",
+          "name": null,
+          "role": "signal_inout",
+          "net_label": "USB3_1_DP"
+        },
+        {
+          "number": "4",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "SSRX"
+        },
+        {
+          "number": "5",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "SSRX-"
+        },
+        {
+          "number": "6",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "7",
+          "name": null,
+          "role": "signal_out",
+          "net_label": "SSTX"
+        },
+        {
+          "number": "8",
+          "name": null,
+          "role": "signal_out",
+          "net_label": "SSTX-"
+        },
+        {
+          "number": "9",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "SHIELD",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "J5",
+      "type": "connector",
+      "value": {
+        "raw": "USB3_A",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 5,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "VBUS"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_inout",
+          "net_label": "USB3_2_DN"
+        },
+        {
+          "number": "3",
+          "name": null,
+          "role": "signal_inout",
+          "net_label": "USB3_2_DP"
+        },
+        {
+          "number": "4",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "SSRX"
+        },
+        {
+          "number": "5",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "SSRX-"
+        },
+        {
+          "number": "6",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "7",
+          "name": null,
+          "role": "signal_out",
+          "net_label": "SSTX"
+        },
+        {
+          "number": "8",
+          "name": null,
+          "role": "signal_out",
+          "net_label": "SSTX-"
+        },
+        {
+          "number": "9",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "SHIELD",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "J17",
+      "type": "connector",
+      "value": {
+        "raw": "USB3_A",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 5,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "VBUS"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_inout",
+          "net_label": "USB2_DN"
+        },
+        {
+          "number": "3",
+          "name": null,
+          "role": "signal_inout",
+          "net_label": "USB2_DP"
+        },
+        {
+          "number": "4",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "SSRX"
+        },
+        {
+          "number": "5",
+          "name": null,
+          "role": "signal_in",
+          "net_label": "SSRX-"
+        },
+        {
+          "number": "6",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "7",
+          "name": null,
+          "role": "signal_out",
+          "net_label": "SSTX"
+        },
+        {
+          "number": "8",
+          "name": null,
+          "role": "signal_out",
+          "net_label": "SSTX-"
+        },
+        {
+          "number": "9",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "SHIELD",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "FB5",
+      "type": "ferrite",
+      "value": {
+        "raw": "220@100MHz 1.4A",
+        "primary": "220Ω@100MHz 1.4A",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 5,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "USB_PWR"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "power_out",
+          "net_label": "USBH_3V3"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "FB8",
+      "type": "ferrite",
+      "value": {
+        "raw": "220@100MHz 1.4A",
+        "primary": "220Ω@100MHz 1.4A",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 5,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "USB_PWR"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "power_out",
+          "net_label": "USBH_3V3"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "FB9",
+      "type": "ferrite",
+      "value": {
+        "raw": "220@100MHz 1.4A",
+        "primary": "220Ω@100MHz 1.4A",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 5,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "USB_PWR"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "power_out",
+          "net_label": "USBH_3V3"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C63",
+      "type": "capacitor",
+      "value": {
+        "raw": "10uF",
+        "primary": "10µF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 5,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "USBH_3V3"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C70",
+      "type": "capacitor",
+      "value": {
+        "raw": "0.1uF",
+        "primary": "100nF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 5,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "USBH_3V3"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C81",
+      "type": "capacitor",
+      "value": {
+        "raw": "10uF",
+        "primary": "10µF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 5,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "USBH_3V3"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C85",
+      "type": "capacitor",
+      "value": {
+        "raw": "0.1uF",
+        "primary": "100nF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 5,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "USBH_3V3"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C72",
+      "type": "capacitor",
+      "value": {
+        "raw": "10uF",
+        "primary": "10µF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 5,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "USBH_3V3"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C84",
+      "type": "capacitor",
+      "value": {
+        "raw": "0.1uF",
+        "primary": "100nF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 5,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "USBH_3V3"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C67",
+      "type": "capacitor",
+      "value": {
+        "raw": "0.1uF",
+        "primary": "100nF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 5,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "USBH_3V3"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C68",
+      "type": "capacitor",
+      "value": {
+        "raw": "2nF",
+        "primary": "2nF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 5,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": null
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C74",
+      "type": "capacitor",
+      "value": {
+        "raw": "0.1uF",
+        "primary": "100nF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 5,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "USBH_3V3"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C78",
+      "type": "capacitor",
+      "value": {
+        "raw": "2nF",
+        "primary": "2nF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 5,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": null
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C75",
+      "type": "capacitor",
+      "value": {
+        "raw": "0.1uF",
+        "primary": "100nF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 5,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "USBH_3V3"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C79",
+      "type": "capacitor",
+      "value": {
+        "raw": "2nF",
+        "primary": "2nF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 5,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": null
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R55",
+      "type": "resistor",
+      "value": {
+        "raw": "1M",
+        "primary": "1MΩ",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 5,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": null
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "terminal",
+          "net_label": null
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R96",
+      "type": "resistor",
+      "value": {
+        "raw": "1M",
+        "primary": "1MΩ",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 5,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": null
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "terminal",
+          "net_label": null
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R97",
+      "type": "resistor",
+      "value": {
+        "raw": "1M",
+        "primary": "1MΩ",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 5,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": null
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "terminal",
+          "net_label": null
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R84",
+      "type": "resistor",
+      "value": {
+        "raw": "10k",
+        "primary": "10kΩ",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 5,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": null
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "terminal",
+          "net_label": null
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R85",
+      "type": "resistor",
+      "value": {
+        "raw": "10k",
+        "primary": "10kΩ",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 5,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": null
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "terminal",
+          "net_label": null
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R90",
+      "type": "resistor",
+      "value": {
+        "raw": "27",
+        "primary": "27Ω",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 5,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "USB3_3_DN"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "terminal",
+          "net_label": null
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R91",
+      "type": "resistor",
+      "value": {
+        "raw": "27",
+        "primary": "27Ω",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 5,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "USB3_3_DP"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "terminal",
+          "net_label": null
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R92",
+      "type": "resistor",
+      "value": {
+        "raw": "27",
+        "primary": "27Ω",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 5,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "USB3_4_DN"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "terminal",
+          "net_label": null
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R93",
+      "type": "resistor",
+      "value": {
+        "raw": "27",
+        "primary": "27Ω",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 5,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "USB3_4_DP"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "terminal",
+          "net_label": null
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C69",
+      "type": "capacitor",
+      "value": {
+        "raw": "10uF",
+        "primary": "10µF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 5,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "USB_PWR"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C76",
+      "type": "capacitor",
+      "value": {
+        "raw": "0.1uF",
+        "primary": "100nF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 5,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "USB_PWR"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C71",
+      "type": "capacitor",
+      "value": {
+        "raw": "10uF",
+        "primary": "10µF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 5,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "USB_PWR"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C77",
+      "type": "capacitor",
+      "value": {
+        "raw": "0.1uF",
+        "primary": "100nF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 5,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "USB_PWR"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "J9",
+      "type": "connector",
+      "value": {
+        "raw": "USB_INT1",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 5,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_out",
+          "net_label": "USB_INT1"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "terminal",
+          "net_label": "USB3_3_DN"
+        },
+        {
+          "number": "3",
+          "name": null,
+          "role": "terminal",
+          "net_label": "USB3_3_DP"
+        },
+        {
+          "number": "4",
+          "name": null,
+          "role": "terminal",
+          "net_label": null
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "J14",
+      "type": "connector",
+      "value": {
+        "raw": "USB_INT2",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 5,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_out",
+          "net_label": "USB_INT2"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "terminal",
+          "net_label": "USB3_4_DN"
+        },
+        {
+          "number": "3",
+          "name": null,
+          "role": "terminal",
+          "net_label": "USB3_4_DP"
+        },
+        {
+          "number": "4",
+          "name": null,
+          "role": "terminal",
+          "net_label": null
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C77",
+      "type": "capacitor",
+      "value": {
+        "raw": "0.1uF",
+        "primary": "100nF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 5,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "USB_PWR"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    }
+  ],
+  "nets": [
+    {
+      "local_id": "net_GND",
+      "label": "GND",
+      "is_power": true,
+      "is_global": true,
+      "connects": [
+        "C8.2",
+        "C10.2",
+        "R60.2",
+        "R62.2",
+        "R81.2",
+        "R103.2",
+        "U9.64",
+        "U9.81",
+        "C63.2",
+        "C70.2",
+        "C81.2",
+        "C85.2",
+        "C72.2",
+        "C84.2",
+        "C67.2",
+        "C68.2",
+        "C74.2",
+        "C78.2",
+        "C75.2",
+        "C79.2",
+        "C69.2",
+        "C76.2",
+        "C71.2",
+        "C77.2",
+        "J6.GND",
+        "J5.GND",
+        "J17.GND"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB_PWR",
+      "label": "USB_PWR",
+      "is_power": true,
+      "is_global": false,
+      "connects": [
+        "R59.1",
+        "FB5.1",
+        "FB8.1",
+        "FB9.1",
+        "C69.1",
+        "C76.1",
+        "C71.1",
+        "C77.1",
+        "J12.13",
+        "J12.14",
+        "J12.15",
+        "J12.16"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_USBH_3V3",
+      "label": "USBH_3V3",
+      "is_power": true,
+      "is_global": false,
+      "connects": [
+        "FB5.2",
+        "FB8.2",
+        "FB9.2",
+        "C63.1",
+        "C70.1",
+        "C81.1",
+        "C85.1",
+        "C72.1",
+        "C84.1",
+        "C67.1",
+        "C74.1",
+        "C75.1",
+        "U9.USBH_3V3"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_1V1_HBSU",
+      "label": "1V1_HBSU",
+      "is_power": true,
+      "is_global": false,
+      "connects": [
+        "U9.VDD11"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_3V3_HBSU",
+      "label": "3V3_HBSU",
+      "is_power": true,
+      "is_global": false,
+      "connects": [],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB1_RX_P",
+      "label": "USB1_RX_P",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U9.63"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB1_RX_N",
+      "label": "USB1_RX_N",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U9.62"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB1_TX_P",
+      "label": "USB1_TX_P",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U9.66"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB1_TX_N",
+      "label": "USB1_TX_N",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U9.65"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB1_DP",
+      "label": "USB1_DP",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U9.70"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB1_DN",
+      "label": "USB1_DN",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U9.69"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB_SSTXP_UP",
+      "label": "USB_SSTXP_UP",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U9.78"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB_SSTXM_UP",
+      "label": "USB_SSTXM_UP",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U9.79"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB_SSRXP_UP",
+      "label": "USB_SSRXP_UP",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U9.73"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB_SSRXM_UP",
+      "label": "USB_SSRXM_UP",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U9.60"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB_DP_UP",
+      "label": "USB_DP_UP",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U9.55"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB_DM_UP",
+      "label": "USB_DM_UP",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U9.56"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB_R1",
+      "label": "USB_R1",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U9.53"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB_R1RTN",
+      "label": "USB_R1RTN",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U9.54"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB_VBUS",
+      "label": "USB_VBUS",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U9.59"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_HS_SUSPEND",
+      "label": "HS_SUSPEND",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U9.24"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_SS_SUSPEND",
+      "label": "SS_SUSPEND",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U9.25"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_SCL_SMBCLK",
+      "label": "SCL/SMBCLK",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U9.41"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_SDA_SMBDAT",
+      "label": "SDA/SMBDAT",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U9.34"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_JTAG_TCK",
+      "label": "JTAG_TCK",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U9.36"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_JTAG_TDI",
+      "label": "JTAG_TDI",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U9.35"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_JTAG_TDO",
+      "label": "JTAG_TDO",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U9.27"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_JTAG_TMS",
+      "label": "JTAG_TMS",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U9.31"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB2_TX_P",
+      "label": "USB2_TX_P",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U21.1",
+        "U21.13"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB2_TX_N",
+      "label": "USB2_TX_N",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U21.2",
+        "U21.12"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB2_DN",
+      "label": "USB2_DN",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U21.3",
+        "U21.11",
+        "J17.2"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB2_DP",
+      "label": "USB2_DP",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U21.4",
+        "U21.10",
+        "J17.3"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB2_RX_P",
+      "label": "USB2_RX_P",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U21.6"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB2_RX_N",
+      "label": "USB2_RX_N",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U21.7",
+        "U21.9"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB3_1_SSTXCP",
+      "label": "USB3_1_SSTXCP",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U25.1",
+        "U25.13"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB3_1_SSTXCN",
+      "label": "USB3_1_SSTXCN",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U25.2",
+        "U25.12"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB3_1_DN",
+      "label": "USB3_1_DN",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U25.3",
+        "U25.11",
+        "J6.2"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB3_1_DP",
+      "label": "USB3_1_DP",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U25.4",
+        "U25.10",
+        "J6.3"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB3_1_SSRXP",
+      "label": "USB3_1_SSRXP",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U25.6"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB3_1_SSRXN",
+      "label": "USB3_1_SSRXN",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U25.7",
+        "U25.9"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB3_1_SSTXN",
+      "label": "USB3_1_SSTXN",
+      "is_power": false,
+      "is_global": false,
+      "connects": [],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB3_1_SSTXP",
+      "label": "USB3_1_SSTXP",
+      "is_power": false,
+      "is_global": false,
+      "connects": [],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB3_2_SSTXCP",
+      "label": "USB3_2_SSTXCP",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U26.1",
+        "U26.13"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB3_2_SSTXCN",
+      "label": "USB3_2_SSTXCN",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U26.2",
+        "U26.12"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB3_2_DN",
+      "label": "USB3_2_DN",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U26.3",
+        "U26.11",
+        "J5.2"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB3_2_DP",
+      "label": "USB3_2_DP",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U26.4",
+        "U26.10",
+        "J5.3"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB3_2_SSRXP",
+      "label": "USB3_2_SSRXP",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U26.6"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB3_2_SSRXN",
+      "label": "USB3_2_SSRXN",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U26.7",
+        "U26.9"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB3_3_DN",
+      "label": "USB3_3_DN",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "J9.2",
+        "R90.1"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB3_3_DP",
+      "label": "USB3_3_DP",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "J9.3",
+        "R91.1"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB3_4_DN",
+      "label": "USB3_4_DN",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "J14.2",
+        "R92.1"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB3_4_DP",
+      "label": "USB3_4_DP",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "J14.3",
+        "R93.1"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB3_3_SSTXP",
+      "label": "USB3_3_SSTXP",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "J12.1"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB3_3_SSTXN",
+      "label": "USB3_3_SSTXN",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "J12.3"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB3_3_SSRXP",
+      "label": "USB3_3_SSRXP",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "J12.5"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB3_3_SSRXN",
+      "label": "USB3_3_SSRXN",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "J12.7"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB3_4_SSTXP",
+      "label": "USB3_4_SSTXP",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "J12.2"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB3_4_SSTXN",
+      "label": "USB3_4_SSTXN",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "J12.4"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB3_4_SSRXP",
+      "label": "USB3_4_SSRXP",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "J12.6"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB3_4_SSRXN",
+      "label": "USB3_4_SSRXN",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "J12.8"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB_INT1",
+      "label": "USB_INT1",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "J9.1"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB_INT2",
+      "label": "USB_INT2",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "J14.1"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_VSSOSC",
+      "label": "VSSOSC",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U9.74",
+        "U9.75"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB_SSTXP_DN0",
+      "label": "USB_SSTXP_DN0",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U9.14"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB_SSTXM_DN0",
+      "label": "USB_SSTXM_DN0",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U9.15"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB_SSRXP_DN0",
+      "label": "USB_SSRXP_DN0",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U9.12"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB_SSRXM_DN0",
+      "label": "USB_SSRXM_DN0",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U9.13"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB_DP_DN0",
+      "label": "USB_DP_DN0",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U9.17"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB_DM_DN0",
+      "label": "USB_DM_DN0",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U9.18"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB_SSTXP_DN1",
+      "label": "USB_SSTXP_DN1",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U9.49"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB_SSTXM_DN1",
+      "label": "USB_SSTXM_DN1",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U9.50"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB_SSRXP_DN1",
+      "label": "USB_SSRXP_DN1",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U9.47"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB_SSRXM_DN1",
+      "label": "USB_SSRXM_DN1",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U9.48"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB_DP_DN1",
+      "label": "USB_DP_DN1",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U9.45"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB_DM_DN1",
+      "label": "USB_DM_DN1",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U9.44"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB_SSTXP_DN2",
+      "label": "USB_SSTXP_DN2",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U9.8"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB_SSTXM_DN2",
+      "label": "USB_SSTXM_DN2",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U9.9"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB_SSRXP_DN2",
+      "label": "USB_SSRXP_DN2",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U9.6"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB_SSRXM_DN2",
+      "label": "USB_SSRXM_DN2",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U9.7"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB_DP_DN2",
+      "label": "USB_DP_DN2",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U9.2"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB_DM_DN2",
+      "label": "USB_DM_DN2",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U9.3"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB_SSTXP_DN3",
+      "label": "USB_SSTXP_DN3",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U9.40"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB_SSTXM_DN3",
+      "label": "USB_SSTXM_DN3",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U9.41"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB_SSRXP_DN3",
+      "label": "USB_SSRXP_DN3",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U9.47"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB_SSRXM_DN3",
+      "label": "USB_SSRXM_DN3",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U9.48"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB_DP_DN3",
+      "label": "USB_DP_DN3",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U9.43"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_USB_DM_DN3",
+      "label": "USB_DM_DN3",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U9.42"
+      ],
+      "page": 5
+    },
+    {
+      "local_id": "net_VBUS_J6",
+      "label": "VBUS",
+      "is_power": true,
+      "is_global": false,
+      "connects": [
+        "J6.1",
+        "J5.1",
+        "J17.1"
+      ],
+      "page": 5
+    }
+  ],
+  "cross_page_refs": [
+    {
+      "label": "USB_PWR",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "reform2-usbpwr.kicad_sch",
+      "page": 5
+    },
+    {
+      "label": "USBH_3V3",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "reform2-usbpwr.kicad_sch",
+      "page": 5
+    },
+    {
+      "label": "1V1_HBSU",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "power page",
+      "page": 5
+    },
+    {
+      "label": "3V3_HBSU",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "power page",
+      "page": 5
+    },
+    {
+      "label": "USB_SSTXP_UP",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "SoM connection",
+      "page": 5
+    },
+    {
+      "label": "USB_SSTXM_UP",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "SoM connection",
+      "page": 5
+    },
+    {
+      "label": "USB_SSRXP_UP",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "SoM connection",
+      "page": 5
+    },
+    {
+      "label": "USB_SSRXM_UP",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "SoM connection",
+      "page": 5
+    },
+    {
+      "label": "USB_DP_UP",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "SoM connection",
+      "page": 5
+    },
+    {
+      "label": "USB_DM_UP",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "SoM connection",
+      "page": 5
+    },
+    {
+      "label": "USB1_RX_P",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "SoM connection",
+      "page": 5
+    },
+    {
+      "label": "USB1_RX_N",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "SoM connection",
+      "page": 5
+    },
+    {
+      "label": "USB1_TX_P",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "SoM connection",
+      "page": 5
+    },
+    {
+      "label": "USB1_TX_N",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "SoM connection",
+      "page": 5
+    },
+    {
+      "label": "USB1_DP",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "SoM connection",
+      "page": 5
+    },
+    {
+      "label": "USB1_DN",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "SoM connection",
+      "page": 5
+    },
+    {
+      "label": "SCL/SMBCLK",
+      "direction": "bidir",
+      "at_pin": null,
+      "target_hint": "I2C bus",
+      "page": 5
+    },
+    {
+      "label": "SDA/SMBDAT",
+      "direction": "bidir",
+      "at_pin": null,
+      "target_hint": "I2C bus",
+      "page": 5
+    },
+    {
+      "label": "JTAG_TCK",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "JTAG header",
+      "page": 5
+    },
+    {
+      "label": "JTAG_TDI",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "JTAG header",
+      "page": 5
+    },
+    {
+      "label": "JTAG_TDO",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "JTAG header",
+      "page": 5
+    },
+    {
+      "label": "JTAG_TMS",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "JTAG header",
+      "page": 5
+    },
+    {
+      "label": "HS_SUSPEND",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "power management",
+      "page": 5
+    },
+    {
+      "label": "SS_SUSPEND",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "power management",
+      "page": 5
+    },
+    {
+      "label": "USB_INT1",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "interrupt",
+      "page": 5
+    },
+    {
+      "label": "USB_INT2",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "interrupt",
+      "page": 5
+    },
+    {
+      "label": "USB_VBUS",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "VBUS sense",
+      "page": 5
+    },
+    {
+      "label": "Reform 2 USB Power",
+      "direction": "subsheet",
+      "at_pin": null,
+      "target_hint": "reform2-usbpwr.kicad_sch",
+      "page": 5
+    }
+  ],
+  "typed_edges": [
+    {
+      "src": "USB_PWR",
+      "dst": "FB5",
+      "kind": "powers",
+      "page": 5
+    },
+    {
+      "src": "USB_PWR",
+      "dst": "FB8",
+      "kind": "powers",
+      "page": 5
+    },
+    {
+      "src": "USB_PWR",
+      "dst": "FB9",
+      "kind": "powers",
+      "page": 5
+    },
+    {
+      "src": "FB5",
+      "dst": "USBH_3V3",
+      "kind": "filters",
+      "page": 5
+    },
+    {
+      "src": "FB8",
+      "dst": "USBH_3V3",
+      "kind": "filters",
+      "page": 5
+    },
+    {
+      "src": "FB9",
+      "dst": "USBH_3V3",
+      "kind": "filters",
+      "page": 5
+    },
+    {
+      "src": "USBH_3V3",
+      "dst": "U9",
+      "kind": "powers",
+      "page": 5
+    },
+    {
+      "src": "1V1_HBSU",
+      "dst": "U9",
+      "kind": "powers",
+      "page": 5
+    },
+    {
+      "src": "C63",
+      "dst": "USBH_3V3",
+      "kind": "decouples",
+      "page": 5
+    },
+    {
+      "src": "C70",
+      "dst": "USBH_3V3",
+      "kind": "decouples",
+      "page": 5
+    },
+    {
+      "src": "C81",
+      "dst": "USBH_3V3",
+      "kind": "decouples",
+      "page": 5
+    },
+    {
+      "src": "C85",
+      "dst": "USBH_3V3",
+      "kind": "decouples",
+      "page": 5
+    },
+    {
+      "src": "C72",
+      "dst": "USBH_3V3",
+      "kind": "decouples",
+      "page": 5
+    },
+    {
+      "src": "C84",
+      "dst": "USBH_3V3",
+      "kind": "decouples",
+      "page": 5
+    },
+    {
+      "src": "C67",
+      "dst": "USBH_3V3",
+      "kind": "decouples",
+      "page": 5
+    },
+    {
+      "src": "C74",
+      "dst": "USBH_3V3",
+      "kind": "decouples",
+      "page": 5
+    },
+    {
+      "src": "C75",
+      "dst": "USBH_3V3",
+      "kind": "decouples",
+      "page": 5
+    },
+    {
+      "src": "C69",
+      "dst": "USB_PWR",
+      "kind": "decouples",
+      "page": 5
+    },
+    {
+      "src": "C76",
+      "dst": "USB_PWR",
+      "kind": "decouples",
+      "page": 5
+    },
+    {
+      "src": "C71",
+      "dst": "USB_PWR",
+      "kind": "decouples",
+      "page": 5
+    },
+    {
+      "src": "C77",
+      "dst": "USB_PWR",
+      "kind": "decouples",
+      "page": 5
+    },
+    {
+      "src": "U9",
+      "dst": "USB_SSTXP_DN0",
+      "kind": "produces_signal",
+      "page": 5
+    },
+    {
+      "src": "U9",
+      "dst": "USB_SSTXM_DN0",
+      "kind": "produces_signal",
+      "page": 5
+    },
+    {
+      "src": "U9",
+      "dst": "USB_DP_DN0",
+      "kind": "produces_signal",
+      "page": 5
+    },
+    {
+      "src": "U9",
+      "dst": "USB_DM_DN0",
+      "kind": "produces_signal",
+      "page": 5
+    },
+    {
+      "src": "U9",
+      "dst": "USB_SSTXP_DN1",
+      "kind": "produces_signal",
+      "page": 5
+    },
+    {
+      "src": "U9",
+      "dst": "USB_SSTXM_DN1",
+      "kind": "produces_signal",
+      "page": 5
+    },
+    {
+      "src": "U9",
+      "dst": "USB_DP_DN1",
+      "kind": "produces_signal",
+      "page": 5
+    },
+    {
+      "src": "U9",
+      "dst": "USB_DM_DN1",
+      "kind": "produces_signal",
+      "page": 5
+    },
+    {
+      "src": "U9",
+      "dst": "USB_SSTXP_DN2",
+      "kind": "produces_signal",
+      "page": 5
+    },
+    {
+      "src": "U9",
+      "dst": "USB_SSTXM_DN2",
+      "kind": "produces_signal",
+      "page": 5
+    },
+    {
+      "src": "U9",
+      "dst": "USB_DP_DN2",
+      "kind": "produces_signal",
+      "page": 5
+    },
+    {
+      "src": "U9",
+      "dst": "USB_DM_DN2",
+      "kind": "produces_signal",
+      "page": 5
+    },
+    {
+      "src": "U9",
+      "dst": "USB_SSTXP_DN3",
+      "kind": "produces_signal",
+      "page": 5
+    },
+    {
+      "src": "U9",
+      "dst": "USB_SSTXM_DN3",
+      "kind": "produces_signal",
+      "page": 5
+    },
+    {
+      "src": "U9",
+      "dst": "USB_DP_DN3",
+      "kind": "produces_signal",
+      "page": 5
+    },
+    {
+      "src": "U9",
+      "dst": "USB_DM_DN3",
+      "kind": "produces_signal",
+      "page": 5
+    },
+    {
+      "src": "U21",
+      "dst": "J17",
+      "kind": "produces_signal",
+      "page": 5
+    },
+    {
+      "src": "U25",
+      "dst": "J6",
+      "kind": "produces_signal",
+      "page": 5
+    },
+    {
+      "src": "U26",
+      "dst": "J5",
+      "kind": "produces_signal",
+      "page": 5
+    },
+    {
+      "src": "R59",
+      "dst": "R60",
+      "kind": "depends_on",
+      "page": 5
+    },
+    {
+      "src": "R90",
+      "dst": "USB3_3_DN",
+      "kind": "filters",
+      "page": 5
+    },
+    {
+      "src": "R91",
+      "dst": "USB3_3_DP",
+      "kind": "filters",
+      "page": 5
+    },
+    {
+      "src": "R92",
+      "dst": "USB3_4_DN",
+      "kind": "filters",
+      "page": 5
+    },
+    {
+      "src": "R93",
+      "dst": "USB3_4_DP",
+      "kind": "filters",
+      "page": 5
+    }
+  ],
+  "designer_notes": [
+    {
+      "text": "TX & RX caps are on the SoM",
+      "page": 5,
+      "attached_to_refdes": null,
+      "attached_to_net": "USB1_RX_P"
+    },
+    {
+      "text": "TX & RX caps are on the SoM",
+      "page": 5,
+      "attached_to_refdes": null,
+      "attached_to_net": "USB2_RX_P"
+    },
+    {
+      "text": "disables U1/U2 states",
+      "page": 5,
+      "attached_to_refdes": "U9",
+      "attached_to_net": null
+    },
+    {
+      "text": "TODO: possibly control by LPC",
+      "page": 5,
+      "attached_to_refdes": "U9",
+      "attached_to_net": null
+    },
+    {
+      "text": "Protection",
+      "page": 5,
+      "attached_to_refdes": "U21",
+      "attached_to_net": null
+    },
+    {
+      "text": "License: CERN-OHL-S 2.0\nEngineer: Lukas F. Hartmann\nhttps://mntre.com\nMNT Research GmbH\nSheet: /Reform 2 USB/\nFile: reform2-usb.kicad_sch",
+      "page": 5,
+      "attached_to_refdes": null,
+      "attached_to_net": null
+    }
+  ],
+  "ambiguities": [
+    {
+      "description": "U9 (TUSB8040PFP) has many pins; exact pin-to-net mapping for downstream port pins (DN2, DN3) is difficult to read precisely from image density — some pin numbers may be misassigned.",
+      "page": 5,
+      "related_refdes": [
+        "U9"
+      ],
+      "related_nets": [
+        "USB_SSTXP_DN2",
+        "USB_SSTXM_DN2",
+        "USB_SSRXP_DN2",
+        "USB_SSRXM_DN2",
+        "USB_DP_DN2",
+        "USB_DM_DN2",
+        "USB_SSTXP_DN3",
+        "USB_SSTXM_DN3",
+        "USB_SSRXP_DN3",
+        "USB_SSRXM_DN3",
+        "USB_DP_DN3",
+        "USB_DM_DN3"
+      ]
+    },
+    {
+      "description": "USB3_1_SSTXN and USB3_1_SSTXP nets appear on the schematic going to J6 (SSTX/SSTX-) but exact routing through protection ICs is partially obscured.",
+      "page": 5,
+      "related_refdes": [
+        "J6",
+        "U25"
+      ],
+      "related_nets": [
+        "USB3_1_SSTXN",
+        "USB3_1_SSTXP",
+        "SSTX",
+        "SSTX-"
+      ]
+    },
+    {
+      "description": "USB3_2_SSTXN and USB3_2_SSTXP routing through U26 to J5 is partially obscured.",
+      "page": 5,
+      "related_refdes": [
+        "J5",
+        "U26"
+      ],
+      "related_nets": [
+        "USB3_2_SSTXN",
+        "USB3_2_SSTXP"
+      ]
+    },
+    {
+      "description": "USB3_2_SSTXN, USB3_2_SSTXP net labels appear in the NET_LABELS list but their connections via U26 are not clearly legible.",
+      "page": 5,
+      "related_refdes": [
+        "U26"
+      ],
+      "related_nets": [
+        "USB3_2_SSTXN",
+        "USB3_2_SSTXP"
+      ]
+    },
+    {
+      "description": "R84, R85 exact net connections (to PWROND or similar control lines) are unclear from image resolution.",
+      "page": 5,
+      "related_refdes": [
+        "R84",
+        "R85"
+      ],
+      "related_nets": []
+    },
+    {
+      "description": "R55 placement relative to J6 SSRX lines and its exact net label connections could not be fully traced.",
+      "page": 5,
+      "related_refdes": [
+        "R55"
+      ],
+      "related_nets": [
+        "USB3_1_SSRXP",
+        "USB3_1_SSRXN"
+      ]
+    },
+    {
+      "description": "GRSTz pin of U9 connects via R81 (USB_RESETn), the exact net label could not be confirmed - may be USB_RESETn which is not in the validated net label list.",
+      "page": 5,
+      "related_refdes": [
+        "U9",
+        "R81"
+      ],
+      "related_nets": []
+    },
+    {
+      "description": "J9 and J14 exact connector type and all pin assignments are not fully legible; USB_INT1 and USB_INT2 signal origins within U9 are unclear.",
+      "page": 5,
+      "related_refdes": [
+        "J9",
+        "J14"
+      ],
+      "related_nets": [
+        "USB_INT1",
+        "USB_INT2"
+      ]
+    }
+  ]
+}

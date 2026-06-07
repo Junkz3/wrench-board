@@ -1,0 +1,36 @@
+{
+  "section": {
+    "home": "Repair log",
+    "pcb": "Boardview",
+    "schematic": "Schematic",
+    "graphe": "Memory",
+    "stock": "Stock & donors",
+    "profile": "Profile"
+  },
+  "mode": {
+    "journal_tag": "JOURNAL",
+    "journal_repairs": "Repairs",
+    "journal_session": "Session",
+    "tool_tag": "TOOL",
+    "tool_boardview": "Boardview",
+    "tool_schematic": "Electrical graph",
+    "tool_stock": "Stock & donors",
+    "wait_tag": "WAITING",
+    "wait_no_memory": "No memory loaded",
+    "wait_no_repair": "No active repair",
+    "wait_unbuilt": "Memory not built",
+    "memory_tag": "MEMORY",
+    "memory_graph": "Knowledge graph",
+    "build_tag": "BUILDING",
+    "build_in_progress": "Memory in progress",
+    "profile_tag": "PROFILE",
+    "profile_sub": "Technician"
+  },
+  "metabar": {
+    "no_repair": "No active repair",
+    "no_memory_for_device": "No memory for this device — create a repair to build it.",
+    "memory_loaded_approved": "Memory loaded · audit APPROVED",
+    "memory_building_missing": "Memory building — missing {missing}",
+    "open_repair_to_view_graph": "Open a repair from the journal to view its graph."
+  }
+}

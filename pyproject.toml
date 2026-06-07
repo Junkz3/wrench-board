@@ -1,0 +1,95 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "wrench-board"
+version = "0.1.0"
+description = "Agent-native board-level diagnostics workbench powered by Claude Opus 4.8."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "Apache-2.0" }
+authors = [
+    { name = "Alexis Chapellier" },
+]
+keywords = [
+    "claude",
+    "anthropic",
+    "microsoldering",
+    "electronics-repair",
+    "agent",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Framework :: FastAPI",
+    "Topic :: Scientific/Engineering :: Electronic Design Automation (EDA)",
+]
+
+dependencies = [
+    "fastapi ~= 0.136.0",
+    "uvicorn[standard] ~= 0.45.0",
+    "pydantic ~= 2.13.0",
+    "pydantic-settings ~= 2.14.0",
+    "anthropic ~= 0.97.0",
+    "pdfplumber ~= 0.11.0",
+    "python-dotenv ~= 1.2.0",
+    "httpx ~= 0.28.0",
+    "python-multipart ~= 0.0.20",
+    "websockets >= 13.1, < 17.0",
+    "cryptography ~= 46.0",
+    # numpy : utilisé DIRECTEMENT par le parser board (_xzz_engine) ; en dev il
+    # arrivait transitivement (llama-index-core), mais l'image de prod propre ne
+    # l'a pas → import error au boot. Déclaré explicitement.
+    "numpy ~= 2.4",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest ~= 8.4.0",
+    "pytest-asyncio ~= 0.26.0",
+    "ruff ~= 0.15.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/Junkz3/wrench-board"
+Repository = "https://github.com/Junkz3/wrench-board"
+
+[tool.setuptools.packages.find]
+include = ["api*"]
+exclude = ["tests*", "web*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "I",    # isort
+    "B",    # flake8-bugbear
+    "UP",   # pyupgrade
+]
+ignore = [
+    "E501",  # line too long (handled by formatter)
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = ["tests"]
+asyncio_mode = "auto"
+filterwarnings = [
+    "ignore::DeprecationWarning",
+]
+markers = [
+    "slow: accuracy or perf benchmarks that take >30s (skipped by default in `make test`, included in `make test-all`)",
+]

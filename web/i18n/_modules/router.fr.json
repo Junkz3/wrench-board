@@ -1,0 +1,36 @@
+{
+  "section": {
+    "home": "Journal des réparations",
+    "pcb": "Boardview",
+    "schematic": "Schematic",
+    "graphe": "Mémoire",
+    "stock": "Stock & donneurs",
+    "profile": "Profil"
+  },
+  "mode": {
+    "journal_tag": "JOURNAL",
+    "journal_repairs": "Réparations",
+    "journal_session": "Session",
+    "tool_tag": "OUTIL",
+    "tool_boardview": "Boardview",
+    "tool_schematic": "Graphe électrique",
+    "tool_stock": "Stock & donneurs",
+    "wait_tag": "ATTENTE",
+    "wait_no_memory": "Aucune mémoire chargée",
+    "wait_no_repair": "Aucune réparation en cours",
+    "wait_unbuilt": "Mémoire non construite",
+    "memory_tag": "MÉMOIRE",
+    "memory_graph": "Graphe de connaissances",
+    "build_tag": "CONSTRUCTION",
+    "build_in_progress": "Mémoire en cours",
+    "profile_tag": "PROFIL",
+    "profile_sub": "Technicien"
+  },
+  "metabar": {
+    "no_repair": "Aucune réparation en cours",
+    "no_memory_for_device": "Aucune mémoire pour ce device — crée une réparation pour la construire.",
+    "memory_loaded_approved": "Mémoire chargée · audit APPROUVÉ",
+    "memory_building_missing": "Mémoire en construction — manque {missing}",
+    "open_repair_to_view_graph": "Ouvre une réparation depuis le Journal pour voir son graphe."
+  }
+}

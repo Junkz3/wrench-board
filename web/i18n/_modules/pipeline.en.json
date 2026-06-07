@@ -1,0 +1,60 @@
+{
+  "drawer": {
+    "header_label": "Building memory",
+    "device_placeholder": "—",
+    "close_aria": "Close progress panel"
+  },
+  "phase": {
+    "scout": {
+      "label": "Scout",
+      "sub": "Web research"
+    },
+    "registry": {
+      "label": "Registry",
+      "sub": "Canonical vocabulary"
+    },
+    "writers": {
+      "label": "Writers",
+      "sub": "Graph · Rules · Dictionary"
+    },
+    "audit": {
+      "label": "Auditor",
+      "sub": "QA & consistency"
+    },
+    "schematic_ingest": {
+      "label": "Schematic ingested",
+      "sub": "Page-by-page vision"
+    },
+    "device_kind": {
+      "label": "Device type",
+      "sub": "Graph classification"
+    }
+  },
+  "step": {
+    "time_placeholder": "—",
+    "in_progress": "running…",
+    "failed": "failed"
+  },
+  "status": {
+    "waiting": "Waiting for first events…",
+    "connecting": "Connecting to pipeline…",
+    "started": "Pipeline started…",
+    "phase_running": "Phase running · <b>{phase}</b>",
+    "ready": "Memory ready · audit <b>{status}</b> · consistency <b>{score}</b>",
+    "failed": "Pipeline failed · <b>{status}</b>",
+    "lost_connection": "Lost connection to progress stream.",
+    "closed_early": "Connection closed before pipeline finished."
+  },
+  "cta": {
+    "view_memory_bank": "Open Memory Bank",
+    "close": "Close"
+  },
+  "kind": {
+    "declared": "Declared",
+    "detected": "Detected",
+    "recommended": "recommended",
+    "confirm": "Confirm and resume",
+    "confirmed": "confirmed",
+    "undeclared": "undeclared"
+  }
+}

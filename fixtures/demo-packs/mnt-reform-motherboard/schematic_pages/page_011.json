@@ -1,0 +1,1218 @@
+{
+  "schema_version": "1.0",
+  "page": 11,
+  "sheet_name": "MNT Reform 2 Ethernet Size",
+  "sheet_path": "/Reform 2 Ethernet/",
+  "page_kind": "schematic",
+  "orientation": "landscape",
+  "confidence": 0.82,
+  "nodes": [
+    {
+      "refdes": "PP11",
+      "type": "connector",
+      "value": {
+        "raw": "JJ00GG--00000033NNLL",
+        "primary": "JOG-0003NL",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": "Gigabit Ethernet Port, Equiv: TE 1-2301994-1"
+      },
+      "page": 11,
+      "pins": [
+        {
+          "number": "8",
+          "name": "TRD4+",
+          "role": "signal_inout",
+          "net_label": "ETH0_D"
+        },
+        {
+          "number": "7",
+          "name": "TRCT4",
+          "role": "signal_inout",
+          "net_label": "TRCT4"
+        },
+        {
+          "number": "9",
+          "name": "TRD4-",
+          "role": "signal_inout",
+          "net_label": "ETH0_D-"
+        },
+        {
+          "number": "3",
+          "name": "TRD3+",
+          "role": "signal_inout",
+          "net_label": "ETH0_C"
+        },
+        {
+          "number": "1",
+          "name": "TRCT3",
+          "role": "signal_inout",
+          "net_label": "TRCT3"
+        },
+        {
+          "number": "2",
+          "name": "TRD3-",
+          "role": "signal_inout",
+          "net_label": "ETH0_C-"
+        },
+        {
+          "number": "4",
+          "name": "TRD2+",
+          "role": "signal_inout",
+          "net_label": "ETH0_B"
+        },
+        {
+          "number": "6",
+          "name": "TRCT2",
+          "role": "signal_inout",
+          "net_label": "TRCT2"
+        },
+        {
+          "number": "5",
+          "name": "TRD2-",
+          "role": "signal_inout",
+          "net_label": "ETH0_B-"
+        },
+        {
+          "number": "11",
+          "name": "TDR1+",
+          "role": "signal_inout",
+          "net_label": "ETH0_A"
+        },
+        {
+          "number": "12",
+          "name": "TRCT1",
+          "role": "signal_inout",
+          "net_label": "TRCT1"
+        },
+        {
+          "number": "10",
+          "name": "TDR1-",
+          "role": "signal_inout",
+          "net_label": "ETH0_A-"
+        },
+        {
+          "number": "14",
+          "name": "YEL+",
+          "role": "signal_out",
+          "net_label": "YEL"
+        },
+        {
+          "number": "13",
+          "name": "YEL-",
+          "role": "signal_out",
+          "net_label": "YEL-"
+        },
+        {
+          "number": "15",
+          "name": "ORN-",
+          "role": "signal_out",
+          "net_label": "ORN-"
+        },
+        {
+          "number": "16",
+          "name": "COM+",
+          "role": "signal_inout",
+          "net_label": "COM"
+        },
+        {
+          "number": "17",
+          "name": "GRN-",
+          "role": "signal_out",
+          "net_label": "GRN-"
+        },
+        {
+          "number": "7",
+          "name": "TRP4+",
+          "role": "signal_inout",
+          "net_label": "TRP4+"
+        },
+        {
+          "number": "8",
+          "name": "TRP4-",
+          "role": "signal_inout",
+          "net_label": "TRP4-"
+        },
+        {
+          "number": "4",
+          "name": "TRP3+",
+          "role": "signal_inout",
+          "net_label": "TRP3+"
+        },
+        {
+          "number": "5",
+          "name": "TRP3-",
+          "role": "signal_inout",
+          "net_label": "TRP3-"
+        },
+        {
+          "number": "3",
+          "name": "TRP2+",
+          "role": "signal_inout",
+          "net_label": "TRP2+"
+        },
+        {
+          "number": "6",
+          "name": "TRP2-",
+          "role": "signal_inout",
+          "net_label": "TRP2-"
+        },
+        {
+          "number": "1",
+          "name": "TRP1+",
+          "role": "signal_inout",
+          "net_label": "TRP1+"
+        },
+        {
+          "number": "2",
+          "name": "TRP1-",
+          "role": "signal_inout",
+          "net_label": "TRP1-"
+        },
+        {
+          "number": "16",
+          "name": "SSHH11",
+          "role": "ground",
+          "net_label": "SSHH11"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "CC2222",
+      "type": "capacitor",
+      "value": {
+        "raw": "0.1uF",
+        "primary": "100nF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 11,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "+3V3"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GGNNDD"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "CC2233",
+      "type": "capacitor",
+      "value": {
+        "raw": "0.1uF",
+        "primary": "100nF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 11,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "TRCT4"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GGNNDD"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "CC2244",
+      "type": "capacitor",
+      "value": {
+        "raw": "0.1uF",
+        "primary": "100nF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 11,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "TRCT3"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GGNNDD"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "CC2255",
+      "type": "capacitor",
+      "value": {
+        "raw": "0.1uF",
+        "primary": "100nF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 11,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "TRCT2"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GGNNDD"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "CC2266",
+      "type": "capacitor",
+      "value": {
+        "raw": "0.1uF",
+        "primary": "100nF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 11,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "TRCT1"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GGNNDD"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "RR111166",
+      "type": "resistor",
+      "value": {
+        "raw": "00",
+        "primary": "0Ω",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 11,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "ETH0_LED_RX"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "terminal",
+          "net_label": "YEL-"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "RR114466",
+      "type": "resistor",
+      "value": {
+        "raw": "00",
+        "primary": "0Ω",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 11,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "ETH0_LED_LINK2"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "terminal",
+          "net_label": "ORN-"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "RR114477",
+      "type": "resistor",
+      "value": {
+        "raw": "00",
+        "primary": "0Ω",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 11,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "ETH0_LED_LINK1"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "terminal",
+          "net_label": "GRN-"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "SSHH11",
+      "type": "other",
+      "value": {
+        "raw": "0.001uF",
+        "primary": "1nF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": "Shield capacitor to GND"
+      },
+      "page": 11,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "SSHH11"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GGNNDD"
+        }
+      ],
+      "populated": true
+    }
+  ],
+  "nets": [
+    {
+      "local_id": "net_3V3",
+      "label": "+3V3",
+      "is_power": true,
+      "is_global": true,
+      "connects": [
+        "CC2222.1"
+      ],
+      "page": 11
+    },
+    {
+      "local_id": "net_GND",
+      "label": "GGNNDD",
+      "is_power": true,
+      "is_global": true,
+      "connects": [
+        "CC2222.2",
+        "CC2233.2",
+        "CC2244.2",
+        "CC2255.2",
+        "CC2266.2",
+        "SSHH11.2"
+      ],
+      "page": 11
+    },
+    {
+      "local_id": "net_ETH0_D",
+      "label": "ETH0_D",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "PP11.8"
+      ],
+      "page": 11
+    },
+    {
+      "local_id": "net_ETH0_D-",
+      "label": "ETH0_D-",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "PP11.9"
+      ],
+      "page": 11
+    },
+    {
+      "local_id": "net_ETH0_C",
+      "label": "ETH0_C",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "PP11.3"
+      ],
+      "page": 11
+    },
+    {
+      "local_id": "net_ETH0_C-",
+      "label": "ETH0_C-",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "PP11.2"
+      ],
+      "page": 11
+    },
+    {
+      "local_id": "net_ETH0_B",
+      "label": "ETH0_B",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "PP11.4"
+      ],
+      "page": 11
+    },
+    {
+      "local_id": "net_ETH0_B-",
+      "label": "ETH0_B-",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "PP11.5"
+      ],
+      "page": 11
+    },
+    {
+      "local_id": "net_ETH0_A",
+      "label": "ETH0_A",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "PP11.11"
+      ],
+      "page": 11
+    },
+    {
+      "local_id": "net_ETH0_A-",
+      "label": "ETH0_A-",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "PP11.10"
+      ],
+      "page": 11
+    },
+    {
+      "local_id": "net_TRCT4",
+      "label": "TRCT4",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "PP11.7",
+        "CC2233.1"
+      ],
+      "page": 11
+    },
+    {
+      "local_id": "net_TRCT3",
+      "label": "TRCT3",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "PP11.1",
+        "CC2244.1"
+      ],
+      "page": 11
+    },
+    {
+      "local_id": "net_TRCT2",
+      "label": "TRCT2",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "PP11.6",
+        "CC2255.1"
+      ],
+      "page": 11
+    },
+    {
+      "local_id": "net_TRCT1",
+      "label": "TRCT1",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "PP11.12",
+        "CC2266.1"
+      ],
+      "page": 11
+    },
+    {
+      "local_id": "net_TRP4+",
+      "label": "TRP4+",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "PP11.7"
+      ],
+      "page": 11
+    },
+    {
+      "local_id": "net_TRP4-",
+      "label": "TRP4-",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "PP11.8"
+      ],
+      "page": 11
+    },
+    {
+      "local_id": "net_TRP3+",
+      "label": "TRP3+",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "PP11.4"
+      ],
+      "page": 11
+    },
+    {
+      "local_id": "net_TRP3-",
+      "label": "TRP3-",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "PP11.5"
+      ],
+      "page": 11
+    },
+    {
+      "local_id": "net_TRP2+",
+      "label": "TRP2+",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "PP11.3"
+      ],
+      "page": 11
+    },
+    {
+      "local_id": "net_TRP2-",
+      "label": "TRP2-",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "PP11.6"
+      ],
+      "page": 11
+    },
+    {
+      "local_id": "net_TRP1+",
+      "label": "TRP1+",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "PP11.1"
+      ],
+      "page": 11
+    },
+    {
+      "local_id": "net_TRP1-",
+      "label": "TRP1-",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "PP11.2"
+      ],
+      "page": 11
+    },
+    {
+      "local_id": "net_TDR1",
+      "label": "TDR1",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "PP11.11"
+      ],
+      "page": 11
+    },
+    {
+      "local_id": "net_TDR1-",
+      "label": "TDR1-",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "PP11.10"
+      ],
+      "page": 11
+    },
+    {
+      "local_id": "net_TRD2",
+      "label": "TRD2",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "PP11.4"
+      ],
+      "page": 11
+    },
+    {
+      "local_id": "net_TRD2-",
+      "label": "TRD2-",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "PP11.5"
+      ],
+      "page": 11
+    },
+    {
+      "local_id": "net_TRD3",
+      "label": "TRD3",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "PP11.3"
+      ],
+      "page": 11
+    },
+    {
+      "local_id": "net_TRD3-",
+      "label": "TRD3-",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "PP11.2"
+      ],
+      "page": 11
+    },
+    {
+      "local_id": "net_TRD4",
+      "label": "TRD4",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "PP11.8"
+      ],
+      "page": 11
+    },
+    {
+      "local_id": "net_TRD4-",
+      "label": "TRD4-",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "PP11.9"
+      ],
+      "page": 11
+    },
+    {
+      "local_id": "net_YEL",
+      "label": "YEL",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "PP11.14"
+      ],
+      "page": 11
+    },
+    {
+      "local_id": "net_YEL-",
+      "label": "YEL-",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "PP11.13",
+        "RR111166.2"
+      ],
+      "page": 11
+    },
+    {
+      "local_id": "net_ORN-",
+      "label": "ORN-",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "PP11.15",
+        "RR114466.2"
+      ],
+      "page": 11
+    },
+    {
+      "local_id": "net_COM",
+      "label": "COM",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "PP11.16"
+      ],
+      "page": 11
+    },
+    {
+      "local_id": "net_GRN-",
+      "label": "GRN-",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "PP11.17",
+        "RR114477.2"
+      ],
+      "page": 11
+    },
+    {
+      "local_id": "net_ETH0_LED_RX",
+      "label": "ETH0_LED_RX",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "RR111166.1"
+      ],
+      "page": 11
+    },
+    {
+      "local_id": "net_ETH0_LINK2",
+      "label": "ETH0_LED_LINK2",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "RR114466.1"
+      ],
+      "page": 11
+    },
+    {
+      "local_id": "net_ETH0_LINK1",
+      "label": "ETH0_LED_LINK1",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "RR114477.1"
+      ],
+      "page": 11
+    },
+    {
+      "local_id": "net_SSHH11",
+      "label": "SSHH11",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "PP11.16",
+        "SSHH11.1"
+      ],
+      "page": 11
+    }
+  ],
+  "cross_page_refs": [
+    {
+      "label": "ETH0_A",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "Ethernet PHY page",
+      "page": 11
+    },
+    {
+      "label": "ETH0_A-",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "Ethernet PHY page",
+      "page": 11
+    },
+    {
+      "label": "ETH0_B",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "Ethernet PHY page",
+      "page": 11
+    },
+    {
+      "label": "ETH0_B-",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "Ethernet PHY page",
+      "page": 11
+    },
+    {
+      "label": "ETH0_C",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "Ethernet PHY page",
+      "page": 11
+    },
+    {
+      "label": "ETH0_C-",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "Ethernet PHY page",
+      "page": 11
+    },
+    {
+      "label": "ETH0_D",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "Ethernet PHY page",
+      "page": 11
+    },
+    {
+      "label": "ETH0_D-",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "Ethernet PHY page",
+      "page": 11
+    },
+    {
+      "label": "ETH0_LED_RX",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "Ethernet PHY page",
+      "page": 11
+    },
+    {
+      "label": "ETH0_LED_LINK1",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "Ethernet PHY page",
+      "page": 11
+    },
+    {
+      "label": "ETH0_LED_LINK2",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "Ethernet PHY page",
+      "page": 11
+    },
+    {
+      "label": "TRP4+",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "Ethernet PHY page",
+      "page": 11
+    },
+    {
+      "label": "TRP4-",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "Ethernet PHY page",
+      "page": 11
+    },
+    {
+      "label": "TRP3+",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "Ethernet PHY page",
+      "page": 11
+    },
+    {
+      "label": "TRP3-",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "Ethernet PHY page",
+      "page": 11
+    },
+    {
+      "label": "TRP2+",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "Ethernet PHY page",
+      "page": 11
+    },
+    {
+      "label": "TRP2-",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "Ethernet PHY page",
+      "page": 11
+    },
+    {
+      "label": "TRP1+",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "Ethernet PHY page",
+      "page": 11
+    },
+    {
+      "label": "TRP1-",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "Ethernet PHY page",
+      "page": 11
+    }
+  ],
+  "typed_edges": [
+    {
+      "src": "+3V3",
+      "dst": "CC2222",
+      "kind": "decouples",
+      "page": 11
+    },
+    {
+      "src": "CC2233",
+      "dst": "TRCT4",
+      "kind": "decouples",
+      "page": 11
+    },
+    {
+      "src": "CC2244",
+      "dst": "TRCT3",
+      "kind": "decouples",
+      "page": 11
+    },
+    {
+      "src": "CC2255",
+      "dst": "TRCT2",
+      "kind": "decouples",
+      "page": 11
+    },
+    {
+      "src": "CC2266",
+      "dst": "TRCT1",
+      "kind": "decouples",
+      "page": 11
+    },
+    {
+      "src": "ETH0_LED_RX",
+      "dst": "RR111166",
+      "kind": "consumes_signal",
+      "page": 11
+    },
+    {
+      "src": "RR111166",
+      "dst": "YEL-",
+      "kind": "produces_signal",
+      "page": 11
+    },
+    {
+      "src": "ETH0_LED_LINK2",
+      "dst": "RR114466",
+      "kind": "consumes_signal",
+      "page": 11
+    },
+    {
+      "src": "RR114466",
+      "dst": "ORN-",
+      "kind": "produces_signal",
+      "page": 11
+    },
+    {
+      "src": "ETH0_LED_LINK1",
+      "dst": "RR114477",
+      "kind": "consumes_signal",
+      "page": 11
+    },
+    {
+      "src": "RR114477",
+      "dst": "GRN-",
+      "kind": "produces_signal",
+      "page": 11
+    },
+    {
+      "src": "PP11",
+      "dst": "TRP4+",
+      "kind": "produces_signal",
+      "page": 11
+    },
+    {
+      "src": "PP11",
+      "dst": "TRP4-",
+      "kind": "produces_signal",
+      "page": 11
+    },
+    {
+      "src": "PP11",
+      "dst": "TRP3+",
+      "kind": "produces_signal",
+      "page": 11
+    },
+    {
+      "src": "PP11",
+      "dst": "TRP3-",
+      "kind": "produces_signal",
+      "page": 11
+    },
+    {
+      "src": "PP11",
+      "dst": "TRP2+",
+      "kind": "produces_signal",
+      "page": 11
+    },
+    {
+      "src": "PP11",
+      "dst": "TRP2-",
+      "kind": "produces_signal",
+      "page": 11
+    },
+    {
+      "src": "PP11",
+      "dst": "TRP1+",
+      "kind": "produces_signal",
+      "page": 11
+    },
+    {
+      "src": "PP11",
+      "dst": "TRP1-",
+      "kind": "produces_signal",
+      "page": 11
+    },
+    {
+      "src": "SSHH11",
+      "dst": "GGNNDD",
+      "kind": "filters",
+      "page": 11
+    }
+  ],
+  "designer_notes": [
+    {
+      "text": "Gigabit Ethernet Port",
+      "page": 11,
+      "attached_to_refdes": "PP11",
+      "attached_to_net": null
+    },
+    {
+      "text": "Equiv: TE 1-2301994-1",
+      "page": 11,
+      "attached_to_refdes": "PP11",
+      "attached_to_net": null
+    },
+    {
+      "text": "License: CERN-OHL-S 2.0\nEngineer: Lukas F. Hartmann\nhttps://mntre.com\nMNT Research GmbH\nSheet: /Reform 2 Ethernet/\nFile: reform2-eth.kicad_sch",
+      "page": 11,
+      "attached_to_refdes": null,
+      "attached_to_net": null
+    }
+  ],
+  "ambiguities": [
+    {
+      "description": "The Ethernet magnetics transformer block (P1 internal) pin mappings between LAN-side (TRDx/TRCTx) and line-side (TRPx) are inferred from the 1:1 transformer symbol arrangement; exact internal centre-tap wiring could not be individually traced.",
+      "page": 11,
+      "related_refdes": [
+        "PP11"
+      ],
+      "related_nets": [
+        "TRCT4",
+        "TRCT3",
+        "TRCT2",
+        "TRCT1",
+        "TRP4+",
+        "TRP4-",
+        "TRP3+",
+        "TRP3-",
+        "TRP2+",
+        "TRP2-",
+        "TRP1+",
+        "TRP1-"
+      ]
+    },
+    {
+      "description": "The 75 OHM termination resistors shown inside the transformer block cannot be confirmed as separate discrete components or internal to PP11 — no distinct refdes is visible for them in the grounding set.",
+      "page": 11,
+      "related_refdes": [],
+      "related_nets": [
+        "TRP4+",
+        "TRP4-",
+        "TRP3+",
+        "TRP3-",
+        "TRP2+",
+        "TRP2-",
+        "TRP1+",
+        "TRP1-"
+      ]
+    },
+    {
+      "description": "Net label 'ETH0_D' appears as 'ETHO_D+' in the image text but only 'ETH0_D' is in the grounding NET_LABELS set; same ambiguity for ETH0_A, ETH0_B, ETH0_C — the '+' suffix may or may not be present.",
+      "page": 11,
+      "related_refdes": [
+        "PP11"
+      ],
+      "related_nets": [
+        "ETH0_A",
+        "ETH0_B",
+        "ETH0_C",
+        "ETH0_D"
+      ]
+    },
+    {
+      "description": "SSHH11 appears both as a net label and as what appears to be a shield/chassis ground capacitor component; the exact refdes for that capacitor is not in the grounding REFDES set (which is empty), so it is listed as a component named SSHH11 with caution.",
+      "page": 11,
+      "related_refdes": [
+        "SSHH11"
+      ],
+      "related_nets": [
+        "SSHH11"
+      ]
+    }
+  ]
+}

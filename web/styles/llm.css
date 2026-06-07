@@ -1,0 +1,1015 @@
+/* ============ LLM PANEL — diagnostic agent chat (push-mode) ============ */
+/* Docked right-side panel. When body.llm-open, main content zones shrink
+   to leave the 420px strip. Designed to feel like the Inspector / Tweaks
+   chrome: flat surfaces, 1px semantic borders, JetBrains Mono for any
+   machine payload (tool calls, IDs), Inter for prose. */
+
+.llm-panel{
+  position:fixed;top:48px;right:0;bottom:0;width:420px;
+  background:linear-gradient(180deg,var(--bg-2),var(--bg));
+  border-left:1px solid var(--border);
+  display:none;flex-direction:column;z-index:24;
+}
+body:not(.no-metabar) .llm-panel{top:92px}
+.llm-panel.open{display:flex}
+
+/* Push main content under the panel — every section that owns a fixed
+   right edge. `.brd-root` is `position:absolute; inset:0` inside its
+   `.stub` parent, so shrinking `.stub` here already shrinks the board
+   canvas — do NOT re-apply `right:420px` on `.brd-root` or it offsets
+   twice (you get a dead gap between the board and the panel). */
+body.llm-open .canvas,
+body.llm-open .home,
+body.llm-open .stub{right:420px}
+
+/* --- head --- */
+.llm-head{
+  display:flex;align-items:flex-start;gap:10px;
+  padding:8px 14px 10px;border-bottom:1px solid var(--border);
+  background:linear-gradient(180deg,rgba(192,132,252,.06),transparent);
+  position:relative;
+}
+.llm-head .type-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:3px 8px;border-radius:4px;
+  background:rgba(192,132,252,.12);color:var(--violet);
+  border:1px solid rgba(192,132,252,.3);
+  font-family:var(--mono);font-size:10px;letter-spacing:.4px;text-transform:uppercase;
+  flex-shrink:0;
+}
+.llm-head .title-col{flex:1;display:flex;flex-direction:column;gap:2px;min-width:0}
+.llm-head h3{margin:0;font-size:13px;font-weight:600;color:var(--text);
+             overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.llm-head .llm-subline{
+  font-family:var(--mono);font-size:10.5px;color:var(--text-3);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;letter-spacing:.2px;
+}
+.llm-head-actions{display:flex;align-items:center;gap:6px;position:relative}
+
+/* Hide the old tier grid — replaced by chip + popover. Kept as a safety net in case an old fragment is cached. */
+.llm-tiers{display:none}
+
+/* --- tier chip + popover --- */
+.llm-tier-chip{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:4px 8px;
+  background:var(--panel);border:1px solid var(--border);border-radius:4px;
+  cursor:pointer;transition:all .15s;
+  font-family:var(--mono);font-size:10px;letter-spacing:.4px;color:var(--text-2);
+  text-transform:uppercase;
+}
+.llm-tier-chip:hover{color:var(--text);border-color:var(--border-hover)}
+.llm-tier-chip[data-tier="fast"]{color:var(--emerald);border-color:rgba(52,211,153,.35);background:rgba(52,211,153,.08)}
+.llm-tier-chip[data-tier="normal"]{color:var(--cyan);border-color:rgba(56,189,248,.35);background:rgba(56,189,248,.08)}
+.llm-tier-chip[data-tier="deep"]{color:var(--violet);border-color:rgba(192,132,252,.35);background:rgba(192,132,252,.08)}
+.llm-tier-chip .chevron-down{transition:transform .15s;opacity:.7}
+.llm-tier-chip[aria-expanded="true"] .chevron-down{transform:rotate(180deg)}
+
+.llm-tier-popover{
+  position:absolute;top:calc(100% + 4px);right:30px;min-width:180px;z-index:40;
+  background:rgba(20,32,48,.96);backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+  border:1px solid var(--border);border-radius:6px;
+  box-shadow:0 8px 24px rgba(0,0,0,.35);padding:4px;
+  display:flex;flex-direction:column;gap:2px;
+}
+.llm-tier-popover[hidden]{display:none}
+.llm-tier-popover button{
+  text-align:left;background:transparent;border:0;
+  padding:6px 10px;border-radius:4px;cursor:pointer;
+  font-family:inherit;font-size:11.5px;color:var(--text-2);
+}
+.llm-tier-popover button:hover{background:var(--panel-2);color:var(--text)}
+.llm-tier-popover button.on{color:var(--text);background:rgba(192,132,252,.08)}
+
+/* --- status strip (connected / device slug / mode) --- */
+.llm-status{
+  padding:5px 14px;font-family:var(--mono);font-size:10.5px;
+  color:var(--text-3);border-bottom:1px solid var(--border-soft);
+  display:flex;align-items:center;gap:8px;
+}
+.llm-status .dot{width:6px;height:6px;border-radius:50%;background:var(--text-3)}
+.llm-status.connecting .dot{background:var(--amber);box-shadow:0 0 6px var(--amber);animation:pulse 2.4s ease-in-out infinite}
+.llm-status.connected  .dot{background:var(--emerald);box-shadow:0 0 6px var(--emerald)}
+.llm-status.closed     .dot{background:var(--amber)}
+.llm-status.error      .dot{background:oklch(0.70 0.22 25);box-shadow:0 0 6px oklch(0.70 0.22 25)}
+.llm-status .device-tag{
+  padding:1px 6px;border-radius:3px;background:var(--panel);border:1px solid var(--border);
+  color:var(--text-2);font-size:10px;letter-spacing:.3px;text-transform:uppercase;
+}
+
+/* --- log --- */
+.llm-log{
+  flex:1;overflow:hidden auto;padding:12px 14px;
+  display:flex;flex-direction:column;gap:9px;
+  font-size:12.5px;line-height:1.55;
+}
+.llm-log::-webkit-scrollbar{width:6px}
+.llm-log::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+.llm-log::-webkit-scrollbar-track{background:transparent}
+
+.llm-log .msg{padding:4px 0 4px 22px;overflow-wrap:anywhere;position:relative}
+.llm-log .msg .role{display:none}
+.llm-log .msg.user{color:var(--text)}
+/* Sobre attribution marker — a tiny cyan chevron on the left, no bubble, no bg. */
+.llm-log .msg.user::before{
+  content:"›";
+  position:absolute;left:6px;top:3px;
+  font-family:var(--mono);font-size:13px;line-height:1;
+  color:var(--cyan);opacity:.75;
+}
+.llm-log .msg.replay,.llm-log .tool.replay{opacity:.55}
+.llm-log .msg .cost-chip{display:inline-block;margin-top:6px;padding:1px 6px;border:1px solid var(--border-soft);border-radius:10px;font-family:var(--mono);font-size:9.5px;color:var(--text-3);letter-spacing:.3px}
+.llm-status .cost-total{margin-left:auto;padding:1px 6px;border:1px solid var(--border-soft);border-radius:10px;font-family:var(--mono);font-size:10px;color:var(--text-2);letter-spacing:.3px}
+.llm-status .cost-total.hot{color:var(--amber);border-color:rgba(245,158,11,.3);background:rgba(245,158,11,.08)}
+
+.llm-log .sys{
+  font-family:var(--mono);font-size:10.5px;color:var(--text-3);
+  padding:3px 10px;
+  overflow-wrap:anywhere;
+}
+.llm-log .sys.err{color:oklch(0.72 0.20 25)}
+
+/* --- input --- */
+/* Buttons overlay the bottom-right corner of the textarea for a fused
+   chat-input feel. Textarea reserves right-padding so typed text never
+   slides under the icons. */
+.llm-input{
+  position:relative;display:block;padding:12px 14px 14px;
+  border-top:1px solid var(--border);
+  background:var(--bg-2);
+}
+.llm-input textarea{
+  display:block;width:100%;
+  background:var(--panel);border:1px solid var(--border);color:var(--text);
+  border-radius:8px;
+  padding:12px 84px 12px 14px;   /* right pad reserves space for the two icon-btns */
+  font-family:inherit;font-size:13px;line-height:1.5;
+  outline:none;resize:none;
+  min-height:82px;max-height:220px;overflow-y:auto;
+  transition:border-color .15s,box-shadow .15s;
+}
+.llm-input textarea:focus{
+  border-color:var(--cyan);
+  box-shadow:0 0 0 3px rgba(56,189,248,.12);
+}
+.llm-input textarea::placeholder{color:var(--text-3)}
+
+/* Actions float inside the bottom-right corner of the textarea. */
+.llm-input-actions{
+  position:absolute;right:22px;bottom:22px;
+  display:flex;gap:6px;align-items:center;
+}
+
+/* Icon-only buttons (Stop + Envoyer). Compact, nested feel. */
+.llm-input .icon-btn{
+  width:30px;height:30px;padding:0;
+  display:inline-flex;align-items:center;justify-content:center;
+  background:var(--bg-2);border:1px solid var(--border-soft);border-radius:6px;
+  color:var(--text-3);cursor:pointer;
+  transition:background .15s,border-color .15s,color .15s,transform .1s;
+}
+.llm-input .icon-btn svg{width:15px;height:15px;display:block}
+.llm-input .icon-btn:hover{
+  background:var(--panel-2);border-color:var(--border-hover);color:var(--text);
+}
+.llm-input .icon-btn:active{transform:scale(.94)}
+.llm-input .icon-btn:disabled{opacity:.35;cursor:not-allowed}
+.llm-input .icon-btn:disabled:hover{background:var(--bg-2);border-color:var(--border-soft);color:var(--text-3)}
+
+/* Stop — amber when active. */
+.llm-input .icon-btn.llm-stop:not(:disabled){
+  color:var(--amber);
+  border-color:rgba(245,158,11,.35);
+  background:rgba(245,158,11,.1);
+}
+.llm-input .icon-btn.llm-stop:not(:disabled):hover{
+  background:rgba(245,158,11,.2);border-color:rgba(245,158,11,.65);
+}
+
+/* Envoyer — cyan when enabled, primary action. */
+.llm-input .icon-btn.llm-send:not(:disabled){
+  color:var(--cyan);
+  border-color:rgba(56,189,248,.45);
+  background:rgba(56,189,248,.14);
+}
+.llm-input .icon-btn.llm-send:not(:disabled):hover{
+  background:rgba(56,189,248,.24);border-color:rgba(56,189,248,.7);
+}
+
+/* topbar toggle — matches the existing .top-btn visually */
+.top-btn.llm-toggle.on{
+  color:var(--violet);border-color:rgba(192,132,252,.35);
+  background:rgba(192,132,252,.08);
+}
+
+/* ============ Turn-block — grouping for agent narrative ============ */
+/* A .turn wraps one agent reasoning cycle: [thinking?][tool_use*][message].
+   The left vertical rail carries the chronology; nodes are typed by color
+   (cyan = MB read, violet = BV action, grey = thinking). */
+
+.turn {
+  display: grid;
+  /* minmax(0, 1fr) prevents the grid track from blowing out when a child
+     has min-content wider than the panel — without it, a long nowrap
+     `tool_use` phrase pushes the whole turn beyond .llm-log and gets
+     clipped on the right. */
+  grid-template-columns: minmax(0, 1fr);
+  min-width: 0;
+  padding: 2px 0 10px;
+}
+.turn + .turn,
+.turn + .msg,
+.msg + .turn {
+  border-top: 1px dashed var(--border-soft);
+  margin-top: 8px;
+  padding-top: 12px;
+}
+
+.turn-rail {
+  border-left: 1px solid rgba(192,132,252,.35);
+  margin-left: 4px;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+}
+.turn-rail:empty { display: none; }
+
+.turn-message {
+  padding-left: 22px;
+  margin-top: 8px;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+.turn-message > :first-child { margin-top: 0; }
+.turn-message > :last-child  { margin-bottom: 0; }
+.turn-message p { margin: 6px 0; }
+.turn-message ul, .turn-message ol { margin: 6px 0; padding-left: 22px; }
+.turn-message li { margin: 2px 0; }
+.turn-message code {
+  font-family: var(--mono); font-size: 11px;
+  background: rgba(148,163,184,.08);
+  padding: 1px 4px; border-radius: 3px;
+  color: var(--text-2);
+}
+.turn-message strong { font-weight: 600; color: var(--text); }
+.turn-message em { font-style: italic; color: var(--text-2); }
+
+.turn-foot {
+  padding-left: 22px;
+  margin-top: 6px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-3);
+  display: flex;
+  gap: 8px;
+  letter-spacing: .3px;
+}
+.turn-foot .foot-sep { opacity: .5 }
+
+/* ----- Steps inside the rail ----- */
+.step {
+  position: relative;
+  padding: 5px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11.5px;
+  color: var(--text-2);
+  min-height: 20px;
+  /* min-width:0 lets the flex item shrink inside the rail column.
+     Without it, a long nowrap step-phrase grows the .step beyond the
+     rail and overflows the panel. */
+  min-width: 0;
+}
+.step .node {
+  position: absolute;
+  left: -22px;
+  top: 10px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--text-3);
+}
+.step.thinking {
+  font-style: italic;
+  color: var(--text-3);
+}
+.step.thinking .node { background: var(--text-3); }
+.step.mb .node {
+  background: var(--cyan);
+  box-shadow: 0 0 0 2px rgba(56,189,248,.15);
+}
+.step.bv .node {
+  background: var(--violet);
+  box-shadow: 0 0 0 2px rgba(192,132,252,.15);
+}
+/* MEM = MA-native filesystem ops (read/write/edit/grep/glob on the device's
+   memory store). Muted grey on purpose — this is technical plumbing, not
+   part of the four-color semantic ontology (amber/cyan/emerald/violet). */
+.step.mem {
+  color: var(--text-3);
+}
+.step.mem .node {
+  background: var(--text-3);
+  box-shadow: 0 0 0 2px rgba(148,163,184,.15);
+}
+.step.mem .step-icon { color: var(--text-3); }
+/* STOCK = donor inventory queries (stock_search / stock_consume / …). Uses
+   the emerald accent: net/rail family in the semantic ontology, which fits
+   "physical resource you can use" better than cyan (component) or amber
+   (symptom). */
+.step.stock {
+  color: var(--emerald);
+}
+.step.stock .node {
+  background: var(--emerald);
+  box-shadow: 0 0 0 2px rgba(52,211,153,.15);
+}
+.step.stock .step-icon { color: var(--emerald); }
+.step.stock .refdes { color: var(--emerald); }
+.step .step-phrase {
+  flex: 1;
+  /* min-width:0 is mandatory here — without it, `flex:1` + `white-space:nowrap`
+     can't ellipsize because the flex item refuses to shrink below its
+     intrinsic content width (default `min-width: auto`). */
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* Memory ops carry long paths/patterns — let them wrap so the tech can
+   actually read what was searched/read. The rail already paginates the
+   chronology vertically; an extra line per step is fine. */
+.step.mem {
+  align-items: flex-start;
+}
+.step.mem .step-phrase {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  overflow-wrap: anywhere;
+  line-height: 1.4;
+}
+.step.mem .node { top: 8px; }
+.step .refdes, .step .net {
+  font-family: var(--mono);
+  font-size: 10.5px;
+}
+.step.mb .refdes, .step.mb .net { color: var(--cyan); }
+.step.bv .refdes, .step.bv .net { color: var(--violet); }
+.step.mem .mem-path {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--text-2);
+  background: rgba(148,163,184,.08);
+  padding: 0 4px;
+  border-radius: 3px;
+}
+
+/* Coalesced runs — when the agent fires the same tool back-to-back, chatLog.js
+   folds the occurrences into ONE step (`.grouped`) listing every target chip
+   inline. The run is plumbing, so it recedes: dimmed, and the phrase wraps so
+   the full comma-separated list stays readable instead of being ellipsized. */
+.step.grouped {
+  opacity: .68;
+  align-items: flex-start;
+}
+.step.grouped .step-phrase {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  overflow-wrap: anywhere;
+  line-height: 1.4;
+}
+.step.grouped .node { top: 8px; }
+.step .step-item-sep { color: var(--text-3); }
+.step .step-count {
+  color: var(--text-3);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Replay dimming: whole log dims, not per-row. */
+.llm-log.replay .turn,
+.llm-log.replay .msg { opacity: .55; }
+
+.step .step-icon {
+  width: 12px; height: 12px; flex-shrink: 0;
+}
+.step.mb .step-icon { color: var(--cyan); }
+.step.bv .step-icon { color: var(--violet); }
+
+.step-expand {
+  background: none; border: 0; color: var(--text-3); cursor: pointer;
+  padding: 2px 4px; border-radius: 3px;
+  transition: color .15s, background .15s;
+  flex-shrink: 0;
+}
+.step-expand:hover { color: var(--text-2); background: var(--panel); }
+.step-expand .chevron { transition: transform .15s; display: block; }
+.step-expand[aria-expanded="true"] .chevron { transform: rotate(90deg); }
+
+.step-payload {
+  display: none;
+  grid-column: 1 / -1;
+  width: calc(100% - 4px);
+  margin: 6px 0 2px 0;
+  background: var(--panel);
+  border-left: 2px solid currentColor;
+  padding: 8px 10px;
+  border-radius: 4px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--text-2);
+  white-space: pre-wrap;
+  overflow-x: auto;
+  line-height: 1.4;
+}
+.step.mb .step-payload { border-left-color: var(--cyan); }
+.step.bv .step-payload { border-left-color: var(--violet); }
+.step.mem .step-payload { border-left-color: var(--text-3); }
+.step.expanded .step-payload { display: block; }
+.step.expanded { flex-wrap: wrap; align-items: center; }
+
+.tool-name-raw {
+  font-family: var(--mono); font-size: 10.5px; color: var(--text-3);
+}
+
+/* ============ Chips in turn-message ============ */
+.turn-message .chip-refdes,
+.turn-message .chip-net {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  padding: 1px 6px;
+  margin: 0 1px;
+  border-radius: 3px;
+  cursor: pointer;
+  background: transparent;
+  transition: background .15s, border-color .15s;
+  vertical-align: baseline;
+  line-height: 1.25;
+}
+.turn-message .chip-refdes {
+  color: var(--cyan);
+  border: 1px solid rgba(56,189,248,.3);
+}
+.turn-message .chip-refdes:hover {
+  background: rgba(56,189,248,.12);
+  border-color: rgba(56,189,248,.55);
+}
+.turn-message .chip-net {
+  color: var(--emerald);
+  border: 1px solid rgba(52,211,153,.3);
+}
+.turn-message .chip-net:hover {
+  background: rgba(52,211,153,.12);
+  border-color: rgba(52,211,153,.55);
+}
+.turn-message .refdes-unknown {
+  color: var(--amber);
+  font-family: var(--mono);
+  font-size: 10.5px;
+  background: rgba(245,158,11,.06);
+  padding: 0 4px;
+  border-radius: 3px;
+  border: 1px dashed rgba(245,158,11,.35);
+}
+
+/* ============ Live feedback ============ */
+/* Phantom "agent is working" node at the bottom of the rail. */
+.step.pending {
+  color: var(--violet);
+  font-style: italic;
+  opacity: 1;
+}
+.step.pending .step-phrase {
+  color: var(--violet);
+  letter-spacing: .1px;
+  white-space: normal;
+}
+.step.pending .node {
+  background: var(--violet);
+  box-shadow: 0 0 0 3px rgba(192,132,252,.15);
+  animation: node-pulse 1.4s ease-in-out infinite;
+}
+@keyframes node-pulse {
+  0%, 100% { box-shadow: 0 0 0 3px rgba(192,132,252,.15) }
+  50%      { box-shadow: 0 0 0 6px rgba(192,132,252,.45) }
+}
+
+/* 3-dot bouncing indicator next to "l'agent réfléchit". */
+.step.pending .pending-dots {
+  display: inline-flex;
+  margin-left: 4px;
+  gap: 1px;
+  vertical-align: baseline;
+}
+.step.pending .pending-dots span {
+  font-style: normal;
+  display: inline-block;
+  animation: pending-dot 1.2s infinite;
+  opacity: .25;
+}
+.step.pending .pending-dots span:nth-child(1) { animation-delay: 0s; }
+.step.pending .pending-dots span:nth-child(2) { animation-delay: .18s; }
+.step.pending .pending-dots span:nth-child(3) { animation-delay: .36s; }
+@keyframes pending-dot {
+  0%, 70%, 100% { opacity: .25; transform: translateY(0); }
+  35%           { opacity: 1;   transform: translateY(-2px); }
+}
+
+/* Suppress live indicators during replay (CSS guard). */
+.llm-log.replay .step.pending { display: none; }
+
+/* Cost-chip migrated into .turn-foot — hide any residual instance. */
+.llm-log .cost-chip { display: none; }
+/* User row's label (e.g. "Toi") is redundant next to the cyan left border. */
+.llm-log .msg.user .role { display: none; }
+
+/* ============ Conversation chip + popover ============ */
+.conv-wrap { position: relative; display: inline-block; }
+
+.conv-chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 7px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all .15s;
+  font-family: var(--mono); font-size: 10px; letter-spacing: .4px;
+  color: var(--text-2);
+  text-transform: uppercase;
+}
+.conv-chip:hover { color: var(--text); border-color: var(--border-hover); }
+.conv-chip .chevron-down { transition: transform .15s; opacity: .7; }
+.conv-chip[aria-expanded="true"] .chevron-down { transform: rotate(180deg); }
+
+.conv-popover {
+  position: absolute; top: calc(100% + 6px); right: 0;
+  min-width: 280px; max-width: 340px; z-index: 40;
+  background: rgba(20,32,48,.96);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--border); border-radius: 7px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.35);
+  padding: 6px;
+  display: flex; flex-direction: column; gap: 2px;
+}
+.conv-popover[hidden] { display: none; }
+.conv-popover-sep {
+  height: 1px; background: var(--border-soft);
+  margin: 6px -2px 4px;
+}
+
+.conv-list { display: flex; flex-direction: column; gap: 2px; max-height: 300px; overflow-y: auto; }
+.conv-list::-webkit-scrollbar { width: 6px; }
+.conv-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+.conv-item {
+  display: flex; align-items: stretch; gap: 0;
+  background: transparent; border: 1px solid transparent;
+  border-left: 2px solid transparent;
+  border-radius: 4px;
+  color: var(--text-2);
+  transition: background .15s, border-color .15s;
+}
+.conv-item:hover { background: var(--panel-2); color: var(--text); }
+.conv-item.active {
+  background: rgba(192,132,252,.08);
+  border-left-color: var(--violet);
+  color: var(--text);
+}
+.conv-item-open {
+  flex: 1;
+  display: flex; flex-direction: column; gap: 3px;
+  padding: 8px 10px;
+  background: transparent; border: 0;
+  cursor: pointer;
+  text-align: left;
+  color: inherit;
+  font-family: inherit;
+  min-width: 0;
+}
+.conv-item-delete {
+  display: flex; align-items: center; justify-content: center;
+  width: 28px;
+  background: transparent;
+  border: 0;
+  border-left: 1px solid transparent;
+  cursor: pointer;
+  color: var(--text-3);
+  transition: color .15s, background .15s, border-color .15s;
+}
+.conv-item:hover .conv-item-delete { border-left-color: var(--border-soft); }
+.conv-item-delete:hover { color: var(--amber); background: rgba(0,0,0,.15); }
+.conv-item-head {
+  display: flex; align-items: center; gap: 6px; min-width: 0;
+}
+.conv-item-tier {
+  font-family: var(--mono); font-size: 9px; letter-spacing: .4px;
+  text-transform: uppercase;
+  padding: 1px 5px; border-radius: 3px;
+  flex-shrink: 0;
+}
+.conv-item-tier.t-fast   { color: var(--emerald); background: rgba(52,211,153,.08); border: 1px solid rgba(52,211,153,.3); }
+.conv-item-tier.t-normal { color: var(--cyan);    background: rgba(56,189,248,.08); border: 1px solid rgba(56,189,248,.3); }
+.conv-item-tier.t-deep   { color: var(--violet);  background: rgba(192,132,252,.08); border: 1px solid rgba(192,132,252,.3); }
+
+.conv-item-title {
+  font-size: 12px; flex: 1;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.conv-item-meta {
+  font-family: var(--mono); font-size: 9.5px;
+  color: var(--text-3); letter-spacing: .3px;
+  display: flex; gap: 6px;
+}
+.conv-item-meta .conv-item-sep { opacity: .5; }
+
+.conv-new {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: transparent; border: 1px dashed rgba(192,132,252,.35);
+  padding: 7px 10px; border-radius: 5px;
+  cursor: pointer;
+  color: var(--violet); font-family: inherit; font-size: 12px;
+  transition: background .15s, border-color .15s;
+}
+.conv-new:hover {
+  background: rgba(192,132,252,.08);
+  border-color: rgba(192,132,252,.6);
+  border-style: solid;
+}
+
+/* =========== Resume-summary card =========== */
+/* Rendered when a dead MA session was recreated and Haiku summarised the
+   prior conversation for the new agent. Carries the same text the new
+   agent just received, so the tech knows the transition happened and
+   what carried over. Token-chip is ghostly so it doesn't scream. */
+.resume-summary {
+  margin: 8px 6px 10px;
+  padding: 10px 12px;
+  background: linear-gradient(135deg, rgba(192,132,252,.06), rgba(34,211,238,.04));
+  border: 1px solid rgba(192,132,252,.35);
+  border-radius: 8px;
+  box-shadow: inset 0 0 0 1px rgba(192,132,252,.08);
+}
+.resume-summary header {
+  display: flex; align-items: center; gap: 8px;
+  padding-bottom: 8px; margin-bottom: 8px;
+  border-bottom: 1px dashed rgba(192,132,252,.25);
+}
+.resume-summary .icon-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--violet);
+  box-shadow: 0 0 6px var(--violet);
+}
+.resume-summary .title {
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: .4px;
+  text-transform: uppercase; color: var(--violet); font-weight: 500;
+}
+.resume-summary .meta {
+  margin-left: auto;
+  font-family: var(--mono); font-size: 9.5px; color: var(--text-3);
+  letter-spacing: .3px;
+}
+.resume-summary .body {
+  font-size: 12.5px; color: var(--text-2); line-height: 1.55;
+}
+.resume-summary .body p { margin: 0 0 6px; }
+.resume-summary .body p:last-child { margin-bottom: 0; }
+.resume-summary .body strong { color: var(--cyan); font-weight: 500; }
+.resume-summary .body em { color: var(--emerald); font-style: normal; }
+.resume-summary .body ul {
+  margin: 4px 0 6px; padding-left: 18px;
+}
+.resume-summary .body li { margin-bottom: 2px; }
+
+/* =========== Context-lost alert card =========== */
+/* Rendered when MA dropped the session AND there was no local JSONL backup
+   to summarize. Different from .resume-summary on purpose: amber tone,
+   dashed border, "alert" semantic — the agent has zero memory of prior
+   turns and the tech needs to know before they fire off a follow-up that
+   assumes context. */
+.context-lost {
+  margin: 8px 6px 10px;
+  padding: 10px 12px;
+  background: linear-gradient(135deg, rgba(245,158,11,.10), rgba(245,158,11,.04));
+  border: 1px dashed rgba(245,158,11,.55);
+  border-radius: 8px;
+}
+.context-lost header {
+  display: flex; align-items: center; gap: 8px;
+  padding-bottom: 8px; margin-bottom: 8px;
+  border-bottom: 1px dashed rgba(245,158,11,.35);
+}
+.context-lost .icon-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--amber);
+  box-shadow: 0 0 6px var(--amber);
+}
+.context-lost .title {
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: .4px;
+  text-transform: uppercase; color: var(--amber); font-weight: 600;
+}
+.context-lost .body {
+  font-size: 12.5px; color: var(--text); line-height: 1.55;
+}
+.context-lost .body p { margin: 0 0 6px; }
+.context-lost .body p:last-child { margin-bottom: 0; }
+.context-lost .body p.meta {
+  font-family: var(--mono); font-size: 10px; color: var(--text-3);
+  margin-top: 4px; letter-spacing: .2px;
+}
+.context-lost .body code {
+  font-family: var(--mono); font-size: 10px;
+  background: rgba(245,158,11,.08); padding: 1px 4px; border-radius: 3px;
+  color: var(--text-2);
+}
+/* "Récupéré du disque" line — emerald (= net / signal alive in our
+   semantic palette). Highlights what survived so the tech reads it as
+   a positive recovery signal next to the amber loss header. */
+.context-lost .body p.preserved {
+  background: rgba(52,211,153,.07);
+  border-left: 2px solid var(--emerald);
+  padding: 6px 8px; border-radius: 0 4px 4px 0;
+  margin: 8px 0;
+}
+.context-lost .body p.preserved.muted {
+  background: rgba(148,163,184,.05);
+  border-left-color: var(--text-3);
+  color: var(--text-3);
+  font-style: italic;
+}
+.context-lost .body p.preserved strong { color: var(--emerald); font-weight: 600; }
+
+/* ============ Files+Vision: upload btn, dropzone, image bubble, modal ==== */
+
+/* Upload button mirrors .llm-stop / .llm-send sizing & hover. */
+.llm-upload-btn {
+  background: transparent;
+  color: var(--text-2);
+}
+.llm-upload-btn:hover {
+  color: var(--text);
+}
+
+/* Drag-drop overlay covers the whole .llm-panel when a file is being
+   dragged in. Glass treatment cohérent avec les autres overlays
+   (inspector, legend, tweaks). The [hidden] override is REQUIRED — our
+   .llm-dropzone sets display:flex which beats the user-agent
+   `[hidden]{display:none}` rule. Without this, the overlay is always on
+   and obscures the chat. */
+.llm-dropzone[hidden] { display: none !important; }
+.llm-dropzone {
+  position: absolute;
+  inset: 48px 0 0 0;  /* below the panel head */
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(20, 20, 20, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 2px dashed var(--cyan);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 14px;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Image bubble in the chat log — narrow card, click to fullscreen. */
+.msg-image {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  max-width: 240px;
+  padding: 6px 8px;
+}
+.llm-bubble-img {
+  display: block;
+  width: 200px;
+  height: auto;
+  cursor: zoom-in;
+  border-radius: 4px;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+}
+.llm-bubble-caption {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-3);
+  letter-spacing: 0.2px;
+}
+
+/* Fullscreen image modal — click backdrop to dismiss. */
+.llm-image-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  cursor: zoom-out;
+}
+.llm-image-modal img {
+  max-width: 90vw;
+  max-height: 90vh;
+  border-radius: 6px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
+}
+
+/* Camera picker — custom chip+popover (mirrors .llm-tier-chip pattern).
+   Lives in .llm-head-actions next to the tier chip so it's visible
+   across every section — the metabar is hidden on most sections via
+   body.no-metabar in layout.css. */
+.llm-camera-wrap { position: relative; }
+.llm-camera-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 7px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--panel);
+  color: var(--text-2);
+  font-family: var(--mono);
+  font-size: 10px;
+  cursor: pointer;
+  max-width: 150px;
+  transition: all 0.15s;
+}
+.llm-camera-chip:hover {
+  background: var(--panel-2);
+  border-color: var(--border-hover);
+  color: var(--text);
+}
+.llm-camera-chip[aria-expanded="true"] {
+  background: var(--panel-2);
+  border-color: var(--cyan);
+  color: var(--text);
+}
+.llm-camera-chip .icon { flex-shrink: 0; color: var(--text-3); }
+.llm-camera-chip .camera-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 90px;
+}
+.llm-camera-chip .chevron-down { flex-shrink: 0; color: var(--text-3); }
+
+/* Same trap as .llm-dropzone : our display:flex beats the user-agent
+   `[hidden]{display:none}`. Without this override the popover stays
+   permanently visible. */
+.llm-camera-popover[hidden] { display: none !important; }
+.llm-camera-popover {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  z-index: 50;
+  min-width: 180px;
+  max-width: 260px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+  font-family: var(--mono);
+  font-size: 10.5px;
+}
+.llm-camera-popover button {
+  background: transparent;
+  border: none;
+  color: var(--text-2);
+  text-align: left;
+  padding: 5px 8px;
+  border-radius: 3px;
+  cursor: pointer;
+  font: inherit;
+  letter-spacing: 0.2px;
+  transition: background-color 0.12s, color 0.12s;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.llm-camera-popover button:hover {
+  background: var(--panel-2);
+  color: var(--text);
+}
+.llm-camera-popover button.on {
+  background: rgba(34, 211, 238, 0.10);
+  color: var(--cyan);
+}
+
+/* Preview toggle button in the head. .on state = preview window open. */
+.llm-camera-preview-btn {
+  background: transparent;
+  color: var(--text-2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 3px 5px;
+}
+.llm-camera-preview-btn:hover {
+  background: var(--panel-2);
+  border-color: var(--border-hover);
+  color: var(--text);
+}
+.llm-camera-preview-btn[aria-pressed="true"] {
+  color: var(--cyan);
+  border-color: var(--cyan);
+  background: rgba(34, 211, 238, 0.08);
+}
+
+/* Floating draggable camera preview window. Mounted into <body> on
+   first open, position persists in localStorage. */
+.camera-preview {
+  position: fixed;
+  top: 100px;
+  right: 460px;  /* default sits left of an open .llm-panel (420px wide) */
+  z-index: 900;
+  width: 280px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.camera-preview[hidden] { display: none !important; }
+.camera-preview-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 8px;
+  background: linear-gradient(180deg, var(--panel-2), var(--panel));
+  border-bottom: 1px solid var(--border-soft);
+  cursor: move;
+  user-select: none;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--text-2);
+  letter-spacing: 0.3px;
+}
+.camera-preview-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+.camera-preview-close {
+  background: transparent;
+  border: none;
+  color: var(--text-3);
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+.camera-preview-close:hover {
+  background: var(--panel-2);
+  color: var(--text);
+}
+.camera-preview-video {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: #000;
+}
+
+/* ── Onboarding demo cue ───────────────────────────────────────────────────
+   The guided demo "uses" the real conversation controls (chip → popover →
+   "+ New conversation"). These classes pulse whichever control the tour is
+   about to act on so the gesture reads clearly. Toggled by coaching.js; purely
+   cosmetic, never present outside the first-run demo. */
+@keyframes wbDemoPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(192,132,252,0); }
+  50%      { box-shadow: 0 0 0 4px rgba(192,132,252,.35); }
+}
+.conv-chip.wb-demo-cue,
+.conv-new.wb-demo-cue {
+  animation: wbDemoPulse 1.1s ease-in-out infinite;
+  border-color: var(--violet) !important;
+  border-style: solid !important;
+  color: var(--violet) !important;
+  /* The tour drives these controls itself; block real clicks while spotlit so
+     a stray tap can't fire the live (offline-broken) switchConv handler. */
+  pointer-events: none;
+}
+.conv-new.wb-demo-cue { background: rgba(192,132,252,.1); }

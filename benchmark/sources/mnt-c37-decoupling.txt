@@ -1,0 +1,1 @@
+C37 is the output decoupling capacitor of the +1V2 buck (U13). A hard short drops +1V2 to ground; the TLV62568 enters current-limit protection and the downstream core domain stays unpowered.

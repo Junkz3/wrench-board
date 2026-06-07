@@ -1,0 +1,64 @@
+{
+  "app": {
+    "title": "Wrench Board — Graphe de connaissances"
+  },
+  "topbar": {
+    "brand": "wrench-board",
+    "repair_log": "Journal des réparations",
+    "settings": "Réglages",
+    "agent": "Agent",
+    "agent_title": "Agent diagnostic (⌘J)"
+  },
+  "session": {
+    "tag": "SESSION",
+    "pill_aria": "Session active — clic pour ouvrir le dashboard",
+    "pill_title": "Revenir au dashboard de la session",
+    "leave": "Quitter la session"
+  },
+  "rail": {
+    "home": "Réparations",
+    "diagnostic": "Diagnostic",
+    "pcb": "PCB",
+    "schematic": "Schematic",
+    "memory": "Mémoire",
+    "stock": "Stock",
+    "profile": "Profil"
+  },
+  "metabar": {
+    "view_mode": "Mode d'affichage",
+    "view_visual": "Visuel",
+    "view_raw": "Brut",
+    "filter_symptoms": "Symptômes",
+    "filter_components": "Composants",
+    "filter_nets": "Nets",
+    "filter_actions": "Actions",
+    "search_placeholder": "Rechercher un nœud…"
+  },
+  "tweaks": {
+    "title": "Tweaks",
+    "close": "Fermer",
+    "relations_visible": "Relations visibles",
+    "rel_causes": "provoque",
+    "rel_powers": "alimente",
+    "rel_connected": "connecté",
+    "rel_resolves": "résout",
+    "edge_labels": "Étiquettes d'arêtes",
+    "label_hover": "Au survol",
+    "label_all": "Toutes",
+    "label_none": "Aucune",
+    "min_confidence": "Confiance minimale",
+    "particle_speed": "Vitesse des particules",
+    "boardview_colors": "Couleurs des pins",
+    "color_signal": "Signal",
+    "color_power": "Power",
+    "color_ground": "Ground",
+    "color_clock": "Clock",
+    "color_reset": "Reset",
+    "color_nc": "NC",
+    "color_testpad": "Test pad",
+    "color_via": "Via",
+    "color_board_outline": "Contour board",
+    "color_board_fill": "Fond board",
+    "reset_colors": "Réinitialiser les couleurs"
+  }
+}

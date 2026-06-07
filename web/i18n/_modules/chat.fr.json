@@ -1,0 +1,191 @@
+{
+  "demo": {
+    "read_only": "Mode démo — l'appareil d'exemple est en lecture seule. Crée ton propre diagnostic pour poser de vraies questions à l'agent."
+  },
+  "panel": {
+    "aria": "Agent diagnostic",
+    "badge": "Agent",
+    "title": "Diagnostic",
+    "subline_empty": "—"
+  },
+  "header": {
+    "camera_chip_title": "Caméra pour cam_capture (Flow B)",
+    "camera_chip_none": "— aucune —",
+    "camera_preview_title": "Afficher / cacher la preview caméra",
+    "camera_preview_aria": "Toggle preview caméra",
+    "tier_title": "Tier de modèle",
+    "tier_fast": "Fast · Haiku 4.5",
+    "tier_normal": "Normal · Sonnet 4.6",
+    "tier_deep": "Deep · Opus 4.8",
+    "close_aria": "Fermer le panel"
+  },
+  "status": {
+    "idle": "inactif",
+    "connecting": "connexion · {slug} · {tier}",
+    "connected": "connecté · {slug} · {tier}",
+    "closed": "fermé",
+    "error_socket": "erreur socket",
+    "url_invalid": "URL invalide"
+  },
+  "conv": {
+    "title": "Conversations",
+    "label_empty": "CONV 0/0",
+    "label_count": "CONV {idx}/{total}",
+    "new": "Nouvelle conversation",
+    "default_title": "Conversation {idx}",
+    "turns_one": "{n} turn",
+    "turns_many": "{n} turns",
+    "ago_seconds": "il y a {n} s",
+    "ago_minutes": "il y a {n} min",
+    "ago_hours": "il y a {n} h",
+    "ago_days": "il y a {n} j",
+    "ago_unknown": "—",
+    "switching": "→ changement de conversation : {id}",
+    "delete_aria": "Supprimer la conversation",
+    "delete_confirm": "Supprimer cette conversation ?\nL'historique des messages et la session agent associée seront effacés. Cette action est irréversible.",
+    "delete_failed": "Échec de la suppression — réessaie."
+  },
+  "input": {
+    "placeholder": "Pose ta question à l'agent… (Enter pour envoyer, Shift+Enter pour un retour à la ligne)",
+    "upload_title": "Upload macro photo (PNG/JPEG, max 5MB)",
+    "upload_aria": "Upload macro",
+    "stop_title": "Interrompre l'agent (Esc)",
+    "stop_aria": "Stop",
+    "send_title": "Envoyer (Enter)",
+    "send_aria": "Envoyer"
+  },
+  "dropzone": {
+    "label": "Lâche la photo ici"
+  },
+  "roles": {
+    "user": "Toi",
+    "agent": "Agent",
+    "replay_suffix": " · replay"
+  },
+  "pending": {
+    "thinking": "l'agent réfléchit"
+  },
+  "step": {
+    "expand_title": "Voir le payload",
+    "no_result": "— result non rendu par le runtime"
+  },
+  "tool": {
+    "mb_get_component": "Consultation de <span class=\"refdes\">{refdes}</span>",
+    "mb_get_rules_for_symptoms": "Lecture des règles pour « {symptoms} »",
+    "mb_list_findings": "Revue des findings",
+    "mb_list_findings_for": "Revue des findings pour <span class=\"refdes\">{device}</span>",
+    "mb_record_finding": "Enregistrement d'un finding",
+    "mb_expand_knowledge": "Extension du pack",
+    "mb_expand_knowledge_scope": "Extension du pack — {scope}",
+    "mb_schematic_graph": "Lecture du graphe schématique",
+    "bv_highlight": "Mise en évidence de <span class=\"refdes\">{refdes}</span>",
+    "bv_focus": "Focus sur <span class=\"refdes\">{refdes}</span>",
+    "bv_reset_view": "Réinitialisation de la vue",
+    "bv_highlight_net": "Highlight du net <span class=\"net\">{net}</span>",
+    "bv_flip": "Retournement du board",
+    "bv_annotate_near": "Annotation près de <span class=\"refdes\">{refdes}</span>",
+    "bv_annotate_at": "Annotation en ({x}, {y})",
+    "bv_annotate_blank": "Annotation",
+    "bv_filter_by_type": "Filtrage par type — {prefix}",
+    "bv_draw_arrow": "Flèche de <span class=\"refdes\">{from}</span> vers <span class=\"refdes\">{to}</span>",
+    "bv_measure": "Mesure entre <span class=\"refdes\">{a}</span> et <span class=\"refdes\">{b}</span>",
+    "bv_show_pin": "Pin {pin} de <span class=\"refdes\">{refdes}</span>",
+    "bv_dim_unrelated": "Atténuation des éléments non liés",
+    "bv_layer_visibility": "Visibilité de la couche {layer}",
+    "bv_scene_empty": "Scène — vide",
+    "bv_scene": "Scène — {parts}",
+    "scene_highlight_one": "{n} highlight",
+    "scene_highlight_many": "{n} highlights",
+    "scene_annotation_one": "{n} annotation",
+    "scene_annotation_many": "{n} annotations",
+    "scene_arrow_one": "{n} flèche",
+    "scene_arrow_many": "{n} flèches",
+    "scene_focus": "focus <span class=\"refdes\">{refdes}</span>",
+    "scene_dim": "dim",
+    "scene_reset": "reset",
+    "stock_search": "Recherche dans le stock <span class=\"refdes\">{type} {value}</span>",
+    "stock_search_minimal": "Recherche dans le stock",
+    "stock_consume": "Consommation de <span class=\"refdes\">{refdes}</span> depuis <span class=\"refdes\">{donor_id}</span>",
+    "stock_mark_donor": "Déclare <span class=\"refdes\">{device_slug}</span> comme donneur",
+    "stock_unmark_donor": "Retrait du donneur <span class=\"refdes\">{donor_id}</span>",
+    "stock_list_donors": "Liste des donneurs en stock"
+  },
+  "memtool": {
+    "read": "Lecture mémoire — {path}",
+    "write": "Écriture mémoire — {path}",
+    "edit": "Édition mémoire — {path}",
+    "view": "Vue mémoire — {path}",
+    "grep": "grep <code class=\"mem-path\">{pattern}</code>",
+    "grep_in": "grep <code class=\"mem-path\">{pattern}</code> dans {path}",
+    "glob": "glob <code class=\"mem-path\">{pattern}</code>",
+    "list": "Listing mémoire",
+    "list_at": "Listing mémoire — {path}"
+  },
+  "context_lost": {
+    "title": "Historique de turns perdu",
+    "reason_ma_empty": "Session précédente archivée par le backend Managed Agents (events.list vide), et aucun backup JSONL local disponible.",
+    "reason_generic": "La session précédente n'a pas pu être restaurée et aucun résumé n'a pu être généré.",
+    "preserved_label": "Récupéré du disque et réinjecté à l'agent",
+    "preserved_none": "Aucun artefact persistant trouvé pour ce repair (pas de mesures, pas de protocole, pas d'outcome).",
+    "context_reinject": "Le device, le symptôme et ton profil sont automatiquement réinjectés ci-dessous — l'agent saura sur quoi tu travailles.",
+    "lost_explainer": "Ce qui reste perdu : le <strong>fil conversationnel</strong> (raisonnement de l'agent, hypothèses émises, échanges libres). Si tu as discuté de pistes ou pris des décisions hors-protocole, redonne-les en une ligne pour qu'il s'aligne.",
+    "preserved_measurements_one": "{n} mesure",
+    "preserved_measurements_many": "{n} mesures",
+    "preserved_protocol": "protocole « {title} » ({completed}/{total})",
+    "preserved_outcome": "outcome final"
+  },
+  "resume": {
+    "title": "Reprise de session",
+    "meta_summary": "résumé Haiku · {tok_in}→{tok_out} tok"
+  },
+  "session": {
+    "ready": "session prête — {mode} · {model}",
+    "ready_with_repair": "session prête — {mode} · {model} · repair {repair}",
+    "subline": "{model} · {mode}",
+    "subline_with_repair": "{model} · {mode} · repair {repair}",
+    "device_label_simple": "{slug}",
+    "device_label_with_repair": "{slug} · {repair}",
+    "tier_auto_align": "→ alignement automatique sur le tier de cette conv : {tier}",
+    "tier_switch": "→ changement de tier : {tier}. Nouvelle conversation.",
+    "replay_count": "replay · {n} events précédents",
+    "replay_done": "replay terminé — reprends où tu t'étais arrêté",
+    "context_loaded": "contexte device + symptôme chargé · l'agent attend ton premier message",
+    "session_resumed": "session reprise · historique et mémoire agent restaurés",
+    "session_terminated": "session terminée",
+    "interrupt_sent": "interruption envoyée · l'agent s'arrête"
+  },
+  "image_bubble": {
+    "alt": "macro",
+    "macro_caption": "Photo macro envoyée par le tech.",
+    "capture_caption": "Capture · {label}"
+  },
+  "capture": {
+    "no_camera": "agent demande une capture mais aucune caméra sélectionnée",
+    "requested": "capture demandée par l'agent · {reason}",
+    "no_reason": "sans raison",
+    "failed": "capture échouée : {error}"
+  },
+  "upload": {
+    "too_large": "photo trop grosse ({size}MB > 5MB)",
+    "unsupported": "format non supporté : {mime} · PNG ou JPEG seulement",
+    "socket_closed": "impossible d'uploader : socket non ouvert",
+    "failed": "upload échoué : {error}",
+    "rejected": "upload rejeté · {reason}"
+  },
+  "preview": {
+    "select_camera_first": "sélectionne d'abord une caméra dans le picker",
+    "open_failed": "ouverture preview échouée — vérifie les permissions"
+  },
+  "send": {
+    "socket_closed": "impossible d'envoyer : socket non ouvert",
+    "connect_failed": "échec de connexion : {error}"
+  },
+  "error": {
+    "generic": "erreur : {text}",
+    "unknown_reason": "raison inconnue"
+  },
+  "fix": {
+    "validated_one": "Validé ({n} fix)",
+    "validated_many": "Validé ({n} fixes)"
+  }
+}

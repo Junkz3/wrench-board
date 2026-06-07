@@ -1,0 +1,806 @@
+{
+ "frames": [
+  {
+   "ms": 0,
+   "dir": "send",
+   "frame": {
+    "type": "client.capabilities",
+    "camera_available": false,
+    "selected_device_id": null
+   }
+  },
+  {
+   "ms": 1,
+   "dir": "recv",
+   "frame": {
+    "type": "session_ready",
+    "mode": "managed",
+    "session_id": "sesn_01HXGVmKnryRS87AXPzmiHw6",
+    "memory_store_id": "memstore_016p1Y17mvFoQx7Zj75EbYaD",
+    "device_slug": "mnt-reform-motherboard",
+    "tier": "deep",
+    "conv_tier": null,
+    "model": "claude-opus-4-8",
+    "board_loaded": true,
+    "repair_id": "example-mnt-reform",
+    "conv_id": "eed6dd99",
+    "conversation_count": 0
+   }
+  },
+  {
+   "ms": 1,
+   "dir": "send",
+   "frame": {
+    "type": "message",
+    "text": "Explique-moi la séquence de démarrage de cette carte : quels rails montent et dans quel ordre. Montre-la directement sur le board."
+   }
+  },
+  {
+   "ms": 1,
+   "dir": "recv",
+   "frame": {
+    "type": "protocol_cleared"
+   }
+  },
+  {
+   "ms": 1,
+   "dir": "recv",
+   "frame": {
+    "type": "boardview.reset_view"
+   }
+  },
+  {
+   "ms": 1,
+   "dir": "recv",
+   "frame": {
+    "type": "context_loaded",
+    "device_slug": "mnt-reform-motherboard",
+    "repair_id": "example-mnt-reform"
+   }
+  },
+  {
+   "ms": 7424,
+   "dir": "recv",
+   "frame": {
+    "type": "memory_tool_use",
+    "name": "grep",
+    "input": {
+     "output_mode": "files_with_matches",
+     "path": "/mnt/memory/wrench-board-mnt-reform-motherboard/field_reports/",
+     "pattern": "."
+    }
+   }
+  },
+  {
+   "ms": 7428,
+   "dir": "recv",
+   "frame": {
+    "type": "memory_tool_use",
+    "name": "glob",
+    "input": {
+     "pattern": "/mnt/memory/wrench-board-repair-*/**/*.md"
+    }
+   }
+  },
+  {
+   "ms": 7430,
+   "dir": "recv",
+   "frame": {
+    "type": "tool_use",
+    "name": "mb_schematic_graph",
+    "input": {
+     "query": "list_boot"
+    }
+   }
+  },
+  {
+   "ms": 7431,
+   "dir": "recv",
+   "frame": {
+    "type": "tool_use",
+    "name": "mb_schematic_graph",
+    "input": {
+     "query": "critical_path"
+    }
+   }
+  },
+  {
+   "ms": 7433,
+   "dir": "recv",
+   "frame": {
+    "type": "turn_cost",
+    "model": "claude-opus-4-8",
+    "input_tokens": 2,
+    "output_tokens": 477,
+    "cache_read_input_tokens": 0,
+    "cache_creation_input_tokens": 24375,
+    "cost_usd": 0.164279,
+    "priced": true,
+    "cache_hit_rate": 0
+   }
+  },
+  {
+   "ms": 20068,
+   "dir": "recv",
+   "frame": {
+    "type": "tool_use",
+    "name": "mb_schematic_graph",
+    "input": {
+     "index": 1,
+     "query": "boot_phase"
+    }
+   }
+  },
+  {
+   "ms": 20072,
+   "dir": "recv",
+   "frame": {
+    "type": "tool_use",
+    "name": "mb_schematic_graph",
+    "input": {
+     "index": 2,
+     "query": "boot_phase"
+    }
+   }
+  },
+  {
+   "ms": 20075,
+   "dir": "recv",
+   "frame": {
+    "type": "tool_use",
+    "name": "mb_schematic_graph",
+    "input": {
+     "index": 3,
+     "query": "boot_phase"
+    }
+   }
+  },
+  {
+   "ms": 20077,
+   "dir": "recv",
+   "frame": {
+    "type": "tool_use",
+    "name": "mb_schematic_graph",
+    "input": {
+     "index": 4,
+     "query": "boot_phase"
+    }
+   }
+  },
+  {
+   "ms": 20081,
+   "dir": "recv",
+   "frame": {
+    "type": "tool_use",
+    "name": "mb_get_rules_for_symptoms",
+    "input": {
+     "symptoms": [
+      "ne démarre pas",
+      "aucune alimentation",
+      "no power",
+      "dead board"
+     ]
+    }
+   }
+  },
+  {
+   "ms": 20084,
+   "dir": "recv",
+   "frame": {
+    "type": "turn_cost",
+    "model": "claude-opus-4-8",
+    "input_tokens": 2,
+    "output_tokens": 716,
+    "cache_read_input_tokens": 24375,
+    "cache_creation_input_tokens": 4130,
+    "cost_usd": 0.05591,
+    "priced": true,
+    "cache_hit_rate": 85.5
+   }
+  },
+  {
+   "ms": 57360,
+   "dir": "recv",
+   "frame": {
+    "type": "tool_use",
+    "name": "mb_get_component",
+    "input": {
+     "refdes": "U18"
+    }
+   }
+  },
+  {
+   "ms": 57367,
+   "dir": "recv",
+   "frame": {
+    "type": "tool_use",
+    "name": "mb_get_component",
+    "input": {
+     "refdes": "U2"
+    }
+   }
+  },
+  {
+   "ms": 57367,
+   "dir": "recv",
+   "frame": {
+    "type": "tool_use",
+    "name": "mb_get_component",
+    "input": {
+     "refdes": "F1"
+    }
+   }
+  },
+  {
+   "ms": 57367,
+   "dir": "recv",
+   "frame": {
+    "type": "tool_use",
+    "name": "mb_get_component",
+    "input": {
+     "refdes": "Q3"
+    }
+   }
+  },
+  {
+   "ms": 57369,
+   "dir": "recv",
+   "frame": {
+    "type": "tool_use",
+    "name": "mb_get_component",
+    "input": {
+     "refdes": "U7"
+    }
+   }
+  },
+  {
+   "ms": 57372,
+   "dir": "recv",
+   "frame": {
+    "type": "tool_use",
+    "name": "mb_get_component",
+    "input": {
+     "refdes": "U12"
+    }
+   }
+  },
+  {
+   "ms": 57372,
+   "dir": "recv",
+   "frame": {
+    "type": "tool_use",
+    "name": "mb_get_component",
+    "input": {
+     "refdes": "U19"
+    }
+   }
+  },
+  {
+   "ms": 57374,
+   "dir": "recv",
+   "frame": {
+    "type": "tool_use",
+    "name": "mb_get_component",
+    "input": {
+     "refdes": "U13"
+    }
+   }
+  },
+  {
+   "ms": 57379,
+   "dir": "recv",
+   "frame": {
+    "type": "tool_use",
+    "name": "mb_get_component",
+    "input": {
+     "refdes": "U27"
+    }
+   }
+  },
+  {
+   "ms": 57381,
+   "dir": "recv",
+   "frame": {
+    "type": "tool_use",
+    "name": "mb_get_component",
+    "input": {
+     "refdes": "U1"
+    }
+   }
+  },
+  {
+   "ms": 57381,
+   "dir": "recv",
+   "frame": {
+    "type": "turn_cost",
+    "model": "claude-opus-4-8",
+    "input_tokens": 2,
+    "output_tokens": 2843,
+    "cache_read_input_tokens": 28505,
+    "cache_creation_input_tokens": 2648,
+    "cost_usd": 0.101887,
+    "priced": true,
+    "cache_hit_rate": 91.5
+   }
+  },
+  {
+   "ms": 91997,
+   "dir": "recv",
+   "frame": {
+    "type": "tool_use",
+    "name": "bv_scene",
+    "input": {
+     "annotations": [
+      {
+       "label": "1 - 24V input fuse",
+       "refdes": "F1"
+      },
+      {
+       "label": "1 - Charger/booster -> VIN",
+       "refdes": "U2"
+      },
+      {
+       "label": "1 - Inrush limiter",
+       "refdes": "Q3"
+      },
+      {
+       "label": "LPC = sequencer of ALL rails",
+       "refdes": "U18"
+      },
+      {
+       "label": "2 - +5V (EN by LPC)",
+       "refdes": "U7"
+      },
+      {
+       "label": "2 - +3V3 (EN by LPC)",
+       "refdes": "U12"
+      },
+      {
+       "label": "3 - +1V5 SoC core",
+       "refdes": "U19"
+      },
+      {
+       "label": "3 - +1V2 SoC core",
+       "refdes": "U13"
+      },
+      {
+       "label": "4 - 3V3 AUX + USB switch",
+       "refdes": "U27"
+      },
+      {
+       "label": "SO-DIMM connector (i.MX8M module)",
+       "refdes": "U1"
+      }
+     ],
+     "arrows": [
+      {
+       "from_refdes": "F1",
+       "to_refdes": "U2"
+      },
+      {
+       "from_refdes": "U2",
+       "to_refdes": "U18"
+      },
+      {
+       "from_refdes": "U18",
+       "to_refdes": "U7"
+      },
+      {
+       "from_refdes": "U18",
+       "to_refdes": "U12"
+      },
+      {
+       "from_refdes": "U18",
+       "to_refdes": "U13"
+      }
+     ],
+     "dim_unrelated": true,
+     "highlights": [
+      {
+       "color": "warn",
+       "refdes": "F1"
+      },
+      {
+       "color": "accent",
+       "refdes": "U2"
+      },
+      {
+       "color": "accent",
+       "refdes": "Q3"
+      },
+      {
+       "color": "warn",
+       "refdes": "U18"
+      },
+      {
+       "color": "accent",
+       "refdes": "U7"
+      },
+      {
+       "color": "accent",
+       "refdes": "U12"
+      },
+      {
+       "color": "accent",
+       "refdes": "U19"
+      },
+      {
+       "color": "accent",
+       "refdes": "U13"
+      },
+      {
+       "color": "mute",
+       "refdes": "U27"
+      },
+      {
+       "color": "mute",
+       "refdes": "U1"
+      }
+     ],
+     "reset": true
+    }
+   }
+  },
+  {
+   "ms": 91999,
+   "dir": "recv",
+   "frame": {
+    "type": "turn_cost",
+    "model": "claude-opus-4-8",
+    "input_tokens": 2,
+    "output_tokens": 2217,
+    "cache_read_input_tokens": 31153,
+    "cache_creation_input_tokens": 8715,
+    "cost_usd": 0.12548,
+    "priced": true,
+    "cache_hit_rate": 78.1
+   }
+  },
+  {
+   "ms": 92203,
+   "dir": "recv",
+   "frame": {
+    "type": "boardview.reset_view"
+   }
+  },
+  {
+   "ms": 92203,
+   "dir": "recv",
+   "frame": {
+    "type": "boardview.highlight",
+    "refdes": [
+     "F1"
+    ],
+    "color": "warn",
+    "additive": false
+   }
+  },
+  {
+   "ms": 92203,
+   "dir": "recv",
+   "frame": {
+    "type": "boardview.highlight",
+    "refdes": [
+     "U2"
+    ],
+    "color": "accent",
+    "additive": true
+   }
+  },
+  {
+   "ms": 92203,
+   "dir": "recv",
+   "frame": {
+    "type": "boardview.highlight",
+    "refdes": [
+     "Q3"
+    ],
+    "color": "accent",
+    "additive": true
+   }
+  },
+  {
+   "ms": 92203,
+   "dir": "recv",
+   "frame": {
+    "type": "boardview.highlight",
+    "refdes": [
+     "U18"
+    ],
+    "color": "warn",
+    "additive": true
+   }
+  },
+  {
+   "ms": 92203,
+   "dir": "recv",
+   "frame": {
+    "type": "boardview.highlight",
+    "refdes": [
+     "U7"
+    ],
+    "color": "accent",
+    "additive": true
+   }
+  },
+  {
+   "ms": 92203,
+   "dir": "recv",
+   "frame": {
+    "type": "boardview.highlight",
+    "refdes": [
+     "U12"
+    ],
+    "color": "accent",
+    "additive": true
+   }
+  },
+  {
+   "ms": 92203,
+   "dir": "recv",
+   "frame": {
+    "type": "boardview.highlight",
+    "refdes": [
+     "U19"
+    ],
+    "color": "accent",
+    "additive": true
+   }
+  },
+  {
+   "ms": 92203,
+   "dir": "recv",
+   "frame": {
+    "type": "boardview.highlight",
+    "refdes": [
+     "U13"
+    ],
+    "color": "accent",
+    "additive": true
+   }
+  },
+  {
+   "ms": 92203,
+   "dir": "recv",
+   "frame": {
+    "type": "boardview.highlight",
+    "refdes": [
+     "U27"
+    ],
+    "color": "mute",
+    "additive": true
+   }
+  },
+  {
+   "ms": 92203,
+   "dir": "recv",
+   "frame": {
+    "type": "boardview.highlight",
+    "refdes": [
+     "U1"
+    ],
+    "color": "mute",
+    "additive": true
+   }
+  },
+  {
+   "ms": 92203,
+   "dir": "recv",
+   "frame": {
+    "type": "boardview.annotate",
+    "refdes": "F1",
+    "label": "1 - 24V input fuse",
+    "id": "ann-01bd1ef5"
+   }
+  },
+  {
+   "ms": 92203,
+   "dir": "recv",
+   "frame": {
+    "type": "boardview.annotate",
+    "refdes": "U2",
+    "label": "1 - Charger/booster -> VIN",
+    "id": "ann-c7abeb6c"
+   }
+  },
+  {
+   "ms": 92203,
+   "dir": "recv",
+   "frame": {
+    "type": "boardview.annotate",
+    "refdes": "Q3",
+    "label": "1 - Inrush limiter",
+    "id": "ann-fd123ad9"
+   }
+  },
+  {
+   "ms": 92203,
+   "dir": "recv",
+   "frame": {
+    "type": "boardview.annotate",
+    "refdes": "U18",
+    "label": "LPC = sequencer of ALL rails",
+    "id": "ann-131a46ae"
+   }
+  },
+  {
+   "ms": 92203,
+   "dir": "recv",
+   "frame": {
+    "type": "boardview.annotate",
+    "refdes": "U7",
+    "label": "2 - +5V (EN by LPC)",
+    "id": "ann-40ed126d"
+   }
+  },
+  {
+   "ms": 92203,
+   "dir": "recv",
+   "frame": {
+    "type": "boardview.annotate",
+    "refdes": "U12",
+    "label": "2 - +3V3 (EN by LPC)",
+    "id": "ann-72d4c33b"
+   }
+  },
+  {
+   "ms": 92203,
+   "dir": "recv",
+   "frame": {
+    "type": "boardview.annotate",
+    "refdes": "U19",
+    "label": "3 - +1V5 SoC core",
+    "id": "ann-064a2574"
+   }
+  },
+  {
+   "ms": 92203,
+   "dir": "recv",
+   "frame": {
+    "type": "boardview.annotate",
+    "refdes": "U13",
+    "label": "3 - +1V2 SoC core",
+    "id": "ann-8ed1d232"
+   }
+  },
+  {
+   "ms": 92203,
+   "dir": "recv",
+   "frame": {
+    "type": "boardview.annotate",
+    "refdes": "U27",
+    "label": "4 - 3V3 AUX + USB switch",
+    "id": "ann-b31673ae"
+   }
+  },
+  {
+   "ms": 92203,
+   "dir": "recv",
+   "frame": {
+    "type": "boardview.annotate",
+    "refdes": "U1",
+    "label": "SO-DIMM connector (i.MX8M module)",
+    "id": "ann-851d6603"
+   }
+  },
+  {
+   "ms": 92203,
+   "dir": "recv",
+   "frame": {
+    "type": "boardview.draw_arrow",
+    "from": [
+     11630,
+     2063
+    ],
+    "to": [
+     10196,
+     3533
+    ],
+    "id": "arr-23968d3e"
+   }
+  },
+  {
+   "ms": 92203,
+   "dir": "recv",
+   "frame": {
+    "type": "boardview.draw_arrow",
+    "from": [
+     10196,
+     3533
+    ],
+    "to": [
+     8736,
+     3720
+    ],
+    "id": "arr-63dbbf6f"
+   }
+  },
+  {
+   "ms": 92203,
+   "dir": "recv",
+   "frame": {
+    "type": "boardview.draw_arrow",
+    "from": [
+     8736,
+     3720
+    ],
+    "to": [
+     10781,
+     2598
+    ],
+    "id": "arr-c5ce0e14"
+   }
+  },
+  {
+   "ms": 92203,
+   "dir": "recv",
+   "frame": {
+    "type": "boardview.draw_arrow",
+    "from": [
+     8736,
+     3720
+    ],
+    "to": [
+     9826,
+     2598
+    ],
+    "id": "arr-f52bcbc9"
+   }
+  },
+  {
+   "ms": 92203,
+   "dir": "recv",
+   "frame": {
+    "type": "boardview.draw_arrow",
+    "from": [
+     8736,
+     3720
+    ],
+    "to": [
+     4453,
+     4716
+    ],
+    "id": "arr-d4af15a4"
+   }
+  },
+  {
+   "ms": 92203,
+   "dir": "recv",
+   "frame": {
+    "type": "boardview.dim_unrelated"
+   }
+  },
+  {
+   "ms": 119553,
+   "dir": "recv",
+   "frame": {
+    "type": "message",
+    "role": "assistant",
+    "text": "Here's the sequence laid out on the board, from the power connector to the CPU module. Let me walk you through it in order — it's exactly the path the current takes when you press power.\n\n## The conductor: U18 (the LPC)\nFirst things first, remember **U18** (highlighted in orange). It's a small ARM Cortex-⟨?M0⟩ microcontroller (NXP LPC11U24). It doesn't \"compute\" anything useful for you — its only job is to **bring the rails up in the right order**, through its GPIOs. Until it wakes up (or if it has a dead pin), **no main rail comes up**. That's key reason #1 for a \"won't start\".\n\n## The rails coming up, phase by phase\n\n**Phase 0 — Permanent standby (always-on)**\nAs soon as 24 V is plugged in: the battery + `LPC_VCC` + the RTC are powered permanently. The LPC is powered and waiting for the power-on command.\n\n**Phase 1 — VIN stage (input + charging)**\n24 V enters through fuse **F1** (highlighted in red — also suspect #1 for a dead board), passes the inrush limiter **Q3**, then reaches the charger/booster **U2** which generates the `VIN` rail. The `VIN / LPC_VCC / VOUT / 5V_OUT / INTVCC` rails stabilize.\n\n**Phase 2 — Main rails (the LPC opens the valves)**\nVIN stable → the LPC asserts two enable signals:\n- `5V_PWR_EN` → **U7** outputs **+5V**\n- `3V3_PWR_EN` → **U12** outputs **+3V3**\n\n**Phase 3 — SoC core rails**\nThe LPC continues (these converters are fed from +5V, so necessarily after):\n- `1V5_PWR_EN` → **U19** outputs **+1V5**\n- `1V2_PWR_EN` → **U13** outputs **+1V2**\n\n**Phase 4 — AUX + USB + the CPU module**\n`AUX_PWR_EN` → **U27** (auxiliary 3V3 switch), `USB_PWR_EN` → the USB supply, and the i.MX8M module plugged into connector **U1** finally gets all its voltages and starts to boot.\n\n**Phases 5-6 — On demand**\nOnce the SoC is alive, it requests PCIe itself, then the backlight, then the USB / HDMI / audio hub.\n\n## What to remember for your symptom\nThis board's golden rule: **F1 → U2 → U18 (LPC) → U7/U12 → the rest**. If it \"won't start, no power at all\", you walk this chain in order — you don't jump straight to the SoC. The two most common starting points are **F1** (open fuse, board completely dead) and **U18** (LPC no longer sequencing).\n\nWant to tackle the \"no power\" diagnostic now? If so, tell me: is there **a LED lighting up somewhere**, and do you measure **24 V at the input**? That tells us right away whether we're stuck before or after F1."
+   }
+  },
+  {
+   "ms": 119554,
+   "dir": "recv",
+   "frame": {
+    "type": "turn_cost",
+    "model": "claude-opus-4-8",
+    "input_tokens": 2,
+    "output_tokens": 1722,
+    "cache_read_input_tokens": 39868,
+    "cache_creation_input_tokens": 2265,
+    "cost_usd": 0.07715,
+    "priced": true,
+    "cache_hit_rate": 94.6
+   }
+  },
+  {
+   "ms": 119821,
+   "dir": "recv",
+   "frame": {
+    "type": "turn_complete",
+    "stop_reason": "end_turn"
+   }
+  }
+ ]
+}

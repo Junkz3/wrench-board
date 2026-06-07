@@ -1,0 +1,5354 @@
+{
+  "schema_version": "1.0",
+  "page": 1,
+  "sheet_name": "MNT Reform 2 Size",
+  "sheet_path": "/reform2-power.kicad_sch",
+  "page_kind": "schematic",
+  "orientation": "portrait",
+  "confidence": 0.62,
+  "nodes": [
+    {
+      "refdes": "U1",
+      "type": "ic",
+      "value": {
+        "raw": "NitrogenBM_SOM",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 1,
+      "pins": [
+        {
+          "number": "1",
+          "name": "5V",
+          "role": "power_in",
+          "net_label": "+5V"
+        },
+        {
+          "number": "2",
+          "name": "5V",
+          "role": "power_in",
+          "net_label": "+5V"
+        },
+        {
+          "number": "3",
+          "name": "5V",
+          "role": "power_in",
+          "net_label": "+5V"
+        },
+        {
+          "number": "4",
+          "name": "5V",
+          "role": "power_in",
+          "net_label": "+5V"
+        },
+        {
+          "number": "5",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "6",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "7",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "8",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "9",
+          "name": "TRX3_N",
+          "role": "signal_inout",
+          "net_label": "ETHO_D-"
+        },
+        {
+          "number": "10",
+          "name": "PMIC_ON_REQ",
+          "role": "signal_out",
+          "net_label": "PMIC_ON_REQ"
+        },
+        {
+          "number": "11",
+          "name": "TRX3_P",
+          "role": "signal_inout",
+          "net_label": "ETHO_D+"
+        },
+        {
+          "number": "12",
+          "name": "SLOW_CLK",
+          "role": "clock_out",
+          "net_label": "SLOW_CLK"
+        },
+        {
+          "number": "13",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "14",
+          "name": "SD2_DATA0",
+          "role": "signal_inout",
+          "net_label": "SD2_DATA0"
+        },
+        {
+          "number": "15",
+          "name": "TRX2_N",
+          "role": "signal_inout",
+          "net_label": "ETHO_C-"
+        },
+        {
+          "number": "16",
+          "name": "SD2_DATA1",
+          "role": "signal_inout",
+          "net_label": "SD2_DATA1"
+        },
+        {
+          "number": "17",
+          "name": "TRX2_P",
+          "role": "signal_inout",
+          "net_label": "ETHO_C+"
+        },
+        {
+          "number": "18",
+          "name": "SD2_DATA2",
+          "role": "signal_inout",
+          "net_label": "SD2_DATA2"
+        },
+        {
+          "number": "19",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "20",
+          "name": "SD2_DATA3",
+          "role": "signal_inout",
+          "net_label": "SD2_DATA3"
+        },
+        {
+          "number": "21",
+          "name": "TRX1_N",
+          "role": "signal_inout",
+          "net_label": "ETHO_B-"
+        },
+        {
+          "number": "22",
+          "name": "SD2_CMD",
+          "role": "signal_inout",
+          "net_label": "SD2_CMD"
+        },
+        {
+          "number": "23",
+          "name": "TRX1_P",
+          "role": "signal_inout",
+          "net_label": "ETHO_B+"
+        },
+        {
+          "number": "24",
+          "name": "WIFI_RESET",
+          "role": "signal_out",
+          "net_label": "WIFI_RESET"
+        },
+        {
+          "number": "25",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "26",
+          "name": "SD2_CLK",
+          "role": "signal_out",
+          "net_label": "SD2_CLK"
+        },
+        {
+          "number": "27",
+          "name": "TRX0_N",
+          "role": "signal_inout",
+          "net_label": "ETHO_A-"
+        },
+        {
+          "number": "28",
+          "name": "BT_HOST_WAKE",
+          "role": "signal_in",
+          "net_label": "BT_HOST_WAKE"
+        },
+        {
+          "number": "29",
+          "name": "TRX0_P",
+          "role": "signal_inout",
+          "net_label": "ETHO_A+"
+        },
+        {
+          "number": "30",
+          "name": "UART3_TXD",
+          "role": "signal_out",
+          "net_label": "LPC_UART2_RX"
+        },
+        {
+          "number": "31",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "32",
+          "name": "UART3_RXD",
+          "role": "signal_in",
+          "net_label": "LPC_UART2_TX"
+        },
+        {
+          "number": "33",
+          "name": "ETH0_LED_RX",
+          "role": "signal_out",
+          "net_label": "ETH0_LED_RX"
+        },
+        {
+          "number": "34",
+          "name": "UART3_RTS",
+          "role": "signal_out",
+          "net_label": "UART3_RTS"
+        },
+        {
+          "number": "35",
+          "name": "ETH0_LED_LINK2",
+          "role": "signal_out",
+          "net_label": "ETH0_LED_LINK2"
+        },
+        {
+          "number": "36",
+          "name": "UART3_CTS",
+          "role": "signal_in",
+          "net_label": "UART3_CTS"
+        },
+        {
+          "number": "37",
+          "name": "ETH0_LED_LINK1",
+          "role": "signal_out",
+          "net_label": "ETH0_LED_LINK1"
+        },
+        {
+          "number": "38",
+          "name": "WL_EN",
+          "role": "signal_out",
+          "net_label": "WL_EN"
+        },
+        {
+          "number": "39",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "40",
+          "name": "EDP_RESETn",
+          "role": "reset_out",
+          "net_label": "EDP_IRQ"
+        },
+        {
+          "number": "41",
+          "name": "PCIE1_CLK_N",
+          "role": "signal_out",
+          "net_label": "WL_IRQ"
+        },
+        {
+          "number": "42",
+          "name": "BT_EN",
+          "role": "enable_out",
+          "net_label": "BT_EN"
+        },
+        {
+          "number": "43",
+          "name": "PCIE1_CLK_P",
+          "role": "signal_out",
+          "net_label": null
+        },
+        {
+          "number": "44",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "45",
+          "name": "PCIE1_TX_P",
+          "role": "signal_out",
+          "net_label": "PCIE1_TX_P"
+        },
+        {
+          "number": "46",
+          "name": "PCIE1_TX_N",
+          "role": "signal_out",
+          "net_label": "PCIE1_TX_N"
+        },
+        {
+          "number": "47",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "48",
+          "name": "PCIE1_RX_P",
+          "role": "signal_in",
+          "net_label": "PCIE1_RX_P"
+        },
+        {
+          "number": "49",
+          "name": "PCIE1_RX_N",
+          "role": "signal_in",
+          "net_label": "PCIE1_RX_N"
+        },
+        {
+          "number": "50",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "51",
+          "name": "PCIE1_CLK_N",
+          "role": "signal_out",
+          "net_label": "PCIE1_CLK_N"
+        },
+        {
+          "number": "52",
+          "name": "PCIE1_CLK_P",
+          "role": "signal_out",
+          "net_label": "PCIE1_CLK_P"
+        },
+        {
+          "number": "53",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "54",
+          "name": "PCIE1_REFCLK_N",
+          "role": "signal_in",
+          "net_label": "PCIE1_REFCLK_N"
+        },
+        {
+          "number": "55",
+          "name": "PCIE1_REFCLK_P",
+          "role": "signal_in",
+          "net_label": "PCIE1_REFCLK_P"
+        },
+        {
+          "number": "56",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "57",
+          "name": "PCIE2_REFCLK_P",
+          "role": "signal_in",
+          "net_label": "PCIE2_REFCLK_P"
+        },
+        {
+          "number": "58",
+          "name": "PCIE2_REFCLK_N",
+          "role": "signal_in",
+          "net_label": "PCIE2_REFCLK_N"
+        },
+        {
+          "number": "59",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "60",
+          "name": "PCIE2_CLK_N",
+          "role": "signal_out",
+          "net_label": "PCIE2_CLK_N"
+        },
+        {
+          "number": "61",
+          "name": "PCIE2_CLK_P",
+          "role": "signal_out",
+          "net_label": "PCIE2_CLK_P"
+        },
+        {
+          "number": "62",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "63",
+          "name": "PCIE_DIS_B",
+          "role": "signal_out",
+          "net_label": "PCIE_DIS_B"
+        },
+        {
+          "number": "64",
+          "name": "PCIE2_CLK_P",
+          "role": "signal_in",
+          "net_label": "PCIE2_CLK_P"
+        },
+        {
+          "number": "65",
+          "name": "PCIE2_CLK_N",
+          "role": "signal_in",
+          "net_label": "PCIE2_CLK_N"
+        },
+        {
+          "number": "66",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "67",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "68",
+          "name": "PCIE2_TX_P",
+          "role": "signal_out",
+          "net_label": "PCIE2_TX_P"
+        },
+        {
+          "number": "69",
+          "name": "PCIE2_TX_N",
+          "role": "signal_out",
+          "net_label": "PCIE2_TX_N"
+        },
+        {
+          "number": "70",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "71",
+          "name": "PCIE2_RX_P",
+          "role": "signal_in",
+          "net_label": "PCIE2_RX_P"
+        },
+        {
+          "number": "72",
+          "name": "PCIE2_RX_N",
+          "role": "signal_in",
+          "net_label": "PCIE2_RX_N"
+        },
+        {
+          "number": "73",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "74",
+          "name": "IMX_JTAG_TCK",
+          "role": "clock_in",
+          "net_label": "IMX_JTAG_TCK"
+        },
+        {
+          "number": "75",
+          "name": "QSPIA_DATA0",
+          "role": "signal_inout",
+          "net_label": "QSPIA_DATA0"
+        },
+        {
+          "number": "76",
+          "name": "IMX_JTAG_TDI",
+          "role": "signal_in",
+          "net_label": "IMX_JTAG_TDI"
+        },
+        {
+          "number": "77",
+          "name": "QSPIA_DATA1",
+          "role": "signal_inout",
+          "net_label": "QSPIA_DATA1"
+        },
+        {
+          "number": "78",
+          "name": "IMX_JTAG_TMS",
+          "role": "signal_in",
+          "net_label": "IMX_JTAG_TMS"
+        },
+        {
+          "number": "79",
+          "name": "QSPIA_DATA2",
+          "role": "signal_inout",
+          "net_label": "QSPIA_DATA2"
+        },
+        {
+          "number": "80",
+          "name": "IMX_JTAG_RSTn",
+          "role": "reset_in",
+          "net_label": "EXT_RESET_N"
+        },
+        {
+          "number": "81",
+          "name": "QSPIA_DATA3",
+          "role": "signal_inout",
+          "net_label": "QSPIA_DATA3"
+        },
+        {
+          "number": "82",
+          "name": "JTAG_MOD",
+          "role": "signal_in",
+          "net_label": "JTAG_MOD"
+        },
+        {
+          "number": "83",
+          "name": "QSPIA_DATA4",
+          "role": "signal_inout",
+          "net_label": "QSPIA_DATA4"
+        },
+        {
+          "number": "84",
+          "name": "CAMERA_CLK",
+          "role": "clock_out",
+          "net_label": "CAMERA_CLK"
+        },
+        {
+          "number": "85",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "86",
+          "name": "QSPIA_NSS0",
+          "role": "signal_out",
+          "net_label": "QSPIA_NSS0"
+        },
+        {
+          "number": "87",
+          "name": "EXT_RESET_N",
+          "role": "reset_in",
+          "net_label": "EXT_RESET_N"
+        },
+        {
+          "number": "88",
+          "name": "QSPIA_CLK",
+          "role": "clock_out",
+          "net_label": "QSPIA_CLK"
+        },
+        {
+          "number": "89",
+          "name": "LPC_SS0",
+          "role": "signal_out",
+          "net_label": "LPC_SS0"
+        },
+        {
+          "number": "90",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "91",
+          "name": "IMX_JTAG_TDO",
+          "role": "signal_out",
+          "net_label": "IMX_JTAG_TDO"
+        },
+        {
+          "number": "92",
+          "name": "USB1_DN",
+          "role": "signal_inout",
+          "net_label": "USB1_DN"
+        },
+        {
+          "number": "93",
+          "name": "LPC_MOSI",
+          "role": "signal_out",
+          "net_label": "LPC_MOSI"
+        },
+        {
+          "number": "94",
+          "name": "USB1_DP",
+          "role": "signal_inout",
+          "net_label": "USB1_DP"
+        },
+        {
+          "number": "95",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "96",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "97",
+          "name": "IMX_RTC_IRQ",
+          "role": "signal_out",
+          "net_label": "IMX_RTC_IRQ"
+        },
+        {
+          "number": "98",
+          "name": "LPC_MISO",
+          "role": "signal_in",
+          "net_label": "LPC_MISO"
+        },
+        {
+          "number": "99",
+          "name": "LPC_SCK",
+          "role": "clock_out",
+          "net_label": "LPC_SCK"
+        },
+        {
+          "number": "100",
+          "name": "USB1_TX_N",
+          "role": "signal_out",
+          "net_label": "USB1_TX_N"
+        },
+        {
+          "number": "101",
+          "name": "DAC_SCL",
+          "role": "clock_out",
+          "net_label": "I2C3_SCL"
+        },
+        {
+          "number": "102",
+          "name": "USB1_TX_P",
+          "role": "signal_out",
+          "net_label": "USB1_TX_P"
+        },
+        {
+          "number": "103",
+          "name": "DAC_SDA",
+          "role": "signal_inout",
+          "net_label": "I2C3_SDA"
+        },
+        {
+          "number": "104",
+          "name": "USB1_RX_N",
+          "role": "signal_in",
+          "net_label": "USB1_RX_N"
+        },
+        {
+          "number": "105",
+          "name": "BACKLIGHT_EN",
+          "role": "enable_out",
+          "net_label": "BACKLIGHT_EN"
+        },
+        {
+          "number": "106",
+          "name": "USB1_RX_P",
+          "role": "signal_in",
+          "net_label": "USB1_RX_P"
+        },
+        {
+          "number": "107",
+          "name": "GPIO1_IO10",
+          "role": "signal_inout",
+          "net_label": "GPIO1_IO10"
+        },
+        {
+          "number": "108",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "109",
+          "name": "I2C4_SCL",
+          "role": "clock_inout",
+          "net_label": "I2C4_SCL"
+        },
+        {
+          "number": "110",
+          "name": "USB1_VBUS",
+          "role": "power_in",
+          "net_label": "USB1_VBUS"
+        },
+        {
+          "number": "111",
+          "name": "EDP_SDA",
+          "role": "signal_inout",
+          "net_label": "EDP_SDA"
+        },
+        {
+          "number": "112",
+          "name": "USB1_OC",
+          "role": "signal_in",
+          "net_label": "USB1_OC"
+        },
+        {
+          "number": "113",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "114",
+          "name": "USB1_OTG_ID",
+          "role": "signal_in",
+          "net_label": "USB1_OTG_ID"
+        },
+        {
+          "number": "115",
+          "name": "USB2_TX_P",
+          "role": "signal_out",
+          "net_label": "USB2_TX_P"
+        },
+        {
+          "number": "116",
+          "name": "USB1_OTG_PWR_EN",
+          "role": "enable_out",
+          "net_label": "USB1_OTG_PWR_EN"
+        },
+        {
+          "number": "117",
+          "name": "USB2_TX_N",
+          "role": "signal_out",
+          "net_label": "USB2_TX_N"
+        },
+        {
+          "number": "118",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "119",
+          "name": "USB2_RX_P",
+          "role": "signal_in",
+          "net_label": "USB2_RX_P"
+        },
+        {
+          "number": "120",
+          "name": "UART4_TXD",
+          "role": "signal_out",
+          "net_label": "UART4_TXD"
+        },
+        {
+          "number": "121",
+          "name": "USB2_RX_N",
+          "role": "signal_in",
+          "net_label": "USB2_RX_N"
+        },
+        {
+          "number": "122",
+          "name": "UART4_RXD",
+          "role": "signal_in",
+          "net_label": "UART4_RXD"
+        },
+        {
+          "number": "123",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "124",
+          "name": "FAST_BOOT",
+          "role": "signal_in",
+          "net_label": "FAST_BOOT"
+        },
+        {
+          "number": "125",
+          "name": "USB2_DN",
+          "role": "signal_inout",
+          "net_label": "USB2_DN"
+        },
+        {
+          "number": "126",
+          "name": "IMX_FBOOT",
+          "role": "signal_out",
+          "net_label": "IMX_FBOOT"
+        },
+        {
+          "number": "127",
+          "name": "USB2_DP",
+          "role": "signal_inout",
+          "net_label": "USB2_DP"
+        },
+        {
+          "number": "128",
+          "name": "IMX_RTC_IRQ",
+          "role": "signal_out",
+          "net_label": "RTC_IRQ"
+        },
+        {
+          "number": "129",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "130",
+          "name": "USB_HUB_RESET",
+          "role": "reset_out",
+          "net_label": "USB_HUB_RESET"
+        },
+        {
+          "number": "131",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "132",
+          "name": "GP_M4_NMI",
+          "role": "signal_out",
+          "net_label": "GP_M4_NMI"
+        },
+        {
+          "number": "133",
+          "name": "NAND_NCE1",
+          "role": "signal_out",
+          "net_label": "NAND_NCE1"
+        },
+        {
+          "number": "134",
+          "name": "IMX_WAKE",
+          "role": "signal_out",
+          "net_label": "IMX_WAKE"
+        },
+        {
+          "number": "135",
+          "name": "NAND_NCE3",
+          "role": "signal_out",
+          "net_label": "NAND_NCE3"
+        },
+        {
+          "number": "136",
+          "name": "GPIO1_IO3",
+          "role": "signal_inout",
+          "net_label": "GPIO1_IO3"
+        },
+        {
+          "number": "137",
+          "name": "NAND_CLE",
+          "role": "signal_out",
+          "net_label": "NAND_CLE"
+        },
+        {
+          "number": "138",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "139",
+          "name": "NAND_NREADY",
+          "role": "signal_in",
+          "net_label": "NAND_NREADY"
+        },
+        {
+          "number": "140",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "141",
+          "name": "NAND_DATA05",
+          "role": "signal_inout",
+          "net_label": "NAND_DATA05"
+        },
+        {
+          "number": "142",
+          "name": "I2C3_SCL",
+          "role": "clock_inout",
+          "net_label": "I2C3_SCL"
+        },
+        {
+          "number": "143",
+          "name": "NAND_NWP",
+          "role": "signal_out",
+          "net_label": "NAND_NWP"
+        },
+        {
+          "number": "144",
+          "name": "I2C3_SDA",
+          "role": "signal_inout",
+          "net_label": "I2C3_SDA"
+        },
+        {
+          "number": "145",
+          "name": "NAND_DQS",
+          "role": "signal_inout",
+          "net_label": "NAND_DQS"
+        },
+        {
+          "number": "146",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "147",
+          "name": "HDMI_CLK_N",
+          "role": "signal_out",
+          "net_label": "HDMI_CLK_N"
+        },
+        {
+          "number": "148",
+          "name": "HDMI_CLK_P",
+          "role": "signal_out",
+          "net_label": "HDMI_CLK_P"
+        },
+        {
+          "number": "149",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "150",
+          "name": "HDMI_TX0_N",
+          "role": "signal_out",
+          "net_label": "HDMI_TX0_N"
+        },
+        {
+          "number": "151",
+          "name": "HDMI_TX0_P",
+          "role": "signal_out",
+          "net_label": "HDMI_TX0_P"
+        },
+        {
+          "number": "152",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "153",
+          "name": "HDMI_TX1_N",
+          "role": "signal_out",
+          "net_label": "HDMI_TX1_N"
+        },
+        {
+          "number": "154",
+          "name": "HDMI_TX1_P",
+          "role": "signal_out",
+          "net_label": "HDMI_TX1_P"
+        },
+        {
+          "number": "155",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "156",
+          "name": "HDMI_TX2_N",
+          "role": "signal_out",
+          "net_label": "HDMI_TX2_N"
+        },
+        {
+          "number": "157",
+          "name": "HDMI_TX2_P",
+          "role": "signal_out",
+          "net_label": "HDMI_TX2_P"
+        },
+        {
+          "number": "158",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "159",
+          "name": "HDMI_AUX_N",
+          "role": "signal_inout",
+          "net_label": "HDMI_AUX_N"
+        },
+        {
+          "number": "160",
+          "name": "HDMI_AUX_P",
+          "role": "signal_inout",
+          "net_label": "HDMI_AUX_P"
+        },
+        {
+          "number": "161",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "162",
+          "name": "HDMI_DDC_SCL",
+          "role": "clock_inout",
+          "net_label": "HDMI_DDC_SCL"
+        },
+        {
+          "number": "163",
+          "name": "HDMI_DDC_SDA",
+          "role": "signal_inout",
+          "net_label": "HDMI_DDC_SDA"
+        },
+        {
+          "number": "164",
+          "name": "HDMI_HPD",
+          "role": "signal_in",
+          "net_label": "HDMI_HPD"
+        },
+        {
+          "number": "165",
+          "name": "HDMI_CEC",
+          "role": "signal_inout",
+          "net_label": "HDMI_CEC"
+        },
+        {
+          "number": "166",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "167",
+          "name": "HDMI_SDA",
+          "role": "signal_inout",
+          "net_label": "HDMI_SDA"
+        },
+        {
+          "number": "168",
+          "name": "HDMI_SCL",
+          "role": "clock_inout",
+          "net_label": "HDMI_SCL"
+        },
+        {
+          "number": "169",
+          "name": "SPDIF_EXT_CLK",
+          "role": "clock_in",
+          "net_label": "SPDIF_EXT_CLK"
+        },
+        {
+          "number": "170",
+          "name": "SAI3_MCLK/PWM4",
+          "role": "signal_out",
+          "net_label": "SAI3_MCLK/PWM4"
+        },
+        {
+          "number": "171",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "172",
+          "name": "SAI1_TXFS",
+          "role": "signal_out",
+          "net_label": "SAI1_TXFS"
+        },
+        {
+          "number": "173",
+          "name": "SAI1_TXC",
+          "role": "signal_out",
+          "net_label": "SAI1_TXC"
+        },
+        {
+          "number": "174",
+          "name": "SAI1_RXD0",
+          "role": "signal_in",
+          "net_label": "SAI1_RXD0"
+        },
+        {
+          "number": "175",
+          "name": "SAI1_RXD1",
+          "role": "signal_in",
+          "net_label": "SAI1_RXD1"
+        },
+        {
+          "number": "176",
+          "name": "SAI1_RXD2",
+          "role": "signal_in",
+          "net_label": "SAI1_RXD2"
+        },
+        {
+          "number": "177",
+          "name": "SAI1_RXD3",
+          "role": "signal_in",
+          "net_label": "SAI1_RXD3"
+        },
+        {
+          "number": "178",
+          "name": "SAI1_RXD4",
+          "role": "signal_in",
+          "net_label": "SAI1_RXD4"
+        },
+        {
+          "number": "179",
+          "name": "SAI1_RXD5",
+          "role": "signal_in",
+          "net_label": "SAI1_RXD5"
+        },
+        {
+          "number": "180",
+          "name": "SAI1_RXD6",
+          "role": "signal_in",
+          "net_label": "SAI1_RXD6"
+        },
+        {
+          "number": "181",
+          "name": "SAI1_RXD7",
+          "role": "signal_in",
+          "net_label": "SAI1_RXD7"
+        },
+        {
+          "number": "182",
+          "name": "SAI1_RXFS",
+          "role": "signal_in",
+          "net_label": "SAI1_RXFS"
+        },
+        {
+          "number": "183",
+          "name": "SAI1_RXC",
+          "role": "signal_in",
+          "net_label": "SAI1_RXC"
+        },
+        {
+          "number": "184",
+          "name": "SAI1_TXD0",
+          "role": "signal_out",
+          "net_label": "SAI1_TXD0"
+        },
+        {
+          "number": "185",
+          "name": "SAI1_TXD1",
+          "role": "signal_out",
+          "net_label": "SAI1_TXD1"
+        },
+        {
+          "number": "186",
+          "name": "SAI1_TXD2",
+          "role": "signal_out",
+          "net_label": "SAI1_TXD2"
+        },
+        {
+          "number": "187",
+          "name": "SAI1_TXD3",
+          "role": "signal_out",
+          "net_label": "SAI1_TXD3"
+        },
+        {
+          "number": "188",
+          "name": "SAI1_TXD4",
+          "role": "signal_out",
+          "net_label": "SAI1_TXD4"
+        },
+        {
+          "number": "189",
+          "name": "SAI1_TXD5",
+          "role": "signal_out",
+          "net_label": "SAI1_TXD5"
+        },
+        {
+          "number": "190",
+          "name": "SAI1_TXD6",
+          "role": "signal_out",
+          "net_label": "SAI1_TXD6"
+        },
+        {
+          "number": "191",
+          "name": "SAI1_TXD7",
+          "role": "signal_out",
+          "net_label": "SAI1_TXD7"
+        },
+        {
+          "number": "192",
+          "name": "SAI1_MCLK",
+          "role": "clock_out",
+          "net_label": "SAI1_MCLK"
+        },
+        {
+          "number": "193",
+          "name": "SAI2_MCLK",
+          "role": "clock_out",
+          "net_label": "SAI2_MCLK"
+        },
+        {
+          "number": "194",
+          "name": "SAI2_RXD",
+          "role": "signal_in",
+          "net_label": "SAI2_RXD"
+        },
+        {
+          "number": "195",
+          "name": "SAI2_RXFS",
+          "role": "signal_in",
+          "net_label": "SAI2_RXFS"
+        },
+        {
+          "number": "196",
+          "name": "SAI2_RXC",
+          "role": "signal_in",
+          "net_label": "SAI2_RXC"
+        },
+        {
+          "number": "197",
+          "name": "SAI2_TXD",
+          "role": "signal_out",
+          "net_label": "SAI2_TXD"
+        },
+        {
+          "number": "198",
+          "name": "SAI2_TXFS",
+          "role": "signal_out",
+          "net_label": "SAI2_TXFS"
+        },
+        {
+          "number": "199",
+          "name": "SAI2_TXC",
+          "role": "signal_out",
+          "net_label": "SAI2_TXC"
+        },
+        {
+          "number": "200",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "201",
+          "name": "SPDIF_RX/PWM2",
+          "role": "signal_in",
+          "net_label": "SPDIF_RX/PWM2"
+        },
+        {
+          "number": "202",
+          "name": "BACKLIGHT_PWM",
+          "role": "signal_out",
+          "net_label": "BACKLIGHT_PWM"
+        },
+        {
+          "number": "203",
+          "name": "SAI3_TXC",
+          "role": "signal_out",
+          "net_label": "SAI3_TXC"
+        },
+        {
+          "number": "204",
+          "name": "SAI3_TXD",
+          "role": "signal_out",
+          "net_label": "SAI3_TXD"
+        },
+        {
+          "number": "205",
+          "name": "SAI3_TXFS",
+          "role": "signal_out",
+          "net_label": "SAI3_TXFS"
+        },
+        {
+          "number": "206",
+          "name": "SAI3_RXC",
+          "role": "signal_in",
+          "net_label": "SAI3_RXC"
+        },
+        {
+          "number": "207",
+          "name": "SAI3_RXD",
+          "role": "signal_in",
+          "net_label": "SAI3_RXD"
+        },
+        {
+          "number": "208",
+          "name": "SAI3_RXFS",
+          "role": "signal_in",
+          "net_label": "SAI3_RXFS"
+        },
+        {
+          "number": "209",
+          "name": "SAI3_MCLK",
+          "role": "clock_out",
+          "net_label": "SAI3_MCLK/PWM4"
+        },
+        {
+          "number": "210",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "211",
+          "name": "UART2_TXD",
+          "role": "signal_out",
+          "net_label": "IMX_UART2_TX"
+        },
+        {
+          "number": "212",
+          "name": "UART2_RXD",
+          "role": "signal_in",
+          "net_label": "IMX_UART2_RX"
+        },
+        {
+          "number": "213",
+          "name": "UART1_TXD",
+          "role": "signal_out",
+          "net_label": "IMX_UART1_TX"
+        },
+        {
+          "number": "214",
+          "name": "UART1_RXD",
+          "role": "signal_in",
+          "net_label": "IMX_UART1_RX"
+        },
+        {
+          "number": "215",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "216",
+          "name": "SAI1_TXC",
+          "role": "signal_out",
+          "net_label": "SAI1_TXC"
+        },
+        {
+          "number": "217",
+          "name": "SAI1_TXD0",
+          "role": "signal_out",
+          "net_label": "BOOTCFG_9"
+        },
+        {
+          "number": "218",
+          "name": "SAI1_TXD1",
+          "role": "signal_out",
+          "net_label": "BOOTCFG_10"
+        },
+        {
+          "number": "219",
+          "name": "SAI1_TXD2",
+          "role": "signal_out",
+          "net_label": "BOOTCFG_11"
+        },
+        {
+          "number": "220",
+          "name": "SAI1_TXD3",
+          "role": "signal_out",
+          "net_label": "BOOTCFG_12"
+        },
+        {
+          "number": "221",
+          "name": "SAI1_TXD4",
+          "role": "signal_out",
+          "net_label": "BOOTCFG_13"
+        },
+        {
+          "number": "222",
+          "name": "SAI1_TXD5",
+          "role": "signal_out",
+          "net_label": "BOOTCFG_14"
+        },
+        {
+          "number": "223",
+          "name": "SAI1_TXD6",
+          "role": "signal_out",
+          "net_label": "BOOTCFG_15"
+        },
+        {
+          "number": "224",
+          "name": "SAI1_TXD7",
+          "role": "signal_out",
+          "net_label": "BOOTCFG_1"
+        },
+        {
+          "number": "225",
+          "name": "SAI1_RXD0",
+          "role": "signal_in",
+          "net_label": "BOOTCFG_0"
+        },
+        {
+          "number": "226",
+          "name": "SAI1_RXD1",
+          "role": "signal_in",
+          "net_label": "BOOTCFG_8"
+        },
+        {
+          "number": "227",
+          "name": "SAI1_RXD2",
+          "role": "signal_inout",
+          "net_label": "BOOTCFG_7"
+        },
+        {
+          "number": "228",
+          "name": "SAI1_RXD3",
+          "role": "signal_inout",
+          "net_label": "BOOTCFG_4"
+        },
+        {
+          "number": "229",
+          "name": "ECSPI2_SS0",
+          "role": "signal_out",
+          "net_label": "ECSPI2_SS0"
+        },
+        {
+          "number": "230",
+          "name": "ECSPI2_MOSI",
+          "role": "signal_out",
+          "net_label": "ECSPI2_MOSI"
+        },
+        {
+          "number": "231",
+          "name": "ECSPI2_MISO",
+          "role": "signal_in",
+          "net_label": "ECSPI2_MISO"
+        },
+        {
+          "number": "232",
+          "name": "ECSPI2_SCLK",
+          "role": "clock_out",
+          "net_label": "ECSPI2_SCLK"
+        },
+        {
+          "number": "233",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "234",
+          "name": "DSI_CLK_P",
+          "role": "signal_out",
+          "net_label": "DSI_CLK_P"
+        },
+        {
+          "number": "235",
+          "name": "DSI_CLK_N",
+          "role": "signal_out",
+          "net_label": "DSI_CLK_N"
+        },
+        {
+          "number": "236",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "237",
+          "name": "DSI_D0_P",
+          "role": "signal_out",
+          "net_label": "DSI_D0_P"
+        },
+        {
+          "number": "238",
+          "name": "DSI_D0_N",
+          "role": "signal_out",
+          "net_label": "DSI_D0_N"
+        },
+        {
+          "number": "239",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "240",
+          "name": "DSI_D1_P",
+          "role": "signal_out",
+          "net_label": "DSI_D1_P"
+        },
+        {
+          "number": "241",
+          "name": "DSI_D1_N",
+          "role": "signal_out",
+          "net_label": "DSI_D1_N"
+        },
+        {
+          "number": "242",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "243",
+          "name": "DSI_D2_P",
+          "role": "signal_out",
+          "net_label": "DSI_D2_P"
+        },
+        {
+          "number": "244",
+          "name": "DSI_D2_N",
+          "role": "signal_out",
+          "net_label": "DSI_D2_N"
+        },
+        {
+          "number": "245",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "246",
+          "name": "DSI_D3_P",
+          "role": "signal_out",
+          "net_label": "DSI_D3_P"
+        },
+        {
+          "number": "247",
+          "name": "DSI_D3_N",
+          "role": "signal_out",
+          "net_label": "DSI_D3_N"
+        },
+        {
+          "number": "248",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "249",
+          "name": "CSI_P2_CK_P",
+          "role": "clock_in",
+          "net_label": "CSI_P2_CK_P"
+        },
+        {
+          "number": "250",
+          "name": "CSI_P2_CK_N",
+          "role": "clock_in",
+          "net_label": "CSI_P2_CK_N"
+        },
+        {
+          "number": "251",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "252",
+          "name": "CSI_P2_D0_P",
+          "role": "signal_in",
+          "net_label": "CSI_P2_D0_P"
+        },
+        {
+          "number": "253",
+          "name": "CSI_P2_D0_N",
+          "role": "signal_in",
+          "net_label": "CSI_P2_D0_N"
+        },
+        {
+          "number": "254",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "255",
+          "name": "CSI_P2_D1_P",
+          "role": "signal_in",
+          "net_label": "CSI_P2_D1_P"
+        },
+        {
+          "number": "256",
+          "name": "CSI_P2_D1_N",
+          "role": "signal_in",
+          "net_label": "CSI_P2_D1_N"
+        },
+        {
+          "number": "257",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "258",
+          "name": "CSI_P2_D2_P",
+          "role": "signal_in",
+          "net_label": "CSI_P2_D2_P"
+        },
+        {
+          "number": "259",
+          "name": "CSI_P2_D2_N",
+          "role": "signal_in",
+          "net_label": "CSI_P2_D2_N"
+        },
+        {
+          "number": "260",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "261",
+          "name": "CSI_P2_D3_P",
+          "role": "signal_in",
+          "net_label": "CSI_P2_D3_P"
+        },
+        {
+          "number": "262",
+          "name": "CSI_P2_D3_N",
+          "role": "signal_in",
+          "net_label": "CSI_P2_D3_N"
+        },
+        {
+          "number": "263",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "264",
+          "name": "SD2_DATA0",
+          "role": "signal_inout",
+          "net_label": "SD2_DATA0"
+        },
+        {
+          "number": "265",
+          "name": "SD2_DATA1",
+          "role": "signal_inout",
+          "net_label": "SD2_DATA1"
+        },
+        {
+          "number": "266",
+          "name": "PCIE_RST_B",
+          "role": "reset_out",
+          "net_label": "PCIE_RST_B"
+        },
+        {
+          "number": "267",
+          "name": "SD2_CD",
+          "role": "signal_in",
+          "net_label": "SD2_CD"
+        },
+        {
+          "number": "268",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "269",
+          "name": "IMX_PWM4",
+          "role": "signal_out",
+          "net_label": "IMX_PWM4"
+        },
+        {
+          "number": "270",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "J15",
+      "type": "connector",
+      "value": {
+        "raw": "Conn_01x33",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 1,
+      "pins": [
+        {
+          "number": "1",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "2",
+          "name": "DSI_D3_N",
+          "role": "signal_inout",
+          "net_label": "DSI_D3_N"
+        },
+        {
+          "number": "3",
+          "name": "DSI_D3_P",
+          "role": "signal_inout",
+          "net_label": "DSI_D3_P"
+        },
+        {
+          "number": "4",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "5",
+          "name": "DSI_D2_N",
+          "role": "signal_inout",
+          "net_label": "DSI_D2_N"
+        },
+        {
+          "number": "6",
+          "name": "DSI_D2_P",
+          "role": "signal_inout",
+          "net_label": "DSI_D2_P"
+        },
+        {
+          "number": "7",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "8",
+          "name": "DSI_D1_N",
+          "role": "signal_inout",
+          "net_label": "DSI_D1_N"
+        },
+        {
+          "number": "9",
+          "name": "DSI_D1_P",
+          "role": "signal_inout",
+          "net_label": "DSI_D1_P"
+        },
+        {
+          "number": "10",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "11",
+          "name": "DSI_D0_N",
+          "role": "signal_inout",
+          "net_label": "DSI_D0_N"
+        },
+        {
+          "number": "12",
+          "name": "DSI_D0_P",
+          "role": "signal_inout",
+          "net_label": "DSI_D0_P"
+        },
+        {
+          "number": "13",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "14",
+          "name": "DSI_CLK_N",
+          "role": "signal_inout",
+          "net_label": "DSI_CLK_N"
+        },
+        {
+          "number": "15",
+          "name": "DSI_CLK_P",
+          "role": "signal_inout",
+          "net_label": "DSI_CLK_P"
+        },
+        {
+          "number": "16",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "17",
+          "name": "DSI_D2_P",
+          "role": "signal_inout",
+          "net_label": "DSI_D2_P"
+        },
+        {
+          "number": "18",
+          "name": "DSI_D2_N",
+          "role": "signal_inout",
+          "net_label": "DSI_D2_N"
+        },
+        {
+          "number": "19",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "20",
+          "name": "DSI_D1_P",
+          "role": "signal_inout",
+          "net_label": "DSI_D1_P"
+        },
+        {
+          "number": "21",
+          "name": "DSI_D1_N",
+          "role": "signal_inout",
+          "net_label": "DSI_D1_N"
+        },
+        {
+          "number": "22",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "23",
+          "name": "DSI_D0_P",
+          "role": "signal_inout",
+          "net_label": "DSI_D0_P"
+        },
+        {
+          "number": "24",
+          "name": "DSI_D0_N",
+          "role": "signal_inout",
+          "net_label": "DSI_D0_N"
+        },
+        {
+          "number": "25",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "26",
+          "name": "DSI_CLK_P",
+          "role": "signal_inout",
+          "net_label": "DSI_CLK_P"
+        },
+        {
+          "number": "27",
+          "name": "DSI_CLK_N",
+          "role": "signal_inout",
+          "net_label": "DSI_CLK_N"
+        },
+        {
+          "number": "28",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "29",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "30",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "31",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "32",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "33",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "J18",
+      "type": "connector",
+      "value": null,
+      "page": 1,
+      "pins": [
+        {
+          "number": "1",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "2",
+          "name": "IMX_UART1_TX",
+          "role": "signal_out",
+          "net_label": "IMX_UART1_TX"
+        },
+        {
+          "number": "3",
+          "name": "IMX_UART1_RX",
+          "role": "signal_in",
+          "net_label": "IMX_UART1_RX"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "J20",
+      "type": "connector",
+      "value": null,
+      "page": 1,
+      "pins": [
+        {
+          "number": "1",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "2",
+          "name": "IMX_UART2_TX",
+          "role": "signal_out",
+          "net_label": "IMX_UART2_TX"
+        },
+        {
+          "number": "3",
+          "name": "IMX_UART2_RX",
+          "role": "signal_in",
+          "net_label": "IMX_UART2_RX"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "TP1",
+      "type": "test_point",
+      "value": null,
+      "page": 1,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_inout",
+          "net_label": "IMX_PWM4"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "TP8",
+      "type": "test_point",
+      "value": null,
+      "page": 1,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_inout",
+          "net_label": "T_PMIC_ON_REQ"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "TP12",
+      "type": "test_point",
+      "value": null,
+      "page": 1,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "signal_inout",
+          "net_label": "SAI2_RXC"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R111",
+      "type": "resistor",
+      "value": {
+        "raw": "R111",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": "SPK_PWR"
+      },
+      "page": 1,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "USB1_VBUS"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "terminal",
+          "net_label": "SPK_PWR"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R113",
+      "type": "resistor",
+      "value": {
+        "raw": "10k",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 1,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "+3V3"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "terminal",
+          "net_label": "SW_DIP_x01"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R115",
+      "type": "resistor",
+      "value": {
+        "raw": "10k",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 1,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "+3V3"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "terminal",
+          "net_label": "IMX_RESETn"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R117",
+      "type": "resistor",
+      "value": {
+        "raw": "10k",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 1,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "+3V3"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "terminal",
+          "net_label": "GND"
+        }
+      ],
+      "populated": false
+    },
+    {
+      "refdes": "R118",
+      "type": "resistor",
+      "value": {
+        "raw": "0k",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 1,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": null
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "terminal",
+          "net_label": null
+        }
+      ],
+      "populated": false
+    },
+    {
+      "refdes": "R119",
+      "type": "resistor",
+      "value": {
+        "raw": "0k",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 1,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": null
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "terminal",
+          "net_label": null
+        }
+      ],
+      "populated": false
+    },
+    {
+      "refdes": "R120",
+      "type": "resistor",
+      "value": {
+        "raw": "100k",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 1,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "+3V3"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "terminal",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R154",
+      "type": "resistor",
+      "value": null,
+      "page": 1,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "BT_HOST_WAKE"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "terminal",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R155",
+      "type": "resistor",
+      "value": null,
+      "page": 1,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "LPC_UART2_TX"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "terminal",
+          "net_label": "LPC_UART2_RX"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R168",
+      "type": "resistor",
+      "value": null,
+      "page": 1,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "BOOTCFG_4"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "terminal",
+          "net_label": "GND"
+        }
+      ],
+      "populated": false
+    },
+    {
+      "refdes": "R169",
+      "type": "resistor",
+      "value": null,
+      "page": 1,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "BOOTCFG_15"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "terminal",
+          "net_label": "GND"
+        }
+      ],
+      "populated": false
+    },
+    {
+      "refdes": "R170",
+      "type": "resistor",
+      "value": null,
+      "page": 1,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "BOOTCFG_13"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "terminal",
+          "net_label": "GND"
+        }
+      ],
+      "populated": false
+    },
+    {
+      "refdes": "R171",
+      "type": "resistor",
+      "value": null,
+      "page": 1,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "BOOTCFG_10"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "terminal",
+          "net_label": "GND"
+        }
+      ],
+      "populated": false
+    },
+    {
+      "refdes": "SW3",
+      "type": "switch",
+      "value": {
+        "raw": "SW_DIP_x01",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 1,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "IMX_FBOOT"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "terminal",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "SW6",
+      "type": "switch",
+      "value": {
+        "raw": "SW_Push",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 1,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "terminal",
+          "net_label": "IMX_RESETn"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "terminal",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "H1",
+      "type": "mounting",
+      "value": {
+        "raw": "NGFF-Mount1",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 1,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "H2",
+      "type": "mounting",
+      "value": {
+        "raw": "NGFF-Mount2",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 1,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "H3",
+      "type": "mounting",
+      "value": {
+        "raw": "NGFF-Mount3",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 1,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "H5",
+      "type": "mounting",
+      "value": {
+        "raw": "MountingHole_Pad",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 1,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "H6",
+      "type": "mounting",
+      "value": {
+        "raw": "MountingHole_Pad",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 1,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "H7",
+      "type": "mounting",
+      "value": {
+        "raw": "MountingHole_Pad",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 1,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "H8",
+      "type": "mounting",
+      "value": {
+        "raw": "MountingHole_Pad",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 1,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "H9",
+      "type": "mounting",
+      "value": {
+        "raw": "OSHWA_DE17",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 1,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "unknown",
+          "net_label": null
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "H10",
+      "type": "mounting",
+      "value": {
+        "raw": "LOGO_REFORM",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 1,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "unknown",
+          "net_label": null
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "H11",
+      "type": "mounting",
+      "value": {
+        "raw": "LABEL_MPCIE1",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 1,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "unknown",
+          "net_label": null
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "H12",
+      "type": "mounting",
+      "value": {
+        "raw": "LABEL_MPCIE2",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 1,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "unknown",
+          "net_label": null
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "H13",
+      "type": "mounting",
+      "value": {
+        "raw": "LABEL_CPU",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 1,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "unknown",
+          "net_label": null
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "H14",
+      "type": "mounting",
+      "value": {
+        "raw": "BADGE",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 1,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "unknown",
+          "net_label": null
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "H15",
+      "type": "mounting",
+      "value": {
+        "raw": "NOTOUCH",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 1,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "H22",
+      "type": "mounting",
+      "value": {
+        "raw": "MountingHole_Pad",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 1,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "H24",
+      "type": "mounting",
+      "value": {
+        "raw": "MountingHole_Pad",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 1,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "H25",
+      "type": "mounting",
+      "value": {
+        "raw": "MountingHole_Pad",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 1,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "H27",
+      "type": "mounting",
+      "value": {
+        "raw": "MountingHole_Pad",
+        "primary": null,
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 1,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    }
+  ],
+  "nets": [
+    {
+      "local_id": "net_5V",
+      "label": "+5V",
+      "is_power": true,
+      "is_global": true,
+      "connects": [
+        "U1.1",
+        "U1.2",
+        "U1.3",
+        "U1.4"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_GND",
+      "label": "GND",
+      "is_power": true,
+      "is_global": true,
+      "connects": [
+        "U1.5",
+        "U1.6",
+        "U1.7",
+        "U1.8",
+        "U1.13",
+        "U1.19",
+        "U1.25",
+        "U1.31",
+        "U1.39",
+        "U1.44",
+        "U1.47",
+        "U1.50",
+        "U1.53",
+        "U1.56",
+        "U1.59",
+        "U1.62",
+        "U1.66",
+        "U1.67",
+        "U1.70",
+        "U1.73",
+        "U1.85",
+        "U1.90",
+        "U1.95",
+        "U1.96",
+        "U1.108",
+        "U1.113",
+        "U1.118",
+        "U1.123",
+        "U1.129",
+        "U1.131",
+        "U1.138",
+        "U1.140",
+        "U1.146",
+        "U1.149",
+        "U1.152",
+        "U1.155",
+        "U1.158",
+        "U1.161",
+        "U1.166",
+        "U1.171",
+        "U1.200",
+        "U1.210",
+        "U1.215",
+        "U1.233",
+        "U1.236",
+        "U1.239",
+        "U1.242",
+        "U1.245",
+        "U1.248",
+        "U1.251",
+        "U1.254",
+        "U1.257",
+        "U1.260",
+        "U1.263",
+        "U1.268",
+        "U1.270",
+        "H1.1",
+        "H2.1",
+        "H3.1",
+        "H5.1",
+        "H6.1",
+        "H7.1",
+        "H8.1",
+        "H15.1",
+        "H22.1",
+        "H24.1",
+        "H25.1",
+        "H27.1",
+        "J15.1",
+        "J15.4",
+        "J15.7",
+        "J15.10",
+        "J15.13",
+        "J15.16",
+        "J18.1",
+        "J20.1",
+        "R117.2",
+        "R120.2",
+        "R154.2",
+        "SW3.2",
+        "SW6.2"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_3V3",
+      "label": "+3V3",
+      "is_power": true,
+      "is_global": true,
+      "connects": [
+        "R113.1",
+        "R115.1",
+        "R117.1",
+        "R120.1",
+        "R168.1",
+        "R169.1",
+        "R170.1",
+        "R171.1"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_PMIC_ON_REQ",
+      "label": "PMIC_ON_REQ",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.10",
+        "TP8.1"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_T_PMIC_ON_REQ",
+      "label": "T_PMIC_ON_REQ",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "TP8.1"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_SLOW_CLK",
+      "label": "SLOW_CLK",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.12"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_SD2_DATA0",
+      "label": "SD2_DATA0",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.14",
+        "U1.264"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_SD2_DATA1",
+      "label": "SD2_DATA1",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.16",
+        "U1.265"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_SD2_DATA2",
+      "label": "SD2_DATA2",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.18"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_SD2_DATA3",
+      "label": "SD2_DATA3",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.20"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_SD2_CMD",
+      "label": "SD2_CMD",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.22"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_WIFI_RESET",
+      "label": "WIFI_RESET",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.24"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_SD2_CLK",
+      "label": "SD2_CLK",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.26"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_BT_HOST_WAKE",
+      "label": "BT_HOST_WAKE",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.28",
+        "R154.1"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_LPC_UART2_RX",
+      "label": "LPC_UART2_RX",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.30",
+        "R155.1"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_LPC_UART2_TX",
+      "label": "LPC_UART2_TX",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.32",
+        "R155.2"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_UART3_RTS",
+      "label": "UART3_RTS",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.34"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_UART3_CTS",
+      "label": "UART3_CTS",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.36"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_WL_EN",
+      "label": "WL_EN",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.38"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_EDP_IRQ",
+      "label": "EDP_IRQ",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.40"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_WL_IRQ",
+      "label": "WL_IRQ",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.41"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_BT_EN",
+      "label": "BT_EN",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.42"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_PCIE1_TX_P",
+      "label": "PCIE1_TX_P",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.45"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_PCIE1_TX_N",
+      "label": "PCIE1_TX_N",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.46"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_PCIE1_RX_P",
+      "label": "PCIE1_RX_P",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.48"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_PCIE1_RX_N",
+      "label": "PCIE1_RX_N",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.49"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_PCIE1_CLK_N",
+      "label": "PCIE1_CLK_N",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.51"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_PCIE1_CLK_P",
+      "label": "PCIE1_CLK_P",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.52"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_PCIE1_REFCLK_N",
+      "label": "PCIE1_REFCLK_N",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.54"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_PCIE1_REFCLK_P",
+      "label": "PCIE1_REFCLK_P",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.55"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_PCIE2_REFCLK_P",
+      "label": "PCIE2_REFCLK_P",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.57"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_PCIE2_REFCLK_N",
+      "label": "PCIE2_REFCLK_N",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.58"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_PCIE2_CLK_N",
+      "label": "PCIE2_CLK_N",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.60",
+        "U1.65"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_PCIE2_CLK_P",
+      "label": "PCIE2_CLK_P",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.61",
+        "U1.64"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_PCIE_DIS_B",
+      "label": "PCIE_DIS_B",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.63"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_PCIE2_TX_P",
+      "label": "PCIE2_TX_P",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.68"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_PCIE2_TX_N",
+      "label": "PCIE2_TX_N",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.69"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_PCIE2_RX_P",
+      "label": "PCIE2_RX_P",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.71"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_PCIE2_RX_N",
+      "label": "PCIE2_RX_N",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.72"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_IMX_JTAG_TCK",
+      "label": "IMX_JTAG_TCK",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.74"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_QSPIA_DATA0",
+      "label": "QSPIA_DATA0",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.75"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_IMX_JTAG_TDI",
+      "label": "IMX_JTAG_TDI",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.76"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_QSPIA_DATA1",
+      "label": "QSPIA_DATA1",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.77"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_IMX_JTAG_TMS",
+      "label": "IMX_JTAG_TMS",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.78"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_QSPIA_DATA2",
+      "label": "QSPIA_DATA2",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.79"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_EXT_RESET_N",
+      "label": "EXT_RESET_N",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.80",
+        "U1.87"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_QSPIA_DATA3",
+      "label": "QSPIA_DATA3",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.81"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_JTAG_MOD",
+      "label": "JTAG_MOD",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.82"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_QSPIA_DATA4",
+      "label": "QSPIA_DATA4",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.83"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_CAMERA_CLK",
+      "label": "CAMERA_CLK",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.84"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_QSPIA_NSS0",
+      "label": "QSPIA_NSS0",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.86"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_QSPIA_CLK",
+      "label": "QSPIA_CLK",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.88"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_LPC_SS0",
+      "label": "LPC_SS0",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.89"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_IMX_JTAG_TDO",
+      "label": "IMX_JTAG_TDO",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.91"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_USB1_DN",
+      "label": "USB1_DN",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.92"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_LPC_MOSI",
+      "label": "LPC_MOSI",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.93"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_USB1_DP",
+      "label": "USB1_DP",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.94"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_IMX_RTC_IRQ",
+      "label": "IMX_RTC_IRQ",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.97"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_LPC_MISO",
+      "label": "LPC_MISO",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.98"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_LPC_SCK",
+      "label": "LPC_SCK",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.99"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_USB1_TX_N",
+      "label": "USB1_TX_N",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.100"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_I2C3_SCL",
+      "label": "I2C3_SCL",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.101",
+        "U1.142"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_USB1_TX_P",
+      "label": "USB1_TX_P",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.102"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_I2C3_SDA",
+      "label": "I2C3_SDA",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.103",
+        "U1.144"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_USB1_RX_N",
+      "label": "USB1_RX_N",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.104"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_BACKLIGHT_EN",
+      "label": "BACKLIGHT_EN",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.105"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_USB1_RX_P",
+      "label": "USB1_RX_P",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.106"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_GPIO1_IO10",
+      "label": "GPIO1_IO10",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.107"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_I2C4_SCL",
+      "label": "I2C4_SCL",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.109"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_USB1_VBUS",
+      "label": "USB1_VBUS",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.110",
+        "R111.1"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_EDP_SDA",
+      "label": "EDP_SDA",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.111"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_USB1_OC",
+      "label": "USB1_OC",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.112"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_USB1_OTG_ID",
+      "label": "USB1_OTG_ID",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.114"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_USB2_TX_P",
+      "label": "USB2_TX_P",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.115"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_USB1_OTG_PWR_EN",
+      "label": "USB1_OTG_PWR_EN",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.116"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_USB2_TX_N",
+      "label": "USB2_TX_N",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.117"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_USB2_RX_P",
+      "label": "USB2_RX_P",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.119"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_UART4_TXD",
+      "label": "UART4_TXD",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.120"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_USB2_RX_N",
+      "label": "USB2_RX_N",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.121"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_UART4_RXD",
+      "label": "UART4_RXD",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.122"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_FAST_BOOT",
+      "label": "FAST_BOOT",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.124"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_USB2_DN",
+      "label": "USB2_DN",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.125"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_IMX_FBOOT",
+      "label": "IMX_FBOOT",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.126",
+        "SW3.1"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_USB2_DP",
+      "label": "USB2_DP",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.127"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_RTC_IRQ",
+      "label": "RTC_IRQ",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.128"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_USB_HUB_RESET",
+      "label": "USB_HUB_RESET",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.130"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_GP_M4_NMI",
+      "label": "GP_M4_NMI",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.132"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_NAND_NCE1",
+      "label": "NAND_NCE1",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.133"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_IMX_WAKE",
+      "label": "IMX_WAKE",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.134"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_NAND_NCE3",
+      "label": "NAND_NCE3",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.135"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_GPIO1_IO3",
+      "label": "GPIO1_IO3",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.136"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_NAND_CLE",
+      "label": "NAND_CLE",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.137"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_NAND_NREADY",
+      "label": "NAND_NREADY",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.139"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_NAND_DATA05",
+      "label": "NAND_DATA05",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.141"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_NAND_NWP",
+      "label": "NAND_NWP",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.143"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_NAND_DQS",
+      "label": "NAND_DQS",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.145"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_HDMI_CLK_N",
+      "label": "HDMI_CLK_N",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.147"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_HDMI_CLK_P",
+      "label": "HDMI_CLK_P",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.148"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_HDMI_TX0_N",
+      "label": "HDMI_TX0_N",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.150"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_HDMI_TX0_P",
+      "label": "HDMI_TX0_P",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.151"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_HDMI_TX1_N",
+      "label": "HDMI_TX1_N",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.153"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_HDMI_TX1_P",
+      "label": "HDMI_TX1_P",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.154"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_HDMI_TX2_N",
+      "label": "HDMI_TX2_N",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.156"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_HDMI_TX2_P",
+      "label": "HDMI_TX2_P",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.157"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_HDMI_AUX_N",
+      "label": "HDMI_AUX_N",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.159"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_HDMI_AUX_P",
+      "label": "HDMI_AUX_P",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.160"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_HDMI_DDC_SCL",
+      "label": "HDMI_DDC_SCL",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.162"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_HDMI_DDC_SDA",
+      "label": "HDMI_DDC_SDA",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.163"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_HDMI_HPD",
+      "label": "HDMI_HPD",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.164"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_HDMI_CEC",
+      "label": "HDMI_CEC",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.165"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_HDMI_SDA",
+      "label": "HDMI_SDA",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.167"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_HDMI_SCL",
+      "label": "HDMI_SCL",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.168"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_SPDIF_EXT_CLK",
+      "label": "SPDIF_EXT_CLK",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.169"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_SAI3_MCLK_PWM4",
+      "label": "SAI3_MCLK/PWM4",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.170",
+        "U1.209"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_SAI1_TXFS",
+      "label": "SAI1_TXFS",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.172"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_SAI1_TXC",
+      "label": "SAI1_TXC",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.173",
+        "U1.216"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_SAI1_RXD0",
+      "label": "SAI1_RXD0",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.174"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_SAI1_RXD1",
+      "label": "SAI1_RXD1",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.175"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_SAI1_RXD2",
+      "label": "SAI1_RXD2",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.176"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_SAI1_RXD3",
+      "label": "SAI1_RXD3",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.177"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_SAI1_RXD4",
+      "label": "SAI1_RXD4",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.178"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_SAI1_RXD5",
+      "label": "SAI1_RXD5",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.179"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_SAI1_RXD6",
+      "label": "SAI1_RXD6",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.180"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_SAI1_RXD7",
+      "label": "SAI1_RXD7",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.181"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_SAI1_RXFS",
+      "label": "SAI1_RXFS",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.182"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_SAI1_RXC",
+      "label": "SAI1_RXC",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.183"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_SAI1_TXD0",
+      "label": "SAI1_TXD0",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.184"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_SAI1_TXD1",
+      "label": "SAI1_TXD1",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.185"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_SAI1_TXD2",
+      "label": "SAI1_TXD2",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.186"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_SAI1_TXD3",
+      "label": "SAI1_TXD3",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.187"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_SAI1_TXD4",
+      "label": "SAI1_TXD4",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.188"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_SAI1_TXD5",
+      "label": "SAI1_TXD5",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.189"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_SAI1_TXD6",
+      "label": "SAI1_TXD6",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.190"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_SAI1_TXD7",
+      "label": "SAI1_TXD7",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.191"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_SAI1_MCLK",
+      "label": "SAI1_MCLK",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.192"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_SAI2_MCLK",
+      "label": "SAI2_MCLK",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.193"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_SAI2_RXD",
+      "label": "SAI2_RXD",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.194"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_SAI2_RXFS",
+      "label": "SAI2_RXFS",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.195"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_SAI2_RXC",
+      "label": "SAI2_RXC",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.196",
+        "TP12.1"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_SAI2_TXD",
+      "label": "SAI2_TXD",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.197"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_SAI2_TXFS",
+      "label": "SAI2_TXFS",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.198"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_SAI2_TXC",
+      "label": "SAI2_TXC",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.199"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_SPDIF_RX_PWM2",
+      "label": "SPDIF_RX/PWM2",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.201"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_BACKLIGHT_PWM",
+      "label": "BACKLIGHT_PWM",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.202"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_SAI3_TXC",
+      "label": "SAI3_TXC",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.203"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_SAI3_TXD",
+      "label": "SAI3_TXD",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.204"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_SAI3_TXFS",
+      "label": "SAI3_TXFS",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.205"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_SAI3_RXC",
+      "label": "SAI3_RXC",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.206"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_SAI3_RXD",
+      "label": "SAI3_RXD",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.207"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_SAI3_RXFS",
+      "label": "SAI3_RXFS",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.208"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_IMX_UART2_TX",
+      "label": "IMX_UART2_TX",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.211",
+        "J20.2"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_IMX_UART2_RX",
+      "label": "IMX_UART2_RX",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.212",
+        "J20.3"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_IMX_UART1_TX",
+      "label": "IMX_UART1_TX",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.213",
+        "J18.2"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_IMX_UART1_RX",
+      "label": "IMX_UART1_RX",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.214",
+        "J18.3"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_BOOTCFG_9",
+      "label": "BOOTCFG_9",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.217"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_BOOTCFG_10",
+      "label": "BOOTCFG_10",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.218",
+        "R171.1"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_BOOTCFG_11",
+      "label": "BOOTCFG_11",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.219"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_BOOTCFG_12",
+      "label": "BOOTCFG_12",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.220"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_BOOTCFG_13",
+      "label": "BOOTCFG_13",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.221",
+        "R170.1"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_BOOTCFG_14",
+      "label": "BOOTCFG_14",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.222"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_BOOTCFG_15",
+      "label": "BOOTCFG_15",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.223",
+        "R169.1"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_BOOTCFG_1",
+      "label": "BOOTCFG_1",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.224"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_BOOTCFG_0",
+      "label": "BOOTCFG_0",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.225"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_BOOTCFG_8",
+      "label": "BOOTCFG_8",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.226"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_BOOTCFG_7",
+      "label": "BOOTCFG_7",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.227"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_BOOTCFG_4",
+      "label": "BOOTCFG_4",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.228",
+        "R168.1"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_ECSPI2_SS0",
+      "label": "ECSPI2_SS0",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.229"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_ECSPI2_MOSI",
+      "label": "ECSPI2_MOSI",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.230"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_ECSPI2_MISO",
+      "label": "ECSPI2_MISO",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.231"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_ECSPI2_SCLK",
+      "label": "ECSPI2_SCLK",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.232"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_DSI_CLK_P",
+      "label": "DSI_CLK_P",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.234",
+        "J15.15",
+        "J15.26"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_DSI_CLK_N",
+      "label": "DSI_CLK_N",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.235",
+        "J15.14",
+        "J15.27"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_DSI_D0_P",
+      "label": "DSI_D0_P",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.237",
+        "J15.12",
+        "J15.23"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_DSI_D0_N",
+      "label": "DSI_D0_N",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.238",
+        "J15.11",
+        "J15.24"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_DSI_D1_P",
+      "label": "DSI_D1_P",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.240",
+        "J15.9",
+        "J15.20"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_DSI_D1_N",
+      "label": "DSI_D1_N",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.241",
+        "J15.8",
+        "J15.21"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_DSI_D2_P",
+      "label": "DSI_D2_P",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.243",
+        "J15.6",
+        "J15.17"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_DSI_D2_N",
+      "label": "DSI_D2_N",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.244",
+        "J15.5",
+        "J15.18"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_DSI_D3_P",
+      "label": "DSI_D3_P",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.246",
+        "J15.3"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_DSI_D3_N",
+      "label": "DSI_D3_N",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.247",
+        "J15.2"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_CSI_P2_CK_P",
+      "label": "CSI_P2_CK_P",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.249"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_CSI_P2_CK_N",
+      "label": "CSI_P2_CK_N",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.250"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_CSI_P2_D0_P",
+      "label": "CSI_P2_D0_P",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.252"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_CSI_P2_D0_N",
+      "label": "CSI_P2_D0_N",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.253"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_CSI_P2_D1_P",
+      "label": "CSI_P2_D1_P",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.255"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_CSI_P2_D1_N",
+      "label": "CSI_P2_D1_N",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.256"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_CSI_P2_D2_P",
+      "label": "CSI_P2_D2_P",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.258"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_CSI_P2_D2_N",
+      "label": "CSI_P2_D2_N",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.259"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_CSI_P2_D3_P",
+      "label": "CSI_P2_D3_P",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.261"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_CSI_P2_D3_N",
+      "label": "CSI_P2_D3_N",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.262"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_PCIE_RST_B",
+      "label": "PCIE_RST_B",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.266"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_SD2_CD",
+      "label": "SD2_CD",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.267"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_IMX_PWM4",
+      "label": "IMX_PWM4",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U1.269",
+        "TP1.1"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_SPK_PWR",
+      "label": "SPK_PWR",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "R111.2"
+      ],
+      "page": 1
+    },
+    {
+      "local_id": "net_IMX_RESETn",
+      "label": "EXT_RESET_N",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "R115.2",
+        "SW6.1"
+      ],
+      "page": 1
+    }
+  ],
+  "cross_page_refs": [
+    {
+      "label": "Reform 2 Power",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "reform2-power.kicad_sch",
+      "page": 1
+    },
+    {
+      "label": "Reform 2 PCIe",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "reform2-pcie.kicad_sch",
+      "page": 1
+    },
+    {
+      "label": "Reform 2 Ethernet",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "reform2-eth.kicad_sch",
+      "page": 1
+    },
+    {
+      "label": "Reform 2 USB",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "reform2-usb.kicad_sch",
+      "page": 1
+    },
+    {
+      "label": "Reform 2 SD Card",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "reform2-sd.kicad_sch",
+      "page": 1
+    },
+    {
+      "label": "Reform 2 Display",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "reform2-display.kicad_sch",
+      "page": 1
+    },
+    {
+      "label": "Reform 2 HDMI",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "reform2-hdmi.kicad_sch",
+      "page": 1
+    },
+    {
+      "label": "Reform 2 Audio",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "reform2-audio.kicad_sch",
+      "page": 1
+    },
+    {
+      "label": "PMIC_ON_REQ",
+      "direction": "bidir",
+      "at_pin": null,
+      "target_hint": null,
+      "page": 1
+    },
+    {
+      "label": "EXT_RESET_N",
+      "direction": "bidir",
+      "at_pin": null,
+      "target_hint": null,
+      "page": 1
+    },
+    {
+      "label": "IMX_JTAG_TCK",
+      "direction": "bidir",
+      "at_pin": null,
+      "target_hint": null,
+      "page": 1
+    },
+    {
+      "label": "IMX_JTAG_TDI",
+      "direction": "bidir",
+      "at_pin": null,
+      "target_hint": null,
+      "page": 1
+    },
+    {
+      "label": "IMX_JTAG_TMS",
+      "direction": "bidir",
+      "at_pin": null,
+      "target_hint": null,
+      "page": 1
+    },
+    {
+      "label": "IMX_JTAG_TDO",
+      "direction": "bidir",
+      "at_pin": null,
+      "target_hint": null,
+      "page": 1
+    },
+    {
+      "label": "IMX_FBOOT",
+      "direction": "bidir",
+      "at_pin": null,
+      "target_hint": null,
+      "page": 1
+    },
+    {
+      "label": "LPC_UART2_RX",
+      "direction": "bidir",
+      "at_pin": null,
+      "target_hint": null,
+      "page": 1
+    },
+    {
+      "label": "LPC_UART2_TX",
+      "direction": "bidir",
+      "at_pin": null,
+      "target_hint": null,
+      "page": 1
+    },
+    {
+      "label": "ETH0_LED_LINK2",
+      "direction": "bidir",
+      "at_pin": null,
+      "target_hint": null,
+      "page": 1
+    },
+    {
+      "label": "IMX_RSTn",
+      "direction": "bidir",
+      "at_pin": null,
+      "target_hint": "IMX_JTAG_RSTn net",
+      "page": 1
+    }
+  ],
+  "typed_edges": [
+    {
+      "src": "U1",
+      "dst": "+5V",
+      "kind": "powered_by",
+      "page": 1
+    },
+    {
+      "src": "U1",
+      "dst": "PMIC_ON_REQ",
+      "kind": "produces_signal",
+      "page": 1
+    },
+    {
+      "src": "U1",
+      "dst": "IMX_FBOOT",
+      "kind": "produces_signal",
+      "page": 1
+    },
+    {
+      "src": "U1",
+      "dst": "EXT_RESET_N",
+      "kind": "consumes_signal",
+      "page": 1
+    },
+    {
+      "src": "U1",
+      "dst": "BACKLIGHT_EN",
+      "kind": "produces_signal",
+      "page": 1
+    },
+    {
+      "src": "U1",
+      "dst": "BACKLIGHT_PWM",
+      "kind": "produces_signal",
+      "page": 1
+    },
+    {
+      "src": "SW3",
+      "dst": "IMX_FBOOT",
+      "kind": "produces_signal",
+      "page": 1
+    },
+    {
+      "src": "SW6",
+      "dst": "EXT_RESET_N",
+      "kind": "produces_signal",
+      "page": 1
+    },
+    {
+      "src": "R115",
+      "dst": "EXT_RESET_N",
+      "kind": "filters",
+      "page": 1
+    },
+    {
+      "src": "R113",
+      "dst": "IMX_FBOOT",
+      "kind": "filters",
+      "page": 1
+    },
+    {
+      "src": "U1",
+      "dst": "DSI_CLK_P",
+      "kind": "produces_signal",
+      "page": 1
+    },
+    {
+      "src": "U1",
+      "dst": "DSI_CLK_N",
+      "kind": "produces_signal",
+      "page": 1
+    },
+    {
+      "src": "U1",
+      "dst": "DSI_D0_P",
+      "kind": "produces_signal",
+      "page": 1
+    },
+    {
+      "src": "U1",
+      "dst": "DSI_D0_N",
+      "kind": "produces_signal",
+      "page": 1
+    },
+    {
+      "src": "U1",
+      "dst": "DSI_D1_P",
+      "kind": "produces_signal",
+      "page": 1
+    },
+    {
+      "src": "U1",
+      "dst": "DSI_D1_N",
+      "kind": "produces_signal",
+      "page": 1
+    },
+    {
+      "src": "U1",
+      "dst": "DSI_D2_P",
+      "kind": "produces_signal",
+      "page": 1
+    },
+    {
+      "src": "U1",
+      "dst": "DSI_D2_N",
+      "kind": "produces_signal",
+      "page": 1
+    },
+    {
+      "src": "U1",
+      "dst": "DSI_D3_P",
+      "kind": "produces_signal",
+      "page": 1
+    },
+    {
+      "src": "U1",
+      "dst": "DSI_D3_N",
+      "kind": "produces_signal",
+      "page": 1
+    },
+    {
+      "src": "U1",
+      "dst": "J15",
+      "kind": "produces_signal",
+      "page": 1
+    },
+    {
+      "src": "U1",
+      "dst": "J18",
+      "kind": "produces_signal",
+      "page": 1
+    },
+    {
+      "src": "U1",
+      "dst": "J20",
+      "kind": "produces_signal",
+      "page": 1
+    },
+    {
+      "src": "R168",
+      "dst": "BOOTCFG_4",
+      "kind": "depends_on",
+      "page": 1
+    },
+    {
+      "src": "R169",
+      "dst": "BOOTCFG_15",
+      "kind": "depends_on",
+      "page": 1
+    },
+    {
+      "src": "R170",
+      "dst": "BOOTCFG_13",
+      "kind": "depends_on",
+      "page": 1
+    },
+    {
+      "src": "R171",
+      "dst": "BOOTCFG_10",
+      "kind": "depends_on",
+      "page": 1
+    },
+    {
+      "src": "U1",
+      "dst": "SPK_PWR",
+      "kind": "produces_signal",
+      "page": 1
+    },
+    {
+      "src": "R111",
+      "dst": "SPK_PWR",
+      "kind": "produces_signal",
+      "page": 1
+    }
+  ],
+  "designer_notes": [
+    {
+      "text": "NOSTUFF NOSTUFF NOSTUFF",
+      "page": 1,
+      "attached_to_refdes": "R117",
+      "attached_to_net": null
+    },
+    {
+      "text": "License: CERN-OHL-S 2.0\nEngineer: Lukas F. Hartmann\nhttps://mntre.com\nMNT Research GmbH\nSheet: /\nFile: reform2-motherboard25.kicad_sch\nTitle: MNT Reform 2\nSize: A4  Date: 2023-02-13\nKiCad E.D.A.  kicad 7.0.6+dfsg-1\nRev: 2.5D-2  Id: 1/12",
+      "page": 1,
+      "attached_to_refdes": null,
+      "attached_to_net": null
+    },
+    {
+      "text": "TE 1717254-1 or TE 1473005-1",
+      "page": 1,
+      "attached_to_refdes": "J15",
+      "attached_to_net": null
+    },
+    {
+      "text": "iMXBM internal oscillator output for PCIe1",
+      "page": 1,
+      "attached_to_refdes": null,
+      "attached_to_net": "PCIE1_CLK_P"
+    },
+    {
+      "text": "Refclk input (PAD_CLK) for PCIe2",
+      "page": 1,
+      "attached_to_refdes": null,
+      "attached_to_net": "PCIE2_REFCLK_P"
+    },
+    {
+      "text": "BOOTCFG_4  0: 1-bit  1: 4-bit\nBOOTCFG_15  01: SD\nBOOTCFG_12  10: eMMC\nBOOTCFG_10  0: eSDHC1  1: eSDHC2",
+      "page": 1,
+      "attached_to_refdes": null,
+      "attached_to_net": null
+    },
+    {
+      "text": "User defined switch (XSW)",
+      "page": 1,
+      "attached_to_refdes": "SW3",
+      "attached_to_net": null
+    },
+    {
+      "text": "Boot UART (SER1)",
+      "page": 1,
+      "attached_to_refdes": "J18",
+      "attached_to_net": null
+    },
+    {
+      "text": "AUX UART (SER2)",
+      "page": 1,
+      "attached_to_refdes": "J20",
+      "attached_to_net": null
+    }
+  ],
+  "ambiguities": [
+    {
+      "description": "R117, R118, R119 are marked NOSTUFF/DNP but exact values and net connections for R118 and R119 are partially obscured.",
+      "page": 1,
+      "related_refdes": [
+        "R117",
+        "R118",
+        "R119"
+      ],
+      "related_nets": []
+    },
+    {
+      "description": "The exact net connections for R154 resistor value is not legible in the image.",
+      "page": 1,
+      "related_refdes": [
+        "R154"
+      ],
+      "related_nets": []
+    },
+    {
+      "description": "The J19 JTAG connector visible in the schematic area is not in the grounding refdes set; could not confirm refdes.",
+      "page": 1,
+      "related_refdes": [],
+      "related_nets": [
+        "IMX_JTAG_TCK",
+        "IMX_JTAG_TDI",
+        "IMX_JTAG_TMS",
+        "IMX_JTAG_TDO",
+        "EXT_RESET_N"
+      ]
+    },
+    {
+      "description": "TP8 is labeled T_PMIC_ON_REQ in the grounding nets but visually appears to connect to PMIC_ON_REQ; the exact relationship between T_PMIC_ON_REQ and PMIC_ON_REQ could not be fully resolved.",
+      "page": 1,
+      "related_refdes": [
+        "TP8"
+      ],
+      "related_nets": [
+        "PMIC_ON_REQ",
+        "T_PMIC_ON_REQ"
+      ]
+    },
+    {
+      "description": "Pin assignments for U1 are dense; some pin numbers beyond 230 may have been mis-mapped due to image resolution.",
+      "page": 1,
+      "related_refdes": [
+        "U1"
+      ],
+      "related_nets": []
+    }
+  ]
+}

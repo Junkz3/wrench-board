@@ -1,0 +1,72 @@
+/* =========== MODAL (nouvelle réparation) =========== */
+.modal-backdrop{position:fixed;inset:0;background:rgba(7,16,31,.65);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:24px;z-index:100;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-backdrop.open{opacity:1;pointer-events:auto}
+.modal{width:min(560px,100%);max-height:calc(100vh - 48px);background:linear-gradient(180deg,rgba(20,32,48,.98),rgba(15,26,46,.98));border:1px solid var(--border);border-radius:10px;box-shadow:0 24px 64px rgba(0,0,0,.55),0 0 0 1px rgba(56,189,248,.05);backdrop-filter:blur(14px);display:flex;flex-direction:column;overflow:hidden;transform:translateY(10px) scale(.985);transition:transform .28s cubic-bezier(.2,.8,.2,1)}
+.modal-backdrop.open .modal{transform:translateY(0) scale(1)}
+.modal-head{padding:14px 16px 12px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:8px;position:relative}
+.modal-head .type-row{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:10px;color:var(--text-3);letter-spacing:.4px;text-transform:uppercase}
+.modal-head h2{margin:0;font-size:18px;font-weight:600;letter-spacing:-.2px}
+.modal-body{padding:16px;display:flex;flex-direction:column;gap:14px;overflow:auto}
+.modal-field{display:flex;flex-direction:column;gap:5px}
+.modal-label{font-family:var(--mono);font-size:10px;color:var(--text-3);font-weight:500;letter-spacing:.5px;text-transform:uppercase}
+.modal-input,.modal-textarea{background:var(--bg-deep);border:1px solid var(--border);color:var(--text);padding:9px 11px;border-radius:6px;font-family:inherit;font-size:13px;outline:none;transition:border-color .15s,box-shadow .15s}
+.modal-input{font-family:var(--mono);font-size:12.5px}
+.modal-textarea{resize:vertical;min-height:92px;line-height:1.5}
+.modal-input:focus,.modal-textarea:focus{border-color:oklch(0.65 0.14 210);box-shadow:0 0 0 3px rgba(56,189,248,.12)}
+.modal-input:disabled,.modal-textarea:disabled{opacity:.5;cursor:not-allowed}
+.modal-input::placeholder,.modal-textarea::placeholder{color:var(--text-3)}
+.modal-hint{font-family:var(--mono);font-size:10.5px;color:var(--text-3);line-height:1.45}
+.modal-error{padding:10px 12px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.35);border-radius:6px;color:var(--amber);font-size:12px;line-height:1.5;font-family:var(--mono)}
+.modal-error strong{color:var(--amber);font-weight:600;margin-right:6px}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;padding-top:4px}
+.modal-actions .btn{flex:0 0 auto;padding:8px 14px;min-width:96px}
+.modal-submit[aria-busy="true"]{cursor:progress}
+.modal-spinner{display:inline-block;width:12px;height:12px;border:1.8px solid currentColor;border-top-color:transparent;border-radius:50%;animation:modal-spin .7s linear infinite;vertical-align:-1px}
+@keyframes modal-spin{to{transform:rotate(360deg)}}
+
+/* ---------- Device combobox (autocomplete grouped by brand) ---------- */
+.combo{position:relative}
+.combo-panel{position:absolute;top:calc(100% + 4px);left:0;right:0;max-height:320px;overflow-y:auto;background:rgba(15,22,36,.96);border:1px solid var(--border);border-radius:6px;box-shadow:0 12px 32px rgba(0,0,0,.45);backdrop-filter:blur(10px);z-index:10;display:flex;flex-direction:column;padding:4px 0}
+.combo-panel[hidden]{display:none}
+.combo-section{display:flex;flex-direction:column}
+.combo-section-head{display:flex;align-items:baseline;gap:8px;padding:8px 12px 4px;font-family:var(--mono);font-size:10px;color:var(--text-3);letter-spacing:.4px;text-transform:uppercase;border-top:1px solid var(--border-soft)}
+.combo-section:first-child .combo-section-head{border-top:none}
+.combo-section-count{font-size:9.5px;color:var(--text-3);opacity:.75}
+.combo-option{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 12px;cursor:pointer;color:var(--text-2);transition:background .12s,color .12s;font-size:12.5px;border:none;background:transparent;text-align:left;font-family:inherit;width:100%}
+.combo-option:hover,.combo-option.active{background:var(--panel-2);color:var(--text)}
+.combo-option .combo-label{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.combo-option .combo-label mark{background:rgba(56,189,248,.25);color:inherit;border-radius:2px;padding:0 1px}
+.combo-option .combo-meta{display:flex;gap:4px;flex-shrink:0;font-family:var(--mono);font-size:9.5px;color:var(--text-3);letter-spacing:.3px;text-transform:uppercase}
+.combo-option .combo-badge{padding:1px 6px;border:1px solid var(--border-soft);border-radius:10px;color:var(--text-3)}
+.combo-option .combo-badge.ok{color:var(--emerald);border-color:rgba(52,211,153,.3);background:rgba(52,211,153,.08)}
+.combo-create{border-top:1px solid var(--border-soft);color:var(--cyan);font-family:var(--mono);font-size:11px;letter-spacing:.3px;text-transform:uppercase}
+.combo-create .combo-label{color:var(--cyan)}
+.combo-create:first-child{border-top:none}
+.combo-empty{padding:12px;font-family:var(--mono);font-size:10.5px;color:var(--text-3);text-align:center}
+
+/* Readiness badges: dim by default, lit (.ok adds emerald above) when ready. */
+.combo-badge{opacity:.55}
+.combo-badge.ok{opacity:1}
+/* Device-kind chip rendered in mono (matches the workshop-label treatment). */
+.combo-badge.mono{font-family:var(--mono);text-transform:uppercase;letter-spacing:.4px}
+
+/* New-repair schematic field — "already ingested" collapses the upload prompt. */
+#newRepairSchematicField.is-ingested #newRepairSchematicPick{display:none}
+#newRepairSchematicField.is-ingested #newRepairSchematicName{color:var(--emerald)}
+
+.modal-rebuild{display:flex;align-items:center;gap:8px;padding:8px 10px;margin-top:4px;background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.25);border-radius:5px;font-size:11.5px;color:var(--text-2);cursor:pointer}
+.modal-rebuild[hidden]{display:none}
+.modal-rebuild input[type="checkbox"]{margin:0;accent-color:var(--amber)}
+
+/* ---------- Protocol confirmation modal ---------- */
+/* Pattern 4 round-trip on bv_propose_protocol — the tech accepts or
+   refuses the agent's proposal in this modal. Same chrome as the
+   other modals; the steps list is the only bespoke piece. */
+.protocol-confirm-modal #protocolConfirmStepCount{font-family:var(--mono);font-size:10px;color:var(--violet);letter-spacing:.4px;text-transform:uppercase}
+.protocol-confirm-rationale{margin:0;font-size:13px;line-height:1.5;color:var(--text-2)}
+.protocol-confirm-steps{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px;max-height:240px;overflow-y:auto;background:var(--bg-deep);border:1px solid var(--border);border-radius:6px;padding:10px}
+.protocol-confirm-steps li{display:flex;gap:10px;align-items:flex-start;font-size:12px;line-height:1.4;color:var(--text-2)}
+.protocol-confirm-steps .step-num{flex:0 0 22px;font-family:var(--mono);font-size:10.5px;color:var(--text-3);padding-top:1px}
+.protocol-confirm-steps .step-target{font-family:var(--mono);font-size:10.5px;color:var(--cyan);background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.25);padding:1px 6px;border-radius:3px;margin-right:6px;display:inline-block}
+.protocol-confirm-steps .step-type{font-family:var(--mono);font-size:9.5px;color:var(--text-3);text-transform:uppercase;letter-spacing:.3px;margin-right:6px}
+.protocol-confirm-steps .step-instr{flex:1;min-width:0}

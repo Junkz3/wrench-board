@@ -1,0 +1,3 @@
+/* =========== STUB SECTIONS =========== */
+.stub{position:fixed;top:92px;left:52px;right:0;bottom:28px;display:flex;align-items:center;justify-content:center;z-index:2;padding:40px}
+.stub.hidden{display:none}

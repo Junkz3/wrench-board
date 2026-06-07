@@ -1,0 +1,77 @@
+{
+  "title": "Technician profile",
+  "head": {
+    "tag": "technician",
+    "no_name": "Unnamed",
+    "no_specialty": "No specialty",
+    "edit_identity": "Edit identity",
+    "years_one": "{n} yr XP",
+    "years_other": "{n} yrs XP",
+    "years_zero": "0 yr",
+    "updated": "Updated {date}"
+  },
+  "ribbon": {
+    "tag": "progression",
+    "title": "Level {level}",
+    "default_blurb": "Level is derived from the number of practiced skills.",
+    "blurbs": {
+      "beginner": "You're just starting out. The agent will explain every step before asking you to act.",
+      "intermediate": "You're progressing. The agent will lighten its explanations and let you lead more.",
+      "confirmed": "You're confirmed. The agent hands you decisions and confirms your hypotheses.",
+      "expert": "You're an expert. The agent stays concise and follows you on complex faults."
+    },
+    "rungs": {
+      "beginner": "Beginner",
+      "intermediate": "Intermediate",
+      "confirmed": "Confirmed",
+      "expert": "Expert"
+    }
+  },
+  "stats": {
+    "tag_mastered": "mastered",
+    "tag_practiced": "practiced",
+    "tag_learning": "learning",
+    "tag_tools": "tooling",
+    "sub_skills": "of {total} cataloged skills",
+    "sub_tools": "of {total} catalog tools",
+    "block_skills_total": "{n} skills",
+    "block_tools_total": "{on} / {total} active"
+  },
+  "blocks": {
+    "skills_tag": "skills",
+    "skills_heading": "Operational profile",
+    "tools_tag": "tooling",
+    "tools_heading": "Declared workshop",
+    "prefs_tag": "diag preferences",
+    "prefs_heading": "Agent posture"
+  },
+  "status": {
+    "mastered": "Mastered",
+    "practiced": "Practiced",
+    "learning": "Learning",
+    "unlearned": "Unpracticed"
+  },
+  "drawer": {
+    "close": "Close",
+    "no_history": "No history for this skill yet — it will be tracked as soon as the agent detects a confirmed use."
+  },
+  "prefs": {
+    "verbosity": "Verbosity",
+    "language": "Language"
+  },
+  "modal": {
+    "kicker": "Technician profile",
+    "title": "Edit your identity",
+    "close": "Close",
+    "field_name": "Name",
+    "field_avatar": "Avatar (2 letters or emoji)",
+    "field_years": "Years of experience",
+    "field_specialties": "Specialties (comma-separated)",
+    "specialties_placeholder": "apple, consoles, laptops",
+    "field_level": "Force level (optional)",
+    "level_auto": "(auto-derived)",
+    "cancel": "Cancel",
+    "save": "Save",
+    "save_failed": "Could not save: {error}"
+  }
+}

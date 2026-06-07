@@ -1,0 +1,3305 @@
+[
+  {
+    "id": "mnt-reform-motherboard-BT1-dead-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "BT1"
+    ],
+    "ground_truth_modes": [
+      "dead"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "BT1": "dead"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-BT1-dead-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "BT1"
+    ],
+    "ground_truth_modes": [
+      "dead"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "BT1": "dead",
+        "C68": "alive"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-BT1-hot-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "BT1"
+    ],
+    "ground_truth_modes": [
+      "hot"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "BT1": "hot"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-BT1-hot-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "BT1"
+    ],
+    "ground_truth_modes": [
+      "hot"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "BT1": "hot",
+        "C113": "alive"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-C103-open-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "C103"
+    ],
+    "ground_truth_modes": [
+      "open"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "U10": "anomalous"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-C103-open-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "C103"
+    ],
+    "ground_truth_modes": [
+      "open"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "U10": "anomalous",
+        "Q5": "alive"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-C103-short-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "C103"
+    ],
+    "ground_truth_modes": [
+      "short"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {},
+      "state_rails": {
+        "VCC": "shorted"
+      }
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-C103-short-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "C103"
+    ],
+    "ground_truth_modes": [
+      "short"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "R42": "alive"
+      },
+      "state_rails": {
+        "VCC": "shorted"
+      }
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-C104-open-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "C104"
+    ],
+    "ground_truth_modes": [
+      "open"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "U10": "anomalous"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-C104-open-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "C104"
+    ],
+    "ground_truth_modes": [
+      "open"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "U10": "anomalous",
+        "C63": "alive"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-C104-short-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "C104"
+    ],
+    "ground_truth_modes": [
+      "short"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "U10": "dead"
+      },
+      "state_rails": {
+        "VCC": "shorted"
+      }
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-C104-short-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "C104"
+    ],
+    "ground_truth_modes": [
+      "short"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "U10": "dead",
+        "R112": "alive"
+      },
+      "state_rails": {
+        "VCC": "shorted"
+      }
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-C11-short-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "C11"
+    ],
+    "ground_truth_modes": [
+      "short"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {},
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-C11-short-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "C11"
+    ],
+    "ground_truth_modes": [
+      "short"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "C120": "alive"
+      },
+      "state_rails": {
+        "VOUT": "shorted"
+      }
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-C111-open-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "C111"
+    ],
+    "ground_truth_modes": [
+      "open"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "U10": "anomalous"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-C111-open-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "C111"
+    ],
+    "ground_truth_modes": [
+      "open"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "U10": "anomalous",
+        "X2": "alive"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-C111-short-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "C111"
+    ],
+    "ground_truth_modes": [
+      "short"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "U10": "dead"
+      },
+      "state_rails": {
+        "VCC": "shorted"
+      }
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-C111-short-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "C111"
+    ],
+    "ground_truth_modes": [
+      "short"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "U10": "dead",
+        "R21": "alive"
+      },
+      "state_rails": {
+        "VCC": "shorted"
+      }
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-C113-open-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "C113"
+    ],
+    "ground_truth_modes": [
+      "open"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "U10": "anomalous"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-C113-open-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "C113"
+    ],
+    "ground_truth_modes": [
+      "open"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "U10": "anomalous",
+        "C34": "alive"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-C113-short-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "C113"
+    ],
+    "ground_truth_modes": [
+      "short"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "U10": "dead"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-C113-short-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "C113"
+    ],
+    "ground_truth_modes": [
+      "short"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "SW3": "alive"
+      },
+      "state_rails": {
+        "VCC": "shorted"
+      }
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-C116-open-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "C116"
+    ],
+    "ground_truth_modes": [
+      "open"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "U10": "anomalous"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-C116-open-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "C116"
+    ],
+    "ground_truth_modes": [
+      "open"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "U10": "anomalous",
+        "C61": "alive"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-C116-short-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "C116"
+    ],
+    "ground_truth_modes": [
+      "short"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "U10": "dead"
+      },
+      "state_rails": {
+        "VCC": "shorted"
+      }
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-C116-short-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "C116"
+    ],
+    "ground_truth_modes": [
+      "short"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "R71": "alive"
+      },
+      "state_rails": {
+        "VCC": "shorted"
+      }
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-C118-open-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "C118"
+    ],
+    "ground_truth_modes": [
+      "open"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "U10": "anomalous"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-C118-open-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "C118"
+    ],
+    "ground_truth_modes": [
+      "open"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "U10": "anomalous",
+        "C65": "alive"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-C118-short-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "C118"
+    ],
+    "ground_truth_modes": [
+      "short"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "U10": "dead"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-C118-short-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "C118"
+    ],
+    "ground_truth_modes": [
+      "short"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "R97": "alive"
+      },
+      "state_rails": {
+        "VCC": "shorted"
+      }
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-C119-open-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "C119"
+    ],
+    "ground_truth_modes": [
+      "open"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "U11": "anomalous"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-C119-open-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "C119"
+    ],
+    "ground_truth_modes": [
+      "open"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "U11": "anomalous",
+        "R150": "alive"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-C119-short-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "C119"
+    ],
+    "ground_truth_modes": [
+      "short"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "U19": "dead"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-C119-short-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "C119"
+    ],
+    "ground_truth_modes": [
+      "short"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "J20": "alive"
+      },
+      "state_rails": {
+        "+1V5": "shorted"
+      }
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-C12-short-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "C12"
+    ],
+    "ground_truth_modes": [
+      "short"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {},
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-C12-short-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "C12"
+    ],
+    "ground_truth_modes": [
+      "short"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "U27": "alive"
+      },
+      "state_rails": {
+        "VOUT": "shorted"
+      }
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-C120-open-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "C120"
+    ],
+    "ground_truth_modes": [
+      "open"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "U11": "anomalous"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-C120-open-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "C120"
+    ],
+    "ground_truth_modes": [
+      "open"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "U11": "anomalous",
+        "R113": "alive"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-C120-short-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "C120"
+    ],
+    "ground_truth_modes": [
+      "short"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {},
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-C120-short-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "C120"
+    ],
+    "ground_truth_modes": [
+      "short"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "C78": "alive"
+      },
+      "state_rails": {
+        "+1V5": "shorted"
+      }
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-C122-short-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "C122"
+    ],
+    "ground_truth_modes": [
+      "short"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "U2": "dead"
+      },
+      "state_rails": {
+        "VOUT": "shorted"
+      }
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-C122-short-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "C122"
+    ],
+    "ground_truth_modes": [
+      "short"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "U2": "dead",
+        "C90": "alive"
+      },
+      "state_rails": {
+        "VOUT": "shorted"
+      }
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-C123-open-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "C123"
+    ],
+    "ground_truth_modes": [
+      "open"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "U11": "anomalous"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-C123-open-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "C123"
+    ],
+    "ground_truth_modes": [
+      "open"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "U11": "anomalous",
+        "H22": "alive"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-C123-short-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "C123"
+    ],
+    "ground_truth_modes": [
+      "short"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "U11": "dead",
+        "U19": "dead"
+      },
+      "state_rails": {
+        "+1V5": "shorted"
+      }
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-C123-short-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "C123"
+    ],
+    "ground_truth_modes": [
+      "short"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "C107": "alive"
+      },
+      "state_rails": {
+        "+1V5": "shorted"
+      }
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-C124-open-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "C124"
+    ],
+    "ground_truth_modes": [
+      "open"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "U11": "anomalous"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-C124-open-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "C124"
+    ],
+    "ground_truth_modes": [
+      "open"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "U11": "anomalous",
+        "R46": "alive"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-C124-short-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "C124"
+    ],
+    "ground_truth_modes": [
+      "short"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {},
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-C124-short-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "C124"
+    ],
+    "ground_truth_modes": [
+      "short"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "R39": "alive"
+      },
+      "state_rails": {
+        "PCIE1_PWR": "shorted"
+      }
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-C125-short-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "C125"
+    ],
+    "ground_truth_modes": [
+      "short"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "U2": "dead"
+      },
+      "state_rails": {
+        "VOUT": "shorted"
+      }
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-C125-short-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "C125"
+    ],
+    "ground_truth_modes": [
+      "short"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "C153": "alive"
+      },
+      "state_rails": {
+        "VOUT": "shorted"
+      }
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-C126-open-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "C126"
+    ],
+    "ground_truth_modes": [
+      "open"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "U11": "anomalous"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-C126-open-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "C126"
+    ],
+    "ground_truth_modes": [
+      "open"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "U11": "anomalous",
+        "L2": "alive"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-C126-short-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "C126"
+    ],
+    "ground_truth_modes": [
+      "short"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "U11": "dead"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-C126-short-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "C126"
+    ],
+    "ground_truth_modes": [
+      "short"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "U11": "dead",
+        "C9": "alive"
+      },
+      "state_rails": {
+        "PCIE1_PWR": "shorted"
+      }
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-C129-open-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "C129"
+    ],
+    "ground_truth_modes": [
+      "open"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "U1": "anomalous"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-C129-open-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "C129"
+    ],
+    "ground_truth_modes": [
+      "open"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "U1": "anomalous",
+        "J11": "alive"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-C131-open-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "C131"
+    ],
+    "ground_truth_modes": [
+      "open"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "J24": "anomalous"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-C131-open-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "C131"
+    ],
+    "ground_truth_modes": [
+      "open"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "J24": "anomalous",
+        "Y4": "alive"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-C133-open-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "C133"
+    ],
+    "ground_truth_modes": [
+      "open"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "J24": "anomalous"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-C133-open-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "C133"
+    ],
+    "ground_truth_modes": [
+      "open"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "J24": "anomalous",
+        "R189": "alive"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-C139-open-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "C139"
+    ],
+    "ground_truth_modes": [
+      "open"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "U3": "anomalous"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-C139-open-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "C139"
+    ],
+    "ground_truth_modes": [
+      "open"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "U3": "anomalous",
+        "H3": "alive"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-D0-dead-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "D0"
+    ],
+    "ground_truth_modes": [
+      "dead"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "D0": "dead"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-D0-dead-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "D0"
+    ],
+    "ground_truth_modes": [
+      "dead"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "D0": "dead",
+        "C126": "alive"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-D0-hot-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "D0"
+    ],
+    "ground_truth_modes": [
+      "hot"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "D0": "hot"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-D0-hot-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "D0"
+    ],
+    "ground_truth_modes": [
+      "hot"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "D0": "hot",
+        "C87": "alive"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-D11-dead-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "D11"
+    ],
+    "ground_truth_modes": [
+      "dead"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "D11": "dead"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-D11-dead-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "D11"
+    ],
+    "ground_truth_modes": [
+      "dead"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "D11": "dead",
+        "C3": "alive"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-D11-hot-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "D11"
+    ],
+    "ground_truth_modes": [
+      "hot"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "D11": "hot"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-D11-hot-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "D11"
+    ],
+    "ground_truth_modes": [
+      "hot"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "D11": "hot",
+        "R139": "alive"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-D11-anomalous-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "D11"
+    ],
+    "ground_truth_modes": [
+      "anomalous"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "D11": "anomalous"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-D11-anomalous-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "D11"
+    ],
+    "ground_truth_modes": [
+      "anomalous"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "D11": "anomalous",
+        "R142": "alive"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-D11-shorted-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "D11"
+    ],
+    "ground_truth_modes": [
+      "shorted"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "U27": "dead"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-D11-shorted-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "D11"
+    ],
+    "ground_truth_modes": [
+      "shorted"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "R170": "alive"
+      },
+      "state_rails": {
+        "+3V3": "shorted"
+      }
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-D12-dead-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "D12"
+    ],
+    "ground_truth_modes": [
+      "dead"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "D12": "dead"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-D12-dead-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "D12"
+    ],
+    "ground_truth_modes": [
+      "dead"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "D12": "dead",
+        "R130": "alive"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-D12-hot-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "D12"
+    ],
+    "ground_truth_modes": [
+      "hot"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "D12": "hot"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-D12-hot-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "D12"
+    ],
+    "ground_truth_modes": [
+      "hot"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "D12": "hot",
+        "R193": "alive"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-D12-anomalous-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "D12"
+    ],
+    "ground_truth_modes": [
+      "anomalous"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "D12": "anomalous"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-D12-anomalous-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "D12"
+    ],
+    "ground_truth_modes": [
+      "anomalous"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "D12": "anomalous",
+        "C74": "alive"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-D12-shorted-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "D12"
+    ],
+    "ground_truth_modes": [
+      "shorted"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "U1": "dead"
+      },
+      "state_rails": {
+        "+5V": "shorted"
+      }
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-D12-shorted-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "D12"
+    ],
+    "ground_truth_modes": [
+      "shorted"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "U13": "dead",
+        "R176": "alive"
+      },
+      "state_rails": {
+        "+5V": "shorted"
+      }
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-D22-dead-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "D22"
+    ],
+    "ground_truth_modes": [
+      "dead"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "D22": "dead"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-D22-dead-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "D22"
+    ],
+    "ground_truth_modes": [
+      "dead"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "D22": "dead",
+        "C168": "alive"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-D22-hot-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "D22"
+    ],
+    "ground_truth_modes": [
+      "hot"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "D22": "hot"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-D22-hot-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "D22"
+    ],
+    "ground_truth_modes": [
+      "hot"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "D22": "hot",
+        "CC2244": "alive"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-D23-dead-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "D23"
+    ],
+    "ground_truth_modes": [
+      "dead"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "D23": "dead"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-D23-dead-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "D23"
+    ],
+    "ground_truth_modes": [
+      "dead"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "D23": "dead",
+        "R199": "alive"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-D23-hot-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "D23"
+    ],
+    "ground_truth_modes": [
+      "hot"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "D23": "hot"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-D23-hot-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "D23"
+    ],
+    "ground_truth_modes": [
+      "hot"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "D23": "hot",
+        "C159": "alive"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-F1-dead-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "F1"
+    ],
+    "ground_truth_modes": [
+      "dead"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {},
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-F1-dead-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "F1"
+    ],
+    "ground_truth_modes": [
+      "dead"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "C60": "alive"
+      },
+      "state_rails": {
+        "VIN": "dead"
+      }
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-F1-hot-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "F1"
+    ],
+    "ground_truth_modes": [
+      "hot"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "F1": "hot"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-F1-hot-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "F1"
+    ],
+    "ground_truth_modes": [
+      "hot"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "F1": "hot",
+        "C148": "alive"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-F2-dead-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "F2"
+    ],
+    "ground_truth_modes": [
+      "dead"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "F2": "dead"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-F2-dead-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "F2"
+    ],
+    "ground_truth_modes": [
+      "dead"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "F2": "dead",
+        "D3": "alive"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-F2-hot-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "F2"
+    ],
+    "ground_truth_modes": [
+      "hot"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "F2": "hot"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-F2-hot-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "F2"
+    ],
+    "ground_truth_modes": [
+      "hot"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "F2": "hot",
+        "R120": "alive"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-F3-dead-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "F3"
+    ],
+    "ground_truth_modes": [
+      "dead"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "F3": "dead"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-F3-dead-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "F3"
+    ],
+    "ground_truth_modes": [
+      "dead"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "F3": "dead",
+        "R39": "alive"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-F3-hot-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "F3"
+    ],
+    "ground_truth_modes": [
+      "hot"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "F3": "hot"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-F3-hot-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "F3"
+    ],
+    "ground_truth_modes": [
+      "hot"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "F3": "hot",
+        "J16": "alive"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-F3-anomalous-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "F3"
+    ],
+    "ground_truth_modes": [
+      "anomalous"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "F3": "anomalous"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-F3-anomalous-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "F3"
+    ],
+    "ground_truth_modes": [
+      "anomalous"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "F3": "anomalous",
+        "RR114466": "alive"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-H1-dead-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "H1"
+    ],
+    "ground_truth_modes": [
+      "dead"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "H1": "dead"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-H1-dead-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "H1"
+    ],
+    "ground_truth_modes": [
+      "dead"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "H1": "dead",
+        "R199": "alive"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-H1-hot-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "H1"
+    ],
+    "ground_truth_modes": [
+      "hot"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "H1": "hot"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-H1-hot-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "H1"
+    ],
+    "ground_truth_modes": [
+      "hot"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "H1": "hot",
+        "C73": "alive"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-H10-dead-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "H10"
+    ],
+    "ground_truth_modes": [
+      "dead"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "H10": "dead"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-H10-dead-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "H10"
+    ],
+    "ground_truth_modes": [
+      "dead"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "H10": "dead",
+        "C45": "alive"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-H10-hot-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "H10"
+    ],
+    "ground_truth_modes": [
+      "hot"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "H10": "hot"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-H10-hot-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "H10"
+    ],
+    "ground_truth_modes": [
+      "hot"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "H10": "hot",
+        "C31": "alive"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-H11-dead-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "H11"
+    ],
+    "ground_truth_modes": [
+      "dead"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "H11": "dead"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-H11-dead-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "H11"
+    ],
+    "ground_truth_modes": [
+      "dead"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "H11": "dead",
+        "C66": "alive"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-H11-hot-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "H11"
+    ],
+    "ground_truth_modes": [
+      "hot"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "H11": "hot"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-H11-hot-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "H11"
+    ],
+    "ground_truth_modes": [
+      "hot"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "H11": "hot",
+        "U12": "alive"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-H12-dead-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "H12"
+    ],
+    "ground_truth_modes": [
+      "dead"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "H12": "dead"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-H12-dead-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "H12"
+    ],
+    "ground_truth_modes": [
+      "dead"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "H12": "dead",
+        "H24": "alive"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-H12-hot-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "H12"
+    ],
+    "ground_truth_modes": [
+      "hot"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "H12": "hot"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-H12-hot-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "H12"
+    ],
+    "ground_truth_modes": [
+      "hot"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "H12": "hot",
+        "FB11": "alive"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-H13-dead-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "H13"
+    ],
+    "ground_truth_modes": [
+      "dead"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "H13": "dead"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-H13-dead-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "H13"
+    ],
+    "ground_truth_modes": [
+      "dead"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "H13": "dead",
+        "C85": "alive"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-H13-hot-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "H13"
+    ],
+    "ground_truth_modes": [
+      "hot"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "H13": "hot"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-H13-hot-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "H13"
+    ],
+    "ground_truth_modes": [
+      "hot"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "H13": "hot",
+        "R151": "alive"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-H14-dead-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "H14"
+    ],
+    "ground_truth_modes": [
+      "dead"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "H14": "dead"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-H14-dead-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "H14"
+    ],
+    "ground_truth_modes": [
+      "dead"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "H14": "dead",
+        "R16": "alive"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-H14-hot-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "H14"
+    ],
+    "ground_truth_modes": [
+      "hot"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "H14": "hot"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-H14-hot-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "H14"
+    ],
+    "ground_truth_modes": [
+      "hot"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "H14": "hot",
+        "C118": "alive"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-J1-shorted-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "J1"
+    ],
+    "ground_truth_modes": [
+      "shorted"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {},
+      "state_rails": {
+        "24V_IN": "shorted"
+      }
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-J1-shorted-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "J1"
+    ],
+    "ground_truth_modes": [
+      "shorted"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "J15": "alive"
+      },
+      "state_rails": {
+        "24V_IN": "shorted"
+      }
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-J10-anomalous-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "J10"
+    ],
+    "ground_truth_modes": [
+      "anomalous"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "J10": "anomalous"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-J10-anomalous-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "J10"
+    ],
+    "ground_truth_modes": [
+      "anomalous"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "J10": "anomalous",
+        "R55": "alive"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-J10-shorted-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "J10"
+    ],
+    "ground_truth_modes": [
+      "shorted"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {},
+      "state_rails": {
+        "PCIE1_PWR": "shorted"
+      }
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-J10-shorted-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "J10"
+    ],
+    "ground_truth_modes": [
+      "shorted"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "J22": "alive"
+      },
+      "state_rails": {
+        "PCIE1_PWR": "shorted"
+      }
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-J17-shorted-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "J17"
+    ],
+    "ground_truth_modes": [
+      "shorted"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {},
+      "state_rails": {
+        "VBUS": "shorted"
+      }
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-J17-shorted-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "J17"
+    ],
+    "ground_truth_modes": [
+      "shorted"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "R118": "alive"
+      },
+      "state_rails": {
+        "VBUS": "shorted"
+      }
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-J24-anomalous-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "J24"
+    ],
+    "ground_truth_modes": [
+      "anomalous"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "J24": "anomalous"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-J24-anomalous-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "J24"
+    ],
+    "ground_truth_modes": [
+      "anomalous"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "J24": "anomalous",
+        "J15": "alive"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-J24-shorted-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "J24"
+    ],
+    "ground_truth_modes": [
+      "shorted"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "J24": "dead"
+      },
+      "state_rails": {
+        "EDP_LCD_VCC": "shorted"
+      }
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-J24-shorted-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "J24"
+    ],
+    "ground_truth_modes": [
+      "shorted"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "J24": "dead",
+        "R103": "alive"
+      },
+      "state_rails": {
+        "EDP_LCD_VCC": "shorted"
+      }
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-J4-shorted-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "J4"
+    ],
+    "ground_truth_modes": [
+      "shorted"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {},
+      "state_rails": {
+        "5V_SUPPLY": "shorted"
+      }
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-J4-shorted-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "J4"
+    ],
+    "ground_truth_modes": [
+      "shorted"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "C68": "alive"
+      },
+      "state_rails": {
+        "5V_SUPPLY": "shorted"
+      }
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-J5-shorted-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "J5"
+    ],
+    "ground_truth_modes": [
+      "shorted"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {},
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-J5-shorted-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "J5"
+    ],
+    "ground_truth_modes": [
+      "shorted"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "C119": "alive"
+      },
+      "state_rails": {
+        "VBUS": "shorted"
+      }
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-J6-shorted-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "J6"
+    ],
+    "ground_truth_modes": [
+      "shorted"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {},
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-J6-shorted-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "J6"
+    ],
+    "ground_truth_modes": [
+      "shorted"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "J7": "alive"
+      },
+      "state_rails": {
+        "VBUS": "shorted"
+      }
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-J8-shorted-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "J8"
+    ],
+    "ground_truth_modes": [
+      "shorted"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {},
+      "state_rails": {
+        "VBUS": "shorted"
+      }
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-J8-shorted-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "J8"
+    ],
+    "ground_truth_modes": [
+      "shorted"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "H22": "alive"
+      },
+      "state_rails": {
+        "VBUS": "shorted"
+      }
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-PP11-anomalous-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "PP11"
+    ],
+    "ground_truth_modes": [
+      "anomalous"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "PP11": "anomalous"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-PP11-anomalous-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "PP11"
+    ],
+    "ground_truth_modes": [
+      "anomalous"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "PP11": "anomalous",
+        "R90": "alive"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-Q1-stuck_off-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "Q1"
+    ],
+    "ground_truth_modes": [
+      "stuck_off"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "U2": "dead"
+      },
+      "state_rails": {
+        "VOUT": "dead"
+      }
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-Q1-stuck_off-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "Q1"
+    ],
+    "ground_truth_modes": [
+      "stuck_off"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "R22": "alive"
+      },
+      "state_rails": {
+        "VOUT": "dead"
+      }
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-Q2-stuck_off-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "Q2"
+    ],
+    "ground_truth_modes": [
+      "stuck_off"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "U2": "dead"
+      },
+      "state_rails": {
+        "VOUT": "dead"
+      }
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-Q2-stuck_off-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "Q2"
+    ],
+    "ground_truth_modes": [
+      "stuck_off"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "U27": "alive"
+      },
+      "state_rails": {
+        "VOUT": "dead"
+      }
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-Q3-stuck_off-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "Q3"
+    ],
+    "ground_truth_modes": [
+      "stuck_off"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "F1": "dead"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-Q3-stuck_off-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "Q3"
+    ],
+    "ground_truth_modes": [
+      "stuck_off"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "C75": "alive"
+      },
+      "state_rails": {
+        "VIN": "dead"
+      }
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-SW3-anomalous-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "SW3"
+    ],
+    "ground_truth_modes": [
+      "anomalous"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "SW3": "anomalous"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-SW3-anomalous-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "SW3"
+    ],
+    "ground_truth_modes": [
+      "anomalous"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "SW3": "anomalous",
+        "C170": "alive"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-SW6-anomalous-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "SW6"
+    ],
+    "ground_truth_modes": [
+      "anomalous"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "SW6": "anomalous"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-SW6-anomalous-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "SW6"
+    ],
+    "ground_truth_modes": [
+      "anomalous"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "SW6": "anomalous",
+        "U1": "anomalous",
+        "C128": "alive"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-U1-anomalous-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "U1"
+    ],
+    "ground_truth_modes": [
+      "anomalous"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "U1": "anomalous"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-U1-anomalous-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "U1"
+    ],
+    "ground_truth_modes": [
+      "anomalous"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "U1": "anomalous",
+        "H8": "alive"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-U1-shorted-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "U1"
+    ],
+    "ground_truth_modes": [
+      "shorted"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {},
+      "state_rails": {
+        "+5V": "shorted"
+      }
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-U1-shorted-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "U1"
+    ],
+    "ground_truth_modes": [
+      "shorted"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "D12": "dead",
+        "D18": "alive"
+      },
+      "state_rails": {
+        "+5V": "shorted"
+      }
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-U10-anomalous-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "U10"
+    ],
+    "ground_truth_modes": [
+      "anomalous"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "U10": "anomalous"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-U10-anomalous-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "U10"
+    ],
+    "ground_truth_modes": [
+      "anomalous"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "U10": "anomalous",
+        "C65": "alive"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-U10-shorted-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "U10"
+    ],
+    "ground_truth_modes": [
+      "shorted"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "U10": "dead"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-U10-shorted-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "U10"
+    ],
+    "ground_truth_modes": [
+      "shorted"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "U10": "dead",
+        "C166": "alive"
+      },
+      "state_rails": {
+        "VCC": "shorted"
+      }
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-U11-anomalous-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "U11"
+    ],
+    "ground_truth_modes": [
+      "anomalous"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "U11": "anomalous"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-U11-anomalous-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "U11"
+    ],
+    "ground_truth_modes": [
+      "anomalous"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "U11": "anomalous",
+        "R180": "alive"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-U11-shorted-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "U11"
+    ],
+    "ground_truth_modes": [
+      "shorted"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "U11": "dead"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-U11-shorted-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "U11"
+    ],
+    "ground_truth_modes": [
+      "shorted"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "J9": "alive"
+      },
+      "state_rails": {
+        "+1V5": "shorted"
+      }
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-U12-shorted-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "U12"
+    ],
+    "ground_truth_modes": [
+      "shorted"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {},
+      "state_rails": {
+        "+3V3": "shorted"
+      }
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-U12-shorted-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "U12"
+    ],
+    "ground_truth_modes": [
+      "shorted"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "C122": "alive"
+      },
+      "state_rails": {
+        "+3V3": "shorted"
+      }
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-U13-anomalous-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "U13"
+    ],
+    "ground_truth_modes": [
+      "anomalous"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "U13": "anomalous"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-U13-anomalous-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "U13"
+    ],
+    "ground_truth_modes": [
+      "anomalous"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "U13": "anomalous",
+        "R75": "alive"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-U13-shorted-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "U13"
+    ],
+    "ground_truth_modes": [
+      "shorted"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {},
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-U13-shorted-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "U13"
+    ],
+    "ground_truth_modes": [
+      "shorted"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "PP11": "alive"
+      },
+      "state_rails": {
+        "+5V": "shorted"
+      }
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-U17-anomalous-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "U17"
+    ],
+    "ground_truth_modes": [
+      "anomalous"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "U17": "anomalous"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-U17-anomalous-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "U17"
+    ],
+    "ground_truth_modes": [
+      "anomalous"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "U17": "anomalous",
+        "R80": "alive"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-U18-anomalous-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "U18"
+    ],
+    "ground_truth_modes": [
+      "anomalous"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "U18": "anomalous"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-U18-anomalous-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "U18"
+    ],
+    "ground_truth_modes": [
+      "anomalous"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "U18": "anomalous",
+        "D19": "alive"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-U19-anomalous-partial_comps",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "U19"
+    ],
+    "ground_truth_modes": [
+      "anomalous"
+    ],
+    "sample_strategy": "partial_comps",
+    "observations": {
+      "state_comps": {
+        "U19": "anomalous"
+      },
+      "state_rails": {}
+    }
+  },
+  {
+    "id": "mnt-reform-motherboard-U19-anomalous-partial_rails_plus_one_alive",
+    "slug": "mnt-reform-motherboard",
+    "ground_truth_kill": [
+      "U19"
+    ],
+    "ground_truth_modes": [
+      "anomalous"
+    ],
+    "sample_strategy": "partial_rails_plus_one_alive",
+    "observations": {
+      "state_comps": {
+        "U19": "anomalous",
+        "H2": "alive"
+      },
+      "state_rails": {}
+    }
+  }
+]

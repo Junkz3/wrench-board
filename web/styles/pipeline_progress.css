@@ -1,0 +1,77 @@
+/* =========== PIPELINE PROGRESS DRAWER =========== */
+/* Bottom-right glass drawer streaming live pipeline events from
+   WS /pipeline/progress/{slug}. 4-step vertical stepper:
+   Scout → Registry → Writers → Audit. */
+
+.pp-drawer{position:fixed;right:20px;bottom:42px;width:360px;max-height:78vh;display:flex;flex-direction:column;background:rgba(20,32,48,.92);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--border);border-radius:10px;box-shadow:0 12px 40px rgba(0,0,0,.45);z-index:30;overflow:hidden;transform:translateY(10px);opacity:0;pointer-events:none;transition:opacity .22s ease,transform .28s cubic-bezier(.2,.8,.2,1)}
+.pp-drawer.open{transform:translateY(0);opacity:1;pointer-events:auto}
+
+.pp-head{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--border-soft);background:linear-gradient(180deg,var(--bg-2),transparent)}
+.pp-head .pp-dot{width:8px;height:8px;border-radius:50%;background:var(--cyan);box-shadow:0 0 8px var(--cyan);animation:pp-pulse 2s ease-in-out infinite}
+@keyframes pp-pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.pp-head .pp-title{flex:1;display:flex;flex-direction:column;gap:1px;min-width:0}
+.pp-head .pp-title .lbl{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--text-3)}
+.pp-head .pp-title .name{font-size:13px;font-weight:500;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pp-head .pp-close{background:transparent;border:0;color:var(--text-3);cursor:pointer;padding:2px;border-radius:4px;transition:color .15s,background .15s}
+.pp-head .pp-close:hover{color:var(--text);background:var(--panel-2)}
+
+.pp-body{padding:10px 14px 6px;overflow:auto;flex:1}
+
+.pp-step{display:grid;grid-template-columns:28px 1fr auto;grid-template-rows:auto auto;gap:2px 10px;padding:10px 0;position:relative}
+.pp-step + .pp-step{border-top:1px solid var(--border-soft)}
+.pp-step-mark{grid-row:1/3;width:22px;height:22px;border-radius:50%;border:1.5px solid var(--border);background:var(--bg-2);display:flex;align-items:center;justify-content:center;position:relative;margin-top:2px;transition:border-color .2s,background .2s}
+.pp-step-mark::after{content:"";width:6px;height:6px;border-radius:50%;background:var(--text-3);transition:background .2s,box-shadow .2s,transform .2s}
+.pp-step.running .pp-step-mark{border-color:rgba(56,189,248,.55);background:rgba(56,189,248,.06)}
+.pp-step.running .pp-step-mark::after{background:var(--cyan);box-shadow:0 0 10px var(--cyan);animation:pp-pulse 1.3s ease-in-out infinite}
+.pp-step.done .pp-step-mark{border-color:rgba(52,211,153,.55);background:rgba(52,211,153,.1)}
+.pp-step.done .pp-step-mark::after{background:var(--emerald);transform:scale(1.4);box-shadow:0 0 8px var(--emerald)}
+.pp-step.error .pp-step-mark{border-color:rgba(245,158,11,.6);background:rgba(245,158,11,.1)}
+.pp-step.error .pp-step-mark::after{background:var(--amber);box-shadow:0 0 8px var(--amber)}
+
+.pp-step-lbl{font-size:13px;color:var(--text-2);line-height:1.2}
+.pp-step.running .pp-step-lbl{color:var(--text)}
+.pp-step.done .pp-step-lbl{color:var(--text)}
+.pp-step-sub{font-family:var(--mono);font-size:10.5px;color:var(--text-3);line-height:1.2}
+.pp-step-time{font-family:var(--mono);font-size:10.5px;color:var(--text-3);align-self:start;margin-top:2px;white-space:nowrap}
+.pp-step.done .pp-step-time{color:var(--emerald)}
+.pp-step.running .pp-step-time{color:var(--cyan)}
+.pp-step.error .pp-step-time{color:var(--amber)}
+
+/* Vertical connector between the step marks */
+.pp-step-mark::before{content:"";position:absolute;top:100%;left:50%;transform:translateX(-50%);width:1px;height:14px;background:var(--border-soft)}
+.pp-step:last-child .pp-step-mark::before{display:none}
+
+.pp-foot{padding:10px 14px 12px;border-top:1px solid var(--border-soft);background:rgba(10,17,32,.6);display:flex;align-items:center;gap:10px}
+.pp-foot .pp-status{flex:1;font-size:11.5px;color:var(--text-2);line-height:1.35}
+.pp-foot .pp-status b{color:var(--text);font-weight:500}
+.pp-foot .pp-status.ok b{color:var(--emerald)}
+.pp-foot .pp-status.err b{color:var(--amber)}
+.pp-foot .pp-cta{background:var(--panel);border:1px solid var(--border);color:var(--text);font-family:inherit;font-size:12px;padding:6px 10px;border-radius:6px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all .15s}
+.pp-foot .pp-cta:hover{background:var(--panel-2);border-color:rgba(56,189,248,.45)}
+.pp-foot .pp-cta.primary{background:rgba(52,211,153,.1);border-color:rgba(52,211,153,.4);color:var(--emerald)}
+.pp-foot .pp-cta.primary:hover{background:rgba(52,211,153,.18)}
+
+.pp-error-detail{margin-top:6px;padding:8px 10px;background:rgba(245,158,11,.08);border-left:2px solid var(--amber);border-radius:0 4px 4px 0;font-size:11.5px;color:var(--text-2);white-space:pre-wrap;max-height:80px;overflow:auto}
+
+/* Paused step + inline device-kind confirmation panel.
+   Neutral "attention" treatment — no semantic accent (amber/cyan/emerald/
+   violet keep their meanings). Reuses the pp-pulse keyframe on the mark. */
+.pp-step.paused .pp-step-mark{animation:pp-pulse 2.4s infinite}
+.pp-kind-panel{margin-top:8px;padding:10px;border:1px solid var(--border);border-radius:8px;background:var(--panel-2);display:flex;flex-direction:column;gap:6px}
+.pp-kind-row{display:flex;justify-content:space-between;font-size:11px;color:var(--text-2)}
+.pp-kind-row b.mono{font-family:var(--mono);color:var(--text)}
+.pp-kind-evidence{font-size:11px;color:var(--text-3);font-style:italic}
+.pp-kind-opts{display:flex;flex-direction:column;gap:4px}
+.pp-kind-opt{display:flex;gap:6px;align-items:center;font-size:12px;cursor:pointer}
+.pp-kind-opt em{color:var(--text-3);font-style:normal}
+/* Panel-scoped CTA — mirrors .pp-foot .pp-cta (which is scoped under the
+   footer); the confirm button lives in .pp-body, not the footer. */
+.pp-kind-panel .pp-cta{align-self:flex-start;background:var(--panel);border:1px solid var(--border);color:var(--text);font-family:inherit;font-size:12px;padding:6px 10px;border-radius:6px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all .15s}
+.pp-kind-panel .pp-cta:hover{background:var(--panel-2);border-color:rgba(56,189,248,.45)}
+.pp-kind-panel .pp-cta.primary{background:rgba(52,211,153,.1);border-color:rgba(52,211,153,.4);color:var(--emerald)}
+.pp-kind-panel .pp-cta.primary:hover{background:rgba(52,211,153,.18)}
+
+/* Scrollbar for the drawer body */
+.pp-body::-webkit-scrollbar{width:5px}
+.pp-body::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+.pp-body::-webkit-scrollbar-track{background:transparent}

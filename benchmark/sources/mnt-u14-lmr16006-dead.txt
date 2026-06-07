@@ -1,0 +1,1 @@
+LMR16006 SIMPLE SWITCHER Y 0.6-A step-down converter. Failure of this IC (internal FET short, inductor saturation event) leaves the LPC microcontroller without its 3.3V supply, halting the entire power-on sequencer.

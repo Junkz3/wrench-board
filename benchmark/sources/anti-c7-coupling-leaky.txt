@@ -1,0 +1,1 @@
+An AC-coupling MLCC with resistive leakage degrades the AC signal coupling (introduces DC offset, reduces high-pass cutoff response) but does not cause any rail to collapse or any IC to lose power. The cap itself remains physically present in-circuit; only its decoupling effectiveness is impaired.

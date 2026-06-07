@@ -1,0 +1,2011 @@
+{
+  "device_slug": "mnt-reform-motherboard",
+  "assignments": [
+    {
+      "refdes": "R111",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.4
+    },
+    {
+      "refdes": "R113",
+      "kind": "passive_r",
+      "role": "pull_up",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "R115",
+      "kind": "passive_r",
+      "role": "pull_up",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "R117",
+      "kind": "passive_r",
+      "role": "pull_down",
+      "confidence": 0.5
+    },
+    {
+      "refdes": "R118",
+      "kind": "passive_r",
+      "role": null,
+      "confidence": 0.0
+    },
+    {
+      "refdes": "R119",
+      "kind": "passive_r",
+      "role": null,
+      "confidence": 0.0
+    },
+    {
+      "refdes": "R120",
+      "kind": "passive_r",
+      "role": "pull_down",
+      "confidence": 0.5
+    },
+    {
+      "refdes": "R154",
+      "kind": "passive_r",
+      "role": "pull_down",
+      "confidence": 0.9
+    },
+    {
+      "refdes": "R155",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.4
+    },
+    {
+      "refdes": "R168",
+      "kind": "passive_r",
+      "role": "pull_down",
+      "confidence": 0.9
+    },
+    {
+      "refdes": "R169",
+      "kind": "passive_r",
+      "role": "pull_down",
+      "confidence": 0.9
+    },
+    {
+      "refdes": "R170",
+      "kind": "passive_r",
+      "role": "pull_down",
+      "confidence": 0.9
+    },
+    {
+      "refdes": "R171",
+      "kind": "passive_r",
+      "role": "pull_down",
+      "confidence": 0.9
+    },
+    {
+      "refdes": "D13",
+      "kind": "passive_d",
+      "role": "reverse_protection",
+      "confidence": 0.75
+    },
+    {
+      "refdes": "D1",
+      "kind": "passive_d",
+      "role": "esd",
+      "confidence": 0.6
+    },
+    {
+      "refdes": "R167",
+      "kind": "passive_r",
+      "role": "series",
+      "confidence": 0.6
+    },
+    {
+      "refdes": "C149",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "C160",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "C161",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "D4",
+      "kind": "passive_d",
+      "role": "esd",
+      "confidence": 0.6
+    },
+    {
+      "refdes": "C1",
+      "kind": "passive_c",
+      "role": "filter",
+      "confidence": 0.7
+    },
+    {
+      "refdes": "C44",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.85
+    },
+    {
+      "refdes": "C45",
+      "kind": "passive_c",
+      "role": "bypass",
+      "confidence": 0.8
+    },
+    {
+      "refdes": "R49",
+      "kind": "passive_r",
+      "role": "pull_up",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "R50",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.7
+    },
+    {
+      "refdes": "C6",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.85
+    },
+    {
+      "refdes": "C122",
+      "kind": "passive_c",
+      "role": "filter",
+      "confidence": 0.45
+    },
+    {
+      "refdes": "C125",
+      "kind": "passive_c",
+      "role": "filter",
+      "confidence": 0.45
+    },
+    {
+      "refdes": "R3",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.4
+    },
+    {
+      "refdes": "R94",
+      "kind": "passive_r",
+      "role": "pull_down",
+      "confidence": 0.75
+    },
+    {
+      "refdes": "R34",
+      "kind": "passive_r",
+      "role": "feedback",
+      "confidence": 0.7
+    },
+    {
+      "refdes": "R193",
+      "kind": "passive_r",
+      "role": "pull_down",
+      "confidence": 0.75
+    },
+    {
+      "refdes": "R51",
+      "kind": "passive_r",
+      "role": "pull_down",
+      "confidence": 0.8
+    },
+    {
+      "refdes": "R95",
+      "kind": "passive_r",
+      "role": "feedback",
+      "confidence": 0.7
+    },
+    {
+      "refdes": "R172",
+      "kind": "passive_r",
+      "role": "pull_down",
+      "confidence": 0.6
+    },
+    {
+      "refdes": "R4",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.4
+    },
+    {
+      "refdes": "R5",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.4
+    },
+    {
+      "refdes": "R8",
+      "kind": "passive_r",
+      "role": "feedback",
+      "confidence": 0.75
+    },
+    {
+      "refdes": "R86",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.4
+    },
+    {
+      "refdes": "R78",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.4
+    },
+    {
+      "refdes": "R79",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.4
+    },
+    {
+      "refdes": "R80",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.4
+    },
+    {
+      "refdes": "C2",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.85
+    },
+    {
+      "refdes": "C4",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.85
+    },
+    {
+      "refdes": "C5",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.85
+    },
+    {
+      "refdes": "D2",
+      "kind": "passive_d",
+      "role": "esd",
+      "confidence": 0.6
+    },
+    {
+      "refdes": "D8",
+      "kind": "passive_d",
+      "role": "esd",
+      "confidence": 0.6
+    },
+    {
+      "refdes": "D9",
+      "kind": "passive_d",
+      "role": "esd",
+      "confidence": 0.6
+    },
+    {
+      "refdes": "C3",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.85
+    },
+    {
+      "refdes": "C7",
+      "kind": "passive_c",
+      "role": "ac_coupling",
+      "confidence": 0.55
+    },
+    {
+      "refdes": "C8",
+      "kind": "passive_c",
+      "role": "ac_coupling",
+      "confidence": 0.55
+    },
+    {
+      "refdes": "C9",
+      "kind": "passive_c",
+      "role": "filter",
+      "confidence": 0.8
+    },
+    {
+      "refdes": "C10",
+      "kind": "passive_c",
+      "role": "filter",
+      "confidence": 0.8
+    },
+    {
+      "refdes": "C11",
+      "kind": "passive_c",
+      "role": "filter",
+      "confidence": 0.45
+    },
+    {
+      "refdes": "C12",
+      "kind": "passive_c",
+      "role": "filter",
+      "confidence": 0.45
+    },
+    {
+      "refdes": "C64",
+      "kind": "passive_c",
+      "role": "filter",
+      "confidence": 0.8
+    },
+    {
+      "refdes": "C65",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.8
+    },
+    {
+      "refdes": "R6",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.4
+    },
+    {
+      "refdes": "R9",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.4
+    },
+    {
+      "refdes": "R10",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "R11",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "R12",
+      "kind": "passive_r",
+      "role": "pull_down",
+      "confidence": 0.75
+    },
+    {
+      "refdes": "R13",
+      "kind": "passive_r",
+      "role": "pull_down",
+      "confidence": 0.75
+    },
+    {
+      "refdes": "R14",
+      "kind": "passive_r",
+      "role": "pull_down",
+      "confidence": 0.75
+    },
+    {
+      "refdes": "R15",
+      "kind": "passive_r",
+      "role": "pull_down",
+      "confidence": 0.75
+    },
+    {
+      "refdes": "R16",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.4
+    },
+    {
+      "refdes": "R17",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "R18",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "R19",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "R20",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.4
+    },
+    {
+      "refdes": "R21",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.4
+    },
+    {
+      "refdes": "R22",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "R23",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "R24",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "D17",
+      "kind": "passive_d",
+      "role": "esd",
+      "confidence": 0.7
+    },
+    {
+      "refdes": "D18",
+      "kind": "passive_d",
+      "role": "esd",
+      "confidence": 0.7
+    },
+    {
+      "refdes": "D19",
+      "kind": "passive_d",
+      "role": "esd",
+      "confidence": 0.7
+    },
+    {
+      "refdes": "D24",
+      "kind": "passive_d",
+      "role": "esd",
+      "confidence": 0.7
+    },
+    {
+      "refdes": "D25",
+      "kind": "passive_d",
+      "role": "esd",
+      "confidence": 0.7
+    },
+    {
+      "refdes": "D26",
+      "kind": "passive_d",
+      "role": "esd",
+      "confidence": 0.7
+    },
+    {
+      "refdes": "D27",
+      "kind": "passive_d",
+      "role": "esd",
+      "confidence": 0.7
+    },
+    {
+      "refdes": "D28",
+      "kind": "passive_d",
+      "role": "esd",
+      "confidence": 0.7
+    },
+    {
+      "refdes": "R173",
+      "kind": "passive_r",
+      "role": "pull_up",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "R174",
+      "kind": "passive_r",
+      "role": "feedback",
+      "confidence": 0.85
+    },
+    {
+      "refdes": "R175",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.4
+    },
+    {
+      "refdes": "R176",
+      "kind": "passive_r",
+      "role": "feedback",
+      "confidence": 0.75
+    },
+    {
+      "refdes": "R177",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.4
+    },
+    {
+      "refdes": "C31",
+      "kind": "passive_c",
+      "role": "filter",
+      "confidence": 0.8
+    },
+    {
+      "refdes": "R182",
+      "kind": "passive_r",
+      "role": "pull_up",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "R183",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.4
+    },
+    {
+      "refdes": "C16",
+      "kind": "passive_c",
+      "role": "bulk",
+      "confidence": 0.9
+    },
+    {
+      "refdes": "C146",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.85
+    },
+    {
+      "refdes": "C148",
+      "kind": "passive_c",
+      "role": "bypass",
+      "confidence": 0.8
+    },
+    {
+      "refdes": "C18",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "D20",
+      "kind": "passive_d",
+      "role": "rectifier",
+      "confidence": 0.85
+    },
+    {
+      "refdes": "D15",
+      "kind": "passive_d",
+      "role": "esd",
+      "confidence": 0.6
+    },
+    {
+      "refdes": "R1",
+      "kind": "passive_r",
+      "role": "series",
+      "confidence": 0.75
+    },
+    {
+      "refdes": "C17",
+      "kind": "passive_c",
+      "role": "bulk",
+      "confidence": 0.9
+    },
+    {
+      "refdes": "C145",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.85
+    },
+    {
+      "refdes": "C128",
+      "kind": "passive_c",
+      "role": "bypass",
+      "confidence": 0.8
+    },
+    {
+      "refdes": "C19",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "D21",
+      "kind": "passive_d",
+      "role": "rectifier",
+      "confidence": 0.85
+    },
+    {
+      "refdes": "D16",
+      "kind": "passive_d",
+      "role": "esd",
+      "confidence": 0.6
+    },
+    {
+      "refdes": "R188",
+      "kind": "passive_r",
+      "role": "series",
+      "confidence": 0.75
+    },
+    {
+      "refdes": "D3",
+      "kind": "passive_d",
+      "role": "rectifier",
+      "confidence": 0.8
+    },
+    {
+      "refdes": "C129",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "C130",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.85
+    },
+    {
+      "refdes": "R189",
+      "kind": "passive_r",
+      "role": "pull_up",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "R181",
+      "kind": "passive_r",
+      "role": "pull_up",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "C33",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "C34",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "C38",
+      "kind": "passive_c",
+      "role": "tank",
+      "confidence": 0.6
+    },
+    {
+      "refdes": "R180",
+      "kind": "passive_r",
+      "role": "feedback",
+      "confidence": 0.8
+    },
+    {
+      "refdes": "R179",
+      "kind": "passive_r",
+      "role": "feedback",
+      "confidence": 0.8
+    },
+    {
+      "refdes": "R178",
+      "kind": "passive_r",
+      "role": "pull_down",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "C35",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "C37",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "C36",
+      "kind": "passive_c",
+      "role": "tank",
+      "confidence": 0.6
+    },
+    {
+      "refdes": "R41",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.4
+    },
+    {
+      "refdes": "R68",
+      "kind": "passive_r",
+      "role": "pull_up",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "R69",
+      "kind": "passive_r",
+      "role": "pull_up",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "R70",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.4
+    },
+    {
+      "refdes": "R71",
+      "kind": "passive_r",
+      "role": "pull_up",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "R72",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.4
+    },
+    {
+      "refdes": "R73",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.4
+    },
+    {
+      "refdes": "R74",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.4
+    },
+    {
+      "refdes": "R75",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.4
+    },
+    {
+      "refdes": "R76",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.4
+    },
+    {
+      "refdes": "R124",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.4
+    },
+    {
+      "refdes": "R125",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.4
+    },
+    {
+      "refdes": "R126",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.4
+    },
+    {
+      "refdes": "R137",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.4
+    },
+    {
+      "refdes": "R157",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.4
+    },
+    {
+      "refdes": "R194",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.4
+    },
+    {
+      "refdes": "R195",
+      "kind": "passive_r",
+      "role": "pull_up",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "C46",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "C47",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "C48",
+      "kind": "passive_c",
+      "role": "tank",
+      "confidence": 0.95
+    },
+    {
+      "refdes": "C49",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "C50",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "C51",
+      "kind": "passive_c",
+      "role": "tank",
+      "confidence": 0.95
+    },
+    {
+      "refdes": "C140",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "R61",
+      "kind": "passive_r",
+      "role": null,
+      "confidence": 0.0
+    },
+    {
+      "refdes": "R59",
+      "kind": "passive_r",
+      "role": "feedback",
+      "confidence": 0.75
+    },
+    {
+      "refdes": "R60",
+      "kind": "passive_r",
+      "role": "pull_down",
+      "confidence": 0.7
+    },
+    {
+      "refdes": "R62",
+      "kind": "passive_r",
+      "role": "pull_down",
+      "confidence": 0.7
+    },
+    {
+      "refdes": "R81",
+      "kind": "passive_r",
+      "role": "pull_down",
+      "confidence": 0.7
+    },
+    {
+      "refdes": "R103",
+      "kind": "passive_r",
+      "role": "pull_down",
+      "confidence": 0.9
+    },
+    {
+      "refdes": "FB5",
+      "kind": "passive_fb",
+      "role": "filter",
+      "confidence": 0.85
+    },
+    {
+      "refdes": "FB8",
+      "kind": "passive_fb",
+      "role": "filter",
+      "confidence": 0.85
+    },
+    {
+      "refdes": "FB9",
+      "kind": "passive_fb",
+      "role": "filter",
+      "confidence": 0.85
+    },
+    {
+      "refdes": "C63",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "C70",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "C81",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "C85",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "C72",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "C84",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "C67",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "C68",
+      "kind": "passive_c",
+      "role": "filter",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "C74",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "C78",
+      "kind": "passive_c",
+      "role": "filter",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "C75",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "C79",
+      "kind": "passive_c",
+      "role": "filter",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "R55",
+      "kind": "passive_r",
+      "role": null,
+      "confidence": 0.0
+    },
+    {
+      "refdes": "R96",
+      "kind": "passive_r",
+      "role": null,
+      "confidence": 0.0
+    },
+    {
+      "refdes": "R97",
+      "kind": "passive_r",
+      "role": null,
+      "confidence": 0.0
+    },
+    {
+      "refdes": "R84",
+      "kind": "passive_r",
+      "role": null,
+      "confidence": 0.0
+    },
+    {
+      "refdes": "R85",
+      "kind": "passive_r",
+      "role": null,
+      "confidence": 0.0
+    },
+    {
+      "refdes": "R90",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.9
+    },
+    {
+      "refdes": "R91",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.9
+    },
+    {
+      "refdes": "R92",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.9
+    },
+    {
+      "refdes": "R93",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.9
+    },
+    {
+      "refdes": "C69",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "C76",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "C71",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "C77",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "C167",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "C164",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "FB1",
+      "kind": "passive_fb",
+      "role": "filter",
+      "confidence": 0.85
+    },
+    {
+      "refdes": "FB2",
+      "kind": "passive_fb",
+      "role": "filter",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "C14",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "C20",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "C43",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "C73",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "C86",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "C88",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "C13",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.85
+    },
+    {
+      "refdes": "C15",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.85
+    },
+    {
+      "refdes": "C21",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.85
+    },
+    {
+      "refdes": "C66",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.85
+    },
+    {
+      "refdes": "C80",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.85
+    },
+    {
+      "refdes": "C87",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.85
+    },
+    {
+      "refdes": "C89",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.85
+    },
+    {
+      "refdes": "C90",
+      "kind": "passive_c",
+      "role": "bulk",
+      "confidence": 0.85
+    },
+    {
+      "refdes": "C91",
+      "kind": "passive_c",
+      "role": "bulk",
+      "confidence": 0.85
+    },
+    {
+      "refdes": "D14",
+      "kind": "passive_d",
+      "role": "rectifier",
+      "confidence": 0.5
+    },
+    {
+      "refdes": "C27",
+      "kind": "passive_c",
+      "role": "filter",
+      "confidence": 0.8
+    },
+    {
+      "refdes": "C28",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "C29",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.8
+    },
+    {
+      "refdes": "C30",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "R43",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.4
+    },
+    {
+      "refdes": "R44",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.4
+    },
+    {
+      "refdes": "R45",
+      "kind": "passive_r",
+      "role": "pull_down",
+      "confidence": 0.8
+    },
+    {
+      "refdes": "R192",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.4
+    },
+    {
+      "refdes": "R161",
+      "kind": "passive_r",
+      "role": "pull_down",
+      "confidence": 0.8
+    },
+    {
+      "refdes": "R46",
+      "kind": "passive_r",
+      "role": "pull_up",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "R47",
+      "kind": "passive_r",
+      "role": "pull_up",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "R48",
+      "kind": "passive_r",
+      "role": "pull_up",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "R197",
+      "kind": "passive_r",
+      "role": "pull_up",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "C155",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "FB3",
+      "kind": "passive_fb",
+      "role": "filter",
+      "confidence": 0.85
+    },
+    {
+      "refdes": "C52",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "C53",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "C54",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "C55",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "C83",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "C123",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "C119",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "C120",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "R160",
+      "kind": "passive_r",
+      "role": "series",
+      "confidence": 0.6
+    },
+    {
+      "refdes": "R67",
+      "kind": "passive_r",
+      "role": "pull_up",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "R123",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.4
+    },
+    {
+      "refdes": "R148",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.4
+    },
+    {
+      "refdes": "C152",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.85
+    },
+    {
+      "refdes": "R36",
+      "kind": "passive_r",
+      "role": "pull_down",
+      "confidence": 0.75
+    },
+    {
+      "refdes": "R37",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.8
+    },
+    {
+      "refdes": "R38",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.8
+    },
+    {
+      "refdes": "R39",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.75
+    },
+    {
+      "refdes": "R40",
+      "kind": "passive_r",
+      "role": null,
+      "confidence": 0.0
+    },
+    {
+      "refdes": "R122",
+      "kind": "passive_r",
+      "role": null,
+      "confidence": 0.0
+    },
+    {
+      "refdes": "C62",
+      "kind": "passive_c",
+      "role": "tank",
+      "confidence": 0.85
+    },
+    {
+      "refdes": "C98",
+      "kind": "passive_c",
+      "role": "tank",
+      "confidence": 0.85
+    },
+    {
+      "refdes": "C153",
+      "kind": "passive_c",
+      "role": "filter",
+      "confidence": 0.7
+    },
+    {
+      "refdes": "R198",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.85
+    },
+    {
+      "refdes": "R199",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.85
+    },
+    {
+      "refdes": "FB4",
+      "kind": "passive_fb",
+      "role": "filter",
+      "confidence": 0.85
+    },
+    {
+      "refdes": "C58",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "C59",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "C60",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "C61",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "C124",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "C126",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "R110",
+      "kind": "passive_r",
+      "role": "pull_up",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "R104",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.85
+    },
+    {
+      "refdes": "R105",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.85
+    },
+    {
+      "refdes": "R106",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.85
+    },
+    {
+      "refdes": "R107",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.85
+    },
+    {
+      "refdes": "R108",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.85
+    },
+    {
+      "refdes": "R109",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.85
+    },
+    {
+      "refdes": "R65",
+      "kind": "passive_r",
+      "role": "pull_up",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "FB22",
+      "kind": "passive_fb",
+      "role": "filter",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "C57",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.85
+    },
+    {
+      "refdes": "C168",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.85
+    },
+    {
+      "refdes": "C169",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.85
+    },
+    {
+      "refdes": "R35",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.4
+    },
+    {
+      "refdes": "R42",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.4
+    },
+    {
+      "refdes": "FB20",
+      "kind": "passive_fb",
+      "role": "filter",
+      "confidence": 0.85
+    },
+    {
+      "refdes": "FB18",
+      "kind": "passive_fb",
+      "role": "filter",
+      "confidence": 0.85
+    },
+    {
+      "refdes": "FB21",
+      "kind": "passive_fb",
+      "role": "filter",
+      "confidence": 0.85
+    },
+    {
+      "refdes": "FB19",
+      "kind": "passive_fb",
+      "role": "filter",
+      "confidence": 0.85
+    },
+    {
+      "refdes": "FB10",
+      "kind": "passive_fb",
+      "role": "filter",
+      "confidence": 0.8
+    },
+    {
+      "refdes": "FB11",
+      "kind": "passive_fb",
+      "role": "filter",
+      "confidence": 0.8
+    },
+    {
+      "refdes": "FB16",
+      "kind": "passive_fb",
+      "role": "filter",
+      "confidence": 0.8
+    },
+    {
+      "refdes": "FB17",
+      "kind": "passive_fb",
+      "role": "filter",
+      "confidence": 0.8
+    },
+    {
+      "refdes": "C143",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "C144",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "C142",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "C139",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "C151",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "C127",
+      "kind": "passive_c",
+      "role": "ac_coupling",
+      "confidence": 0.85
+    },
+    {
+      "refdes": "C147",
+      "kind": "passive_c",
+      "role": "ac_coupling",
+      "confidence": 0.85
+    },
+    {
+      "refdes": "C156",
+      "kind": "passive_c",
+      "role": "filter",
+      "confidence": 0.8
+    },
+    {
+      "refdes": "C157",
+      "kind": "passive_c",
+      "role": "filter",
+      "confidence": 0.8
+    },
+    {
+      "refdes": "C158",
+      "kind": "passive_c",
+      "role": "filter",
+      "confidence": 0.8
+    },
+    {
+      "refdes": "C165",
+      "kind": "passive_c",
+      "role": "filter",
+      "confidence": 0.8
+    },
+    {
+      "refdes": "C159",
+      "kind": "passive_c",
+      "role": "filter",
+      "confidence": 0.8
+    },
+    {
+      "refdes": "C166",
+      "kind": "passive_c",
+      "role": "filter",
+      "confidence": 0.8
+    },
+    {
+      "refdes": "C150",
+      "kind": "passive_c",
+      "role": "bypass",
+      "confidence": 0.85
+    },
+    {
+      "refdes": "C154",
+      "kind": "passive_c",
+      "role": "bypass",
+      "confidence": 0.85
+    },
+    {
+      "refdes": "C170",
+      "kind": "passive_c",
+      "role": "bypass",
+      "confidence": 0.85
+    },
+    {
+      "refdes": "R140",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.4
+    },
+    {
+      "refdes": "R142",
+      "kind": "passive_r",
+      "role": "pull_down",
+      "confidence": 0.8
+    },
+    {
+      "refdes": "R143",
+      "kind": "passive_r",
+      "role": "pull_down",
+      "confidence": 0.8
+    },
+    {
+      "refdes": "R144",
+      "kind": "passive_r",
+      "role": "pull_up",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "R121",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.4
+    },
+    {
+      "refdes": "R151",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.4
+    },
+    {
+      "refdes": "R150",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.4
+    },
+    {
+      "refdes": "R139",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.4
+    },
+    {
+      "refdes": "R138",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.4
+    },
+    {
+      "refdes": "R114",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.4
+    },
+    {
+      "refdes": "R66",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.4
+    },
+    {
+      "refdes": "R136",
+      "kind": "passive_r",
+      "role": "pull_up",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "R135",
+      "kind": "passive_r",
+      "role": "pull_up",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "R112",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.4
+    },
+    {
+      "refdes": "R152",
+      "kind": "passive_r",
+      "role": "series",
+      "confidence": 0.6
+    },
+    {
+      "refdes": "D10",
+      "kind": "passive_d",
+      "role": "esd",
+      "confidence": 0.6
+    },
+    {
+      "refdes": "CC2222",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.85
+    },
+    {
+      "refdes": "CC2233",
+      "kind": "passive_c",
+      "role": "ac_coupling",
+      "confidence": 0.55
+    },
+    {
+      "refdes": "CC2244",
+      "kind": "passive_c",
+      "role": "ac_coupling",
+      "confidence": 0.55
+    },
+    {
+      "refdes": "CC2255",
+      "kind": "passive_c",
+      "role": "ac_coupling",
+      "confidence": 0.55
+    },
+    {
+      "refdes": "CC2266",
+      "kind": "passive_c",
+      "role": "ac_coupling",
+      "confidence": 0.55
+    },
+    {
+      "refdes": "RR111166",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.4
+    },
+    {
+      "refdes": "RR114466",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.4
+    },
+    {
+      "refdes": "RR114477",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.4
+    },
+    {
+      "refdes": "FB12",
+      "kind": "passive_fb",
+      "role": "filter",
+      "confidence": 0.85
+    },
+    {
+      "refdes": "FB14",
+      "kind": "passive_fb",
+      "role": "filter",
+      "confidence": 0.85
+    },
+    {
+      "refdes": "FB15",
+      "kind": "passive_fb",
+      "role": "filter",
+      "confidence": 0.85
+    },
+    {
+      "refdes": "C99",
+      "kind": "passive_c",
+      "role": "bulk",
+      "confidence": 0.85
+    },
+    {
+      "refdes": "C100",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.85
+    },
+    {
+      "refdes": "C101",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.85
+    },
+    {
+      "refdes": "C102",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.85
+    },
+    {
+      "refdes": "C103",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "C104",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "C105",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.8
+    },
+    {
+      "refdes": "C106",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.8
+    },
+    {
+      "refdes": "C107",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.8
+    },
+    {
+      "refdes": "C108",
+      "kind": "passive_c",
+      "role": "ac_coupling",
+      "confidence": 0.55
+    },
+    {
+      "refdes": "C109",
+      "kind": "passive_c",
+      "role": "ac_coupling",
+      "confidence": 0.55
+    },
+    {
+      "refdes": "C110",
+      "kind": "passive_c",
+      "role": "ac_coupling",
+      "confidence": 0.55
+    },
+    {
+      "refdes": "C111",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "C112",
+      "kind": "passive_c",
+      "role": "bulk",
+      "confidence": 0.85
+    },
+    {
+      "refdes": "C113",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "C114",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.85
+    },
+    {
+      "refdes": "C115",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.85
+    },
+    {
+      "refdes": "C116",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "C117",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.85
+    },
+    {
+      "refdes": "C118",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "C131",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "C133",
+      "kind": "passive_c",
+      "role": "decoupling",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "R77",
+      "kind": "passive_r",
+      "role": "pull_down",
+      "confidence": 0.55
+    },
+    {
+      "refdes": "R64",
+      "kind": "passive_r",
+      "role": "damping",
+      "confidence": 0.4
+    },
+    {
+      "refdes": "R129",
+      "kind": "passive_r",
+      "role": "pull_up",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "R130",
+      "kind": "passive_r",
+      "role": "pull_up",
+      "confidence": 0.65
+    },
+    {
+      "refdes": "R82",
+      "kind": "passive_r",
+      "role": "pull_down",
+      "confidence": 0.9
+    }
+  ],
+  "filled_by_llm": 142,
+  "unclassified": 10
+}

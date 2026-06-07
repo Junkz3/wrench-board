@@ -1,0 +1,1234 @@
+{
+  "items": [
+    {
+      "id": "comp:U14",
+      "kind": "component",
+      "label": "U14 always-on 3.3V regulator",
+      "properties": {},
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "id": "comp:U18",
+      "kind": "component",
+      "label": "U18 LPC11U24 System Controller",
+      "properties": {},
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "id": "comp:U9",
+      "kind": "component",
+      "label": "U9 TUSB8041 USB hub",
+      "properties": {},
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "id": "comp:U10",
+      "kind": "component",
+      "label": "U10 SN65DSI86 DSI-to-eDP bridge",
+      "properties": {},
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "id": "comp:U11",
+      "kind": "component",
+      "label": "U11 mPCIe socket",
+      "properties": {},
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "id": "comp:U28",
+      "kind": "component",
+      "label": "U28 SD level shifter",
+      "properties": {},
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "id": "comp:U8",
+      "kind": "component",
+      "label": "U8 SD level shifter",
+      "properties": {},
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "id": "comp:LTC4020",
+      "kind": "component",
+      "label": "LTC4020 buck/boost charger",
+      "properties": {},
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "id": "comp:LTC6803IG-4#PBF",
+      "kind": "component",
+      "label": "LTC6803 cell monitor",
+      "properties": {},
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "id": "comp:LM62460",
+      "kind": "component",
+      "label": "LM62460 buck regulator (v3.0)",
+      "properties": {},
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "id": "comp:F1",
+      "kind": "component",
+      "label": "F1 input fuse",
+      "properties": {},
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "id": "comp:R49",
+      "kind": "component",
+      "label": "R49 input sense resistor",
+      "properties": {},
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "id": "comp:J1",
+      "kind": "component",
+      "label": "J1 barrel jack input",
+      "properties": {},
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "id": "comp:J22",
+      "kind": "component",
+      "label": "J22 debug/UART connector",
+      "properties": {},
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "id": "comp:J24",
+      "kind": "component",
+      "label": "J24 MIPI-DSI flex connector",
+      "properties": {},
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "id": "comp:D11",
+      "kind": "component",
+      "label": "D11 3.3V status LED",
+      "properties": {},
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "id": "comp:D12",
+      "kind": "component",
+      "label": "D12 5V status LED",
+      "properties": {},
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "id": "comp:C130",
+      "kind": "component",
+      "label": "C130 1.8V decoupling cap",
+      "properties": {},
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "id": "comp:C37",
+      "kind": "component",
+      "label": "C37 1.2V decoupling cap",
+      "properties": {},
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "id": "comp:microHDMI connector",
+      "kind": "component",
+      "label": "microHDMI connector (Pocket Reform)",
+      "properties": {},
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "id": "net:VIN",
+      "kind": "net",
+      "label": "VIN 9-32V input",
+      "properties": {},
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "id": "net:29V_MAIN_BUS",
+      "kind": "net",
+      "label": "~29V main bus",
+      "properties": {},
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "id": "net:LPC_VCC",
+      "kind": "net",
+      "label": "LPC_VCC always-on 3.3V",
+      "properties": {},
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "id": "net:VCC_1V8",
+      "kind": "net",
+      "label": "VCC_1V8 1.8V rail",
+      "properties": {},
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "id": "net:VCC_1V2",
+      "kind": "net",
+      "label": "VCC_1V2 1.2V rail",
+      "properties": {},
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "id": "net:3V3_PWR_AUX",
+      "kind": "net",
+      "label": "3V3_PWR_AUX switched 3.3V",
+      "properties": {},
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "id": "net:USB_PWR",
+      "kind": "net",
+      "label": "USB_PWR 5V switched",
+      "properties": {},
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "id": "net:PCIE1_PWR",
+      "kind": "net",
+      "label": "PCIE1_PWR mPCIe power",
+      "properties": {},
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "id": "sym:no-power-dead",
+      "kind": "symptom",
+      "label": "No power at all — no LEDs, no rails",
+      "properties": {},
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "id": "sym:d11-absent-lpc-unresponsive",
+      "kind": "symptom",
+      "label": "D11 absent; LPC unresponsive on UART",
+      "properties": {},
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "id": "sym:1p-fails-d11-extinguishes",
+      "kind": "symptom",
+      "label": "1P command: D11 extinguishes, CPU does not start",
+      "properties": {},
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "id": "sym:sd-boot-fails",
+      "kind": "symptom",
+      "label": "SD card boot fails despite live 3.3V",
+      "properties": {},
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "id": "sym:display-and-usb-dead",
+      "kind": "symptom",
+      "label": "Internal display dark and USB ports dead",
+      "properties": {},
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "id": "sym:display-flicker-intermittent",
+      "kind": "symptom",
+      "label": "Internal display flickers/blank after reassembly",
+      "properties": {},
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "id": "sym:battery-balance-incorrect",
+      "kind": "symptom",
+      "label": "Battery cells charge/balance incorrectly (R-2)",
+      "properties": {},
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "id": "sym:microhdmi-detached",
+      "kind": "symptom",
+      "label": "microHDMI connector detached (Pocket Reform)",
+      "properties": {},
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "id": "sym:v3-rails-incorrect",
+      "kind": "symptom",
+      "label": "v3.0: 5V/3.3V main rails incorrect after SOM swap",
+      "properties": {},
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "source_id": "comp:J1",
+      "target_id": "net:VIN",
+      "relation": "powers",
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "source_id": "comp:F1",
+      "target_id": "net:VIN",
+      "relation": "connects",
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "source_id": "comp:R49",
+      "target_id": "net:VIN",
+      "relation": "measured_at",
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "source_id": "net:VIN",
+      "target_id": "comp:R49",
+      "relation": "measured_at",
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "source_id": "comp:LTC4020",
+      "target_id": "net:29V_MAIN_BUS",
+      "relation": "powers",
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "source_id": "comp:LTC4020",
+      "target_id": "comp:LTC6803IG-4#PBF",
+      "relation": "connects",
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "source_id": "comp:LTC6803IG-4#PBF",
+      "target_id": "comp:U18",
+      "relation": "connects",
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "source_id": "comp:U14",
+      "target_id": "net:LPC_VCC",
+      "relation": "powers",
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "source_id": "comp:U18",
+      "target_id": "net:LPC_VCC",
+      "relation": "connects",
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "source_id": "net:LPC_VCC",
+      "target_id": "comp:J22",
+      "relation": "measured_at",
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "source_id": "net:LPC_VCC",
+      "target_id": "comp:D11",
+      "relation": "measured_at",
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "source_id": "comp:U18",
+      "target_id": "net:3V3_PWR_AUX",
+      "relation": "connects",
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "source_id": "comp:U18",
+      "target_id": "net:USB_PWR",
+      "relation": "connects",
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "source_id": "comp:U18",
+      "target_id": "net:PCIE1_PWR",
+      "relation": "connects",
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "source_id": "net:3V3_PWR_AUX",
+      "target_id": "comp:D11",
+      "relation": "measured_at",
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "source_id": "net:USB_PWR",
+      "target_id": "comp:D12",
+      "relation": "measured_at",
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "source_id": "comp:U11",
+      "target_id": "net:PCIE1_PWR",
+      "relation": "connects",
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "source_id": "comp:LM62460",
+      "target_id": "net:USB_PWR",
+      "relation": "powers",
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "source_id": "comp:LM62460",
+      "target_id": "net:3V3_PWR_AUX",
+      "relation": "powers",
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "source_id": "comp:C130",
+      "target_id": "net:VCC_1V8",
+      "relation": "decouples",
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "source_id": "net:VCC_1V8",
+      "target_id": "comp:C130",
+      "relation": "measured_at",
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "source_id": "comp:U28",
+      "target_id": "net:VCC_1V8",
+      "relation": "connects",
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "source_id": "comp:U8",
+      "target_id": "net:VCC_1V8",
+      "relation": "connects",
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "source_id": "comp:U28",
+      "target_id": "net:3V3_PWR_AUX",
+      "relation": "connects",
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "source_id": "comp:U8",
+      "target_id": "net:3V3_PWR_AUX",
+      "relation": "connects",
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "source_id": "comp:C37",
+      "target_id": "net:VCC_1V2",
+      "relation": "decouples",
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "source_id": "net:VCC_1V2",
+      "target_id": "comp:C37",
+      "relation": "measured_at",
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "source_id": "comp:U9",
+      "target_id": "net:VCC_1V2",
+      "relation": "connects",
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "source_id": "comp:U10",
+      "target_id": "net:VCC_1V2",
+      "relation": "connects",
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "source_id": "comp:U9",
+      "target_id": "net:USB_PWR",
+      "relation": "connects",
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "source_id": "comp:U10",
+      "target_id": "net:3V3_PWR_AUX",
+      "relation": "connects",
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "source_id": "comp:U10",
+      "target_id": "comp:J24",
+      "relation": "connects",
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "source_id": "comp:F1",
+      "target_id": "sym:no-power-dead",
+      "relation": "causes",
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "source_id": "comp:R49",
+      "target_id": "sym:no-power-dead",
+      "relation": "causes",
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "source_id": "comp:J1",
+      "target_id": "sym:no-power-dead",
+      "relation": "causes",
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "source_id": "comp:U14",
+      "target_id": "sym:d11-absent-lpc-unresponsive",
+      "relation": "causes",
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "source_id": "comp:U18",
+      "target_id": "sym:d11-absent-lpc-unresponsive",
+      "relation": "causes",
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "source_id": "comp:U18",
+      "target_id": "sym:1p-fails-d11-extinguishes",
+      "relation": "causes",
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "source_id": "comp:U28",
+      "target_id": "sym:sd-boot-fails",
+      "relation": "causes",
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "source_id": "comp:U8",
+      "target_id": "sym:sd-boot-fails",
+      "relation": "causes",
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "source_id": "comp:U9",
+      "target_id": "sym:display-and-usb-dead",
+      "relation": "causes",
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "source_id": "comp:U10",
+      "target_id": "sym:display-and-usb-dead",
+      "relation": "causes",
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "source_id": "comp:J24",
+      "target_id": "sym:display-flicker-intermittent",
+      "relation": "causes",
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "source_id": "comp:U10",
+      "target_id": "sym:display-flicker-intermittent",
+      "relation": "causes",
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "source_id": "comp:LTC4020",
+      "target_id": "sym:battery-balance-incorrect",
+      "relation": "causes",
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "source_id": "comp:LTC6803IG-4#PBF",
+      "target_id": "sym:battery-balance-incorrect",
+      "relation": "causes",
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "source_id": "comp:microHDMI connector",
+      "target_id": "sym:microhdmi-detached",
+      "relation": "causes",
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    },
+    {
+      "source_id": "comp:LM62460",
+      "target_id": "sym:v3-rails-incorrect",
+      "relation": "causes",
+      "_provenance": {
+        "expansion_id": "baseline-pre-T8",
+        "added_at": "2026-04-25T18:37:19.402064+00:00",
+        "added_by_tenant": null,
+        "confidence": 1.0,
+        "source_kind": "baseline",
+        "sanitizer_actions": [],
+        "status": "baseline"
+      }
+    }
+  ],
+  "_meta": {
+    "schema_version": "1.0"
+  }
+}

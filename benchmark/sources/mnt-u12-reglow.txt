@@ -1,0 +1,1 @@
+U12 is the buck regulator that sources +3V3 on the MNT Reform 2 motherboard. Feedback resistor drift (R aging) causes the output to regulate at 80-90% of nominal.

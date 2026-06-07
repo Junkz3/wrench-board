@@ -1,0 +1,11 @@
+{
+  "schema_version": "1.0",
+  "nodes": [
+    {"id": "cmp_U7",    "kind": "component", "label": "U7", "properties": {}},
+    {"id": "cmp_C29",   "kind": "component", "label": "C29", "properties": {}},
+    {"id": "net_3V3",   "kind": "net",       "label": "3V3_RAIL", "properties": {}}
+  ],
+  "edges": [
+    {"source_id": "cmp_U7", "target_id": "net_3V3", "relation": "powers"}
+  ]
+}

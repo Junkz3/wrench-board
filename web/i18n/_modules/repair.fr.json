@@ -1,0 +1,21 @@
+{
+  "demo_symptom": "Ne démarre pas — aucune alimentation",
+  "device_kind": {
+    "label": "Type de carte (optionnel)",
+    "none": "— non déclaré",
+    "options": {
+      "gpu_card": "Carte graphique (GPU)",
+      "laptop_logic_board": "Carte mère PC portable",
+      "phone_logic_board": "Carte mère smartphone",
+      "desktop_motherboard": "Carte mère PC fixe",
+      "sbc_board": "Carte SBC / mini-PC",
+      "power_charging_board": "Carte d'alimentation / charge",
+      "other": "Autre"
+    }
+  },
+  "schematic": {
+    "label": "Schéma (optionnel — pack plus précis)",
+    "cta": "Joindre un PDF de schéma",
+    "already_ingested": "Schéma déjà ingéré ✓ — pas besoin de joindre"
+  }
+}

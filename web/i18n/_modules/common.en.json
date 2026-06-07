@@ -1,0 +1,64 @@
+{
+  "app": {
+    "title": "Wrench Board — Knowledge graph"
+  },
+  "topbar": {
+    "brand": "wrench-board",
+    "repair_log": "Repair log",
+    "settings": "Settings",
+    "agent": "Agent",
+    "agent_title": "Diagnostic agent (⌘J)"
+  },
+  "session": {
+    "tag": "SESSION",
+    "pill_aria": "Active session — click to open the dashboard",
+    "pill_title": "Back to session dashboard",
+    "leave": "Leave session"
+  },
+  "rail": {
+    "home": "Repairs",
+    "diagnostic": "Diagnostic",
+    "pcb": "PCB",
+    "schematic": "Schematic",
+    "memory": "Memory",
+    "stock": "Stock",
+    "profile": "Profile"
+  },
+  "metabar": {
+    "view_mode": "View mode",
+    "view_visual": "Visual",
+    "view_raw": "Raw",
+    "filter_symptoms": "Symptoms",
+    "filter_components": "Components",
+    "filter_nets": "Nets",
+    "filter_actions": "Actions",
+    "search_placeholder": "Search a node…"
+  },
+  "tweaks": {
+    "title": "Tweaks",
+    "close": "Close",
+    "relations_visible": "Visible relations",
+    "rel_causes": "causes",
+    "rel_powers": "powers",
+    "rel_connected": "connected",
+    "rel_resolves": "resolves",
+    "edge_labels": "Edge labels",
+    "label_hover": "On hover",
+    "label_all": "All",
+    "label_none": "None",
+    "min_confidence": "Minimum confidence",
+    "particle_speed": "Particle speed",
+    "boardview_colors": "Pin colors",
+    "color_signal": "Signal",
+    "color_power": "Power",
+    "color_ground": "Ground",
+    "color_clock": "Clock",
+    "color_reset": "Reset",
+    "color_nc": "NC",
+    "color_testpad": "Test pad",
+    "color_via": "Via",
+    "color_board_outline": "Board outline",
+    "color_board_fill": "Board fill",
+    "reset_colors": "Reset colors"
+  }
+}

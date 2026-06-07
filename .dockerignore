@@ -1,0 +1,27 @@
+# Contexte de build léger. Le Dockerfile copie explicitement api/ web/
+# board_assets/ scripts/ pyproject README managed_ids.json. On EXCLUT surtout :
+#  - memory/ : données tenant (packs/cache, le moat) → volume monté au runtime,
+#    JAMAIS baké dans l'image.
+#  - les gros répertoires hors-runtime (evolve*, benchmark, archives).
+memory
+.venv
+venv
+__pycache__
+**/__pycache__
+*.pyc
+.pytest_cache
+.ruff_cache
+.git
+.gitignore
+tests
+docs
+benchmark
+evolve
+evolve-agent
+evolve-pipeline
+evolve-pipeline-vision
+archive-evolve-runs
+wrench_board.egg-info
+*.log
+.vscode
+.idea

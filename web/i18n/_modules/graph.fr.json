@@ -1,0 +1,67 @@
+{
+  "empty": {
+    "title": "Aucun graphe chargé",
+    "body": "Lance le pipeline de génération sur un device — le graphe se construira ensuite à partir du pack produit."
+  },
+  "legend": {
+    "types_heading": "Types",
+    "type_symptom": "Symptôme",
+    "type_symptom_desc": "ce que le client observe",
+    "type_net": "Net / Rail",
+    "type_net_desc": "signal ou alim",
+    "type_component": "Composant",
+    "type_component_desc": "puce, connecteur",
+    "type_action": "Action",
+    "type_action_desc": "réparation possible",
+    "relations_heading": "Relations",
+    "rel_causes": "provoque",
+    "rel_causes_desc": "lien causal",
+    "rel_powers": "alimente",
+    "rel_powers_desc": "flux de puissance",
+    "rel_connected": "connecté à",
+    "rel_connected_desc": "bus/masse",
+    "rel_resolves": "résout",
+    "rel_resolves_desc": "action correctrice"
+  },
+  "controls": {
+    "zoom_in": "Zoom avant",
+    "zoom_out": "Zoom arrière",
+    "fit": "Ajuster"
+  },
+  "inspector": {
+    "type_inferred": "· inférence du modèle",
+    "id_label": "id: {id}",
+    "confidence": "Confiance",
+    "description": "Description",
+    "metadata": "Métadonnées",
+    "relations": "Relations",
+    "edge_weight": "{label} · poids {weight}",
+    "edge_outgoing": "→",
+    "edge_incoming": "←",
+    "rules_field": "rules",
+    "conf_high": "Confiance élevée — corroboré par plusieurs sources.",
+    "conf_low": "Confiance faible — source unique ou inférence indirecte.",
+    "conf_medium": "Confiance modérée — recoupement partiel."
+  },
+  "tooltip": {
+    "conf_pct": "conf. {pct}%"
+  },
+  "subsystem": {
+    "fallback_label": "AUTRES"
+  },
+  "type_label": {
+    "component": "Composant",
+    "symptom": "Symptôme",
+    "net": "Net / Rail",
+    "action": "Action"
+  },
+  "rel_label": {
+    "causes": "provoque",
+    "powers": "alimente",
+    "connected_to": "connecté à",
+    "resolves": "résout"
+  },
+  "stats": {
+    "summary": "{n} nœuds · {e} arêtes"
+  }
+}

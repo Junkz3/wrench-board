@@ -1,0 +1,808 @@
+{
+  "schema_version": "1.0",
+  "page": 9,
+  "sheet_name": "MNT Reform 2 SD Card Size",
+  "sheet_path": "/Reform 2 SD Card/",
+  "page_kind": "schematic",
+  "orientation": "landscape",
+  "confidence": 0.82,
+  "nodes": [
+    {
+      "refdes": "R65",
+      "type": "resistor",
+      "value": {
+        "raw": "0",
+        "primary": "0Ω",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 9,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "+1V8"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "power_out",
+          "net_label": "VCCA"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "FB22",
+      "type": "ferrite",
+      "value": {
+        "raw": "100@100MHz 3A",
+        "primary": "100Ω@100MHz 3A",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 9,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "+3V3"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "power_out",
+          "net_label": "VCCB"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C57",
+      "type": "capacitor",
+      "value": {
+        "raw": "0.1uF",
+        "primary": "100nF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 9,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "VCCA"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C168",
+      "type": "capacitor",
+      "value": {
+        "raw": "0.1uF",
+        "primary": "100nF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 9,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "VCCA"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "C169",
+      "type": "capacitor",
+      "value": {
+        "raw": "0.1uF",
+        "primary": "100nF",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 9,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "VCCB"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "ground",
+          "net_label": "GND"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R35",
+      "type": "resistor",
+      "value": {
+        "raw": "1.5k",
+        "primary": "1.5kΩ",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 9,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "VCCB"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": "SSHHEELLLL11"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "R42",
+      "type": "resistor",
+      "value": {
+        "raw": "1.5k",
+        "primary": "1.5kΩ",
+        "package": null,
+        "mpn": null,
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": null
+      },
+      "page": 9,
+      "pins": [
+        {
+          "number": "1",
+          "name": null,
+          "role": "power_in",
+          "net_label": "VCCB"
+        },
+        {
+          "number": "2",
+          "name": null,
+          "role": "signal_out",
+          "net_label": "SSHHEELLLL22"
+        }
+      ],
+      "populated": true
+    },
+    {
+      "refdes": "U28",
+      "type": "ic",
+      "value": {
+        "raw": "SN74AVC1T45",
+        "primary": null,
+        "package": null,
+        "mpn": "SN74AVC1T45",
+        "mpn_alternate": null,
+        "tolerance": null,
+        "voltage_rating": null,
+        "temp_coef": null,
+        "polarity_marker": false,
+        "description": "includes ESD protection"
+      },
+      "page": 9,
+      "pins": [
+        {
+          "number": "1",
+          "name": "VCCA",
+          "role": "power_in",
+          "net_label": "VCCA"
+        },
+        {
+          "number": "2",
+          "name": "GND",
+          "role": "ground",
+          "net_label": "GND"
+        },
+        {
+          "number": "3",
+          "name": "A",
+          "role": "signal_in",
+          "net_label": "SD2_CLK"
+        },
+        {
+          "number": "4",
+          "name": "B",
+          "role": "signal_out",
+          "net_label": "CCLLKK"
+        },
+        {
+          "number": "5",
+          "name": "DIR",
+          "role": "signal_in",
+          "net_label": "DIR"
+        },
+        {
+          "number": "6",
+          "name": "VCCB",
+          "role": "power_in",
+          "net_label": "VCCB"
+        }
+      ],
+      "populated": true
+    }
+  ],
+  "nets": [
+    {
+      "local_id": "net_+1V8",
+      "label": "+1V8",
+      "is_power": true,
+      "is_global": true,
+      "connects": [
+        "R65.1"
+      ],
+      "page": 9
+    },
+    {
+      "local_id": "net_+3V3",
+      "label": "+3V3",
+      "is_power": true,
+      "is_global": true,
+      "connects": [
+        "FB22.1"
+      ],
+      "page": 9
+    },
+    {
+      "local_id": "net_GND",
+      "label": "GND",
+      "is_power": true,
+      "is_global": true,
+      "connects": [
+        "C57.2",
+        "C168.2",
+        "C169.2",
+        "U28.2"
+      ],
+      "page": 9
+    },
+    {
+      "local_id": "net_VCCA",
+      "label": "VCCA",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "R65.2",
+        "C57.1",
+        "C168.1",
+        "U28.1"
+      ],
+      "page": 9
+    },
+    {
+      "local_id": "net_VCCB",
+      "label": "VCCB",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "FB22.2",
+        "C169.1",
+        "R35.1",
+        "R42.1",
+        "U28.6"
+      ],
+      "page": 9
+    },
+    {
+      "local_id": "net_SD2_CLK",
+      "label": "SD2_CLK",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U28.3"
+      ],
+      "page": 9
+    },
+    {
+      "local_id": "net_CCLLKK",
+      "label": "CCLLKK",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U28.4"
+      ],
+      "page": 9
+    },
+    {
+      "local_id": "net_DIR",
+      "label": "DIR",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "U28.5"
+      ],
+      "page": 9
+    },
+    {
+      "local_id": "net_SSHHEELLLL11",
+      "label": "SSHHEELLLL11",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "R35.2"
+      ],
+      "page": 9
+    },
+    {
+      "local_id": "net_SSHHEELLLL22",
+      "label": "SSHHEELLLL22",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "R42.2"
+      ],
+      "page": 9
+    },
+    {
+      "local_id": "net_PWR_FLAG_1",
+      "label": "PWR_FLAG",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "R65.2"
+      ],
+      "page": 9
+    },
+    {
+      "local_id": "net_PWR_FLAG_2",
+      "label": "PWR_FLAG",
+      "is_power": false,
+      "is_global": false,
+      "connects": [
+        "FB22.2"
+      ],
+      "page": 9
+    },
+    {
+      "local_id": "net_SD2_CD",
+      "label": "SD2_CD",
+      "is_power": false,
+      "is_global": false,
+      "connects": [],
+      "page": 9
+    },
+    {
+      "local_id": "net_SD2_CMD",
+      "label": "SD2_CMD",
+      "is_power": false,
+      "is_global": false,
+      "connects": [],
+      "page": 9
+    },
+    {
+      "local_id": "net_SD2_DATA0",
+      "label": "SD2_DATA0",
+      "is_power": false,
+      "is_global": false,
+      "connects": [],
+      "page": 9
+    },
+    {
+      "local_id": "net_SD2_DATA1",
+      "label": "SD2_DATA1",
+      "is_power": false,
+      "is_global": false,
+      "connects": [],
+      "page": 9
+    },
+    {
+      "local_id": "net_SD2_DATA2",
+      "label": "SD2_DATA2",
+      "is_power": false,
+      "is_global": false,
+      "connects": [],
+      "page": 9
+    },
+    {
+      "local_id": "net_SD2_DATA3",
+      "label": "SD2_DATA3",
+      "is_power": false,
+      "is_global": false,
+      "connects": [],
+      "page": 9
+    },
+    {
+      "local_id": "net_CCMMDD",
+      "label": "CCMMDD",
+      "is_power": false,
+      "is_global": false,
+      "connects": [],
+      "page": 9
+    },
+    {
+      "local_id": "net_DDAATT00",
+      "label": "DDAATT00",
+      "is_power": false,
+      "is_global": false,
+      "connects": [],
+      "page": 9
+    },
+    {
+      "local_id": "net_DDAATT11",
+      "label": "DDAATT11",
+      "is_power": false,
+      "is_global": false,
+      "connects": [],
+      "page": 9
+    },
+    {
+      "local_id": "net_DDAATT22",
+      "label": "DDAATT22",
+      "is_power": false,
+      "is_global": false,
+      "connects": [],
+      "page": 9
+    },
+    {
+      "local_id": "net_CCAARRDD__DDEETTEECCTT",
+      "label": "CCAARRDD__DDEETTEECCTT",
+      "is_power": false,
+      "is_global": false,
+      "connects": [],
+      "page": 9
+    },
+    {
+      "local_id": "net_WWRRIITTEE__PPRROOTTEECCTT",
+      "label": "WWRRIITTEE__PPRROOTTEECCTT",
+      "is_power": false,
+      "is_global": false,
+      "connects": [],
+      "page": 9
+    },
+    {
+      "local_id": "net_CCDD_DDAATT33",
+      "label": "CCDD//DDAATT33",
+      "is_power": false,
+      "is_global": false,
+      "connects": [],
+      "page": 9
+    },
+    {
+      "local_id": "net_VVDDDD",
+      "label": "VVDDDD",
+      "is_power": false,
+      "is_global": false,
+      "connects": [],
+      "page": 9
+    },
+    {
+      "local_id": "net_VVSSSS",
+      "label": "VVSSSS",
+      "is_power": false,
+      "is_global": false,
+      "connects": [],
+      "page": 9
+    }
+  ],
+  "cross_page_refs": [
+    {
+      "label": "+1V8",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "power rail from another page",
+      "page": 9
+    },
+    {
+      "label": "+3V3",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "power rail from another page",
+      "page": 9
+    },
+    {
+      "label": "SD2_CLK",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "SD2 interface signals",
+      "page": 9
+    },
+    {
+      "label": "SD2_CMD",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "SD2 interface signals",
+      "page": 9
+    },
+    {
+      "label": "SD2_DATA0",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "SD2 interface signals",
+      "page": 9
+    },
+    {
+      "label": "SD2_DATA1",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "SD2 interface signals",
+      "page": 9
+    },
+    {
+      "label": "SD2_DATA2",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "SD2 interface signals",
+      "page": 9
+    },
+    {
+      "label": "SD2_DATA3",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "SD2 interface signals",
+      "page": 9
+    },
+    {
+      "label": "SD2_CD",
+      "direction": "out",
+      "at_pin": null,
+      "target_hint": "card detect to host",
+      "page": 9
+    },
+    {
+      "label": "DIR",
+      "direction": "in",
+      "at_pin": null,
+      "target_hint": "direction control for level shifter U28",
+      "page": 9
+    }
+  ],
+  "typed_edges": [
+    {
+      "src": "+1V8",
+      "dst": "R65",
+      "kind": "powers",
+      "page": 9
+    },
+    {
+      "src": "R65",
+      "dst": "VCCA",
+      "kind": "powers",
+      "page": 9
+    },
+    {
+      "src": "+3V3",
+      "dst": "FB22",
+      "kind": "powers",
+      "page": 9
+    },
+    {
+      "src": "FB22",
+      "dst": "VCCB",
+      "kind": "powers",
+      "page": 9
+    },
+    {
+      "src": "C57",
+      "dst": "VCCA",
+      "kind": "decouples",
+      "page": 9
+    },
+    {
+      "src": "C168",
+      "dst": "VCCA",
+      "kind": "decouples",
+      "page": 9
+    },
+    {
+      "src": "C169",
+      "dst": "VCCB",
+      "kind": "decouples",
+      "page": 9
+    },
+    {
+      "src": "VCCA",
+      "dst": "U28",
+      "kind": "powers",
+      "page": 9
+    },
+    {
+      "src": "VCCB",
+      "dst": "U28",
+      "kind": "powers",
+      "page": 9
+    },
+    {
+      "src": "VCCB",
+      "dst": "R35",
+      "kind": "powers",
+      "page": 9
+    },
+    {
+      "src": "VCCB",
+      "dst": "R42",
+      "kind": "powers",
+      "page": 9
+    },
+    {
+      "src": "R35",
+      "dst": "SSHHEELLLL11",
+      "kind": "produces_signal",
+      "page": 9
+    },
+    {
+      "src": "R42",
+      "dst": "SSHHEELLLL22",
+      "kind": "produces_signal",
+      "page": 9
+    },
+    {
+      "src": "FB22",
+      "dst": "VCCB",
+      "kind": "filters",
+      "page": 9
+    }
+  ],
+  "designer_notes": [
+    {
+      "text": "Level Shifter",
+      "page": 9,
+      "attached_to_refdes": null,
+      "attached_to_net": null
+    },
+    {
+      "text": "includes ESD protection",
+      "page": 9,
+      "attached_to_refdes": "U28",
+      "attached_to_net": null
+    },
+    {
+      "text": "SD Card Slot",
+      "page": 9,
+      "attached_to_refdes": "JJ33",
+      "attached_to_net": null
+    },
+    {
+      "text": "License: CERN-OHL-S 2.0\nEngineer: Lukas F. Hartmann\nhttps://mntre.com\nMNT Research GmbH\nSheet: /Reform 2 SD Card/\nFile: reform2-sd.kicad_sch",
+      "page": 9,
+      "attached_to_refdes": null,
+      "attached_to_net": null
+    }
+  ],
+  "ambiguities": [
+    {
+      "description": "The SD card connector (J3/JJ33) refdes is visible in the image but not in the provided REFDES grounding set; it is referenced in net labels (SSHHEELLLL11, SSHHEELLLL22, CCLLKK, DDAATT00-DDAATT22, CCMMDD, VVDDDD, VVSSSS, CCAARRDD__DDEETTEECCTT, WWRRIITTEE__PPRROOTTEECCTT, CCDD//DDAATT33) so its pins and nets cannot be fully captured.",
+      "page": 9,
+      "related_refdes": [
+        "JJ33"
+      ],
+      "related_nets": [
+        "SSHHEELLLL11",
+        "SSHHEELLLL22",
+        "CCLLKK",
+        "DDAATT00",
+        "DDAATT11",
+        "DDAATT22",
+        "CCMMDD",
+        "VVDDDD",
+        "VVSSSS",
+        "CCAARRDD__DDEETTEECCTT",
+        "WWRRIITTEE__PPRROOTTEECCTT",
+        "CCDD//DDAATT33"
+      ]
+    },
+    {
+      "description": "Level shifter IC for SD data lines (labeled UU88 / TTXXSS00110088EEPPWW in the grounding tokens) appears in the schematic image but its refdes is not in the grounding REFDES set; pins and nets for that device are unresolved.",
+      "page": 9,
+      "related_refdes": [
+        "UU88"
+      ],
+      "related_nets": [
+        "SD2_DATA0",
+        "SD2_DATA1",
+        "SD2_DATA2",
+        "SD2_DATA3",
+        "SD2_CMD",
+        "DDAATT00",
+        "DDAATT11",
+        "DDAATT22",
+        "CCMMDD"
+      ]
+    },
+    {
+      "description": "Capacitors C137 and C138 (10uF and 0.1uF) are visible on the schematic near VCCB/GND but their refdes values are not in the grounding REFDES set, so they cannot be emitted.",
+      "page": 9,
+      "related_refdes": [
+        "C137",
+        "C138"
+      ],
+      "related_nets": [
+        "VCCB",
+        "GND"
+      ]
+    },
+    {
+      "description": "Capacitor C16B (0.1uF) is visible near U28 VCCA but its refdes is not in the grounding REFDES set; it may be part of C168 or a separate unlisted component.",
+      "page": 9,
+      "related_refdes": [
+        "C16B"
+      ],
+      "related_nets": [
+        "VCCA",
+        "GND"
+      ]
+    },
+    {
+      "description": "Net label CC5566 visible in grounding tokens but not clearly traceable to a specific pin in the image.",
+      "page": 9,
+      "related_refdes": [],
+      "related_nets": [
+        "CC5566"
+      ]
+    },
+    {
+      "description": "Net labels CC113377 and CC113388 visible in grounding tokens and near the SD connector area but specific pin connections not clearly legible.",
+      "page": 9,
+      "related_refdes": [],
+      "related_nets": [
+        "CC113377",
+        "CC113388"
+      ]
+    }
+  ]
+}

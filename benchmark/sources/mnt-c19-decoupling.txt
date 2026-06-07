@@ -1,0 +1,1 @@
+C19 is a 100nF decoupling capacitor on the +3V3 rail near U12. A hard short of any decoupling cap on this rail collapses +3V3 to ground.

@@ -1,0 +1,98 @@
+{
+  "title": "Bibliothèque mémoire",
+  "subtitle": "Knowledge pack déterministe produit par le pipeline V2. Parcours le registre, le graphe de connaissances, les règles de diagnostic, les fiches composants et le verdict d'audit.",
+  "title_with_device": "Bibliothèque mémoire <span class=\"sub\" style=\"color:var(--text-3);font-weight:400;font-size:14px;margin-left:10px\">· {device}</span>{form}",
+  "picker": {
+    "label": "Pack",
+    "empty_option": "— aucun pack —"
+  },
+  "search": {
+    "placeholder": "Filtrer dans le pack (refdes, symptôme, mécanisme…)",
+    "esc_hint": "ESC efface"
+  },
+  "blocks": {
+    "registry_heading": "Vocabulaire canonique",
+    "graph_heading": "Graphe de connaissances",
+    "rules_heading": "Règles de diagnostic",
+    "dictionary_heading": "Fiches composants",
+    "audit_heading": "Verdict d'audit"
+  },
+  "empty": {
+    "title": "Aucun pack disponible",
+    "body_default": "Aucun pack de connaissances n'est disponible. Lance le pipeline pour en générer un.",
+    "load_failed": "Impossible de charger le pack « {slug} »."
+  },
+  "verdict": {
+    "none_title": "Aucun audit n'a encore été écrit pour ce pack.",
+    "none_label": "AUDIT · non exécuté",
+    "approved_label": "AUDIT · approuvé",
+    "needs_revision_label": "AUDIT · révision",
+    "rejected_label": "AUDIT · rejeté",
+    "unknown_label": "AUDIT · inconnu",
+    "consistency": "cohérence"
+  },
+  "counts": {
+    "components": "composants",
+    "signals": "signaux",
+    "nodes": "nœuds",
+    "edges": "arêtes",
+    "rules": "règles",
+    "sheets": "fiches",
+    "rules_count": "<b>{n}</b> règles",
+    "rules_count_zero": "<b>0</b> règles",
+    "sheets_count": "<b>{n}</b> fiches",
+    "sheets_count_zero": "<b>0</b> fiches",
+    "registry_count": "<b>{c}</b> composants · <b>{s}</b> signaux",
+    "graph_count": "<b>{n}</b> nœuds · <b>{e}</b> arêtes"
+  },
+  "registry": {
+    "missing": "registry.json absent — pipeline non exécuté.",
+    "components_heading": "Composants ({n})",
+    "signals_heading": "Signaux ({n})",
+    "no_components": "Aucun composant.",
+    "no_signals": "Aucun signal.",
+    "th_refdes": "Refdes",
+    "th_type": "Type",
+    "th_aliases": "Alias",
+    "th_description": "Description",
+    "th_canonical": "Nom canonique",
+    "th_nominal_voltage": "Tension nominale"
+  },
+  "graph": {
+    "missing": "knowledge_graph.json absent.",
+    "no_edges": "Aucune arête dans le graphe.",
+    "stat_symptoms": "Symptômes",
+    "stat_components": "Composants",
+    "stat_nets": "Nets",
+    "stat_edges": "Arêtes"
+  },
+  "rules": {
+    "missing": "rules.json absent.",
+    "none": "Aucune règle de diagnostic.",
+    "no_symptom": "(aucun symptôme)",
+    "h_symptoms": "Symptômes",
+    "h_likely_causes": "Causes probables",
+    "h_diagnostic_steps": "Étapes de diagnostic",
+    "h_sources": "Sources",
+    "expected": "attendu {value}",
+    "conf_label": "conf {value}"
+  },
+  "dictionary": {
+    "missing": "dictionary.json absent.",
+    "none": "Aucune fiche composant.",
+    "th_refdes": "Refdes",
+    "th_role": "Rôle",
+    "th_package": "Boîtier",
+    "th_failure_modes": "Modes de défaillance",
+    "th_notes": "Notes"
+  },
+  "audit": {
+    "missing": "audit_verdict.json absent — le pipeline n'a pas encore audité ce pack.",
+    "headline_approved": "Audit approuvé — le pack est cohérent avec le registre.",
+    "headline_needs_revision": "Audit demande une révision — dérive détectée, corrections attendues.",
+    "headline_rejected": "Audit rejeté — pack incohérent, non exploitable en l'état.",
+    "headline_unknown": "Statut d'audit inconnu.",
+    "files_to_rewrite": "Fichiers à réécrire",
+    "drift_heading": "Dérives détectées ({n})"
+  }
+}
