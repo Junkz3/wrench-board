@@ -12,6 +12,9 @@
 
 **📺 Demo video (3 min):** https://youtu.be/OZ2D_p82z6w
 
+> ☁️ **Don't want to self-host?** A managed version is coming at
+> [wrenchboard.cloud](https://wrenchboard.cloud) — [sign up for early access](https://wrenchboard.cloud).
+
 ![Wrench Board — boardview + diagnostic agent on an MNT Reform motherboard](docs/assets/screenshot-workbench.png)
 
 ## What it is
@@ -143,6 +146,14 @@ deterministic simulator against their own field cases. When the evolve
 loop discovers a rule that holds up, it surfaces a candidate pull request
 to the upstream repo. Right-to-repair, built in the open, by the people
 who actually do the repairs.
+
+## ☁️ Hosted version — WrenchBoard Cloud
+
+Prefer not to run it yourself? A fully-managed version is on the way at
+**[wrenchboard.cloud](https://wrenchboard.cloud)** — accounts and metered
+diagnostics with zero setup. **Sign up to be among the first to try it.**
+The engine in this repo stays open-source and self-hostable; the hosted
+layer is the optional managed product.
 
 ## Quickstart
 
