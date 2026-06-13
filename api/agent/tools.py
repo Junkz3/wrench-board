@@ -230,9 +230,10 @@ async def mb_record_finding(
 ) -> dict[str, Any]:
     """Persist a confirmed repair finding for cross-session learning.
 
-    JSON-first write to `memory/{slug}/field_reports/*.md`. When the MA
-    memory_stores flag is on, the same content is mirrored to the device's
-    memory store so native `memory_search` can surface it too.
+    JSON-first write to `memory/{slug}/field_reports/*.md`, scoped to the
+    session's tenant (`current_owner_ref()`) so a confirmed repair stays private
+    to its owner. When the MA memory_stores flag is on AND no tenant is bound
+    (self-host), the content is mirrored to the device's memory store too.
     """
     return await record_field_report(
         client=client,
@@ -244,6 +245,7 @@ async def mb_record_finding(
         notes=notes,
         session_id=session_id,
         memory_root=memory_root,
+        owner_ref=current_owner_ref(),
     )
 
 

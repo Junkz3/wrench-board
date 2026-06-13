@@ -480,14 +480,22 @@ async def get_pack_full(device_slug: str) -> dict:
 
 
 @router.get("/packs/{device_slug}/findings")
-async def list_device_findings(device_slug: str, limit: int = 50) -> list[dict]:
+async def list_device_findings(
+    device_slug: str,
+    limit: int = 50,
+    x_owner_ref: str | None = Header(default=None, alias="X-Owner-Ref"),
+) -> list[dict]:
     """Return every field report recorded for this device, newest first.
 
-    Same content the agent reads via grep on the FUSE mount, exposed to
-    the web UI so the Journal dashboard can render cross-session memory
-    without a WS round-trip. Strictly JSON-on-disk — no MA memory-store.
+    Scoped to the caller's tenant (`X-Owner-Ref`) so the Journal dashboard only
+    renders that tenant's own confirmed repairs — never another tenant's. None
+    (self-host) → the shared store. Strictly JSON-on-disk — no MA memory-store.
     """
-    return list_field_reports(device_slug=_validate_slug(device_slug), limit=limit)
+    return list_field_reports(
+        device_slug=_validate_slug(device_slug),
+        limit=limit,
+        owner_ref=x_owner_ref,
+    )
 
 
 @router.post("/packs/{device_slug}/expand")

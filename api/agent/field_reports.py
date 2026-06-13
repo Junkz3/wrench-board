@@ -141,8 +141,28 @@ def _slug_fragment(text: str, max_len: int = 32) -> str:
     return (frag or "unknown")[:max_len]
 
 
-def _reports_dir(device_slug: str, memory_root: Path) -> Path:
-    return memory_root / device_slug / "field_reports"
+# Owner refs are opaque tenant keys injected by the cloud front-door. Validate
+# before using one in a path (anti path-traversal) — mirrors live_graph's guard.
+_SAFE_OWNER = re.compile(r"^[A-Za-z0-9_.-]{1,64}$")
+
+
+def _reports_dir(
+    device_slug: str, memory_root: Path, owner_ref: str | None = None
+) -> Path:
+    """Field-report directory for (device, tenant).
+
+    owner_ref None → shared `memory/{slug}/field_reports/` (self-host +
+    pre-tenant back-compat). owner set → tenant-private
+    `memory/{slug}/_owners/{owner}/field_reports/`, so one tenant's confirmed
+    repairs never surface in another's session. Opt-in cross-tenant sharing is
+    a separate, explicit system layered on top later.
+    """
+    base = memory_root / device_slug
+    if owner_ref:
+        if not _SAFE_OWNER.match(owner_ref):
+            raise ValueError(f"invalid owner_ref: {owner_ref!r}")
+        base = base / "_owners" / owner_ref
+    return base / "field_reports"
 
 
 async def record_field_report(
@@ -156,8 +176,13 @@ async def record_field_report(
     notes: str | None = None,
     session_id: str | None = None,
     memory_root: Path | None = None,
+    owner_ref: str | None = None,
 ) -> dict[str, Any]:
     """Write a new field report. JSON-first; MA mirror when the flag is on.
+
+    `owner_ref` (the tenant) scopes the report to a private per-tenant directory
+    and suppresses the shared-device MA mirror, so a confirmed repair never leaks
+    across tenants. None → shared/self-host behaviour (unchanged).
 
     Returns a status dict — tests and telemetry both key on it. Never raises:
     MA mirror failure does NOT fail the JSON write; the audit record stands.
@@ -187,13 +212,14 @@ async def record_field_report(
     )
     markdown = report.to_markdown()
 
-    reports_dir = _reports_dir(device_slug, memory_root)
+    reports_dir = _reports_dir(device_slug, memory_root, owner_ref)
     reports_dir.mkdir(parents=True, exist_ok=True)
     file_path = reports_dir / f"{report_id}.md"
     file_path.write_text(markdown, encoding="utf-8")
     logger.info(
-        "[FieldReport] Wrote slug=%s refdes=%s report_id=%s",
+        "[FieldReport] Wrote slug=%s owner=%s refdes=%s report_id=%s",
         device_slug,
+        owner_ref or "-",
         refdes,
         report_id,
     )
@@ -204,6 +230,13 @@ async def record_field_report(
         "json_status": "written",
         "ma_mirror_status": "skipped:flag_disabled",
     }
+
+    # A bound tenant means the report is private — never mirror it to the shared
+    # per-device MA store (the agent greps that store cross-tenant in managed
+    # mode). Opt-in cross-tenant sharing is a separate system layered later.
+    if owner_ref:
+        status["ma_mirror_status"] = "skipped:tenant_private"
+        return status
 
     if not settings.ma_memory_store_enabled:
         return status
@@ -255,18 +288,20 @@ def list_field_reports(
     memory_root: Path | None = None,
     limit: int = 20,
     filter_refdes: str | None = None,
+    owner_ref: str | None = None,
 ) -> list[dict[str, Any]]:
     """Return reports sorted newest-first, filtered by refdes when supplied.
 
     Pure disk read — the JSON-backed path that works without MA access.
     Used by the `/pipeline/packs/{slug}/findings` HTTP endpoint and as a
-    test helper. The diagnostic agent reads the same content via grep on
-    the FUSE mount (`/mnt/memory/wrench-board-{slug}/field_reports/`)
+    test helper. `owner_ref` scopes the read to one tenant's private reports
+    (None → shared/self-host). The diagnostic agent reads the same content via
+    grep on the FUSE mount (`/mnt/memory/wrench-board-{slug}/field_reports/`)
     rather than through a wrapper tool.
     """
     settings = get_settings()
     memory_root = memory_root or Path(settings.memory_root)
-    reports_dir = _reports_dir(device_slug, memory_root)
+    reports_dir = _reports_dir(device_slug, memory_root, owner_ref)
     if not reports_dir.exists():
         return []
 

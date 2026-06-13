@@ -974,6 +974,7 @@ async def _dispatch_mb_tool(
             query=payload.get("query"),
             refdes=payload.get("refdes"),
             limit=payload.get("limit", 8),
+            owner_ref=current_owner_ref(),
         )
         return {"ok": True, "reports": reports, "count": len(reports)}
     if name == "mb_search_patterns":
