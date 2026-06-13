@@ -1,6 +1,7 @@
 // First-diagnostic coaching — a one-shot guided tour of the repair workspace,
 // played the very first time a diagnostic dashboard opens (gated by the
-// `wb_first_diag_seen` localStorage flag). Unlike a static card, this walks the
+// profile's `state.first_diag_seen` flag — server-side so it's cross-device —
+// via onboarding_state.js, with localStorage as a fast pre-gate). Unlike a static card, this walks the
 // real surfaces in workflow order with anchored mascot bubbles, and actually
 // NAVIGATES the rail views (PCB / schematic / graph) so the technician sees each
 // page change in context — closing the "abandoned on the repair screen" gap.
@@ -18,8 +19,7 @@ import { t } from "../../../i18n.js";
 import { mountMascot, setMascotState } from "../../../mascot.js";
 import { showBubble, hideBubble } from "../../../mascot_bubble.js";
 import { repairHash } from "../../../router.js";
-
-const FLAG = "wb_first_diag_seen";
+import { hasSeenOnboarding, markOnboardingSeen } from "../../../onboarding_state.js";
 
 // On the shipped demo device the tour is "live": it highlights a real component
 // on the board and pre-fills the chat with a concrete question, so the value is
@@ -30,6 +30,7 @@ const DEMO_SLUG = "mnt-reform-motherboard";
 const DEMO_HIGHLIGHT_REFDES = "U14";
 
 let _running = false;   // re-entry guard (renderRepairDashboard re-runs on nav)
+let _forceNext = false; // one-shot bypass: replay the tour once despite the seen flag
 let _aborted = false;   // set when the tech hits "Skip the tour"
 let _wasDemo = false;   // true while the demo (example) tour is the one playing
 let _onDone = null;     // optional completion hook (example-device handoff)
@@ -84,11 +85,20 @@ function _step({ anchor, text, placement = "bottom", mascot = "idle", last = fal
   });
 }
 
+// Arm a one-shot replay of the workspace tour, ignoring the persisted "seen"
+// flag for the next dashboard render. Used by the landing onboarding's "see the
+// example" handoff so the demo tour plays even for a tech who already saw it.
+export function forceNextDiagCoaching() {
+  _forceNext = true;
+}
+
 export async function maybeShowFirstDiagCoaching(rid, { onDone = null, slug = null } = {}) {
   if (_running) return;
-  try {
-    if (localStorage.getItem(FLAG)) return;
-  } catch { return; } // private mode — skip rather than nag every render
+  if (_forceNext) {
+    _forceNext = false; // consume the one-shot bypass
+  } else if (hasSeenOnboarding("first_diag_seen")) {
+    return; // already toured (server truth; localStorage fallback pre-hydration)
+  }
 
   const isDemo = slug === DEMO_SLUG; // live tour (highlight + prefilled chat)
   _wasDemo = isDemo;
@@ -316,8 +326,8 @@ export async function maybeShowFirstDiagCoaching(rid, { onDone = null, slug = nu
 // covered. The tour's closing step points the tech at the chat toggle to open
 // it themselves.
 export function firstDiagTourPending() {
-  if (_running) return true;
-  try { return !localStorage.getItem(FLAG); } catch { return false; }
+  if (_running || _forceNext) return true;
+  return !hasSeenOnboarding("first_diag_seen");
 }
 
 export function finishFirstDiagCoaching() {
@@ -330,7 +340,7 @@ export function finishFirstDiagCoaching() {
     document.getElementById("schInspector")?.classList.remove("open");
   } catch { /* best effort */ }
   if (_mascotHost) { _mascotHost.remove(); _mascotHost = null; _mascot = null; }
-  try { localStorage.setItem(FLAG, "1"); } catch { /* private mode — best effort */ }
+  markOnboardingSeen("first_diag_seen"); // server (cross-device) + localStorage cache
   _running = false;
   // Fire the completion hook last, after teardown + flag, so the handoff caller
   // (landing onboarding, via window.__wbExampleTourOnDone) resumes cleanly.

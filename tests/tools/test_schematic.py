@@ -816,3 +816,114 @@ def test_simulate_query_without_session_omits_probe_route(memory_root, graph):
     )
     assert result["found"] is True
     assert "probe_route" not in result
+
+
+# ----------------------------------------------------------------------
+# Untraced-component annotation (A2337 'U7000' incident)
+# ----------------------------------------------------------------------
+
+
+def _untraced_graph() -> ElectricalGraph:
+    """One traced producer (U7), one untraced alias-page title (U9000) that
+    nonetheless sources a rail and sits in a boot phase."""
+    return ElectricalGraph(
+        device_slug=SLUG,
+        components={
+            "U7": ComponentNode(
+                refdes="U7",
+                type="ic",
+                pages=[1],
+                pins=[PagePin(number="1", role="power_in", net_label="+5V")],
+            ),
+            "U9000": ComponentNode(
+                refdes="U9000", type="ic", pages=[79], evidence="untraced"
+            ),
+        },
+        nets={"+9V": NetNode(label="+9V", is_power=True, pages=[79])},
+        power_rails={
+            "+9V": PowerRail(
+                label="+9V", voltage_nominal=9.0,
+                source_refdes="U9000", consumers=["U7"],
+            ),
+        },
+        boot_sequence=[
+            BootPhase(index=1, name="PHASE 1",
+                      rails_stable=["+9V"],
+                      components_entering=["U9000", "U7"]),
+        ],
+        quality=SchematicQualityReport(
+            total_pages=1, pages_parsed=1, components_untraced=1,
+        ),
+    )
+
+
+def test_component_query_flags_untraced(memory_root):
+    _write_graph(memory_root, _untraced_graph())
+    r = mb_schematic_graph(
+        device_slug=SLUG, memory_root=memory_root, query="component", refdes="U9000"
+    )
+    assert r["found"] is True
+    assert r["untraced"] is True
+    assert "Verify" in r["untraced_hint"]
+
+
+def test_component_query_no_flag_when_traced(memory_root):
+    _write_graph(memory_root, _untraced_graph())
+    r = mb_schematic_graph(
+        device_slug=SLUG, memory_root=memory_root, query="component", refdes="U7"
+    )
+    assert r["found"] is True
+    assert "untraced" not in r
+
+
+def test_rail_query_flags_untraced_source(memory_root):
+    _write_graph(memory_root, _untraced_graph())
+    r = mb_schematic_graph(
+        device_slug=SLUG, memory_root=memory_root, query="rail", label="+9V"
+    )
+    assert r["found"] is True
+    assert r["source_refdes"] == "U9000"
+    assert r["source_untraced"] is True
+
+
+def test_boot_phase_query_lists_untraced_refdes(memory_root):
+    _write_graph(memory_root, _untraced_graph())
+    r = mb_schematic_graph(
+        device_slug=SLUG, memory_root=memory_root, query="boot_phase", index=1
+    )
+    assert r["found"] is True
+    assert r["untraced_refdes"] == ["U9000"]
+    assert "untraced_hint" in r
+
+
+def test_critical_path_flags_untraced_spofs(memory_root):
+    _write_graph(memory_root, _untraced_graph())
+    r = mb_schematic_graph(
+        device_slug=SLUG, memory_root=memory_root, query="critical_path"
+    )
+    assert r["found"] is True
+    flagged = [s for s in r["top_spofs"] if s.get("untraced")]
+    assert [s["label"] for s in flagged] == ["U9000"]
+    assert "untraced_hint" in r
+
+
+def test_untraced_legacy_fallback_without_evidence_field(memory_root):
+    """Graphs compiled before the `evidence` stamp: a pin-less component must
+    still be flagged via the read-time fallback."""
+    graph = _untraced_graph()
+    raw = json.loads(graph.model_dump_json())
+    for comp in raw["components"].values():
+        comp.pop("evidence", None)
+    raw["quality"].pop("components_untraced", None)
+    pack_dir = memory_root / SLUG
+    pack_dir.mkdir(parents=True, exist_ok=True)
+    (pack_dir / "electrical_graph.json").write_text(json.dumps(raw))
+
+    r = mb_schematic_graph(
+        device_slug=SLUG, memory_root=memory_root, query="component", refdes="U9000"
+    )
+    assert r["untraced"] is True
+    r = mb_schematic_graph(
+        device_slug=SLUG, memory_root=memory_root, query="component", refdes="U7"
+    )
+    assert "untraced" not in r

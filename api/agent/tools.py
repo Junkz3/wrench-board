@@ -27,13 +27,13 @@ from api.session.state import SessionState
 
 
 def _unflatten_effective(eff: dict[str, Any]) -> dict[str, Any]:
-    """Convertit la forme effective T8 {kind: {items:[...]}} vers la forme
-    attendue par les tools mb_* : {registry:{components,signals}, dictionary:
-    {entries}, rules:{rules}}.
+    """Convert the effective shape {kind: {items:[...]}} into the shape the
+    mb_* tools expect: {registry:{components,signals}, dictionary:{entries},
+    rules:{rules}}.
 
-    Registry : un item est un composant si kind (insensible à la casse) ∈
-    COMPONENT_KINDS, sinon un signal (couvre les packs legacy lowercase
-    'pmic'/'power_rail' aussi bien que le T8 uppercase).
+    Registry: an item is a component when its kind (case-insensitive) is in
+    COMPONENT_KINDS, otherwise a signal (covers both legacy lowercase packs
+    'pmic'/'power_rail' and the uppercase form).
     """
     reg_items = eff.get("registry", {}).get("items", [])
     components = [it for it in reg_items if str(it.get("kind", "")).upper() in COMPONENT_KINDS]
@@ -63,8 +63,8 @@ def _load_pack(
     memory_root: Path,
     session: SessionState | None = None,
 ) -> dict[str, Any]:
-    # T8 : migration idempotente legacy → baseline/ au premier accès, puis lecture
-    # de la vue effective (baseline + promoted, résolution par clé canonique).
+    # Idempotent legacy → baseline/ migration on first access, then read the
+    # effective view (baseline + promoted, resolved by canonical key).
     migrate_pack_if_needed(memory_root, slug)
     owner_ref = current_owner_ref()
 
@@ -312,9 +312,9 @@ async def mb_expand_knowledge(
             focus_refdes=focus_refdes or [],
             client=client,
             memory_root=memory_root,
-            # T8 : scope l'enrichissement au tenant (added_by_tenant dans la
-            # provenance). Ferme le résidu de fuite T6 — le cloud reste le
-            # gatekeeper, l'owner_ref est opaque côté moteur.
+            # Scope the enrichment to the tenant (added_by_tenant in the
+            # provenance). The cloud stays the gatekeeper; the owner_ref is
+            # opaque on the engine side.
             owner_ref=current_owner_ref(),
         )
         summary["ok"] = True

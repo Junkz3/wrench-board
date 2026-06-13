@@ -94,6 +94,10 @@ class TaxonomyPackEntry(BaseModel):
     # "ready" vs "waiting for graph" (a pack can exist with no parts_index yet).
     has_parts_index: bool = False
     device_kind: str | None = None
+    # Every carnet alias of this device (board# / Apple model / EMC /
+    # codename / marketing) so the new-repair autocomplete matches any of them,
+    # not just the label. Empty when the device has no registry fiche yet.
+    aliases: list[str] = Field(default_factory=list)
 
 
 class TaxonomyTree(BaseModel):
@@ -152,6 +156,44 @@ class RepairRequest(BaseModel):
             "unset for standalone/self-host, where all repairs share one owner."
         ),
     )
+    allow_expand: bool = Field(
+        default=True,
+        description=(
+            "Capability flag from a multi-tenant front-door: when False, a "
+            "complete-pack + uncovered-symptom request must NOT fire the targeted "
+            "expand round (it is LLM spend) — the engine answers expand_blocked=True, "
+            "removes the just-persisted ticket, and the front-door maps that to its "
+            "own access policy. The engine just honors the flag (like owner_ref, "
+            "this is NOT a security boundary). Default "
+            "True = standalone/self-host behaviour unchanged."
+        ),
+    )
+
+
+class DisambiguationCandidate(BaseModel):
+    """One candidate board when a free-text device label is ambiguous: the
+    term fans out to several same-family siblings and the tech must pick one."""
+
+    device_slug: str
+    family: str | None = None
+    facets: dict[str, list[str]] = Field(default_factory=dict)
+
+
+class ResolveDeviceRequest(BaseModel):
+    """Resolve a free device label to a canonical identity without creating a
+    repair or starting a build. The cloud calls this BEFORE its quota gate
+    so it can adopt the canonical slug and surface ambiguity for free."""
+
+    device_label: str = Field(min_length=1, max_length=200)
+    device_slug: str | None = Field(
+        default=None, description="When pinned, returned verbatim — no resolution."
+    )
+
+
+class ResolveDeviceResponse(BaseModel):
+    canonical_slug: str
+    ambiguous: bool = False
+    candidates: list[DisambiguationCandidate] = Field(default_factory=list)
 
 
 class RepairResponse(BaseModel):
@@ -188,6 +230,41 @@ class RepairResponse(BaseModel):
             "One-sentence explanation from the coverage classifier — set alongside "
             "`matched_rule_id` when the symptom is already covered, otherwise null."
         ),
+    )
+    queued: bool = Field(
+        default=False,
+        description=(
+            "True when the build was accepted but is WAITING behind the concurrent-"
+            "build cap rather than running immediately. The UI shows a waiting state; "
+            "the build starts (and the normal pipeline events flow) once a slot frees."
+        ),
+    )
+    queue_position: int | None = Field(
+        default=None,
+        description="1-based position in the build queue when `queued` is true (1 = next to run); null otherwise.",
+    )
+    expand_blocked: bool = Field(
+        default=False,
+        description=(
+            "True when the pack is complete, the symptom is uncovered, and the "
+            "caller sent allow_expand=false: no expand was launched and the ticket "
+            "was NOT kept (repair_id is empty) so a later allowed retry re-enters "
+            "the normal flow instead of dedup-reusing a dead ticket. The front-door "
+            "maps this to its own access policy."
+        ),
+    )
+    needs_disambiguation: bool = Field(
+        default=False,
+        description=(
+            "True when the free-text device label was ambiguous (matched several "
+            "same-family boards) and no device_slug was pinned: NO repair was "
+            "created and NO pipeline started. The UI shows `candidates` so the tech "
+            "picks one, then re-submits with the chosen device_slug."
+        ),
+    )
+    candidates: list[DisambiguationCandidate] = Field(
+        default_factory=list,
+        description="The candidate boards to choose from when needs_disambiguation is true.",
     )
 
 

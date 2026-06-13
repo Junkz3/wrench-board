@@ -25,6 +25,8 @@ from api.pipeline.prompts import (
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Awaitable, Callable
+
     from api.pipeline.telemetry.token_stats import PhaseTokenStats
 
 logger = logging.getLogger("wrench_board.pipeline.scout")
@@ -105,6 +107,7 @@ async def run_scout(
     min_sources: int = 3,
     max_retries: int = 1,
     stats: PhaseTokenStats | None = None,
+    on_event: Callable[[dict], Awaitable[None]] | None = None,
 ) -> str:
     """Execute Phase 1 — return the raw research Markdown dump.
 
@@ -137,6 +140,7 @@ async def run_scout(
             max_continuations=max_continuations,
             attempt=attempt,
             stats=stats,
+            on_event=on_event,
         )
         last_dump = dump
         last_assessment = assess_dump(
@@ -228,6 +232,7 @@ async def _scout_once(
     max_continuations: int,
     attempt: int,
     stats: PhaseTokenStats | None = None,
+    on_event: Callable[[dict], Awaitable[None]] | None = None,
 ) -> str:
     """One end-to-end Scout run, including server-side `pause_turn` handling."""
     user_prompt = _build_user_prompt(
@@ -250,6 +255,13 @@ async def _scout_once(
 
     for iteration in range(max_continuations + 1):
         logger.info("[Scout] API call iteration=%d (attempt=%d)", iteration + 1, attempt + 1)
+        # Live sub-step: the landing line reads "recherche web · tour N" so a
+        # long multi-round Scout phase isn't a silent spinner.
+        if on_event is not None:
+            await on_event({
+                "type": "phase_step", "phase": "scout", "step": "search_round",
+                "index": iteration + 1,
+            })
         effort = "xhigh" if str(model).startswith("claude-opus-4-") else "high"
         response = await client.messages.create(
             model=model,
@@ -269,6 +281,7 @@ async def _scout_once(
                 output_tokens=response.usage.output_tokens,
                 cache_read=getattr(response.usage, "cache_read_input_tokens", 0) or 0,
                 cache_write=getattr(response.usage, "cache_creation_input_tokens", 0) or 0,
+                model=getattr(response, "model", None),
             )
 
         if response.stop_reason == "pause_turn":

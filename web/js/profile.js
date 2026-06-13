@@ -3,7 +3,7 @@
 // and injects it into #profileSection. Subsequent activations skip the fetch.
 // Consumes GET /profile and renders identity / tools / skills / preferences.
 // Tool toggles → PUT /profile/tools ; preference changes → PUT /profile/preferences
-// ; skill click opens the evidence drawer. Identity modal handler lands in Task 12.
+// ; skill click opens the evidence drawer. Identity modal handler is wired separately.
 
 import { escapeHtml as escHtml } from "./shared/dom.js";
 
@@ -43,9 +43,9 @@ function fmtYears(n) {
 }
 
 function fmtUpdated(iso) {
-  if (!iso) return "—";
+  if (!iso) return "…";
   const d = new Date(iso);
-  if (isNaN(d)) return "—";
+  if (isNaN(d)) return "…";
   const locale = currentLocale() === "fr" ? "fr-FR" : "en-US";
   const date = d.toLocaleDateString(locale, { day: "numeric", month: "short" });
   return window.t("profile.head.updated", { date });
@@ -57,7 +57,7 @@ function renderHead() {
   const id = _state.profile.identity;
   const level = _state.derived.level;
   document.getElementById("profAvatar").textContent =
-    id.avatar || (id.name?.slice(0, 2)?.toUpperCase() || "—");
+    id.avatar || (id.name?.slice(0, 2)?.toUpperCase() || "?");
   document.getElementById("profName").textContent = id.name || window.t("profile.head.no_name");
   const levelEl = document.getElementById("profLevel");
   levelEl.textContent = level.toUpperCase();

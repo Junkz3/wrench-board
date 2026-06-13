@@ -31,13 +31,21 @@ from unittest.mock import MagicMock
 import pytest
 
 from api.pipeline import writers as writers_mod
+from api.pipeline.graph_truth import GraphTruth
 from api.pipeline.schemas import (
+    ComponentSheet,
     Dictionary,
     KnowledgeGraph,
+    KnowledgeNode,
     Registry,
     RegistryComponent,
     RegistrySignal,
     RulesSet,
+)
+from api.pipeline.schematic.schemas import (
+    ComponentNode,
+    ElectricalGraph,
+    SchematicQualityReport,
 )
 
 # ---------------------------------------------------------------------------
@@ -48,7 +56,7 @@ from api.pipeline.schemas import (
 @pytest.fixture
 def registry() -> Registry:
     """Minimal registry with a couple of entries to give the prefix non-trivial JSON."""
-    # T8 : kind en majuscules (PMIC, CAPACITOR, POWER_RAIL)
+    # kind en majuscules (PMIC, CAPACITOR, POWER_RAIL)
     return Registry(
         device_label="Demo Device",
         components=[
@@ -152,6 +160,69 @@ async def test_cartographe_dispatched_before_clinicien_and_lexicographe(
     )
     assert by_tool[writers_mod.SUBMIT_RULES_TOOL_NAME] > 1
     assert by_tool[writers_mod.SUBMIT_DICT_TOOL_NAME] > 1
+
+
+async def test_emits_phase_step_as_each_writer_completes(
+    monkeypatch, registry, dummy_outputs
+):
+    """run_writers_parallel emits one `phase_step writer_done` per writer.
+
+    The landing UI renders these live ("graphe ✓", "règles ✓", "dico ✓") as
+    each of the 3 writers returns. The event carries the artifact's count so
+    the line can read "graphe ✓ 142 nœuds".
+    """
+    captured: list[dict[str, Any]] = []
+    monkeypatch.setattr(
+        writers_mod,
+        "call_with_forced_tool",
+        _make_fake_call(captured, dummy_outputs),
+    )
+
+    steps: list[dict[str, Any]] = []
+
+    async def collect(ev: dict[str, Any]) -> None:
+        steps.append(ev)
+
+    await writers_mod.run_writers_parallel(
+        client=MagicMock(),
+        cartographe_model="opus",
+        clinicien_model="opus",
+        lexicographe_model="haiku",
+        device_label="Demo",
+        raw_dump="# dump",
+        registry=registry,
+        cache_warmup_seconds=0.0,
+        on_event=collect,
+    )
+
+    writer_steps = [
+        e for e in steps
+        if e.get("type") == "phase_step" and e.get("step") == "writer_done"
+    ]
+    assert {e["writer"] for e in writer_steps} == {"graph", "rules", "dict"}
+    assert all(e["phase"] == "writers" for e in writer_steps)
+    assert all("count" in e for e in writer_steps)
+
+
+async def test_writers_run_without_on_event(monkeypatch, registry, dummy_outputs):
+    """on_event is optional — omitting it must not crash the writers phase."""
+    captured: list[dict[str, Any]] = []
+    monkeypatch.setattr(
+        writers_mod,
+        "call_with_forced_tool",
+        _make_fake_call(captured, dummy_outputs),
+    )
+    kg, rules, dictionary = await writers_mod.run_writers_parallel(
+        client=MagicMock(),
+        cartographe_model="opus",
+        clinicien_model="opus",
+        lexicographe_model="haiku",
+        device_label="Demo",
+        raw_dump="# dump",
+        registry=registry,
+        cache_warmup_seconds=0.0,
+    )
+    assert kg is not None and rules is not None and dictionary is not None
 
 
 async def test_cache_warmup_sleep_is_awaited_between_writer1_and_writers_2_3(
@@ -464,6 +535,11 @@ async def test_revision_uses_same_cached_prefix_as_initial_writers(
         file_name="rules",
         revision_brief="Add a missing 3V3 rule",
         previous_output_json="{}",
+        # current_kg/current_rules/current_dictionary are now REQUIRED (RC1 fix):
+        # the reviser must see the up-to-date sibling files.
+        current_kg=KnowledgeGraph(nodes=[], edges=[]),
+        current_rules=RulesSet(rules=[]),
+        current_dictionary=Dictionary(entries=[]),
     )
 
     assert len(captured) == 1
@@ -475,3 +551,268 @@ async def test_revision_uses_same_cached_prefix_as_initial_writers(
     assert len(msg["content"]) == 2
     # The forced tool must be the rules submitter (writer 2 surface).
     assert captured[0]["forced_tool_name"] == writers_mod.SUBMIT_RULES_TOOL_NAME
+
+
+# ---------------------------------------------------------------------------
+# RC1 — revisers see the CURRENT siblings + ground truth, fixed kg→rules→dict order
+# ---------------------------------------------------------------------------
+
+
+def _mini_graph() -> ElectricalGraph:
+    """A tiny compiled graph so the query-loop dispatch has a real GraphTruth."""
+    return ElectricalGraph(
+        device_slug="mini",
+        components={
+            "U7": ComponentNode(refdes="U7", type="ic", kind="ic", role="pmic", pages=[1]),
+        },
+        nets={},
+        power_rails={},
+        typed_edges=[],
+        quality=SchematicQualityReport(total_pages=1, pages_parsed=1),
+    )
+
+
+async def test_reviser_sees_current_siblings(monkeypatch, registry, dummy_outputs):
+    """Revising `rules` must surface the CURRENT kg + dictionary as read-only
+    sibling sections — and NOT a section for `rules` itself (that's the baseline).
+
+    This is the RC1 fix: a reviser that only ever saw its own previous output
+    re-aligned cross-file references against stale siblings. The captured request
+    suffix must carry distinctive marker strings from both current siblings."""
+    captured: list[dict[str, Any]] = []
+    monkeypatch.setattr(
+        writers_mod,
+        "call_with_forced_tool",
+        _make_fake_call(captured, dummy_outputs),
+    )
+
+    current_kg = KnowledgeGraph(
+        nodes=[KnowledgeNode(id="N-U7", kind="component", label="KG_MARKER_SIBLING U7")],
+        edges=[],
+    )
+    current_dictionary = Dictionary(
+        entries=[ComponentSheet(canonical_name="U7", notes="DICT_MARKER_SIBLING note")],
+    )
+
+    await writers_mod.run_single_writer_revision(
+        client=MagicMock(),
+        cartographe_model="opus",
+        clinicien_model="opus",
+        lexicographe_model="haiku",
+        device_label="Demo Device",
+        raw_dump="# dump",
+        registry=registry,
+        file_name="rules",
+        revision_brief="Add a missing 3V3 rule",
+        previous_output_json="{}",
+        current_kg=current_kg,
+        current_rules=RulesSet(rules=[]),
+        current_dictionary=current_dictionary,
+    )
+
+    assert len(captured) == 1
+    # The siblings live in the revision SUFFIX (2nd content block) — the cached
+    # prefix stays identical for the writer cache.
+    suffix = captured[0]["messages"][0]["content"][1]["text"]
+    assert "# Current sibling files" in suffix
+    assert "## knowledge_graph (current)" in suffix
+    assert "## dictionary (current)" in suffix
+    assert "KG_MARKER_SIBLING" in suffix
+    assert "DICT_MARKER_SIBLING" in suffix
+    # The reviser's OWN file must NOT appear as a sibling — it's the baseline.
+    assert "## rules (current)" not in suffix
+
+
+async def test_apply_revisions_fixed_order_and_threading(registry):
+    """`_apply_revisions` revises in FIXED kg→rules→dict order (NOT the auditor's
+    `files_to_rewrite` order) AND threads the freshly-revised kg into the rules
+    reviser as `current_kg` — the two halves of the RC1 fix."""
+    from api.pipeline.orchestrator import _apply_revisions
+    from api.pipeline.schemas import AuditVerdict
+
+    # Distinct marker objects so we can prove the THREADED (revised) kg — not the
+    # original — reaches the rules reviser.
+    original_kg = KnowledgeGraph(
+        nodes=[KnowledgeNode(id="N-ORIG", kind="component", label="ORIGINAL")], edges=[]
+    )
+    revised_kg = KnowledgeGraph(
+        nodes=[KnowledgeNode(id="N-NEW", kind="component", label="REVISED")], edges=[]
+    )
+
+    # Marker pour prouver la 2e maille de la chaîne (rules → dictionary) :
+    # le réviseur dictionary doit recevoir le RulesSet fraîchement révisé.
+    revised_rules = RulesSet(rules=[])
+
+    call_order: list[str] = []
+    received_current_kg: dict[str, KnowledgeGraph] = {}
+    received_current_rules: dict[str, RulesSet] = {}
+
+    async def fake_revision(*, file_name, current_kg, current_rules, **kwargs):
+        call_order.append(file_name)
+        received_current_kg[file_name] = current_kg
+        received_current_rules[file_name] = current_rules
+        if file_name == "knowledge_graph":
+            return revised_kg
+        if file_name == "rules":
+            return revised_rules
+        return Dictionary(entries=[])
+
+    import api.pipeline.orchestrator as orch_mod
+
+    orig = orch_mod.run_single_writer_revision
+    orch_mod.run_single_writer_revision = fake_revision  # type: ignore[assignment]
+    try:
+        # Auditor asks in a DELIBERATELY scrambled order — must be ignored.
+        verdict = AuditVerdict(
+            overall_status="NEEDS_REVISION",
+            consistency_score=0.5,
+            drift_report=[],
+            files_to_rewrite=["rules", "knowledge_graph", "dictionary"],
+            revision_brief="fix things",
+        )
+        await _apply_revisions(
+            client=MagicMock(),
+            cartographe_model="opus",
+            clinicien_model="opus",
+            lexicographe_model="haiku",
+            device_label="Demo",
+            raw_dump="# dump",
+            registry=registry,
+            verdict=verdict,
+            current_kg=original_kg,
+            current_rules=RulesSet(rules=[]),
+            current_dictionary=Dictionary(entries=[]),
+        )
+    finally:
+        orch_mod.run_single_writer_revision = orig  # type: ignore[assignment]
+
+    # FIXED order regardless of the auditor's scrambled request.
+    assert call_order == ["knowledge_graph", "rules", "dictionary"]
+    # Threading: the rules reviser saw the FRESHLY revised kg, not the original.
+    assert received_current_kg["rules"] is revised_kg
+    assert received_current_kg["dictionary"] is revised_kg
+    # ... et le réviseur dictionary a reçu le rules FRAÎCHEMENT révisé (chaîne
+    # complète kg → rules → dictionary, pas seulement la 1re maille).
+    assert received_current_rules["dictionary"] is revised_rules
+
+
+async def test_reviser_tool_only_with_graph(monkeypatch, registry, dummy_outputs):
+    """Dispatch mirrors the auditor: `graph_truth=None` → a single forced call
+    offering ONLY the role's submit tool; a GraphTruth → the query loop offering
+    `query_graph` + the role's submit tool."""
+    # --- no graph → forced, submit-tool-only ---
+    forced_captured: list[dict[str, Any]] = []
+    monkeypatch.setattr(
+        writers_mod,
+        "call_with_forced_tool",
+        _make_fake_call(forced_captured, dummy_outputs),
+    )
+
+    await writers_mod.run_single_writer_revision(
+        client=MagicMock(),
+        cartographe_model="opus",
+        clinicien_model="opus",
+        lexicographe_model="haiku",
+        device_label="Demo",
+        raw_dump="# dump",
+        registry=registry,
+        file_name="rules",
+        revision_brief="fix",
+        previous_output_json="{}",
+        current_kg=KnowledgeGraph(nodes=[], edges=[]),
+        current_rules=RulesSet(rules=[]),
+        current_dictionary=Dictionary(entries=[]),
+        graph_truth=None,
+    )
+
+    assert len(forced_captured) == 1
+    tool_names = {t["name"] for t in forced_captured[0]["tools"]}
+    assert tool_names == {writers_mod.SUBMIT_RULES_TOOL_NAME}
+
+    # --- graph present → query loop, query_graph + submit tool ---
+    query_captured: dict[str, Any] = {}
+
+    async def fake_query(*, query_tool, submit_tool, submit_tool_name, output_schema, **kw):
+        query_captured["tools"] = [query_tool, submit_tool]
+        return dummy_outputs[output_schema]
+
+    monkeypatch.setattr(writers_mod, "call_with_query_tools", fake_query)
+
+    await writers_mod.run_single_writer_revision(
+        client=MagicMock(),
+        cartographe_model="opus",
+        clinicien_model="opus",
+        lexicographe_model="haiku",
+        device_label="Demo",
+        raw_dump="# dump",
+        registry=registry,
+        file_name="rules",
+        revision_brief="fix",
+        previous_output_json="{}",
+        current_kg=KnowledgeGraph(nodes=[], edges=[]),
+        current_rules=RulesSet(rules=[]),
+        current_dictionary=Dictionary(entries=[]),
+        ground_truth_report="(report)",
+        graph_truth=GraphTruth(_mini_graph()),
+    )
+
+    names = {t["name"] for t in query_captured["tools"]}
+    assert names == {"query_graph", writers_mod.SUBMIT_RULES_TOOL_NAME}
+
+
+def test_clinicien_task_id_example_matches_pattern():
+    """Le prompt ne doit pas enseigner un format d'id qui ne valide que grâce à
+    la normalisation _normalize_id (RULE-/rule- → R-) : l'exemple doit être
+    directement canonique."""
+    import re as _re
+
+    from api.pipeline.prompts import CLINICIEN_TASK
+    from api.pipeline.schemas import _RULE_ID_PATTERN
+
+    examples = _re.findall(r"'(rule-[^']*|R-[^']*)'", CLINICIEN_TASK)
+    assert examples, "id example missing from CLINICIEN_TASK"
+    for ex in examples:
+        assert _re.fullmatch(_RULE_ID_PATTERN, ex), ex
+
+
+async def test_apply_revisions_collects_reviser_stats():
+    """Chaque appel réviseur doit verser un PhaseTokenStats dans le sink — sans
+    ça, les tours query_graph des réviseurs (jusqu'à max_query_turns appels Opus
+    par fichier) disparaissent de token_stats.json et du total facturable."""
+    from unittest.mock import AsyncMock, MagicMock, patch
+
+    from api.pipeline.orchestrator import _apply_revisions
+    from api.pipeline.schemas import AuditVerdict
+
+    registry = Registry(device_label="Demo", components=[], signals=[])
+    verdict = AuditVerdict(
+        overall_status="NEEDS_REVISION",
+        consistency_score=0.5,
+        drift_report=[],
+        files_to_rewrite=["knowledge_graph", "rules"],
+        revision_brief="fix",
+    )
+    sink = []
+    fake = AsyncMock(side_effect=[KnowledgeGraph(nodes=[], edges=[]), RulesSet(rules=[])])
+    with patch("api.pipeline.orchestrator.run_single_writer_revision", new=fake):
+        await _apply_revisions(
+            client=MagicMock(),
+            cartographe_model="opus",
+            clinicien_model="opus",
+            lexicographe_model="haiku",
+            device_label="Demo",
+            raw_dump="# dump",
+            registry=registry,
+            verdict=verdict,
+            current_kg=KnowledgeGraph(nodes=[], edges=[]),
+            current_rules=RulesSet(rules=[]),
+            current_dictionary=Dictionary(entries=[]),
+            stats_sink=sink,
+            round_index=2,
+        )
+    assert [st.phase for st in sink] == [
+        "reviser_knowledge_graph_round_2",
+        "reviser_rules_round_2",
+    ]
+    # ... et chaque stats est bien passé à l'appel réviseur correspondant.
+    assert [c.kwargs["stats"] for c in fake.await_args_list] == sink

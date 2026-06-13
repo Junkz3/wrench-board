@@ -51,6 +51,66 @@ def test_repairs_endpoint_returns_id_and_slug(memory_root, client):
     assert body["pipeline_started"] is True
 
 
+def test_create_repair_adopts_board_number_as_canonical_slug(memory_root, client):
+    # free text with a board# resolves to the board# as canonical slug,
+    # not the naive slugify of the whole label.
+    with patch("api.pipeline.generate_knowledge_pack", new=AsyncMock(side_effect=_fake_pipeline)):
+        res = client.post(
+            "/pipeline/repairs",
+            data={"device_label": "MacBook Pro A1286 820-2533", "symptom": "no power on the board"},
+        )
+    assert res.status_code == 200
+    assert res.json()["device_slug"] == "820-2533"
+
+
+def test_create_repair_dedupes_aliases_to_same_slug(memory_root, client):
+    # Two differently-written inputs sharing the board# land on ONE pack slug.
+    with patch("api.pipeline.generate_knowledge_pack", new=AsyncMock(side_effect=_fake_pipeline)):
+        a = client.post(
+            "/pipeline/repairs",
+            data={"device_label": "820-2533", "symptom": "dead board, nothing happens"},
+        )
+        b = client.post(
+            "/pipeline/repairs",
+            data={"device_label": "logic board 820-2533 no power", "symptom": "totally different symptom text"},
+        )
+    assert a.json()["device_slug"] == "820-2533"
+    assert b.json()["device_slug"] == "820-2533"
+
+
+def test_create_repair_honors_explicit_device_slug(memory_root, client):
+    # An explicit device_slug (UI re-opening a pack) is pinned — resolution is skipped.
+    with patch("api.pipeline.generate_knowledge_pack", new=AsyncMock(side_effect=_fake_pipeline)):
+        res = client.post(
+            "/pipeline/repairs",
+            data={"device_label": "Whatever 820-2533", "symptom": "some symptom here",
+                  "device_slug": "pinned-pack"},
+        )
+    assert res.json()["device_slug"] == "pinned-pack"
+
+
+def test_create_repair_returns_disambiguation_for_ambiguous_label(memory_root, client):
+    # confirm-on-uncertainty: a broad free-text term matching several siblings
+    # returns the candidate menu WITHOUT creating a repair or starting a build.
+    from api.pipeline.device_registry import JsonDeviceRegistryStore
+
+    store = JsonDeviceRegistryStore(memory_root)
+    asyncio.run(store.upsert(canonical_key="820-2533", family="mbp15", aliases=[
+        {"value": "820-2533", "kind": "board"}, {"value": "MacBook Pro 15", "kind": "marketing"}]))
+    asyncio.run(store.upsert(canonical_key="820-3787", family="mbp15", aliases=[
+        {"value": "820-3787", "kind": "board"}, {"value": "MacBook Pro 15", "kind": "marketing"}]))
+    with patch("api.pipeline.generate_knowledge_pack", new=AsyncMock(side_effect=_fake_pipeline)):
+        res = client.post(
+            "/pipeline/repairs",
+            data={"device_label": "MacBook Pro 15", "symptom": "no power at all on this one"},
+        )
+    assert res.status_code == 200
+    body = res.json()
+    assert body["needs_disambiguation"] is True
+    assert body["pipeline_started"] is False
+    assert sorted(c["device_slug"] for c in body["candidates"]) == ["820-2533", "820-3787"]
+
+
 def test_create_repair_rejects_json_body(memory_root, client):
     # The endpoint is multipart-only now; a JSON body must 422 (not silently accepted).
     r = client.post("/pipeline/repairs", json={"device_label": "Some Board", "symptom": "dead board"})
@@ -73,11 +133,13 @@ def test_repairs_endpoint_persists_symptom_file(memory_root, client):
     assert "created_at" in data
 
 
-def test_repairs_endpoint_empty_rules_pack_fires_expand(memory_root, client):
+def test_repairs_endpoint_empty_rules_pack_opens_repair_without_auto_expand(memory_root, client):
     """Pack complete but rules.json is empty → coverage classifier short-
-    circuits to covered=False (no LLM call) and create_repair fires an
-    expand_pack round rather than skipping. The full pipeline is NOT
-    called. The repair record is persisted either way."""
+    circuits to covered=False (no LLM call). create_repair NO LONGER auto-fires
+    expand_pack: it opens the repair (pipeline_kind="none") so the diagnostic
+    agent can work the graph; enrichment is on-demand (mb_expand_knowledge),
+    plan-gated, never automatic. The full pipeline is NOT called either. The
+    repair record is persisted and kept (not dropped)."""
     slug_dir = memory_root / "demo-pi"
     slug_dir.mkdir()
     (slug_dir / "registry.json").write_text('{"schema_version":"1.0","device_label":"Demo Pi","components":[],"signals":[]}')
@@ -97,23 +159,12 @@ def test_repairs_endpoint_empty_rules_pack_fires_expand(memory_root, client):
         )
     assert res.status_code == 200
     body = res.json()
-    assert body["pipeline_started"] is True
-    assert body["pipeline_kind"] == "expand"
+    assert body["pipeline_started"] is False
+    assert body["pipeline_kind"] == "none"
     assert body["matched_rule_id"] is None
     m_pipeline.assert_not_called()
-    # expand_pack was fired in background — allow the task to run.
-    # Py3.12: get_event_loop() raises when no loop is set on the main
-    # thread (other tests in the suite close their loops, leaving the
-    # thread bare); spin up a fresh one to drive the sleep.
-    import asyncio
-
-    loop = asyncio.new_event_loop()
-    try:
-        loop.run_until_complete(asyncio.sleep(0.05))
-    finally:
-        loop.close()
-    m_expand.assert_called_once()
-    # Repair record persisted regardless.
+    m_expand.assert_not_called()
+    # Repair record persisted AND kept (the agent session attaches to it).
     assert body["repair_id"]
     repair_file = slug_dir / "repairs" / f"{body['repair_id']}.json"
     assert repair_file.exists()
@@ -208,8 +259,9 @@ def test_repairs_endpoint_resolves_by_device_slug_when_provided(memory_root, cli
     assert res.status_code == 200
     body = res.json()
     assert body["device_slug"] == "iphone-x-logic-board"
-    # Pack complete + empty rules → expand fires (not the full pipeline).
-    assert body["pipeline_kind"] == "expand"
+    # Pack complete + empty rules (uncovered) → repair opens, no auto-expand,
+    # no full pipeline. Enrichment is on-demand via the agent.
+    assert body["pipeline_kind"] == "none"
     m_pipeline.assert_not_called()
 
 
@@ -278,8 +330,11 @@ def test_repairs_branch_full_when_pack_absent(memory_root, client):
     assert captured_kwargs["focus_symptom"] == "screen is dark on power-on"
 
 
-def test_repairs_branch_expand_when_pack_complete_and_symptom_uncovered(memory_root, client, monkeypatch):
-    """Pack complete + coverage classifier says NOT covered → Branch 3: expand."""
+def test_repairs_branch_uncovered_opens_repair_without_auto_expand(memory_root, client, monkeypatch):
+    """Pack complete + coverage classifier says NOT covered → repair opens with
+    pipeline_kind="none" and NO automatic expand_pack. Enrichment is now an
+    on-demand, plan-gated agent action (mb_expand_knowledge), never auto-fired
+    at create_repair. The ticket is kept so the agent session attaches to it."""
     # `_safe_coverage_check` early-returns "no API key" before calling
     # `check_symptom_coverage` when ANTHROPIC_API_KEY is empty, which would
     # bypass the patch below. Inject a fake key + reset settings cache so
@@ -313,73 +368,16 @@ def test_repairs_branch_expand_when_pack_complete_and_symptom_uncovered(memory_r
             "/pipeline/repairs",
             data={"device_label": "Demo Pi", "symptom": "USB port delivers no 5V"},
         )
-    # Py3.12 fresh loop — see note in
-    # test_repairs_endpoint_empty_rules_pack_fires_expand.
-    import asyncio
-
-    loop = asyncio.new_event_loop()
-    try:
-        loop.run_until_complete(asyncio.sleep(0.05))
-    finally:
-        loop.close()
 
     body = res.json()
-    assert body["pipeline_kind"] == "expand"
-    assert body["pipeline_started"] is True
+    assert body["pipeline_kind"] == "none"
+    assert body["pipeline_started"] is False
     assert body["matched_rule_id"] is None
     assert body["coverage_reason"] == "distinct failure mode"
-    m_expand.assert_called_once()
-
-
-def test_repairs_branch_expand_threads_owner_ref_to_expand_pack(memory_root, client, monkeypatch):
-    """Régression T8 : Branch 3 (pack complet + symptôme non couvert) doit transmettre
-    le owner_ref du RepairRequest à expand_pack — sinon l'enrichissement est écrit dans
-    promoted/ avec added_by_tenant=None, cassant l'invariant de traçabilité T8."""
-    monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-test-fake-for-mocked-call")
-    monkeypatch.setattr(config_mod, "_settings", None)
-    slug_dir = memory_root / "demo-pi"
-    slug_dir.mkdir()
-    (slug_dir / "registry.json").write_text('{"schema_version":"1.0","device_label":"Demo Pi","components":[],"signals":[]}')
-    (slug_dir / "knowledge_graph.json").write_text('{"schema_version":"1.0","nodes":[],"edges":[]}')
-    (slug_dir / "rules.json").write_text(
-        '{"schema_version":"1.0","rules":[{"id":"rule-charge-001","symptoms":["no charge"],"likely_causes":[{"refdes":"U1","probability":0.9,"mechanism":"x"}],"confidence":0.8}]}'
-    )
-    (slug_dir / "dictionary.json").write_text('{"schema_version":"1.0","entries":[]}')
-
-    from api.pipeline.schemas import CoverageCheck
-
-    async def _uncovered(**_kwargs):
-        return CoverageCheck(
-            covered=False, matched_rule_id=None, confidence=0.1,
-            reason="symptôme distinct",
-        )
-
-    with patch(
-        "api.pipeline.coverage.check_symptom_coverage", new=AsyncMock(side_effect=_uncovered)
-    ), patch(
-        "api.pipeline.expand_pack",
-        new=AsyncMock(return_value={"new_rules_count": 1, "new_components_count": 0, "total_rules_after": 2}),
-    ) as m_expand:
-        res = client.post(
-            "/pipeline/repairs",
-            data={"device_label": "Demo Pi", "symptom": "USB port delivers no 5V", "owner_ref": "tenant-A"},
-        )
-
-    loop = asyncio.new_event_loop()
-    try:
-        loop.run_until_complete(asyncio.sleep(0.05))
-    finally:
-        loop.close()
-
-    assert res.json()["pipeline_kind"] == "expand"
-    m_expand.assert_called_once()
-    # L'invariant T8 : owner_ref doit être propagé jusqu'à expand_pack pour
-    # que l'enrichissement porte added_by_tenant="tenant-A" et non None.
-    _, call_kwargs = m_expand.call_args
-    assert call_kwargs.get("owner_ref") == "tenant-A", (
-        "Branch 3 doit passer owner_ref=request.owner_ref à expand_pack "
-        "(trou d'attribution T8 : enrichissement promu sans tenant tracé)"
-    )
+    assert body["repair_id"]
+    # No auto-expand, and the ticket is kept alive for the agent session.
+    m_expand.assert_not_called()
+    assert (slug_dir / "repairs" / f"{body['repair_id']}.json").exists()
 
 
 def test_repairs_branch_none_when_symptom_already_covered(memory_root, client, monkeypatch):
@@ -477,6 +475,20 @@ def test_progress_ws_ignores_events_for_other_slugs(memory_root, client):
         assert ev == {"type": "pipeline_finished"}
 
 
+def _seed_complete_pack(memory_root, slug):
+    """A trustworthy on-disk pack: the 4 writer files, no build-state veto.
+    The dedup short-circuit (Branch 0) only holds for COMPLETE packs — an
+    incomplete one re-fires the build instead (the retry flow)."""
+    slug_dir = memory_root / slug
+    slug_dir.mkdir(parents=True, exist_ok=True)
+    (slug_dir / "registry.json").write_text(
+        '{"schema_version":"1.0","device_label":"Demo Pi","components":[],"signals":[]}'
+    )
+    (slug_dir / "knowledge_graph.json").write_text('{"schema_version":"1.0","nodes":[],"edges":[]}')
+    (slug_dir / "rules.json").write_text('{"schema_version":"1.0","rules":[]}')
+    (slug_dir / "dictionary.json").write_text('{"schema_version":"1.0","entries":[]}')
+
+
 def _seed_repair(memory_root, slug, *, repair_id, symptom, status, label="Demo Pi", owner_ref=None):
     rdir = memory_root / slug / "repairs"
     rdir.mkdir(parents=True, exist_ok=True)
@@ -496,7 +508,7 @@ def _seed_repair(memory_root, slug, *, repair_id, symptom, status, label="Demo P
 async def test_cancel_running_pipeline_cancels_task_and_publishes_terminal():
     """cancel_repair cancels the running pipeline task and publishes a terminal
     pipeline_failed(CANCELLED) so subscribers (the cloud progress relay) stop
-    waiting — the cooperative-cancel half of the cloud's T5 cancellation (the
+    waiting — the cooperative-cancel half of the cloud's cancellation (the
     engine holds the only handle on the task).
 
     Driven by calling the handler directly in one event loop: a background task
@@ -543,7 +555,9 @@ def test_cancel_when_nothing_running_returns_false(memory_root, client):
 def test_repairs_endpoint_dedup_reuses_open_ticket(memory_root, client):
     """Resubmitting the same (device, symptom) on an open ticket must NOT
     create a new repair_id nor fire any LLM work — that's the credit-burn
-    loop the dedup short-circuit closes."""
+    loop the dedup short-circuit closes. (Holds for a COMPLETE pack; an
+    incomplete one re-fires the build instead — see the refire tests.)"""
+    _seed_complete_pack(memory_root, "demo-pi")
     _seed_repair(
         memory_root,
         "demo-pi",
@@ -637,6 +651,7 @@ def test_repairs_dedup_scoped_by_owner_ref(memory_root, client):
 def test_repairs_dedup_reuses_within_same_owner(memory_root, client):
     """Within the SAME owner the (slug, symptom) dedup still holds — re-submitting
     a tenant's own open ticket must not burn LLM credits."""
+    _seed_complete_pack(memory_root, "demo-pi")
     _seed_repair(
         memory_root,
         "demo-pi",
@@ -678,6 +693,7 @@ def test_repairs_persists_owner_ref(memory_root, client):
 def test_repairs_endpoint_dedup_matches_case_insensitive(memory_root, client):
     """Symptom matching is whitespace-trimmed + case-folded, so a
     capitalised resubmit still hits the dedup path."""
+    _seed_complete_pack(memory_root, "demo-pi")
     _seed_repair(
         memory_root,
         "demo-pi",
@@ -697,6 +713,83 @@ def test_repairs_endpoint_dedup_matches_case_insensitive(memory_root, client):
     body = res.json()
     assert body["repair_id"] == "rExisting"
     assert body["pipeline_started"] is False
+
+
+def test_repairs_dedup_refires_build_when_pack_incomplete(memory_root, client):
+    """The 'relancer' flow: an open ticket whose pack build FAILED must re-fire
+    the full pipeline on the SAME repair instead of short-circuiting — before
+    this, a failed build left the client stuck (dedup returned the open repair,
+    the partial pack never rebuilt). The rebuild rides the hash caches, so the
+    retry is cheap."""
+    from api.pipeline import build_state
+
+    _seed_repair(
+        memory_root,
+        "demo-pi",
+        repair_id="rExisting",
+        symptom="pas de boot, écran noir",
+        status="open",
+    )
+    # The live-test shape: all 4 files survived the failed build, marker says failed.
+    _seed_complete_pack(memory_root, "demo-pi")
+    build_state.mark_failed(memory_root / "demo-pi", stage="audit", error="boom")
+
+    with patch(
+        "api.pipeline.generate_knowledge_pack", new=AsyncMock(side_effect=_fake_pipeline)
+    ) as m_pipeline, patch(
+        "api.pipeline._maybe_check_coverage", new=AsyncMock()
+    ) as m_coverage:
+        res = client.post(
+            "/pipeline/repairs",
+            data={"device_label": "Demo Pi", "symptom": "pas de boot, écran noir"},
+        )
+    # Give the background task a tick to run (see test_repairs_branch_full_when_pack_absent).
+    loop = asyncio.new_event_loop()
+    try:
+        loop.run_until_complete(asyncio.sleep(0.05))
+    finally:
+        loop.close()
+
+    assert res.status_code == 200
+    body = res.json()
+    assert body["repair_id"] == "rExisting"      # same ticket — no duplicate session
+    assert body["pipeline_started"] is True       # the build re-fired
+    assert body["pipeline_kind"] == "full"
+    m_pipeline.assert_called_once()               # full rebuild, riding the caches
+    m_coverage.assert_not_called()                # phantom rules never consulted
+
+
+def test_repairs_dedup_rides_inflight_build_when_pack_incomplete(memory_root, client):
+    """Retry while the (re)build is still running → join it, don't duplicate."""
+    from unittest.mock import Mock
+
+    from api.pipeline.routes.repairs import _RUNNING
+
+    _seed_repair(
+        memory_root,
+        "demo-pi",
+        repair_id="rExisting",
+        symptom="pas de boot, écran noir",
+        status="open",
+    )
+    running = Mock()
+    running.done.return_value = False
+    _RUNNING["demo-pi"] = running
+    try:
+        with patch(
+            "api.pipeline.generate_knowledge_pack", new=AsyncMock(side_effect=_fake_pipeline)
+        ) as m_pipeline:
+            res = client.post(
+                "/pipeline/repairs",
+                data={"device_label": "Demo Pi", "symptom": "pas de boot, écran noir"},
+            )
+        body = res.json()
+        assert body["repair_id"] == "rExisting"
+        assert body["pipeline_started"] is True   # riding the in-flight build
+        assert _RUNNING["demo-pi"] is running     # not replaced
+        m_pipeline.assert_not_called()            # no duplicate launch
+    finally:
+        _RUNNING.pop("demo-pi", None)
 
 
 def test_repairs_endpoint_dedup_skipped_when_existing_is_closed(memory_root, client):
@@ -781,3 +874,188 @@ def test_create_repair_rejects_invalid_device_kind(memory_root):
             data={"device_label": "X Board", "symptom": "dead board", "device_kind": "toaster"},
         )
     assert r.status_code == 422
+
+def test_build_dispatch_enqueues_at_capacity(memory_root, client, monkeypatch):
+    """At the concurrent-build cap, a NEW build (pack missing → Branch 1) is
+    ENQUEUED with a visible position (queued=True, queue_position≥1) instead of
+    503 — and the heavy pipeline is NOT launched yet (the slot is full)."""
+    import api.pipeline.routes.repairs as R
+
+    s = config_mod.get_settings()
+    monkeypatch.setattr(s, "pipeline_max_concurrent_builds", 1, raising=False)
+    monkeypatch.setattr(R, "_active_builds", 1, raising=False)  # one heavy build already in flight
+    R._build_queue.clear()
+    with patch("api.pipeline.generate_knowledge_pack", new=AsyncMock(side_effect=_fake_pipeline)) as m:
+        res = client.post(
+            "/pipeline/repairs",
+            data={"device_label": "Brand New Board", "symptom": "dead board no power"},
+        )
+    assert res.status_code == 200
+    body = res.json()
+    assert body["queued"] is True
+    assert body["queue_position"] == 1
+    assert body["pipeline_started"] is True  # accepted, just waiting
+    m.assert_not_called()  # the heavy build did NOT launch (slot full)
+    R._build_queue.clear()
+
+
+async def test_queued_build_launches_when_slot_frees():
+    """When a build slot frees, the queue drains: the head launches (and, at
+    cap=1, the next stays queued and shifts to position 1)."""
+    import asyncio
+
+    import api.pipeline.routes.repairs as R
+    from api import config as _cfg
+
+    _cfg.get_settings().pipeline_max_concurrent_builds = 1
+    R._build_queue.clear()
+    R._active_builds = 1  # at capacity
+
+    launched = []
+    hold = asyncio.Event()
+
+    def make_launch(slug):
+        async def _run():
+            launched.append(slug)
+            await hold.wait()  # occupy the slot until released
+        return _run
+
+    R._enqueue_build("slug-a", make_launch("slug-a"))
+    R._enqueue_build("slug-b", make_launch("slug-b"))
+    assert len(R._build_queue) == 2
+
+    R._active_builds = 0  # a slot frees
+    R._drain_queue()
+    await asyncio.sleep(0.05)
+
+    assert launched == ["slug-a"]               # only the head launched (cap=1)
+    assert R._queue_position("slug-b") == 1     # b shifted to front
+    hold.set()
+    await asyncio.sleep(0.05)                    # let a-then-b drain
+    assert launched == ["slug-a", "slug-b"]
+    R._build_queue.clear()
+    R._active_builds = 0
+
+def test_queued_event_reaches_progress_ws_end_to_end(memory_root, client, monkeypatch):
+    """Bout-en-bout : à capacité, le dispatch publie un event `queued` que la WS
+    de progression délivre au navigateur — c'est CE qui pilote l'UI 'en attente'."""
+    import api.pipeline.routes.repairs as R
+
+    s = config_mod.get_settings()
+    monkeypatch.setattr(s, "pipeline_max_concurrent_builds", 1, raising=False)
+    monkeypatch.setattr(R, "_active_builds", 1, raising=False)  # at capacity
+    R._build_queue.clear()
+
+    with patch("api.pipeline.generate_knowledge_pack", new=AsyncMock(side_effect=_fake_pipeline)):
+        res = client.post(
+            "/pipeline/repairs",
+            data={"device_label": "Queued Board", "symptom": "dead board no power"},
+        )
+    body = res.json()
+    assert body["queued"] is True and body["queue_position"] == 1
+    slug = body["device_slug"]
+
+    # The progress WS replays history on connect → the `queued` event is delivered.
+    with client.websocket_connect(f"/pipeline/progress/{slug}") as ws:
+        ack = json.loads(ws.receive_text())
+        assert ack["type"] == "subscribed"
+        ev = json.loads(ws.receive_text())
+        assert ev["type"] == "queued"
+        assert ev["position"] == 1
+        assert ev["ahead"] == 0
+    R._build_queue.clear()
+
+
+def test_repairs_allow_expand_false_no_longer_blocks_or_drops_ticket(memory_root, client, monkeypatch):
+    """`allow_expand` is now INERT at create_repair (expand is never auto-fired).
+    Pack complete + symptom uncovered → the repair opens normally regardless of
+    the flag: repair_id valid, pipeline_kind="none", NO expand spend, and the
+    ticket is KEPT alive so the agent session can attach. The plan gate moved to
+    the on-demand mb_expand_knowledge tool (see session_caps / manifest)."""
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-test-fake-for-mocked-call")
+    monkeypatch.setattr(config_mod, "_settings", None)
+    slug_dir = memory_root / "demo-pi"
+    slug_dir.mkdir()
+    (slug_dir / "registry.json").write_text('{"schema_version":"1.0","device_label":"Demo Pi","components":[],"signals":[]}')
+    (slug_dir / "knowledge_graph.json").write_text('{"schema_version":"1.0","nodes":[],"edges":[]}')
+    (slug_dir / "rules.json").write_text(
+        '{"schema_version":"1.0","rules":[{"id":"rule-charge-001","symptoms":["no charge"],"likely_causes":[{"refdes":"U1","probability":0.9,"mechanism":"x"}],"confidence":0.8}]}'
+    )
+    (slug_dir / "dictionary.json").write_text('{"schema_version":"1.0","entries":[]}')
+
+    from api.pipeline.schemas import CoverageCheck
+
+    async def _uncovered(**_kwargs):
+        return CoverageCheck(
+            covered=False, matched_rule_id=None, confidence=0.2,
+            reason="distinct failure mode",
+        )
+
+    with patch(
+        "api.pipeline.coverage.check_symptom_coverage", new=AsyncMock(side_effect=_uncovered)
+    ), patch(
+        "api.pipeline.expand_pack",
+        new=AsyncMock(return_value={}),
+    ) as m_expand:
+        res = client.post(
+            "/pipeline/repairs",
+            data={
+                "device_label": "Demo Pi",
+                "symptom": "USB port delivers no 5V",
+                "owner_ref": "tenant-free",
+                "allow_expand": "false",
+            },
+        )
+
+    body = res.json()
+    assert res.status_code == 200
+    assert body["expand_blocked"] is False
+    assert body["pipeline_started"] is False
+    assert body["pipeline_kind"] == "none"
+    assert body["repair_id"]  # ticket valide et gardé
+    assert body["coverage_reason"] == "distinct failure mode"
+    m_expand.assert_not_called()
+    # Le ticket est CONSERVÉ (l'agent s'y rattache pour bosser sur le graphe).
+    assert (slug_dir / "repairs" / f"{body['repair_id']}.json").exists()
+
+
+def test_repairs_allow_expand_false_still_matches_covered_rule(memory_root, client, monkeypatch):
+    """allow_expand=false ne touche PAS le chemin couvert : un symptôme matché
+    par une règle existante répond normalement (rule match, pas de blocage)."""
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-test-fake-for-mocked-call")
+    monkeypatch.setattr(config_mod, "_settings", None)
+    slug_dir = memory_root / "demo-pi"
+    slug_dir.mkdir()
+    (slug_dir / "registry.json").write_text('{"schema_version":"1.0","device_label":"Demo Pi","components":[],"signals":[]}')
+    (slug_dir / "knowledge_graph.json").write_text('{"schema_version":"1.0","nodes":[],"edges":[]}')
+    (slug_dir / "rules.json").write_text(
+        '{"schema_version":"1.0","rules":[{"id":"rule-charge-001","symptoms":["no charge"],"likely_causes":[{"refdes":"U1","probability":0.9,"mechanism":"x"}],"confidence":0.8}]}'
+    )
+    (slug_dir / "dictionary.json").write_text('{"schema_version":"1.0","entries":[]}')
+
+    from api.pipeline.schemas import CoverageCheck
+
+    async def _covered(**_kwargs):
+        return CoverageCheck(
+            covered=True, matched_rule_id="rule-charge-001", confidence=0.95,
+            reason="same failure mode",
+        )
+
+    with patch(
+        "api.pipeline.coverage.check_symptom_coverage", new=AsyncMock(side_effect=_covered)
+    ), patch("api.pipeline.expand_pack", new=AsyncMock(return_value={})) as m_expand:
+        res = client.post(
+            "/pipeline/repairs",
+            data={
+                "device_label": "Demo Pi",
+                "symptom": "battery does not charge at all",
+                "allow_expand": "false",
+            },
+        )
+
+    body = res.json()
+    assert body["expand_blocked"] is False
+    assert body["matched_rule_id"] == "rule-charge-001"
+    assert body["pipeline_kind"] == "none"
+    assert body["repair_id"]  # ticket gardé : c'est un diagnostic normal
+    m_expand.assert_not_called()

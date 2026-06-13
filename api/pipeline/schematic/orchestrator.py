@@ -25,8 +25,12 @@ import json
 import logging
 import shutil
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from anthropic import AsyncAnthropic
+
+if TYPE_CHECKING:
+    from collections.abc import Awaitable, Callable
 
 from api.config import get_settings
 from api.pipeline.schematic.compiler import compile_electrical_graph
@@ -41,7 +45,7 @@ from api.pipeline.schematic.net_classifier import (
 )
 from api.pipeline.schematic.page_vision import extract_page
 from api.pipeline.schematic.passive_classifier import classify_passives
-from api.pipeline.schematic.renderer import render_pages
+from api.pipeline.schematic.renderer import ensure_renderable_pdf, render_pages
 from api.pipeline.schematic.schemas import (
     ElectricalGraph,
     NetClassification,
@@ -67,6 +71,7 @@ async def ingest_schematic(
     use_grounding: bool = True,
     cache_warmup_seconds: float | None = None,
     render_dpi: int = 200,
+    on_event: Callable[[dict], Awaitable[None]] | None = None,
 ) -> ElectricalGraph:
     """Run the full ingestion pipeline for `pdf_path` and persist artefacts.
 
@@ -97,6 +102,14 @@ async def ingest_schematic(
         logger.warning(
             "could not persist source PDF to %s", persisted_pdf, exc_info=True
         )
+
+    # Some real-world schematics (XZZ library) carry non-standard objects that
+    # pdfplumber/pdfminer can't parse → 0 pages probed → render 0 pages → an
+    # EMPTY pack built on wasted Scout/writer tokens (observed live on an
+    # iPhone 8 schematic). Repair via ghostscript up front (and FAIL loudly if
+    # still unreadable). The repaired copy is used for BOTH render and grounding
+    # below, which both read the PDF via pdfplumber/poppler.
+    pdf_path = ensure_renderable_pdf(pdf_path, pages_dir)
 
     # Rasterise directly into the persistent pages dir — the PNGs are
     # durable artefacts consumed by the web PDF viewer, not just vision
@@ -136,6 +149,20 @@ async def ingest_schematic(
                 len(g.refdes_anchors),
             )
 
+    # Live progress: pages fan out in parallel and finish out of order, so we
+    # emit a running done-count (1..total) rather than the page number — the
+    # landing line reads "page 3/12" as a monotonic progress bar.
+    pages_done = 0
+
+    async def _emit_page_done() -> None:
+        nonlocal pages_done
+        pages_done += 1
+        if on_event is not None:
+            await on_event({
+                "type": "phase_step", "phase": "schematic_ingest", "step": "page",
+                "index": pages_done, "total": total,
+            })
+
     async def _one_page(idx: int) -> SchematicPageGraph:
         rp = rendered_pages[idx]
         cached_path = pages_dir / f"page_{rp.page_number:03d}.json"
@@ -146,7 +173,9 @@ async def ingest_schematic(
                 total,
                 cached_path.name,
             )
-            return SchematicPageGraph.model_validate_json(cached_path.read_text())
+            result = SchematicPageGraph.model_validate_json(cached_path.read_text())
+            await _emit_page_done()
+            return result
         logger.info(
             "vision call page %d/%d (model=%s)", rp.page_number, total, model
         )
@@ -159,7 +188,52 @@ async def ingest_schematic(
             grounding=grounding_texts[idx],
         )
         cached_path.write_text(graph.model_dump_json(indent=2))
+        await _emit_page_done()
         return graph
+
+    # Batch mode (operator flag PIPELINE_VISION_BATCH): run the uncached
+    # pages through the Message Batches API first — same model/prompt at 50%
+    # of the token price, asynchronous. Successes are written straight into
+    # the per-page cache so the direct gather below loads them from disk;
+    # pages the batch could not produce (errored entry, invalid payload)
+    # simply stay uncached and ride the direct path's full retry machinery
+    # at full price. The direct path itself is untouched.
+    if settings.pipeline_vision_batch:
+        from api.pipeline.schematic import batch_vision
+
+        uncached_idx = [
+            i
+            for i in range(total)
+            if not (
+                pages_dir / f"page_{rendered_pages[i].page_number:03d}.json"
+            ).exists()
+        ]
+        if uncached_idx:
+            logger.info(
+                "vision batch mode: %d/%d page(s) uncached → Message Batches "
+                "API (-50%% token price)",
+                len(uncached_idx),
+                total,
+            )
+            batch_graphs = await batch_vision.extract_pages_batch(
+                client=client,
+                model=model,
+                pages=[rendered_pages[i] for i in uncached_idx],
+                total_pages=total,
+                device_label=device_label,
+                groundings=[grounding_texts[i] for i in uncached_idx],
+            )
+            for page_number, graph in batch_graphs.items():
+                (pages_dir / f"page_{page_number:03d}.json").write_text(
+                    graph.model_dump_json(indent=2)
+                )
+            missing = len(uncached_idx) - len(batch_graphs)
+            if missing:
+                logger.warning(
+                    "vision batch mode: %d page(s) failed in the batch — "
+                    "retrying via the direct path at full price",
+                    missing,
+                )
 
     # Fan every page out immediately. The earlier pattern serialised page
     # 1 so its `cache_write` would land before the rest arrived, but with

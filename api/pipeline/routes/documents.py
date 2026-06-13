@@ -28,7 +28,7 @@ from fastapi import APIRouter, File, Form, Header, HTTPException, UploadFile
 from fastapi.responses import FileResponse
 
 import api.pipeline as _pkg  # noqa: PLC0415 — module-attribute lookups for patchability
-from api.pipeline import live_graph, sources
+from api.pipeline import events, live_graph, sources
 from api.pipeline.models import (
     DeleteSourceResponse,
     DocumentUploadResponse,
@@ -315,7 +315,7 @@ async def get_pack_sources(device_slug: str) -> SourcesResponse:
     )
 
 
-# ── Per-slug ingestion serialisation (T9 — cross-tenant cache safety) ────────
+# ── Per-slug ingestion serialisation (cross-tenant cache safety) ────────────
 #
 # In managed mode the slug ROOT (`memory/{slug}/schematic.pdf` + derived files)
 # is used as transient build scratch: clear → copy the target PDF → ingest →
@@ -387,11 +387,21 @@ async def _reingest_and_cache(slug: str, pack_dir: Path, pdf_path: Path, pdf_has
         return
     try:
         client = AsyncAnthropic(api_key=api_key, max_retries=4)
+
+        # Publish only the per-page sub-steps onto the slug bus. The pipeline's
+        # wait-gate (orchestrator: expect_schematic) owns this phase's
+        # started/finished bracket — we just fill its live line with "page N/M"
+        # while it polls for electrical_graph.json to land.
+        async def _relay_page_step(ev: dict) -> None:
+            if ev.get("type") == "phase_step":
+                await events.publish(slug, ev)
+
         await _pkg.ingest_schematic(
             device_slug=slug,
             pdf_path=pdf_path,
             client=client,
             memory_root=Path(settings.memory_root),
+            on_event=_relay_page_step,
         )
         # Persist this version's artefacts so a future switch back is instant.
         sources.write_through_cache(pack_dir, pdf_hash)
@@ -469,9 +479,9 @@ def _apply_schematic_pin(
       On `rebuilding`: copies the source PDF to `memory/{slug}/schematic.pdf`,
       drops stale derivatives, schedules a background ingestion task.
 
-    Managé (`owner_ref` set) — T9 per-owner, NO root clobber:
+    Managed (`owner_ref` set) — per-owner, NO root clobber:
       Writes the per-owner pointer (_sources/{owner}/) mapping schematic_pdf →
-      {filename, hash}; readers (Task 3) resolve owner→hash→.cache_schematic/
+      {filename, hash}; readers resolve owner→hash→.cache_schematic/
       {hash}/ directly. On a cache hit we do NOT restore to the root (that root
       copy is exactly what clobbered cross-tenant). On a miss we still ingest
       via the SAME background task — the root is mere build scratch in managed

@@ -1,7 +1,7 @@
 {
   "empty": {
     "title": "Aucun graphe chargé",
-    "body": "Lance le pipeline de génération sur un device — le graphe se construira ensuite à partir du pack produit."
+    "body": "Lance le pipeline de génération sur un device : le graphe se construira à partir du pack produit."
   },
   "legend": {
     "types_heading": "Types",
@@ -39,9 +39,9 @@
     "edge_outgoing": "→",
     "edge_incoming": "←",
     "rules_field": "rules",
-    "conf_high": "Confiance élevée — corroboré par plusieurs sources.",
-    "conf_low": "Confiance faible — source unique ou inférence indirecte.",
-    "conf_medium": "Confiance modérée — recoupement partiel."
+    "conf_high": "Confiance élevée, corroboré par plusieurs sources.",
+    "conf_low": "Confiance faible : source unique ou inférence indirecte.",
+    "conf_medium": "Confiance modérée : recoupement partiel."
   },
   "tooltip": {
     "conf_pct": "conf. {pct}%"

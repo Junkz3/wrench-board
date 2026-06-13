@@ -23,6 +23,7 @@ import api.pipeline as _pkg  # noqa: PLC0415 — module-attribute lookups for pa
 from api.agent.field_reports import list_field_reports
 from api.pipeline import device_kind as device_kind_module
 from api.pipeline import sources
+from api.pipeline.build_state import read_build_state
 from api.pipeline.graph_transform import pack_to_graph_payload
 from api.pipeline.models import (
     ExpandRequest,
@@ -40,16 +41,15 @@ logger = logging.getLogger("wrench_board.pipeline.api")
 router = APIRouter()
 
 
-# --- T8 — lecture migration-aware du pack ------------------------------------
+# --- Migration-aware pack reading --------------------------------------------
 #
-# La migration T8 (pack_migrate) déplace registry.json/rules.json/
-# knowledge_graph.json/dictionary.json de la racine vers baseline/ (format
-# {items:[...]} + _meta pour les clés non-liste). Les endpoints ci-dessous
-# doivent suivre : sur un pack migré (.migrated_t8 présent), on lit la vue
-# effective (baseline + promoted) et on reconstruit la forme legacy attendue
-# par les consommateurs (UI / graph_transform). Sur un pack non-migré (tests
-# qui écrivent encore la racine, self-host pré-migration), on garde le reader
-# racine historique.
+# The migration (pack_migrate) moves registry.json/rules.json/
+# knowledge_graph.json/dictionary.json from the root into baseline/ (format
+# {items:[...]} + _meta for non-list keys). The endpoints below must follow:
+# on a migrated pack (.migrated_t8 present), read the effective view
+# (baseline + promoted) and rebuild the legacy shape expected by consumers
+# (UI / graph_transform). On a non-migrated pack (tests that still write the
+# root, pre-migration self-host), keep the historical root reader.
 
 
 def _is_migrated(pack_dir: Path) -> bool:
@@ -185,17 +185,17 @@ def _find_boardview(slug: str, pack_dir: Path) -> Path | None:
 
 
 def _find_owner_boardview(slug: str, pack_dir: Path, owner_ref: str | None) -> Path | None:
-    """Per-owner boardview path (T9 — clôt la fuite `/api/board/render`).
+    """Per-owner boardview path (closes the `/api/board/render` leak).
 
-    Self-host (owner None) → chaîne globale historique `_find_boardview` (inchangé).
-    Managé (owner set) → STRICTEMENT le pin per-owner du tenant
-    (`_sources/{owner}/active_sources.json` → `uploads/{filename}`) ; aucun fallback
-    racine / `board_assets` / scan `uploads/` → un tenant sans boardview actif
-    obtient None (la route répond 404, jamais le board d'un autre tenant).
+    Self-host (owner None) → historical global chain `_find_boardview` (unchanged).
+    Managed (owner set) → STRICTLY the tenant's per-owner pin
+    (`_sources/{owner}/active_sources.json` → `uploads/{filename}`); no fallback
+    to root / `board_assets` / `uploads/` scan → a tenant with no active
+    boardview gets None (the route returns 404, never another tenant's board).
     """
     if owner_ref is None:
         return _find_boardview(slug, pack_dir)
-    from api.pipeline import live_graph  # local — évite tout cycle au chargement du package
+    from api.pipeline import live_graph  # local — avoids any cycle at package load
 
     active = live_graph.read_owner_active(pack_dir, owner_ref)
     bv = active.get(sources.BOARDVIEW_KIND)
@@ -214,8 +214,8 @@ def _find_owner_boardview(slug: str, pack_dir: Path, owner_ref: str | None) -> P
 def _detect_boardview(slug: str, pack_dir: Path, owner_ref: str | None = None) -> tuple[bool, str | None]:
     """Return (present, extension) for a slug's boardview — bitmask helper.
 
-    Per-owner (T9) : managé → le boardview épinglé par CE tenant ; self-host
-    (owner None) → chaîne globale. Returns the dotted extension (e.g. ".kicad_pcb")
+    Per-owner: managed → the boardview pinned by THIS tenant; self-host
+    (owner None) → global chain. Returns the dotted extension (e.g. ".kicad_pcb")
     so the UI can label the format on the boardview card.
     """
     path = _find_owner_boardview(slug, pack_dir, owner_ref)
@@ -227,9 +227,9 @@ def _detect_boardview(slug: str, pack_dir: Path, owner_ref: str | None = None) -
 def _detect_schematic_pdf(slug: str, pack_dir: Path, owner_ref: str | None = None) -> bool:
     """True when a source schematic PDF exists for this slug.
 
-    Per-owner (T9) : managé (owner set) → True ssi CE tenant a un pin schematic
-    actif (`_sources/{owner}/active_sources.json`) ; pas de fallback racine/
-    board_assets → un tenant sans upload voit `has_schematic_pdf=false`.
+    Per-owner: managed (owner set) → True iff THIS tenant has an active
+    schematic pin (`_sources/{owner}/active_sources.json`); no fallback to
+    root / board_assets → a tenant with no upload sees `has_schematic_pdf=false`.
     Self-host (owner None) → chaîne globale historique :
       1. Active pin from `active_sources.json`.
       2. `memory/{slug}/schematic.pdf` (canonical post-ingest copy).
@@ -259,17 +259,18 @@ def _summarize_pack(pack_dir: Path, owner_ref: str | None = None) -> PackSummary
     slug = pack_dir.name
     bv_present, bv_ext = _detect_boardview(slug, pack_dir, owner_ref)
     migrated = _is_migrated(pack_dir)
-    # T9 : les artefacts PRIVÉS (graphe électrique, boardview, schematic PDF) se
-    # résolvent per-owner ; le pack partagé (registry/kg/rules/dictionary/parts_index)
-    # reste SHARED. Un tenant sans upload voit donc les cartes privées en « absent ».
+    # PRIVATE artefacts (electrical graph, boardview, schematic PDF) resolve
+    # per-owner; the shared pack (registry/kg/rules/dictionary/parts_index)
+    # stays SHARED. A tenant with no upload therefore sees the private cards
+    # as "absent".
     if owner_ref is not None:
-        from api.pipeline import live_graph  # local — évite tout cycle au chargement
+        from api.pipeline import live_graph  # local — avoids any cycle at load
 
         has_graph = live_graph.resolve_graph_path(pack_dir, owner_ref) is not None
     else:
         has_graph = (pack_dir / "electrical_graph.json").exists()
-    # T8 : sur un pack migré, le bitmask de présence lit baseline/+promoted/ ;
-    # le dump est sous audit/. Sinon, les fichiers racine historiques.
+    # On a migrated pack, the presence bitmask reads baseline/+promoted/;
+    # the dump is under audit/. Otherwise, the historical root files.
     return PackSummary(
         device_slug=slug,
         disk_path=str(pack_dir),
@@ -322,9 +323,19 @@ def _read_optional_json(path: Path) -> dict | None:
 def _pack_is_complete(pack_dir: Path) -> bool:
     """A pack is 'complete' when the 4 writer files are present — audit is optional.
 
-    T8 : sur un pack migré, "présent" = baseline/ ou promoted/ (cf.
-    _pack_file_present) ; sinon, fichier racine historique.
+    On a migrated pack, "present" = baseline/ or promoted/ (see
+    _pack_file_present); otherwise, the historical root file.
+
+    Build-state veto: the orchestrator writes the files incrementally, so a
+    failed build leaves a partial-but-plausible pack behind (surviving rules →
+    phantom symptom coverage → a retry never rebuilt). A marker whose status is
+    not "complete" (failed/building/paused) vetoes completeness regardless of
+    which files survived. NO marker = pack built before the marker existed
+    (every self-host pack) = trusted on file presence alone, as before.
     """
+    state = read_build_state(pack_dir)
+    if state is not None and state.get("status") != "complete":
+        return False
     files = ("registry.json", "knowledge_graph.json", "rules.json", "dictionary.json")
     if _is_migrated(pack_dir):
         return all(_pack_file_present(pack_dir, name) for name in files)
@@ -360,11 +371,26 @@ async def get_taxonomy() -> TaxonomyTree:
     if not root.exists():
         return tree
 
+    # One carnet read → map each device's aliases so the autocomplete can
+    # match by board#/model/EMC. Best-effort: a registry hiccup just leaves
+    # aliases empty (the label-based filter still works).
+    aliases_by_slug: dict[str, list[str]] = {}
+    try:
+        from api.pipeline.device_registry import get_device_registry_store
+
+        for ident in await get_device_registry_store(root).list():
+            vals: list[str] = []
+            for items in (ident.get("facets") or {}).values():
+                vals.extend(items)
+            aliases_by_slug[ident["canonicalKey"]] = vals
+    except Exception:  # noqa: BLE001 - autocomplete enrichment must never 500 the list
+        logger.warning("[Taxonomy] carnet alias enrichment failed", exc_info=True)
+
     for pack_dir in sorted(root.iterdir(), key=lambda p: p.name):
         if not pack_dir.is_dir():
             continue
-        # T8 : sur un pack migré, taxonomy/device_label vivent dans la registry
-        # reconstruite depuis baseline/_meta + vue effective.
+        # On a migrated pack, taxonomy/device_label live in the registry
+        # rebuilt from baseline/_meta + effective view.
         if _is_migrated(pack_dir):
             if not _pack_file_present(pack_dir, "registry.json"):
                 continue
@@ -388,6 +414,7 @@ async def get_taxonomy() -> TaxonomyTree:
             has_electrical_graph=(pack_dir / "electrical_graph.json").exists(),
             has_parts_index=(pack_dir / "parts_index.json").exists(),
             device_kind=taxonomy.get("device_kind"),
+            aliases=aliases_by_slug.get(pack_dir.name, []),
         )
 
         if brand and model:
@@ -476,8 +503,8 @@ async def expand_device_pack(
     Scout + Registry + Clinicien mini-pipeline and merges the output into
     the existing pack. See api/pipeline/expansion.py for the mechanics.
 
-    T8 : l'en-tête X-Owner-Ref (injecté par le cloud, opaque côté moteur) scope
-    l'enrichissement au tenant (added_by_tenant dans la provenance). Absent →
+    The X-Owner-Ref header (injected by the cloud, opaque to the engine) scopes
+    the enrichment to the tenant (added_by_tenant in the provenance). Absent →
     None (self-host).
     """
     slug = _slugify(device_slug)
@@ -552,7 +579,11 @@ class ConfirmKindRequest(BaseModel):
 
 
 @router.post("/packs/{device_slug}/confirm-kind")
-async def confirm_pack_kind(device_slug: str, payload: ConfirmKindRequest) -> dict:
+async def confirm_pack_kind(
+    device_slug: str,
+    payload: ConfirmKindRequest,
+    x_owner_ref: str | None = Header(default=None, alias="X-Owner-Ref"),
+) -> dict:
     """Record the technician's resolved device kind and re-run the pipeline.
 
     When the pipeline detects a mismatch between the user-declared kind and the
@@ -577,10 +608,15 @@ async def confirm_pack_kind(device_slug: str, payload: ConfirmKindRequest) -> di
     # Local import: repairs.py imports packs.py at module load (it pulls in
     # `_pack_is_complete`), so importing repairs at packs' module top would be
     # a circular import. Deferring it to the function body breaks the cycle.
+    from api.pipeline import events
     from api.pipeline.routes.repairs import (
-        _register_running,
+        _builds_at_capacity,
+        _enqueue_build,
+        _queue_position,
+        _register_build,
         _run_pipeline_with_events,
         _slug_is_building,
+        _slug_queued,
     )
 
     # Clear the pending marker first — even if the rerun fails to start the
@@ -590,8 +626,8 @@ async def confirm_pack_kind(device_slug: str, payload: ConfirmKindRequest) -> di
     # Recover the original device_label so the rerun targets the same pack dir.
     # `generate_knowledge_pack` re-slugifies its first arg internally; the slug
     # round-trips to itself, so the slug is a safe fallback when no registry
-    # device_label is on disk. T8 : sur un pack migré, device_label vit dans la
-    # registry reconstruite (baseline/_meta + vue effective), pas à la racine.
+    # device_label is on disk. On a migrated pack, device_label lives in the
+    # registry rebuilt (baseline/_meta + effective view), not at the root.
     if _is_migrated(pack_dir):
         registry = _effective_registry(memory_root, slug, pack_dir)
     else:
@@ -613,24 +649,48 @@ async def confirm_pack_kind(device_slug: str, payload: ConfirmKindRequest) -> di
             "status": "rebuilding",
         }
 
+    # Already queued for this slug → join it (no duplicate), return its position.
+    if _slug_queued(slug):
+        return {
+            "device_slug": slug,
+            "confirmed_kind": payload.device_kind,
+            "status": "queued",
+            "queue_position": _queue_position(slug),
+        }
+
     logger.info(
         "[API] /packs/%s/confirm-kind · confirmed_kind=%s — clearing pending, rebuilding",
         slug,
         payload.device_kind,
     )
-    # Reuse the repairs.py pipeline-run wrapper so background exceptions publish
-    # a `pipeline_failed` event on the bus, and register the task so
-    # POST /repairs/{slug}/cancel can cancel it cooperatively.
-    _register_running(
-        slug,
-        asyncio.create_task(
-            _run_pipeline_with_events(
-                device_label,
-                slug,
-                confirmed_device_kind=payload.device_kind,
-            )
-        ),
-    )
+
+    # Reuse the repairs.py pipeline-run wrapper so background exceptions publish a
+    # `pipeline_failed` event on the bus, and register the task (counted against
+    # the build cap) so POST /repairs/{slug}/cancel can cancel it cooperatively.
+    def _launch():
+        # The rebuild's spend is attributed to the confirming tenant (the
+        # cloud injects X-Owner-Ref on all proxied traffic); no single repair_id
+        # backs a kind-confirmation rebuild → build_metering keys on the slug.
+        return _run_pipeline_with_events(
+            device_label, slug,
+            confirmed_device_kind=payload.device_kind,
+            owner_ref=x_owner_ref,
+        )
+
+    # Same concurrent-build cap as create_repair: at capacity, ENQUEUE (visible
+    # position) instead of 503 — the rebuild starts when a slot frees.
+    if _builds_at_capacity():
+        pos = _enqueue_build(slug, _launch)
+        await events.publish(slug, {"type": "queued", "position": pos, "ahead": pos - 1})
+        logger.info("[API] /packs/%s/confirm-kind · rebuild queued at position %d", slug, pos)
+        return {
+            "device_slug": slug,
+            "confirmed_kind": payload.device_kind,
+            "status": "queued",
+            "queue_position": pos,
+        }
+
+    _register_build(slug, asyncio.create_task(_launch()))
     return {
         "device_slug": slug,
         "confirmed_kind": payload.device_kind,

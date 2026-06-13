@@ -42,6 +42,7 @@ from anthropic import AsyncAnthropic
 
 from api.agent._session_mirrors import SessionMirrors
 from api.agent.dispatch_bv import dispatch_bv
+from api.agent.session_caps import current_can_expand
 from api.agent.tools import (
     mb_expand_knowledge,
     mb_get_component,
@@ -499,6 +500,16 @@ async def _mb_validate_finding(payload: dict, ctx: ToolContext) -> dict:
 
 
 async def _mb_expand_knowledge(payload: dict, ctx: ToolContext) -> dict:
+    # Plan gate (defence in depth): free tenants don't get this tool in the
+    # manifest, but refuse here too so a baked managed manifest — or any stray
+    # call — can never spend on a paid enrichment for a non-entitled tenant.
+    if not current_can_expand():
+        return {
+            "ok": False,
+            "expanded": False,
+            "reason": "plan_gated",
+            "error": "Pack enrichment requires a paid plan.",
+        }
     return await mb_expand_knowledge(
         client=ctx.client,
         device_slug=ctx.device_slug,

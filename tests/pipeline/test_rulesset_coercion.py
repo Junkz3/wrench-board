@@ -94,3 +94,26 @@ def test_non_json_string_left_for_pydantic_to_reject():
 
     with pytest.raises(ValidationError):
         RulesSet.model_validate({"schema_version": "1.0", "rules": "just prose"})
+
+
+# --- Rule id normalization (Clinicien drift fix) ----------------------------
+# Found in a real build: the Clinicien writer emits lowercase 'rule-...' ids that
+# fail the schema pattern ^R-[A-Z0-9_-]{1,48}$ → forced-tool validation fails →
+# retry/degradation. Normalize server-side instead of betting on the LLM's casing.
+
+def test_rule_id_lowercase_rule_prefix_is_normalized():
+    from api.pipeline.schemas import Rule
+    r = Rule.model_validate({**_ONE_RULE, "id": "rule-cd3217-ldo-short-001"})
+    assert r.id == "R-CD3217-LDO-SHORT-001"
+
+
+def test_rule_id_lowercase_without_prefix_is_uppercased():
+    from api.pipeline.schemas import Rule
+    r = Rule.model_validate({**_ONE_RULE, "id": "r-pp1v8-short-001"})
+    assert r.id == "R-PP1V8-SHORT-001"
+
+
+def test_rule_id_already_canonical_is_unchanged():
+    from api.pipeline.schemas import Rule
+    r = Rule.model_validate({**_ONE_RULE, "id": "R-REFORM-001"})
+    assert r.id == "R-REFORM-001"

@@ -26,6 +26,10 @@ class PhaseTokenStats:
     cache_creation_input_tokens: int = 0
     duration_s: float = 0.0
     call_count: int = 0
+    # The model that served this phase's calls (last-wins if a phase ever mixes
+    # tiers — close enough for pricing). Carried so the cloud build-metering
+    # report (kind='build') can price each phase; None on legacy stats files.
+    model: str | None = None
 
     def record(
         self,
@@ -35,6 +39,7 @@ class PhaseTokenStats:
         cache_read: int = 0,
         cache_write: int = 0,
         duration_s: float = 0.0,
+        model: str | None = None,
     ) -> None:
         self.input_tokens += input_tokens
         self.output_tokens += output_tokens
@@ -42,6 +47,8 @@ class PhaseTokenStats:
         self.cache_creation_input_tokens += cache_write
         self.duration_s += duration_s
         self.call_count += 1
+        if model:
+            self.model = model
 
 
 def write_token_stats(path: Path, stats: list[PhaseTokenStats]) -> None:

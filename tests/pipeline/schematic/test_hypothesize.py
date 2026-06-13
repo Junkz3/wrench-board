@@ -656,7 +656,7 @@ def test_cascade_pull_up_open_marks_signal_consumers_anomalous():
 
 def test_table_covers_all_resistor_and_capacitor_roles():
     from api.pipeline.schematic.hypothesize import _PASSIVE_CASCADE_TABLE
-    # After T7, the table has all R + C entries.
+    # The table has all R + C entries.
     for r_role in ("series", "feedback", "pull_up", "pull_down"):
         for mode in ("open", "short"):
             assert ("passive_r", r_role, mode) in _PASSIVE_CASCADE_TABLE, (
@@ -1032,8 +1032,8 @@ def test_cascade_preview_exposes_always_on_count():
 
 def test_applicable_modes_passive_q_returns_four_modes():
     """Q with a known role gets all 4 modes (open/short/stuck_on/stuck_off)
-    — but only those whose handler is not passive_alive. Depends on T7
-    cascade table entries; this test will fail until T7 lands.
+    — but only those whose handler is not passive_alive. Depends on the
+    cascade table entries; this test will fail until that table lands.
     """
     from api.pipeline.schematic.hypothesize import _applicable_modes
     from api.pipeline.schematic.schemas import (
@@ -1066,13 +1066,13 @@ def test_applicable_modes_passive_q_returns_four_modes():
         quality=SchematicQualityReport(total_pages=1, pages_parsed=1, confidence_global=1.0),
     )
     modes = _applicable_modes(graph, "Q5")
-    # load_switch has handlers for all 4 modes per T7 table.
+    # load_switch has handlers for all 4 modes per the cascade table.
     assert set(modes) == {"open", "short", "stuck_on", "stuck_off"}
 
 
 def test_applicable_modes_passive_q_inrush_skips_alive_handlers():
     """inrush_limiter role has short/stuck_on → passive_alive → filtered out.
-    Depends on T7; will fail until T7 table lands."""
+    Depends on the cascade table; will fail until that table lands."""
     from api.pipeline.schematic.hypothesize import _applicable_modes
     from api.pipeline.schematic.schemas import (
         ComponentNode,
@@ -1107,7 +1107,7 @@ def test_applicable_modes_passive_q_inrush_skips_alive_handlers():
 
 
 # ---------------------------------------------------------------------------
-# Phase 4.5 T7 — Q cascade handlers + dispatch table
+# Phase 4.5 — Q cascade handlers + dispatch table
 # ---------------------------------------------------------------------------
 
 

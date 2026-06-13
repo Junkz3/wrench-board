@@ -1,7 +1,7 @@
-"""T8 — schémas augmentés : Provenance, WithProvenance mixin, identifiants stricts.
+"""Schémas augmentés : Provenance, WithProvenance mixin, identifiants stricts.
 
 Ce module ne teste QUE les changements de schéma (Pydantic) : aucune I/O, aucun
-pipeline. La vraie intégration est testée plus tard (test_expansion_t8.py).
+pipeline. La vraie intégration est testée plus tard (test_expansion_promoted.py).
 """
 
 from datetime import UTC, datetime
@@ -84,11 +84,11 @@ def test_registry_component_canonical_name_strict_pattern():
 def test_registry_component_kind_enum():
     """kind est un Literal[...] ; tout autre valeur est rejetée."""
     RegistryComponent(canonical_name="U1300", kind="PMIC", aliases=[])
-    # Types restaurés en T8 (FUSE/SWITCH/CRYSTAL/COIL) — doivent être acceptés
+    # Types restaurés (FUSE/SWITCH/CRYSTAL/COIL) — doivent être acceptés
     RegistryComponent(canonical_name="F1300", kind="FUSE", aliases=[])
     with pytest.raises(ValidationError):
         RegistryComponent(canonical_name="U1300", kind="processeur_principal", aliases=[])
-    # Minuscule rejeté — le schéma T8 est strict UPPERCASE
+    # Minuscule rejeté — le schéma est strict UPPERCASE
     with pytest.raises(ValidationError):
         RegistryComponent(canonical_name="F1300", kind="fuse", aliases=[])
 
@@ -117,7 +117,7 @@ def test_knowledge_node_id_and_kind():
 
 
 def test_knowledge_edge_relation_enum():
-    """Toutes les nouvelles relations T8 sont acceptées ; les anciennes sont rejetées."""
+    """Toutes les nouvelles relations sont acceptées ; les anciennes sont rejetées."""
     # Smoke test : chaque relation du nouveau vocabulaire doit passer
     for rel in ("powers", "drives", "senses", "grounds", "shares_net", "caused_by", "indicates"):
         KnowledgeEdge(source_id="N-A", target_id="N-B", relation=rel)
@@ -126,7 +126,7 @@ def test_knowledge_edge_relation_enum():
     with pytest.raises(ValidationError):
         KnowledgeEdge(source_id="N-A", target_id="N-B", relation="alimente")
 
-    # Anciennes relations supprimées en T8 — doivent maintenant être rejetées
+    # Anciennes relations supprimées — doivent maintenant être rejetées
     for old_rel in ("causes", "decouples", "connects", "measured_at", "part_of"):
         with pytest.raises(ValidationError):
             KnowledgeEdge(source_id="N-A", target_id="N-B", relation=old_rel)

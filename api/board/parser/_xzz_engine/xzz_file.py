@@ -67,11 +67,10 @@ XZZ_KEY_ENV = "WRENCH_BOARD_XZZ_KEY"
 
 
 class XZZFile(BoardFormatBase):
-    # DES master key — loaded at runtime from WRENCH_BOARD_XZZ_KEY (8 bytes
-    # hex). Aligns with the OpenBoardView convention of leaving cipher keys
-    # as runtime configuration. Empty string disables DES decryption; XOR
-    # decryption (using a key derived from the file itself at offset 0x10)
-    # still works without it.
+    # DES key — loaded at runtime from WRENCH_BOARD_XZZ_KEY (8 bytes hex).
+    # The key stays runtime configuration and is never embedded in the repo.
+    # An empty string disables the DES block step; the outer byte transform
+    # (keyed from the file itself at offset 0x10) still works without it.
     MASTER_KEY = os.environ.get(XZZ_KEY_ENV, "").strip()
     DIODE_PATTERN = bytes([
         0x76, 0x36, 0x76, 0x36, 0x35, 0x35, 0x35, 0x76,
@@ -150,9 +149,9 @@ class XZZFile(BoardFormatBase):
 
     def _decrypt_file(self, data: bytes) -> bytes:
         """
-        Décrypte le fichier XZZ (XOR + DES pour les blocs PART).
+        Decode the XZZ file (outer byte transform + DES for PART blocks).
 
-        Utilise Rust quand disponible (10-50x plus rapide).
+        Uses the Rust path when available.
         """
         if not self.MASTER_KEY:
             self.error_msg = (

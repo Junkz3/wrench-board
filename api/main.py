@@ -271,6 +271,11 @@ async def diagnostic_session(websocket: WebSocket, device_slug: str) -> None:
     # the handshake so the session's owner-sensitive tools (stock) write to the
     # right tenant's private store. Absent in standalone/self-host.
     owner_ref = websocket.headers.get("X-Owner-Ref") or None
+    # Plan capability injected by the cloud (the only gatekeeper): may this
+    # session's tenant trigger a paid pack enrichment (mb_expand_knowledge)?
+    # Header absent → standalone/self-host → True (unrestricted). The cloud
+    # always sends an explicit "true"/"false"; only "false" disables it.
+    can_expand = (websocket.headers.get("X-Wb-Can-Expand") or "true").strip().lower() != "false"
 
     mode = os.environ.get("DIAGNOSTIC_MODE", "managed").lower()
     if mode == "direct":
@@ -278,14 +283,14 @@ async def diagnostic_session(websocket: WebSocket, device_slug: str) -> None:
 
         await run_diagnostic_session_direct(
             websocket, device_slug, tier=tier, repair_id=repair_id, conv_id=conv_id,
-            owner_ref=owner_ref,
+            owner_ref=owner_ref, can_expand=can_expand,
         )
     else:
         from api.agent.runtime_managed import run_diagnostic_session_managed
 
         await run_diagnostic_session_managed(
             websocket, device_slug, tier=tier, repair_id=repair_id, conv_id=conv_id,  # type: ignore[arg-type]
-            owner_ref=owner_ref,
+            owner_ref=owner_ref, can_expand=can_expand,
         )
 
 

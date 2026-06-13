@@ -1,0 +1,16 @@
+[package]
+name = "wb_tvw_walker"
+version = "0.1.0"
+edition = "2021"
+description = "Rust/PyO3 accelerator for the TVW boardview pin-walk hot loop (record-identical to the Python reference)."
+
+[lib]
+name = "wb_tvw_walker"
+crate-type = ["cdylib"]
+
+[dependencies]
+pyo3 = { version = "0.22", features = ["extension-module"] }
+
+[profile.release]
+opt-level = 3
+lto = true

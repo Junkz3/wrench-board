@@ -21,9 +21,9 @@ from api.board.parser._ascii_boardview import (
     looks_like_binary,
     parse_test_link_shape,
 )
+from api.board.parser._cpd_neutral import looks_like_cpd_neutral, parse_cpd_neutral
 from api.board.parser._fz_zlib import looks_like_fz_zlib, parse_fz_zlib
 from api.board.parser._gencad import looks_like_gencad, parse_gencad
-from api.board.parser._cpd_neutral import looks_like_cpd_neutral, parse_cpd_neutral
 from api.board.parser.base import BoardParser, ObfuscatedFileError, register
 from api.board.parser.brd2 import BRD2Parser
 

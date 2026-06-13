@@ -126,7 +126,7 @@
     "measured": "Mesuré",
     "nominal_with_unit": "nominal: {value}{unit}",
     "record": "Enregistrer",
-    "history_title": "Historique — {target}",
+    "history_title": "Historique : {target}",
     "history_empty": "Aucune mesure pour cette cible.",
     "diagnose_one": "Diagnostiquer ({count} observation)",
     "diagnose_many": "Diagnostiquer ({count} observations)",
@@ -145,7 +145,7 @@
     "reanalyze": "Analyser avec Opus",
     "reanalyze_title": "Lancer l'analyse Opus (~$0.25, ~15s)",
     "reanalyzing": "Analyse en cours…",
-    "reanalyze_timeout": "Timeout — réessaye",
+    "reanalyze_timeout": "Timeout, réessaye",
     "reanalyze_failed": "Échec : {error}",
     "phase_pre_boot": "Pré-boot",
     "phase_default_name": "Phase {n}",
@@ -175,7 +175,7 @@
     "step_back_title": "Phase précédente",
     "step_fwd_title": "Phase suivante",
     "close_title": "Masquer la timeline",
-    "blocked": "BLOQUÉE — {reason}",
+    "blocked": "BLOQUÉE : {reason}",
     "blocked_default": "cascade",
     "hypotheses_title": "Hypothèses (top {count})",
     "hyp_close_title": "Fermer",
@@ -186,7 +186,7 @@
   },
   "rail_focus": {
     "select_hint": "← Sélectionne un rail dans la liste",
-    "select_sub": "Vue propre — un rail à la fois, zéro spaghetti.",
+    "select_sub": "Vue propre : un rail à la fois, zéro spaghetti.",
     "zone_upstream": "AMONT",
     "zone_source": "SOURCE",
     "zone_rail": "RAIL",
@@ -194,10 +194,10 @@
     "external_supply": "Alim externe"
   },
   "powertree": {
-    "orphan_strip": "SIGNAUX / AUTRES — {count} composants non attachés à un rail power"
+    "orphan_strip": "SIGNAUX / AUTRES : {count} composants non attachés à un rail power"
   },
   "degraded": {
-    "title": "Mode dégradé actif — la viz est exploitable mais quelques infos du schematic n'ont pas pu être croisées automatiquement entre pages :\n\n• {reasons}\n\nPages parsées : {parsed}/{total}",
+    "title": "Mode dégradé actif : la viz est exploitable mais quelques infos du schematic n'ont pas pu être croisées automatiquement entre pages.\n\n• {reasons}\n\nPages parsées : {parsed}/{total}",
     "reason_confidence": "confiance globale {value} < 0.7",
     "reason_orphans": "{count} orphan cross-page refs > 5",
     "reason_unresolved_nets": "{count} nets non résolus"

@@ -1,0 +1,16 @@
+[package]
+name = "wb_fz_cipher"
+version = "0.1.0"
+edition = "2021"
+description = "Rust/PyO3 accelerator for the FZ-xor boardview decoder (byte-identical to the Python reference)."
+
+[lib]
+name = "wb_fz_cipher"
+crate-type = ["cdylib"]
+
+[dependencies]
+pyo3 = { version = "0.22", features = ["extension-module"] }
+
+[profile.release]
+opt-level = 3
+lto = true

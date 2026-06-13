@@ -26,12 +26,12 @@ class ObfuscatedFileError(InvalidBoardFile):
 
 
 class MissingFZKeyError(InvalidBoardFile):
-    """Raised when a .fz file is uploaded without a decryption key configured.
+    """Raised when a .fz file is uploaded without a decode key configured.
 
-    `.fz` files are XOR-scrambled with a per-vendor 44×32-bit key
-    that ships separately from the file. Set `WRENCH_BOARD_FZ_KEY` in
-    the environment (space-separated decimal or hex integers), or
-    pass the key to `FZParser(key=...)` directly.
+    XOR-flavoured `.fz` files carry an encoded outer layer keyed by a
+    44×32-bit key that ships separately from the file. Set
+    `WRENCH_BOARD_FZ_KEY` in the environment (space-separated decimal or
+    hex integers), or pass the key to `FZParser(key=...)` directly.
     """
 
 

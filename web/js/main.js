@@ -17,6 +17,7 @@ import { initCameraPicker } from './camera.js';
 import { updatePreviewDevice } from './camera_preview.js';
 import { closeSchematicInspector } from './schematic.js?v=fitzoom';
 import { initLanding, showLanding, hideLanding } from './features/global/landing/index.js';
+import { hydrateOnboardingState } from './onboarding_state.js';
 import { mountMascot } from './mascot.js';
 import { sendDiagnostic } from './services/diagnosticSocket.js';
 import { sendCapabilities } from './features/repair/diagnostic/filesVision.js';
@@ -85,20 +86,17 @@ if (!window.Boardview) {
 (async function bootstrap() {
   // Wait for i18n dictionaries before any module renders dynamic strings.
   if (window.i18n && window.i18n.ready) await window.i18n.ready;
-  // Profile is the source of truth for the user's language. localStorage is
-  // just a paint-hint cache. Fire-and-forget reconcile after i18n is ready;
-  // any module subscribed via i18n.onChange re-renders if the profile differs.
-  (async () => {
-    try {
-      const r = await fetch("/profile");
-      if (!r.ok) return;
-      const data = await r.json();
-      const pref = data?.profile?.preferences?.language;
-      if (pref && pref !== window.i18n.locale && window.i18n.SUPPORTED.includes(pref)) {
-        await window.i18n.setLocale(pref);
-      }
-    } catch {}
-  })();
+  // Profile is the source of truth for the user's language AND the one-shot
+  // onboarding flags (cross-device). localStorage is just a paint-hint / pre-gate
+  // cache. Kick the single /profile hydration off here so it overlaps the init
+  // below; it's awaited further down (before routing) so the synchronous
+  // onboarding gates see server truth, not an empty localStorage on a new device.
+  const _profileHydrated = hydrateOnboardingState().then((env) => {
+    const pref = env?.profile?.preferences?.language;
+    if (pref && pref !== window.i18n.locale && window.i18n.SUPPORTED.includes(pref)) {
+      return window.i18n.setLocale(pref);
+    }
+  }).catch(() => {});
   mountMascot(document.getElementById("brandMascot"), { size: "xs", state: "idle" });
   wireRouter({ maybeLoadGraph });
   syncContextFromUrl();   // Phase C.1: populate store.device/repair before any view mounts
@@ -136,6 +134,9 @@ if (!window.Boardview) {
   // route's device/repair into the store BEFORE mounting any view.
   migrateLegacyUrl();
   await syncContextFromUrl();
+  // Ensure server onboarding flags are loaded before showLanding() / mountRoute()
+  // run their synchronous one-shot gates (landing tour + first-diag coaching).
+  await _profileHydrated;
 
   // Landing IS the global home (Phase D.1): it shows on #home and #landing (and
   // a bare load → parseRoute returns global "home"). #stock/#profile hide it; a

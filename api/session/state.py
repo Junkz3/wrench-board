@@ -59,7 +59,7 @@ def _memory_root() -> Path:
 def _candidate_boardview_paths(device_slug: str, owner_ref: str | None = None) -> list[Path]:
     """Ordered candidate boardview files for a slug — first match wins.
 
-    Managed (`owner_ref` set) — T9 per-owner: resolve STRICTLY the tenant's own
+    Managed (`owner_ref` set) — per-owner: resolve STRICTLY the tenant's own
     pin (`_sources/{owner}/active_sources.json` → `uploads/{filename}`). No root
     pin, no `board_assets`, no shared `uploads/` scan — any of those would
     cross-load another tenant's board. Mirrors
@@ -144,7 +144,7 @@ class SessionState:
     # changes mid-session. Without this the board is a one-time snapshot taken
     # at WS open — a boardview uploaded *after* the session opened stays
     # invisible to the bv_* tools (the viewer reads disk live; the agent never
-    # re-reads). `owner_ref` makes resolution per-tenant (T9): a managed session
+    # re-reads). `owner_ref` makes resolution per-tenant: a managed session
     # resolves STRICTLY its own per-owner pin, never the shared uploads scan.
     device_slug: str | None = None
     owner_ref: str | None = None
@@ -170,8 +170,8 @@ class SessionState:
         default_factory=lambda: {"top": True, "bottom": True}
     )
     # R1: pack cache — keyed by device_slug, storing (max_mtime, pack_dict,
-    # owner_ref). owner_ref dans la valeur → un mismatch est traité comme un
-    # miss (anti cross-tenant ; T8 Option C).
+    # owner_ref). owner_ref lives in the value → a mismatch is treated as a
+    # miss (anti cross-tenant; Option C).
     pack_cache: dict[str, tuple[float, dict[str, Any], str | None]] = field(default_factory=dict)
     # R2: per-session LRU for mb_get_component results, keyed by (device_slug, refdes).
     # Size cap kept small — sessions ask about the same ~dozen refdes repeatedly.
@@ -315,7 +315,7 @@ class SessionState:
         """Build a session for a device, auto-loading the board if available.
 
         Managed (`owner_ref` set) resolves STRICTLY the tenant's own per-owner
-        boardview pin (T9). Self-host (`owner_ref` None) uses the legacy
+        boardview pin. Self-host (`owner_ref` None) uses the legacy
         slug-scoped chain (root pin → `board_assets` → uploads scan). The
         session remembers `(device_slug, owner_ref)` so
         `refresh_board_if_changed` can reload when the active boardview changes

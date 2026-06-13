@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title data-i18n="common.app.title">Wrench Board — Knowledge graph</title>
+<title data-i18n="common.app.title">Wrench Board: Knowledge graph</title>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -188,6 +188,20 @@
 <div id="landing-overlay" class="landing" hidden>
   <div class="landing-bg" aria-hidden="true"></div>
   <nav class="landing-tools" aria-label="Tools">
+    <!-- Mobile-only drawer trigger for the recent-repairs sidebar (hidden on
+         desktop where the sidebar is a persistent left column, and hidden until
+         there is at least one repair — landing.js syncs its `hidden` with the
+         sidebar's). -->
+    <button type="button" id="landingRepairsToggle" class="landing-tool-link landing-repairs-toggle" hidden
+            aria-haspopup="true" aria-expanded="false"
+            data-i18n-attr="aria-label:landing.sidebar.aria" aria-label="Recent repairs">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none"
+           stroke="currentColor" stroke-width="1.6"
+           stroke-linecap="round" stroke-linejoin="round">
+        <path d="M2 4h12M2 8h12M2 12h8"/>
+      </svg>
+      <span data-i18n="landing.sidebar.title">Recent</span>
+    </button>
     <a href="#stock" id="landingStockLink" class="landing-tool-link">
       <svg width="14" height="14" viewBox="0 0 16 16" fill="none"
            stroke="currentColor" stroke-width="1.6"
@@ -206,7 +220,7 @@
       <button type="button" class="landing-profile-pill" id="landingProfilePill"
               aria-haspopup="dialog"
               data-i18n-attr="aria-label:onboarding.menu.open_aria">
-        <span class="landing-profile-avatar" id="landingProfileAvatar" aria-hidden="true">—</span>
+        <span class="landing-profile-avatar" id="landingProfileAvatar" aria-hidden="true">…</span>
         <span class="landing-profile-name" id="landingProfileName"></span>
       </button>
     </div>
@@ -221,13 +235,15 @@
       </header>
       <ol class="landing-sidebar-list" id="landingSidebarList"></ol>
     </aside>
+    <!-- Scrim behind the mobile drawer; tap to close. Inert on desktop. -->
+    <div class="landing-sidebar-backdrop" id="landingSidebarBackdrop" hidden></div>
     <main class="landing-hero">
     <div class="landing-mascot" id="landingMascot" aria-hidden="true"></div>
     <div class="landing-mark">
       <span>Wrench Board</span>
     </div>
     <h1 class="landing-title" data-ob-reveal data-i18n="landing.hero.title">Your hardware repair assistant.</h1>
-    <p class="landing-sub" data-ob-reveal data-i18n="landing.hero.sub">Give me your device and the symptom — I'll build the knowledge and open the diagnostic.</p>
+    <p class="landing-sub" data-ob-reveal data-i18n="landing.hero.sub">Give me your device and the symptom: I'll build the knowledge and open the diagnostic.</p>
 
     <form class="landing-form landing-form--stack" id="landingForm" autocomplete="off">
       <div class="landing-input-wrap" data-ob-reveal>
@@ -272,12 +288,6 @@
       <div class="landing-knowledge-chips" id="landingKnowledgeChips" hidden></div>
     </form>
 
-    <div class="landing-chips" id="landingChips" data-ob-reveal>
-      <button type="button" class="landing-chip" data-device="MNT Reform motherboard" data-symptom-key="landing.chips.mnt_symptom" data-symptom="no boot, black screen" data-i18n="landing.chips.mnt_label">MNT Reform — no boot</button>
-      <button type="button" class="landing-chip" data-device="iPhone 11" data-symptom-key="landing.chips.iphone_symptom" data-symptom="won't charge" data-i18n="landing.chips.iphone_label">iPhone 11 — no charge</button>
-      <button type="button" class="landing-chip" data-device="Framework laptop" data-symptom-key="landing.chips.framework_symptom" data-symptom="black screen on boot" data-i18n="landing.chips.framework_label">Framework — black screen</button>
-    </div>
-
     <!-- Live pipeline timeline — populated by landing.js once submit fires. -->
     <section class="landing-timeline" id="landingTimeline" hidden aria-live="polite">
       <header class="landing-timeline-head">
@@ -285,11 +295,11 @@
         <span class="landing-timeline-eta" id="landingTimelineEta"></span>
       </header>
       <ol class="landing-phase-list" id="landingPhaseList">
-        <li class="landing-phase" data-phase="scout"><span class="landing-phase-dot"></span><span class="landing-phase-label" data-i18n="landing.timeline.phase_scout">Scout · web research</span><div class="landing-phase-narration"></div></li>
-        <li class="landing-phase" data-phase="registry"><span class="landing-phase-dot"></span><span class="landing-phase-label" data-i18n="landing.timeline.phase_registry">Registry · canonical vocabulary</span><div class="landing-phase-narration"></div></li>
-        <li class="landing-phase" data-phase="mapper" hidden><span class="landing-phase-dot"></span><span class="landing-phase-label" data-i18n="landing.timeline.phase_mapper">Mapper · refdes ↔ graph</span><div class="landing-phase-narration"></div></li>
-        <li class="landing-phase" data-phase="writers"><span class="landing-phase-dot"></span><span class="landing-phase-label" data-i18n="landing.timeline.phase_writers">Writers · graph + rules + glossary</span><div class="landing-phase-narration"></div></li>
-        <li class="landing-phase" data-phase="audit"><span class="landing-phase-dot"></span><span class="landing-phase-label" data-i18n="landing.timeline.phase_audit">Auditor · validation</span><div class="landing-phase-narration"></div></li>
+        <li class="landing-phase" data-phase="scout"><span class="landing-phase-dot"></span><div class="landing-phase-head"><span class="landing-phase-label" data-i18n="landing.timeline.phase_scout">Scout · web research</span><span class="landing-phase-live" data-role="live"></span><button type="button" class="landing-phase-detail" data-role="detail-toggle" data-i18n="landing.timeline.detail" aria-expanded="false" hidden>detail</button></div><ul class="landing-phase-log" data-role="log" hidden></ul></li>
+        <li class="landing-phase" data-phase="registry"><span class="landing-phase-dot"></span><div class="landing-phase-head"><span class="landing-phase-label" data-i18n="landing.timeline.phase_registry">Registry · canonical vocabulary</span><span class="landing-phase-live" data-role="live"></span><button type="button" class="landing-phase-detail" data-role="detail-toggle" data-i18n="landing.timeline.detail" aria-expanded="false" hidden>detail</button></div><ul class="landing-phase-log" data-role="log" hidden></ul></li>
+        <li class="landing-phase" data-phase="mapper" hidden><span class="landing-phase-dot"></span><div class="landing-phase-head"><span class="landing-phase-label" data-i18n="landing.timeline.phase_mapper">Mapper · refdes ↔ graph</span><span class="landing-phase-live" data-role="live"></span><button type="button" class="landing-phase-detail" data-role="detail-toggle" data-i18n="landing.timeline.detail" aria-expanded="false" hidden>detail</button></div><ul class="landing-phase-log" data-role="log" hidden></ul></li>
+        <li class="landing-phase" data-phase="writers"><span class="landing-phase-dot"></span><div class="landing-phase-head"><span class="landing-phase-label" data-i18n="landing.timeline.phase_writers">Writers · graph + rules + glossary</span><span class="landing-phase-live" data-role="live"></span><button type="button" class="landing-phase-detail" data-role="detail-toggle" data-i18n="landing.timeline.detail" aria-expanded="false" hidden>detail</button></div><ul class="landing-phase-log" data-role="log" hidden></ul></li>
+        <li class="landing-phase" data-phase="audit"><span class="landing-phase-dot"></span><div class="landing-phase-head"><span class="landing-phase-label" data-i18n="landing.timeline.phase_audit">Auditor · validation</span><span class="landing-phase-live" data-role="live"></span><button type="button" class="landing-phase-detail" data-role="detail-toggle" data-i18n="landing.timeline.detail" aria-expanded="false" hidden>detail</button></div><ul class="landing-phase-log" data-role="log" hidden></ul></li>
       </ol>
     </section>
 
@@ -310,7 +320,7 @@
   <div class="mode-pill" id="modePill"><span class="dot"></span><span id="modePillText"></span></div>
   <div class="session-pill hidden" id="sessionPill" role="button" tabindex="0"
        data-i18n-attr="aria-label:common.session.pill_aria,title:common.session.pill_title"
-       aria-label="Active session — click to open the dashboard"
+       aria-label="Active session, click to open the dashboard"
        title="Back to session dashboard">
     <svg class="session-pill-dot" viewBox="0 0 24 24" fill="none" stroke="currentColor"
          stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -318,9 +328,9 @@
     </svg>
     <span class="session-pill-text">
       <span class="session-pill-tag mono" data-i18n="common.session.tag">SESSION</span>
-      <span class="session-pill-device" id="sessionPillDevice">—</span>
+      <span class="session-pill-device" id="sessionPillDevice">…</span>
       <span class="session-pill-sep">·</span>
-      <span class="session-pill-rid mono" id="sessionPillRid">—</span>
+      <span class="session-pill-rid mono" id="sessionPillRid">…</span>
     </span>
     <button type="button" class="session-pill-close" id="sessionPillClose"
             data-i18n-attr="aria-label:common.session.leave,title:common.session.leave"
@@ -497,7 +507,7 @@
          `hidden` attribute is removed when a part / pin is clicked. -->
     <aside id="component-info" class="brd-inspector" hidden>
       <header class="brd-ins-head">
-        <span class="brd-ins-ref" id="info-id">—</span>
+        <span class="brd-ins-ref" id="info-id">…</span>
         <button class="brd-ins-close" id="info-close" type="button" aria-label="Close">
           <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor"
                stroke-width="1.8" stroke-linecap="round">
@@ -507,9 +517,9 @@
       </header>
       <div class="brd-ins-scroll">
         <div class="brd-ins-body">
-          <div class="brd-ins-value" id="info-value">—</div>
+          <div class="brd-ins-value" id="info-value">…</div>
           <div class="brd-ins-meta">
-            <span id="info-type">—</span>
+            <span id="info-type">…</span>
             <span id="info-layer">TOP</span>
           </div>
           <div class="brd-ins-size" id="info-pos">X: 0  Y: 0</div>
@@ -522,7 +532,7 @@
         </div>
         <div class="brd-ins-section-label" id="info-net-label" hidden>Net</div>
         <div class="brd-ins-body" id="info-net-row" hidden>
-          <span class="brd-ins-value" id="info-net">—</span>
+          <span class="brd-ins-value" id="info-net">…</span>
         </div>
         <!-- Manufacturer-tagged diagnostic expectations from the
              source format (XZZ post-v6 block on iPad/iPhone dumps).
@@ -560,7 +570,7 @@
   <aside id="protocolQuest" class="protocol-quest hidden"
          data-i18n-attr="aria-label:protocol.aria.panel" aria-label="diagnostic protocol">
     <header class="protocol-quest-head">
-      <span class="protocol-quest-title" id="protocolTitle">—</span>
+      <span class="protocol-quest-title" id="protocolTitle">…</span>
       <span class="protocol-quest-counter" id="protocolCounter"></span>
       <button class="protocol-quest-toggle" id="protocolToggleBtn" type="button"
               data-i18n-attr="aria-label:protocol.aria.toggle,title:protocol.toggle.collapse"
@@ -590,7 +600,7 @@
   <div id="bvMinimap" class="bv-minimap hidden" aria-hidden="true">
     <header class="bv-minimap-head">
       <span class="bv-minimap-title" id="bvMinimapKind" data-i18n="brd.minimap.title">Relations</span>
-      <span class="bv-minimap-ref" id="bvMinimapRef">—</span>
+      <span class="bv-minimap-ref" id="bvMinimapRef">…</span>
       <span class="bv-minimap-sub" id="bvMinimapSub"></span>
       <button class="bv-minimap-close" id="bvMinimapClose" data-i18n-attr="aria-label:brd.minimap.close" aria-label="Close">
         <svg class="icon icon-sm" viewBox="0 0 24 24" width="12" height="12">
@@ -635,7 +645,7 @@
   <aside class="sch-railbar" id="schRailBar">
     <header class="sch-railbar-head">
       <span class="sch-railbar-title" data-i18n="schematic.railbar.title">Rails</span>
-      <span class="sch-railbar-count" id="schRailBarCount">—</span>
+      <span class="sch-railbar-count" id="schRailBarCount">…</span>
     </header>
     <!-- local search — client-side filter on the rail name (+3V3, USB…) -->
     <div class="sch-railbar-search">
@@ -648,12 +658,12 @@
   <!-- Top-left zone — read-only stats capsule. Sits clear of the centred
        Graph/PDF switch. -->
   <div class="sch-statsbar">
-    <span class="sch-stat"><span class="k" data-i18n="schematic.stats.comps">Comps</span><span class="v" id="schStatComps">—</span></span>
-    <span class="sch-stat"><span class="k" data-i18n="schematic.stats.rails">Rails</span><span class="v" id="schStatRails">—</span></span>
-    <span class="sch-stat"><span class="k" data-i18n="schematic.stats.sources">Sources</span><span class="v" id="schStatRegs">—</span></span>
-    <span class="sch-stat"><span class="k" data-i18n="schematic.stats.phases">Phases</span><span class="v" id="schStatPhases">—</span></span>
-    <span class="sch-stat"><span class="k" data-i18n="schematic.stats.conf">Conf.</span><span class="v" id="schStatConf">—</span></span>
-    <span class="sch-stat"><span class="k" data-i18n="schematic.stats.pages">Pages</span><span class="v" id="schStatPages">—</span></span>
+    <span class="sch-stat"><span class="k" data-i18n="schematic.stats.comps">Comps</span><span class="v" id="schStatComps">…</span></span>
+    <span class="sch-stat"><span class="k" data-i18n="schematic.stats.rails">Rails</span><span class="v" id="schStatRails">…</span></span>
+    <span class="sch-stat"><span class="k" data-i18n="schematic.stats.sources">Sources</span><span class="v" id="schStatRegs">…</span></span>
+    <span class="sch-stat"><span class="k" data-i18n="schematic.stats.phases">Phases</span><span class="v" id="schStatPhases">…</span></span>
+    <span class="sch-stat"><span class="k" data-i18n="schematic.stats.conf">Conf.</span><span class="v" id="schStatConf">…</span></span>
+    <span class="sch-stat"><span class="k" data-i18n="schematic.stats.pages">Pages</span><span class="v" id="schStatPages">…</span></span>
     <span class="sch-stat-pill warn" id="schStatDegraded" data-i18n="schematic.stats.degraded">degraded</span>
   </div>
 
@@ -708,7 +718,7 @@
     <!-- scrollable list of pages, populated by js/schematic.js -->
     <div class="sch-pdf-scroll" id="schPdfScroll"></div>
     <!-- status pill (bottom-center): "Page k / n" -->
-    <div class="sch-pdf-pagepill" id="schPdfPagePill">—</div>
+    <div class="sch-pdf-pagepill" id="schPdfPagePill">…</div>
     <!-- zoom controls (bottom-right, mirrors .sch-zoom) -->
     <div class="sch-pdf-zoom">
       <button class="sch-pdf-zoom-btn" id="schPdfZoomIn" data-i18n-attr="title:schematic.zoom.in_pdf" title="Zoom in (+)"><svg class="icon icon-sm" viewBox="0 0 24 24" width="14" height="14"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.6" fill="none"/><path d="M11 8v6M8 11h6M21 21l-4.3-4.3" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg></button>
@@ -757,8 +767,8 @@
         </svg>
       </button>
       <span class="sch-type-badge" id="schInspType">RAIL</span>
-      <h2 id="schInspTitle">—</h2>
-      <div class="sub" id="schInspSub">—</div>
+      <h2 id="schInspTitle">…</h2>
+      <div class="sub" id="schInspSub">…</div>
     </header>
     <div class="sch-insp-body" id="schInspBody"></div>
   </aside>
@@ -790,7 +800,7 @@
       <div class="mb-block-head">
         <span class="mb-tag">registry.json</span>
         <h2 data-i18n="memory_bank.blocks.registry_heading">Canonical vocabulary</h2>
-        <span class="mb-block-count" id="mbBlockRegistryCount">—</span>
+        <span class="mb-block-count" id="mbBlockRegistryCount">…</span>
       </div>
       <div class="mb-block-body" id="mbBlockRegistry"></div>
     </section>
@@ -799,7 +809,7 @@
       <div class="mb-block-head">
         <span class="mb-tag">knowledge_graph.json</span>
         <h2 data-i18n="memory_bank.blocks.graph_heading">Knowledge graph</h2>
-        <span class="mb-block-count" id="mbBlockGraphCount">—</span>
+        <span class="mb-block-count" id="mbBlockGraphCount">…</span>
       </div>
       <div class="mb-block-body" id="mbBlockGraph"></div>
     </section>
@@ -808,7 +818,7 @@
       <div class="mb-block-head">
         <span class="mb-tag">rules.json</span>
         <h2 data-i18n="memory_bank.blocks.rules_heading">Diagnostic rules</h2>
-        <span class="mb-block-count" id="mbBlockRulesCount">—</span>
+        <span class="mb-block-count" id="mbBlockRulesCount">…</span>
       </div>
       <div class="mb-block-body" id="mbBlockRules"></div>
     </section>
@@ -817,7 +827,7 @@
       <div class="mb-block-head">
         <span class="mb-tag">dictionary.json</span>
         <h2 data-i18n="memory_bank.blocks.dictionary_heading">Component sheets</h2>
-        <span class="mb-block-count" id="mbBlockDictionaryCount">—</span>
+        <span class="mb-block-count" id="mbBlockDictionaryCount">…</span>
       </div>
       <div class="mb-block-body" id="mbBlockDictionary"></div>
     </section>
@@ -826,7 +836,7 @@
       <div class="mb-block-head">
         <span class="mb-tag">audit_verdict.json</span>
         <h2 data-i18n="memory_bank.blocks.audit_heading">Audit verdict</h2>
-        <span class="mb-block-count" id="mbBlockAuditCount">—</span>
+        <span class="mb-block-count" id="mbBlockAuditCount">…</span>
       </div>
       <div class="mb-block-body" id="mbBlockAudit"></div>
     </section>
@@ -864,7 +874,7 @@
   <div class="stock-body">
   <div class="stock-search-form">
     <select id="stock-q-type">
-      <option value="" data-i18n="stock.select_type">— Type —</option>
+      <option value="" data-i18n="stock.select_type">(Type)</option>
       <option value="capacitor" data-i18n="stock.type_capacitor">Capacitor</option>
       <option value="resistor" data-i18n="stock.type_resistor">Resistor</option>
       <option value="inductor" data-i18n="stock.type_inductor">Inductor</option>
@@ -881,7 +891,7 @@
     <input id="stock-q-voltage" type="number" placeholder="V min"
            data-i18n-attr="placeholder:stock.ph_voltage">
     <select id="stock-q-role">
-      <option value="" data-i18n="stock.select_role">— Target role —</option>
+      <option value="" data-i18n="stock.select_role">(Target role)</option>
       <option value="decoupling">decoupling</option>
       <option value="bulk">bulk</option>
       <option value="filter">filter</option>
@@ -922,9 +932,9 @@
   <div class="hidden" id="repairDashboard">
     <header class="rd-head">
       <div class="rd-head-left">
-        <span class="rd-slug mono" id="rdSlug">—</span>
-        <h1 class="rd-device" id="rdDevice">—</h1>
-        <p class="rd-symptom" id="rdSymptom">—</p>
+        <span class="rd-slug mono" id="rdSlug">…</span>
+        <h1 class="rd-device" id="rdDevice">…</h1>
+        <p class="rd-symptom" id="rdSymptom">…</p>
         <div class="rd-badges" id="rdBadges"></div>
       </div>
       <div class="rd-head-right">
@@ -951,8 +961,8 @@
       <div class="rd-cap-head">
         <span class="rd-cap-pulse" id="rdCapPulse"></span>
         <span class="rd-cap-tag" data-i18n="home.dashboard.cap.tag">AI capabilities</span>
-        <h2 class="rd-cap-title" id="rdCapTitle">—</h2>
-        <span class="rd-cap-score" id="rdCapScore">—</span>
+        <h2 class="rd-cap-title" id="rdCapTitle">…</h2>
+        <span class="rd-cap-score" id="rdCapScore">…</span>
       </div>
       <p class="rd-cap-body" id="rdCapBody" data-i18n="home.dashboard.cap.body">
         The agent has access to its tools depending on the data you provide.
@@ -964,7 +974,7 @@
            `[data-open]` + positions it; renderCapabilities owns the content. -->
       <div class="rd-cap-popover" id="rdCapPopover" hidden role="dialog" aria-modal="false">
         <header class="rd-cap-popover-head">
-          <h3 id="rdCapPopoverTitle">—</h3>
+          <h3 id="rdCapPopoverTitle">…</h3>
           <button type="button" class="rd-cap-popover-close" id="rdCapPopoverClose" aria-label="Close">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
           </button>
@@ -989,7 +999,7 @@
             <h3 data-i18n="home.dashboard.schematic.title">Schematic PDF</h3>
             <span class="rd-data-card-sub" data-i18n="home.dashboard.schematic.sub">vision pipeline · input</span>
           </div>
-          <span class="rd-data-card-state" id="rdCardSchematicState">—</span>
+          <span class="rd-data-card-state" id="rdCardSchematicState">…</span>
         </header>
         <p class="rd-data-card-meta" id="rdCardSchematicMeta" data-i18n="home.dashboard.schematic.checking">checking…</p>
         <div class="rd-data-card-actions" id="rdCardSchematicActions"></div>
@@ -1030,7 +1040,7 @@
               <p class="rd-diag-popover-body" data-i18n="home.dashboard.boardview.diag_popover_body">…</p>
             </div>
           </span>
-          <span class="rd-data-card-state" id="rdCardBoardviewState">—</span>
+          <span class="rd-data-card-state" id="rdCardBoardviewState">…</span>
         </header>
         <p class="rd-data-card-meta" id="rdCardBoardviewMeta" data-i18n="home.dashboard.schematic.checking">checking…</p>
         <div class="rd-data-card-actions" id="rdCardBoardviewActions"></div>
@@ -1049,9 +1059,9 @@
             <h3 data-i18n="home.dashboard.knowledge.title">Causal graph</h3>
             <span class="rd-data-card-sub" data-i18n="home.dashboard.knowledge.sub">derived · symptom → action</span>
           </div>
-          <span class="rd-data-card-state" id="rdCardKnowledgeState">—</span>
+          <span class="rd-data-card-state" id="rdCardKnowledgeState">…</span>
         </header>
-        <p class="rd-data-card-meta" id="rdCardKnowledgeMeta">—</p>
+        <p class="rd-data-card-meta" id="rdCardKnowledgeMeta">…</p>
         <div class="rd-data-card-actions" id="rdCardKnowledgeActions"></div>
       </article>
 
@@ -1064,9 +1074,9 @@
             <h3 data-i18n="home.dashboard.memory.title">Memory Bank</h3>
             <span class="rd-data-card-sub" data-i18n="home.dashboard.memory.sub">derived · rules · findings</span>
           </div>
-          <span class="rd-data-card-state" id="rdCardMemoryState">—</span>
+          <span class="rd-data-card-state" id="rdCardMemoryState">…</span>
         </header>
-        <p class="rd-data-card-meta" id="rdCardMemoryMeta">—</p>
+        <p class="rd-data-card-meta" id="rdCardMemoryMeta">…</p>
         <div class="rd-data-card-actions" id="rdCardMemoryActions"></div>
       </article>
 
@@ -1093,7 +1103,7 @@
       <span class="rd-toast-icon" id="rdToastIcon"></span>
       <div class="rd-toast-body">
         <div class="rd-toast-title" id="rdToastTitle">Import in progress…</div>
-        <div class="rd-toast-sub" id="rdToastSub">—</div>
+        <div class="rd-toast-sub" id="rdToastSub">…</div>
       </div>
     </div>
 
@@ -1103,7 +1113,7 @@
           <header class="rd-block-head">
             <span class="rd-block-tag" data-i18n="home.dashboard.convs.tag">conversations</span>
             <h2 data-i18n="home.dashboard.convs.title">Diagnostic threads</h2>
-            <span class="rd-block-count" id="rdConvCount">—</span>
+            <span class="rd-block-count" id="rdConvCount">…</span>
           </header>
           <div class="rd-block-body" id="rdConvBody">
             <div class="rd-block-empty" data-i18n="home.dashboard.convs.empty">No conversation.</div>
@@ -1114,7 +1124,7 @@
           <header class="rd-block-head">
             <span class="rd-block-tag" data-i18n="home.dashboard.findings.tag">field_reports/</span>
             <h2 data-i18n="home.dashboard.findings.title">Saved findings</h2>
-            <span class="rd-block-count" id="rdFindingsCount">—</span>
+            <span class="rd-block-count" id="rdFindingsCount">…</span>
           </header>
           <div class="rd-block-body" id="rdFindingsBody">
             <div class="rd-block-empty" data-i18n="home.dashboard.findings.empty_html" data-i18n-html="1">No finding for this device. The agent records them via <code>mb_record_finding</code> when you confirm a fault.</div>
@@ -1137,7 +1147,7 @@
             <h2 data-i18n="home.dashboard.pack.title">Device memory</h2>
           </header>
           <div class="rd-block-body" id="rdPackBody">
-            <div class="rd-block-empty">—</div>
+            <div class="rd-block-empty">…</div>
           </div>
         </section>
       </aside>
@@ -1177,16 +1187,16 @@
        graph.js via the #cnt-sym/#cnt-net/#cnt-cmp/#cnt-act IDs. -->
   <div class="legend">
     <h4 data-i18n="graph.legend.types_heading">Types</h4>
-    <div class="legend-row type-row"><span class="type-dot" style="background:var(--amber)"></span><b style="color:var(--amber);font-weight:500" data-i18n="graph.legend.type_symptom">Symptom</b> — <span data-i18n="graph.legend.type_symptom_desc">what the client observes</span><span class="type-count mono" id="cnt-sym">0</span></div>
-    <div class="legend-row type-row"><span class="type-dot" style="background:var(--emerald)"></span><b style="color:var(--emerald);font-weight:500" data-i18n="graph.legend.type_net">Net / Rail</b> — <span data-i18n="graph.legend.type_net_desc">signal or supply</span><span class="type-count mono" id="cnt-net">0</span></div>
-    <div class="legend-row type-row"><span class="type-dot" style="background:var(--cyan)"></span><b style="color:var(--cyan);font-weight:500" data-i18n="graph.legend.type_component">Component</b> — <span data-i18n="graph.legend.type_component_desc">chip, connector</span><span class="type-count mono" id="cnt-cmp">0</span></div>
-    <div class="legend-row type-row"><span class="type-dot" style="background:var(--violet)"></span><b style="color:var(--violet);font-weight:500" data-i18n="graph.legend.type_action">Action</b> — <span data-i18n="graph.legend.type_action_desc">possible repair</span><span class="type-count mono" id="cnt-act">0</span></div>
+    <div class="legend-row type-row"><span class="type-dot" style="background:var(--amber)"></span><b style="color:var(--amber);font-weight:500" data-i18n="graph.legend.type_symptom">Symptom</b>: <span data-i18n="graph.legend.type_symptom_desc">what the client observes</span><span class="type-count mono" id="cnt-sym">0</span></div>
+    <div class="legend-row type-row"><span class="type-dot" style="background:var(--emerald)"></span><b style="color:var(--emerald);font-weight:500" data-i18n="graph.legend.type_net">Net / Rail</b>: <span data-i18n="graph.legend.type_net_desc">signal or supply</span><span class="type-count mono" id="cnt-net">0</span></div>
+    <div class="legend-row type-row"><span class="type-dot" style="background:var(--cyan)"></span><b style="color:var(--cyan);font-weight:500" data-i18n="graph.legend.type_component">Component</b>: <span data-i18n="graph.legend.type_component_desc">chip, connector</span><span class="type-count mono" id="cnt-cmp">0</span></div>
+    <div class="legend-row type-row"><span class="type-dot" style="background:var(--violet)"></span><b style="color:var(--violet);font-weight:500" data-i18n="graph.legend.type_action">Action</b>: <span data-i18n="graph.legend.type_action_desc">possible repair</span><span class="type-count mono" id="cnt-act">0</span></div>
 
     <h4 class="legend-sub" data-i18n="graph.legend.relations_heading">Relations</h4>
-    <div class="legend-row"><span class="legend-line" style="border-color:oklch(0.70 0.15 70);border-style:dashed"></span> <b style="color:var(--amber);font-weight:500" data-i18n="graph.legend.rel_causes">causes</b> — <span data-i18n="graph.legend.rel_causes_desc">causal link</span></div>
-    <div class="legend-row"><span class="legend-line" style="border-color:oklch(0.70 0.13 155)"></span> <b style="color:var(--emerald);font-weight:500" data-i18n="graph.legend.rel_powers">powers</b> — <span data-i18n="graph.legend.rel_powers_desc">power flow</span></div>
-    <div class="legend-row"><span class="legend-line" style="border-color:#3a5680"></span> <b style="color:var(--text-2);font-weight:500" data-i18n="graph.legend.rel_connected">connected to</b> — <span data-i18n="graph.legend.rel_connected_desc">bus / ground</span></div>
-    <div class="legend-row"><span class="legend-line" style="border-color:oklch(0.72 0.14 295);border-style:dotted"></span> <b style="color:var(--violet);font-weight:500" data-i18n="graph.legend.rel_resolves">resolves</b> — <span data-i18n="graph.legend.rel_resolves_desc">corrective action</span></div>
+    <div class="legend-row"><span class="legend-line" style="border-color:oklch(0.70 0.15 70);border-style:dashed"></span> <b style="color:var(--amber);font-weight:500" data-i18n="graph.legend.rel_causes">causes</b>: <span data-i18n="graph.legend.rel_causes_desc">causal link</span></div>
+    <div class="legend-row"><span class="legend-line" style="border-color:oklch(0.70 0.13 155)"></span> <b style="color:var(--emerald);font-weight:500" data-i18n="graph.legend.rel_powers">powers</b>: <span data-i18n="graph.legend.rel_powers_desc">power flow</span></div>
+    <div class="legend-row"><span class="legend-line" style="border-color:#3a5680"></span> <b style="color:var(--text-2);font-weight:500" data-i18n="graph.legend.rel_connected">connected to</b>: <span data-i18n="graph.legend.rel_connected_desc">bus / ground</span></div>
+    <div class="legend-row"><span class="legend-line" style="border-color:oklch(0.72 0.14 295);border-style:dotted"></span> <b style="color:var(--violet);font-weight:500" data-i18n="graph.legend.rel_resolves">resolves</b>: <span data-i18n="graph.legend.rel_resolves_desc">corrective action</span></div>
   </div>
 
   <!-- Zoom controls -->
@@ -1203,7 +1213,7 @@
     <div class="empty-state-card">
       <div class="glyph"><svg class="icon" viewBox="0 0 24 24"><circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="7" r="2.5"/><circle cx="12" cy="17" r="2.5"/><path d="M8 7l8 0M7 8l4 7M17 9l-4 6"/></svg></div>
       <h3 data-i18n="graph.empty.title">No graph loaded</h3>
-      <p data-i18n="graph.empty.body">Run the generation pipeline on a device — the graph will be built from the resulting pack.</p>
+      <p data-i18n="graph.empty.body">Run the generation pipeline on a device: the graph will be built from the resulting pack.</p>
       <code>curl -X POST http://localhost:8000/pipeline/generate \
   -H "Content-Type: application/json" \
   -d '{"device_label":"iPhone X"}'</code>
@@ -1219,8 +1229,8 @@
       <span class="type-badge" id="inspBadge"><span id="inspBadgeText" data-i18n="graph.type_label.component">Component</span></span>
       <span data-i18n="graph.inspector.type_inferred">· model inference</span>
     </div>
-    <h2 id="inspTitle">—</h2>
-    <div class="insp-id" id="inspId">id: —</div>
+    <h2 id="inspTitle">…</h2>
+    <div class="insp-id" id="inspId">id: …</div>
   </div>
   <div class="insp-body">
     <div class="insp-section">
@@ -1229,9 +1239,9 @@
         <div class="conf-bar"><div class="conf-fill" id="confFill" style="width:0%"></div></div>
         <div class="conf-value" id="confValue">0.00</div>
       </div>
-      <div style="font-size:11px;color:var(--text-3);margin-top:6px;font-family:var(--mono)" id="confNote">—</div>
+      <div style="font-size:11px;color:var(--text-3);margin-top:6px;font-family:var(--mono)" id="confNote">…</div>
     </div>
-    <div class="insp-section"><h3 data-i18n="graph.inspector.description">Description</h3><div class="insp-desc" id="inspDesc">—</div></div>
+    <div class="insp-section"><h3 data-i18n="graph.inspector.description">Description</h3><div class="insp-desc" id="inspDesc">…</div></div>
     <div class="insp-section" id="metaSection"><h3 data-i18n="graph.inspector.metadata">Metadata</h3><dl class="meta-grid" id="metaGrid"></dl></div>
     <div class="insp-section"><h3><span data-i18n="graph.inspector.relations">Relations</span> <span style="color:var(--text-3);font-weight:400" id="edgeCount"></span></h3><div class="edge-list" id="edgeList"></div></div>
   </div>
@@ -1262,7 +1272,7 @@
       <div class="modal-field">
         <label class="modal-label" for="landingDeviceKind" data-i18n="repair.device_kind.label">Board type (optional)</label>
         <select id="landingDeviceKind" class="modal-input" data-i18n-attr="aria-label:landing.kind.aria">
-          <option value="" data-i18n="landing.kind.none">— device type (optional)</option>
+          <option value="" data-i18n="landing.kind.none">(device type, optional)</option>
           <option value="gpu_card" data-i18n="repair.device_kind.options.gpu_card">Discrete GPU card</option>
           <option value="laptop_logic_board" data-i18n="repair.device_kind.options.laptop_logic_board">Laptop logic board</option>
           <option value="phone_logic_board" data-i18n="repair.device_kind.options.phone_logic_board">Phone logic board</option>
@@ -1273,7 +1283,7 @@
         </select>
       </div>
       <div class="modal-field landing-schematic" id="landingSchematicField">
-        <label class="modal-label" data-i18n="repair.schematic.label">Schematic (optional — sharper pack)</label>
+        <label class="modal-label" data-i18n="repair.schematic.label">Schematic (optional, for a sharper pack)</label>
         <button type="button" class="modal-input landing-schematic-pick" id="landingSchematicPick" data-i18n="landing.schematic.cta">Attach a schematic PDF (optional)</button>
         <span class="landing-schematic-name mono" id="landingSchematicName"></span>
         <input type="file" id="landingSchematic" hidden accept=".pdf,application/pdf" data-i18n-attr="aria-label:landing.schematic.aria">
@@ -1295,14 +1305,14 @@
     <header class="modal-head">
       <div class="type-row">
         <span class="type-badge action" data-i18n="protocol.confirm.badge">Proposed protocol</span>
-        <span id="protocolConfirmStepCount" data-i18n="protocol.confirm.step_count_placeholder">— steps</span>
+        <span id="protocolConfirmStepCount" data-i18n="protocol.confirm.step_count_placeholder">number of steps</span>
       </div>
-      <h2 id="protocolConfirmTitle">—</h2>
+      <h2 id="protocolConfirmTitle">…</h2>
     </header>
     <div class="modal-body">
       <div class="modal-field">
         <span class="modal-label" data-i18n="protocol.confirm.rationale_label">Rationale</span>
-        <p class="protocol-confirm-rationale" id="protocolConfirmRationale">—</p>
+        <p class="protocol-confirm-rationale" id="protocolConfirmRationale">…</p>
       </div>
       <div class="modal-field">
         <span class="modal-label" data-i18n="protocol.confirm.steps_label">Steps</span>
@@ -1312,7 +1322,7 @@
         <label class="modal-label" for="protocolConfirmReason" data-i18n="protocol.confirm.reject_reason_label">Reason for rejection (optional)</label>
         <textarea class="modal-textarea" id="protocolConfirmReason" rows="2"
                   data-i18n-placeholder="protocol.confirm.reject_reason_placeholder"
-                  placeholder="Why reject this protocol — the agent will take it into account."></textarea>
+                  placeholder="Why reject this protocol? The agent will take it into account."></textarea>
       </div>
       <p class="modal-hint" id="protocolConfirmHint" data-i18n="protocol.confirm.hint">
         The agent is waiting for your decision before pushing the protocol.
@@ -1349,7 +1359,7 @@
                data-i18n="protocol.abandon.modal.reason_label">Reason (optional, surfaced to the agent)</label>
         <textarea class="modal-textarea" id="protocolAbandonReason" rows="2"
                   data-i18n-placeholder="protocol.abandon.modal.reason_placeholder"
-                  placeholder="Why abandon — wrong hypothesis, dead end, customer left, …"></textarea>
+                  placeholder="Why abandon? (wrong hypothesis, dead end, customer left…)"></textarea>
       </div>
       <footer class="modal-actions">
         <button type="button" class="btn" id="protocolAbandonCancel" data-i18n="protocol.abandon.modal.cancel">Cancel</button>
@@ -1391,11 +1401,11 @@
     <div class="tweak-row pcb-only">
       <label data-i18n="common.tweaks.boardview_colors">Boardview colors</label>
       <div class="brd-color-grid">
-        <div class="brd-color-row" title="Nets nommés non-spéciaux (DATA, ENABLE, …) — fallback par défaut."><span class="brd-color-dot" data-cat="signal"></span><span data-i18n="common.tweaks.color_signal">Signal</span><span class="brd-color-count" data-cat-count="signal"></span></div>
-        <div class="brd-color-row" title="Nets matchant PP*, VDD, +V, *_PWR, AVDD, VBAT — alimentations."><span class="brd-color-dot" data-cat="power"></span><span data-i18n="common.tweaks.color_power">Power</span><span class="brd-color-count" data-cat-count="power"></span></div>
+        <div class="brd-color-row" title="Nets nommés non-spéciaux (DATA, ENABLE, …), fallback par défaut."><span class="brd-color-dot" data-cat="signal"></span><span data-i18n="common.tweaks.color_signal">Signal</span><span class="brd-color-count" data-cat-count="signal"></span></div>
+        <div class="brd-color-row" title="Nets matchant PP*, VDD, +V, *_PWR, AVDD, VBAT : alimentations."><span class="brd-color-dot" data-cat="power"></span><span data-i18n="common.tweaks.color_power">Power</span><span class="brd-color-count" data-cat-count="power"></span></div>
         <div class="brd-color-row" title="GND, VSS, AGND, DGND, PGND, GROUND."><span class="brd-color-dot" data-cat="ground"></span><span data-i18n="common.tweaks.color_ground">Ground</span><span class="brd-color-count" data-cat-count="ground"></span></div>
-        <div class="brd-color-row" title="CLK_*, *_CLK, REFCLK, OSC_OUT — signaux d'horloge."><span class="brd-color-dot" data-cat="clock"></span><span data-i18n="common.tweaks.color_clock">Clock</span><span class="brd-color-count" data-cat-count="clock"></span></div>
-        <div class="brd-color-row" title="RESET_*, RST_*, NRST, PORST_* — lignes de reset."><span class="brd-color-dot" data-cat="reset"></span><span data-i18n="common.tweaks.color_reset">Reset</span><span class="brd-color-count" data-cat-count="reset"></span></div>
+        <div class="brd-color-row" title="CLK_*, *_CLK, REFCLK, OSC_OUT : signaux d'horloge."><span class="brd-color-dot" data-cat="clock"></span><span data-i18n="common.tweaks.color_clock">Clock</span><span class="brd-color-count" data-cat-count="clock"></span></div>
+        <div class="brd-color-row" title="RESET_*, RST_*, NRST, PORST_* : lignes de reset."><span class="brd-color-dot" data-cat="reset"></span><span data-i18n="common.tweaks.color_reset">Reset</span><span class="brd-color-count" data-cat-count="reset"></span></div>
         <div class="brd-color-row" title="Pins sans net assigné (NC, N/A, UNCONNECTED)."><span class="brd-color-dot" data-cat="no-net"></span><span data-i18n="common.tweaks.color_nc">NC</span><span class="brd-color-count" data-cat-count="no-net"></span></div>
         <div class="brd-color-row" title="Test pads & probe pads (XZZ type_09 solid, TEST_POINT pins XW/TPxxx, mounting holes / vias mécaniques sans net)."><span class="brd-color-dot" data-cat="testPad"></span><span data-i18n="common.tweaks.color_testpad">Test pad</span><span class="brd-color-count" data-cat-count="testPad"></span></div>
         <div class="brd-color-row" title="Contour de la carte (le trait du board outline)."><span class="brd-color-dot" data-cat="boardOutline"></span><span data-i18n="common.tweaks.color_board_outline">Contour board</span><span class="brd-color-count" data-cat-count="boardOutline"></span></div>

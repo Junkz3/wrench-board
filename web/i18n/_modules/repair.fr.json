@@ -1,8 +1,8 @@
 {
-  "demo_symptom": "Ne démarre pas — aucune alimentation",
+  "demo_symptom": "Ne démarre pas : aucune alimentation",
   "device_kind": {
     "label": "Type de carte (optionnel)",
-    "none": "— non déclaré",
+    "none": "(non déclaré)",
     "options": {
       "gpu_card": "Carte graphique (GPU)",
       "laptop_logic_board": "Carte mère PC portable",
@@ -14,8 +14,8 @@
     }
   },
   "schematic": {
-    "label": "Schéma (optionnel — pack plus précis)",
+    "label": "Schéma (optionnel, pour un pack plus précis)",
     "cta": "Joindre un PDF de schéma",
-    "already_ingested": "Schéma déjà ingéré ✓ — pas besoin de joindre"
+    "already_ingested": "Schéma déjà ingéré ✓ (pas besoin de joindre)"
   }
 }

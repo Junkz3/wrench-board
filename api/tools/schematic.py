@@ -22,7 +22,11 @@ if TYPE_CHECKING:
 
 from api.agent.owner_ref import current_owner_ref
 from api.pipeline import live_graph
-from api.pipeline.schematic.schemas import AnalyzedBootSequence, ElectricalGraph
+from api.pipeline.schematic.schemas import (
+    AnalyzedBootSequence,
+    ElectricalGraph,
+    component_is_untraced,
+)
 from api.pipeline.schematic.simulator import SimulationEngine
 
 _VALID_QUERIES = (
@@ -44,9 +48,9 @@ def _load_graph(
     memory_root: Path,
     session: SessionState | None = None,
 ) -> tuple[dict | None, str | None]:
-    # T9/T6 — graphe = moat PARTAGÉ : le tenant lit SON graphe per-owner s'il a
-    # uploadé (owner→hash→.cache_schematic/{hash}/), sinon le graphe CANONIQUE du
-    # slug (racine owner=None). owner None (self-host) → racine, inchangé.
+    # graph = shared graph: the tenant reads ITS per-owner graph if it uploaded
+    # one (owner→hash→.cache_schematic/{hash}/), otherwise the slug's CANONICAL
+    # graph (root owner=None). owner None (self-host) → root, unchanged.
     pack_dir = memory_root / device_slug
     owner_ref = current_owner_ref()
     base = live_graph.resolve_graph_dir(pack_dir, owner_ref)
@@ -112,6 +116,23 @@ def _load_graph(
     return graph, None
 
 
+_UNTRACED_HINT = (
+    "Untraced refdes: no pin-level connectivity was traced in the schematic "
+    "(often a section title or block label on a power-alias page, not a "
+    "placed part). Verify it exists on the physical board / boardview "
+    "before citing it to the technician."
+)
+
+
+def _untraced_refdes_set(graph: dict) -> set[str]:
+    """Uppercased refdes of components with no traced connectivity."""
+    return {
+        refdes.upper()
+        for refdes, comp in graph.get("components", {}).items()
+        if component_is_untraced(comp)
+    }
+
+
 def _boot_phase_for_rail(graph: dict, label: str) -> int | None:
     for phase in graph.get("boot_sequence", []):
         if label in phase.get("rails_stable", []):
@@ -174,7 +195,7 @@ def _rail_query(graph: dict, label: str | None) -> dict[str, Any]:
         }
     rail = rails[label]
     nets = graph.get("nets", {})
-    return {
+    result = {
         "found": True,
         "query": "rail",
         "label": label,
@@ -187,6 +208,12 @@ def _rail_query(graph: dict, label: str | None) -> dict[str, Any]:
         "boot_phase": _boot_phase_for_rail(graph, label),
         "pages": nets.get(label, {}).get("pages", []),
     }
+    source = rail.get("source_refdes")
+    source_comp = graph.get("components", {}).get(source) if source else None
+    if source_comp is not None and component_is_untraced(source_comp):
+        result["source_untraced"] = True
+        result["untraced_hint"] = _UNTRACED_HINT
+    return result
 
 
 def _component_query(graph: dict, refdes: str | None) -> dict[str, Any]:
@@ -205,7 +232,7 @@ def _component_query(graph: dict, refdes: str | None) -> dict[str, Any]:
             "closest_matches": _closest_matches(list(components.keys()), refdes),
         }
     comp = components[refdes]
-    return {
+    result = {
         "found": True,
         "query": "component",
         "refdes": refdes,
@@ -218,6 +245,10 @@ def _component_query(graph: dict, refdes: str | None) -> dict[str, Any]:
         "rails_consumed": _rails_consumed_by(graph, refdes),
         "boot_phase": _boot_phase_for_component(graph, refdes),
     }
+    if component_is_untraced(comp):
+        result["untraced"] = True
+        result["untraced_hint"] = _UNTRACED_HINT
+    return result
 
 
 def _downstream_query(graph: dict, refdes: str | None) -> dict[str, Any]:
@@ -296,6 +327,15 @@ def _boot_phase_query(graph: dict, index: int | None) -> dict[str, Any]:
             for extra in ("kind", "evidence", "confidence"):
                 if extra in phase:
                     result[extra] = phase[extra]
+            untraced_set = _untraced_refdes_set(graph)
+            untraced = [
+                r
+                for r in phase.get("components_entering", [])
+                if r.upper() in untraced_set
+            ]
+            if untraced:
+                result["untraced_refdes"] = untraced
+                result["untraced_hint"] = _UNTRACED_HINT
             return result
     return {
         "found": False,
@@ -335,8 +375,8 @@ def _compute_blast_radius_all(graph: dict) -> list[dict[str, Any]]:
     adj: dict[str, list[str]] = {}
     all_nodes: set[str] = set()
 
-    # IDs internes : N-NET_<label> pour les rails, N-<refdes> pour les composants.
-    # Convention T8 alignée sur KnowledgeNode.id (^N-[A-Z0-9_-]{1,48}$).
+    # Internal IDs: N-NET_<label> for rails, N-<refdes> for components.
+    # Convention aligned on KnowledgeNode.id (^N-[A-Z0-9_-]{1,48}$).
     for label, rail in rails.items():
         rid = f"N-NET_{label.upper()}"
         all_nodes.add(rid)
@@ -369,7 +409,7 @@ def _compute_blast_radius_all(graph: dict) -> list[dict[str, Any]]:
         cas = blast(nid)
         rails_lost = sum(1 for x in cas if x.startswith("N-NET_"))
         comps_lost = sum(1 for x in cas if not x.startswith("N-NET_"))
-        # Détermine le kind et le label d'affichage depuis le préfixe T8.
+        # Determine the kind and display label from the prefix.
         if nid.startswith("N-NET_"):
             kind = "rail"
             label = nid[len("N-NET_"):]
@@ -401,6 +441,10 @@ def _critical_path_query(graph: dict) -> dict[str, Any]:
     placement), falls back to the compiler's topological one otherwise.
     """
     scores = _compute_blast_radius_all(graph)
+    untraced_set = _untraced_refdes_set(graph)
+    for s in scores:
+        if s["kind"] == "component" and s["label"] in untraced_set:
+            s["untraced"] = True
     by_label = {s["label"]: s for s in scores}
 
     boot_seq = graph.get("boot_sequence", [])
@@ -424,7 +468,7 @@ def _critical_path_query(graph: dict) -> dict[str, Any]:
             }
         )
 
-    return {
+    result = {
         "found": True,
         "query": "critical_path",
         "total_nodes": len(scores),
@@ -432,6 +476,10 @@ def _critical_path_query(graph: dict) -> dict[str, Any]:
         "per_phase": per_phase,
         "source": graph.get("boot_sequence_source", "compiler"),
     }
+    surfaced = [*result["top_spofs"], *(c for p in per_phase for c in p["critical"])]
+    if any(s.get("untraced") for s in surfaced):
+        result["untraced_hint"] = _UNTRACED_HINT
+    return result
 
 
 def _list_boot_query(graph: dict) -> dict[str, Any]:
@@ -692,8 +740,8 @@ def _simulate_query(
         }
 
     # Re-validate from disk so we get the real Pydantic shapes the engine expects.
-    # T9/T6 — re-resolve via le graphe (per-owner OU canonique partagé) ; cohérent
-    # avec _load_graph ci-dessus qui a déjà résolu la même base.
+    # Re-resolve via the graph (per-owner OR shared canonical); consistent
+    # with _load_graph above which already resolved the same base.
     pack = live_graph.resolve_graph_dir(memory_root / device_slug, current_owner_ref())
     if pack is None:
         return {"found": False, "reason": "no_schematic_graph"}

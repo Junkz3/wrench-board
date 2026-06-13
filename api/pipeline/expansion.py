@@ -200,10 +200,11 @@ async def _run_targeted_scout(
 
 
 def _audit_dump_path(pack_dir: Path) -> Path:
-    """Chemin du dump cumulatif après migration T8 → audit/raw_research_dump.md.
+    """Path of the cumulative dump after migration → audit/raw_research_dump.md.
 
-    Le dump est privé/audit (jamais re-servi aux tenants) : la PII y est tolérée
-    — le point de contrôle est la sanitisation des FACTS à la sortie (promoted/).
+    The dump is private/audit (never re-served to tenants): PII is tolerated
+    there. The control point is the sanitization of the FACTS on output
+    (promoted/).
     """
     return pack_dir / "audit" / "raw_research_dump.md"
 
@@ -486,14 +487,13 @@ async def expand_pack(
 ) -> dict[str, Any]:
     """Grow the on-disk pack for `device_slug` around a focus symptom area.
 
-    Option C (T8) : au lieu d'écraser registry.json/rules.json à la racine,
-    on écrit le DELTA (facts nouveaux ou modifiés vs le pack effectif courant)
-    dans la couche partagée `promoted/`, avec attribution owner_ref + sanitisation
-    PII + provenance + journal. Pas de staging tenant-local en V1 (les
-    enrichissements sont partagés immédiatement — le moat T6 — mais PII-free,
-    tracés et revocables).
+    Option C: instead of overwriting registry.json/rules.json at the root, the
+    DELTA (facts new or modified vs the current effective pack) is written to
+    the shared `promoted/` layer, with owner_ref attribution + PII sanitization
+    + provenance + journal. No tenant-local staging in V1 (the enrichments are
+    shared immediately — the shared graph — but PII-free, traced and revocable).
 
-    Trade-off documenté : une "amélioration" du Registry-Builder à la description
+    Documented trade-off: an "improvement" of the Registry-Builder description
     d'un fact baseline est captée comme MODIFIED et écrite dans promoted/, où elle
     écrasera la baseline au merge (load_effective_pack : promoted > baseline).
 
@@ -524,8 +524,8 @@ async def expand_pack(
             raise RuntimeError("ANTHROPIC_API_KEY not set")
         client = AsyncAnthropic(api_key=settings.anthropic_api_key, max_retries=settings.anthropic_max_retries)
 
-    # 0. Migration idempotente legacy → T8 (baseline/ + audit/). Après ça, les
-    #    fichiers racine n'existent plus : on lit l'état via le pack effectif.
+    # 0. Idempotent legacy migration (baseline/ + audit/). After it, the root
+    #    files no longer exist: state is read via the effective pack.
     migrate_pack_if_needed(memory_root, device_slug)
 
     # 1. État "avant" = pack effectif partagé (baseline + promoted). owner_ref=None
@@ -541,11 +541,11 @@ async def expand_pack(
         name = it.get("canonical_name")
         if name is None:
             continue
-        # Case-insensitive : les packs legacy ont des kinds en minuscules
-        # (pmic/power_rail) alors que la convention T8 est UPPERCASE. Doit
-        # matcher _unflatten_effective (tools.py) + _effective_registry
-        # (routes/packs.py) sinon un composant legacy mal classe serait vu
-        # comme NEW et re-promu (write amplification + mauvaise provenance).
+        # Case-insensitive: legacy packs have lowercase kinds (pmic/power_rail)
+        # while the convention is UPPERCASE. Must match _unflatten_effective
+        # (tools.py) + _effective_registry (routes/packs.py), otherwise a
+        # mis-classified legacy component would be seen as NEW and re-promoted
+        # (write amplification + wrong provenance).
         if str(it.get("kind", "")).upper() in COMPONENT_KINDS:
             before_comp_by_key[name] = it
         else:
@@ -555,11 +555,10 @@ async def expand_pack(
     # device_label : baseline/_meta le préserve ; fallback sur le slug.
     device_label = _device_label_from(memory_root, device_slug) or device_slug
 
-    # 2. Targeted Scout → new chunk (appended au dump audit/).
-    #    On lit la taxonomy pré-existante AVANT le Scout pour réinjecter le
-    #    device_kind connu comme contrainte de classe (même helper que la
-    #    création — Task 6), évitant qu'un focus mono-symptôme dérive sur une
-    #    autre utilisation du même board code.
+    # 2. Targeted Scout → new chunk (appended to the audit/ dump).
+    #    Read the pre-existing taxonomy BEFORE the Scout to re-inject the known
+    #    device_kind as a class constraint (same helper as creation), avoiding a
+    #    single-symptom focus drifting onto another use of the same board code.
     model_sonnet = settings.anthropic_model_sonnet
     model_main = settings.anthropic_model_main
     prior_tax = _prior_taxonomy(memory_root, device_slug)
@@ -583,10 +582,10 @@ async def expand_pack(
     dump_start, dump_end = _append_scout_chunk(pack_dir, chunk, focus_symptoms)
     dump_bytes_added = len(chunk)
 
-    # 3. Re-run Registry + Clinicien sur le dump cumulatif COMPLET → objets entiers.
-    #    prior_tax / prior_kind sont déjà lus en étape 2 (réinjectés au Registry
-    #    Builder comme contrainte — même mécanisme que la création, Task 6 —
-    #    évitant qu'un focus mono-symptôme reclasse le board).
+    # 3. Re-run Registry + Clinicien on the FULL cumulative dump → whole objects.
+    #    prior_tax / prior_kind are already read in step 2 (re-injected into the
+    #    Registry Builder as a constraint — same mechanism as creation —
+    #    avoiding a single-symptom focus reclassifying the board).
     full_dump = _audit_dump_path(pack_dir).read_text(encoding="utf-8")
     new_registry = await run_registry_builder(
         client=client, model=model_sonnet,

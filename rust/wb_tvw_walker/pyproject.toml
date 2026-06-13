@@ -1,0 +1,13 @@
+[build-system]
+requires = ["maturin>=1.2,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "wb_tvw_walker"
+version = "0.1.0"
+description = "Rust/PyO3 accelerator for the TVW boardview pin-walk hot loop."
+requires-python = ">=3.11"
+
+[tool.maturin]
+# Module Rust pur, accélération OPTIONNELLE. Fallback Python pur dans le moteur
+# (walker.py) → jamais une dépendance dure pour un self-hoster.

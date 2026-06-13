@@ -1,7 +1,7 @@
 {
   "drawer": {
     "header_label": "Building memory",
-    "device_placeholder": "—",
+    "device_placeholder": "...",
     "close_aria": "Close progress panel"
   },
   "phase": {
@@ -31,7 +31,7 @@
     }
   },
   "step": {
-    "time_placeholder": "—",
+    "time_placeholder": "...",
     "in_progress": "running…",
     "failed": "failed"
   },
@@ -39,6 +39,7 @@
     "waiting": "Waiting for first events…",
     "connecting": "Connecting to pipeline…",
     "started": "Pipeline started…",
+    "queued": "Queued · position <b>{position}</b> ({ahead} ahead) · starts automatically when a slot frees up",
     "phase_running": "Phase running · <b>{phase}</b>",
     "ready": "Memory ready · audit <b>{status}</b> · consistency <b>{score}</b>",
     "failed": "Pipeline failed · <b>{status}</b>",

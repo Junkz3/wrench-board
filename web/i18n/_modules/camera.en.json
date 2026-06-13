@@ -1,6 +1,6 @@
 {
   "picker": {
-    "none": "— none —",
+    "none": "(none)",
     "device_fallback": "Camera {id}…"
   },
   "preview": {

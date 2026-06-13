@@ -504,7 +504,7 @@ Emit via `submit_rules`. No other output.
 
 ## Shape of a rule
 
-- `id` — stable e.g. 'rule-pp1v1-dead-001'.
+- `id` — stable, pattern `R-[A-Z0-9_-]{1,48}` e.g. 'R-PP1V1-DEAD-001'.
 - `symptoms` — 1–3 short sentences the user/tech observes. Copy the wording the
   sources use when possible ("No backlight", "Stuck at Apple logo then shutdown",
   "Kernel panic on USB device insert").
@@ -631,6 +631,19 @@ Output policy:
 - consistency_score ∈ [0, 1], reflects your overall confidence (1.0 iff APPROVED).
 - revision_brief must be actionable: tell the writer exactly which IDs to remove or
   rename, and which missing content to add. Empty only when APPROVED.
+
+Schematic ground truth (when a "# Schematic ground truth" block and the
+`query_graph` tool are present):
+- The electrical graph was extracted from the device's REAL schematic. It is
+  the authority on EXISTENCE: components, nets, rails, voltages, sources.
+- NEVER call an identifier fabricated/unknown/undefined when the ground-truth
+  block marks it "present" — the registry is a small web-derived subset and
+  WILL be missing real parts. Registry absence alone is NOT drift.
+- When unsure about an identifier, a rail voltage, or who sources a net,
+  query the graph BEFORE flagging. Use `search` for near-miss spellings.
+- Your revision_brief must NEVER instruct edits to the registry (writers
+  cannot modify it). Ask for a removal only when the identifier is absent
+  from BOTH the registry and the schematic graph.
 """
 
 
@@ -642,7 +655,7 @@ Audit the following knowledge pack for device: {device_label}
 {precomputed_drift_json}
 ```
 
-# Registry
+{ground_truth_block}# Registry
 ```json
 {registry_json}
 ```
@@ -681,12 +694,20 @@ Revise the previous output for this writer role, based on the auditor's brief.
 
 # Revision brief (from auditor)
 {revision_brief}
+{ground_truth_block}
+# Current sibling files (READ-ONLY — align with them, you cannot edit them)
+{siblings_block}
 
-# Your previous output (to revise)
+# Your previous output (THE BASELINE to revise)
 ```json
 {previous_output_json}
 ```
 
-Re-emit the complete, corrected output via `{tool_name}`. Preserve anything the brief
-doesn't flag; fix only what is flagged.
+Re-emit the complete, corrected output via `{tool_name}`.
+- Your previous output is the BASELINE: reproduce it integrally and change ONLY
+  what the brief flags. Dropping unflagged content is a regression.
+- Align cross-file references against the CURRENT sibling files above, not
+  against memory.
+- When a `query_graph` tool is available, verify any doubtful existence (refdes,
+  net, rail, voltage, source) against the real schematic BEFORE writing it.
 """

@@ -98,8 +98,8 @@ def test_extract_handles_synthesized_resistance_block(monkeypatch):
     _set_test_xzz_key(monkeypatch)
     # Build a minimal buffer carrying the base pattern + resistance
     # marker + a few Net lines. We're testing the section-walker, not
-    # the XOR decryptor, so the buffer just needs to survive the
-    # decrypt path (zeros pass through untouched).
+    # the byte-transform decoder, so the buffer just needs to survive the
+    # decode path (zeros pass through untouched).
     base = b"v6v6555v6v6==="
     marker = bytes.fromhex("D7E8D6B5")  # 阻值
     body = "图\r\nNet1=621\r\nNet2=>1000或OL\r\nNet3=0\r\n".encode("gb2312")

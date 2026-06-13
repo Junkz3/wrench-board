@@ -1,4 +1,4 @@
-"""T8 — pack_migrate : migration in-place idempotente du layout legacy → T8."""
+"""pack_migrate : migration in-place idempotente du layout legacy."""
 
 import json
 from pathlib import Path
@@ -10,7 +10,7 @@ SLUG = "iphone-12-legacy"
 
 
 def _legacy_pack(memory_root: Path) -> Path:
-    """Crée un pack pré-T8 avec les VRAIES clés des fichiers legacy.
+    """Crée un pack pré-migration avec les VRAIES clés des fichiers legacy.
 
     Fixture corrigée :
     - registry.json  : schema_version + device_label + taxonomy + components + signals
@@ -153,8 +153,8 @@ def test_migrate_preserves_dictionary_entries(tmp_path):
 def test_migrate_preserves_top_level_metadata(tmp_path):
     """schema_version et autres métadonnées top-level survivent dans _meta.
 
-    Task 5 câblera taxonomy/device_label à partir de _meta ; pour l'instant
-    _meta est préservé-mais-pas-encore-consommé.
+    Le câblage taxonomy/device_label à partir de _meta viendra plus tard ; pour
+    l'instant _meta est préservé-mais-pas-encore-consommé.
     """
     _legacy_pack(tmp_path)
     migrate_pack_if_needed(tmp_path, SLUG)

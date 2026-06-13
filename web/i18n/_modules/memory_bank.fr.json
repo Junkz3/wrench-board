@@ -4,7 +4,7 @@
   "title_with_device": "Bibliothèque mémoire <span class=\"sub\" style=\"color:var(--text-3);font-weight:400;font-size:14px;margin-left:10px\">· {device}</span>{form}",
   "picker": {
     "label": "Pack",
-    "empty_option": "— aucun pack —"
+    "empty_option": "(aucun pack)"
   },
   "search": {
     "placeholder": "Filtrer dans le pack (refdes, symptôme, mécanisme…)",
@@ -46,7 +46,7 @@
     "graph_count": "<b>{n}</b> nœuds · <b>{e}</b> arêtes"
   },
   "registry": {
-    "missing": "registry.json absent — pipeline non exécuté.",
+    "missing": "registry.json absent. Pipeline non exécuté.",
     "components_heading": "Composants ({n})",
     "signals_heading": "Signaux ({n})",
     "no_components": "Aucun composant.",
@@ -87,10 +87,10 @@
     "th_notes": "Notes"
   },
   "audit": {
-    "missing": "audit_verdict.json absent — le pipeline n'a pas encore audité ce pack.",
-    "headline_approved": "Audit approuvé — le pack est cohérent avec le registre.",
-    "headline_needs_revision": "Audit demande une révision — dérive détectée, corrections attendues.",
-    "headline_rejected": "Audit rejeté — pack incohérent, non exploitable en l'état.",
+    "missing": "audit_verdict.json absent. Le pipeline n'a pas encore audité ce pack.",
+    "headline_approved": "Audit approuvé : le pack est cohérent avec le registre.",
+    "headline_needs_revision": "Audit : révision demandée. Dérive détectée, corrections attendues.",
+    "headline_rejected": "Audit rejeté : pack incohérent, non exploitable en l'état.",
     "headline_unknown": "Statut d'audit inconnu.",
     "files_to_rewrite": "Fichiers à réécrire",
     "drift_heading": "Dérives détectées ({n})"

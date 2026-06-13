@@ -1,5 +1,5 @@
 {
-  "page_title": "Wrench Board — Intro",
+  "page_title": "Wrench Board : Intro",
   "mascot": {
     "aria": "Mascotte Wrench Board"
   },
@@ -16,7 +16,7 @@
   "hero": {
     "mark": "Wrench Board",
     "title": "Ton assistant de réparation hardware.",
-    "sub": "Donne-moi ton appareil et le symptôme — je construis la connaissance et j'ouvre le diagnostic."
+    "sub": "Donne-moi ton appareil et le symptôme : je construis la connaissance et j'ouvre le diagnostic."
   },
   "form": {
     "device_placeholder": "Appareil (ex. MNT Reform motherboard, iPhone 11, Framework 13)",
@@ -26,8 +26,8 @@
     "submit": "Lancer le diagnostic"
   },
   "chips": {
-    "chip1": "MNT Reform — pas de boot",
-    "chip2": "iPhone 11 — pas de charge",
-    "chip3": "Framework — écran noir"
+    "chip1": "MNT Reform : pas de boot",
+    "chip2": "iPhone 11 : pas de charge",
+    "chip3": "Framework : écran noir"
   }
 }

@@ -28,10 +28,9 @@ import struct
 
 import pytest
 
-from api.board.parser._tvw_engine.board_mapper import to_board
 from api.board.parser._tvw_engine.cipher import decode, encode
 from api.board.parser._tvw_engine.magic import is_production_binary
-from api.board.parser._tvw_engine.walker import _read_file_header, parse
+from api.board.parser._tvw_engine.walker import _read_file_header
 from api.board.parser.tvw import TVWParser
 
 # Magic signature shared by EVERY production-binary `.tvw`, vendor-agnostic.

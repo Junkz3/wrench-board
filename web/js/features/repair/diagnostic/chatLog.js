@@ -109,8 +109,8 @@ export function renderContextLost(payload) {
 // same block the new agent is seeing, so the tech knows what carried over.
 export function renderResumeSummary(payload) {
   const summary = payload?.summary || "";
-  const tokIn = payload?.tokens_in ?? "—";
-  const tokOut = payload?.tokens_out ?? "—";
+  const tokIn = payload?.tokens_in ?? "n/a";
+  const tokOut = payload?.tokens_out ?? "n/a";
   let bodyHTML = escapeHTML(summary);
   if (typeof window.marked !== "undefined" && typeof window.DOMPurify !== "undefined") {
     try {
@@ -179,7 +179,7 @@ export function renderInlineProtocolCard(_ev) {
   card.className = "protocol-inline-card";
   card.dataset.step = active.id;
   card.innerHTML =
-    `<div class="protocol-step-target">${escapeHTML(active.target || active.test_point || "—")}</div>` +
+    `<div class="protocol-step-target">${escapeHTML(active.target || active.test_point || "…")}</div>` +
     `<p class="protocol-step-instruction">${escapeHTML(active.instruction)}</p>` +
     `<p class="protocol-step-rationale">${escapeHTML(active.rationale)}</p>`;
   if (Protocol.buildStepForm) {
@@ -374,7 +374,7 @@ export function appendTurnFoot(turn, payload) {
     foot.className = "turn-foot";
     turn.appendChild(foot);
   }
-  const priceLabel = payload.priced ? fmtUsd(payload.cost_usd) : "—";
+  const priceLabel = payload.priced ? fmtUsd(payload.cost_usd) : "n/a";
   const modelLabel = payload.model ? payload.model.replace("claude-", "") : "?";
   const tokensLabel = `${(payload.input_tokens || 0) + (payload.cache_read_input_tokens || 0) + (payload.cache_creation_input_tokens || 0)}→${payload.output_tokens || 0} tok`;
   foot.innerHTML =

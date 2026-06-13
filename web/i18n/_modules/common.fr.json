@@ -1,6 +1,6 @@
 {
   "app": {
-    "title": "Wrench Board — Graphe de connaissances"
+    "title": "Wrench Board : Graphe de connaissances"
   },
   "topbar": {
     "brand": "wrench-board",
@@ -11,7 +11,7 @@
   },
   "session": {
     "tag": "SESSION",
-    "pill_aria": "Session active — clic pour ouvrir le dashboard",
+    "pill_aria": "Session active, clic pour ouvrir le dashboard",
     "pill_title": "Revenir au dashboard de la session",
     "leave": "Quitter la session"
   },

@@ -489,21 +489,18 @@ def _read_dcodes(buf: bytes, off: int, region_end: int) -> tuple[list[Aperture],
             if last_poly_end is None:
                 return apertures, off
             pin_start = None
-            best_pin_count = 0
             # The pin header follows the final Custom aperture body
             # closely on tested TVWs. Bound this local search so a
             # late false layer marker does not make dcode parsing scan
             # the rest of a multi-MB layer byte by byte.
             scan_limit = min(region_end, last_poly_end + 262_144)
-            for cand in range(min(last_poly_end + 8, region_end), scan_limit):
-                if _looks_like_pin_section_header(buf, cand, region_end):
-                    res = _try_walk_pins_at(buf, cand, region_end)
-                    if res is None:
-                        continue
-                    pins, _pin_end, _declared = res
-                    if len(pins) > best_pin_count:
-                        best_pin_count = len(pins)
-                        pin_start = cand
+            # Scan natif Rust (pas de 1) — ne sert qu'à localiser le meilleur
+            # header de section pin (offset + nb de pins) ; fallback Python sinon.
+            _best = _scan_best_pin_section(
+                buf, min(last_poly_end + 8, region_end), scan_limit, region_end, 1
+            )
+            if _best is not None:
+                pin_start = _best[0]
             custom_stop = pin_start - 8 if pin_start is not None and pin_start >= 8 else region_end
             scan_stop = pin_start if pin_start is not None else region_end
             for match in _CUSTOM_POLY_RE.finditer(buf, off + 12, scan_stop):
@@ -627,7 +624,76 @@ def _is_plausible_pin(rec: PinRecord) -> bool:
     return True
 
 
-def _try_walk_pins_at(
+try:
+    from wb_tvw_walker import scan_best_pin_section as _rust_scan
+    from wb_tvw_walker import try_read_network_names as _rust_netnames
+    from wb_tvw_walker import try_walk_pins_at as _rust_walk
+except ImportError:  # pragma: no cover - dépend du build Rust optionnel
+    _rust_walk = None
+    _rust_scan = None
+    _rust_netnames = None
+
+
+def _pins_from_tuples(tuples):
+    return [
+        PinRecord(
+            part_index=t[0], pin_local_index=t[1], x=t[2], y=t[3],
+            flag1=t[4], flag3=t[5], raw_size=t[6],
+            pad_dx1=t[7], pad_dy1=t[8], pad_dx2=t[9], pad_dy2=t[10],
+            has_pad_bbox=t[11],
+        )
+        for t in tuples
+    ]
+
+
+def _scan_best_pin_section_py(buf, scan_start, scan_end, region_end, step,
+                              max_pin_count=200_000, min_partial_ratio=0.5):
+    """Cœur Python du scan brute-force des sections pin (fallback). Retourne le
+    meilleur candidat (best_off, pins, end, declared) — celui avec le plus de
+    pins — ou None. Mutualise les deux boucles de scan (step 4 et step 1)."""
+    best = None
+    best_len = 0
+    cand = scan_start
+    while cand < scan_end:
+        if _looks_like_pin_section_header(buf, cand, region_end):
+            res = _try_walk_pins_at(buf, cand, region_end, max_pin_count, min_partial_ratio)
+            if res is not None and len(res[0]) > best_len:
+                best_len = len(res[0])
+                best = (cand, res[0], res[1], res[2])
+        cand += step
+    return best
+
+
+def _scan_best_pin_section(buf, scan_start, scan_end, region_end, step,
+                           max_pin_count=200_000, min_partial_ratio=0.5):
+    """Dispatcher : scan natif Rust (triage + try_walk + meilleur candidat, en une
+    passe sur le buffer emprunté zéro-copie) si dispo, sinon cœur Python."""
+    if _rust_scan is None:
+        return _scan_best_pin_section_py(buf, scan_start, scan_end, region_end, step,
+                                         max_pin_count, min_partial_ratio)
+    res = _rust_scan(buf, scan_start, scan_end, region_end, step, max_pin_count, min_partial_ratio)
+    if res is None:
+        return None
+    best_off, tuples, end_off, declared = res
+    return (best_off, _pins_from_tuples(tuples), end_off, declared)
+
+
+def _try_walk_pins_at(buf, off, region_end, max_pin_count=200_000, min_partial_ratio=0.5):
+    """Dispatcher : délègue le hot-loop de walk des pins au cœur natif Rust s'il
+    est construit (sortie record-identique au Python — vérifié par les tests),
+    sinon retombe sur le cœur Python pur. Le buffer est passé tel quel (bytes) →
+    PyO3 l'emprunte en zéro-copie (cette fonction est rappelée des dizaines de
+    milliers de fois sur le même buffer)."""
+    if _rust_walk is None:
+        return _try_walk_pins_at_py(buf, off, region_end, max_pin_count, min_partial_ratio)
+    res = _rust_walk(buf, off, region_end, max_pin_count, min_partial_ratio)
+    if res is None:
+        return None
+    tuples, end_off, declared = res
+    return _pins_from_tuples(tuples), end_off, declared
+
+
+def _try_walk_pins_at_py(
     buf: bytes,
     off: int,
     region_end: int,
@@ -788,22 +854,12 @@ def _read_pins(
     scan_start = max(off, last_poly_end) if last_poly_end is not None else off
 
     scan_end = region_end - 30
-    best_pins: list[PinRecord] = []
-    best_end = off
-    best_decl = 0
-    cand = scan_start
-    while cand < scan_end:
-        if not _looks_like_pin_section_header(buf, cand, region_end):
-            cand += 4
-            continue
-        res = _try_walk_pins_at(buf, cand, region_end)
-        if res is not None:
-            pins_list, end, declared = res
-            if len(pins_list) > len(best_pins):
-                best_pins = pins_list
-                best_end = end
-                best_decl = declared
-        cand += 4
+    # Scan brute-force (triage + try_walk + meilleur candidat) — porté en Rust
+    # (le buffer n'est emprunté qu'une fois), fallback Python sinon. Pas de 4.
+    best = _scan_best_pin_section(buf, scan_start, scan_end, region_end, 4)
+    if best is None:
+        return [], off, 0
+    _best_off, best_pins, best_end, best_decl = best
     return best_pins, best_end, best_decl
 
 
@@ -1290,6 +1346,15 @@ def _scan_pascal_string_run(
 
 
 def _try_read_network_names(buf: bytes, after_layers: int) -> list[str]:
+    """Dispatcher : scan natif Rust du dernier quart du fichier si dispo (le buffer
+    n'est emprunté qu'une fois ; les net-names sont de l'ASCII pur → decode trivial),
+    sinon cœur Python `_try_read_network_names_py`."""
+    if _rust_netnames is not None:
+        return _rust_netnames(buf, after_layers)
+    return _try_read_network_names_py(buf, after_layers)
+
+
+def _try_read_network_names_py(buf: bytes, after_layers: int) -> list[str]:
     """Locate and decode the trailing network_names section.
 
     Strategy: scan from `after_layers` toward EOF, find the position

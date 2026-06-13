@@ -28,7 +28,7 @@ function _ensureRoot() {
   _root.hidden = true;
   _root.innerHTML = `
     <header class="camera-preview-head" id="cameraPreviewHead">
-      <span class="camera-preview-title"><span data-i18n="camera.preview.title_prefix">Camera</span> · <span id="cameraPreviewLabel">—</span></span>
+      <span class="camera-preview-title"><span data-i18n="camera.preview.title_prefix">Camera</span> · <span id="cameraPreviewLabel">...</span></span>
       <button class="camera-preview-close" type="button"
               data-i18n-attr="aria-label:camera.preview.close_aria"
               aria-label="Close preview">

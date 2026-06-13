@@ -389,7 +389,7 @@ function selectNode(d){
   if (d.confidence<0.6) note = t("graph.inspector.conf_low");
   else if (d.confidence<0.8) note = t("graph.inspector.conf_medium");
   document.getElementById("confNote").textContent = note;
-  document.getElementById("inspDesc").textContent = d.description || "—";
+  document.getElementById("inspDesc").textContent = d.description || "…";
 
   const mg = document.getElementById("metaGrid"); mg.innerHTML="";
   const entries = Object.entries(d.meta || {});

@@ -10,7 +10,7 @@ from fastapi.testclient import TestClient
 def client(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> TestClient:
     monkeypatch.setenv("MEMORY_ROOT", str(tmp_path))
     import api.config as _cfg
-    _cfg._settings = None  # reset settings cache (see T4 for pattern)
+    _cfg._settings = None  # reset settings cache
     from api.main import app
     with TestClient(app) as c:
         yield c
@@ -75,6 +75,36 @@ def test_put_preferences_persists(client: TestClient):
     prefs = res.json()["profile"]["preferences"]
     assert prefs["verbosity"] == "concise"
     assert prefs["language"] == "en"
+
+
+def test_state_defaults_to_unseen(client: TestClient):
+    state = client.get("/profile").json()["profile"]["state"]
+    assert state == {"onboarding_seen": False, "first_diag_seen": False}
+
+
+def test_put_state_patches_one_flag_without_clobbering_the_other(client: TestClient):
+    # Flip first_diag_seen only…
+    res = client.put("/profile/state", json={"first_diag_seen": True})
+    assert res.status_code == 200
+    state = res.json()["profile"]["state"]
+    assert state == {"onboarding_seen": False, "first_diag_seen": True}
+    # …then onboarding_seen only — the earlier flag must survive (patch, not replace).
+    res = client.put("/profile/state", json={"onboarding_seen": True})
+    assert res.status_code == 200
+    assert res.json()["profile"]["state"] == {
+        "onboarding_seen": True,
+        "first_diag_seen": True,
+    }
+    # Independent re-read confirms persistence.
+    assert client.get("/profile").json()["profile"]["state"] == {
+        "onboarding_seen": True,
+        "first_diag_seen": True,
+    }
+
+
+def test_put_state_rejects_unknown_keys(client: TestClient):
+    res = client.put("/profile/state", json={"nope": True})
+    assert res.status_code == 422
 
 
 def test_put_identity_rejects_unknown_level_override(client: TestClient):

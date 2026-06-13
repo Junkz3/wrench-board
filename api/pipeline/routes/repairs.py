@@ -1,8 +1,10 @@
 """Repair-session CRUD + the `POST /repairs` orchestration entry point.
 
 Hosts the background helpers (`_run_pipeline_with_events`,
-`_run_expand_with_events`, `_maybe_check_coverage`) and the
-`_persist_repair` dedup writer that backs the home library.
+`_maybe_check_coverage`) and the `_persist_repair` dedup writer that
+backs the home library. Pack enrichment is no longer auto-fired here:
+an uncovered symptom opens the repair and the diagnostic agent triggers
+`mb_expand_knowledge` on demand (plan-gated) only when it needs it.
 
 Also re-exports `_run_pipeline_with_events` via the package
 `__init__.py` — `tests/pipeline/test_pipeline_events_narration.py`
@@ -21,16 +23,20 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 from anthropic import AsyncAnthropic
-from fastapi import APIRouter, File, Form, HTTPException, UploadFile
+from fastapi import APIRouter, File, Form, Header, HTTPException, UploadFile
 from pydantic import ValidationError
 
 import api.pipeline as _pkg  # noqa: PLC0415 — module-attribute lookups for patchability
 from api.agent.memory_stores import delete_repair_store
 from api.pipeline import events
+from api.pipeline.device_registry import get_device_registry_store, resolve_device
 from api.pipeline.models import (
+    DisambiguationCandidate,
     RepairRequest,
     RepairResponse,
     RepairSummary,
+    ResolveDeviceRequest,
+    ResolveDeviceResponse,
 )
 from api.pipeline.orchestrator import _slugify
 from api.pipeline.routes._helpers import _validate_repair_id
@@ -72,6 +78,85 @@ def _slug_is_building(slug: str) -> bool:
     """
     task = _RUNNING.get(slug)
     return task is not None and not task.done()
+
+
+# Count of in-flight RAM/cost-heavy schematic→graph builds (the full pipeline).
+# Distinct from _RUNNING (which also tracks expand/analyze tasks): this bounds
+# ONLY the heavy builds so concurrent distinct-device uploads can't OOM the host.
+# Process-local (single-worker deploy, like _RUNNING).
+_active_builds = 0
+
+# FIFO d'attente des builds en surplus du cap. Chaque entrée :
+# {"slug": str, "launch": callable() -> coroutine}. Au lieu de rejeter (503) le
+# build de trop, on l'empile ici et l'utilisateur voit sa POSITION ; quand un slot
+# se libère (done-callback d'un build), on dépile la tête et on la lance. La file
+# est globale (le cap l'est) ; un slug déjà en file/build REJOINT (pas de doublon).
+_build_queue: list[dict] = []
+
+
+def _build_cap() -> int:
+    """Max concurrent heavy builds; 0 = unlimited."""
+    cap = _pkg.get_settings().pipeline_max_concurrent_builds
+    return cap if cap and cap > 0 else 0
+
+
+def _builds_at_capacity() -> bool:
+    cap = _build_cap()
+    return cap > 0 and _active_builds >= cap
+
+
+def _slug_queued(slug: str) -> bool:
+    return any(item["slug"] == slug for item in _build_queue)
+
+
+def _queue_position(slug: str) -> int:
+    """1-based position of `slug` in the queue, or 0 if not queued."""
+    for i, item in enumerate(_build_queue, start=1):
+        if item["slug"] == slug:
+            return i
+    return 0
+
+
+def _enqueue_build(slug: str, launch) -> int:
+    """Append a pending build (`launch` = zero-arg callable → coroutine).
+    Returns its 1-based queue position."""
+    _build_queue.append({"slug": slug, "launch": launch})
+    return len(_build_queue)
+
+
+async def _publish_queue_positions() -> None:
+    """(Re)publish every queued build's current position on its slug's progress
+    stream so the browser can show 'En attente — position N' and watch it shrink."""
+    for i, item in enumerate(_build_queue, start=1):
+        await events.publish(item["slug"], {"type": "queued", "position": i, "ahead": i - 1})
+
+
+def _drain_queue() -> None:
+    """Launch queued builds while a slot is free. Called when a build settles
+    (done-callback) — that's when capacity opens up."""
+    launched = False
+    while not _builds_at_capacity() and _build_queue:
+        item = _build_queue.pop(0)
+        _register_build(item["slug"], asyncio.create_task(item["launch"]()))
+        launched = True
+    if launched and _build_queue:
+        # The survivors all shifted up one slot → refresh their positions.
+        asyncio.create_task(_publish_queue_positions())
+
+
+def _register_build(slug: str, task: asyncio.Task) -> None:
+    """Register a heavy build: track it in _RUNNING AND count it against the
+    concurrency cap. When it settles, free the slot and drain the queue."""
+    global _active_builds
+    _active_builds += 1
+
+    def _dec(_t: asyncio.Task) -> None:
+        global _active_builds
+        _active_builds -= 1
+        _drain_queue()
+
+    task.add_done_callback(_dec)
+    _register_running(slug, task)
 
 
 def _persist_repair(
@@ -408,14 +493,17 @@ async def _run_pipeline_with_events(
     confirmed_device_kind: str | None = None,
     user_device_kind: str | None = None,
     expect_schematic: bool = False,
+    owner_ref: str | None = None,
+    engine_repair_id: str | None = None,
 ) -> None:
     """Background task: run the pipeline, relaying its events on the bus.
 
-    On every `phase_finished` event we also spawn a fire-and-forget narration
-    task: a small Haiku call reads the just-written artifact and publishes a
-    `phase_narration` event so the landing UI can render a human-readable
-    sentence next to the progress dot. Narration failures are silent; the
-    pipeline never blocks waiting for them.
+    Every orchestrator event is forwarded onto the per-slug bus verbatim,
+    including the live `phase_step` sub-steps (Scout rounds, schematic pages,
+    each writer completing, audit rounds) the landing timeline renders as the
+    phase's live line. (The old Haiku `phase_narration` hook was removed — an
+    extra LLM call per phase for an after-the-fact sentence; the live
+    sub-steps replaced it.)
 
     `focus_symptom`, when supplied, is threaded to Scout so the technician's
     reason-for-opening-the-repair is prioritised in the web_search rounds.
@@ -433,47 +521,26 @@ async def _run_pipeline_with_events(
     """
     t0 = time.monotonic()
 
-    # Lazily-built Haiku client for narration (kept in closure so we don't
-    # spawn a new TCP pool per phase).
-    settings = _pkg.get_settings()
-    narrator_client: AsyncAnthropic | None = None
-    if settings.anthropic_api_key:
-        narrator_client = AsyncAnthropic(api_key=settings.anthropic_api_key, max_retries=settings.anthropic_max_retries)
-
-    async def _narrate_and_publish(phase: str) -> None:
-        if narrator_client is None:
-            return
-        try:
-            text = await _pkg.narrate_phase(phase, slug, client=narrator_client)
-        except Exception as exc:  # noqa: BLE001 — narrate_phase already swallows; defence-in-depth
-            logger.warning(
-                "[API] narrator unexpected raise (phase=%s slug=%s): %s",
-                phase, slug, exc,
-            )
-            return
-        if not text:
-            return
-        await events.publish(
-            slug,
-            {"type": "phase_narration", "phase": phase, "text": text},
-        )
-
     async def _on_event(ev: dict) -> None:
         await events.publish(slug, ev)
-        if ev.get("type") == "phase_finished":
-            phase = ev.get("phase")
-            if isinstance(phase, str) and phase:
-                # Fire-and-forget: do not await — the next phase must start now.
-                asyncio.create_task(_narrate_and_publish(phase))
 
     try:
         await _pkg.generate_knowledge_pack(
             device_label,
+            # Pin the pack directory to the repair's slug — without this the
+            # orchestrator re-slugifies the rich label and builds a FRESH pack
+            # next to the one holding the uploaded documents (graph=no).
+            device_slug=slug,
             on_event=_on_event,
             focus_symptom=focus_symptom,
             confirmed_device_kind=confirmed_device_kind,
             user_device_kind=user_device_kind,
             expect_schematic=expect_schematic,
+            # Build metering: the build's per-phase token spend is reported
+            # to the cloud ledger as kind='build' under this tenant + repair
+            # (no-op self-host — see api/pipeline/build_metering.py).
+            owner_ref=owner_ref,
+            engine_repair_id=engine_repair_id,
         )
     except Exception as exc:  # noqa: BLE001 — fire-and-forget bg task; report failure on event bus
         logger.exception("[API] background pipeline failed for slug=%r", slug)
@@ -484,85 +551,6 @@ async def _run_pipeline_with_events(
                 "status": "ERROR",
                 "error": str(exc),
                 "elapsed_s": time.monotonic() - t0,
-            },
-        )
-
-
-async def _run_expand_with_events(slug: str, symptom: str, *, owner_ref: str | None = None) -> None:
-    """Background task: run expand_pack with event-bus relaying.
-
-    Kicked off by `create_repair` when the pack already exists and the
-    coverage classifier decided the new symptom is NOT covered by an
-    existing rule.
-
-    `owner_ref` must be threaded from the originating RepairRequest so that
-    expand_pack attributes the promoted enrichments to the correct tenant
-    (T8 traceability invariant: added_by_tenant must never be None for a
-    request that carries a tenant identity).
-
-    We emit events in two shapes simultaneously on the WS bus:
-
-    1. **Generic `pipeline_*` events** — same types the landing UI
-       listens for on a full pipeline run (`pipeline_started`,
-       `phase_started/finished` on a synthetic "expand" phase,
-       `pipeline_finished/failed`). Each carries `kind: "expand"` so
-       consumers that care can branch; consumers that don't can treat
-       the flow identically to a full run. This keeps the landing
-       timeline + auto-redirect working without frontend changes.
-    2. **Specific `expand_*` events** — in addition, so a future UI
-       that wants to render expand differently has a distinct stream.
-    """
-    t0 = time.monotonic()
-    # Compat: landing.js / pipeline_progress.js listen for pipeline_started.
-    await events.publish(
-        slug,
-        {"type": "pipeline_started", "kind": "expand", "device_slug": slug, "symptom": symptom},
-    )
-    await events.publish(slug, {"type": "phase_started", "phase": "expand"})
-    # Specific flavour (optional consumers).
-    await events.publish(slug, {"type": "expand_started", "symptom": symptom})
-    try:
-        summary = await _pkg.expand_pack(
-            device_slug=slug,
-            focus_symptoms=[symptom],
-            owner_ref=owner_ref,
-        )
-        elapsed = time.monotonic() - t0
-        counts = {
-            "new_rules_count": summary.get("new_rules_count", 0),
-            "new_components_count": summary.get("new_components_count", 0),
-            "total_rules_after": summary.get("total_rules_after", 0),
-        }
-        await events.publish(
-            slug,
-            {"type": "phase_finished", "phase": "expand", "elapsed_s": elapsed, "counts": counts},
-        )
-        await events.publish(slug, {"type": "expand_finished", "elapsed_s": elapsed, **counts})
-        # Compat: triggers landing goToWorkspace redirect.
-        await events.publish(
-            slug,
-            {
-                "type": "pipeline_finished",
-                "kind": "expand",
-                "device_slug": slug,
-                "status": "APPROVED",
-                "elapsed_s": elapsed,
-                **counts,
-            },
-        )
-    except Exception as exc:  # noqa: BLE001 — bus delivery must not crash
-        logger.exception("[API] expand_pack failed for slug=%r", slug)
-        elapsed = time.monotonic() - t0
-        await events.publish(slug, {"type": "expand_failed", "error": str(exc), "elapsed_s": elapsed})
-        # Compat: landing_failed branch.
-        await events.publish(
-            slug,
-            {
-                "type": "pipeline_failed",
-                "kind": "expand",
-                "status": "ERROR",
-                "error": str(exc),
-                "elapsed_s": elapsed,
             },
         )
 
@@ -611,6 +599,34 @@ async def _maybe_check_coverage(
         )
 
 
+@router.post("/resolve-device", response_model=ResolveDeviceResponse)
+async def resolve_device_route(
+    req: ResolveDeviceRequest,
+    x_owner_ref: str | None = Header(default=None, alias="X-Owner-Ref"),
+) -> ResolveDeviceResponse:
+    """Resolve a free device label to a canonical identity (or the ambiguous
+    candidate menu) WITHOUT creating a repair or building. The cloud front-door
+    calls this before its quota gate so it adopts the canonical slug and gets
+    disambiguation for free. A pinned device_slug is returned verbatim."""
+    if req.device_slug:
+        return ResolveDeviceResponse(canonical_slug=req.device_slug, ambiguous=False, candidates=[])
+    memory_root = Path(_pkg.get_settings().memory_root)
+    store = get_device_registry_store(memory_root)
+    res = await resolve_device(req.device_label, store, owner_ref=x_owner_ref)
+    return ResolveDeviceResponse(
+        canonical_slug=res["canonical_slug"],
+        ambiguous=bool(res["ambiguous"]),
+        candidates=[
+            DisambiguationCandidate(
+                device_slug=c.get("canonicalKey"),
+                family=c.get("family"),
+                facets=c.get("facets") or {},
+            )
+            for c in res.get("candidates", [])
+        ],
+    )
+
+
 @router.post("/repairs", response_model=RepairResponse)
 async def create_repair(
     device_label: str = Form(...),
@@ -619,6 +635,7 @@ async def create_repair(
     device_kind: str | None = Form(default=None),
     force_rebuild: bool = Form(default=False),
     owner_ref: str | None = Form(default=None),
+    allow_expand: bool = Form(default=True),
     schematic_pending: bool = Form(default=False),
     file: UploadFile | None = File(default=None),  # noqa: B008 — FastAPI DI idiom
 ) -> RepairResponse:
@@ -640,13 +657,50 @@ async def create_repair(
             device_kind=device_kind,
             force_rebuild=force_rebuild,
             owner_ref=owner_ref,
+            allow_expand=allow_expand,
         )
     except ValidationError as exc:
         raise HTTPException(status_code=422, detail=exc.errors()) from exc
 
     settings = _pkg.get_settings()
     memory_root = Path(settings.memory_root)
+    # Device alias registry: when the slug isn't explicitly pinned, resolve
+    # the free label to a canonical device identity so aliases of the same board
+    # (board# / Apple model / EMC / marketing) land on ONE pack instead of N.
+    # Best-effort: any registry hiccup degrades to the naive slugify (today's
+    # behavior), so resolution can never block a repair.
     slug = request.device_slug or _slugify(request.device_label)
+    resolution = None
+    if not request.device_slug:
+        try:
+            store = get_device_registry_store(memory_root)
+            resolution = await resolve_device(
+                request.device_label, store, owner_ref=request.owner_ref
+            )
+            slug = resolution["canonical_slug"]
+        except Exception:  # noqa: BLE001 - registry must never break a repair
+            logger.warning("[API] device resolution failed for %r — using slug=%r",
+                           request.device_label, slug, exc_info=True)
+
+    # Confirm-on-uncertainty: a broad term that fans out to several siblings —
+    # don't guess. Return the candidate menu; no repair created, no build started.
+    if resolution is not None and resolution.get("ambiguous"):
+        return RepairResponse(
+            repair_id="",
+            device_slug=slug,
+            device_label=request.device_label,
+            pipeline_started=False,
+            pipeline_kind="none",
+            needs_disambiguation=True,
+            candidates=[
+                DisambiguationCandidate(
+                    device_slug=c.get("canonicalKey"),
+                    family=c.get("family"),
+                    facets=c.get("facets") or {},
+                )
+                for c in resolution.get("candidates", [])
+            ],
+        )
     pack_dir = memory_root / slug
 
     # Every "new repair" IS a repair session — persist the record
@@ -657,34 +711,45 @@ async def create_repair(
         memory_root, slug, request.device_label, request.symptom, request.owner_ref
     )
 
+    pack_complete = _pack_is_complete(pack_dir)
+
     # Branch 0 — the tech resubmitted the form for an already-open ticket
-    # on the same (device, symptom). Reuse the existing repair without
-    # burning a coverage check or an expand-pack round-trip. Without this
-    # short-circuit a stuck-on-low-confidence coverage classifier loops
-    # and chews $0.40 of LLM tokens every retry.
+    # on the same (device, symptom). On a COMPLETE pack, reuse the existing
+    # repair without burning a coverage check or an expand-pack round-trip
+    # (without this short-circuit a stuck-on-low-confidence coverage classifier
+    # loops and chews $0.40 of LLM tokens every retry). On an INCOMPLETE pack
+    # (failed/interrupted build — see build_state), fall through to Branch 1
+    # instead: the resubmit IS the 'relancer' flow, and the rebuild re-fires on
+    # this same repair, riding the hash caches. force_rebuild also falls
+    # through, so an explicit rebuild request on an open ticket is honored.
     if not is_new:
+        if pack_complete and not request.force_rebuild:
+            logger.info(
+                "[API] /pipeline/repairs · reusing open repair=%s for slug=%r — no LLM run",
+                repair_id,
+                slug,
+            )
+            return RepairResponse(
+                repair_id=repair_id,
+                device_slug=slug,
+                device_label=request.device_label,
+                pipeline_started=False,
+                pipeline_kind="none",
+                coverage_reason="reusing existing open ticket on the same symptom",
+            )
         logger.info(
-            "[API] /pipeline/repairs · reusing open repair=%s for slug=%r — no LLM run",
+            "[API] /pipeline/repairs · open repair=%s on INCOMPLETE pack for slug=%r — re-firing the build",
             repair_id,
             slug,
         )
-        return RepairResponse(
-            repair_id=repair_id,
-            device_slug=slug,
-            device_label=request.device_label,
-            pipeline_started=False,
-            pipeline_kind="none",
-            coverage_reason="reusing existing open ticket on the same symptom",
-        )
 
-    # Stash an attached schematic now that we know this is a fresh repair (a dedup
-    # hit returned above). Done BEFORE the generation kickoff so the orchestrator's
-    # inline-ingest picks it up; we deliberately do NOT trigger the documents-endpoint
-    # auto-pin/background ingest here (it would race the inline-ingest).
+    # Stash an attached schematic — either a fresh repair or a retry that is about
+    # to re-fire the build (a complete-pack dedup hit returned above). Done BEFORE
+    # the generation kickoff so the orchestrator's inline-ingest picks it up; we
+    # deliberately do NOT trigger the documents-endpoint auto-pin/background ingest
+    # here (it would race the inline-ingest).
     if file is not None and file.filename:
         await persist_upload(pack_dir / "uploads", "schematic_pdf", file)
-
-    pack_complete = _pack_is_complete(pack_dir)
 
     # Branch 1 — pack missing (or force_rebuild): fire the full pipeline
     # with the symptom threaded to Scout as a priority target.
@@ -704,32 +769,67 @@ async def create_repair(
                 pipeline_started=True,
                 pipeline_kind="full",
             )
+        # Already QUEUED for this slug → join it (no duplicate build), return its
+        # current position so the UI shows the same waiting state.
+        if _slug_queued(slug):
+            pos = _queue_position(slug)
+            return RepairResponse(
+                repair_id=repair_id,
+                device_slug=slug,
+                device_label=request.device_label,
+                pipeline_started=True,
+                pipeline_kind="full",
+                queued=True,
+                queue_position=pos,
+            )
         if request.force_rebuild and pack_complete:
             logger.info(
                 "[API] /pipeline/repairs · force_rebuild=True · repair=%s regenerating pack for slug=%r",
                 repair_id,
                 slug,
             )
+
+        # Launcher capturing the exact build args — run now if a slot is free,
+        # else ENQUEUE it (the user sees a position; it starts when a slot frees).
+        def _launch():
+            return _run_pipeline_with_events(
+                request.device_label,
+                slug,
+                focus_symptom=request.symptom,
+                user_device_kind=request.device_kind,
+                # A schematic uploaded via /documents (not the create body) lands
+                # out-of-band — tell the pipeline to wait for its electrical graph
+                # before device-kind classification. Skip when the file rode the
+                # create body (inline-ingest handles it).
+                expect_schematic=schematic_pending and file is None,
+                owner_ref=request.owner_ref,
+                engine_repair_id=repair_id,
+            )
+
+        if _builds_at_capacity():
+            pos = _enqueue_build(slug, _launch)
+            await events.publish(slug, {"type": "queued", "position": pos, "ahead": pos - 1})
+            logger.info(
+                "[API] /pipeline/repairs · build queued at position %d (cap=%d) for slug=%r",
+                pos,
+                _build_cap(),
+                slug,
+            )
+            return RepairResponse(
+                repair_id=repair_id,
+                device_slug=slug,
+                device_label=request.device_label,
+                pipeline_started=True,
+                pipeline_kind="full",
+                queued=True,
+                queue_position=pos,
+            )
+
         logger.info(
             "[API] /pipeline/repairs · firing full pipeline for slug=%r · focus_symptom=yes",
             slug,
         )
-        _register_running(
-            slug,
-            asyncio.create_task(
-                _run_pipeline_with_events(
-                    request.device_label,
-                    slug,
-                    focus_symptom=request.symptom,
-                    user_device_kind=request.device_kind,
-                    # A schematic uploaded via /documents (not the create body)
-                    # lands out-of-band — tell the pipeline to wait for its
-                    # electrical graph before device-kind classification. Skip
-                    # when the file rode the create body (inline-ingest handles it).
-                    expect_schematic=schematic_pending and file is None,
-                )
-            ),
-        )
+        _register_build(slug, asyncio.create_task(_launch()))
         return RepairResponse(
             repair_id=repair_id,
             device_slug=slug,
@@ -765,36 +865,32 @@ async def create_repair(
             coverage_reason=coverage.reason,
         )
 
-    # Branch 3 — pack complete but symptom uncovered: fire a targeted
-    # expand_pack that grows the existing pack with Scout + Clinicien on
-    # the symptom alone (much cheaper than the full pipeline).
-    # Stampede guard (expand): a build/expand for this slug is already in flight →
-    # join it rather than launching a duplicate (same rationale as Branch 1).
-    if _slug_is_building(slug):
-        logger.info(
-            "[API] /pipeline/repairs · slug=%r already expanding — repair=%s joins the in-flight expand",
-            slug,
-            repair_id,
-        )
-        return RepairResponse(
-            repair_id=repair_id,
-            device_slug=slug,
-            device_label=request.device_label,
-            pipeline_started=True,
-            pipeline_kind="expand",
-            coverage_reason=coverage.reason,
-        )
+    # Branch 3 — pack complete but symptom uncovered.
+    #
+    # We DO NOT auto-fire expand_pack here anymore. Enrichment (the paid
+    # Scout + Clinicien pass, ~$0.40) is a *recourse*, not a step: the repair
+    # opens normally and the diagnostic agent works the existing electrical
+    # graph + rules first. Only if it comes up empty-handed does it PROPOSE
+    # `mb_expand_knowledge` (with the tech's go-ahead), and that tool is itself
+    # plan-gated (free tenants don't get it — see session_caps / manifest).
+    #
+    # This collapses the old double-trigger (auto-expand at create_repair AND
+    # the agent tool) onto the single agent-driven path, kills the "spend on a
+    # web search before the agent even looked" waste, and removes the need to
+    # drop the ticket: it stays alive so the agent session can attach to it.
+    # `allow_expand` (front-door flag) is now inert here — kept on the request
+    # for skew-tolerance with an older cloud, but no longer changes behaviour.
     logger.info(
-        "[API] /pipeline/repairs · pack complete for slug=%r; symptom uncovered — firing expand",
+        "[API] /pipeline/repairs · pack complete for slug=%r; symptom uncovered — "
+        "opening repair, agent works the graph (expand is on-demand, plan-gated)",
         slug,
     )
-    _register_running(slug, asyncio.create_task(_run_expand_with_events(slug, request.symptom, owner_ref=request.owner_ref)))
     return RepairResponse(
         repair_id=repair_id,
         device_slug=slug,
         device_label=request.device_label,
-        pipeline_started=True,
-        pipeline_kind="expand",
+        pipeline_started=False,
+        pipeline_kind="none",
         coverage_reason=coverage.reason,
     )
 

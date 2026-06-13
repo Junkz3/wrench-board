@@ -658,6 +658,16 @@ class PCBViewerOptimized {
         this.canvas.addEventListener('click', (e) => this.onClick(e));
         this.canvas.addEventListener('contextmenu', (e) => e.preventDefault());
 
+        // Touch: 1 finger = pan, 2 fingers = pinch-zoom (to the midpoint), a
+        // short 1-finger tap = select (forwarded to the click path). passive:
+        // false so we can preventDefault the browser's native pan/pinch-zoom.
+        this.canvas.addEventListener('touchstart', (e) => this.onTouchStart(e), { passive: false });
+        this.canvas.addEventListener('touchmove', (e) => this.onTouchMove(e), { passive: false });
+        this.canvas.addEventListener('touchend', (e) => this.onTouchEnd(e), { passive: false });
+        this.canvas.addEventListener('touchcancel', () => this.onTouchEnd(), { passive: false });
+        // Disable native gestures (double-tap zoom, scroll) over the canvas.
+        this.canvas.style.touchAction = 'none';
+
         const closeBtn = document.getElementById('info-close');
         if (closeBtn) closeBtn.addEventListener('click', () => this.clearSelection());
     }
@@ -683,18 +693,18 @@ class PCBViewerOptimized {
 
     onWheel(e) {
         e.preventDefault();
-
-        // Zoom-to-cursor: convert the cursor's pixel position to the
-        // world point BEFORE the frustum change, apply the zoom, then
-        // shift the camera so the same world point still sits under the
-        // cursor. Default behaviour was zoom-to-centre which forced the
-        // user to click-pan after every scroll wheel step.
         const rect = this.container.getBoundingClientRect();
-        const offsetX = e.clientX - rect.left;
-        const offsetY = e.clientY - rect.top;
-        const worldBefore = this.screenToWorld(offsetX, offsetY);
+        // Zoom toward the cursor (see _zoomAtPoint).
+        this._zoomAtPoint(e.clientX - rect.left, e.clientY - rect.top, e.deltaY > 0 ? 1.1 : 0.9);
+    }
 
-        const zoomFactor = e.deltaY > 0 ? 1.1 : 0.9;
+    // Zoom-to-point: convert the anchor's pixel position to the world point
+    // BEFORE the frustum change, apply the zoom, then shift the camera so the
+    // same world point still sits under the anchor. Shared by the wheel and the
+    // two-finger pinch (anchor = cursor / pinch midpoint) so zoom-to-centre
+    // never forces a re-pan after each step.
+    _zoomAtPoint(offsetX, offsetY, zoomFactor) {
+        const worldBefore = this.screenToWorld(offsetX, offsetY);
         this.frustumSize *= zoomFactor;
         // Allow generous zoom-out (10× the board diagonal) so dense
         // boards like the MSI V300 (46 mm GPU section, 5k+ vias) can
@@ -703,17 +713,96 @@ class PCBViewerOptimized {
         const maxSize = this.boardData ? Math.max(this.boardData.board_width, this.boardData.board_height) * 10 : 2000;
         this.frustumSize = Math.max(0.5, Math.min(maxSize, this.frustumSize));
         this.zoom = 100 / this.frustumSize;
-
-        // Recompute frustum extents and renderer size, then read the
-        // post-zoom world position of the cursor and apply the offset.
         this.onResize();
         const worldAfter = this.screenToWorld(offsetX, offsetY);
         this.camera.position.x += worldBefore.x - worldAfter.x;
         this.camera.position.y += worldBefore.y - worldAfter.y;
-
         const zoomEl = document.getElementById('zoom-level');
         if (zoomEl) zoomEl.textContent = Math.round(this.zoom * 100);
         this.requestRender();
+    }
+
+    // Pan the camera by a pixel delta (shared by mouse drag + touch pan).
+    _panByPixels(dxPx, dyPx) {
+        const w = this.container.clientWidth, h = this.container.clientHeight;
+        const aspect = w / h;
+        this.camera.position.x -= dxPx * (this.frustumSize * aspect) / w;
+        this.camera.position.y += dyPx * this.frustumSize / h;
+        this.requestRender();
+    }
+
+    _touchDist(t) { return Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY); }
+    _touchMid(t) { return { x: (t[0].clientX + t[1].clientX) / 2, y: (t[0].clientY + t[1].clientY) / 2 }; }
+
+    // A single-finger tap with no real movement selects the item under it —
+    // mobile has no hover, so we update the picking ray + hover at the tap
+    // point, then route through the same onClick stack-picking path as mouse.
+    _forwardTapAsClick(clientX, clientY) {
+        const rect = this.container.getBoundingClientRect();
+        const w = this.container.clientWidth, h = this.container.clientHeight;
+        this.mouse.x = ((clientX - rect.left) / w) * 2 - 1;
+        this.mouse.y = -((clientY - rect.top) / h) * 2 + 1;
+        this.checkHover();
+        this._pressStart = { x: clientX, y: clientY };
+        this.onClick({ clientX, clientY });
+    }
+
+    onTouchStart(e) {
+        if (e.touches.length === 1) {
+            e.preventDefault();
+            const t = e.touches[0];
+            this._touchMode = 'pan';
+            this._lastTouch = { x: t.clientX, y: t.clientY };
+            this._touchStart = { x: t.clientX, y: t.clientY };
+            this._touchMoved = false;
+        } else if (e.touches.length === 2) {
+            e.preventDefault();
+            this._touchMode = 'pinch';
+            this._pinchPrevDist = this._touchDist(e.touches);
+            this._pinchPrevMid = this._touchMid(e.touches);
+            this._touchMoved = true; // a pinch is never a tap
+        }
+    }
+
+    onTouchMove(e) {
+        if (this._touchMode === 'pan' && e.touches.length === 1) {
+            e.preventDefault();
+            const t = e.touches[0];
+            if (Math.abs(t.clientX - this._touchStart.x) > 6 || Math.abs(t.clientY - this._touchStart.y) > 6) {
+                this._touchMoved = true;
+            }
+            this._panByPixels(t.clientX - this._lastTouch.x, t.clientY - this._lastTouch.y);
+            this._lastTouch = { x: t.clientX, y: t.clientY };
+        } else if (this._touchMode === 'pinch' && e.touches.length === 2) {
+            e.preventDefault();
+            const dist = this._touchDist(e.touches);
+            const mid = this._touchMid(e.touches);
+            const rect = this.container.getBoundingClientRect();
+            if (this._pinchPrevDist > 0) {
+                // Fingers apart → dist↑ → factor<1 → frustum shrinks → zoom IN.
+                this._zoomAtPoint(mid.x - rect.left, mid.y - rect.top, this._pinchPrevDist / dist);
+            }
+            // Two-finger drag also pans (midpoint movement).
+            this._panByPixels(mid.x - this._pinchPrevMid.x, mid.y - this._pinchPrevMid.y);
+            this._pinchPrevDist = dist;
+            this._pinchPrevMid = mid;
+        }
+    }
+
+    onTouchEnd(e) {
+        if (this._touchMode === 'pan' && !this._touchMoved && this._touchStart) {
+            this._forwardTapAsClick(this._touchStart.x, this._touchStart.y);
+        }
+        // One finger left after lifting the other (pinch → pan): keep panning
+        // from its position; otherwise end the gesture.
+        if (e && e.touches && e.touches.length === 1) {
+            this._touchMode = 'pan';
+            this._lastTouch = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+            this._touchStart = { ...this._lastTouch };
+            this._touchMoved = true; // tail of a multi-touch, not a fresh tap
+        } else {
+            this._touchMode = null;
+        }
     }
 
     onMouseDown(e) {
@@ -1314,8 +1403,8 @@ class PCBViewerOptimized {
             const el = document.getElementById(id);
             if (el) el.textContent = txt;
         };
-        setText('info-id', item.id || '—');
-        setText('info-value', item.value || item.net || '—');
+        setText('info-id', item.id || '…');
+        setText('info-value', item.value || item.net || '…');
         setText('info-type', (item.type || 'Pin').toUpperCase());
         setText('info-layer', (item.layer || 'top').toUpperCase());
         setText('info-pos',
@@ -1412,7 +1501,7 @@ class PCBViewerOptimized {
                     const li = document.createElement('li');
                     if (alt) {
                         const fp = alt.footprint || alt.id;
-                        const v = alt.value || '(non listé au BOM — DNP)';
+                        const v = alt.value || '(non listé au BOM, DNP)';
                         li.innerHTML =
                             `<span class="mono">${refdes}</span> ` +
                             `<span class="muted">${fp}</span><br>` +

@@ -1,4 +1,4 @@
-"""POST /pipeline/packs/{slug}/confirm-kind — Task 9.
+"""POST /pipeline/packs/{slug}/confirm-kind.
 
 Records the technician's resolved device kind, clears the pending-confirmation
 marker, and re-runs the pipeline with `confirmed_device_kind`.

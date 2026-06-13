@@ -251,7 +251,7 @@ def test_symptom_backfill_long_label_id_within_bounds():
     conforme au pattern ^N-[A-Z0-9_-]{1,48}$ — jamais plus de 50 chars au total.
     Vérifie aussi que KnowledgeNode valide l'id sans lever d'exception.
 
-    Fix B (T8) : le slug est tronqué à 40 chars avant d'assembler N-S_<slug>
+    Fix B : le slug est tronqué à 40 chars avant d'assembler N-S_<slug>
     (réserve 4 chars pour le suffixe d'unicité éventuel, et 4 pour le préfixe
     "N-S_"), soit len(N-S_<slug>) ≤ 44 < 50 en toutes circonstances.
     """

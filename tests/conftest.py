@@ -38,5 +38,13 @@ def memory_root(
     """
     monkeypatch.setattr(config_mod, "_settings", None)
     monkeypatch.setenv("MEMORY_ROOT", str(tmp_path))
+    # Hermetic: never let an operator's cloud-registry config (set in .env for
+    # live managed-mode testing) turn these tests into calls to a live cloud —
+    # force the local JSON device-registry store under tmp_path. setenv to ""
+    # (not delenv): pydantic-settings re-reads the .env FILE, so a process-env
+    # override is what actually wins; "" is falsy → get_device_registry_store
+    # picks JSON.
+    monkeypatch.setenv("CLOUD_DEVICE_REGISTRY_URL", "")
+    monkeypatch.setenv("CLOUD_DEVICE_REGISTRY_TOKEN", "")
     yield tmp_path
     monkeypatch.setattr(config_mod, "_settings", None)

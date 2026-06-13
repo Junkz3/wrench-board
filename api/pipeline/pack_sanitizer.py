@@ -1,29 +1,29 @@
-"""T8 — Sanitisation PII sur les champs libres avant écriture dans le pack partagé.
+"""PII sanitization of free-text fields before writing to the shared pack.
 
-Module pur (aucune I/O). Appliqué par `expand_pack` sur :
-- focus_symptoms[] en entrée (texte tenant brut)
-- tous les champs libres des facts produits par le Scout (description,
+Pure module (no I/O). Applied by `expand_pack` on:
+- focus_symptoms[] on input (raw tenant text)
+- all free-text fields of the facts produced by the Scout (description,
   notes, properties.values(), symptoms[], etc.)
 
-Politique V1 = regex + listes. L'interface est designed pour permettre une
-impl LLM redactor en V2 (cf. spec §5b "Interface pour V2"). Le sanitizer
-LOGUE chaque action pour audit (provenance.sanitizer_actions[] + journal).
+V1 policy = regex + lists. The interface is designed to allow an LLM redactor
+impl in V2 (see spec section 5b "Interface for V2"). The sanitizer LOGS each
+action for audit (provenance.sanitizer_actions[] + journal).
 
-NE PAS confondre avec api/agent/sanitize.py (refdes hallucination guard
-sur les réponses agent — c'est un autre vecteur).
+Do NOT confuse with api/agent/sanitize.py (refdes hallucination guard on agent
+replies, which is a different vector).
 
-Limitations connues V1 (best-effort regex+listes ; à durcir en V2 si besoin) :
-- IPv4 capture aussi des chaînes type firmware version (10.0.1.2) — accepté
-  comme over-redact (safe).
-- IPv6 : ::1 (loopback seul) et fe80::1%eth0 (scope) non couverts.
-- Mention client : nécessite ponctuation finale de phrase (.!?). 'le client
-  Dupont reports X' sans point ne match pas.
-- Honorifique : 'le client M. Dupont dit X.' ne match pas car le '.' de
-  'M.' coupe la frontière de phrase regex.
-- Phone : forme '(0)6 12 34 56 78' et '+33 (0)6 12 34 56 78' non couvertes.
-- TI chips SN74xxx ne sont pas pris pour des serials (fixé après revue).
-- IBAN : seuil corps ≥ 13 chars (total ≥ 17) → BE (16 total) et NO (15 total)
-  non couverts ; compromis accepté pour éviter les faux positifs SN74xxx.
+Known V1 limitations (best-effort regex+lists; to harden in V2 if needed):
+- IPv4 also captures firmware-version-like strings (10.0.1.2), accepted as
+  over-redact (safe).
+- IPv6: ::1 (loopback alone) and fe80::1%eth0 (scope) not covered.
+- Customer mention: requires sentence-final punctuation (.!?). 'le client
+  Dupont reports X' without a period does not match.
+- Honorific: 'le client M. Dupont dit X.' does not match because the '.' of
+  'M.' cuts the regex sentence boundary.
+- Phone: forms '(0)6 12 34 56 78' and '+33 (0)6 12 34 56 78' not covered.
+- TI chips SN74xxx are not mistaken for serials (fixed after review).
+- IBAN: body threshold >= 13 chars (total >= 17) → BE (16 total) and NO
+  (15 total) not covered; tradeoff accepted to avoid SN74xxx false positives.
 """
 
 from __future__ import annotations
@@ -32,10 +32,10 @@ import re
 from collections.abc import Iterable
 from dataclasses import dataclass
 
-# On évite la dépendance Pydantic ici pour garder ce module utilisable hors
-# pipeline (par les tests, et plus tard par un LLM redactor offline).
-# Task 5 convertira les SanitizerAction (dataclass) → SanitizerAction (Pydantic,
-# défini dans schemas.py) au moment de construire l'objet Provenance.
+# Avoid the Pydantic dependency here to keep this module usable outside the
+# pipeline (by tests, and later by an offline LLM redactor). The conversion of
+# SanitizerAction (dataclass) → SanitizerAction (Pydantic, defined in
+# schemas.py) happens when building the Provenance object.
 
 
 @dataclass

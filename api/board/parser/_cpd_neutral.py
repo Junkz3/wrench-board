@@ -407,7 +407,7 @@ def parse_cpd_neutral(
             part_pin_refs: list[int] = []
             xs: list[float] = []
             ys: list[float] = []
-            for i, (_, pinname, x, y, side, padstack, net) in enumerate(rows, start=1):
+            for i, (_, pinname, x, y, side, _padstack, net) in enumerate(rows, start=1):
                 sx = x * scale
                 sy = y * scale
                 xs.append(sx)
@@ -474,7 +474,7 @@ def parse_cpd_neutral(
             xs, ys = [], []
             # Side comes from the first pin (parts sit on one side).
             part_layer = _side_to_layer(rows[0][3]) if rows else Layer.TOP
-            for i, (pinname, x, y, side, net_name) in enumerate(rows, start=1):
+            for i, (pinname, x, y, _side, net_name) in enumerate(rows, start=1):
                 sx, sy = x * scale, y * scale
                 xs.append(sx)
                 ys.append(sy)

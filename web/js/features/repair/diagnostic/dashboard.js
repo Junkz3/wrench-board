@@ -15,6 +15,7 @@ import { escapeHtml, relativeTime as relativeTimeFr } from '../../../shared/dom.
 import { apiGet } from '../../../shared/api.js';
 import { openInfoModal } from '../../../info_modal.js';
 import { maybeShowFirstDiagCoaching } from './coaching.js';
+import { hideUploads } from '../../../cloud_hints.js';
 
 export async function loadTaxonomy() {
   try {
@@ -195,9 +196,9 @@ function renderDashboardHeader(repair, taxEntry, slug, rid) {
   deviceEl.textContent = taxEntry
     ? deviceName(taxEntry, { includeBrand: true })
     : (repair?.device_label || humanizeSlug(slug));
-  symptomEl.textContent = isDemo ? t("repair.demo_symptom") : (repair?.symptom || "—");
+  symptomEl.textContent = isDemo ? t("repair.demo_symptom") : (repair?.symptom || "…");
 
-  const created = repair?.created_at ? relativeTimeFr(repair.created_at) : "—";
+  const created = repair?.created_at ? relativeTimeFr(repair.created_at) : "…";
   const status = repair?.status || "open";
   const form = taxEntry?.form_factor
     ? `<span class="badge mono">${escapeHtml(taxEntry.form_factor)}</span>`
@@ -217,7 +218,7 @@ const ICONS = {
 // Pretty file-size formatter — KB/MB with one decimal. Used in card metas
 // after an upload so the tech sees "iphone-x.brd · 2.4 MB" not raw bytes.
 function fmtBytes(n) {
-  if (!Number.isFinite(n) || n <= 0) return "—";
+  if (!Number.isFinite(n) || n <= 0) return "…";
   const units = ["B", "KB", "MB", "GB"];
   let i = 0;
   let v = n;
@@ -285,11 +286,15 @@ function renderDashboardData(slug, rid, pack, sourcesData) {
     if (pack?.has_schematic_pdf) {
       schemActions.appendChild(linkButton(repairHash(rid, "schematic"),
         ICONS.arrowRight + " " + escapeHtml(t("home.dashboard.schematic.open")), "is-primary"));
-      schemActions.appendChild(actionButton(
-        ICONS.upload + " " + escapeHtml(t("home.dashboard.schematic.import_version")), () => {
-          document.getElementById("rdUploadSchematic")?.click();
-        }));
-    } else {
+      // Plan free (mode managé, cloud_hints) : pas d'import de fichier — le
+      // serveur refuse l'upload (402), donc l'affordance disparaît.
+      if (!hideUploads()) {
+        schemActions.appendChild(actionButton(
+          ICONS.upload + " " + escapeHtml(t("home.dashboard.schematic.import_version")), () => {
+            document.getElementById("rdUploadSchematic")?.click();
+          }));
+      }
+    } else if (!hideUploads()) {
       schemActions.appendChild(actionButton(
         ICONS.upload + " " + escapeHtml(t("home.dashboard.schematic.import_pdf")), () => {
           document.getElementById("rdUploadSchematic")?.click();
@@ -349,11 +354,14 @@ function renderDashboardData(slug, rid, pack, sourcesData) {
     if (pack?.has_boardview) {
       bvActions.appendChild(linkButton(repairHash(rid, "pcb"),
         ICONS.arrowRight + " " + escapeHtml(t("home.dashboard.boardview.open")), "is-primary"));
-      bvActions.appendChild(actionButton(
-        ICONS.upload + " " + escapeHtml(t("home.dashboard.boardview.import_version")), () => {
-          document.getElementById("rdUploadBoardview")?.click();
-        }));
-    } else {
+      // Plan free (mode managé, cloud_hints) : pas d'import — voir card schématique.
+      if (!hideUploads()) {
+        bvActions.appendChild(actionButton(
+          ICONS.upload + " " + escapeHtml(t("home.dashboard.boardview.import_version")), () => {
+            document.getElementById("rdUploadBoardview")?.click();
+          }));
+      }
+    } else if (!hideUploads()) {
       bvActions.appendChild(actionButton(
         ICONS.upload + " " + escapeHtml(t("home.dashboard.boardview.import_boardview")), () => {
           document.getElementById("rdUploadBoardview")?.click();
@@ -680,7 +688,7 @@ function renderVersionList(cardId, kind, versions, slug, rid, opts = {}) {
 // Parse the ISO-like upload timestamp `20260424T130000Z` into a short
 // fr-locale label `24 avr · 13:00`. Falls back to the raw string on parse fail.
 function formatVersionDate(ts) {
-  if (!ts) return "—";
+  if (!ts) return "…";
   const m = ts.match(/^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z$/);
   if (!m) return ts;
   const [, y, mo, d, h, mi] = m;
@@ -998,6 +1006,9 @@ function actionButton(html, onclick, extra = "") {
 // ───────────────────────────────────────────────────────────────
 let _uploadHandlersWired = false;
 function wireUploadHandlers(slug, rid) {
+  // Plan free (mode managé, cloud_hints) : aucune voie d'import — ni boutons
+  // (déjà non rendus) ni drag-drop. Le serveur refuse l'upload (402) pareil.
+  if (hideUploads()) return;
   // Always re-bind the per-session slug/rid even on re-mount.
   const schemInput = document.getElementById("rdUploadSchematic");
   const bvInput = document.getElementById("rdUploadBoardview");
@@ -1180,8 +1191,8 @@ function renderDashboardConvs(conversations, rid) {
       const tier = (c.tier || "fast").toLowerCase();
       const fallbackTitle = t("home.dashboard.convs.untitled", { id: c.id.slice(0, 6) });
       const title = escapeHtml((c.title || fallbackTitle).slice(0, 80));
-      const ago = c.last_turn_at ? relativeTimeFr(c.last_turn_at) : "—";
-      const cost = typeof c.cost_usd === "number" ? `$${c.cost_usd.toFixed(3)}` : "—";
+      const ago = c.last_turn_at ? relativeTimeFr(c.last_turn_at) : "…";
+      const cost = typeof c.cost_usd === "number" ? `$${c.cost_usd.toFixed(3)}` : "n/a";
       const meta = t("home.dashboard.convs.turns_meta", {
         turns: c.turns || 0,
         cost,
@@ -1249,7 +1260,7 @@ function renderDashboardFindings(findings, currentRid) {
       ? `<span class="rd-finding-session current">${escapeHtml(t("home.dashboard.findings.session_current"))}</span>`
       : (f.session_id
           ? `<span class="rd-finding-session">${escapeHtml(f.session_id.slice(0, 8))}</span>`
-          : `<span class="rd-finding-session">—</span>`);
+          : `<span class="rd-finding-session">(none)</span>`);
     const notes = f.notes
       ? `<p class="rd-finding-notes">${escapeHtml(f.notes)}</p>`
       : "";
@@ -1259,7 +1270,7 @@ function renderDashboardFindings(findings, currentRid) {
         `<span class="rd-finding-symptom">${escapeHtml(f.symptom)}</span>` +
         sessionChip +
       `</div>` +
-      `<p class="rd-finding-cause">${escapeHtml(f.confirmed_cause || "—")}</p>` +
+      `<p class="rd-finding-cause">${escapeHtml(f.confirmed_cause || "…")}</p>` +
       notes;
     body.appendChild(row);
   }

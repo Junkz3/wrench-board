@@ -22,18 +22,18 @@
       "nostuff": "NOSTUFF"
     },
     "tooltip": {
-      "open_rail_with_voltage": "{label} · {volt} V — ouvrir dans le schematic",
-      "open_rail": "{label} — ouvrir dans le schematic",
-      "decouple_cap": "{label} — cap de découplage sur ce rail",
+      "open_rail_with_voltage": "{label} · {volt} V (ouvrir dans le schematic)",
+      "open_rail": "{label} (ouvrir dans le schematic)",
+      "decouple_cap": "{label} : cap de découplage sur ce rail",
       "open_rail_focus": "Ouvrir dans le schematic en focus rail",
       "pin_role_type": "{refdes}.{pin} · {role}",
       "pin_role_type_full": "{refdes}.{pin} · {role} · {type}",
       "comp_type": "{refdes} · {type}",
       "comp_type_mpn": "{refdes} · {type} · {mpn}",
-      "pins_of_ref": "{refdes} · {type} — pins {pins}",
-      "pin_of_ref": "{refdes} · {type} — pin {pins}",
-      "pins_of_ref_no_type": "{refdes} — pins {pins}",
-      "pin_of_ref_no_type": "{refdes} — pin {pins}"
+      "pins_of_ref": "{refdes} · {type} · pins {pins}",
+      "pin_of_ref": "{refdes} · {type} · pin {pins}",
+      "pins_of_ref_no_type": "{refdes} · pins {pins}",
+      "pin_of_ref_no_type": "{refdes} · pin {pins}"
     },
     "rail": {
       "label": "Rail",
@@ -92,10 +92,10 @@
   },
   "inspector": {
     "close": "Fermer",
-    "value_dash": "—",
-    "footprint_dash": "—",
+    "value_dash": "N/A",
+    "footprint_dash": "N/A",
     "rotation": "rot {deg}",
-    "rotation_dash": "—",
+    "rotation_dash": "N/A",
     "smd": "SMD",
     "tht": "THT",
     "layer_top": "TOP",
@@ -115,7 +115,7 @@
     "with_count_one": "{net} · {n} pin"
   },
   "cursor": {
-    "empty": "—",
+    "empty": "·",
     "xy": "x: {x}  y: {y}"
   }
 }

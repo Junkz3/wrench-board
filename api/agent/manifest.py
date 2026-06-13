@@ -31,6 +31,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from api.agent.reliability import load_reliability_line
+from api.agent.session_caps import current_can_expand
 from api.config import get_settings
 from api.profile.prompt import render_technician_block
 from api.profile.store import load_profile
@@ -1170,12 +1171,19 @@ def build_tools_manifest(session: SessionState) -> list[dict]:
         manifest.extend(BV_TOOLS)
     if session.has_camera:
         manifest.extend(CAM_TOOLS)
+    # Plan gate (cloud capability): a free tenant may NOT trigger a paid pack
+    # enrichment, so drop mb_expand_knowledge entirely — the agent never sees
+    # it, never proposes it (no dead CTA). Pro / self-host keep it. The
+    # execution path is gated too (defence in depth) for the managed runtime,
+    # whose manifest is baked at agent bootstrap and can't be filtered here.
+    if not current_can_expand():
+        manifest = [t for t in manifest if t.get("name") != "mb_expand_knowledge"]
     return manifest
 
 
 def _has_electrical_graph(device_slug: str) -> bool:
-    # T9 — per-owner : présence du graphe pour le tenant courant (son PDF
-    # actif), pas la racine partagée du slug. owner None → racine, inchangé.
+    # Per-owner: presence of the graph for the current tenant (its active
+    # PDF), not the slug's shared root. owner None → root, unchanged.
     from api.agent.owner_ref import current_owner_ref
     from api.pipeline import live_graph
 
@@ -1183,11 +1191,17 @@ def _has_electrical_graph(device_slug: str) -> bool:
     return live_graph.resolve_graph_path(root / device_slug, current_owner_ref()) is not None
 
 
-def render_system_prompt(session: SessionState, *, device_slug: str) -> str:
+def render_system_prompt(
+    session: SessionState, *, device_slug: str, cousin_line: str | None = None
+) -> str:
     """Build the system prompt for the DIRECT runtime only.
 
     The Managed runtime carries its prompt server-side via managed_ids.json
     and doesn't call this function.
+
+    ``cousin_line``: when this board has no schematic of its own,
+    the caller may pass a one-line hint pointing the agent at a sibling pack
+    (same family) it can lean on as an indicative reference.
     """
     boardview_status = "✅" if session.board is not None else "❌ (no board file loaded)"
     schematic_status = (
@@ -1203,17 +1217,28 @@ def render_system_prompt(session: SessionState, *, device_slug: str) -> str:
         if reliability_line
         else ""
     )
+    cousin_block = f"\n{cousin_line}\n" if cousin_line else ""
+    # mb_expand_knowledge is plan-gated (dropped from the manifest for free
+    # tenants) — keep the advertised capability line in sync so the agent isn't
+    # told about a tool it doesn't have.
+    mb_tools_line = (
+        "mb_get_component, mb_get_rules_for_symptoms, mb_record_finding, "
+        "mb_record_session_log, mb_expand_knowledge"
+        if current_can_expand()
+        else "mb_get_component, mb_get_rules_for_symptoms, mb_record_finding, "
+        "mb_record_session_log"
+    )
     return f"""\
 You are a calm, methodical board-level diagnostics assistant for a
 microsoldering technician. Address the technician directly, in a
 direct and pedagogical tone.
 
 Current device: {device_slug}.
-{reliability_block}
+{reliability_block}{cousin_block}
 {technician_block}
 
 Capabilities for this session:
-  - memory bank ✅ (mb_get_component, mb_get_rules_for_symptoms, mb_record_finding, mb_record_session_log, mb_expand_knowledge)
+  - memory bank ✅ ({mb_tools_line})
   - profile ✅ (profile_get, profile_check_skills, profile_track_skill)
   - filesystem ✅ (read, write, edit, grep, glob — for the /mnt/memory/ mounts)
   - boardview {boardview_status}

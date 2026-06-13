@@ -73,12 +73,40 @@ body.pending-landing .statusbar { display: none !important; }
    participates in .landing's centering grid as a direct child. */
 .landing-shell { display: contents; }
 
-/* Below 1000px, the sidebar disappears and the landing collapses back to
-   a single-column hero centered on the full viewport. */
+/* Below 1000px there's no room for a persistent left column, so the hero
+   centers on the full viewport and the sidebar becomes a slide-in DRAWER
+   opened from the nav trigger (#landingRepairsToggle). It keeps `hidden`
+   (no repairs → nothing to show), but when present it parks off-screen and
+   slides in when `.landing` gains `.sidebar-open`. */
 @media (max-width: 999px) {
   .landing { padding-left: 0; }
-  .landing-sidebar { display: none !important; }
+  .landing-sidebar:not([hidden]) {
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    width: min(300px, 84vw);
+    transform: translateX(-100%);
+    transition: transform .22s ease;
+    animation: none;          /* the drawer slides; skip the desktop rise-in */
+    z-index: 1200;
+    box-shadow: 0 0 40px rgba(0, 0, 0, .5);
+  }
+  .landing.sidebar-open .landing-sidebar:not([hidden]) { transform: translateX(0); }
+  .landing-sidebar-backdrop:not([hidden]) {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, .5);
+    z-index: 1150;
+  }
 }
+
+/* The recent-repairs drawer trigger is mobile-only (desktop shows the sidebar
+   as a persistent column). landing.js toggles its `hidden` in lockstep with
+   the sidebar, so it only appears when there's at least one repair. */
+.landing-repairs-toggle { display: none; }
+@media (max-width: 999px) {
+  .landing-repairs-toggle:not([hidden]) { display: inline-flex; }
+}
+.landing-sidebar-backdrop[hidden] { display: none; }
 
 .landing-bg {
   position: absolute;
@@ -183,6 +211,7 @@ body.pending-landing .statusbar { display: none !important; }
 .landing-input-wrap {
   position: relative;
   width: 100%;
+  display: flex;
 }
 
 .landing-suggest {
@@ -211,9 +240,10 @@ body.pending-landing .statusbar { display: none !important; }
 
 .landing-suggest-item {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 10px;
-  padding: 9px 12px;
+  padding: 5px 12px;
+  line-height: 1.25;
   cursor: pointer;
   font-size: 13px;
   color: var(--text);
@@ -239,21 +269,55 @@ body.pending-landing .statusbar { display: none !important; }
 }
 .landing-suggest-icon.is-complete { color: var(--cyan); }
 .landing-suggest-icon.is-partial  { color: var(--amber); }
+.landing-suggest-icon { margin-top: 2px; }
+
+/* Two-line body: title row (model + brand + readiness) over an identifiers row. */
+.landing-suggest-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  text-align: left;
+}
+.landing-suggest-line1 {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  min-width: 0;
+}
 
 .landing-suggest-label {
-  flex: 1;
+  flex: 0 1 auto;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 600;
+}
+
+.landing-suggest-brand {
+  flex: 0 0 auto;
+  font-size: 11px;
+  color: var(--text-3);
+}
+
+/* Distinguishing identifiers — A-number(s) / board# / form-factor. */
+.landing-suggest-ids {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  color: var(--text-2);
+  letter-spacing: 0.2px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .landing-suggest-meta {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 10.5px;
-  color: var(--text-3);
-  letter-spacing: 0.2px;
-  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 5px;
   flex: 0 0 auto;
+  margin-left: 2px;
 }
 
 /* Landing CTA uses --cyan (component) instead of --violet (action) to match
@@ -381,32 +445,6 @@ body.pending-landing .statusbar { display: none !important; }
  * lift this one above the hero or it opens invisibly behind it. */
 #landingKnowledgeBackdrop { z-index: 1100; }
 
-.landing-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  justify-content: center;
-  margin-bottom: 24px;
-}
-
-.landing-chip {
-  background: transparent;
-  border: 1px solid var(--border-soft);
-  color: var(--text-2);
-  font-size: 12px;
-  padding: 6px 12px;
-  border-radius: 999px;
-  cursor: pointer;
-  font-family: inherit;
-  transition: border-color .15s, background .15s, color .15s;
-}
-
-.landing-chip:hover {
-  border-color: var(--border-hover);
-  color: var(--text);
-  background: var(--panel);
-}
-
 .landing-status {
   font-size: 12px;
   color: var(--text-3);
@@ -495,27 +533,63 @@ body.pending-landing .statusbar { display: none !important; }
   transition: border-color .2s, background .2s, box-shadow .2s;
 }
 
+/* Single-row head: label, then the always-visible live sub-step line, then
+   the "détail" toggle pushed to the right. Keeps each phase to one line so a
+   long build doesn't grow the timeline vertically. */
+.landing-phase-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
 .landing-phase-label {
   font-weight: 500;
+  flex: 0 0 auto;
 }
 
-.landing-phase-narration {
-  margin-top: 6px;
+/* The compact live line — latest sub-step only. Truncates with an ellipsis so
+   it never wraps and never pushes the toggle off-row. */
+.landing-phase-live {
+  flex: 1 1 auto;
+  min-width: 0;
   font-size: 12px;
   color: var(--text-2);
-  line-height: 1.55;
-  min-height: 0;
-  max-height: 0;
+  white-space: nowrap;
   overflow: hidden;
+  text-overflow: ellipsis;
   opacity: 0;
-  transition: max-height .35s cubic-bezier(.2,.8,.2,1), opacity .25s ease-out, margin-top .2s;
+  transition: opacity .2s ease-out;
 }
+.landing-phase.has-steps .landing-phase-live { opacity: 1; }
 
-.landing-phase.has-narration .landing-phase-narration {
-  max-height: 200px;
-  opacity: 1;
-  margin-top: 6px;
+/* "détail" toggle — quiet text button, only shown once a phase has sub-steps. */
+.landing-phase-detail {
+  flex: 0 0 auto;
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  font-size: 11px;
+  color: var(--cyan);
+  cursor: pointer;
+  opacity: .8;
+  transition: opacity .15s;
 }
+.landing-phase-detail:hover { opacity: 1; text-decoration: underline; }
+.landing-phase-detail[hidden] { display: none; }
+
+/* Collapsible chronological sub-step log, revealed by the toggle. */
+.landing-phase-log {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 4px 0 2px 10px;
+  border-left: 1px solid var(--border-soft);
+  font-size: 12px;
+  color: var(--text-2);
+  line-height: 1.7;
+}
+.landing-phase-log[hidden] { display: none; }
+.landing-phase-log li { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 /* In-progress: dot pulses cyan */
 .landing-phase.is-running { color: var(--text-2); }
@@ -844,6 +918,12 @@ body.pending-landing .statusbar { display: none !important; }
   opacity: 1;
   color: var(--text-2);
 }
+.landing-suggest-badge.is-draft {
+  opacity: 1;
+  color: var(--amber);
+  border-color: color-mix(in oklch, var(--amber) 35%, transparent);
+  text-transform: uppercase;
+}
 
 /* ============ Schematic upload field (optional PDF) ============
  * #landingSchematicField wraps a pick button (.landing-schematic-pick,
@@ -873,3 +953,16 @@ body.pending-landing .statusbar { display: none !important; }
 #landingSchematicField.is-ingested .landing-schematic-pick { display: none; }
 #landingSchematicField.is-ingested .landing-schematic-name { color: var(--emerald); }
 
+
+/* Lock free (mode managé, cloud_hints.packedOnly) — texte d'aide + CTA upgrade
+   sous le formulaire quand le start-diagnostic est verrouillé. */
+.landing-free-hint {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: var(--text-3);
+  line-height: 1.5;
+}
+.landing-free-hint a {
+  color: var(--teal, #64d2de);
+  text-decoration: underline;
+}

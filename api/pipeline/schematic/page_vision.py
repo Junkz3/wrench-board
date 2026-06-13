@@ -20,12 +20,28 @@ from anthropic import AsyncAnthropic
 
 from api.pipeline.schematic.renderer import RenderedPage
 from api.pipeline.schematic.schemas import SchematicPageGraph
-from api.pipeline.tool_call import call_with_forced_tool
+from api.pipeline.tool_call import call_with_forced_tool, effort_for_model
 
 logger = logging.getLogger("wrench_board.pipeline.schematic.page_vision")
 
 
 SUBMIT_PAGE_TOOL_NAME = "submit_schematic_page"
+
+# Token budget: 128k total (Opus 4.8 max output) = up to 24k thinking +
+# ~104k visible. Dense Apple pages (hundreds of nets) genuinely exceed the
+# old 64k cap → they hit stop_reason=max_tokens and TRUNCATED, silently
+# dropping real refdes/nets from the extraction (measured on a 92-page Mac
+# build: 14 pages pegged out=64000). On a diagnostic graph, truncation is
+# worse than the extra tokens — the cost is data we actually need. (V2:
+# also trim the SchematicPageGraph schema to cut redundant verbosity.)
+PAGE_MAX_TOKENS = 128000
+
+# Extended thinking: the model reasons before emitting the structured tool
+# call. Opus 4.7/4.8 only accept `adaptive` (the deprecated `enabled` type
+# returns 400), and the default `display` is "omitted" (silent) — opt back
+# into summarized blocks so observers see progress. Shared verbatim by the
+# direct path (via tool_call.py) and the batch-vision twin.
+PAGE_THINKING_PARAM = {"type": "adaptive", "display": "summarized"}
 
 
 SYSTEM_PROMPT = """You are an expert electronics technician and schematic analyst.
@@ -107,16 +123,19 @@ def _submit_page_tool() -> dict:
     }
 
 
-async def extract_page(
+def build_page_user_content(
     *,
-    client: AsyncAnthropic,
-    model: str,
     rendered: RenderedPage,
     total_pages: int,
     device_label: str | None = None,
     grounding: str | None = None,
-) -> SchematicPageGraph:
-    """Run the per-page vision call and return a validated SchematicPageGraph.
+) -> list[dict]:
+    """Build the user-message content blocks for one page's vision call.
+
+    Shared by the direct path (`extract_page`) and the batch twin
+    (`batch_vision.build_page_request`) so the two passes extract with the
+    byte-identical prompt — any drift here would mean the -50% batch pass
+    silently produces different-quality graphs.
 
     When `grounding` is provided, it is inlined into the user message as a
     truth set. The system prompt tells the model to only emit refdes, net
@@ -199,50 +218,117 @@ async def extract_page(
             "rather than guessing from adjacency alone."
         )
     user_content.append({"type": "text", "text": instruction})
+    return user_content
 
+
+def _system_cached() -> list[dict]:
     # Pass the system prompt as a cached content block so the burst of 12
     # page calls reuses the same 1.5k-token preamble via Anthropic's prompt
-    # cache. The tool definition on the next line carries its own cache
-    # marker — together they cover ~5-6k tokens of shared preamble.
-    system_cached = [
+    # cache. The tool definition carries its own cache marker — together
+    # they cover ~5-6k tokens of shared preamble.
+    return [
         {
             "type": "text",
             "text": SYSTEM_PROMPT,
             "cache_control": {"type": "ephemeral"},
         }
     ]
-    graph = await call_with_forced_tool(
-        client=client,
-        model=model,
-        system=system_cached,
-        messages=[{"role": "user", "content": user_content}],
-        tools=[_submit_page_tool()],
-        forced_tool_name=SUBMIT_PAGE_TOOL_NAME,
-        output_schema=SchematicPageGraph,
-        # Token budget: 64k total = up to 24k thinking + ~40k visible output.
-        # mnt-reform p2 baseline visible output was ~38.5k tokens; with 64k
-        # cap and 24k thinking budget, the actual visible budget is ~40k —
-        # fits p2 with ~1.5k margin. If p2 starts truncating again, dial
-        # thinking_budget back to 16k to free 8k more visible budget.
-        max_tokens=64000,
-        # Extended thinking: model reasons before emitting the structured
-        # tool_call. Adaptive thinking on Opus 4.7/4.8 (the deprecated
-        # `enabled` type returns 400). Adaptive is incompatible with
-        # forced tool_choice — tool_call.py auto-switches to
-        # tool_choice="auto" when thinking is on; the SYSTEM_PROMPT
-        # below tells the model to always emit the submit_schematic_page
-        # tool, so the effective behavior is identical.
-        thinking_budget=24000,
-        log_label=f"page_vision:page_{rendered.page_number}",
-    )
 
-    # The model occasionally fills `page` from its own prompt context; overwrite
-    # with the canonical value to guarantee downstream identity.
-    if graph.page != rendered.page_number:
+
+def build_page_vision_params(
+    *,
+    model: str,
+    rendered: RenderedPage,
+    total_pages: int,
+    device_label: str | None = None,
+    grounding: str | None = None,
+) -> dict:
+    """Full Messages-API params for one page's vision call — the batch twin.
+
+    Mirrors `call_with_forced_tool`'s FIRST attempt with thinking active
+    (tool_choice "auto": the API rejects thinking + forced tool; the system
+    prompt tells the model to always emit the tool). The retry tail of the
+    direct path (validation suffix, thinking→forced fallback) has no batch
+    equivalent — a failed batch page falls back to the direct path instead.
+    Guarded by a parity test that diffs these params against the kwargs the
+    direct path actually sends.
+    """
+    return {
+        "model": model,
+        "max_tokens": PAGE_MAX_TOKENS,
+        "system": _system_cached(),
+        "messages": [
+            {
+                "role": "user",
+                "content": build_page_user_content(
+                    rendered=rendered,
+                    total_pages=total_pages,
+                    device_label=device_label,
+                    grounding=grounding,
+                ),
+            }
+        ],
+        "tools": [_submit_page_tool()],
+        "tool_choice": {"type": "auto"},
+        "thinking": dict(PAGE_THINKING_PARAM),
+        "output_config": {"effort": effort_for_model(model)},
+    }
+
+
+def ensure_canonical_page(
+    graph: SchematicPageGraph, page_number: int
+) -> SchematicPageGraph:
+    """Force `graph.page` to the canonical page number.
+
+    The model occasionally fills `page` from its own prompt context; overwrite
+    with the canonical value to guarantee downstream identity.
+    """
+    if graph.page != page_number:
         logger.info(
             "Model emitted page=%d, overriding with canonical page=%d",
             graph.page,
-            rendered.page_number,
+            page_number,
         )
-        graph = graph.model_copy(update={"page": rendered.page_number})
+        graph = graph.model_copy(update={"page": page_number})
     return graph
+
+
+async def extract_page(
+    *,
+    client: AsyncAnthropic,
+    model: str,
+    rendered: RenderedPage,
+    total_pages: int,
+    device_label: str | None = None,
+    grounding: str | None = None,
+) -> SchematicPageGraph:
+    """Run the per-page vision call and return a validated SchematicPageGraph.
+
+    See `build_page_user_content` for the grounding semantics; the prompt and
+    knobs are shared with the batch pass via the builders above.
+    """
+    graph = await call_with_forced_tool(
+        client=client,
+        model=model,
+        system=_system_cached(),
+        messages=[
+            {
+                "role": "user",
+                "content": build_page_user_content(
+                    rendered=rendered,
+                    total_pages=total_pages,
+                    device_label=device_label,
+                    grounding=grounding,
+                ),
+            }
+        ],
+        tools=[_submit_page_tool()],
+        forced_tool_name=SUBMIT_PAGE_TOOL_NAME,
+        output_schema=SchematicPageGraph,
+        max_tokens=PAGE_MAX_TOKENS,
+        # The integer budget is unused under adaptive thinking (see
+        # tool_call.py) — non-None simply switches thinking on.
+        thinking_budget=24000,
+        log_label=f"page_vision:page_{rendered.page_number}",
+    )
+    return ensure_canonical_page(graph, rendered.page_number)

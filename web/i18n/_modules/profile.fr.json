@@ -53,7 +53,7 @@
   },
   "drawer": {
     "close": "Fermer",
-    "no_history": "Aucun historique pour cette compétence — elle sera tracée dès que l'agent détectera une utilisation confirmée."
+    "no_history": "Aucun historique pour cette compétence. Elle sera tracée dès que l'agent détectera une utilisation confirmée."
   },
   "prefs": {
     "verbosity": "Verbosité",

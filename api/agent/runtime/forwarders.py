@@ -25,6 +25,7 @@ from api.agent.chat_history import (
     touch_conversation,
 )
 from api.agent.owner_ref import current_owner_ref
+from api.agent.session_caps import current_can_expand
 from api.agent.pricing import compute_turn_cost
 from api.agent.runtime._aux import (
     TierLiteral,
@@ -327,8 +328,26 @@ async def _forward_ws_to_session(
                 from api.agent.chat_history import touch_status
 
                 touch_status(device_slug=device_slug, repair_id=repair_id, status="in_progress")
-        if ctx_tag:
-            text = ctx_tag + "\n\n" + text
+        # The board is a snapshot taken at WS open. The pre-dispatch refresh
+        # in `dispatch_tool` makes a mid-session import visible to bv_* calls,
+        # but an agent told "no board" at session start never CALLS bv_* — so
+        # re-resolve on every user turn and, when the active board actually
+        # changed, tell the agent inline. The note stacks under the ctx tag
+        # as one leading block that `strip_ctx_tag` removes from replays.
+        board_note: str | None = None
+        if session_state is not None and session_state.refresh_board_if_changed():
+            from api.agent.chat_history import build_board_refresh_note
+
+            board_note = build_board_refresh_note(
+                session_state.board, session_state.board_source
+            )
+            logger.info(
+                "[Diag-MA] board (re)loaded mid-session from %s",
+                session_state.board_source,
+            )
+        prefix = "\n".join(line for line in (ctx_tag, board_note) if line)
+        if prefix:
+            text = prefix + "\n\n" + text
         await client.beta.sessions.events.send(
             session_id,
             events=[
@@ -681,7 +700,7 @@ async def _forward_session_to_ws(
                             model=model_label,
                             memory_root=memory_root,
                         )
-                    # T13 — report this LLM call's raw token usage to the cloud
+                    # Report this LLM call's raw token usage to the cloud
                     # (the tenant-private billing unit). Best-effort + no-op when
                     # unconfigured (self-host never phones home). The catch-up
                     # replay path already `continue`d above on `_already_seen`, so
@@ -796,6 +815,30 @@ async def _forward_session_to_ws(
                     # research; the existing Registry + Clinicien validate
                     # and merge the chunk into rules.json.
                     if name == "mb_expand_knowledge":
+                        # Plan gate (defence in depth): the managed manifest is
+                        # baked at agent bootstrap, so a free tenant's agent may
+                        # still emit this call. Refuse here — no Curator session,
+                        # no Scout spend — and feed a typed result back so the
+                        # agent relays the limitation instead of stalling.
+                        if not current_can_expand():
+                            await client.beta.sessions.events.send(
+                                session_id,
+                                events=[{
+                                    "type": "user.custom_tool_result",
+                                    "custom_tool_use_id": eid,
+                                    "content": [{
+                                        "type": "text",
+                                        "text": _safe_tool_result_text({
+                                            "ok": False,
+                                            "expanded": False,
+                                            "reason": "plan_gated",
+                                            "error": "Pack enrichment requires a paid plan.",
+                                        }),
+                                    }],
+                                }],
+                            )
+                            responded_tool_ids.add(eid)
+                            continue
                         from api.pipeline.expansion import expand_pack
 
                         focus_symptoms = list(payload.get("focus_symptoms") or [])
@@ -818,9 +861,9 @@ async def _forward_session_to_ws(
                             )
 
                         try:
-                            # T8 : propage l'owner_ref de la session (curator
-                            # path) → added_by_tenant dans la provenance des
-                            # facts promus. Ferme le résidu de fuite T6.
+                            # Propagate the session's owner_ref (curator
+                            # path) → added_by_tenant in the provenance of the
+                            # promoted facts.
                             # (current_owner_ref is imported at module top.)
                             expand_result = await expand_pack(
                                 device_slug=device_slug,

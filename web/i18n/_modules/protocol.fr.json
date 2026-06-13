@@ -6,7 +6,7 @@
     "abandon": "Abandonner le protocole"
   },
   "title": {
-    "default": "—"
+    "default": "(sans titre)"
   },
   "history": {
     "summary": "historique"
@@ -29,7 +29,7 @@
       "yes": "oui",
       "no": "non",
       "done": "fait",
-      "empty": "—"
+      "empty": "n/a"
     }
   },
   "abandon": {
@@ -39,7 +39,7 @@
       "title": "Abandonner le protocole en cours ?",
       "body": "L'agent sera notifié et la séquence de diagnostic sera marquée comme abandonnée. Les résultats d'étapes déjà enregistrés restent dans l'historique du repair.",
       "reason_label": "Raison (optionnelle, transmise à l'agent)",
-      "reason_placeholder": "Pourquoi abandonner — mauvaise hypothèse, impasse, client parti, …",
+      "reason_placeholder": "Pourquoi abandonner ? (mauvaise hypothèse, impasse, client parti…)",
       "cancel": "Annuler",
       "confirm": "Oui, abandonner"
     }
@@ -50,12 +50,12 @@
   },
   "confirm": {
     "badge": "Protocole proposé",
-    "step_count_placeholder": "— étapes",
+    "step_count_placeholder": "nombre d'étapes",
     "step_count": "{n} étapes",
     "rationale_label": "Justification",
     "steps_label": "Étapes",
     "reject_reason_label": "Raison du refus (optionnel)",
-    "reject_reason_placeholder": "Pourquoi refuser ce protocole — l'agent en tiendra compte.",
+    "reject_reason_placeholder": "Pourquoi refuser ce protocole ? L'agent en tiendra compte.",
     "hint": "L'agent attend votre décision avant de pousser le protocole.",
     "reject": "Refuser",
     "accept": "Accepter"

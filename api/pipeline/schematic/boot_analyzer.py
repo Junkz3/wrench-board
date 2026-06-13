@@ -83,12 +83,38 @@ For each phase, emit:
 Identify the `sequencer_refdes` when one is visibly orchestrating the
 sequence (MCU referenced in notes, the refdes driving 3+ EN lines).
 
+The context may include an UNTRACED REFDES list: components with no
+pin-level connectivity traced from the schematic. These are usually
+section titles or block labels on power-alias pages, NOT verified placed
+parts. Do NOT list them in `components_entering` and do NOT pick one as
+`sequencer_refdes`; when their rails matter to a phase, keep the rails and
+record the unverified producer in `ambiguities` instead.
+
 Output every field of the AnalyzedBootSequence schema. Stay concise in
 narrative fields (one sentence per rationale, one quote per evidence).
 """
 
 
+def _untraced_refdes(graph: ElectricalGraph) -> list[str]:
+    return sorted(
+        refdes
+        for refdes, comp in graph.components.items()
+        if comp.evidence == "untraced"
+    )
+
+
+def _format_untraced(graph: ElectricalGraph, limit: int = 40) -> str:
+    untraced = _untraced_refdes(graph)
+    if not untraced:
+        return "(none)"
+    shown = ", ".join(untraced[:limit])
+    if len(untraced) > limit:
+        shown += f", … (+{len(untraced) - limit} more)"
+    return shown
+
+
 def _format_rails(graph: ElectricalGraph) -> str:
+    untraced = set(_untraced_refdes(graph))
     lines: list[str] = []
     for label, rail in sorted(graph.power_rails.items()):
         parts = [f"- {label}"]
@@ -96,6 +122,8 @@ def _format_rails(graph: ElectricalGraph) -> str:
             parts.append(f"({rail.voltage_nominal} V)")
         if rail.source_refdes:
             parts.append(f"source={rail.source_refdes}")
+            if rail.source_refdes in untraced:
+                parts.append("[UNTRACED]")
             if rail.source_type:
                 parts.append(f"[{rail.source_type}]")
         else:
@@ -170,6 +198,10 @@ COMPILED BOOT SEQUENCE (topological, needs refinement):
 
 POWER RAILS ({len(graph.power_rails)}):
 {_format_rails(graph)}
+
+UNTRACED REFDES (no pin-level connectivity traced — likely section titles or
+block labels, NOT verified placed parts; see system instructions):
+{_format_untraced(graph)}
 
 ENABLE / RESET / SIGNAL EDGES (from typed_edges):
 {_format_enable_edges(graph)}

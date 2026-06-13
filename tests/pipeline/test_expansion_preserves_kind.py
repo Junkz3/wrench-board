@@ -1,4 +1,4 @@
-"""Task 10 — device_kind threading + preservation across expansion.
+"""device_kind threading + preservation across expansion.
 
 Two checks:
   1. `RepairRequest` accepts a `device_kind` prior (free `str | None`).
@@ -71,7 +71,7 @@ def _seed_pack_with_kind(tmp_path: Path, slug: str, kind: str) -> Path:
         components=[RegistryComponent(canonical_name="U1", kind="IC")],
         signals=[RegistrySignal(canonical_name="VCC", kind="POWER_RAIL")],
     )
-    # pre-T8 layout — expand_pack's migrate_pack_if_needed promotes this flat
+    # pre-migration layout — expand_pack's migrate_pack_if_needed promotes this flat
     # root registry.json to baseline/ on first call.
     (pack / "registry.json").write_text(
         seed_registry.model_dump_json(indent=2), encoding="utf-8"
@@ -164,7 +164,7 @@ def _seed_pack_kind_only(tmp_path: Path, slug: str, kind: str) -> Registry:
         components=[RegistryComponent(canonical_name="U1", kind="IC")],
         signals=[RegistrySignal(canonical_name="VCC", kind="POWER_RAIL")],
     )
-    # pre-T8 layout — expand_pack's migrate_pack_if_needed promotes this flat
+    # pre-migration layout — expand_pack's migrate_pack_if_needed promotes this flat
     # root registry.json to baseline/ on first call.
     (pack / "registry.json").write_text(
         seed_registry.model_dump_json(indent=2), encoding="utf-8"

@@ -184,7 +184,7 @@ async def test_seed_records_per_file_upsert_failure(pack_dir, monkeypatch):
 
 
 # ---------------------------------------------------------------------------
-# Marker I/O tests (Task 1)
+# Marker I/O tests
 # ---------------------------------------------------------------------------
 
 from api.agent.memory_seed import (  # noqa: E402

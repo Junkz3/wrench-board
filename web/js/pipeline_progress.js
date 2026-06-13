@@ -63,7 +63,7 @@ const STATE = {
 function el(id) { return document.getElementById(id); }
 
 function fmtElapsed(sec) {
-  if (typeof sec !== "number" || !isFinite(sec)) return "—";
+  if (typeof sec !== "number" || !isFinite(sec)) return "…";
   if (sec < 1) return `${(sec * 1000).toFixed(0)} ms`;
   if (sec < 60) return `${sec.toFixed(1)} s`;
   const m = Math.floor(sec / 60);
@@ -83,7 +83,7 @@ function buildDrawer() {
       <span class="pp-dot" aria-hidden="true"></span>
       <div class="pp-title">
         <span class="lbl" data-i18n="pipeline.drawer.header_label">Building memory</span>
-        <span class="name" id="ppDeviceLabel">—</span>
+        <span class="name" id="ppDeviceLabel">…</span>
       </div>
       <button class="pp-close" id="ppClose"
               data-i18n-attr="aria-label:pipeline.drawer.close_aria"
@@ -256,6 +256,15 @@ function handleEvent(ev) {
       // or the first phase_started to flip the UI.
       break;
 
+    case "queued": {
+      // Build en attente derrière le cap de builds concurrents : position visible,
+      // décroît à mesure que la file se vide ; pipeline_started prendra le relais.
+      const position = ev.position || 1;
+      const ahead = ev.ahead != null ? ev.ahead : Math.max(0, position - 1);
+      setStatusKey("pipeline.status.queued", { position, ahead });
+      break;
+    }
+
     case "pipeline_started":
       setStatusKey("pipeline.status.started");
       break;
@@ -276,7 +285,7 @@ function handleEvent(ev) {
     case "pipeline_finished": {
       STATE.done = true;
       const score = typeof ev.consistency_score === "number"
-        ? ev.consistency_score.toFixed(2) : "—";
+        ? ev.consistency_score.toFixed(2) : "n/a";
       const status = ev.status || "APPROVED";
       setStatusKey("pipeline.status.ready", { status: escHtml(status), score }, "ok");
       showCta(

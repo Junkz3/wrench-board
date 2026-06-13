@@ -1,4 +1,4 @@
-"""T8 — CLI pack-admin list-expansions / show-expansion / promote-stub (Option C)."""
+"""CLI pack-admin list-expansions / show-expansion / promote-stub (Option C)."""
 
 from datetime import UTC, datetime
 from pathlib import Path

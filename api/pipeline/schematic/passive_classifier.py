@@ -2,7 +2,7 @@
 
 Same architecture as `net_classifier.py`:
 - `classify_passives_heuristic(graph)` — rule-driven, no LLM, always available.
-- `classify_passives_llm(graph, client, model)` — optional Opus enrichment (T18).
+- `classify_passives_llm(graph, client, model)` — optional Opus enrichment.
 - `classify_passives(graph, client=None)` — public entry point with graceful
   fallback.
 
@@ -118,7 +118,7 @@ def _classify_resistor(
 
 
 # ---------------------------------------------------------------------------
-# Capacitors / Diodes / Ferrites — stubs filled in T3
+# Capacitors / Diodes / Ferrites
 # ---------------------------------------------------------------------------
 
 def _classify_capacitor(

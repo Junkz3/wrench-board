@@ -1,0 +1,14 @@
+[build-system]
+requires = ["maturin>=1.2,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "wb_fz_cipher"
+version = "0.1.0"
+description = "Rust/PyO3 accelerator for the FZ-xor boardview cipher."
+requires-python = ">=3.11"
+
+[tool.maturin]
+# Module Rust pur (cdylib) — accélération OPTIONNELLE du moteur. Le moteur
+# garde un fallback Python pur, donc ce module n'est jamais une dépendance dure
+# (un self-hoster sans toolchain Rust fonctionne sans lui).

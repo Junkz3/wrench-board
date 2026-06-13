@@ -208,3 +208,23 @@ def test_analyzed_boot_phase_confidence_bounded():
             index=0, name="bad", kind="always-on",
             confidence=1.5,  # out of bounds
         )
+
+
+def test_context_surfaces_untraced_refdes():
+    graph = _sample_graph()
+    graph.components["U9000"] = ComponentNode(
+        refdes="U9000", type="ic", pages=[79], evidence="untraced"
+    )
+    graph.power_rails["+9V"] = PowerRail(
+        label="+9V", source_refdes="U9000", consumers=["U12"]
+    )
+    ctx = build_context(graph)
+    assert "UNTRACED REFDES" in ctx
+    assert "U9000" in ctx
+    assert "source=U9000 [UNTRACED]" in ctx
+
+
+def test_context_untraced_block_empty_when_all_traced():
+    ctx = build_context(_sample_graph())
+    assert "UNTRACED REFDES" in ctx
+    assert "(none)" in ctx

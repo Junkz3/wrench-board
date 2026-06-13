@@ -44,14 +44,14 @@ def _seed_pack(tmp_path: Path, slug: str) -> Path:
     seed_registry = Registry(
         device_label="Test Device",
         taxonomy=DeviceTaxonomy(brand="TestCo", model="Thing"),
-        # T8 : kind en majuscules, canonical_name uppercase
+        # kind en majuscules, canonical_name uppercase
         components=[RegistryComponent(canonical_name="U1", kind="IC")],
         signals=[RegistrySignal(canonical_name="VCC", kind="POWER_RAIL")],
     )
     (pack / "registry.json").write_text(seed_registry.model_dump_json(indent=2), encoding="utf-8")
     seed_rules = RulesSet(rules=[
         Rule(
-            # T8 : Rule.id suit le pattern R-[A-Z0-9_-]{1,48}
+            # Rule.id suit le pattern R-[A-Z0-9_-]{1,48}
             id="R-EXISTING-001",
             symptoms=["prior symptom"],
             likely_causes=[Cause(refdes="U1", probability=0.5, mechanism="short")],
@@ -71,7 +71,7 @@ async def test_expand_pack_merges_new_components_and_rules(tmp_path, monkeypatch
     expanded_registry = Registry(
         device_label="Test Device",
         taxonomy=DeviceTaxonomy(brand="TestCo", model="Thing"),
-        # T8 : kind en majuscules, canonical_name uppercase
+        # kind en majuscules, canonical_name uppercase
         components=[
             RegistryComponent(canonical_name="U1", kind="IC"),
             RegistryComponent(canonical_name="U3101", kind="IC"),
@@ -84,7 +84,7 @@ async def test_expand_pack_merges_new_components_and_rules(tmp_path, monkeypatch
 
     expanded_rules = RulesSet(rules=[
         Rule(
-            # T8 : Rule.id suit le pattern R-[A-Z0-9_-]{1,48}
+            # Rule.id suit le pattern R-[A-Z0-9_-]{1,48}
             id="R-EXISTING-001",
             symptoms=["prior symptom"],
             likely_causes=[Cause(refdes="U1", probability=0.5, mechanism="short")],
@@ -122,9 +122,9 @@ async def test_expand_pack_merges_new_components_and_rules(tmp_path, monkeypatch
     assert summary["new_signals_count"] == 1     # VCC_AUDIO
     assert summary["total_rules_after"] == 2
     assert summary["dump_bytes_added"] > 0
-    assert summary["expansion_id"].startswith("E-")  # T8 Option C
+    assert summary["expansion_id"].startswith("E-")  # Option C
 
-    # T8 Option C : le DELTA part dans promoted/, PAS à la racine (migrée en
+    # Option C : le DELTA part dans promoted/, PAS à la racine (migrée en
     # baseline/). Seuls les facts nouveaux/modifiés vs baseline sont écrits.
     assert not (pack / "registry.json").exists()
     assert not (pack / "rules.json").exists()
@@ -181,13 +181,13 @@ async def test_expand_pack_preserves_taxonomy_when_regenerate_returns_blank(
     blank_tax_registry = Registry(
         device_label="Test Device",
         taxonomy=DeviceTaxonomy(),  # all null
-        # T8 : kind en majuscules
+        # kind en majuscules
         components=[RegistryComponent(canonical_name="U1", kind="IC")],
         signals=[RegistrySignal(canonical_name="VCC", kind="POWER_RAIL")],
     )
     same_rules = RulesSet(rules=[
         Rule(
-            # T8 : Rule.id suit le pattern R-[A-Z0-9_-]{1,48}
+            # Rule.id suit le pattern R-[A-Z0-9_-]{1,48}
             id="R-EXISTING-001",
             symptoms=["prior symptom"],
             likely_causes=[Cause(refdes="U1", probability=0.5, mechanism="short")],
@@ -210,7 +210,7 @@ async def test_expand_pack_preserves_taxonomy_when_regenerate_returns_blank(
             memory_root=tmp_path,
         )
 
-    # T8 Option C : la taxonomy registry-level vit dans baseline/registry.json _meta
+    # Option C : la taxonomy registry-level vit dans baseline/registry.json _meta
     # (la migration y range les clés non-liste) et n'est JAMAIS réécrite par
     # l'expansion → préservée par construction. La re-run blank-taxonomy ne peut
     # plus la clobber. _prior_taxonomy() la réinjecte aussi dans le Registry vu

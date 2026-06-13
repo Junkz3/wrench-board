@@ -82,7 +82,7 @@
     "bubble": "Here's the idea: each repair is a persistent session, like a ticket you can leave and come back to. When you name a device, I research it, build its knowledge sheet, then open the diagnostic right here."
   },
   "example": {
-    "bubble": "Want to see it on a real board first? I've got a full example on hand — the MNT Reform motherboard. Let me give you a quick tour, then you'll run your own.",
+    "bubble": "Want to see it on a real board first? I've got a full example on hand: the MNT Reform motherboard. Let me give you a quick tour, then you'll run your own.",
     "cta": "Show me the example"
   },
   "firstdiag": {
@@ -133,10 +133,10 @@
     "repair": {
       "title": "How a repair works",
       "intro": "A repair is a persistent session: I learn your device, then walk the diagnostic with you.",
-      "p1": "Knowledge sheet: when you name a device I research it and build its electrical knowledge base — that's the timeline you saw on launch.",
+      "p1": "Knowledge sheet: when you name a device I research it and build its electrical knowledge base (the timeline you saw on launch).",
       "p2": "Views: the rail on the left switches between the diagnostic dashboard, the PCB boardview, the schematic and the knowledge graph.",
       "p3": "Capabilities grow with data: load a schematic or boardview and I unlock the simulator, hypotheses and pad-level reasoning.",
-      "p4": "Diagnose by talking: describe the symptom and your measurements in the chat — I propose protocols, suspects and the next step, logging findings as we go."
+      "p4": "Diagnose by talking: describe the symptom and your measurements in the chat. I propose protocols, suspects and the next step, logging findings as we go."
     }
   },
   "tour": {
@@ -147,33 +147,33 @@
     "skip": "Skip the tour",
     "done": "Got it",
     "demo_done": "Got it, my turn",
-    "session": "You're in a repair now — a session that sticks around; leave it and come back anytime. I've just analyzed this device: schematic, components, power rails, all in memory.",
-    "cap": "Here's what I can do on this board right now. The more you give me — a schematic, a boardview — the higher the score climbs and the more tools unlock.",
-    "cards": "The device data I've gathered. You can add to it — a schematic or a boardview — to go deeper.",
+    "session": "You're in a repair now: a persistent session you can leave and come back to anytime. I've just analyzed this device: schematic, components, power rails, all in memory.",
+    "cap": "Here's what I can do on this board right now. The more you give me (a schematic, a boardview), the higher the score climbs and the more tools unlock.",
+    "cards": "The device data I've gathered. You can add to it (a schematic or a boardview) to go deeper.",
     "pcb": "PCB view: your actual board. Highlight a part and I isolate its pads, its net and what sits around it.",
-    "demo_pcb": "PCB view — the real MNT Reform. I've lit up U14, the regulator that puts out the standby 3V3 rail: typically the first part you probe when a board won't power on.",
-    "schematic": "Schematic view: the navigable electrical schematic — the base for the simulator and fault hypotheses.",
-    "demo_schematic": "Schematic view: I click the LPC_VCC rail (the standby supply) — the schematic isolates the rail and its whole cascade. That's how I trace a fault back to its cause.",
-    "graph": "Memory view: the whole board as a graph — components, links and the rules I've inferred.",
-    "demo_graph": "Memory view: everything I know about this board, as a graph. I click a node — the right-hand panel unfolds the detail: what it is, the confidence, and how it links to the rest.",
-    "demo_graph_raw": "And the Raw tab: the same memory as text — rules, facts, observations. That's my raw material: this is what I reason over to diagnose.",
+    "demo_pcb": "PCB view: the real MNT Reform. I've lit up U14, the regulator that puts out the standby 3V3 rail, typically the first part you probe when a board won't power on.",
+    "schematic": "Schematic view: the navigable electrical schematic, the base for the simulator and fault hypotheses.",
+    "demo_schematic": "Schematic view: I click the LPC_VCC rail (the standby supply). The schematic isolates the rail and its whole cascade. That's how I trace a fault back to its cause.",
+    "graph": "Memory view: the whole board as a graph (components, links and the rules I've inferred).",
+    "demo_graph": "Memory view: everything I know about this board, as a graph. I click a node: the right-hand panel unfolds the detail (what it is, the confidence, and how it links to the rest).",
+    "demo_graph_raw": "And the Raw tab: the same memory as text (rules, facts, observations). That's my raw material, this is what I reason over to diagnose.",
     "chat": "To diagnose, just talk to me: describe the symptom and your measurements, and I'll guide you step by step.",
-    "demo_chat": "The heart of it: you describe your fault, the agent diagnoses. Watch a real case — step by step.",
+    "demo_chat": "The heart of it: you describe your fault, the agent diagnoses. Watch a real case, step by step.",
     "demo_play": "Watch the agent work",
     "demo_q1": "Walk me through this board's power-up sequence: which rails come up, in what order. Show it on the board.",
-    "demo_c1_explore": "You ask your question. The agent reads what it already knows about this board — schematic, components, power rails.",
+    "demo_c1_explore": "You ask your question. The agent reads what it already knows about this board: schematic, components, power rails.",
     "demo_c1_board": "It draws the sequence right on the board: the power cascade, from the input connector all the way to the CPU module, with arrows and labels.",
-    "demo_c1_done": "And it explains it phase by phase — which regulator wakes which rail, in what order. That's what knowing a board looks like.",
-    "demo_switch": "Now watch: I open the conversation switcher and create a new one. The previous thread is set aside and the board clears — but the agent keeps this device in memory.",
-    "demo_conv1_title": "MNT Reform — power-up sequence",
+    "demo_c1_done": "And it explains it phase by phase: which regulator wakes which rail, in what order. That's what knowing a board looks like.",
+    "demo_switch": "Now watch: I open the conversation switcher and create a new one. The previous thread is set aside and the board clears, but the agent keeps this device in memory.",
+    "demo_conv1_title": "MNT Reform: power-up sequence",
     "demo_new_conv_title": "New conversation",
-    "demo_q2": "The board is dead — no rail, no LED. Diagnose it and give me a measurement protocol.",
+    "demo_q2": "The board is dead: no rail, no LED. Diagnose it and give me a measurement protocol.",
     "demo_c2_diag": "New conversation, new fault: \"dead board\". The agent explores the memory, validates the components, and lays out its reasoning: the input chain J1 → F1 → VIN → U14.",
-    "demo_c2_protocol": "It draws the chain on the board and proposes a 6-step measurement protocol — safety first: we start cold, nothing plugged in.",
+    "demo_c2_protocol": "It draws the chain on the board and proposes a 6-step measurement protocol. Safety first: we start cold, nothing plugged in.",
     "demo_c2_cold": "Cold and risk-free: fuse F1 is good, and there's no short on VIN. Two leads ruled out.",
     "demo_c2_power": "Now powered: the 24 V from the adapter does reach the board.",
     "demo_c2_u14": "VIN is healthy all the way to the system bus → the agent pivots its suspect to U14, the 3.3 V standby regulator, and shows you where to probe.",
-    "demo_c2_verdict": "The twist: U14 does output 3.3 V. Every supply rail is healthy! It's not a dead board — it's a sequencing issue. Measure, then revise the hypothesis: that's a good diagnostic.",
-    "demo_after": "That's a full diagnostic — reasoning, board annotations, a measurement protocol, a verdict. Your turn: describe your fault and I'll do the same on your board."
+    "demo_c2_verdict": "The twist: U14 does output 3.3 V. Every supply rail is healthy! It's not a dead board, it's a sequencing issue. Measure, then revise the hypothesis: that's a good diagnostic.",
+    "demo_after": "That's a full diagnostic: reasoning, board annotations, a measurement protocol, a verdict. Your turn: describe your fault and I'll do the same on your board."
   }
 }

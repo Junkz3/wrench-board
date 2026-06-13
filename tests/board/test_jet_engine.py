@@ -24,15 +24,12 @@ from __future__ import annotations
 
 import struct
 
-import pytest
-
 from api.board.parser._jet_engine import (
     catalog,
     pages,
     read_jet_tables,
     rows,
 )
-
 
 # ---------------------------------------------------------------------------
 # Hand-built page helpers

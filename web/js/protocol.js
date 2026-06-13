@@ -229,7 +229,7 @@ export function showConfirmation(ev) {
 
   const t = window.t || ((k) => k);
   if (titleEl) titleEl.textContent = decodeEscapes(ev.title || t("protocol.confirm.badge"));
-  if (rationaleEl) rationaleEl.textContent = decodeEscapes(ev.rationale || "—");
+  if (rationaleEl) rationaleEl.textContent = decodeEscapes(ev.rationale || "…");
   if (countEl) {
     const n = Number(ev.step_count || (ev.steps || []).length || 0);
     countEl.textContent = t("protocol.confirm.step_count", { n });

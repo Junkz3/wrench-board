@@ -43,7 +43,6 @@ Derived: layout recovered from real files + cross-checked against
 from __future__ import annotations
 
 import struct
-
 from collections import defaultdict
 
 from api.board.parser._jet_engine.pages import JET4_PAGE_SIZE, page_count

@@ -196,7 +196,7 @@ async def _ensure_pages_rendered(
     found. The rasterisation is pushed to a thread so the event loop isn't
     blocked while `pdftoppm` runs (~1s/page at 150 DPI).
 
-    T9 — per-owner: when `owner_ref` is set, the pages resolve to the tenant's
+    Per-owner: when `owner_ref` is set, the pages resolve to the tenant's
     active PDF cache (.cache_schematic/{hash}/schematic_pages/) keyed off the
     owner pin; the source PDF and rendered PNGs both live in that cache base.
     A managed tenant with no active schematic returns None → 404. owner None
@@ -296,7 +296,7 @@ async def get_pack_schematic_page_png(
 
     `page_n` is the 1-based page number; filename on disk is zero-padded to
     match pdftoppm's output (`page-01.png`). Lazy-renders the full pack if
-    the PNGs aren't on disk yet. T9 — per-owner via X-Owner-Ref.
+    the PNGs aren't on disk yet. Per-owner via X-Owner-Ref.
     """
     settings = _pkg.get_settings()
     slug = _slugify(device_slug)
@@ -339,7 +339,7 @@ async def get_pack_schematic(
     `boot_sequence_source` flag (`"analyzer"` or `"compiler"`) so the UI can
     badge the timeline appropriately.
 
-    T9 — per-owner: the cloud proxy injects `X-Owner-Ref` (= tenant_id); the
+    Per-owner: the cloud proxy injects `X-Owner-Ref` (= tenant_id); the
     graph + its overlays resolve to the tenant's active PDF cache. Absent
     header (self-host) → the slug root, unchanged.
     """
@@ -348,7 +348,7 @@ async def get_pack_schematic(
     pack_dir = Path(settings.memory_root) / slug
     if not pack_dir.exists():
         raise HTTPException(status_code=404, detail=f"No pack for device_slug={slug!r}")
-    base = live_graph.resolve_graph_dir(pack_dir, x_owner_ref)   # graphe = moat partagé (fallback canonique)
+    base = live_graph.resolve_graph_dir(pack_dir, x_owner_ref)   # graphe = graphe partagé (fallback canonique)
     graph_path = base / "electrical_graph.json" if base is not None else None
     if graph_path is None or not graph_path.exists():
         raise HTTPException(
@@ -512,7 +512,7 @@ async def get_pack_schematic_boot(
     timeline view the UI only needs rails and phases, so this route strips
     the heavy `components` / `nets` / `typed_edges` arrays server-side.
 
-    T9 — per-owner: resolves to the tenant's active PDF graph via X-Owner-Ref.
+    Per-owner: resolves to the tenant's active PDF graph via X-Owner-Ref.
     """
     settings = _pkg.get_settings()
     slug = _slugify(device_slug)
@@ -548,7 +548,7 @@ async def get_schematic_passives(
     classifier and for hand-written fixture generators to look up candidate
     refdes without deserializing the entire electrical_graph.json.
 
-    T9 — per-owner: resolves to the tenant's active PDF graph via X-Owner-Ref.
+    Per-owner: resolves to the tenant's active PDF graph via X-Owner-Ref.
     """
     settings = _pkg.get_settings()
     slug = _slugify(device_slug)
@@ -594,11 +594,11 @@ async def post_simulate(
     boards). HTTP context is stateless — no probe_route enrichment
     here; clients that need a route go through the agent WS path.
 
-    T9 — per-owner: resolves to the tenant's active PDF graph via X-Owner-Ref.
+    Per-owner: resolves to the tenant's active PDF graph via X-Owner-Ref.
     """
     settings = _pkg.get_settings()
     slug = _slugify(device_slug)
-    base = live_graph.resolve_graph_dir(Path(settings.memory_root) / slug, x_owner_ref)   # graphe = moat partagé (fallback canonique)
+    base = live_graph.resolve_graph_dir(Path(settings.memory_root) / slug, x_owner_ref)   # graphe = graphe partagé (fallback canonique)
     graph_path = base / "electrical_graph.json" if base is not None else None
     if graph_path is None or not graph_path.exists():
         raise HTTPException(
@@ -662,7 +662,7 @@ async def post_hypothesize(
     Same contract as mb_hypothesize tool. 400 on unknown refdes / rail,
     404 when no electrical_graph is on disk.
 
-    T9 — per-owner: the cloud proxy injects `X-Owner-Ref` (= tenant_id); the
+    Per-owner: the cloud proxy injects `X-Owner-Ref` (= tenant_id); the
     electrical graph is resolved to that tenant's active PDF (owner None →
     slug root, self-host). The measurement journal stays at the slug root.
     """

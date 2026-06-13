@@ -1,4 +1,4 @@
-"""T9 — l'outil agent résout le graphe du bon owner (current_owner_ref ContextVar).
+"""L'outil agent résout le graphe du bon owner (current_owner_ref ContextVar).
 
 Le READ path per-owner : `_load_graph` doit résoudre owner→hash→cache partagé
 via `current_owner_ref()`, pas lire la racine du slug. Deux tenants épinglés sur
@@ -52,7 +52,7 @@ def test_load_graph_resolves_per_owner(tmp_path: Path) -> None:
 
 
 def test_load_graph_managed_no_pin_falls_back_to_canonical(tmp_path: Path) -> None:
-    """Tenant managé sans pin → graphe CANONIQUE partagé du slug (moat T6) :
+    """Tenant managé sans pin → graphe CANONIQUE partagé du slug (graphe partagé) :
     _load_graph renvoie le graphe racine, pas 'no_schematic_graph'. (Un uploader
     a son graphe per-owner — cf. test_load_graph_resolves_per_owner.)"""
     pack = tmp_path / "iphone-x"

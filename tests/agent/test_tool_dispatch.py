@@ -158,3 +158,51 @@ def test_tool_context_field_order_matches_runtime_managed_shim():
         "session_mirrors",
         "conv_id",
     ]
+
+
+@pytest.mark.asyncio
+async def test_mb_expand_knowledge_refused_when_plan_gated(tmp_path: Path, monkeypatch):
+    """Defence in depth: even if mb_expand_knowledge reaches the dispatcher
+    (a baked managed manifest, or a stray call), a free session (can_expand
+    False) is refused with a typed result and NO expand_pack spend."""
+    from api.agent.session_caps import set_can_expand
+
+    set_can_expand(False)
+    try:
+        # expand_pack must never be reached — patch it to blow up if it is.
+        import api.pipeline.expansion as expansion
+        monkeypatch.setattr(
+            expansion, "expand_pack",
+            lambda *a, **k: (_ for _ in ()).throw(AssertionError("expand_pack must not run when plan-gated")),
+        )
+        result = await dispatch_tool(
+            "mb_expand_knowledge",
+            {"focus_symptoms": ["no boot"]},
+            _ctx(tmp_path),
+        )
+    finally:
+        set_can_expand(True)
+
+    assert result["ok"] is False
+    assert result["reason"] == "plan_gated"
+
+
+@pytest.mark.asyncio
+async def test_mb_expand_knowledge_allowed_when_capable(tmp_path: Path, monkeypatch):
+    """A capable session (Pro / self-host) reaches expand_pack."""
+    from api.agent.session_caps import set_can_expand
+    from unittest.mock import AsyncMock
+
+    set_can_expand(True)
+    import api.pipeline.expansion as expansion
+    monkeypatch.setattr(
+        expansion, "expand_pack",
+        AsyncMock(return_value={"new_rules_count": 1, "total_rules_after": 2}),
+    )
+    result = await dispatch_tool(
+        "mb_expand_knowledge",
+        {"focus_symptoms": ["no boot"]},
+        _ctx(tmp_path),
+    )
+    assert result.get("reason") != "plan_gated"
+    assert result["ok"] is True

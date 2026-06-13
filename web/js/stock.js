@@ -70,7 +70,7 @@ function typeChip(type) {
 }
 
 function roleChip(role, safety) {
-  if (!role) return `<span class="role-chip role-unknown" title="${t("stock.col_role")}">—</span>`;
+  if (!role) return `<span class="role-chip role-unknown" title="${t("stock.col_role")}">(none)</span>`;
   return `<span class="role-chip safety-${safety || "exact_only"}">${escapeHtml(role)}</span>`;
 }
 
@@ -199,12 +199,12 @@ function _renderHarvestRows() {
       <td><input type="checkbox" data-refdes="${escapeHtml(p.refdes)}" ${p.available ? "" : "checked"}></td>
       <td class="mono refdes">${escapeHtml(p.refdes)}</td>
       <td>${typeChip(p.type)}</td>
-      <td class="mono value">${escapeHtml(p.value_canonical || "—")}</td>
-      <td class="mono pkg">${escapeHtml(p.package || "—")}</td>
+      <td class="mono value">${escapeHtml(p.value_canonical || "…")}</td>
+      <td class="mono pkg">${escapeHtml(p.package || "…")}</td>
       <td class="mono mpn dim">${escapeHtml(p.mpn || "")}</td>
       <td>${roleChip(p.role_in_design, p.safety_class)}</td>
       <td>${critDot(p.criticality_in_design)}</td>
-      <td class="mono pages dim">${(p.pages || []).join(",") || "—"}</td>
+      <td class="mono pages dim">${(p.pages || []).join(",") || "…"}</td>
     </tr>
   `).join("");
 
@@ -365,10 +365,10 @@ function renderSearchResults(res) {
               <tr>
                 <td class="mono refdes">${escapeHtml(m.refdes)}</td>
                 <td>${typeChip(m.type || "")}</td>
-                <td class="mono value">${escapeHtml(m.value_canonical || "—")}</td>
-                <td class="mono pkg">${escapeHtml(m.package || "—")}</td>
+                <td class="mono value">${escapeHtml(m.value_canonical || "…")}</td>
+                <td class="mono pkg">${escapeHtml(m.package || "…")}</td>
                 <td class="mono donor">${escapeHtml(m.donor_label)}</td>
-                <td class="mono pages dim">${(m.pages || []).join(",") || "—"}</td>
+                <td class="mono pages dim">${(m.pages || []).join(",") || "…"}</td>
                 <td>${critDot(m.criticality_in_donor)}</td>
                 <td><button class="btn-sm" data-mark-consumed
                             data-donor="${escapeHtml(m.donor_id)}"
@@ -566,7 +566,7 @@ async function showAddDonorDialog() {
 
   function suggestLabel(deviceLabel) {
     const date = new Date().toISOString().slice(0, 10);
-    return `${deviceLabel} — ${t("stock.label_donor_suffix")} ${date}`;
+    return `${deviceLabel} · ${t("stock.label_donor_suffix")} ${date}`;
   }
 
   function selectDevice(slug, label) {

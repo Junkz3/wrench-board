@@ -1,7 +1,7 @@
-"""T13 — the engine reports per-LLM-call agent token usage back to the cloud.
+"""The engine reports per-LLM-call agent token usage back to the cloud.
 
 The diagnostic agent's token cost is the tenant-private billing unit (the
-shared pipeline pack build is the amortized moat, not metered here). At each
+shared pipeline pack build is the amortized shared graph, not metered here). At each
 `span.model_request_end` the live forwarder fires a best-effort POST to the
 cloud's `/internal/metering/diagnostic` endpoint. It must:
 
@@ -111,6 +111,7 @@ async def test_report_turn_usage_posts_contract_with_bearer(monkeypatch):
     assert captured["json"] == {
         "owner_ref": "tenant-1",
         "model": "claude-opus-4-8",
+        "kind": "agent",  # default — build reports pass kind='build' explicitly
         "input_tokens": 1000,
         "output_tokens": 200,
         "cache_read_input_tokens": 0,
@@ -218,5 +219,5 @@ async def test_fire_and_forget_schedules_report_when_enabled(monkeypatch):
         owner_ref="tenant-1", model="claude-opus-4-8",
         input_tokens=1000, output_tokens=200,
         cache_read_input_tokens=0, cache_creation_input_tokens=0,
-        engine_repair_id="rep-1", event_id="sesn:evt-1",
+        engine_repair_id="rep-1", event_id="sesn:evt-1", kind="agent",
     )

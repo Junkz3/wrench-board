@@ -1,4 +1,4 @@
-"""T9 — résiduels : _known_refdes (validation) + _lookup_comp_kind (measurements)
+"""Résiduels : _known_refdes (validation) + _lookup_comp_kind (measurements)
 lisent le graphe du bon owner (current_owner_ref ContextVar), pas la racine du slug.
 
 Deux tenants épinglés sur deux PDF distincts (hA / hB) du MÊME slug : chacun voit
@@ -71,7 +71,7 @@ def test_known_refdes_resolves_per_owner(tmp_path: Path) -> None:
 
 
 def test_known_refdes_managed_no_pin_falls_back_to_canonical(tmp_path: Path) -> None:
-    """Tenant managé sans pin → graphe CANONIQUE partagé du slug (moat T6) : les
+    """Tenant managé sans pin → graphe CANONIQUE partagé du slug (graphe partagé) : les
     refdes du graphe racine sont connus (diag d'une carte connue sans upload). Un
     uploader garde son graphe per-owner (cf. test_lookup_comp_kind_resolves_per_owner)."""
     pack = tmp_path / "iphone-x"
@@ -127,7 +127,7 @@ def test_lookup_comp_kind_resolves_per_owner(tmp_path: Path) -> None:
 
 
 def test_lookup_comp_kind_managed_no_pin_falls_back_to_canonical(tmp_path: Path) -> None:
-    """Sans pin → lit le graphe canonique partagé (moat) : U_ROOT y est connu."""
+    """Sans pin → lit le graphe canonique partagé (graphe partagé) : U_ROOT y est connu."""
     pack = tmp_path / "iphone-x"
     pack.mkdir()
     (pack / "electrical_graph.json").write_text(json.dumps(_graph("U_ROOT", "ic")))

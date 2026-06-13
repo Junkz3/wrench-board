@@ -22,6 +22,7 @@ from api.agent.chat_history import (
     save_ma_session_id,
 )
 from api.agent.owner_ref import set_owner_ref
+from api.agent.session_caps import set_can_expand
 from api.agent.runtime import _aux
 from api.agent.runtime._aux import (
     DEFAULT_TIER,
@@ -51,6 +52,7 @@ async def run_diagnostic_session_managed(
     repair_id: str | None = None,
     conv_id: str | None = None,
     owner_ref: str | None = None,
+    can_expand: bool = True,
 ) -> None:
     """Open a Managed Agents session on the tier-scoped agent and relay it to `ws`.
 
@@ -74,6 +76,7 @@ async def run_diagnostic_session_managed(
     session to its tenant so owner-sensitive tools (stock) stay isolated.
     """
     set_owner_ref(owner_ref)
+    set_can_expand(can_expand)
     settings = _rm.get_settings()
     if not settings.anthropic_api_key:
         await ws.accept()
@@ -670,11 +673,21 @@ async def run_diagnostic_session_managed(
             conv_id=resolved_conv_id,
         )
     else:
+        from api.agent.cousin_hint import build_cousin_line
+        from api.agent.manifest import _has_electrical_graph
         from api.agent.recovery_state import build_repair_state_block
         from api.profile.prompt import render_technician_block
         from api.profile.store import load_profile
 
         device_intro = build_session_intro(device_slug=device_slug, repair_id=repair_id)
+        # When this board has no schematic of its own, point the agent
+        # at a same-family sibling pack as an indicative fallback (parity with the
+        # direct runtime, which injects this into its system prompt). Best-effort.
+        cousin_block = (
+            await build_cousin_line(device_slug)
+            if not _has_electrical_graph(device_slug)
+            else None
+        )
         tech_block = render_technician_block(load_profile(owner_ref))
         # Hard-fact snapshot from disk (measurements + protocol + outcome).
         # Surfaces what the tech actually has on record so a fresh MA agent
@@ -689,6 +702,8 @@ async def run_diagnostic_session_managed(
         parts: list[str] = []
         if device_intro:
             parts.append(device_intro)
+        if cousin_block:
+            parts.append(cousin_block)
         if state_block:
             parts.append(state_block)
         parts.append(f"[TECHNICIAN CONTEXT]\n{tech_block}")

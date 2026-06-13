@@ -81,7 +81,7 @@ class Settings(BaseSettings):
         ),
     )
 
-    # --- Cloud token-usage metering (T13) -------------------------------------
+    # --- Cloud token-usage metering -------------------------------------------
     # When the engine runs behind wrenchboard-cloud, each diagnostic-agent LLM
     # call best-effort reports its raw token usage to the cloud's metering
     # endpoint (the cloud prices it per-tenant and keeps the billing ledger).
@@ -103,6 +103,28 @@ class Settings(BaseSettings):
         description=(
             "Bearer service token sent on cloud metering reports. Must match the "
             "cloud's ENGINE_SERVICE_TOKEN. Empty disables reporting (self-host)."
+        ),
+    )
+
+    # --- Cloud device registry (the "carnet") ---------------------------------
+    # When set with cloud_device_registry_token, the device alias registry is
+    # backed by the cloud's Postgres (source of truth in managed mode) via
+    # {url}/internal/device-registry/*. Unset → the engine uses a local JSON
+    # store (self-host accumulates its own carnet). Same shared service token as
+    # cloud_metering (the cloud validates it as ENGINE_SERVICE_TOKEN).
+    cloud_device_registry_url: str = Field(
+        default="",
+        description=(
+            "Base URL of the wrenchboard-cloud. When set with "
+            "cloud_device_registry_token, the device alias registry reads/writes "
+            "{url}/internal/device-registry/*. Empty → local JSON store (self-host)."
+        ),
+    )
+    cloud_device_registry_token: str = Field(
+        default="",
+        description=(
+            "Bearer service token for the cloud device-registry API. Must match "
+            "the cloud's ENGINE_SERVICE_TOKEN. Empty → local JSON store."
         ),
     )
 
@@ -130,18 +152,116 @@ class Settings(BaseSettings):
         ),
     )
 
+    pipeline_vision_batch: bool = Field(
+        default=False,
+        description=(
+            "Operator flag: run the per-page schematic vision pass through the "
+            "Anthropic Message Batches API instead of direct streamed calls. "
+            "Same model, same prompt, same output — 50% of the token price — in "
+            "exchange for asynchronous completion (usually <1h, hard-bounded at "
+            "24h by the API). Meant for offline catalogue pre-builds, NOT for "
+            "tenant-facing builds where someone watches the timeline. Pages "
+            "that fail inside the batch (errored entry, invalid payload) fall "
+            "back to the direct path with its full retry machinery, at full "
+            "price. Env: PIPELINE_VISION_BATCH."
+        ),
+    )
+    pipeline_vision_batch_poll_seconds: float = Field(
+        default=30.0,
+        ge=0.0,
+        le=600.0,
+        description=(
+            "Polling interval while waiting for a vision batch to reach "
+            "processing_status=ended. Batches usually complete in minutes to "
+            "an hour; 30s keeps logs readable without hammering the API."
+        ),
+    )
+    pipeline_vision_batch_timeout_seconds: float = Field(
+        default=86400.0,
+        ge=0.0,
+        description=(
+            "Hard deadline on the batch wait. Defaults to the API's own 24h "
+            "processing bound; on expiry the remote batches are cancelled and "
+            "the ingest fails (a re-run rides the per-page caches of any "
+            "pages that DID complete)."
+        ),
+    )
+    pipeline_vision_batch_max_bytes: int = Field(
+        default=180_000_000,
+        ge=1_000_000,
+        description=(
+            "Per-batch payload budget used to chunk page requests into "
+            "multiple batches. The API caps a batch at 256 MB; base64 PNGs of "
+            "a long dense schematic (92-page Mac at 200 dpi) can exceed that, "
+            "so we stay comfortably under, with headroom for prompt text + "
+            "JSON envelope overhead."
+        ),
+    )
+
+    pipeline_max_concurrent_builds: int = Field(
+        default=2,
+        ge=0,
+        description=(
+            "Hard cap on concurrent schematic→graph pipeline builds — the RAM- and "
+            "cost-heavy path (~hundreds of MB + LLM tokens each). At capacity a new "
+            "build dispatch returns HTTP 503 (backpressure) instead of piling on, so "
+            "several distinct devices building at once can't OOM a shared host. A "
+            "second request for an ALREADY-building slug still rides the in-flight "
+            "build (stampede dedup, not counted twice). 0 = unlimited (a beefy "
+            "self-host can opt out). Env: PIPELINE_MAX_CONCURRENT_BUILDS."
+        ),
+    )
+
     # --- Pipeline V2 settings -------------------------------------------------
     memory_root: str = Field(
         default="memory",
         description="Root directory under which per-device knowledge packs are written.",
     )
     pipeline_max_revise_rounds: int = Field(
-        default=1,
+        default=3,
         ge=0,
-        le=3,
+        le=4,
         description=(
             "Maximum number of audit→revise→re-audit rounds before accepting the pack "
-            "with residual issues. Values > 2 are reserved for debug."
+            "with residual issues. History: a 92-page Mac failed at 1 round on a "
+            "REPARABLE drift (bumped 1→2); then two iPhone builds (denser in "
+            "symptom/test-point nodes) converged 0.45→0.66→0.74 but a single residual "
+            "orphan node survived round 2 → the whole 0.74 pack was REJECTED (it "
+            "needed one more round to drop the orphan). Default 3 gives dense packs "
+            "that head-room; the reviser resolves most items each round, so the extra "
+            "round is cheap insurance against losing a near-good pack on one stray "
+            "node. Bump to 4 via PIPELINE_MAX_REVISE_ROUNDS for stubborn packs."
+        ),
+    )
+    pipeline_accept_score: float = Field(
+        default=0.70,
+        ge=0.0,
+        le=1.0,
+        description=(
+            "Phase 4 acceptance floor: when revise rounds are exhausted (or stopped early on "
+            "score regression), the BEST snapshot (highest-scoring round's artefacts) whose deterministic drift is empty and whose "
+            "consistency_score >= this value is accepted with warnings instead of failing the "
+            "build. 0 disables (legacy hard-fail)."
+        ),
+    )
+    pipeline_graph_query_turns_auditor: int = Field(
+        default=8,
+        ge=0,
+        le=32,
+        description=(
+            "Max query_graph tool turns the Auditor may take per audit round to verify "
+            "identifiers against the compiled schematic before submitting its verdict. 0 = no "
+            "graph queries (the auditor still gets the deterministic ground-truth report)."
+        ),
+    )
+    pipeline_graph_query_turns_reviser: int = Field(
+        default=4,
+        ge=0,
+        le=32,
+        description=(
+            "Max query_graph tool turns each writer reviser may take to ground a revision "
+            "against the compiled schematic. Lower than the auditor's budget: a reviser fixes "
+            "one file, the auditor judges the whole pack. 0 = no graph queries."
         ),
     )
     pipeline_cache_warmup_seconds: float = Field(

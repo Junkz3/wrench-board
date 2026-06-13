@@ -77,6 +77,73 @@ def test_kicad_parser_rejects_invalid_path(tmp_path):
         KicadPcbParser().parse_file(bad)
 
 
+# --- Pre-extracted sidecar (deploys without pcbnew) ---------------------------
+# pcbnew ships with KiCad (not pip-installable), so a slim Docker runtime can't
+# run the extractor subprocess. A `<file>.extract.json` sidecar generated where
+# KiCad IS available lets such deploys parse the committed fixture. The sidecar
+# is only trusted when its embedded source hash matches the .kicad_pcb bytes.
+
+def _fake_extract() -> dict:
+    # Mirrors _kicad_extract.py's output shape (what _json_to_board consumes).
+    return {
+        "outline": [{"x": 0, "y": 0}, {"x": 100, "y": 0}, {"x": 100, "y": 50}, {"x": 0, "y": 50}],
+        "nets": [{"code": 1, "name": "GND"}, {"code": 2, "name": "+5V"}],
+        "parts": [
+            {
+                "refdes": "R1", "first_pin": 0, "side": 1, "value": "10k",
+                "footprint": "R_0402", "rotation_deg": 0.0, "is_smd": True,
+                "bbox": [{"x": 10, "y": 10}, {"x": 20, "y": 14}],
+            }
+        ],
+        "pins": [
+            {"x": 11, "y": 12, "side": 1, "net_code": 1, "pad_shape": "rect", "pad_size": [2, 2]},
+            {"x": 19, "y": 12, "side": 1, "net_code": 2, "pad_shape": "rect", "pad_size": [2, 2]},
+        ],
+    }
+
+
+def test_kicad_parser_uses_matching_sidecar_without_subprocess(tmp_path, monkeypatch):
+    import hashlib
+    import json as _json
+    import subprocess as _subprocess
+
+    pcb = tmp_path / "board.kicad_pcb"
+    pcb.write_text("(kicad_pcb (version 20221018))")
+    digest = "sha256:" + hashlib.sha256(pcb.read_bytes()).hexdigest()
+    sidecar = tmp_path / "board.kicad_pcb.extract.json"
+    sidecar.write_text(_json.dumps({"source_sha256": digest, "extract": _fake_extract()}))
+
+    # Any subprocess attempt = the sidecar was NOT used → fail loudly.
+    def _boom(*a, **k):
+        raise AssertionError("subprocess must not run when a matching sidecar exists")
+
+    monkeypatch.setattr(_subprocess, "run", _boom)
+    board = KicadPcbParser().parse_file(pcb)
+    assert [p.refdes for p in board.parts] == ["R1"]
+    assert len(board.pins) == 2
+
+
+def test_kicad_parser_ignores_stale_sidecar(tmp_path, monkeypatch):
+    import json as _json
+    import subprocess as _subprocess
+
+    pcb = tmp_path / "board.kicad_pcb"
+    pcb.write_text("(kicad_pcb (version 20221018))")
+    sidecar = tmp_path / "board.kicad_pcb.extract.json"
+    sidecar.write_text(_json.dumps({"source_sha256": "sha256:deadbeef", "extract": _fake_extract()}))
+
+    ran = {}
+
+    def _spy(*a, **k):
+        ran["subprocess"] = True
+        raise FileNotFoundError("no pcbnew here")
+
+    monkeypatch.setattr(_subprocess, "run", _spy)
+    with pytest.raises(FileNotFoundError):
+        KicadPcbParser().parse_file(pcb)
+    assert ran.get("subprocess"), "a hash-mismatched sidecar must fall through to the extractor"
+
+
 # --- Broader fixture coverage ------------------------------------------------
 # The MNT Reform motherboard is a real, open-hardware board (CERN-OHL-S-2.0,
 # cf. board_assets/ATTRIBUTIONS.md). These tests lock in the rest of the

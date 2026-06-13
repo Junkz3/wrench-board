@@ -25,7 +25,7 @@ export function prettifySlug(slug) {
 // Renommé relativeTime (le comportement FR reste identique). Dépend des
 // globaux window.t / window.i18n (câblés par i18n.js), comme dans home.js.
 export function relativeTime(isoString) {
-  if (!isoString) return "—";
+  if (!isoString) return "…";
   const then = new Date(isoString);
   if (isNaN(then)) return isoString;
   const diffMs = Date.now() - then.getTime();

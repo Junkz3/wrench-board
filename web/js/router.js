@@ -115,9 +115,9 @@ const _dateFmt = new Intl.DateTimeFormat("fr-FR", {
   day: "numeric", month: "short", hour: "2-digit", minute: "2-digit",
 });
 function formatRepairDate(iso) {
-  if (!iso) return "—";
+  if (!iso) return "…";
   const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return "—";
+  if (Number.isNaN(d.getTime())) return "…";
   // fr-FR formats as "26 avr., 14:32" — drop the comma to read as one phrase.
   return _dateFmt.format(d).replace(/,\s*/g, " ");
 }

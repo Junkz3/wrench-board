@@ -1,4 +1,4 @@
-"""T8 — pack_storage : I/O sur la nouvelle topologie disque.
+"""pack_storage : I/O sur la nouvelle topologie disque.
 
 Pas de LLM, pas d'agent. Toute la machinerie load_effective_pack + write_staged
 + append_journal + write_promoted + revoke est testée ici avec tmp_path.
@@ -35,7 +35,7 @@ def memory_root(tmp_path: Path) -> Path:
 
 @pytest.fixture
 def pack_dir(memory_root: Path) -> Path:
-    """Pack initialisé avec la nouvelle topologie T8."""
+    """Pack initialisé avec la nouvelle topologie."""
     init_pack_layout(memory_root, SLUG)
     return memory_root / SLUG
 

@@ -291,7 +291,7 @@ async def test_sanitizer_wraps_unknown_refdes_in_final_message(monkeypatch: pyte
 
 @pytest.mark.asyncio
 async def test_direct_cam_capture_round_trip(monkeypatch: pytest.MonkeyPatch) -> None:
-    """T16: cam_capture requests a frame, awaits it, uploads to Files API, and
+    """cam_capture requests a frame, awaits it, uploads to Files API, and
     feeds an image tool_result back to the agent (parity with runtime/camera.py).
 
     The disk write (persist_macro) and Files API are stubbed; the behavior under
@@ -377,7 +377,7 @@ async def test_direct_cam_capture_round_trip(monkeypatch: pytest.MonkeyPatch) ->
 async def test_direct_capabilities_rebuilds_manifest_with_cam_capture(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """T16: a client.capabilities{camera_available:true} frame rebuilds the
+    """a client.capabilities{camera_available:true} frame rebuilds the
     tools manifest so cam_capture is offered on subsequent turns.
 
     The frontend sends capabilities AFTER session_ready (after the initial
@@ -413,7 +413,7 @@ async def test_direct_capabilities_rebuilds_manifest_with_cam_capture(
 async def test_direct_protocol_accept_dispatches_after_confirmation(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """T16: bv_propose_protocol parks for tech confirmation; accept → dispatch.
+    """bv_propose_protocol parks for tech confirmation; accept → dispatch.
 
     Parity with runtime_managed Pattern-4: the runtime emits
     protocol_pending_confirmation and waits; only on an accept frame does the
@@ -456,7 +456,7 @@ async def test_direct_protocol_accept_dispatches_after_confirmation(
 async def test_direct_protocol_reject_skips_dispatch_and_returns_error(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """T16: a reject confirmation must NOT materialize the protocol; the agent
+    """a reject confirmation must NOT materialize the protocol; the agent
     gets an error tool_result carrying the tech's reason."""
     _stub_session(monkeypatch, _board_with_u7())
     import api.agent.runtime_direct as rt
@@ -516,7 +516,7 @@ async def test_direct_protocol_reject_skips_dispatch_and_returns_error(
 async def test_direct_protocol_confirmation_timeout_emits_frame(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """T16: if the tech never answers, the parking times out → a
+    """if the tech never answers, the parking times out → a
     protocol_confirmation_timeout frame is emitted and no dispatch runs."""
     _stub_session(monkeypatch, _board_with_u7())
     import api.agent.runtime_direct as rt
@@ -560,7 +560,7 @@ async def test_direct_protocol_confirmation_timeout_emits_frame(
 
 @pytest.mark.asyncio
 async def test_direct_stream_watchdog_trips_on_stall(monkeypatch: pytest.MonkeyPatch) -> None:
-    """T16: a stalled model stream trips the per-event watchdog → stream_error.
+    """a stalled model stream trips the per-event watchdog → stream_error.
 
     Parity with runtime_managed's stream watchdog: if no stream event arrives
     within ma_stream_event_timeout_seconds, the turn must not hang forever (an
@@ -619,7 +619,7 @@ async def test_direct_stream_watchdog_trips_on_stall(monkeypatch: pytest.MonkeyP
 
 @pytest.mark.asyncio
 async def test_direct_turn_reports_token_usage_to_cloud(monkeypatch: pytest.MonkeyPatch) -> None:
-    """T13/T16: a completed direct-mode turn fires cloud token-usage metering.
+    """A completed direct-mode turn fires cloud token-usage metering.
 
     Parity with runtime_managed's span.model_request_end hook: each LLM call's
     raw input/output tokens are reported to the cloud (the tenant-private

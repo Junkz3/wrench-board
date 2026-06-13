@@ -18,7 +18,10 @@ import { mountMascot } from "../../../mascot.js";
 import { showBubble, hideBubble } from "../../../mascot_bubble.js";
 import i18n, { t } from "../../../i18n.js";
 import { apiGet, apiSend } from "../../../shared/api.js";
+import { hasSeenOnboarding, markOnboardingSeen } from "../../../onboarding_state.js";
+import { forceNextDiagCoaching } from "../../repair/diagnostic/coaching.js";
 import { openProfileWizard } from "./profile_modal.js";
+import { hideUploads } from "../../../cloud_hints.js";
 
 const FLAG = "wb_onboarding_seen";
 const EXAMPLE_REPAIR_ID = "example-mnt-reform";
@@ -57,7 +60,13 @@ export function preGateOnboarding() {
 
 export async function maybeStartOnboarding(ctl) {
   _ctl = ctl || {};
-  if (localStorage.getItem(FLAG)) return;
+  // Server-side truth (cross-device), with the localStorage pre-gate as the
+  // fallback before boot hydration resolves. If already seen, drop the pre-gate
+  // dim the synchronous preGateOnboarding() may have added and bail.
+  if (hasSeenOnboarding("onboarding_seen")) {
+    _overlay()?.classList.remove("ob-running");
+    return;
+  }
 
   let repairsCount = 0;
   try {
@@ -202,8 +211,10 @@ function _stepExampleIntro() {
 }
 
 function _openExample() {
-  // Ensure the workspace tour will play (it's gated by wb_first_diag_seen).
-  try { localStorage.removeItem("wb_first_diag_seen"); } catch { /* private mode */ }
+  // Ensure the workspace tour will play even for a tech who already saw it:
+  // arm a one-shot bypass of the persisted `first_diag_seen` flag (server truth
+  // now, so we can't just clear a localStorage key to force the replay).
+  forceNextDiagCoaching();
   // When the workspace tour finishes (dashboard.js forwards this as onDone),
   // return to the landing and resume the user's own first-diag pointers.
   window.__wbExampleTourOnDone = () => { window.__wbExampleTourOnDone = null; _returnFromExample(); };
@@ -257,7 +268,7 @@ function _stepSymptom() {
 }
 
 function _stepLaunch() {
-  _reveal('.landing-actions[data-ob-reveal], .landing-chips[data-ob-reveal]');
+  _reveal('.landing-actions[data-ob-reveal]');
   showBubble({
     anchor: document.getElementById("landingSubmit"),
     placement: "top",
@@ -271,6 +282,9 @@ function _stepLaunch() {
 // Short pointers only; the detailed explanation lives in the on-click info
 // modal (info_modal.js), reachable anytime via the "?" affordance.
 function _stepKnowledge() {
+  // Plan free (mode managé, cloud_hints) : « Add knowledge » est masqué —
+  // ne pas ancrer une bulle sur un élément invisible, enchaîner sur le stock.
+  if (hideUploads()) return _stepStock();
   showBubble({
     anchor: document.getElementById("landingKnowledgeBtn"),
     placement: "top",
@@ -297,6 +311,6 @@ export function finish() {
   _clearHost();
   document.getElementById("landingProfile")?.classList.remove("ob-spotlight");
   _overlay()?.classList.remove("ob-running");
-  try { localStorage.setItem(FLAG, "1"); } catch { /* private mode — best effort */ }
+  markOnboardingSeen("onboarding_seen"); // server (cross-device) + localStorage cache
   _mascotState("idle");
 }

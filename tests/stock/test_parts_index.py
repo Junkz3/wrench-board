@@ -155,7 +155,13 @@ def test_canonicalize_value_none():
 
 def _make_electrical_graph(components):
     """Tiny helper: build a minimal-shaped dict matching ElectricalGraph
-    JSON for build_parts_index input."""
+    JSON for build_parts_index input. Components are stamped
+    evidence="traced" (as a freshly compiled graph dumps it) unless the
+    test sets the key explicitly."""
+    components = {
+        refdes: {"evidence": "traced", **comp}
+        for refdes, comp in components.items()
+    }
     return {
         "schema_version": "1.0",
         "device_slug": "test-device",
@@ -398,3 +404,94 @@ def test_build_parts_index_hash_is_deterministic():
     )
     assert idx1.source_electrical_graph_hash == idx2.source_electrical_graph_hash
     assert len(idx1.source_electrical_graph_hash) == 64  # sha256 hex
+
+
+def test_build_parts_index_skips_untraced_components():
+    """Untraced refdes (schematic section titles, e.g. 'U7000' on the A2337
+    power-alias page) must not become sourceable stock entries."""
+    eg = _make_electrical_graph(
+        {
+            "U7000": {
+                "refdes": "U7000",
+                "type": "ic",
+                "kind": "ic",
+                "role": None,
+                "value": None,
+                "pages": [79],
+                "pins": [],
+                "populated": True,
+                "evidence": "untraced",
+            },
+            "U5200": {
+                "refdes": "U5200",
+                "type": "ic",
+                "kind": "ic",
+                "role": None,
+                "value": None,
+                "pages": [25],
+                "pins": [{"number": "1", "name": "VIN", "role": "power_in", "net_label": "PPBUS_AON"}],
+                "populated": True,
+            },
+        }
+    )
+    idx = build_parts_index(
+        slug="test-device", electrical_graph=eg, passive_classification=None, nets_classified=None
+    )
+    assert "U7000" not in idx.entries
+    assert "U5200" in idx.entries
+
+
+def test_build_parts_index_skips_untraced_legacy_fallback():
+    """Graphs compiled before the `evidence` stamp existed carry no key —
+    the pin-less (or synthetic-pins-only) fallback must still exclude them."""
+    eg = {
+        "schema_version": "1.0",
+        "device_slug": "test-device",
+        "components": {
+            # No `evidence` key, no pins → legacy untraced producer.
+            "U7000": {
+                "refdes": "U7000",
+                "type": "ic",
+                "kind": "ic",
+                "role": None,
+                "value": None,
+                "pages": [79],
+                "pins": [],
+                "populated": True,
+            },
+            # No `evidence` key, only synthetic "?" pins → legacy edge-only consumer.
+            "U7550": {
+                "refdes": "U7550",
+                "type": "ic",
+                "kind": "ic",
+                "role": None,
+                "value": None,
+                "pages": [79],
+                "pins": [{"number": "?", "role": "power_in", "net_label": "PPBUS_AON"}],
+                "populated": True,
+            },
+            # No `evidence` key but a real traced pin → kept.
+            "U5200": {
+                "refdes": "U5200",
+                "type": "ic",
+                "kind": "ic",
+                "role": None,
+                "value": None,
+                "pages": [25],
+                "pins": [{"number": "1", "role": "power_in", "net_label": "PPBUS_AON"}],
+                "populated": True,
+            },
+        },
+        "nets": {},
+        "power_rails": [],
+        "typed_edges": [],
+        "boot_sequence": [],
+        "designer_notes": [],
+        "ambiguities": [],
+        "quality": {},
+        "hierarchy": [],
+    }
+    idx = build_parts_index(
+        slug="test-device", electrical_graph=eg, passive_classification=None, nets_classified=None
+    )
+    assert set(idx.entries) == {"U5200"}

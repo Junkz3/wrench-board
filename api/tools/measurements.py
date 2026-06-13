@@ -56,11 +56,11 @@ def _lookup_comp_kind(memory_root: Path, device_slug: str, refdes: str) -> str |
     unknown. Best-effort — any error path yields None, which means the
     caller skips kind-specific mode validation.
 
-    T9 — per-owner : on lit le graphe du PDF actif du tenant courant
-    (current_owner_ref → hash → .cache_schematic/{hash}/), pas la racine
-    partagée du slug (= scratch de build d'un autre tenant → fuite). owner
-    None (self-host) → racine, inchangé. Fail-soft conservé : graphe absent
-    / non épinglé → None."""
+    Per-owner: read the graph of the current tenant's active PDF
+    (current_owner_ref → hash → .cache_schematic/{hash}/), not the slug's
+    shared root (= another tenant's build scratch → leak). owner None
+    (self-host) → root, unchanged. Fail-soft preserved: graph absent
+    / not pinned → None."""
     from api.agent.owner_ref import current_owner_ref
     from api.pipeline import live_graph
 

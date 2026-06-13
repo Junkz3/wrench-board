@@ -1,12 +1,12 @@
-"""TVW header-string substitution cipher.
+"""TVW header-string substitution table.
 
 The TVW production-binary header carries Pascal strings (format
-signature, vendor, build date, paths, etc.) encoded with a 2D
+signature, vendor, build date, paths, etc.) stored with a
 position-dependent substitution table indexed by (input_char, position
 within the string). Layer header strings, source paths, and net names
-are plain Pascal — the cipher applies to the file header only.
+are plain Pascal — the substitution applies to the file header only.
 
-Algorithm (byte at a time, position resets per Pascal-string):
+Lookup (byte at a time, position resets per Pascal-string):
 
     if char in '0'-'9' or 'a'-'j':
         out = TABLE[char][pos % 3]
@@ -15,8 +15,8 @@ Algorithm (byte at a time, position resets per Pascal-string):
     else:
         out = char  (passes through unchanged — '-', ' ', '.', '!', '@', etc.)
 
-The 256×11 table below contains only the non-zero rows (every other
-char passes through unchanged).
+The table below contains only the non-zero rows (every other char
+passes through unchanged).
 """
 from __future__ import annotations
 

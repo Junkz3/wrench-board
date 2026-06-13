@@ -1,6 +1,6 @@
-"""T8 — les endpoints pack lisent encore correctement APRÈS migration.
+"""les endpoints pack lisent encore correctement APRÈS migration.
 
-La migration T8 déplace registry.json/rules.json/knowledge_graph.json/
+La migration déplace registry.json/rules.json/knowledge_graph.json/
 dictionary.json de la racine vers baseline/. Les readers de routes/packs.py
 (taxonomy, /full, /graph, presence bitmask) doivent suivre — sinon un pack
 expandé/touché par l'agent renvoie vide.

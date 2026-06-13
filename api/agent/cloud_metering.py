@@ -1,4 +1,4 @@
-"""Best-effort token-usage reporting to the wrenchboard-cloud (T13).
+"""Best-effort token-usage reporting to the wrenchboard-cloud.
 
 The diagnostic agent's per-LLM-call token cost is the tenant-private billing
 unit. At each ``span.model_request_end`` the live forwarder fires
@@ -53,12 +53,18 @@ async def report_turn_usage(
     cache_creation_input_tokens: int = 0,
     engine_repair_id: str | None,
     event_id: str,
+    kind: str = "agent",
 ) -> None:
     """POST one LLM call's token usage to the cloud. No-op when unconfigured.
 
     Cache tokens ride the report so the cloud prices them at their own tiers
     (read 0.1x, creation 1.25x input). Dropping them billed hot turns — mostly
     cache_read under prompt caching — as full input (~10x overcharge).
+
+    `kind` buckets the spend cloud-side: 'agent' (interactive chat — bounded by
+    the per-plan budget gates) vs 'build' (the one-shot pipeline pack build —
+    slot-gated separately, excluded from the chat budget). The cloud rejects
+    anything else, loudly.
 
     Best-effort: any failure is logged at WARNING and swallowed.
     """
@@ -72,6 +78,7 @@ async def report_turn_usage(
     payload = {
         "owner_ref": owner_ref,
         "model": model,
+        "kind": kind,
         "input_tokens": input_tokens,
         "output_tokens": output_tokens,
         "cache_read_input_tokens": cache_read_input_tokens,
@@ -108,6 +115,7 @@ def fire_and_forget_report(
     cache_creation_input_tokens: int = 0,
     engine_repair_id: str | None,
     event_id: str,
+    kind: str = "agent",
 ) -> None:
     """Schedule a metering report without blocking the caller (the agent turn).
 
@@ -127,6 +135,7 @@ def fire_and_forget_report(
             cache_creation_input_tokens=cache_creation_input_tokens,
             engine_repair_id=engine_repair_id,
             event_id=event_id,
+            kind=kind,
         )
     )
     _BACKGROUND_TASKS.add(task)

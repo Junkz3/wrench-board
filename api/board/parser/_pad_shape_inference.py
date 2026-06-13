@@ -30,6 +30,7 @@ leaving the caller free to keep whatever upstream shape was set.
 from __future__ import annotations
 
 import re
+from functools import lru_cache
 
 # Boundary regex: match start, end, or any non-letter (digit, dash, dot,
 # underscore). Python's `\b` treats `_` as a word character, so `\b` does
@@ -163,6 +164,7 @@ _CIRCLE_PATTERNS = [
 ]
 
 
+@lru_cache(maxsize=8192)
 def infer_pad_shape(footprint: str | None) -> str | None:
     """Return `"rect"` / `"circle"` for the given footprint, `None` when
     no rule applies.
@@ -170,6 +172,10 @@ def infer_pad_shape(footprint: str | None) -> str | None:
     Rect rules are tried first so chip-under-BGA suffixes like
     `CAP1005_0_55H_BGA` resolve to rect (matching the chip's actual
     package) instead of circle (matching the trailing position tag).
+
+    Pure function of `footprint` → memoised: called once per pin in the FZ
+    pin-build loop (tens of thousands of calls), but distinct footprints are a
+    small set, so the ~35 regex searches run once per unique footprint, not per pin.
     """
     if not footprint or not footprint.strip():
         return None

@@ -1,7 +1,7 @@
 {
   "drawer": {
     "header_label": "Construction de la mémoire",
-    "device_placeholder": "—",
+    "device_placeholder": "...",
     "close_aria": "Fermer le panneau de progression"
   },
   "phase": {
@@ -31,7 +31,7 @@
     }
   },
   "step": {
-    "time_placeholder": "—",
+    "time_placeholder": "...",
     "in_progress": "en cours…",
     "failed": "échec"
   },
@@ -39,6 +39,7 @@
     "waiting": "En attente des premiers événements…",
     "connecting": "Connexion au pipeline…",
     "started": "Pipeline démarré…",
+    "queued": "En file d'attente · position <b>{position}</b> ({ahead} devant) · démarrage auto dès qu'un créneau se libère",
     "phase_running": "Phase en cours · <b>{phase}</b>",
     "ready": "Mémoire prête · audit <b>{status}</b> · cohérence <b>{score}</b>",
     "failed": "Pipeline en échec · <b>{status}</b>",

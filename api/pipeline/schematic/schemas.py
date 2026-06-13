@@ -406,6 +406,31 @@ class ComponentNode(BaseModel):
     pages: list[int] = Field(default_factory=list)
     pins: list[PagePin] = Field(default_factory=list)
     populated: bool = True
+    evidence: Literal["traced", "untraced"] = "traced"
+    """Connectivity evidence. `untraced` = no pin-level connectivity was traced
+    on any page (no pin-side `net_label`, no net-side `connects`); the refdes
+    exists only via typed edges or a bare symbol/title mention. Vision passes
+    emit such nodes for section headings on power-alias pages (e.g. 'U7000'
+    on the A2337 schematic is a page title, not a placed part). Stamped by
+    the compiler BEFORE synthetic-pin materialization; defaults to `traced`
+    so pre-existing graphs reload untouched — readers needing the signal on
+    legacy graphs use `component_is_untraced` below."""
+
+
+def component_is_untraced(comp: dict) -> bool:
+    """True when a component (raw `electrical_graph.json` dict) has no traced
+    pin-level connectivity.
+
+    Prefers the compiler's `evidence` stamp. Legacy graphs (compiled before
+    the stamp existed) fall back to the signal it is derived from: no pins at
+    all, or only synthetic `number="?"` pins materialized by
+    `_synthesize_pins_for_edge_only_consumers`.
+    """
+    evidence = comp.get("evidence")
+    if evidence is not None:
+        return evidence == "untraced"
+    pins = comp.get("pins") or []
+    return not pins or all(p.get("number") == "?" for p in pins)
 
 
 class NetNode(BaseModel):
@@ -518,6 +543,7 @@ class SchematicQualityReport(BaseModel):
     nets_unresolved: int = 0
     components_without_value: int = 0
     components_without_mpn: int = 0
+    components_untraced: int = 0
     confidence_global: float = Field(default=1.0, ge=0.0, le=1.0)
     degraded_mode: bool = Field(
         default=False,

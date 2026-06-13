@@ -40,6 +40,95 @@ class SchematicPageLimitExceeded(ValueError):
     """Raised when an uploaded schematic exceeds `pipeline_schematic_max_pages`."""
 
 
+def probe_page_count(pdf_path: Path) -> int:
+    """Pages pdfplumber/pdfminer can actually parse (0 if the PDF is unreadable).
+
+    Deliberately tolerant: some XZZ-library PDFs carry non-standard objects that
+    make `pdfplumber.open` yield 0 pages (or raise) even though poppler reads
+    them — we treat both as "0, needs repair" rather than crashing.
+    """
+    try:
+        with pdfplumber.open(str(pdf_path)) as pdf:
+            return len(pdf.pages)
+    except Exception:  # noqa: BLE001 — any parse failure means "unreadable here"
+        logger.warning("pdfplumber could not parse %s", pdf_path, exc_info=True)
+        return 0
+
+
+def repair_pdf_with_ghostscript(src: Path, dst: Path) -> bool:
+    """Re-distill `src` → `dst` via ghostscript to normalise broken objects.
+
+    Returns True when gs produced a non-empty file, False on any failure
+    (including gs not being installed) — the caller decides whether a failed
+    repair is fatal. Never raises: a missing `gs` binary is a degraded-mode
+    signal, not a crash.
+    """
+    try:
+        subprocess.run(
+            [
+                "gs", "-o", str(dst),
+                "-sDEVICE=pdfwrite",
+                "-dPDFSETTINGS=/prepress",
+                "-dQUIET", "-dBATCH", "-dNOPAUSE",
+                str(src),
+            ],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+    except FileNotFoundError:
+        logger.warning(
+            "ghostscript (gs) not installed — cannot repair %s "
+            "(apt install ghostscript)", src,
+        )
+        return False
+    except subprocess.CalledProcessError as exc:
+        logger.warning(
+            "ghostscript repair failed on %s: %s", src, (exc.stderr or "").strip()[:300],
+        )
+        return False
+    return Path(dst).is_file() and Path(dst).stat().st_size > 0
+
+
+def ensure_renderable_pdf(pdf_path: Path, work_dir: Path) -> Path:
+    """Return a PDF that pdfplumber AND pdftoppm can read — repairing if needed.
+
+    If the original parses cleanly (pdfplumber sees ≥1 page) it is returned
+    untouched. Otherwise we re-distill it through ghostscript (which fixes the
+    non-standard objects that defeat pdfminer) and re-probe. If it STILL yields
+    0 pages we raise — far better to fail the build loudly than to render 0
+    pages and silently produce an empty pack (wasting Scout/writer tokens).
+
+    The repaired copy lands at `work_dir/_repaired_source.pdf` so the caller
+    can use it for BOTH rendering and grounding (both read the PDF via
+    pdfplumber/poppler).
+    """
+    pdf_path = Path(pdf_path)
+    if probe_page_count(pdf_path) > 0:
+        return pdf_path
+
+    logger.warning(
+        "%s is unreadable by pdfplumber (0 pages) — attempting ghostscript repair",
+        pdf_path,
+    )
+    Path(work_dir).mkdir(parents=True, exist_ok=True)
+    repaired = Path(work_dir) / "_repaired_source.pdf"
+    if repair_pdf_with_ghostscript(pdf_path, repaired):
+        n = probe_page_count(repaired)
+        if n > 0:
+            logger.info(
+                "ghostscript repaired %s → %d pages (using %s)",
+                pdf_path, n, repaired.name,
+            )
+            return repaired
+
+    raise RuntimeError(
+        f"{pdf_path} is unrenderable (0 pages) even after ghostscript repair — "
+        "corrupt or unsupported PDF; aborting the build rather than producing "
+        "an empty pack"
+    )
+
+
 def render_pages(
     pdf_path: Path,
     output_dir: Path,
@@ -117,19 +206,27 @@ def render_pages(
 
 def _probe_pages(pdf_path: Path) -> list[dict]:
     cap = get_settings().pipeline_schematic_max_pages
+    out: list[dict] = []
     with pdfplumber.open(str(pdf_path)) as pdf:
         n = len(pdf.pages)
         if n > cap:
             raise SchematicPageLimitExceeded(
                 f"schematic has {n} pages, exceeds cap of {cap}"
             )
-        return [
-            {
-                "page": i,
-                "width": float(page.width),
-                "height": float(page.height),
-                "char_count": len(page.chars),
-                "line_count": len(page.lines),
-            }
-            for i, page in enumerate(pdf.pages, start=1)
-        ]
+        for i, page in enumerate(pdf.pages, start=1):
+            out.append(
+                {
+                    "page": i,
+                    "width": float(page.width),
+                    "height": float(page.height),
+                    "char_count": len(page.chars),
+                    "line_count": len(page.lines),
+                }
+            )
+            # pdfplumber matérialise et CACHE le modèle objet de chaque page dès
+            # qu'on touche .chars/.lines (~750 Mo sur un schéma vectoriel dense).
+            # Sans flush, les N pages restent résidentes simultanément (~1 Go+) ;
+            # on libère chaque page après lecture → pic ≈ 1 page, pas N. Les
+            # valeurs sont déjà extraites avant le flush → sortie inchangée.
+            page.flush_cache()
+    return out

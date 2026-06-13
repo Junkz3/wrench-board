@@ -25,6 +25,7 @@ from api.pipeline.schematic.schemas import (
     ComponentNode,
     ElectricalGraph,
     NetNode,
+    PagePin,
     PowerRail,
     SchematicGraph,
     SchematicQualityReport,
@@ -41,8 +42,10 @@ def compile_electrical_graph(
     *,
     page_confidences: dict[int, float] | None = None,
 ) -> ElectricalGraph:
+    graph = _mark_untraced_components(graph)
     power_rails, rail_alias_map = _derive_power_rails(graph)
     graph = _rewrite_pin_nets_through_aliases(graph, rail_alias_map)
+    graph = _synthesize_pins_for_edge_only_consumers(graph, power_rails)
     depends_on = _derive_depends_on_edges(graph, power_rails)
     boot_sequence, cycle_refs = _compute_boot_sequence(
         graph, power_rails, depends_on
@@ -125,6 +128,33 @@ def compile_electrical_graph(
         quality=quality,
         hierarchy=graph.hierarchy,
     )
+
+
+def _mark_untraced_components(graph: SchematicGraph) -> SchematicGraph:
+    """Stamp `evidence="untraced"` on components with no pin-level connectivity.
+
+    A component arriving from the merger with zero pins was never traced to a
+    wire on any page — no pin-side `net_label`, and no net-side `connects`
+    entry either (the merger back-fills those). Its existence rests entirely
+    on typed edges or a bare symbol/title mention, which vision passes emit
+    for section headings on power-alias pages (seen on macbook-air-m1:
+    'U7000' is a page-79 section title that sourced 7 always-on rails in the
+    compiled graph, yet is not a placed part on the physical board).
+
+    Must run BEFORE `_synthesize_pins_for_edge_only_consumers` so synthetic
+    `number="?"` pins don't masquerade as traced evidence. Downstream
+    consumers (boot analyzer, `mb_schematic_graph`, parts index) treat these
+    refdes as unverified rather than physical truth.
+    """
+    untraced = [r for r, c in graph.components.items() if not c.pins]
+    if not untraced:
+        return graph
+    new_components = dict(graph.components)
+    for refdes in untraced:
+        new_components[refdes] = new_components[refdes].model_copy(
+            update={"evidence": "untraced"}
+        )
+    return graph.model_copy(update={"components": new_components})
 
 
 # ----------------------------------------------------------------------
@@ -316,6 +346,46 @@ def _rewrite_pin_nets_through_aliases(
             for p in comp.pins
         ]
         new_components[refdes] = comp.model_copy(update={"pins": new_pins})
+    return graph.model_copy(update={"components": new_components})
+
+
+def _synthesize_pins_for_edge_only_consumers(
+    graph: SchematicGraph, rails: dict[str, PowerRail]
+) -> SchematicGraph:
+    """Materialize a synthetic `power_in` pin for pin-less consumers.
+
+    `_scrub_phantom_consumers` deliberately keeps a consumer with NO pin data
+    ("trust the edge" — the pin-sparse vision case the consumer aggregation
+    exists for). But every downstream death-propagation path is pin-driven:
+    the simulator cascade (steps 2/4), hypothesize, and the invariant-suite
+    justification chain all walk `power_in` pins — a pin-less consumer can
+    never die with its rail, breaking dead-rail-implies-dead-consumers
+    (INV-5) on the first pack where vision emits edge-only wiring (seen on
+    macbook-air-m1: U7550 `powered_by PPBUS_AON`, zero pins on page 79).
+
+    Same family of fix as `_rewrite_pin_nets_through_aliases`: restore
+    pin↔rail coherence in the compiled artefact once, instead of
+    special-casing edge-only consumers in every consumer-of-dead-rail walk
+    downstream. Components that already carry pins are never touched — for
+    those, pin data is the truth and the scrub has already arbitrated.
+    """
+    rails_by_consumer: dict[str, list[str]] = {}
+    for rail in rails.values():
+        for refdes in rail.consumers:
+            comp = graph.components.get(refdes)
+            if comp is not None and not comp.pins:
+                rails_by_consumer.setdefault(refdes, []).append(rail.label)
+    if not rails_by_consumer:
+        return graph
+    new_components = dict(graph.components)
+    for refdes, rail_labels in rails_by_consumer.items():
+        synthetic = [
+            PagePin(number="?", role="power_in", net_label=label)
+            for label in sorted(rail_labels)
+        ]
+        new_components[refdes] = new_components[refdes].model_copy(
+            update={"pins": synthetic}
+        )
     return graph.model_copy(update={"components": new_components})
 
 
@@ -1491,6 +1561,9 @@ def _build_quality_report(
         for c in graph.components.values()
         if c.value is None or c.value.mpn is None
     )
+    comps_untraced = sum(
+        1 for c in graph.components.values() if c.evidence == "untraced"
+    )
 
     if page_confidences:
         confidence_global = sum(page_confidences.values()) / len(page_confidences)
@@ -1506,6 +1579,7 @@ def _build_quality_report(
         nets_unresolved=nets_unresolved,
         components_without_value=comps_without_value,
         components_without_mpn=comps_without_mpn,
+        components_untraced=comps_untraced,
         confidence_global=confidence_global,
         degraded_mode=degraded,
     )

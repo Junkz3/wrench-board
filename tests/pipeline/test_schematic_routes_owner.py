@@ -1,4 +1,4 @@
-"""T9 — les routes HTTP du graphe schématique résolvent per-owner via X-Owner-Ref.
+"""Les routes HTTP du graphe schématique résolvent per-owner via X-Owner-Ref.
 
 Le cloud proxy injecte `X-Owner-Ref` (= tenant_id) sur les lectures proxifiées.
 Deux tenants épinglés sur deux PDF distincts (hA / hB) du MÊME slug doivent lire
@@ -91,7 +91,7 @@ def test_get_schematic_resolves_per_owner(memory_root, client):
 
 def test_get_schematic_managed_no_pin_falls_back_to_canonical(memory_root, client):
     """Tenant managé SANS pin → lit le graphe CANONIQUE partagé du slug (racine
-    owner=None) — le moat (T6). Le graphe analysé est de la connaissance device
+    owner=None) — le graphe partagé. Le graphe analysé est de la connaissance device
     PARTAGÉE : un tenant peut diaguer une carte connue sans uploader son PDF.
     (Un uploader, lui, a son graphe per-owner — cf. test_resolves_per_owner.)"""
     slug = "iphone-x"
@@ -112,7 +112,7 @@ def test_get_schematic_managed_no_pin_falls_back_to_canonical(memory_root, clien
 
 
 def test_get_schematic_managed_no_canonical_404(memory_root, client):
-    """Pas de pin ET pas de graphe canonique → 404 (le moat n'existe pas encore)."""
+    """Pas de pin ET pas de graphe canonique → 404 (le graphe partagé n'existe pas encore)."""
     slug = "iphone-x"
     pack = memory_root / slug
     pack.mkdir()
@@ -159,7 +159,7 @@ def test_get_schematic_self_host_reads_root(memory_root, client):
     assert list(r.json()["power_rails"].keys()) == ["+ROOT"]
 
 
-# --- hypothesize (T9 residual reader) ---------------------------------------
+# --- hypothesize (residual reader) ---------------------------------------
 #
 # `mb_hypothesize` validates the caller's `state_comps` refdes against the
 # electrical graph it loads. Seed graph A with IC `U_A` and graph B with `U_B`
@@ -210,7 +210,7 @@ def test_hypothesize_http_route_resolves_per_owner(memory_root, client):
 
 def test_hypothesize_http_managed_no_pin_uses_canonical(memory_root, client):
     """Managed tenant sans pin → hypothesize tourne sur le graphe CANONIQUE partagé
-    (le moat) : U_ROOT y est connu → 200. (Avant T6-graph-shared : 404.)"""
+    (le graphe partagé) : U_ROOT y est connu → 200. (Avant graph-shared : 404.)"""
     slug = "iphone-x"
     pack = memory_root / slug
     pack.mkdir()

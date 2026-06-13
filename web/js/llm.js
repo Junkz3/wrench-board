@@ -80,6 +80,11 @@ import {
 } from './features/repair/diagnostic/chatLog.js';
 
 let ws = null;
+// Route scope the live socket was dialed with ({slug, repairId}). openPanel()
+// compares it to the CURRENT route: SPA navigation repair A → repair B never
+// closes the old socket, and a live socket used to short-circuit the
+// reconnect — leaving the panel (and every typed message) bound to repair A.
+let wsScope = null;
 let currentTier = "deep";
 // Cached <svg.mascot> mounted into #llmMascot at panel-fragment init time.
 // `setPanelMascot()` is the single chokepoint for animating it from WS events
@@ -216,6 +221,7 @@ function connect() {
   statusTone("connecting", t('chat.status.connecting', { slug, tier: currentTier }));
 
   try {
+    wsScope = { slug, repairId: repairId || null };
     ws = connectDiagnostic(
       slug,
       { tier: currentTier, repairId, conv },
@@ -487,6 +493,17 @@ export function handleDiagnosticFrame(payload) {
         store.set("fixButtonReset", true);
         setPanelMascot("error");
         break;
+      case "stream_error":
+        // Terminal: the engine ended the turn (Anthropic API error — e.g. a
+        // spending-limit 400 — or a stream stall) and will NOT stream more.
+        // Without this the "thinking" mascot spins forever (the symptom Alex
+        // hit). Surface the message, close the turn, settle the indicator.
+        // The engine sends `message` (not `text`); fall back across both.
+        logSys(t('chat.error.generic', { text: payload.message || payload.text || '' }), true);
+        store.set("fixButtonReset", true);
+        closeTurn();
+        setPanelMascot("error");
+        break;
       case "session_terminated":
         logSys(t('chat.session.session_terminated'), true);
         closeTurn();
@@ -553,6 +570,15 @@ export function openPanel(targetConv) {
     if (ws && ws.readyState <= 1) {
       try { ws.close(); } catch (_) { /* ignore */ }
     }
+    ws = null;
+  }
+  // Stale-route guard: SPA navigation never tears the socket down, so a live
+  // socket may still be bound to the PREVIOUS repair/device. Reusing it would
+  // show — and send into — the other repair's conversation. Close + redial.
+  if (ws && ws.readyState <= 1 && wsScope
+      && (wsScope.slug !== currentDeviceSlug()
+          || wsScope.repairId !== (currentRepairId() || null))) {
+    try { ws.close(); } catch (_) { /* ignore */ }
     ws = null;
   }
   el("llmPanel").classList.add("open");

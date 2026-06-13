@@ -1,11 +1,11 @@
 """Le résumé `GET /pipeline/packs/{slug}` doit refléter l'état PER-OWNER pour les
 artefacts PRIVÉS (graphe électrique, boardview, schematic PDF) tout en gardant
 SHARED les flags du pack commun (registry / knowledge_graph / rules / dictionary /
-parts_index — le moat).
+parts_index — le graphe partagé).
 
 Avant le fix, `has_electrical_graph` / `has_boardview` / `has_schematic_pdf` étaient
 lus à la RACINE → un tenant qui n'a rien uploadé voyait son dashboard « tout vert »
-(plainte initiale). Miroir du patron T9 (`test_schematic_routes_owner.py`).
+(plainte initiale). Miroir du patron de test_schematic_routes_owner.py.
 """
 
 from __future__ import annotations
@@ -41,7 +41,7 @@ _GRAPH = json.dumps({
 def _seed_shared_and_root(pack: Path) -> None:
     """État RACINE complet : un graphe + un boardup + le pack partagé (registry…)."""
     pack.mkdir()
-    # SHARED (le moat) — doit rester vert pour tout tenant.
+    # SHARED (le graphe partagé) — doit rester vert pour tout tenant.
     (pack / "registry.json").write_text("{}")
     # PRIVÉ à la racine (self-host / legacy).
     (pack / "electrical_graph.json").write_text(_GRAPH)
@@ -52,7 +52,7 @@ def _seed_shared_and_root(pack: Path) -> None:
 
 def test_summary_managed_no_upload_hides_private_renders_keeps_shared_graph(memory_root, client):
     """Tenant sans upload : RENDUS privés (boardview, schematic PDF brut) FALSE,
-    mais le GRAPHE analysé (moat PARTAGÉ, canonique racine) + le pack commun TRUE."""
+    mais le GRAPHE analysé (graphe partagé, canonique racine) + le pack commun TRUE."""
     slug = "iphone-x"
     pack = memory_root / slug
     _seed_shared_and_root(pack)   # racine = electrical_graph canonique + registry partagé
@@ -66,7 +66,7 @@ def test_summary_managed_no_upload_hides_private_renders_keeps_shared_graph(memo
     # RENDUS privés du fichier brut → false (tenant-Z n'a rien uploadé)
     assert body["has_boardview"] is False
     assert body["has_schematic_pdf"] is False
-    # Graphe analysé = moat PARTAGÉ → true (canonique du slug, dispo à tout tenant)
+    # Graphe analysé = graphe partagé → true (canonique du slug, dispo à tout tenant)
     assert body["has_electrical_graph"] is True
     # Pack commun partagé → true
     assert body["has_registry"] is True

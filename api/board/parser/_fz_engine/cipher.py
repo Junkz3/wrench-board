@@ -1,24 +1,22 @@
-"""Decrypt FZ-xor container.
+"""Decode the FZ-xor container outer layer.
 
-The cipher is RC6-shaped (Rivest-Robshaw-Sidney-Yin, 1998 — the AES
-finalist; spec at <http://people.csail.mit.edu/rivest/pubs/RRSY98.pdf>)
-applied per-byte over a rolling 16-byte ciphertext window:
+The outer layer is a keyed byte transform applied over a rolling 16-byte
+input window:
 
   * State: four uint32 accumulators reloaded each iteration from a
-    rolling 16-byte window of CIPHERTEXT bytes (so decryption is
+    rolling 16-byte window of the input bytes (so the transform is
     self-synchronising — corruption recovers within 16 bytes).
-  * Per byte: add `K[0]` and `K[1]` into two accumulators, run 20
-    Feistel-shaped mixing rounds that consume `K[2..41]`, then add
-    `K[42]` and XOR the low byte of the resulting word into the
-    ciphertext byte to recover plaintext.
-  * After each byte the window slides left and the ciphertext byte
-    occupies slot 15; the four accumulators are re-loaded as little-
-    endian uint32s from the new window.
+  * Per byte: a fixed sequence of word-mixing steps over the expanded
+    key produces a word whose low byte is combined with the input byte
+    to recover the original.
+  * After each byte the window slides left and the input byte occupies
+    slot 15; the four accumulators are re-loaded as little-endian
+    uint32s from the new window.
 
 The 44 × uint32 expanded key is loaded at runtime from the
-`FZ_RC6_SARRAY_HEX` environment variable (176 bytes, hex-encoded).
-If the variable is unset, FZ-xor parsing is disabled and callers
-receive a clear error message at parse time.
+`WRENCH_BOARD_FZ_KEY` environment variable (176 bytes hex-encoded, or
+44 space-separated integers). If the variable is unset, FZ-xor parsing
+is disabled and callers receive a clear error message at parse time.
 """
 
 from __future__ import annotations
@@ -37,8 +35,8 @@ def _load_key_words() -> tuple[int, ...] | None:
       * 44 space-separated 32-bit integers (legacy)
 
     Returns `None` if the variable is unset or invalid; callers raise a
-    clean error in that case. Aligns with the OpenBoardView convention
-    of leaving cipher keys as runtime configuration.
+    clean error in that case. The key stays runtime configuration and is
+    never embedded in the repo.
     """
     raw = os.environ.get(FZ_KEY_ENV, "").strip()
     if not raw:
@@ -63,12 +61,22 @@ KEY_WORDS: tuple[int, ...] | None = _load_key_words()
 _WINDOW = 16
 _ROUNDS = 20
 
+# OPTIONAL acceleration: the inner byte loop (~0.02 MB/s in pure Python, due to
+# tens of millions of rotate-32 calls) is also available as a Rust/PyO3 extension
+# (`rust/wb_fz_cipher/`, built with maturin) with GUARANTEED byte-identical output
+# (tests in `tests/board/test_fz_cipher_rust.py`). When it is not built (self-host
+# without a Rust toolchain) we fall back to the pure-Python core — never a hard dep.
+try:
+    from wb_fz_cipher import decrypt_fz_xor as _rust_decrypt
+except ImportError:  # pragma: no cover - depends on the Rust build being present
+    _rust_decrypt = None
+
 
 def _rol32(v: int, s: int) -> int:
     """Rotate a 32-bit unsigned value left by `s` bits.
 
-    Mirrors C# `<<` on `uint`: only the low 5 bits of the count matter,
-    and a count of 0 is the identity (avoids the undefined `>> 32`).
+    Only the low 5 bits of the count matter, and a count of 0 is the
+    identity (avoids the undefined `>> 32`).
     """
     s &= 31
     if s == 0:
@@ -81,9 +89,9 @@ class FZKeyNotConfigured(RuntimeError):
 
 
 def decrypt_fz_xor(cipher: bytes, key: tuple[int, ...] | None = None) -> bytes:
-    """Return the plaintext for an XOR-flavoured `.fz` payload.
+    """Return the decoded bytes for an XOR-flavoured `.fz` payload.
 
-    The plaintext is the FZ-zlib container shape: 4-byte LE int32 holding
+    The result is the FZ-zlib container shape: 4-byte LE int32 holding
     the decompressed text length, followed by a zlib stream. Hand the
     result to `parse_fz_zlib` to finish the parse.
     """
@@ -97,6 +105,19 @@ def decrypt_fz_xor(cipher: bytes, key: tuple[int, ...] | None = None) -> bytes:
         )
     if len(key) != 44:
         raise ValueError(f"FZ-xor key must be 44 uint32 words, got {len(key)}")
+    # Delegate the hot loop to the native core when it is built (byte-identical
+    # to the Python core — verified by the equivalence tests). Otherwise pure Python.
+    if _rust_decrypt is not None:
+        return _rust_decrypt(bytes(cipher), list(key))
+    return _decrypt_core_py(cipher, key)
+
+
+def _decrypt_core_py(cipher: bytes, key: tuple[int, ...]) -> bytes:
+    """Pure-Python core of the FZ-xor transform (fallback when the Rust module is absent).
+
+    Replicates the algorithm exactly; the Rust module `wb_fz_cipher` is its
+    byte-identical accelerated translation.
+    """
     K = key
     window = bytearray(_WINDOW)
     n5 = n4 = n3 = n2 = 0

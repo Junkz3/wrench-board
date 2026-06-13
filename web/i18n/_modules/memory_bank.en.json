@@ -4,7 +4,7 @@
   "title_with_device": "Memory Bank <span class=\"sub\" style=\"color:var(--text-3);font-weight:400;font-size:14px;margin-left:10px\">· {device}</span>{form}",
   "picker": {
     "label": "Pack",
-    "empty_option": "— no pack —"
+    "empty_option": "(no pack)"
   },
   "search": {
     "placeholder": "Filter the pack (refdes, symptom, mechanism…)",
@@ -46,7 +46,7 @@
     "graph_count": "<b>{n}</b> nodes · <b>{e}</b> edges"
   },
   "registry": {
-    "missing": "registry.json missing — pipeline not run.",
+    "missing": "registry.json missing. Pipeline not run.",
     "components_heading": "Components ({n})",
     "signals_heading": "Signals ({n})",
     "no_components": "No components.",
@@ -87,10 +87,10 @@
     "th_notes": "Notes"
   },
   "audit": {
-    "missing": "audit_verdict.json missing — the pipeline has not audited this pack yet.",
-    "headline_approved": "Audit approved — the pack is consistent with the registry.",
-    "headline_needs_revision": "Audit requests revision — drift detected, fixes expected.",
-    "headline_rejected": "Audit rejected — pack inconsistent, unusable as-is.",
+    "missing": "audit_verdict.json missing. The pipeline has not audited this pack yet.",
+    "headline_approved": "Audit approved: the pack is consistent with the registry.",
+    "headline_needs_revision": "Audit: revision requested. Drift detected, fixes expected.",
+    "headline_rejected": "Audit rejected: pack inconsistent, unusable as-is.",
     "headline_unknown": "Unknown audit status.",
     "files_to_rewrite": "Files to rewrite",
     "drift_heading": "Drift detected ({n})"

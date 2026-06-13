@@ -181,7 +181,7 @@ export const SimulationController = {
         <button data-act="play-pause">▶</button>
         <button data-act="step-fwd" title="${t("schematic.simulator.step_fwd_title")}">▶</button>
         <input type="range" min="0" max="0" step="1" value="0" />
-        <span class="sim-phase-label">—</span>
+        <span class="sim-phase-label">…</span>
         <span class="sim-blocked-overlay" hidden></span>
         <button data-act="close" class="sim-scrubber-close" title="${t("schematic.simulator.close_title")}">×</button>
       `;
@@ -226,7 +226,7 @@ export const SimulationController = {
     const el = document.querySelector(".sim-scrubber");
     if (!el) return;
     const state = this.timeline?.states?.[this.cursor];
-    const label = state ? `Φ${state.phase_index} · ${state.phase_name}` : "—";
+    const label = state ? `Φ${state.phase_index} · ${state.phase_name}` : "…";
     el.querySelector(".sim-phase-label").textContent = label;
     const overlay = el.querySelector(".sim-blocked-overlay");
     if (state?.blocked) {
@@ -257,7 +257,7 @@ export const SimulationController = {
 
     // Nodes — we rely on the existing graph renderer having attached
     // `data-refdes` / `data-rail` / `data-signal` on each selectable element.
-    // If the attributes aren't wired yet (Task 13), this is a no-op for those
+    // If the attributes aren't wired yet, this is a no-op for those
     // classes; the scrubber itself still renders.
     for (const [refdes, st] of Object.entries(state.components || {})) {
       document.querySelectorAll(`[data-refdes="${CSS.escape(refdes)}"]`).forEach((el) => {
@@ -362,7 +362,7 @@ export const SimulationController = {
       // Keep the latest event per target (events are stored in insertion order).
       const latest = new Map();
       for (const ev of events) latest.set(ev.target, ev);
-      this.measurementHistory = events;  // full journal, used by T19 timeline
+      this.measurementHistory = events;  // full journal, used by the timeline
       const COMP_MODES = new Set(["dead", "alive", "anomalous", "hot"]);
       const RAIL_MODES = new Set(["dead", "alive", "shorted", "stuck_on"]);
       for (const [target, ev] of latest) {
@@ -996,9 +996,9 @@ const GRID_LEFT = 180;  // x of the first column's center
 // Voltage rows, top→bottom. Signal-only nodes fall into the last row.
 const V_ROWS = [
   { id: "vHi",   label: "≥ 12 V",  min: 12,        max: Infinity },
-  { id: "v5_11", label: "5–11 V",  min: 5,         max: 11.999   },
+  { id: "v5_11", label: "5-11 V",  min: 5,         max: 11.999   },
   { id: "v3v3",  label: "3V3",     min: 3,         max: 4.999    },
-  { id: "v1v8",  label: "1V8–2V5", min: 1.2001,    max: 2.999    },
+  { id: "v1v8",  label: "1V8-2V5", min: 1.2001,    max: 2.999    },
   { id: "vCore", label: "≤ 1V2",   min: 0.01,      max: 1.2      },
   { id: "vSig",  label: "Signaux", min: null,      max: null     },
 ];
@@ -1611,7 +1611,7 @@ function renderRailBar(model) {
       const consumerCount = (rail.consumers || []).length;
       const voltageLbl = rail.voltage_nominal != null
         ? `${rail.voltage_nominal} V`
-        : "—";
+        : "n/a";
       const sourceLbl = rail.source_refdes
         ? `<span class="sch-rail-source">${escHtml(rail.source_refdes)}</span>`
         : `<span class="sch-rail-source external">${escHtml(t("schematic.railbar.external_supply"))}</span>`;
@@ -2442,7 +2442,7 @@ function updateInspector(node) {
     typeBadge.textContent = t("schematic.inspector.type_rail");
     typeBadge.className = "sch-type-badge rail";
     title.textContent = node.label;
-    sub.textContent = (node.voltage_nominal != null ? `${node.voltage_nominal} V` : "—") + " · " + (node.source_type || "—");
+    sub.textContent = (node.voltage_nominal != null ? `${node.voltage_nominal} V` : "n/a") + " · " + (node.source_type || "n/a");
 
     const cascade = computeCascade(STATE.model, node.id);
     const casDead = Array.from(cascade).filter(id => id !== node.id);
@@ -2454,9 +2454,9 @@ function updateInspector(node) {
         <h3>${escHtml(t("schematic.inspector.supply"))}</h3>
         <div class="sch-meta-grid">
           <dt>${escHtml(t("schematic.inspector.supply_producer"))}</dt><dd>${node.source_refdes ? `<span class="mono chip cyan clickable" data-id="comp:${escHtml(node.source_refdes)}">${escHtml(node.source_refdes)}</span>` : `<span class='muted'>${escHtml(t("schematic.inspector.supply_external"))}</span>`}</dd>
-          <dt>${escHtml(t("schematic.inspector.supply_type"))}</dt><dd>${escHtml(node.source_type || "—")}</dd>
-          <dt>${escHtml(t("schematic.inspector.supply_enable"))}</dt><dd>${node.enable_net ? `<span class="mono">${escHtml(node.enable_net)}</span>` : "—"}</dd>
-          <dt>${escHtml(t("schematic.inspector.supply_boot"))}</dt><dd>${node.phase ? `<span class="mono chip amber">Φ${node.phase}</span>` : "—"}</dd>
+          <dt>${escHtml(t("schematic.inspector.supply_type"))}</dt><dd>${escHtml(node.source_type || "n/a")}</dd>
+          <dt>${escHtml(t("schematic.inspector.supply_enable"))}</dt><dd>${node.enable_net ? `<span class="mono">${escHtml(node.enable_net)}</span>` : "n/a"}</dd>
+          <dt>${escHtml(t("schematic.inspector.supply_boot"))}</dt><dd>${node.phase ? `<span class="mono chip amber">Φ${node.phase}</span>` : "n/a"}</dd>
         </div>
       </section>
       <section class="sch-insp-section">
@@ -2485,7 +2485,7 @@ function updateInspector(node) {
     typeBadge.className = `sch-type-badge ${node.role || "component"}`;
     title.textContent = node.refdes;
     const v = node.value && (node.value.primary || node.value.raw);
-    sub.textContent = `${v || "—"}${node.value?.package ? ` · ${node.value.package}` : ""}`;
+    sub.textContent = `${v || "…"}${node.value?.package ? ` · ${node.value.package}` : ""}`;
 
     const producesRails = (STATE.model.edges || []).filter(e => e.kind === "produces" && e.sourceId === node.id).map(e => e.netLabel);
     const consumesRails = (STATE.model.edges || []).filter(e => e.kind === "powers" && e.targetId === node.id).map(e => e.netLabel);
@@ -2500,11 +2500,11 @@ function updateInspector(node) {
         <h3>${escHtml(t("schematic.inspector.metadata"))}</h3>
         <div class="sch-meta-grid">
           <dt>${escHtml(t("schematic.inspector.meta_role"))}</dt><dd><span class="sch-role-badge role-${node.role}">${escHtml(node.role)}</span></dd>
-          <dt>${escHtml(t("schematic.inspector.meta_type"))}</dt><dd>${escHtml(node.type || "—")}</dd>
-          <dt>${escHtml(t("schematic.inspector.meta_pages"))}</dt><dd>${node.pages && node.pages.length ? escHtml(t("schematic.inspector.meta_pages_value", { pages: node.pages.join(", ") })) : "—"}</dd>
+          <dt>${escHtml(t("schematic.inspector.meta_type"))}</dt><dd>${escHtml(node.type || "n/a")}</dd>
+          <dt>${escHtml(t("schematic.inspector.meta_pages"))}</dt><dd>${node.pages && node.pages.length ? escHtml(t("schematic.inspector.meta_pages_value", { pages: node.pages.join(", ") })) : "n/a"}</dd>
           <dt>${escHtml(t("schematic.inspector.meta_populated"))}</dt><dd>${node.populated ? escHtml(t("schematic.inspector.meta_populated_yes")) : `<span class='warn'>${escHtml(t("schematic.inspector.meta_populated_no"))}</span>`}</dd>
-          <dt>${escHtml(t("schematic.inspector.meta_mpn"))}</dt><dd>${node.value?.mpn ? `<span class="mono">${escHtml(node.value.mpn)}</span>` : "—"}</dd>
-          <dt>${escHtml(t("schematic.inspector.meta_boot"))}</dt><dd>${node.phase ? `<span class="mono chip amber">Φ${node.phase}</span>` : "—"}</dd>
+          <dt>${escHtml(t("schematic.inspector.meta_mpn"))}</dt><dd>${node.value?.mpn ? `<span class="mono">${escHtml(node.value.mpn)}</span>` : "n/a"}</dd>
+          <dt>${escHtml(t("schematic.inspector.meta_boot"))}</dt><dd>${node.phase ? `<span class="mono chip amber">Φ${node.phase}</span>` : "n/a"}</dd>
         </div>
       </section>
       ${producesRails.length ? `
@@ -2541,9 +2541,9 @@ function updateInspector(node) {
           ${node.pinsAll.map(p => `
             <tr>
               <td class="mono">${escHtml(p.number)}</td>
-              <td class="mono">${escHtml(p.name || "—")}</td>
+              <td class="mono">${escHtml(p.name || "…")}</td>
               <td class="mono pin-role">${escHtml(p.role || t("schematic.inspector.pin_unknown_role"))}</td>
-              <td class="mono">${p.net_label ? `<span class="chip emerald">${escHtml(p.net_label)}</span>` : "—"}</td>
+              <td class="mono">${p.net_label ? `<span class="chip emerald">${escHtml(p.net_label)}</span>` : "n/a"}</td>
             </tr>`).join("")}
           </tbody>
         </table>
@@ -2672,11 +2672,11 @@ function updateInspector(node) {
       let prev = null;
       const rows = recent.map(ev => {
         const ts = (ev.timestamp || "").slice(11, 19);  // HH:MM:SS
-        const val = ev.value != null ? `${ev.value}${ev.unit || ""}` : "—";
+        const val = ev.value != null ? `${ev.value}${ev.unit || ""}` : "n/a";
         const ratio = (ev.value != null && ev.nominal)
           ? ` (${((ev.value / ev.nominal) * 100).toFixed(0)}%)`
           : "";
-        const mode = ev.auto_classified_mode || "—";
+        const mode = ev.auto_classified_mode || "…";
         const note = ev.note ? ` · « ${escHtml(ev.note)} »` : "";
         const delta = (prev && ev.value != null && prev.value != null)
           ? ` Δ${(ev.value - prev.value).toFixed(3)}`
@@ -2980,8 +2980,8 @@ function updateStats(model, graph) {
   el("schStatRegs").innerHTML   = ratio(sourceShown, tot.sources    ?? sourceShown);
   el("schStatPhases").textContent = tot.phases ?? (graph.boot_sequence || []).length;
   const q = graph.quality || {};
-  el("schStatConf").textContent   = q.confidence_global != null ? q.confidence_global.toFixed(2) : "—";
-  el("schStatPages").textContent  = q.pages_parsed != null ? `${q.pages_parsed}/${q.total_pages}` : "—";
+  el("schStatConf").textContent   = q.confidence_global != null ? q.confidence_global.toFixed(2) : "n/a";
+  el("schStatPages").textContent  = q.pages_parsed != null ? `${q.pages_parsed}/${q.total_pages}` : "n/a";
 
   // Dégradé badge + tooltip explaining WHICH threshold triggered it
   // (compiler criteria: confidence_global < 0.7 OR orphan_cross_page > 5).

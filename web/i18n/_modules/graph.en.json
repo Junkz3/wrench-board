@@ -1,7 +1,7 @@
 {
   "empty": {
     "title": "No graph loaded",
-    "body": "Run the generation pipeline on a device — the graph will be built from the resulting pack."
+    "body": "Run the generation pipeline on a device: the graph will be built from the resulting pack."
   },
   "legend": {
     "types_heading": "Types",
@@ -39,9 +39,9 @@
     "edge_outgoing": "→",
     "edge_incoming": "←",
     "rules_field": "rules",
-    "conf_high": "High confidence — corroborated by multiple sources.",
-    "conf_low": "Low confidence — single source or indirect inference.",
-    "conf_medium": "Moderate confidence — partial cross-reference."
+    "conf_high": "High confidence: corroborated by multiple sources.",
+    "conf_low": "Low confidence: single source or indirect inference.",
+    "conf_medium": "Moderate confidence: partial cross-reference."
   },
   "tooltip": {
     "conf_pct": "conf. {pct}%"

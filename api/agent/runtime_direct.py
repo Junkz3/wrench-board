@@ -26,6 +26,7 @@ from fastapi import WebSocket, WebSocketDisconnect
 from api.agent import cloud_metering
 from api.agent.chat_history import (
     append_event,
+    build_board_refresh_note,
     build_ctx_tag,
     build_session_intro,
     ensure_conversation,
@@ -36,10 +37,16 @@ from api.agent.chat_history import (
     touch_conversation,
     touch_status,
 )
+from api.agent.cousin_hint import build_cousin_line
 from api.agent.dispatch_bv import dispatch_bv
 from api.agent.macros import persist_macro
-from api.agent.manifest import build_tools_manifest, render_system_prompt
+from api.agent.manifest import (
+    _has_electrical_graph,
+    build_tools_manifest,
+    render_system_prompt,
+)
 from api.agent.owner_ref import current_owner_ref, set_owner_ref
+from api.agent.session_caps import set_can_expand
 from api.agent.pricing import cost_from_response
 from api.agent.sanitize import sanitize_agent_text
 from api.agent.tools import (
@@ -320,7 +327,7 @@ async def _run_agent_turn(
         cost = cost_from_response(model, response.usage)
         await ws.send_json({"type": "turn_cost", **cost})
 
-        # T13/T16 — report this LLM call's raw token usage to the cloud (the
+        # Report this LLM call's raw token usage to the cloud (the
         # tenant-private billing unit), keeping the direct runtime at parity
         # with runtime_managed's span.model_request_end hook. Without it,
         # `DIAGNOSTIC_MODE=direct` would spend API credit while the cloud's
@@ -432,6 +439,11 @@ async def _run_agent_turn(
                     conv_id=conv_id,
                 )
             elif block.name.startswith("bv_"):
+                # Same pre-dispatch refresh as the managed runtime's
+                # dispatch_tool: a boardview switched mid-turn (re-upload
+                # while the agent is in a tool loop) reloads before the
+                # refdes validation runs. Cheap no-op when unchanged.
+                session.refresh_board_if_changed()
                 result = dispatch_bv(session, block.name, block.input or {})
             elif block.name.startswith("profile_"):
                 result = _dispatch_profile_tool(block.name, block.input or {}, session=session)
@@ -1162,6 +1174,7 @@ async def run_diagnostic_session_direct(
     repair_id: str | None = None,
     conv_id: str | None = None,
     owner_ref: str | None = None,
+    can_expand: bool = True,
 ) -> None:
     """Run a direct-mode diagnostic session over `ws` for `device_slug`.
 
@@ -1178,8 +1191,13 @@ async def run_diagnostic_session_direct(
 
     `owner_ref` (the tenant id from the cloud's X-Owner-Ref header) binds the
     session to its tenant so owner-sensitive tools (stock) stay isolated.
+
+    `can_expand` (the cloud's X-Wb-Can-Expand verdict) gates the paid pack
+    enrichment tool: False (free plan) drops `mb_expand_knowledge` from the
+    manifest so the agent never proposes it. True / self-host = unrestricted.
     """
     set_owner_ref(owner_ref)
+    set_can_expand(can_expand)
     settings = get_settings()
     if not settings.anthropic_api_key:
         await ws.accept()
@@ -1319,9 +1337,16 @@ async def run_diagnostic_session_direct(
                 )
 
     # NOTE: prompt + manifest are a snapshot of the session at open time.
-    # If a future task supports loading a board mid-session, both must be
-    # recomputed after `session.set_board(...)`.
-    system_prompt = render_system_prompt(session, device_slug=device_slug)
+    # The user-turn loop below re-checks the active boardview each turn
+    # (`refresh_board_if_changed`) and recomputes both when it changed.
+    # When this board has no schematic of its own, offer the agent a
+    # same-family sibling pack as an indicative fallback reference.
+    cousin_line = None
+    if not _has_electrical_graph(device_slug):
+        cousin_line = await build_cousin_line(device_slug)
+    system_prompt = render_system_prompt(
+        session, device_slug=device_slug, cousin_line=cousin_line
+    )
     tools = build_tools_manifest(session)
 
     # Load prior history (+ per-turn costs) when reopening a persisted repair —
@@ -1654,7 +1679,27 @@ async def run_diagnostic_session_direct(
                 )
                 first_user_seen = True
 
-            tagged_text = f"{ctx_tag}\n\n{user_text}" if ctx_tag else user_text
+            # Board snapshot refresh — a boardview imported mid-session is
+            # invisible otherwise: the manifest (gating bv_*) and the system
+            # prompt's "boardview ❌" line were computed at WS open. When the
+            # active board changed, recompute both and tell the agent inline
+            # via a ctx-style note that `strip_ctx_tag` drops from replays.
+            board_note: str | None = None
+            if session.refresh_board_if_changed():
+                system_prompt = render_system_prompt(
+                    session, device_slug=device_slug, cousin_line=cousin_line
+                )
+                tools = build_tools_manifest(session)
+                board_note = build_board_refresh_note(
+                    session.board, session.board_source
+                )
+                logger.info(
+                    "[Diag-Direct] board (re)loaded mid-session from %s",
+                    session.board_source,
+                )
+
+            prefix = "\n".join(line for line in (ctx_tag, board_note) if line)
+            tagged_text = f"{prefix}\n\n{user_text}" if prefix else user_text
             user_msg = {"role": "user", "content": tagged_text}
             messages.append(user_msg)
             if resolved_conv_id and not is_trigger:

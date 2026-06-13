@@ -1,35 +1,35 @@
-"""T8 — Migration in-place idempotente du layout legacy vers T8.
+"""Idempotent in-place migration from the legacy layout to the provenance layout.
 
-Déclenchée au premier accès à un slug (cf. _load_pack dans api/agent/tools.py
-après T8 — Task 5) ou explicitement par la CLI admin.
+Triggered on first access to a slug (see _load_pack in api/agent/tools.py) or
+explicitly by the admin CLI.
 
-Stratégie :
-1. Si .migrated_t8 existe → no-op
-2. Si registry.json existe à la racine (layout pré-T8 détecté) → on migre :
-   - init_pack_layout crée baseline/promoted/_staged/expansions/audit
-   - les 4 JSON pack sont déplacés vers baseline/ en attachant une Provenance
-     synthétique baseline-pre-T8 à chaque fact ({items: [...], _meta: {...}})
-   - raw_research_dump.md est déplacé vers audit/ (privé / audit moteur)
-   - une ligne 'baseline-pre-T8' est ajoutée au journal (status=baseline,
-     non-revocable par design — cf. revoke_expansion dans pack_storage.py)
+Strategy:
+1. If .migrated_t8 exists → no-op
+2. If registry.json exists at the root (legacy layout detected) → migrate:
+   - init_pack_layout creates baseline/promoted/_staged/expansions/audit
+   - the 4 pack JSONs are moved into baseline/, attaching a synthetic
+     baseline-pre-T8 Provenance to each fact ({items: [...], _meta: {...}})
+   - raw_research_dump.md is moved into audit/ (private / engine audit)
+   - a 'baseline-pre-T8' line is appended to the journal (status=baseline,
+     non-revocable by design — see revoke_expansion in pack_storage.py)
 3. touch .migrated_t8
 
-Idempotent : un crash en cours peut laisser un pack à moitié migré ; le
-prochain appel détectera l'absence du flag et reprendra. Chaque fichier est
-traité avec write-then-rename (_atomic_write_json) ; si la destination existe
-déjà (reprise), on supprime juste la source legacy.
+Idempotent: a crash mid-run can leave a pack half-migrated; the next call
+detects the missing flag and resumes. Each file is handled with
+write-then-rename (_atomic_write_json); if the destination already exists
+(resume), the legacy source is simply removed.
 
-Formats legacy hétérogènes normalisés en {items: [...]} T8.
-Clés portant les listes, vérifiées contre les packs réels sur disque :
-  registry.json       : {"components": [...], "signals": [...]} → concaténés
+Heterogeneous legacy formats are normalized to {items: [...]}.
+List-bearing keys, verified against the real packs on disk:
+  registry.json       : {"components": [...], "signals": [...]} → concatenated
   rules.json          : {"rules": [...]}
-  knowledge_graph.json: {"nodes": [...], "edges": [...]} → concaténés
-  dictionary.json     : {"entries": [...]}  ← 'entries', PAS 'components'
+  knowledge_graph.json: {"nodes": [...], "edges": [...]} → concatenated
+  dictionary.json     : {"entries": [...]}  ← 'entries', NOT 'components'
 
-Les clés non-liste (schema_version, device_label, taxonomy, …) sont
-préservées sous une clé _meta dans le fichier baseline migré — zéro perte.
-load_effective_pack ignore _meta (il ne lit que items) ; Task 5 câblera
-taxonomy/device_label à partir de _meta quand le loader en aura besoin.
+Non-list keys (schema_version, device_label, taxonomy, …) are preserved under
+a _meta key in the migrated baseline file — zero loss. load_effective_pack
+ignores _meta (it only reads items); the loader wires taxonomy/device_label
+from _meta when it needs them.
 """
 
 from __future__ import annotations
@@ -47,7 +47,7 @@ from api.pipeline.pack_storage import (
     read_journal,
 )
 
-# Mapping: nom du fichier legacy → (nom cible dans baseline/, clé d'items dans le legacy JSON)
+# Mapping: legacy filename → (target name in baseline/, items key in the legacy JSON)
 _LEGACY_FILE_TO_T8: dict[str, tuple[str, str]] = {
     "registry.json":       ("registry.json",       "registry"),
     "rules.json":          ("rules.json",           "rules"),
@@ -57,12 +57,13 @@ _LEGACY_FILE_TO_T8: dict[str, tuple[str, str]] = {
 
 
 def migrate_pack_if_needed(memory_root: Path, slug: str) -> None:
-    """Point d'entrée idempotent. Coûte un stat() si déjà migré.
+    """Idempotent entry point. Costs one stat() if already migrated.
 
-    - Si le répertoire slug n'existe pas → no-op silencieux.
-    - Si .migrated_t8 est présent → no-op (pack déjà au format T8).
-    - Si aucun fichier legacy n'est détecté (répertoire vide, ou déjà partiellement
-      migré sans flag) → crée le layout + pose le flag sans écriture de journal.
+    - If the slug directory does not exist → silent no-op.
+    - If .migrated_t8 is present → no-op (pack already in the migrated format).
+    - If no legacy file is detected (empty directory, or already partially
+      migrated without the flag) → create the layout + set the flag with no
+      journal write.
     """
     pack = memory_root / slug
     if not pack.is_dir():
@@ -72,7 +73,7 @@ def migrate_pack_if_needed(memory_root: Path, slug: str) -> None:
     if flag.is_file():
         return
 
-    # Crée les sous-répertoires T8 (idempotent).
+    # Create the layout subdirectories (idempotent).
     init_pack_layout(memory_root, slug)
 
     legacy_present = any((pack / fname).is_file() for fname in _LEGACY_FILE_TO_T8)
@@ -82,24 +83,24 @@ def migrate_pack_if_needed(memory_root: Path, slug: str) -> None:
         _migrate_raw_dump(pack)
         _create_baseline_journal_entry(memory_root, slug, pack)
 
-    # Le flag est posé inconditionnellement — même pour un répertoire vide.
-    # Hypothèse valide : les packs new-pipeline (post-T8) écrivent directement
-    # au format T8 natif ; les fichiers legacy, s'il y en a, sont TOUJOURS
-    # déjà présents avant le premier appel à migrate_pack_if_needed (qui est
-    # déclenché depuis _load_pack, après que le build du pack ait terminé).
-    # Un répertoire slug vide = pack new-pipeline, aucune migration nécessaire.
+    # The flag is set unconditionally — even for an empty directory.
+    # Valid assumption: new-pipeline packs write directly in the native
+    # format; legacy files, if any, are ALWAYS present before the first call
+    # to migrate_pack_if_needed (which is triggered from _load_pack, after the
+    # pack build has finished). An empty slug directory = new-pipeline pack,
+    # no migration needed.
     flag.touch()
 
 
 def _migrate_legacy_files(pack: Path) -> None:
-    """Déplace les 4 JSON legacy vers baseline/ en wrappant chaque entrée
-    avec une Provenance synthétique baseline-pre-T8.
+    """Move the 4 legacy JSONs into baseline/, wrapping each entry with a
+    synthetic baseline-pre-T8 Provenance.
 
-    Pré-condition : au moins un fichier legacy est présent (vérifiée par
-    l'appelant via `legacy_present`), donc max() sur un itérateur non-vide.
+    Precondition: at least one legacy file is present (checked by the caller
+    via `legacy_present`), so max() runs over a non-empty iterator.
     """
-    # Utilise le mtime du fichier le plus récent comme timestamp de provenance
-    # (approximation de la date de création du pack original).
+    # Use the most recent file's mtime as the provenance timestamp
+    # (an approximation of the original pack's creation date).
     file_mtime = max(
         (pack / fname).stat().st_mtime
         for fname in _LEGACY_FILE_TO_T8
@@ -122,28 +123,28 @@ def _migrate_legacy_files(pack: Path) -> None:
         dst = pack / "baseline" / t8_name
         if not src.is_file():
             continue
-        # Reprise d'un crash : la destination existe déjà → supprime la source.
+        # Crash resume: the destination already exists → remove the source.
         if dst.is_file():
             src.unlink(missing_ok=True)
             continue
         try:
             legacy_data = json.loads(src.read_text(encoding="utf-8"))
         except json.JSONDecodeError:
-            # JSON corrompu : on supprime et on laisse baseline vide pour ce fichier.
+            # Corrupt JSON: remove it and leave baseline empty for this file.
             src.unlink(missing_ok=True)
             continue
 
         items = _flatten_legacy_payload(legacy_data, items_field)
-        # Clés non-liste à conserver (schema_version, device_label, taxonomy, …).
-        # _meta est préservé-mais-pas-encore-consommé par load_effective_pack ;
-        # Task 5 câblera taxonomy/device_label à partir de _meta.
+        # Non-list keys to keep (schema_version, device_label, taxonomy, …).
+        # _meta is preserved-but-not-yet-consumed by load_effective_pack;
+        # the loader wires taxonomy/device_label from _meta later.
         list_keys = _LIST_KEYS[items_field]
         meta = {k: v for k, v in legacy_data.items() if k not in list_keys}
 
         for it in items:
-            # Ne pas écraser une provenance déjà présente (pack semi-migré).
-            # deep-copy : chaque fact a sa propre liste sanitizer_actions —
-            # pas d'alias partagé entre facts (évite les mutations silencieuses).
+            # Do not overwrite a provenance already present (half-migrated pack).
+            # deep-copy: each fact gets its own sanitizer_actions list —
+            # no shared alias between facts (avoids silent mutations).
             it.setdefault("_provenance", copy.deepcopy(base_prov))
 
         payload: dict = {"items": items}
@@ -153,25 +154,25 @@ def _migrate_legacy_files(pack: Path) -> None:
         src.unlink()
 
 
-# Clés portant les listes pour chaque type de fichier.
-# Vérifiées contre les packs réels sur disque (STEP 0 — 2026-05-28).
-# Toute clé absente de ce tuple est considérée métadonnée et préservée dans _meta.
+# List-bearing keys for each file type.
+# Verified against the real packs on disk.
+# Any key absent from this tuple is treated as metadata and preserved in _meta.
 _LIST_KEYS: dict[str, tuple[str, ...]] = {
     "registry":       ("components", "signals"),
     "rules":          ("rules",),
     "knowledge_graph": ("nodes", "edges"),
-    "dictionary":     ("entries",),   # 'entries' — PAS 'components' (bug corrigé)
+    "dictionary":     ("entries",),   # 'entries', NOT 'components' (bug fixed)
 }
 
 
 def _flatten_legacy_payload(legacy_data: dict, kind: str) -> list[dict]:
-    """Normalise les formats hétérogènes du pack legacy en une liste plate d'items.
+    """Normalize the heterogeneous legacy pack formats into a flat list of items.
 
-    Clés portant les listes (vérifiées contre les packs réels) :
-      registry.json       → components + signals concaténés
+    List-bearing keys (verified against the real packs):
+      registry.json       → components + signals concatenated
       rules.json          → rules
-      knowledge_graph.json→ nodes + edges concaténés
-      dictionary.json     → entries  (PAS 'components' comme supposé à tort dans le plan)
+      knowledge_graph.json→ nodes + edges concatenated
+      dictionary.json     → entries  (NOT 'components', as originally assumed)
     """
     if kind == "registry":
         return (
@@ -186,22 +187,22 @@ def _flatten_legacy_payload(legacy_data: dict, kind: str) -> list[dict]:
             + list(legacy_data.get("edges") or [])
         )
     if kind == "dictionary":
-        # BUG CORRIGÉ : le schéma Dictionary et tous les packs réels utilisent
-        # 'entries', pas 'components'. Lire 'components' produisait {items: []}
-        # (liste vide) et déliait la source → perte définitive des fiches composants.
+        # BUG FIXED: the Dictionary schema and all real packs use 'entries',
+        # not 'components'. Reading 'components' produced {items: []} (empty
+        # list) and dropped the source → permanent loss of component entries.
         return list(legacy_data.get("entries") or [])
-    # Cas exhaustif — ne devrait jamais arriver vu _LEGACY_FILE_TO_T8.
+    # Exhaustive case — should never happen given _LEGACY_FILE_TO_T8.
     return []
 
 
 def _migrate_raw_dump(pack: Path) -> None:
-    """Déplace raw_research_dump.md vers audit/ (données brutes, privé moteur)."""
+    """Move raw_research_dump.md into audit/ (raw data, engine-private)."""
     src = pack / "raw_research_dump.md"
     if not src.is_file():
         return
     dst = pack / "audit" / "raw_research_dump.md"
     if dst.is_file():
-        # Reprise : destination déjà présente, source à nettoyer.
+        # Resume: destination already present, source to clean up.
         src.unlink(missing_ok=True)
         return
     dst.write_text(src.read_text(encoding="utf-8"), encoding="utf-8")
@@ -209,17 +210,17 @@ def _migrate_raw_dump(pack: Path) -> None:
 
 
 def _create_baseline_journal_entry(memory_root: Path, slug: str, pack: Path) -> None:
-    """Ajoute la ligne baseline-pre-T8 au journal si elle n'y est pas encore.
+    """Append the baseline-pre-T8 line to the journal if not already there.
 
-    Cette entrée est non-revocable par design (voir revoke_expansion dans
-    pack_storage.py qui refuse explicitement expansion_id == 'baseline-pre-T8').
+    This entry is non-revocable by design (see revoke_expansion in
+    pack_storage.py, which explicitly refuses expansion_id == 'baseline-pre-T8').
     """
     existing = list(read_journal(memory_root, slug))
     if any(e.id == "baseline-pre-T8" for e in existing):
         return
 
-    # Le mtime des fichiers baseline est notre meilleure approximation du
-    # moment de création du pack original.
+    # The baseline files' mtime is our best approximation of the original
+    # pack's creation time.
     baseline_dir = pack / "baseline"
     ts = datetime.now(UTC)
     for fname in _LEGACY_FILE_TO_T8:

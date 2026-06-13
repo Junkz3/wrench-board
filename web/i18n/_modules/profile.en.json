@@ -53,7 +53,7 @@
   },
   "drawer": {
     "close": "Close",
-    "no_history": "No history for this skill yet — it will be tracked as soon as the agent detects a confirmed use."
+    "no_history": "No history for this skill yet. It will be tracked as soon as the agent detects a confirmed use."
   },
   "prefs": {
     "verbosity": "Verbosity",

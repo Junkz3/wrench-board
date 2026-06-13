@@ -28,9 +28,9 @@
   },
   "metabar": {
     "no_repair": "Aucune réparation en cours",
-    "no_memory_for_device": "Aucune mémoire pour ce device — crée une réparation pour la construire.",
+    "no_memory_for_device": "Aucune mémoire pour ce device. Crée une réparation pour la construire.",
     "memory_loaded_approved": "Mémoire chargée · audit APPROUVÉ",
-    "memory_building_missing": "Mémoire en construction — manque {missing}",
+    "memory_building_missing": "Mémoire en construction, manque {missing}",
     "open_repair_to_view_graph": "Ouvre une réparation depuis le Journal pour voir son graphe."
   }
 }

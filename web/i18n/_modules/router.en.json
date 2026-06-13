@@ -28,9 +28,9 @@
   },
   "metabar": {
     "no_repair": "No active repair",
-    "no_memory_for_device": "No memory for this device — create a repair to build it.",
+    "no_memory_for_device": "No memory for this device. Create a repair to build it.",
     "memory_loaded_approved": "Memory loaded · audit APPROVED",
-    "memory_building_missing": "Memory building — missing {missing}",
+    "memory_building_missing": "Memory building, missing {missing}",
     "open_repair_to_view_graph": "Open a repair from the journal to view its graph."
   }
 }

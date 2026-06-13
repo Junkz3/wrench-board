@@ -543,3 +543,130 @@ def test_coalesced_alias_label_is_rewritten_on_component_pins():
     u_die = elec.components["U_DIE"]
     assert u_die.pins[0].net_label == "PP_PKG"  # rewritten to canonical
     assert "U_DIE" in elec.power_rails["PP_PKG"].consumers
+
+
+# ----------------------------------------------------------------------
+# Edge-only consumers (vision emitted wiring but no pins) must become
+# killable: the simulator's cascade is purely pin-driven, so a pin-less
+# consumer kept by _scrub_phantom_consumers ("trust the edge") could
+# never die with its rail — INV-5 break, first seen on macbook-air-m1
+# U7550 (powered_by PPBUS_AON, zero pins on page 79).
+# ----------------------------------------------------------------------
+
+
+def _edge_only_consumer_graph() -> SchematicGraph:
+    components = {
+        "U_SRC": ComponentNode(
+            refdes="U_SRC", type="ic", pages=[1],
+            pins=[PagePin(number="2", role="power_out", net_label="PP_MAIN")],
+        ),
+        # Pin-less consumer — vision saw the powered_by edge, no pins.
+        "U_EDGE": ComponentNode(refdes="U_EDGE", type="ic", pages=[1], pins=[]),
+        # Consumer with pins but none on PP_MAIN — phantom, must stay scrubbed.
+        "U_PHANTOM": ComponentNode(
+            refdes="U_PHANTOM", type="ic", pages=[1],
+            pins=[PagePin(number="1", role="power_in", net_label="PP_OTHER")],
+        ),
+    }
+    nets = {
+        "PP_MAIN": NetNode(label="PP_MAIN", is_power=True, pages=[1],
+                           connects=["U_SRC.2"]),
+        "PP_OTHER": NetNode(label="PP_OTHER", is_power=True, pages=[1],
+                            connects=["U_PHANTOM.1"]),
+    }
+    edges = [
+        TypedEdge(src="U_SRC", dst="PP_MAIN", kind="powers", page=1),
+        TypedEdge(src="U_EDGE", dst="PP_MAIN", kind="powered_by", page=1),
+        TypedEdge(src="U_PHANTOM", dst="PP_MAIN", kind="powered_by", page=1),
+    ]
+    return SchematicGraph(
+        device_slug="edge-only", source_pdf="x.pdf", page_count=1,
+        components=components, nets=nets, typed_edges=edges,
+    )
+
+
+def test_edge_only_consumer_gets_synthetic_power_in_pin():
+    elec = compile_electrical_graph(_edge_only_consumer_graph())
+    rail = elec.power_rails["PP_MAIN"]
+    assert "U_EDGE" in rail.consumers
+    pins = elec.components["U_EDGE"].pins
+    assert len(pins) == 1
+    assert pins[0].role == "power_in"
+    assert pins[0].net_label == "PP_MAIN"
+    # The phantom keeps its real pins untouched and stays scrubbed.
+    assert "U_PHANTOM" not in rail.consumers
+    assert [p.net_label for p in elec.components["U_PHANTOM"].pins] == ["PP_OTHER"]
+
+
+def test_edge_only_consumer_dies_with_its_rail():
+    """End-to-end INV-5 contract on the mini-fixture: kill the rail source,
+    the edge-only consumer must land in cascade_dead_components."""
+    from api.pipeline.schematic.simulator import Failure, SimulationEngine
+
+    elec = compile_electrical_graph(_edge_only_consumer_graph())
+    tl = SimulationEngine(
+        elec, failures=[Failure(refdes="U_SRC", mode="dead")]
+    ).run()
+    assert "PP_MAIN" in tl.cascade_dead_rails
+    assert "U_EDGE" in tl.cascade_dead_components
+
+
+# ----------------------------------------------------------------------
+# Untraced-component evidence stamping
+# ----------------------------------------------------------------------
+
+
+def _alias_page_graph() -> SchematicGraph:
+    """Power-alias-page shape from the A2337 incident: 'U9000' exists only as
+    a section title (zero pins, zero net membership) yet sources a rail via a
+    grouping-inferred `powers` edge; 'U2' is an edge-only consumer."""
+    return SchematicGraph(
+        device_slug="alias-demo",
+        source_pdf="alias-demo.pdf",
+        page_count=1,
+        components={
+            "U9000": ComponentNode(refdes="U9000", type="ic", pages=[79]),
+            "U2": ComponentNode(refdes="U2", type="ic", pages=[79]),
+            "U1": ComponentNode(
+                refdes="U1",
+                type="ic",
+                pages=[79],
+                pins=[
+                    PagePin(number="1", name="VIN", role="power_in", net_label="+5V"),
+                    PagePin(number="2", name="GND", role="ground", net_label="GND"),
+                ],
+            ),
+        },
+        nets={
+            "+5V": NetNode(label="+5V", is_power=True, pages=[79], connects=["U1.1"]),
+        },
+        typed_edges=[
+            TypedEdge(src="U9000", dst="+5V", kind="powers", page=79),
+            TypedEdge(src="U2", dst="+5V", kind="powered_by", page=79),
+        ],
+    )
+
+
+def test_compile_marks_pinless_components_untraced():
+    eg = compile_electrical_graph(_alias_page_graph())
+    assert eg.components["U9000"].evidence == "untraced"
+    assert eg.components["U2"].evidence == "untraced"
+    assert eg.components["U1"].evidence == "traced"
+    assert eg.quality.components_untraced == 2
+
+
+def test_untraced_stamp_survives_synthetic_pin_materialization():
+    """`_synthesize_pins_for_edge_only_consumers` gives edge-only consumers
+    synthetic `number="?"` pins — those must not flip the evidence back."""
+    eg = compile_electrical_graph(_alias_page_graph())
+    u2 = eg.components["U2"]
+    if u2.pins:  # synthesized for the edge-only consumer
+        assert all(p.number == "?" for p in u2.pins)
+    assert u2.evidence == "untraced"
+
+
+def test_untraced_source_still_sources_rail():
+    """Marking is epistemic only — topology is preserved (the rail keeps its
+    inferred producer so the simulator cascade stays intact)."""
+    eg = compile_electrical_graph(_alias_page_graph())
+    assert eg.power_rails["+5V"].source_refdes == "U9000"

@@ -57,6 +57,21 @@ class KicadPcbParser(BoardParser):
         return self._parse_path(path, file_hash=file_hash, board_id=path.stem)
 
     def _parse_path(self, path: Path, *, file_hash: str, board_id: str) -> Board:
+        # Pre-extracted sidecar: pcbnew ships with KiCad (not pip-installable),
+        # so slim deploys (Docker) can't run the extractor. A
+        # `<file>.extract.json` generated where KiCad IS available — see
+        # scripts/gen_kicad_extract.py — is used instead, but ONLY when its
+        # embedded source hash matches the .kicad_pcb bytes (a stale sidecar
+        # silently describing another board would be worse than failing).
+        sidecar = path.parent / (path.name + ".extract.json")
+        if sidecar.is_file():
+            try:
+                payload = json.loads(sidecar.read_text())
+                if payload.get("source_sha256") == file_hash:
+                    return _json_to_board(payload["extract"], file_hash=file_hash, board_id=board_id)
+            except (OSError, ValueError, KeyError):
+                pass  # unreadable/corrupt sidecar → fall through to the extractor
+
         python3 = shutil.which("python3") or "/usr/bin/python3"
         try:
             result = subprocess.run(

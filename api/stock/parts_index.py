@@ -15,6 +15,7 @@ import re
 from datetime import UTC, datetime
 from typing import Literal
 
+from api.pipeline.schematic.schemas import component_is_untraced
 from api.stock.safety import classify_safety
 from api.stock.schemas import PartsIndex, PartsIndexEntry
 
@@ -258,7 +259,15 @@ def build_parts_index(
     boot_sequence = electrical_graph.get("boot_sequence", [])
 
     entries: dict[str, PartsIndexEntry] = {}
+    skipped_untraced = 0
     for refdes, comp in electrical_graph.get("components", {}).items():
+        # Untraced refdes (no pin-level connectivity in the schematic — often
+        # section titles on power-alias pages) are not verified physical parts;
+        # indexing them would let stock_search propose sourcing a part that
+        # does not exist on the board.
+        if component_is_untraced(comp):
+            skipped_untraced += 1
+            continue
         comp_type = comp.get("type", "unknown")
         comp_kind = comp.get("kind", "ic")
         value = comp.get("value")
@@ -294,6 +303,12 @@ def build_parts_index(
             pages=comp.get("pages", []),
         )
 
+    if skipped_untraced:
+        logger.info(
+            "parts_index(%s): skipped %d untraced component(s)",
+            slug,
+            skipped_untraced,
+        )
     return PartsIndex(
         schema_version="1.0",
         device_slug=slug,

@@ -6,9 +6,10 @@
 //
 // No classifier here — the existing pipeline (Scout → Registry → Mapper? →
 // Writers ×3 → Auditor) does device identification + knowledge construction
-// in one shot. The narrator agent (api/pipeline/phase_narrator.py) emits a
-// `phase_narration` event after each phase_finished; we render those into
-// the timeline rows so the technician watches the agent learn.
+// in one shot. The orchestrator emits live `phase_step` events from inside
+// each phase (Scout rounds, schematic pages, each writer completing, audit
+// rounds); we render those into each timeline row's live line + a collapsible
+// "détail" log so the technician watches the agent work in real time.
 
 import { mountMascot, setMascotState } from '../../../mascot.js';
 import { prettifySlug, repairHash, seedSlugForRepair } from '../../../router.js';
@@ -17,6 +18,7 @@ import { escapeHtml as _escapeHtml } from '../../../shared/dom.js';
 import { initProfileMenu, refreshProfileMenu } from './profile_menu.js';
 import { maybeStartOnboarding, preGateOnboarding } from './onboarding.js';
 import { openInfoModal } from '../../../info_modal.js';
+import { packedOnly, hideUploads } from '../../../cloud_hints.js';
 
 const KNOWLEDGE_INFO_FLAG = 'wb_knowledge_info_seen';
 import { connectProgress, fetchPendingKind } from '../../../services/pipelineSocket.js';
@@ -27,7 +29,7 @@ import {
   stopEtaTicker,
   ensureLandingPhase,
   setPhaseState,
-  setPhaseNarration,
+  setPhaseStep,
   setTimelineTitle,
   resetTimelineRows,
 } from './timeline.js';
@@ -69,10 +71,27 @@ function _landingDateFmt() {
   });
 }
 
+// Mobile drawer (≤999px): the recent-repairs sidebar slides in from the left,
+// opened by #landingRepairsToggle. On desktop the sidebar is a persistent
+// column and these are inert (the toggle/backdrop are display:none via CSS).
+function openRepairsDrawer() {
+  document.getElementById("landing-overlay")?.classList.add("sidebar-open");
+  const bd = document.getElementById("landingSidebarBackdrop");
+  if (bd) bd.hidden = false;
+  document.getElementById("landingRepairsToggle")?.setAttribute("aria-expanded", "true");
+}
+function closeRepairsDrawer() {
+  document.getElementById("landing-overlay")?.classList.remove("sidebar-open");
+  const bd = document.getElementById("landingSidebarBackdrop");
+  if (bd) bd.hidden = true;
+  document.getElementById("landingRepairsToggle")?.setAttribute("aria-expanded", "false");
+}
+
 async function loadAndRenderSidebar() {
   const sidebar = document.getElementById("landingSidebar");
   const list = document.getElementById("landingSidebarList");
   const count = document.getElementById("landingSidebarCount");
+  const toggle = document.getElementById("landingRepairsToggle");
   if (!sidebar || !list) return;
 
   let repairs = [];
@@ -84,6 +103,8 @@ async function loadAndRenderSidebar() {
   }
   if (!repairs || repairs.length === 0) {
     sidebar.hidden = true;
+    if (toggle) toggle.hidden = true;   // nothing to open → hide the mobile trigger
+    closeRepairsDrawer();
     return;
   }
 
@@ -108,6 +129,7 @@ async function loadAndRenderSidebar() {
     a.className = "landing-sidebar-link";
     seedSlugForRepair(r.repair_id, r.device_slug);   // known slug — keep nav synchronous
     a.href = repairHash(r.repair_id, "diagnostic");
+    a.addEventListener("click", closeRepairsDrawer);  // close the mobile drawer on navigation
 
     const dev = document.createElement("span");
     dev.className = "landing-sidebar-device";
@@ -115,7 +137,7 @@ async function loadAndRenderSidebar() {
 
     const sym = document.createElement("span");
     sym.className = "landing-sidebar-symptom";
-    sym.textContent = r.symptom || "—";
+    sym.textContent = r.symptom || "…";
     if (r.symptom) sym.title = r.symptom;
 
     const meta = document.createElement("span");
@@ -147,6 +169,25 @@ async function loadAndRenderSidebar() {
     list.appendChild(li);
   }
   sidebar.hidden = false;
+  if (toggle) toggle.hidden = false;   // repairs exist → expose the mobile trigger
+}
+
+// Build a human-readable Error from a failed Response. Prefers the structured
+// error message when the backend sent one (the cloud front-door's
+// {error:{message}} gates, FastAPI's {detail:...}) — a raw JSON body in a
+// status line reads as a bug to the technician. Non-JSON bodies keep the raw
+// `HTTP <status> <body>` line (still the most useful thing to show).
+async function httpError(res) {
+  const detail = await res.text().catch(() => "");
+  let msg = `HTTP ${res.status} ${detail}`;
+  try {
+    const parsed = JSON.parse(detail);
+    const m = parsed?.error?.message
+      || parsed?.detail?.message
+      || (typeof parsed?.detail === "string" ? parsed.detail : null);
+    if (m) msg = m;
+  } catch { /* not JSON — keep the raw line */ }
+  return new Error(msg);
 }
 
 async function onDeleteRepairClick(repairId, itemEl, btnEl) {
@@ -159,10 +200,7 @@ async function onDeleteRepairClick(repairId, itemEl, btnEl) {
     const res = await fetch(`/pipeline/repairs/${encodeURIComponent(repairId)}`, {
       method: "DELETE",
     });
-    if (!res.ok) {
-      const detail = await res.text().catch(() => "");
-      throw new Error(`HTTP ${res.status} ${detail}`);
-    }
+    if (!res.ok) throw await httpError(res);
   } catch (err) {
     console.error("[landing] delete failed", err);
     setStatus(t("landing.status.error_delete", { error: err.message || err }), STATUS_ERROR);
@@ -207,6 +245,7 @@ export function showLanding() {
   }
   loadAndRenderSidebar();
   loadPacksForSuggest();
+  _updateFreeLock(); // état initial du lock free (mode managé uniquement)
   setTimeout(() => document.getElementById("landingDevice")?.focus(), 50);
 
   // Profile pill (always present) + the one-time guided onboarding. Both read
@@ -239,6 +278,37 @@ function setSubmitting(on) {
   const sym = document.getElementById("landingSymptom");
   if (dev) dev.disabled = on;
   if (sym) sym.disabled = on;
+  // En sortie de soumission, le lock free reprend la main sur l'état du bouton.
+  if (!on) _updateFreeLock();
+}
+
+// Lock free du start-diagnostic (cloud_hints.packedOnly — mode managé
+// uniquement) : le bouton reste désactivé tant que le tech n'a pas SÉLECTIONNÉ
+// au picker un appareil dont le pack est complet (badge ✓), avec un texte
+// d'aide + CTA upgrade sous le formulaire. Self-host : packedOnly() est faux,
+// cette fonction ne touche à rien. Cosmétique pur — le cloud répond 402
+// FREE_PACK_ONLY de toute façon si on force la soumission.
+function _updateFreeLock() {
+  if (!packedOnly()) return;
+  const locked = !(_selectedDeviceSlug && _selectedDeviceComplete);
+  const btn = document.getElementById("landingSubmit");
+  if (btn && !isSubmitting) btn.disabled = locked;
+  let hint = document.getElementById("landingFreeHint");
+  if (!hint) {
+    const form = document.getElementById("landingForm");
+    if (!form) return;
+    const t = window.t || ((k) => k);
+    hint = document.createElement("p");
+    hint.id = "landingFreeHint";
+    hint.className = "landing-free-hint";
+    hint.append(document.createTextNode(`${t("landing.free.locked_hint")} `));
+    const a = document.createElement("a");
+    a.href = "/app/upgrade";
+    a.textContent = t("landing.free.upgrade_cta");
+    hint.appendChild(a);
+    form.appendChild(hint);
+  }
+  hint.hidden = !locked;
 }
 
 // Reset for a fresh run: clear the orchestration-pause state + device-kind
@@ -266,6 +336,14 @@ async function onSubmit(ev) {
   if (symptom.length < 5) {
     setStatus(t("landing.status.validation_symptom"), STATUS_ERROR);
     symptomEl?.focus();
+    return;
+  }
+
+  // Ceinture du lock free : la soumission implicite (Entrée) ne doit pas
+  // contourner le bouton désactivé. Le serveur refuserait pareil (402).
+  if (packedOnly() && !(_selectedDeviceSlug && _selectedDeviceComplete)) {
+    _updateFreeLock();
+    deviceEl?.focus();
     return;
   }
 
@@ -298,11 +376,22 @@ async function onSubmit(ev) {
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: body.toString(),
     });
-    if (!res.ok) {
-      const detail = await res.text().catch(() => "");
-      throw new Error(`HTTP ${res.status} ${detail}`);
-    }
+    if (!res.ok) throw await httpError(res);
     const repair = await res.json();
+
+    // confirm-on-uncertainty: a broad label matched several sibling boards.
+    // No repair was created and no quota spent — show the candidate menu in the
+    // suggest dropdown; picking one pins its device_slug, then the tech re-runs.
+    if (repair && repair.needs_disambiguation) {
+      setSubmitting(false);
+      _renderDisambiguation(repair.candidates || []);
+      setStatus(
+        "Plusieurs cartes correspondent : choisis-en une, puis relance le diagnostic.",
+        STATUS_NEUTRAL,
+      );
+      return;
+    }
+
     const rid = repair.repair_id;
     const slug = repair.device_slug;
     if (!rid || !slug) throw new Error(t("landing.status.error_invalid_response"));
@@ -328,32 +417,25 @@ async function onSubmit(ev) {
           STATUS_NEUTRAL,
         );
       }
-      // Pack on disk → play an accelerated fake-timeline (~15–17s) so the
-      // tech sees the cache hit as a fast pipeline run, then navigate.
-      // setStatus message above stays as the lead-in; setTimelineTitle
-      // takes over once showTimeline() inside the helper fires.
-      playCachedPipelineTimeline(slug, rid, repair.device_label || slug)
-        .catch((err) => {
-          console.warn("[landing] cached timeline failed, falling back to direct nav", err);
-          goToWorkspace(rid, slug);
-        });
+      // Cache hit — the pack is already on disk, there is genuinely nothing to
+      // build. Go straight to the diagnostic workspace (no artificial wait). The
+      // status message above is the lead-in. (A ~15s fake-timeline animation used
+      // to play here for demo polish — removed; only the real flow remains.)
+      goToWorkspace(rid, slug, "diagnostic");
       return;
     }
 
-    // Branch 3 — pack exists but the symptom is new: the backend kicked
-    // a real targeted expand in background. We play the same fake-timeline
-    // as branch 2 (pack is on disk, agent works from existing rules even
-    // if the expand hasn't finished). The expand runs silently — harmless.
+    // Branch 3 — pack exists but the symptom is new: the backend kicked a real
+    // targeted expand in the background. The pack is on disk so the agent works
+    // from existing rules immediately; the expand finishes silently. Go straight
+    // to the workspace — no artificial wait. (A ~15s fake-timeline used to play
+    // here too — removed.)
     if (repair.pipeline_kind === "expand") {
       setStatus(
         t("landing.status.device_known", { device: repair.device_label }),
         STATUS_NEUTRAL,
       );
-      playCachedPipelineTimeline(slug, rid, repair.device_label || slug)
-        .catch((err) => {
-          console.warn("[landing] cached timeline (expand) failed, falling back", err);
-          goToWorkspace(rid, slug, "diagnostic");
-        });
+      goToWorkspace(rid, slug, "diagnostic");
       return;
     }
 
@@ -409,14 +491,54 @@ function subscribeToProgress(slug, repairId) {
   });
 }
 
+// Localize a live `phase_step` sub-step into the short line the timeline shows
+// ("recherche web · tour 2", "page 3/12", "graphe ✓ 142 nœuds", "révision 1").
+// Returns "" for an unknown step kind (forward-compat — ignored silently).
+function phaseStepText(ev, t) {
+  switch (ev.step) {
+    case "search_round":
+      return t("landing.timeline.step.search_round", { index: ev.index });
+    case "page":
+      return t("landing.timeline.step.page", { index: ev.index, total: ev.total });
+    case "writer_done": {
+      const key = ev.writer === "rules" ? "step.writer_rules"
+        : ev.writer === "dict" ? "step.writer_dict"
+        : "step.writer_graph";
+      return t("landing.timeline." + key, { count: ev.count });
+    }
+    case "round":
+      return ev.index >= 1
+        ? t("landing.timeline.step.revision", { index: ev.index })
+        : t("landing.timeline.step.audit");
+    default:
+      return "";
+  }
+}
+
 function handleProgressEvent(ev, slug, repairId) {
   const t = window.t || ((k) => k);
   switch (ev.type) {
     case "subscribed":
       break;
-    case "pipeline_started":
-      setStatus(t("landing.status.pipeline_started", { device: ev.device_label || ev.device_slug || slug }), STATUS_LOADING);
+    case "queued": {
+      // Build accepté mais EN ATTENTE derrière le cap de builds concurrents.
+      // On montre clairement la position ; elle décroît à mesure que la file se
+      // vide, puis `pipeline_started` prend le relais quand un créneau se libère.
+      const position = ev.position || 1;
+      const ahead = ev.ahead != null ? ev.ahead : Math.max(0, position - 1);
+      setTimelineTitle(t("landing.timeline.title_queued", { position }));
+      setStatus(t("landing.status.queued", { position, ahead }), STATUS_LOADING);
+      setLandingMascot("working");
       break;
+    }
+    case "pipeline_started": {
+      const dev = ev.device_label || ev.device_slug || slug;
+      // Reset the title in case it was showing the queued state ("En file
+      // d'attente · position N") — the build just left the queue and started.
+      setTimelineTitle(t("landing.timeline.title_build", { device: dev }));
+      setStatus(t("landing.status.pipeline_started", { device: dev }), STATUS_LOADING);
+      break;
+    }
     case "phase_started": {
       const phase = ev.phase;
       ensureLandingPhase(phase);
@@ -433,10 +555,11 @@ function handleProgressEvent(ev, slug, repairId) {
       }
       break;
     }
-    case "phase_narration": {
+    case "phase_step": {
       const phase = ev.phase;
-      const text = (ev.text || "").trim();
-      if (text && PHASE_ORDER.includes(phase)) setPhaseNarration(phase, text);
+      if (!(PHASE_ORDER.includes(phase) || phase === "expand" || phase in LANDING_DYNAMIC_PHASES)) break;
+      const text = phaseStepText(ev, t);
+      if (text) setPhaseStep(phase, text);
       break;
     }
     case "pipeline_finished": {
@@ -444,8 +567,8 @@ function handleProgressEvent(ev, slug, repairId) {
       setStatus(t("landing.status.ready"), STATUS_NEUTRAL);
       stopEtaTicker();
       setLandingMascot("success");
-      // 2500 ms grace gives the audit phase narration (Haiku ~800-1600 ms)
-      // time to land on the WS bus and render before we navigate away.
+      // Short grace so the final audit sub-step + "ready" state render before
+      // we navigate away to the workspace.
       setTimeout(() => goToWorkspace(repairId, slug), 2500);
       break;
     }
@@ -565,44 +688,6 @@ async function confirmLandingKind(deviceKind) {
 }
 
 
-function _sleep(ms) {
-  return new Promise((r) => setTimeout(r, ms));
-}
-
-// Plays a fake 5-phase pipeline timeline at ~3s per phase, then the
-// mascot success state, then navigates to the workspace. Used when the
-// backend signals `pipeline_started: false` (pack already on disk) so
-// the technician sees the cache hit as a fast pipeline run instead of
-// an instant flash. ~15s total + 1.5s success grace = ~16–17s.
-async function playCachedPipelineTimeline(slug, repairId, deviceLabel) {
-  const t = window.t || ((k) => k);
-  showTimeline();
-  setTimelineTitle(t("landing.timeline.title_loading", { device: deviceLabel }));
-  setLandingMascot("working");
-
-  // PHASE_ORDER includes "mapper" which the live pipeline marks hidden
-  // until a phase event arrives. For a cache hit we want to show all
-  // phases marching past, so unhide it first.
-  const mapperRow = document.querySelector('.landing-phase[data-phase="mapper"]');
-  if (mapperRow) mapperRow.hidden = false;
-
-  const PER_PHASE_MS = 3000;
-  for (const phase of PHASE_ORDER) {
-    setPhaseState(phase, "running");
-    await _sleep(PER_PHASE_MS * 0.7);
-    setPhaseState(phase, "done");
-    await _sleep(PER_PHASE_MS * 0.3);
-  }
-
-  setLandingMascot("success");
-  setTimelineTitle(t("landing.timeline.title_ready", { status: deviceLabel }));
-  await _sleep(1500);
-  // Cache hit: land on the repair dashboard (#home) so the tech sees the
-  // findings + timeline straight away, not the graph view that the live
-  // pipeline path defaults to.
-  goToWorkspace(repairId, slug, "diagnostic");
-}
-
 function goToWorkspace(repairId, slug, vue = "graph") {
   // Land the tech on the requested repair vue — default the graph view (loads
   // graph + memory bank + opens the chat via openLLMPanelIfRepairParam) rather
@@ -631,28 +716,6 @@ function goToWorkspace(repairId, slug, vue = "graph") {
   }
 }
 
-function onChipClick(ev) {
-  const btn = ev.target.closest(".landing-chip");
-  if (!btn) return;
-  const dev = document.getElementById("landingDevice");
-  const sym = document.getElementById("landingSymptom");
-  // Chips don't carry a canonical slug; clearing here prevents a stale
-  // _selectedDeviceSlug from the autocomplete leaking onto a chip submit.
-  // Same for any graph-backed schematic state from a prior pick.
-  _selectedDeviceSlug = null;
-  resetSchematicField();
-  if (dev && btn.dataset.device) dev.value = btn.dataset.device;
-  if (sym) {
-    // Prefer the i18n key if present so the chip's symptom matches the active
-    // locale; fall back to the literal data-symptom attribute.
-    const key = btn.dataset.symptomKey;
-    const fallback = btn.dataset.symptom || "";
-    if (key && window.t) sym.value = window.t(key);
-    else if (fallback) sym.value = fallback;
-  }
-  sym?.focus();
-}
-
 // ============================================================
 // Device autocomplete — surfaces devices already known under the device
 // input as the technician types. Sourced from /pipeline/taxonomy so the
@@ -669,6 +732,10 @@ function onChipClick(ev) {
 let _devicesCache = null;
 let _suggestActiveIdx = -1;
 let _selectedDeviceSlug = null;
+// Complétude du pack du device sélectionné au picker (badge ✓). Sert au lock
+// free (cloud_hints.packedOnly) : le plan gratuit ne lance que sur un pack
+// complet — cosmétique, le cloud refuse pareil côté serveur (402).
+let _selectedDeviceComplete = false;
 let _schematicFile = null;
 
 // Flatten a TaxonomyTree into a plain list with one entry per
@@ -690,6 +757,9 @@ function _flattenTaxonomy(tree) {
         complete: Boolean(canonical.complete),
         has_electrical_graph: Boolean(canonical.has_electrical_graph),
         device_kind: canonical.device_kind || null,
+        version: canonical.version || null,
+        form_factor: canonical.form_factor || null,
+        aliases: Array.isArray(canonical.aliases) ? canonical.aliases : [],
       });
     }
   }
@@ -703,6 +773,9 @@ function _flattenTaxonomy(tree) {
       complete: Boolean(p.complete),
       has_electrical_graph: Boolean(p.has_electrical_graph),
       device_kind: p.device_kind || null,
+      version: p.version || null,
+      form_factor: p.form_factor || null,
+      aliases: Array.isArray(p.aliases) ? p.aliases : [],
     });
   }
   // Sort: complete first, then alphabetical by label.
@@ -737,9 +810,36 @@ function _matchDevices(query) {
       const label = (d.label || "").toLowerCase();
       const sub = (d.subtitle || "").toLowerCase();
       const slug = (d.slug || "").toLowerCase();
-      return label.includes(q) || sub.includes(q) || slug.includes(q);
+      // match carnet aliases too (board# / Apple model / EMC / codename /
+      // marketing) so "820-2533" or "A1286" finds the MacBook Pro 15 pack.
+      const aliases = (d.aliases || []).join(" ").toLowerCase();
+      return label.includes(q) || sub.includes(q) || slug.includes(q) || aliases.includes(q);
     })
     .slice(0, 6);
+}
+
+// Second line of a suggestion: the identifiers that distinguish THIS exact board
+// — the model version / Apple number(s), the board number (820-xxxx) when known,
+// and the form factor. e.g. "A2172 / A2176 · logic board" or
+// "A1286 · 820-2533 · logic board". Empty when nothing distinguishing is known.
+function _deviceIdLine(d) {
+  const parts = [];
+  const seen = new Set();
+  const push = (v) => {
+    const s = (v == null ? "" : String(v)).trim();
+    if (!s) return;
+    const k = s.toLowerCase();
+    if (!seen.has(k)) { seen.add(k); parts.push(s); }
+  };
+  if (d.version) push(d.version);
+  // Board number(s) from the carnet aliases, if not already in the version text.
+  const vtext = (d.version || "").toLowerCase();
+  for (const a of (d.aliases || [])) {
+    const m = String(a).match(/\b8\d{2}-\d{3,5}\b/);
+    if (m && !vtext.includes(m[0].toLowerCase())) push(m[0]);
+  }
+  if (d.form_factor) push(d.form_factor);
+  return parts.join(" · ");
 }
 
 function _renderSuggest(query) {
@@ -760,24 +860,52 @@ function _renderSuggest(query) {
     const safeSlug = _escapeHtml(d.slug);
     const iconClass = d.complete ? "is-complete" : "is-partial";
     const iconText = d.complete ? "✓" : "•";
-    const meta = d.complete ? safeSub : (safeSub ? `${safeSub} · ${draftLabel}` : draftLabel);
-    // Readiness badges next to the complete (✓/•) "mémoire" marker:
-    //   graph badge — lit (.is-on) when the device has a compiled electrical graph;
-    //   kind chip — mono short code (GPU / PORTABLE / …) when device_kind is known.
+    // Readiness badges (right of line 1): draft marker (incomplete pack), the
+    // graph badge (lit when an electrical graph is compiled), and the device-kind
+    // short code (GPU / PORTABLE / …).
+    const draftBadge = d.complete ? "" : `<span class="landing-suggest-badge is-draft">${_escapeHtml(draftLabel)}</span>`;
     const graphBadge = `<span class="landing-suggest-badge${d.has_electrical_graph ? " is-on" : ""}" title="${_escapeHtml(tFn("landing.suggest.graph_title"))}">${_escapeHtml(tFn("landing.suggest.graph_label"))}</span>`;
     const kindBadge = (d.device_kind && d.device_kind !== "unknown")
       ? `<span class="landing-suggest-badge mono">${_escapeHtml(DEVICE_KIND_SHORT[d.device_kind] || d.device_kind)}</span>`
       : "";
+    const idLine = _escapeHtml(_deviceIdLine(d));
+    const brand = safeSub ? `<span class="landing-suggest-brand">${safeSub}</span>` : "";
     // data-label = the short model name (e.g. "iPhone 12") that lands in
     // the input on selection. NOT d.device_label, which is the raw
     // registry label (e.g. "Apple iPhone 12 logic board") and would
     // pollute the input with brand + form-factor noise.
     return `<div class="landing-suggest-item" role="option" `
       + `data-slug="${safeSlug}" data-label="${safeLabel}" data-index="${i}" `
-      + `data-graph="${d.has_electrical_graph ? "1" : ""}">`
+      + `data-graph="${d.has_electrical_graph ? "1" : ""}" data-complete="${d.complete ? "1" : ""}">`
       + `<span class="landing-suggest-icon ${iconClass}" aria-hidden="true">${iconText}</span>`
-      + `<span class="landing-suggest-label">${safeLabel}</span>`
-      + `<span class="landing-suggest-meta">${meta}${graphBadge}${kindBadge}</span>`
+      + `<div class="landing-suggest-body">`
+      + `<div class="landing-suggest-line1">`
+      + `<span class="landing-suggest-label">${safeLabel}</span>${brand}`
+      + `<span class="landing-suggest-meta">${draftBadge}${graphBadge}${kindBadge}</span>`
+      + `</div>`
+      + (idLine ? `<div class="landing-suggest-ids">${idLine}</div>` : "")
+      + `</div>`
+      + `</div>`;
+  }).join("");
+  box.hidden = false;
+  _suggestActiveIdx = -1;
+}
+
+// render the disambiguation candidates into the suggest dropdown using the
+// SAME .landing-suggest-item markup, so the existing mousedown handler pins the
+// chosen device_slug (via _selectSuggest) with zero extra wiring.
+function _renderDisambiguation(candidates) {
+  const box = document.getElementById("landingSuggest");
+  if (!box || !Array.isArray(candidates) || candidates.length === 0) return;
+  box.innerHTML = candidates.map((c, i) => {
+    const f = c.facets || {};
+    const label = (f.marketing && f.marketing[0]) || (f.board && f.board[0]) || c.device_slug;
+    const detail = [f.board && f.board[0], c.family].filter(Boolean).join(" · ");
+    return `<div class="landing-suggest-item" role="option" `
+      + `data-slug="${_escapeHtml(c.device_slug)}" data-label="${_escapeHtml(label)}" data-index="${i}" data-graph="">`
+      + `<span class="landing-suggest-icon is-partial" aria-hidden="true">•</span>`
+      + `<span class="landing-suggest-label">${_escapeHtml(label)}</span>`
+      + `<span class="landing-suggest-meta">${_escapeHtml(detail)}</span>`
       + `</div>`;
   }).join("");
   box.hidden = false;
@@ -793,7 +921,7 @@ function _setSuggestActive(idx) {
   items[clamped].scrollIntoView({ block: "nearest" });
 }
 
-function _selectSuggest(label, slug, hasGraph) {
+function _selectSuggest(label, slug, hasGraph, isComplete) {
   const dev = document.getElementById("landingDevice");
   const sym = document.getElementById("landingSymptom");
   if (dev) dev.value = label;
@@ -801,6 +929,7 @@ function _selectSuggest(label, slug, hasGraph) {
   // (skips re-slugification of the label and guarantees the cache hit
   // on the right pack — defends against near-but-not-identical spellings).
   _selectedDeviceSlug = slug || null;
+  _selectedDeviceComplete = !!isComplete;
   // When the picked device already has a compiled electrical graph, the
   // schematic is on disk — no need to attach a PDF. Otherwise restore the
   // default "attach" affordance.
@@ -822,6 +951,7 @@ function _selectSuggest(label, slug, hasGraph) {
   }
   _hideSuggest();
   renderKnowledgeIndicators();
+  _updateFreeLock();
   if (sym) sym.focus();
 }
 
@@ -845,8 +975,10 @@ function _initSuggest() {
     // Restore the schematic-attach affordance too: a graph-backed pick is
     // no longer in force once the label diverges.
     _selectedDeviceSlug = null;
+    _selectedDeviceComplete = false;
     resetSchematicField();
     _renderSuggest(dev.value);
+    _updateFreeLock();
   });
 
   dev.addEventListener("focus", () => {
@@ -867,7 +999,7 @@ function _initSuggest() {
       // suggestion via arrows. Otherwise let the form submit naturally.
       ev.preventDefault();
       const item = items[_suggestActiveIdx];
-      if (item) _selectSuggest(item.dataset.label, item.dataset.slug, !!item.dataset.graph);
+      if (item) _selectSuggest(item.dataset.label, item.dataset.slug, !!item.dataset.graph, !!item.dataset.complete);
     } else if (ev.key === "Escape") {
       _hideSuggest();
     }
@@ -882,7 +1014,7 @@ function _initSuggest() {
     const item = ev.target.closest(".landing-suggest-item");
     if (item && item.dataset.label) {
       ev.preventDefault();
-      _selectSuggest(item.dataset.label, item.dataset.slug, !!item.dataset.graph);
+      _selectSuggest(item.dataset.label, item.dataset.slug, !!item.dataset.graph, !!item.dataset.complete);
     }
   });
 }
@@ -1002,8 +1134,16 @@ async function uploadSchematicForSlug(slug, file) {
 export function initLanding() {
   const form = document.getElementById("landingForm");
   if (form) form.addEventListener("submit", onSubmit);
-  const chips = document.getElementById("landingChips");
-  if (chips) chips.addEventListener("click", onChipClick);
+  // Plan free (mode managé) : pas d'analyse de nouveau fichier → l'affordance
+  // « Add knowledge » disparaît EN ENTIER : le bouton, son « ? » d'explication
+  // (qui ouvrait le modal info) et la rangée de chips. Le serveur refuse
+  // l'upload de toute façon (402).
+  if (hideUploads()) {
+    for (const id of ["landingKnowledgeBtn", "landingKnowledgeInfo", "landingKnowledgeChips"]) {
+      const el = document.getElementById(id);
+      if (el) el.hidden = true;
+    }
+  }
   document.getElementById("landingSchematicPick")?.addEventListener("click", () => {
     document.getElementById("landingSchematic")?.click();
   });
@@ -1037,8 +1177,14 @@ export function initLanding() {
     });
   }
   document.addEventListener("keydown", (ev) => {
-    if (ev.key === "Escape") closeKnowledgeModal();
+    if (ev.key === "Escape") { closeKnowledgeModal(); closeRepairsDrawer(); }
   });
+  // Mobile recent-repairs drawer: toggle from the nav, dismiss via the scrim.
+  document.getElementById("landingRepairsToggle")?.addEventListener("click", () => {
+    const open = document.getElementById("landing-overlay")?.classList.contains("sidebar-open");
+    if (open) closeRepairsDrawer(); else openRepairsDrawer();
+  });
+  document.getElementById("landingSidebarBackdrop")?.addEventListener("click", closeRepairsDrawer);
   document.getElementById("landingDeviceKind")?.addEventListener("change", renderKnowledgeIndicators);
   const kChips = document.getElementById("landingKnowledgeChips");
   if (kChips) kChips.addEventListener("click", onKnowledgeChipClick);

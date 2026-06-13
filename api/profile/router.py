@@ -19,6 +19,18 @@ class CustomToolsUpdate(BaseModel):
     model_config = ConfigDict(extra="forbid")
     custom_tools: list[str] = Field(default_factory=list)
 
+
+class StateUpdate(BaseModel):
+    """Body for PUT /profile/state — partial patch of onboarding flags.
+
+    Each field is optional: the client sends only the flag it is flipping, so
+    two independent tours can mark themselves seen without clobbering each
+    other (full-replace would reset the flag the caller didn't include)."""
+
+    model_config = ConfigDict(extra="forbid")
+    onboarding_seen: bool | None = None
+    first_diag_seen: bool | None = None
+
 router = APIRouter(prefix="/profile", tags=["profile"])
 
 # The multi-tenant cloud front-door injects X-Owner-Ref (the tenant id) on every
@@ -81,5 +93,16 @@ def put_custom_tools(body: CustomToolsUpdate, owner_ref: OwnerRef = None) -> dic
 def put_preferences(prefs: Preferences, owner_ref: OwnerRef = None) -> dict:
     profile = load_profile(owner_ref)
     profile.preferences = prefs
+    save_profile(profile, owner_ref)
+    return _envelope(owner_ref)
+
+
+@router.put("/state")
+def put_state(body: StateUpdate, owner_ref: OwnerRef = None) -> dict:
+    profile = load_profile(owner_ref)
+    if body.onboarding_seen is not None:
+        profile.state.onboarding_seen = body.onboarding_seen
+    if body.first_diag_seen is not None:
+        profile.state.first_diag_seen = body.first_diag_seen
     save_profile(profile, owner_ref)
     return _envelope(owner_ref)

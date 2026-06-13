@@ -351,7 +351,7 @@ def test_record_step_result_not_active(tmp_path):
 
 
 # ---------------------------------------------------------------------------
-# Task 5 — update_protocol tests
+# update_protocol tests
 # ---------------------------------------------------------------------------
 
 

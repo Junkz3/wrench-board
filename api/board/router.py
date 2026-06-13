@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import hashlib
 import tempfile
 from pathlib import Path
@@ -91,7 +92,13 @@ async def parse_board(file: UploadFile = File(...)) -> dict:  # noqa: B008
         path = Path(tmp.name)
         try:
             parser = parser_for(path)
-            board = parser.parse(data, file_hash=file_hash, board_id=board_id)
+            # Offload le parse CPU-lourd hors de l'event-loop : sur le moteur
+            # async single-worker, un parse sync inline gèle TOUTES les requêtes
+            # (diags, /health, WS) le temps du parse, et les parses concurrents
+            # se sérialisent. to_thread garde le loop responsive (cf. main.py:78).
+            board = await asyncio.to_thread(
+                parser.parse, data, file_hash=file_hash, board_id=board_id
+            )
         except NotImplementedError as e:
             # Defensive: surface unimplemented parser branches as 501 rather
             # than letting them propagate as a generic 500.
@@ -152,11 +159,11 @@ async def render_board(
 ) -> dict:
     """Return the Three.js render payload for the active boardview of a slug.
 
-    Tenant-scopé (T9) : le cloud injecte `X-Owner-Ref` (= tenant_id) sur le trafic
-    proxifié. Managé → STRICTEMENT le boardview épinglé par CE tenant ; un tenant
-    sans boardview actif obtient 404 (jamais le board d'un autre — c'était la fuite).
-    Self-host (en-tête absent) → chaîne globale historique (`active_sources.json` →
-    `board_assets/{slug}.<ext>` → `memory/{slug}/uploads/*-boardview-*`), inchangé.
+    Tenant-scoped: the cloud injects `X-Owner-Ref` (= tenant_id) on proxied
+    traffic. Managed → STRICTLY the boardview pinned by THIS tenant; a tenant
+    with no active boardview gets a 404 (never another tenant's board).
+    Self-host (header absent) → the legacy global chain (`active_sources.json` →
+    `board_assets/{slug}.<ext>` → `memory/{slug}/uploads/*-boardview-*`), unchanged.
     Returns 404 when no boardview is on disk; 422 / 415 when the file fails to parse.
     """
     # Local imports — avoids dragging the pipeline package into the board
@@ -189,7 +196,9 @@ async def render_board(
         return cached
     try:
         parser = parser_for(path)
-        board = parser.parse_file(path)
+        # Offload hors event-loop (cf. /parse) : un render de gros boardview ne
+        # doit pas geler le moteur ni sérialiser avec les autres requêtes.
+        board = await asyncio.to_thread(parser.parse_file, path)
     except UnsupportedFormatError as e:
         raise HTTPException(
             status_code=415,

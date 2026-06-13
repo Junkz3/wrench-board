@@ -34,6 +34,7 @@ let _etaTimer = null;
 export function showTimeline() {
   const tl = document.getElementById("landingTimeline");
   if (tl) tl.hidden = false;
+  initTimelineToggles();
   pipelineStartedAt = Date.now();
   startEtaTicker();
 }
@@ -67,7 +68,14 @@ export function ensureLandingPhase(phaseKey) {
   const li = document.createElement("li");
   li.className = "landing-phase";
   li.dataset.phase = phaseKey;
-  li.innerHTML = `<span class="landing-phase-dot"></span><span class="landing-phase-label" data-i18n="${labelKey}">${_escapeHtml(tFn(labelKey))}</span><div class="landing-phase-narration"></div>`;
+  li.innerHTML =
+    `<span class="landing-phase-dot"></span>` +
+    `<div class="landing-phase-head">` +
+      `<span class="landing-phase-label" data-i18n="${labelKey}">${_escapeHtml(tFn(labelKey))}</span>` +
+      `<span class="landing-phase-live" data-role="live"></span>` +
+      `<button type="button" class="landing-phase-detail" data-role="detail-toggle" data-i18n="landing.timeline.detail" aria-expanded="false" hidden>${_escapeHtml(tFn("landing.timeline.detail"))}</button>` +
+    `</div>` +
+    `<ul class="landing-phase-log" data-role="log" hidden></ul>`;
   const scout = list.querySelector('.landing-phase[data-phase="scout"]');
   list.insertBefore(li, scout);  // null scout → appended (safe)
 }
@@ -83,13 +91,49 @@ export function setPhaseState(phase, state) {
   if (state === "failed") li.classList.add("is-failed");
 }
 
-export function setPhaseNarration(phase, text) {
+// A live sub-step landed: refresh the always-visible compact line (latest
+// step) AND append to the per-phase detail log (revealed by the "détail"
+// toggle). Both fed by the orchestrator's `phase_step` events. `text` is
+// pre-localized by the caller (index.js phaseStepText).
+export function setPhaseStep(phase, text) {
   const li = document.querySelector(`.landing-phase[data-phase="${phase}"]`);
   if (!li) return;
-  const slot = li.querySelector(".landing-phase-narration");
-  if (!slot) return;
-  slot.textContent = text;
-  li.classList.add("has-narration");
+  const live = li.querySelector('[data-role="live"]');
+  if (live) live.textContent = text;
+  const log = li.querySelector('[data-role="log"]');
+  if (log) {
+    const item = document.createElement("li");
+    item.textContent = text;
+    log.appendChild(item);
+  }
+  // The detail toggle only earns its place once the phase has ≥1 sub-step
+  // (registry / mapper emit none, so theirs stays hidden).
+  const btn = li.querySelector('[data-role="detail-toggle"]');
+  if (btn) btn.hidden = false;
+  li.classList.add("has-steps");
+}
+
+// One delegated click listener handles every phase's "détail" toggle (static
+// + dynamically-injected rows). Idempotent — guarded by a dataset flag so
+// repeated showTimeline() calls don't stack listeners.
+export function initTimelineToggles() {
+  const list = document.getElementById("landingPhaseList");
+  if (!list || list.dataset.toggleWired) return;
+  list.dataset.toggleWired = "1";
+  list.addEventListener("click", (e) => {
+    const btn = e.target.closest('[data-role="detail-toggle"]');
+    if (!btn) return;
+    const li = btn.closest(".landing-phase");
+    const log = li && li.querySelector('[data-role="log"]');
+    if (!log) return;
+    const open = li.classList.toggle("is-open");
+    log.hidden = !open;
+    btn.setAttribute("aria-expanded", open ? "true" : "false");
+    // Keep data-i18n in sync so a locale switch re-renders the right label.
+    const key = open ? "landing.timeline.detail_hide" : "landing.timeline.detail";
+    btn.setAttribute("data-i18n", key);
+    btn.textContent = (window.t || ((k) => k))(key);
+  });
 }
 
 export function setTimelineTitle(text) {
@@ -105,10 +149,19 @@ export function resetTimelineRows() {
   PHASE_ORDER.forEach((p) => {
     const li = document.querySelector(`.landing-phase[data-phase="${p}"]`);
     if (!li) return;
-    li.classList.remove("is-running", "is-done", "is-failed", "has-narration");
+    li.classList.remove("is-running", "is-done", "is-failed", "has-steps", "is-open");
     if (p === "mapper") li.hidden = true;
-    const slot = li.querySelector(".landing-phase-narration");
-    if (slot) slot.textContent = "";
+    const live = li.querySelector('[data-role="live"]');
+    if (live) live.textContent = "";
+    const log = li.querySelector('[data-role="log"]');
+    if (log) { log.innerHTML = ""; log.hidden = true; }
+    const btn = li.querySelector('[data-role="detail-toggle"]');
+    if (btn) {
+      btn.hidden = true;
+      btn.setAttribute("aria-expanded", "false");
+      btn.setAttribute("data-i18n", "landing.timeline.detail");
+      btn.textContent = (window.t || ((k) => k))("landing.timeline.detail");
+    }
   });
   // Drop any dynamically-injected phase rows so a fresh run starts clean.
   document.querySelectorAll('#landingPhaseList .landing-phase').forEach((li) => {

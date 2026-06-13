@@ -1,4 +1,4 @@
-"""T9 — sérialisation per-slug de l'ingestion managée (cache-miss).
+"""Sérialisation per-slug de l'ingestion managée (cache-miss).
 
 Le bug (revue qualité) : en managé cache-miss, deux uploads de PDF *différents*
 sur le MÊME slug utilisent la racine (`memory/{slug}/schematic.pdf`) comme

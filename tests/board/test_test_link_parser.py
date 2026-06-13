@@ -169,7 +169,7 @@ def test_parses_file_with_zero_pins(tmp_path: Path):
     assert r1 is not None
     assert r1.pin_refs == []
     # Zero-pin parts keep the zero-placeholder bbox (known limitation,
-    # addressed when Task 8+ lands proper Optional-bbox support).
+    # to be addressed when proper Optional-bbox support lands).
     assert r1.bbox[0].x == 0 and r1.bbox[1].x == 0
 
 

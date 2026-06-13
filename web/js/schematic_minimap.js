@@ -246,7 +246,7 @@ function setHeader(kind, ref, sub) {
   // kind is one of "COMP" / "NET" — translate to the display label.
   const kindLabel = kind === "NET" ? t('brd.minimap.kind.net') : t('brd.minimap.kind.comp');
   el("bvMinimapKind").textContent = kindLabel;
-  el("bvMinimapRef").textContent = ref || "—";
+  el("bvMinimapRef").textContent = ref || "…";
   el("bvMinimapSub").textContent = sub || "";
   const mm = el("bvMinimap");
   if (mm) mm.dataset.kind = kind === "NET" ? "net" : "component";

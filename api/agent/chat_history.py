@@ -416,6 +416,30 @@ def build_ctx_tag(
     return f"{CTX_TAG_PREFIX} device={label} ({device_slug})]"
 
 
+def build_board_refresh_note(board: Any, source: Path | None = None) -> str:
+    """One-line status note for a boardview that appeared or changed mid-session.
+
+    In both runtimes the board is a snapshot taken at WS open; a boardview
+    imported afterwards is reloaded by `refresh_board_if_changed()` but the
+    agent — told "no board" at session start — has no reason to ever call a
+    `bv_*` tool and discover it. This line rides on the next user turn to
+    close that gap.
+
+    Starts with CTX_TAG_PREFIX so the replay paths' `strip_ctx_tag` drops it
+    from the chat panel exactly like the per-turn ctx tag: alone it matches
+    the prefix; stacked under the ctx tag (single newline between them, blank
+    line after) the two form one leading block that strip removes whole.
+    """
+    name = source.name if source is not None else getattr(board, "board_id", "?")
+    n_parts = len(getattr(board, "parts", []) or [])
+    n_nets = len(getattr(board, "nets", []) or [])
+    return (
+        f'{CTX_TAG_PREFIX} board_status: boardview "{name}" was just loaded '
+        f"({n_parts} parts, {n_nets} nets); the bv_* boardview tools are now "
+        "operational on it]"
+    )
+
+
 def strip_ctx_tag(text: str) -> str:
     """Peel a leading `[ctx · …]` line from `text`, if present.
 
@@ -526,7 +550,7 @@ def _create_index_entry(
     )
     _write_index(root, device_slug, repair_id, index)
     # One-shot migration of the legacy per-repair `ma_sessions` dict into
-    # the first conversation's per-tier files. Pre-T1, MA session ids were
+    # the first conversation's per-tier files. Previously, MA session ids were
     # stored under `memory/{slug}/repairs/{id}.json::ma_sessions[{tier}]`;
     # after the refactor they live at `conversations/{conv}/ma_session_{tier}.json`.
     # Without this hop, the first conv created on a legacy repair loses the

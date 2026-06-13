@@ -57,6 +57,23 @@ class Preferences(BaseModel):
     language: LanguageValue = "en"
 
 
+class State(BaseModel):
+    """One-shot onboarding / lifecycle flags, persisted per technician (and so
+    per tenant in cloud, via the X-Owner-Ref-scoped profile store).
+
+    These replace the browser-local `wb_onboarding_seen` / `wb_first_diag_seen`
+    flags as the source of truth: a guided tour completed on one device must not
+    replay on another. The frontend keeps localStorage as a fast pre-gate cache.
+
+    Defaulted bools so pre-state JSON files still load (the missing `state` key
+    falls back to defaults; extra="forbid" only rejects UNKNOWN keys)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    onboarding_seen: bool = False  # landing cockpit guided tour
+    first_diag_seen: bool = False  # first-diagnostic workspace coaching
+
+
 class ToolInventory(BaseModel):
     """Bitmap of owned tools, one bool field per ToolId."""
 
@@ -101,6 +118,7 @@ class TechnicianProfile(BaseModel):
     schema_version: Literal[1] = 1
     identity: Identity = Field(default_factory=Identity)
     preferences: Preferences = Field(default_factory=Preferences)
+    state: State = Field(default_factory=State)
     tools: ToolInventory = Field(default_factory=ToolInventory)
     custom_tools: list[str] = Field(default_factory=list)
     skills: dict[SkillId, SkillRecord] = Field(default_factory=dict)

@@ -6,6 +6,7 @@ phase helper to isolate the event-emission contract from the network.
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any
 from unittest.mock import AsyncMock, patch
 
@@ -80,7 +81,9 @@ async def test_pipeline_emits_phase_events_in_order(
     assert result.verdict.overall_status == "APPROVED"
 
     # Expect: pipeline_started → (phase scout s/f) → (registry) → (writers) → (audit) → pipeline_finished
-    types = [(e["type"], e.get("phase")) for e in events]
+    # phase_step events (live sub-steps) are interleaved within phases — filtered
+    # here since this test asserts the phase start/finish skeleton only.
+    types = [(e["type"], e.get("phase")) for e in events if e["type"] != "phase_step"]
     assert types == [
         ("pipeline_started", None),
         ("phase_started", "scout"),
@@ -101,6 +104,55 @@ async def test_pipeline_emits_phase_events_in_order(
     done = events[-1]
     assert done["status"] == "APPROVED"
     assert done["revise_rounds_used"] == 0
+
+
+async def test_pipeline_emits_audit_round_step(
+    tmp_path, dummy_registry, dummy_outputs, approved_verdict
+):
+    """The audit loop emits a live `phase_step` for each auditor round.
+
+    Round 0 is the initial audit; revision rounds (index >= 1) would follow on
+    NEEDS_REVISION. The landing UI renders these as the phase's live line.
+    """
+    kg, rules, dictionary = dummy_outputs
+    events: list[dict[str, Any]] = []
+
+    async def collect(ev: dict[str, Any]) -> None:
+        events.append(ev)
+
+    with (
+        patch("api.pipeline.orchestrator.run_scout", new=AsyncMock(return_value="# dump")),
+        patch(
+            "api.pipeline.orchestrator.run_registry_builder",
+            new=AsyncMock(return_value=dummy_registry),
+        ),
+        patch(
+            "api.pipeline.orchestrator.run_writers_parallel",
+            new=AsyncMock(return_value=(kg, rules, dictionary)),
+        ),
+        patch(
+            "api.pipeline.orchestrator.run_auditor",
+            new=AsyncMock(return_value=approved_verdict),
+        ),
+    ):
+        await orchestrator.generate_knowledge_pack(
+            "Demo",
+            client=object(),
+            memory_root=tmp_path,
+            on_event=collect,
+        )
+
+    audit_steps = [
+        e for e in events
+        if e["type"] == "phase_step" and e.get("phase") == "audit"
+    ]
+    assert len(audit_steps) == 1
+    assert audit_steps[0]["step"] == "round"
+    assert audit_steps[0]["index"] == 0
+    # The step must arrive AFTER phase_started:audit and BEFORE phase_finished:audit.
+    order = [(e["type"], e.get("phase")) for e in events]
+    assert order.index(("phase_started", "audit")) < order.index(("phase_step", "audit"))
+    assert order.index(("phase_step", "audit")) < order.index(("phase_finished", "audit"))
 
 
 async def test_pipeline_emits_pipeline_failed_on_rejected_verdict(
@@ -190,7 +242,11 @@ async def test_pipeline_rejects_when_max_revise_rounds_exhausted(
             new=AsyncMock(side_effect=[rules]),
         ),
     ):
-        with pytest.raises(RuntimeError, match="revise rounds exhausted"):
+        # The convergence refactor reworded the terminal message — it
+        # now reports "unrecoverable after N revise round(s)" with the
+        # rounds-exhausted reason. Behaviour is unchanged: a NEEDS_REVISION that
+        # never clears is still a hard REJECTED fail.
+        with pytest.raises(RuntimeError, match="unrecoverable after 1 revise round"):
             await orchestrator.generate_knowledge_pack(
                 "Demo",
                 client=object(),
@@ -303,3 +359,41 @@ async def test_pipeline_writes_token_stats_even_on_failure(
     stats_content = stats_path.read_text()
     assert "scout" in stats_content
     assert "registry" in stats_content
+
+
+async def test_pipeline_honors_pinned_device_slug(
+    tmp_path, dummy_registry, dummy_outputs, approved_verdict
+):
+    """A pinned `device_slug` must decide the pack directory — NOT a re-slugified
+    label. Regression: create_repair pinned `macbook-pro-m1` (where the uploaded
+    schematic lived) but the pipeline slugified the rich label and built a fresh
+    pack at `macbook-pro-13-m1-2020-...` with NO graph (live pilot 2026-06-12)."""
+    kg, rules, dictionary = dummy_outputs
+
+    with (
+        patch("api.pipeline.orchestrator.run_scout", new=AsyncMock(return_value="# dump")),
+        patch(
+            "api.pipeline.orchestrator.run_registry_builder",
+            new=AsyncMock(return_value=dummy_registry),
+        ),
+        patch(
+            "api.pipeline.orchestrator.run_writers_parallel",
+            new=AsyncMock(return_value=(kg, rules, dictionary)),
+        ),
+        patch(
+            "api.pipeline.orchestrator.run_auditor",
+            new=AsyncMock(return_value=approved_verdict),
+        ),
+    ):
+        result = await orchestrator.generate_knowledge_pack(
+            'MacBook Pro 13" M1 2020 (A2338, 820-02020)',
+            device_slug="macbook-pro-m1",
+            client=object(),
+            memory_root=tmp_path,
+        )
+
+    assert result.device_slug == "macbook-pro-m1"
+    assert Path(result.disk_path) == tmp_path / "macbook-pro-m1"
+    assert (tmp_path / "macbook-pro-m1" / "registry.json").is_file()
+    # The slugified-label dir must NOT exist.
+    assert not (tmp_path / "macbook-pro-13-m1-2020-a2338-820-02020").exists()

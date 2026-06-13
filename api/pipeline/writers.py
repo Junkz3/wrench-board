@@ -21,6 +21,9 @@ import asyncio
 import logging
 from typing import TYPE_CHECKING
 
+if TYPE_CHECKING:
+    from collections.abc import Awaitable, Callable
+
 from anthropic import AsyncAnthropic
 
 from api.config import get_settings
@@ -32,9 +35,10 @@ from api.pipeline.prompts import (
     WRITER_SYSTEM,
 )
 from api.pipeline.schemas import Dictionary, KnowledgeGraph, Registry, RulesSet
-from api.pipeline.tool_call import call_with_forced_tool
+from api.pipeline.tool_call import call_with_forced_tool, call_with_query_tools
 
 if TYPE_CHECKING:
+    from api.pipeline.graph_truth import GraphTruth
     from api.pipeline.telemetry.token_stats import PhaseTokenStats
 
 logger = logging.getLogger("wrench_board.pipeline.writers")
@@ -152,6 +156,7 @@ async def run_writers_parallel(
     registry: Registry,
     cache_warmup_seconds: float | None = None,
     writer_stats: dict[str, PhaseTokenStats] | None = None,
+    on_event: Callable[[dict], Awaitable[None]] | None = None,
 ) -> tuple[KnowledgeGraph, RulesSet, Dictionary]:
     """Launch the 3 writers with a staggered start for cache warming.
 
@@ -180,18 +185,37 @@ async def run_writers_parallel(
         device_label,
     )
 
+    async def _emit_done(coro, writer: str, count_fn):
+        """Await one writer, then emit a live `phase_step` as it completes.
+
+        Wrapping each writer (rather than emitting after the gather) is what
+        makes the landing line tick "graphe ✓ … règles ✓ … dico ✓" as the 3
+        finish at their own pace, not all at once.
+        """
+        result = await coro
+        if on_event is not None:
+            await on_event({
+                "type": "phase_step", "phase": "writers", "step": "writer_done",
+                "writer": writer, "count": count_fn(result),
+            })
+        return result
+
     kg_task = asyncio.create_task(
-        _run_single_writer(
-            client=client,
-            model=cartographe_model,
-            device_label=device_label,
-            raw_dump=raw_dump,
-            registry=registry,
-            task_suffix=CARTOGRAPHE_TASK,
-            forced_tool_name=SUBMIT_KG_TOOL_NAME,
-            output_schema=KnowledgeGraph,
-            log_label="Cartographe",
-            stats=writer_stats.get("cartographe") if writer_stats else None,
+        _emit_done(
+            _run_single_writer(
+                client=client,
+                model=cartographe_model,
+                device_label=device_label,
+                raw_dump=raw_dump,
+                registry=registry,
+                task_suffix=CARTOGRAPHE_TASK,
+                forced_tool_name=SUBMIT_KG_TOOL_NAME,
+                output_schema=KnowledgeGraph,
+                log_label="Cartographe",
+                stats=writer_stats.get("cartographe") if writer_stats else None,
+            ),
+            "graph",
+            lambda kg: len(kg.nodes),
         ),
         name="writer-cartographe",
     )
@@ -202,32 +226,40 @@ async def run_writers_parallel(
     await asyncio.sleep(cache_warmup_seconds)
 
     rules_task = asyncio.create_task(
-        _run_single_writer(
-            client=client,
-            model=clinicien_model,
-            device_label=device_label,
-            raw_dump=raw_dump,
-            registry=registry,
-            task_suffix=CLINICIEN_TASK,
-            forced_tool_name=SUBMIT_RULES_TOOL_NAME,
-            output_schema=RulesSet,
-            log_label="Clinicien",
-            stats=writer_stats.get("clinicien") if writer_stats else None,
+        _emit_done(
+            _run_single_writer(
+                client=client,
+                model=clinicien_model,
+                device_label=device_label,
+                raw_dump=raw_dump,
+                registry=registry,
+                task_suffix=CLINICIEN_TASK,
+                forced_tool_name=SUBMIT_RULES_TOOL_NAME,
+                output_schema=RulesSet,
+                log_label="Clinicien",
+                stats=writer_stats.get("clinicien") if writer_stats else None,
+            ),
+            "rules",
+            lambda rules: len(rules.rules),
         ),
         name="writer-clinicien",
     )
     dict_task = asyncio.create_task(
-        _run_single_writer(
-            client=client,
-            model=lexicographe_model,
-            device_label=device_label,
-            raw_dump=raw_dump,
-            registry=registry,
-            task_suffix=LEXICOGRAPHE_TASK,
-            forced_tool_name=SUBMIT_DICT_TOOL_NAME,
-            output_schema=Dictionary,
-            log_label="Lexicographe",
-            stats=writer_stats.get("lexicographe") if writer_stats else None,
+        _emit_done(
+            _run_single_writer(
+                client=client,
+                model=lexicographe_model,
+                device_label=device_label,
+                raw_dump=raw_dump,
+                registry=registry,
+                task_suffix=LEXICOGRAPHE_TASK,
+                forced_tool_name=SUBMIT_DICT_TOOL_NAME,
+                output_schema=Dictionary,
+                log_label="Lexicographe",
+                stats=writer_stats.get("lexicographe") if writer_stats else None,
+            ),
+            "dict",
+            lambda d: len(d.entries),
         ),
         name="writer-lexicographe",
     )
@@ -244,6 +276,57 @@ async def run_writers_parallel(
     return kg, rules, dictionary
 
 
+# The reviser's sibling/source mapping. Each entry is the tool surface for that
+# writer role PLUS a closure that renders the CURRENT artefact of one of the OTHER
+# two roles as JSON — used to build the read-only `siblings_block`. Keyed by the
+# canonical file_name (knowledge_graph / rules / dictionary).
+_REVISE_MAPPING = {
+    "knowledge_graph": (SUBMIT_KG_TOOL_NAME, KnowledgeGraph, "Cartographe-Revise"),
+    "rules": (SUBMIT_RULES_TOOL_NAME, RulesSet, "Clinicien-Revise"),
+    "dictionary": (SUBMIT_DICT_TOOL_NAME, Dictionary, "Lexicographe-Revise"),
+}
+
+
+def _submit_tool_for(file_name: str) -> dict:
+    """The single submit tool object for one writer role (by file_name)."""
+    return {
+        "knowledge_graph": _submit_kg_tool,
+        "rules": _submit_rules_tool,
+        "dictionary": _submit_dict_tool,
+    }[file_name]()
+
+
+def _build_siblings_block(
+    *,
+    file_name: str,
+    current_kg: KnowledgeGraph,
+    current_rules: RulesSet,
+    current_dictionary: Dictionary,
+) -> str:
+    """Render the TWO files that are NOT `file_name` as `## <name> (current)`
+    JSON sections — the up-to-date cross-file context the reviser must align with.
+
+    RC1 (the convergence bug): when a reviser only ever saw its OWN previous
+    output, revise-round-1 re-aligned each of kg/rules/dictionary against the
+    STALE versions of the other two, collapsing a state that no longer existed.
+    Handing the reviser the CURRENT siblings (read-only) is the fix — it aligns
+    cross-file references against reality, not memory. The reviser's own file is
+    excluded (it's the BASELINE in `previous_output_json`, not a sibling)."""
+    artefacts = {
+        "knowledge_graph": current_kg,
+        "rules": current_rules,
+        "dictionary": current_dictionary,
+    }
+    sections: list[str] = []
+    for name, artefact in artefacts.items():
+        if name == file_name:
+            continue  # the reviser edits this one — it's the baseline, not a sibling
+        sections.append(
+            f"## {name} (current)\n```json\n{artefact.model_dump_json(indent=2)}\n```"
+        )
+    return "\n\n".join(sections)
+
+
 async def run_single_writer_revision(
     *,
     client: AsyncAnthropic,
@@ -256,34 +339,56 @@ async def run_single_writer_revision(
     file_name: str,
     revision_brief: str,
     previous_output_json: str,
+    current_kg: KnowledgeGraph,
+    current_rules: RulesSet,
+    current_dictionary: Dictionary,
+    ground_truth_report: str | None = None,
+    graph_truth: GraphTruth | None = None,
+    max_query_turns: int = 4,
+    stats: PhaseTokenStats | None = None,
 ) -> KnowledgeGraph | RulesSet | Dictionary:
     """Re-run one writer with a revision brief from the Auditor.
 
     Must use the same model that produced the original output, so the revised
     artefact stays coherent with the first pass (same taste, same shape).
+
+    The reviser sees, as READ-ONLY context, the CURRENT versions of the two
+    sibling files (`current_kg`/`current_rules`/`current_dictionary` minus its
+    own) so it aligns cross-file references against reality — the RC1 fix (see
+    `_build_siblings_block`). When a `graph_truth` is supplied it ALSO gets the
+    mention-scoped ground-truth report + the `query_graph` tool to verify
+    existence/voltage/source against the real schematic before writing.
     """
     # Import here to avoid circular import if orchestrator ever imports this module.
+    from api.pipeline.graph_truth import QUERY_GRAPH_TOOL, handle_query_graph
     from api.pipeline.prompts import REVISER_USER_TEMPLATE
 
-    mapping = {
-        "knowledge_graph": (
-            SUBMIT_KG_TOOL_NAME,
-            KnowledgeGraph,
-            "Cartographe-Revise",
-            cartographe_model,
-        ),
-        "rules": (SUBMIT_RULES_TOOL_NAME, RulesSet, "Clinicien-Revise", clinicien_model),
-        "dictionary": (
-            SUBMIT_DICT_TOOL_NAME,
-            Dictionary,
-            "Lexicographe-Revise",
-            lexicographe_model,
-        ),
+    model_for = {
+        "knowledge_graph": cartographe_model,
+        "rules": clinicien_model,
+        "dictionary": lexicographe_model,
     }
-    if file_name not in mapping:
+    if file_name not in _REVISE_MAPPING:
         raise ValueError(f"Unknown file_name for revision: {file_name!r}")
 
-    tool_name, output_schema, log_label, model = mapping[file_name]
+    tool_name, output_schema, log_label = _REVISE_MAPPING[file_name]
+    model = model_for[file_name]
+
+    # Read-only sibling context (the up-to-date OTHER two files) + optional
+    # deterministic ground-truth. Both ride the revision SUFFIX — the shared
+    # cached prefix message structure stays IDENTICAL so the writer cache serves.
+    siblings_block = _build_siblings_block(
+        file_name=file_name,
+        current_kg=current_kg,
+        current_rules=current_rules,
+        current_dictionary=current_dictionary,
+    )
+    ground_truth_block = (
+        "\n# Schematic ground truth (deterministic — verify via query_graph "
+        "before doubting)\n" + ground_truth_report + "\n"
+        if ground_truth_report
+        else ""
+    )
 
     # Keep the shared cached prefix identical so the cache still serves.
     shared_prefix = WRITER_SHARED_USER_PREFIX_TEMPLATE.format(
@@ -295,6 +400,8 @@ async def run_single_writer_revision(
         revision_brief=revision_brief,
         previous_output_json=previous_output_json,
         tool_name=tool_name,
+        ground_truth_block=ground_truth_block,
+        siblings_block=siblings_block,
     )
     messages = [
         {
@@ -313,15 +420,40 @@ async def run_single_writer_revision(
         }
     ]
 
-    logger.info("[Revise] Rewriting file=%r", file_name)
-    return await call_with_forced_tool(
+    logger.info("[Revise] Rewriting file=%r (graph=%s)", file_name, graph_truth is not None)
+
+    # Dispatch on the presence of a graph — mirrors the auditor. No graph → the
+    # legacy single forced-tool call (tools = ONLY this role's submit tool, so the
+    # reviser can't accidentally emit a sibling's shape). A graph → the capped
+    # agentic loop where the reviser may verify identifiers against the real
+    # schematic before it submits.
+    if graph_truth is None:
+        return await call_with_forced_tool(
+            client=client,
+            model=model,
+            system=WRITER_SYSTEM,
+            messages=messages,
+            tools=[_submit_tool_for(file_name)],
+            forced_tool_name=tool_name,
+            output_schema=output_schema,
+            max_attempts=2,
+            log_label=log_label,
+            stats=stats,
+        )
+    return await call_with_query_tools(
         client=client,
         model=model,
         system=WRITER_SYSTEM,
         messages=messages,
-        tools=_all_writer_tools(),
-        forced_tool_name=tool_name,
+        query_tool=QUERY_GRAPH_TOOL,
+        # Closure binds the deterministic handler to this pack's graph — the loop
+        # hands us only the raw tool input, never the graph.
+        query_handler=lambda i: handle_query_graph(graph_truth, i),
+        submit_tool=_submit_tool_for(file_name),
+        submit_tool_name=tool_name,
         output_schema=output_schema,
+        max_query_turns=max_query_turns,
         max_attempts=2,
         log_label=log_label,
+        stats=stats,
     )

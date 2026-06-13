@@ -31,7 +31,22 @@ from api.tools.ws_events import (
 
 def _no_board(session: SessionState) -> dict[str, Any] | None:
     if session.board is None:
-        return {"ok": False, "reason": "no-board-loaded", "suggestions": []}
+        # Both runtimes re-resolve the active boardview before dispatching
+        # bv_* (and on every user turn), so reaching this branch means no
+        # boardview file exists on disk for the device right now. The hint
+        # keeps the agent from writing the tool family off for the rest of
+        # the session: an import later is picked up automatically.
+        return {
+            "ok": False,
+            "reason": "no-board-loaded",
+            "hint": (
+                "no boardview file exists for this device yet; ask the "
+                "technician to import one (PCB panel). A mid-session import "
+                "is picked up automatically; retry bv_* tools after the "
+                "technician confirms the import."
+            ),
+            "suggestions": [],
+        }
     return None
 
 
