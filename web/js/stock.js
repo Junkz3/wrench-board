@@ -491,7 +491,7 @@ async function showAddDonorDialog() {
           <h3>${t("stock.add_donor_title")}</h3>
           <p class="add-donor-sub">${t("stock.add_donor_subtitle")}</p>
         </div>
-        <button class="ad-close" data-close aria-label="${t("stock.close")}">
+        <button class="dn-close" data-close aria-label="${t("stock.close")}">
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"
                stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M18 6 6 18M6 6l12 12"/>
@@ -502,59 +502,59 @@ async function showAddDonorDialog() {
         <div class="add-donor-filters">
           <label class="add-donor-field">
             <span class="add-donor-lbl">${t("stock.field_kind")}</span>
-            <select id="ad-kind"></select>
+            <select id="dn-kind"></select>
           </label>
           <label class="add-donor-field">
             <span class="add-donor-lbl">${t("stock.field_brand")}</span>
-            <select id="ad-brand"></select>
+            <select id="dn-brand"></select>
           </label>
         </div>
         <label class="add-donor-field">
           <span class="add-donor-lbl">${t("stock.field_device")}</span>
-          <span class="ad-search-wrap">
-            <svg class="ad-search-icon" viewBox="0 0 24 24" width="15" height="15" fill="none"
+          <span class="dn-search-wrap">
+            <svg class="dn-search-icon" viewBox="0 0 24 24" width="15" height="15" fill="none"
                  stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>
             </svg>
-            <input id="ad-search" type="search" autocomplete="off"
+            <input id="dn-search" type="search" autocomplete="off"
                    placeholder="${t("stock.search_device_placeholder")}">
           </span>
         </label>
-        <div class="add-donor-results" id="ad-results"></div>
+        <div class="add-donor-results" id="dn-results"></div>
         <div class="add-donor-row">
           <label class="add-donor-field grow">
             <span class="add-donor-lbl">${t("stock.field_label")}</span>
-            <input id="ad-label" type="text" autocomplete="off">
+            <input id="dn-label" type="text" autocomplete="off">
           </label>
           <label class="add-donor-field">
             <span class="add-donor-lbl">${t("stock.field_condition")}</span>
-            <select id="ad-condition">
+            <select id="dn-condition">
               <option value="donor_only">${t("stock.condition_donor_only")}</option>
               <option value="potentially_repairable">${t("stock.condition_repairable")}</option>
             </select>
           </label>
         </div>
-        <div class="add-donor-error" id="ad-error" hidden></div>
+        <div class="add-donor-error" id="dn-error" hidden></div>
       </div>
       <footer class="add-donor-foot">
-        <span class="ad-selection" id="ad-selection">${t("stock.nothing_selected")}</span>
-        <div class="ad-foot-actions">
+        <span class="dn-selection" id="dn-selection">${t("stock.nothing_selected")}</span>
+        <div class="dn-foot-actions">
           <button class="btn-sm" data-close>${t("stock.cancel")}</button>
-          <button class="btn-primary" id="ad-submit" disabled>${t("stock.create")}</button>
+          <button class="btn-primary" id="dn-submit" disabled>${t("stock.create")}</button>
         </div>
       </footer>
     </div>
   `;
   document.body.appendChild(overlay);
 
-  const kindSel = overlay.querySelector("#ad-kind");
-  const brandSel = overlay.querySelector("#ad-brand");
-  const searchInput = overlay.querySelector("#ad-search");
-  const resultsEl = overlay.querySelector("#ad-results");
-  const labelInput = overlay.querySelector("#ad-label");
-  const conditionSel = overlay.querySelector("#ad-condition");
-  const submitBtn = overlay.querySelector("#ad-submit");
-  const errorEl = overlay.querySelector("#ad-error");
+  const kindSel = overlay.querySelector("#dn-kind");
+  const brandSel = overlay.querySelector("#dn-brand");
+  const searchInput = overlay.querySelector("#dn-search");
+  const resultsEl = overlay.querySelector("#dn-results");
+  const labelInput = overlay.querySelector("#dn-label");
+  const conditionSel = overlay.querySelector("#dn-condition");
+  const submitBtn = overlay.querySelector("#dn-submit");
+  const errorEl = overlay.querySelector("#dn-error");
 
   // Board-type options from the kinds actually present in the taxonomy.
   const kindsPresent = [...new Set(entries.map(e => e.device_kind).filter(k => k && k !== "unknown"))].sort();
@@ -591,27 +591,27 @@ async function showAddDonorDialog() {
     const rows = matches();
     if (!rows.length) {
       const msg = loadError ? t("stock.devices_error") : t("stock.no_devices");
-      resultsEl.innerHTML = `<div class="add-donor-empty${loadError ? " ad-error-state" : ""}">${escapeHtml(msg)}</div>`;
+      resultsEl.innerHTML = `<div class="add-donor-empty${loadError ? " dn-error-state" : ""}">${escapeHtml(msg)}</div>`;
       return;
     }
     resultsEl.innerHTML = rows.slice(0, 60).map(e => {
       const badge = e.has_parts_index
-        ? `<span class="ad-badge ready">✓ ${escapeHtml(t("stock.graph_ready"))}</span>`
-        : `<span class="ad-badge pending">${escapeHtml(t("stock.graph_pending"))}</span>`;
+        ? `<span class="dn-badge ready">✓ ${escapeHtml(t("stock.graph_ready"))}</span>`
+        : `<span class="dn-badge pending">${escapeHtml(t("stock.graph_pending"))}</span>`;
       const meta = [
         isDuplicateLabel(e) ? e.device_slug : null,
         e.brand, e.version, e.form_factor,
       ].filter(Boolean).join(" · ");
       return `
-        <button type="button" class="ad-option${state.slug === e.device_slug ? " selected" : ""}"
+        <button type="button" class="dn-option${state.slug === e.device_slug ? " selected" : ""}"
                 data-slug="${escapeHtml(e.device_slug)}" data-label="${escapeHtml(e.device_label)}">
-          <span class="ad-option-icon">${_AD_BOARD_ICON}</span>
-          <span class="ad-option-main">
-            <span class="ad-option-label">${escapeHtml(e.device_label)}</span>
-            ${meta ? `<span class="ad-option-meta mono">${escapeHtml(meta)}</span>` : ""}
+          <span class="dn-option-icon">${_AD_BOARD_ICON}</span>
+          <span class="dn-option-main">
+            <span class="dn-option-label">${escapeHtml(e.device_label)}</span>
+            ${meta ? `<span class="dn-option-meta mono">${escapeHtml(meta)}</span>` : ""}
           </span>
           ${badge}
-          <span class="ad-option-check">${_AD_CHECK_ICON}</span>
+          <span class="dn-option-check">${_AD_CHECK_ICON}</span>
         </button>
       `;
     }).join("");
@@ -628,7 +628,7 @@ async function showAddDonorDialog() {
     labelInput.value = suggestLabel(label);
     submitBtn.disabled = false;
     errorEl.hidden = true;
-    const sel = overlay.querySelector("#ad-selection");
+    const sel = overlay.querySelector("#dn-selection");
     if (sel) { sel.textContent = label; sel.classList.add("active"); }
     renderResults();
   }
@@ -650,7 +650,7 @@ async function showAddDonorDialog() {
   brandSel.onchange = () => { state.brand = brandSel.value; renderResults(); };
   searchInput.oninput = () => { state.query = searchInput.value; renderResults(); };
   resultsEl.onclick = (ev) => {
-    const opt = ev.target.closest(".ad-option");
+    const opt = ev.target.closest(".dn-option");
     if (opt) selectDevice(opt.dataset.slug, opt.dataset.label);
   };
   overlay.querySelectorAll("[data-close]").forEach(b => { b.onclick = close; });
