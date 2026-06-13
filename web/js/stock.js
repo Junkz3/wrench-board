@@ -83,7 +83,7 @@ function critDot(crit) {
 // badge, and drops the Harvest action.
 function donorCard(d, pending) {
   const head = pending
-    ? `<span class="donor-pending-badge mono">⏳ ${escapeHtml(t("stock.pending_badge"))}</span>`
+    ? `<span class="donor-pending-badge mono">${escapeHtml(t("stock.pending_badge"))}</span>`
     : `<span class="donor-condition mono">${escapeHtml(d.condition)}</span>`;
   const stats = pending
     ? `<span class="donor-pending-hint">${escapeHtml(t("stock.pending_hint"))}</span>`
@@ -134,7 +134,18 @@ async function loadDonors() {
   }
 
   if (!donors.length) {
-    list.innerHTML = `<div class="empty stock-empty">${escapeHtml(t("stock.empty_donors"))}</div>`;
+    list.innerHTML = `
+      <div class="stock-empty">
+        <svg class="stock-empty-icon" viewBox="0 0 24 24" width="32" height="32" fill="none"
+             stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 7v10l9 4 9-4V7"/><path d="M12 11v10"/>
+        </svg>
+        <div class="stock-empty-title">${escapeHtml(t("stock.empty_donors"))}</div>
+        <div class="stock-empty-hint">${escapeHtml(t("stock.empty_hint"))}</div>
+        <button type="button" class="btn-primary" id="stock-empty-add">${escapeHtml(t("stock.add_donor"))}</button>
+      </div>`;
+    const addBtn = document.getElementById("stock-empty-add");
+    if (addBtn) addBtn.onclick = showAddDonorDialog;
   } else {
     list.innerHTML =
       donorGroup("stock.section_ready", ready, false) +
@@ -402,6 +413,11 @@ function renderSearchResults(res) {
 // requires the slug to exist); readiness (parts_index) is shown per row.
 let _deviceEntries = null;
 
+// Inline SVGs for the device picker rows — a board glyph (leading) and the
+// selection tick (revealed by CSS on the selected row). 16×16, currentColor.
+const _AD_BOARD_ICON = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 8h4M7 12h4M7 16h2"/><circle cx="16.5" cy="13" r="2.4"/></svg>`;
+const _AD_CHECK_ICON = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>`;
+
 async function loadDeviceEntries() {
   if (_deviceEntries) return _deviceEntries;
   const tax = await apiGet("/pipeline/taxonomy");
@@ -454,11 +470,19 @@ async function showAddDonorDialog() {
   overlay.innerHTML = `
     <div class="add-donor-panel glass">
       <header class="add-donor-head">
-        <h3>${t("stock.add_donor_title")}</h3>
-        <button class="btn-sm" data-close>${t("stock.close")}</button>
+        <div class="add-donor-head-text">
+          <h3>${t("stock.add_donor_title")}</h3>
+          <p class="add-donor-sub">${t("stock.add_donor_subtitle")}</p>
+        </div>
+        <button class="ad-close" data-close aria-label="${t("stock.close")}">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"
+               stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M18 6 6 18M6 6l12 12"/>
+          </svg>
+        </button>
       </header>
       <div class="add-donor-body">
-        <div class="add-donor-row">
+        <div class="add-donor-filters">
           <label class="add-donor-field">
             <span class="add-donor-lbl">${t("stock.field_kind")}</span>
             <select id="ad-kind"></select>
@@ -470,8 +494,14 @@ async function showAddDonorDialog() {
         </div>
         <label class="add-donor-field">
           <span class="add-donor-lbl">${t("stock.field_device")}</span>
-          <input id="ad-search" type="search" autocomplete="off"
-                 placeholder="${t("stock.search_device_placeholder")}">
+          <span class="ad-search-wrap">
+            <svg class="ad-search-icon" viewBox="0 0 24 24" width="15" height="15" fill="none"
+                 stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>
+            </svg>
+            <input id="ad-search" type="search" autocomplete="off"
+                   placeholder="${t("stock.search_device_placeholder")}">
+          </span>
         </label>
         <div class="add-donor-results" id="ad-results"></div>
         <div class="add-donor-row">
@@ -490,8 +520,11 @@ async function showAddDonorDialog() {
         <div class="add-donor-error" id="ad-error" hidden></div>
       </div>
       <footer class="add-donor-foot">
-        <button class="btn-sm" data-close>${t("stock.cancel")}</button>
-        <button class="btn-primary" id="ad-submit" disabled>${t("stock.create")}</button>
+        <span class="ad-selection" id="ad-selection">${t("stock.nothing_selected")}</span>
+        <div class="ad-foot-actions">
+          <button class="btn-sm" data-close>${t("stock.cancel")}</button>
+          <button class="btn-primary" id="ad-submit" disabled>${t("stock.create")}</button>
+        </div>
       </footer>
     </div>
   `;
@@ -546,7 +579,7 @@ async function showAddDonorDialog() {
     resultsEl.innerHTML = rows.slice(0, 60).map(e => {
       const badge = e.has_parts_index
         ? `<span class="ad-badge ready">✓ ${escapeHtml(t("stock.graph_ready"))}</span>`
-        : `<span class="ad-badge pending">⏳ ${escapeHtml(t("stock.graph_pending"))}</span>`;
+        : `<span class="ad-badge pending">${escapeHtml(t("stock.graph_pending"))}</span>`;
       const meta = [
         isDuplicateLabel(e) ? e.device_slug : null,
         e.brand, e.version, e.form_factor,
@@ -554,11 +587,13 @@ async function showAddDonorDialog() {
       return `
         <button type="button" class="ad-option${state.slug === e.device_slug ? " selected" : ""}"
                 data-slug="${escapeHtml(e.device_slug)}" data-label="${escapeHtml(e.device_label)}">
+          <span class="ad-option-icon">${_AD_BOARD_ICON}</span>
           <span class="ad-option-main">
             <span class="ad-option-label">${escapeHtml(e.device_label)}</span>
             ${meta ? `<span class="ad-option-meta mono">${escapeHtml(meta)}</span>` : ""}
           </span>
           ${badge}
+          <span class="ad-option-check">${_AD_CHECK_ICON}</span>
         </button>
       `;
     }).join("");
@@ -575,6 +610,8 @@ async function showAddDonorDialog() {
     labelInput.value = suggestLabel(label);
     submitBtn.disabled = false;
     errorEl.hidden = true;
+    const sel = overlay.querySelector("#ad-selection");
+    if (sel) { sel.textContent = label; sel.classList.add("active"); }
     renderResults();
   }
 

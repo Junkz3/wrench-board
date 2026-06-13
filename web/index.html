@@ -862,62 +862,99 @@
     <h1 class="stock-title" data-i18n="stock.title">Stock</h1>
     <button type="button" class="ob-infohint" id="stock-info-btn"
             data-i18n-attr="aria-label:onboarding.infohint,title:onboarding.infohint">?</button>
-    <div class="stock-counts">
-      <span class="chip mono"><span data-i18n="stock.donors">Donors</span>: <b id="stock-donors-count">0</b></span>
-      <span class="chip mono"><span data-i18n="stock.available">Available</span>: <b id="stock-available-count">0</b></span>
-      <span class="chip mono"><span data-i18n="stock.consumed">Consumed</span>: <b id="stock-consumed-count">0</b></span>
-    </div>
     <div class="stock-head-spacer"></div>
     <button id="stock-add-donor-btn" class="btn-primary" data-i18n="stock.add_donor">+ Add donor</button>
   </header>
 
   <div class="stock-body">
-  <div class="stock-search-form">
-    <select id="stock-q-type">
-      <option value="" data-i18n="stock.select_type">(Type)</option>
-      <option value="capacitor" data-i18n="stock.type_capacitor">Capacitor</option>
-      <option value="resistor" data-i18n="stock.type_resistor">Resistor</option>
-      <option value="inductor" data-i18n="stock.type_inductor">Inductor</option>
-      <option value="diode" data-i18n="stock.type_diode">Diode</option>
-      <option value="ic" data-i18n="stock.type_ic">IC</option>
-      <option value="transistor" data-i18n="stock.type_transistor">Transistor</option>
-      <option value="ferrite" data-i18n="stock.type_ferrite">Ferrite bead</option>
-      <option value="connector" data-i18n="stock.type_connector">Connector</option>
-    </select>
-    <input id="stock-q-value" type="text" placeholder="Value (0.1uF, 10k, MPN…)"
-           data-i18n-attr="placeholder:stock.ph_value">
-    <input id="stock-q-package" type="text" placeholder="Package (0402, QFN-24…)"
-           data-i18n-attr="placeholder:stock.ph_package">
-    <input id="stock-q-voltage" type="number" placeholder="V min"
-           data-i18n-attr="placeholder:stock.ph_voltage">
-    <select id="stock-q-role">
-      <option value="" data-i18n="stock.select_role">(Target role)</option>
-      <option value="decoupling">decoupling</option>
-      <option value="bulk">bulk</option>
-      <option value="filter">filter</option>
-      <option value="bypass">bypass</option>
-      <option value="ac_coupling">ac_coupling</option>
-      <option value="tank">tank</option>
-      <option value="feedback">feedback</option>
-      <option value="pull_up">pull_up</option>
-      <option value="pull_down">pull_down</option>
-      <option value="current_sense">current_sense</option>
-      <option value="damping">damping</option>
-      <option value="series">series</option>
-      <option value="load_switch">load_switch</option>
-      <option value="level_shifter">level_shifter</option>
-      <option value="inrush_limiter">inrush_limiter</option>
-      <option value="flyback_switch">flyback_switch</option>
-      <option value="ic">ic</option>
-      <option value="connector">connector</option>
-    </select>
-    <button id="stock-search-btn" class="btn-primary" data-i18n="stock.search">Search</button>
-  </div>
+    <!-- Overview — three stat tiles read at a glance before the donor grid. -->
+    <div class="stock-overview">
+      <div class="stock-stat">
+        <span class="stock-stat-val mono" id="stock-donors-count">0</span>
+        <span class="stock-stat-lbl" data-i18n="stock.donors">Donors</span>
+      </div>
+      <div class="stock-stat">
+        <span class="stock-stat-val mono accent-emerald" id="stock-available-count">0</span>
+        <span class="stock-stat-lbl" data-i18n="stock.available">Available</span>
+      </div>
+      <div class="stock-stat">
+        <span class="stock-stat-val mono dim" id="stock-consumed-count">0</span>
+        <span class="stock-stat-lbl" data-i18n="stock.consumed">Consumed</span>
+      </div>
+    </div>
 
-  <div id="stock-results" class="stock-results"></div>
+    <!-- Donor inventory — the heart of the section, shown first. -->
+    <section class="stock-section">
+      <header class="stock-section-head">
+        <h2 class="stock-section-title" data-i18n="stock.donors_title">Donors in stock</h2>
+      </header>
+      <div id="stock-donors-list" class="stock-donors-list"></div>
+    </section>
 
-  <h2 class="stock-h2" data-i18n="stock.donors_title">Donors in stock</h2>
-  <div id="stock-donors-list" class="stock-donors-list"></div>
+    <!-- Part finder — secondary tool, searches parts across all donors. -->
+    <section class="stock-section stock-finder">
+      <header class="stock-section-head">
+        <h2 class="stock-section-title" data-i18n="stock.search_form_title">Search parts across donors</h2>
+      </header>
+      <div class="stock-search-form">
+        <label class="finder-field">
+          <span class="finder-lbl" data-i18n="stock.col_type">Type</span>
+          <select id="stock-q-type">
+            <option value="" data-i18n="stock.select_type">(Type)</option>
+            <option value="capacitor" data-i18n="stock.type_capacitor">Capacitor</option>
+            <option value="resistor" data-i18n="stock.type_resistor">Resistor</option>
+            <option value="inductor" data-i18n="stock.type_inductor">Inductor</option>
+            <option value="diode" data-i18n="stock.type_diode">Diode</option>
+            <option value="ic" data-i18n="stock.type_ic">IC</option>
+            <option value="transistor" data-i18n="stock.type_transistor">Transistor</option>
+            <option value="ferrite" data-i18n="stock.type_ferrite">Ferrite bead</option>
+            <option value="connector" data-i18n="stock.type_connector">Connector</option>
+          </select>
+        </label>
+        <label class="finder-field grow">
+          <span class="finder-lbl" data-i18n="stock.col_value">Value</span>
+          <input id="stock-q-value" type="text" placeholder="Value (0.1uF, 10k, MPN…)"
+                 data-i18n-attr="placeholder:stock.ph_value">
+        </label>
+        <label class="finder-field">
+          <span class="finder-lbl" data-i18n="stock.col_pkg">Pkg</span>
+          <input id="stock-q-package" type="text" placeholder="Package (0402, QFN-24…)"
+                 data-i18n-attr="placeholder:stock.ph_package">
+        </label>
+        <label class="finder-field finder-field-sm">
+          <span class="finder-lbl">V min</span>
+          <input id="stock-q-voltage" type="number" placeholder="V min"
+                 data-i18n-attr="placeholder:stock.ph_voltage">
+        </label>
+        <label class="finder-field">
+          <span class="finder-lbl" data-i18n="stock.col_role">Role</span>
+          <select id="stock-q-role">
+            <option value="" data-i18n="stock.select_role">(Target role)</option>
+            <option value="decoupling">decoupling</option>
+            <option value="bulk">bulk</option>
+            <option value="filter">filter</option>
+            <option value="bypass">bypass</option>
+            <option value="ac_coupling">ac_coupling</option>
+            <option value="tank">tank</option>
+            <option value="feedback">feedback</option>
+            <option value="pull_up">pull_up</option>
+            <option value="pull_down">pull_down</option>
+            <option value="current_sense">current_sense</option>
+            <option value="damping">damping</option>
+            <option value="series">series</option>
+            <option value="load_switch">load_switch</option>
+            <option value="level_shifter">level_shifter</option>
+            <option value="inrush_limiter">inrush_limiter</option>
+            <option value="flyback_switch">flyback_switch</option>
+            <option value="ic">ic</option>
+            <option value="connector">connector</option>
+          </select>
+        </label>
+        <button id="stock-search-btn" class="btn-primary" data-i18n="stock.search">Search</button>
+      </div>
+
+      <div id="stock-results" class="stock-results"></div>
+    </section>
   </div>
 </section>
 <section class="profile hidden" id="profileSection" data-partial="/profil.html"></section>
