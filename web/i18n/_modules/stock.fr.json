@@ -66,6 +66,8 @@
   "pending_hint": "Les pièces deviennent recherchables dès que le graphe électrique de cette carte est disponible.",
   "empty_donors": "Aucune carte donneuse pour l'instant.",
   "empty_hint": "Ajoute une carte morte comme donneur pour récupérer ses pièces.",
+  "load_error": "Impossible de charger ton stock. Reconnecte-toi et réessaie.",
+  "devices_error": "Impossible de charger les appareils. Reconnecte-toi et réessaie.",
   "label_donor_suffix": "donneur",
   "kind_phone_logic_board": "Carte mère téléphone",
   "kind_gpu_card": "Carte graphique",

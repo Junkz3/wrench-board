@@ -13,10 +13,22 @@ export class ApiError extends Error {
   }
 }
 
+// A 401 on a UI call means the session lapsed (hosted deployment) — the engine
+// itself is auth-agnostic and can't re-auth, so we fire a global event the
+// hosting layer (cloud auth shim) can act on (e.g. redirect to /login). In
+// self-host there's no listener, so this is a no-op. Exported so the few views
+// that still own a raw fetch (stock) can report the same signal.
+export function notifyUnauthorized() {
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent("wb:unauthorized"));
+  }
+}
+
 async function _parse(res) {
   if (!res.ok) {
     let body = null;
     try { body = await res.json(); } catch { /* non-JSON error body */ }
+    if (res.status === 401) notifyUnauthorized();
     throw new ApiError(res.status, body?.detail || res.statusText, body);
   }
   return res.json();

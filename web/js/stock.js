@@ -3,7 +3,7 @@
 
 import { t } from "./i18n.js";
 import { escapeHtml } from "./shared/dom.js";
-import { apiGet } from "./shared/api.js";
+import { apiGet, notifyUnauthorized } from "./shared/api.js";
 import { openInfoModal } from "./info_modal.js";
 
 const STOCK_INFO_FLAG = "wb_stock_info_seen";
@@ -59,7 +59,12 @@ const _harvestState = {
 
 async function fetchJson(path, opts) {
   const r = await fetch(API + path, opts);
-  if (!r.ok) throw new Error(`${r.status} ${r.statusText}`);
+  if (!r.ok) {
+    // Mirror shared/api.js: a lapsed session (401) gets surfaced globally so
+    // the host can re-auth, instead of dying silently into an empty view.
+    if (r.status === 401) notifyUnauthorized();
+    throw new Error(`${r.status} ${r.statusText}`);
+  }
   return r.json();
 }
 
@@ -119,8 +124,16 @@ function donorGroup(titleKey, donors, pending) {
 }
 
 async function loadDonors() {
-  const { donors } = await fetchJson("/donors");
   const list = document.getElementById("stock-donors-list");
+  let donors;
+  try {
+    ({ donors } = await fetchJson("/donors"));
+  } catch {
+    // Don't die into a silent empty view (the 0/0/0 + "no donors" trap of a
+    // lapsed session). Show why; the 401 path also fires wb:unauthorized.
+    if (list) list.innerHTML = `<div class="stock-empty stock-error">${escapeHtml(t("stock.load_error"))}</div>`;
+    return;
+  }
   let totalAvail = 0;
   let totalCons = 0;
   const ready = [];
@@ -448,10 +461,14 @@ function _kindLabel(kind) {
 
 async function showAddDonorDialog() {
   let entries;
+  let loadError = false;
   try {
     entries = await loadDeviceEntries();
   } catch {
+    // A lapsed session (or any taxonomy failure) used to leave the picker
+    // silently empty. Flag it so the list reports the failure instead.
     entries = [];
+    loadError = true;
   }
 
   const state = { kind: "", brand: "", query: "", slug: null, label: null };
@@ -573,7 +590,8 @@ async function showAddDonorDialog() {
   function renderResults() {
     const rows = matches();
     if (!rows.length) {
-      resultsEl.innerHTML = `<div class="add-donor-empty">${escapeHtml(t("stock.no_devices"))}</div>`;
+      const msg = loadError ? t("stock.devices_error") : t("stock.no_devices");
+      resultsEl.innerHTML = `<div class="add-donor-empty${loadError ? " ad-error-state" : ""}">${escapeHtml(msg)}</div>`;
       return;
     }
     resultsEl.innerHTML = rows.slice(0, 60).map(e => {

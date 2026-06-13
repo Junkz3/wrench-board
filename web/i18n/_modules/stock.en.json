@@ -66,6 +66,8 @@
   "pending_hint": "Parts become searchable once this board's electrical graph is available.",
   "empty_donors": "No donor boards yet.",
   "empty_hint": "Add a dead board as a donor to salvage its parts.",
+  "load_error": "Couldn't load your stock. Reconnect and try again.",
+  "devices_error": "Couldn't load devices. Reconnect and try again.",
   "label_donor_suffix": "donor",
   "kind_phone_logic_board": "Phone logic board",
   "kind_gpu_card": "GPU card",
