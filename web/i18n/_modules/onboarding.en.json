@@ -15,6 +15,7 @@
     "panel_title": "Your technician profile",
     "field_name": "Name",
     "name_placeholder": "How should I call you?",
+    "name_required": "Your name is required to continue.",
     "field_avatar": "Avatar",
     "avatar_placeholder": "2 letters or an emoji",
     "field_level": "Experience level",

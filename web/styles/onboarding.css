@@ -292,6 +292,20 @@
 }
 select.ob-input { cursor: pointer; }
 
+/* Mandatory-gate validation: a required field that's still empty (the name on
+   the first-connection profile wizard). Amber = "needs your attention". */
+.ob-input.is-invalid {
+  border-color: var(--amber);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--amber) 16%, transparent);
+}
+.ob-field-error {
+  display: block;
+  margin-top: 2px;
+  font-size: 11.5px;
+  color: var(--amber);
+}
+.ob-field-error[hidden] { display: none; }
+
 .ob-tools { border: none; padding: 0; margin: 0; }
 .ob-tools-grid {
   display: grid;

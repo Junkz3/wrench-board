@@ -15,6 +15,7 @@
     "panel_title": "你的技师资料",
     "field_name": "姓名",
     "name_placeholder": "我该怎么称呼你？",
+    "name_required": "请填写你的名字以继续。",
     "field_avatar": "头像",
     "avatar_placeholder": "2 个字母或一个表情符号",
     "field_level": "经验等级",

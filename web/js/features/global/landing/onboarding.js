@@ -16,8 +16,8 @@
 
 import { mountMascot } from "../../../mascot.js";
 import { showBubble, hideBubble } from "../../../mascot_bubble.js";
-import i18n, { t } from "../../../i18n.js";
-import { apiGet, apiSend } from "../../../shared/api.js";
+import { t } from "../../../i18n.js";
+import { apiGet } from "../../../shared/api.js";
 import { hasSeenOnboarding, markOnboardingSeen } from "../../../onboarding_state.js";
 import { forceNextDiagCoaching } from "../../repair/diagnostic/coaching.js";
 import { openProfileWizard } from "./profile_modal.js";
@@ -60,14 +60,9 @@ export function preGateOnboarding() {
 
 export async function maybeStartOnboarding(ctl) {
   _ctl = ctl || {};
-  // Server-side truth (cross-device), with the localStorage pre-gate as the
-  // fallback before boot hydration resolves. If already seen, drop the pre-gate
-  // dim the synchronous preGateOnboarding() may have added and bail.
-  if (hasSeenOnboarding("onboarding_seen")) {
-    _overlay()?.classList.remove("ob-running");
-    return;
-  }
-
+  // Always load profile + repairs first: the profile gate is INDEPENDENT of the
+  // tour flag (a missing name must prompt even on a returning device / after the
+  // tour was skipped), so we can't early-return on `onboarding_seen` here.
   let repairsCount = 0;
   try {
     const res = await fetch("/pipeline/repairs");
@@ -86,50 +81,49 @@ export async function maybeStartOnboarding(ctl) {
   }
 
   const incomplete = !_env?.profile?.identity?.name;
-  if (!incomplete && repairsCount > 0) {
-    // Nothing to onboard — undo the pre-gate and leave the cockpit alone.
-    _overlay()?.classList.remove("ob-running");
+
+  // ── Gate 1: mandatory profile (language first, name required) ────────────
+  // Server-persisted + tenant-scoped (PUT /profile/*), so once the name is set
+  // it never re-prompts on reconnection. Can't be escaped by refusing the tour.
+  if (incomplete) {
+    _overlay()?.classList.add("ob-running");
+    _mascotState("scanning");
+    document.getElementById("landingProfile")?.classList.add("ob-spotlight");
+    openProfileWizard(_env, {
+      mandatory: true,
+      onComplete: () => {
+        document.getElementById("landingProfile")?.classList.remove("ob-spotlight");
+        _mascotState("success");
+        _maybeOfferTour(repairsCount);
+      },
+    });
     return;
   }
 
+  // Profile already complete → consider the optional tour.
+  _maybeOfferTour(repairsCount);
+}
+
+// ── Gate 2: optional guided tour (one-shot, server-backed onboarding_seen) ──
+function _maybeOfferTour(repairsCount) {
+  if (hasSeenOnboarding("onboarding_seen") || repairsCount > 0) {
+    // Nothing to tour — undo the pre-gate and leave the cockpit alone.
+    _overlay()?.classList.remove("ob-running");
+    return;
+  }
   _overlay()?.classList.add("ob-running");
   _mascotState("scanning");
-  _stepWelcome(incomplete);
+  _stepWelcome();
 }
 
-// Live language switch — applied immediately and persisted, so the rest of the
-// onboarding (and the whole UI) reflows into the chosen language right away. The
-// caller passes a re-render so the current screen rebuilds in the new locale.
-async function _switchLanguage(lang, rerender) {
-  if (!lang || lang === i18n.locale) return;
-  await i18n.setLocale(lang);
-  try {
-    const verbosity = _env?.profile?.preferences?.verbosity || "auto";
-    await apiSend("/profile/preferences", {
-      method: "PUT",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ verbosity, language: lang }),
-    });
-    if (_env?.profile?.preferences) _env.profile.preferences.language = lang;
-  } catch (err) {
-    console.warn("[onboarding] persist language failed", err);
-  }
-  rerender();
-}
-
-// ── Step 1: welcome modal (blocking) — language first ─────────────────────
-function _stepWelcome(incomplete) {
+// ── Tour step 1: offer modal (blocking) — refusable ───────────────────────
+// Language and profile are already handled by Gate 1, so this is purely the
+// "want a quick tour?" prompt; refusing ends the run (and marks it seen).
+function _stepWelcome() {
   const host = _ensureHost();
-  const lang = i18n.locale;
   host.innerHTML = `
     <div class="ob-backdrop" id="obBackdrop">
       <div class="ob-modal" role="dialog" aria-modal="true" aria-labelledby="obWelcomeTitle">
-        <div class="ob-welcome-lang ob-lang-opts" role="group" aria-label="Language">
-          <button type="button" class="landing-lang-opt${lang === "en" ? " is-active" : ""}" data-lang="en">${t("onboarding.menu.lang_en")}</button>
-          <button type="button" class="landing-lang-opt${lang === "fr" ? " is-active" : ""}" data-lang="fr">${t("onboarding.menu.lang_fr")}</button>
-          <button type="button" class="landing-lang-opt${lang === "zh" ? " is-active" : ""}" data-lang="zh">${t("onboarding.menu.lang_zh")}</button>
-          <button type="button" class="landing-lang-opt${lang === "hi" ? " is-active" : ""}" data-lang="hi">${t("onboarding.menu.lang_hi")}</button>
-        </div>
         <div class="ob-modal-mascot" id="obWelcomeMascot" aria-hidden="true"></div>
         <span class="ob-kicker">${t("onboarding.welcome.kicker")}</span>
         <h2 class="ob-title" id="obWelcomeTitle">${t("onboarding.welcome.title")}</h2>
@@ -141,25 +135,10 @@ function _stepWelcome(incomplete) {
       </div>
     </div>`;
   mountMascot(host.querySelector("#obWelcomeMascot"), { size: "md", state: "idle" });
-  host.querySelectorAll(".ob-welcome-lang .landing-lang-opt").forEach((btn) => {
-    btn.addEventListener("click", () => _switchLanguage(btn.dataset.lang, () => _stepWelcome(incomplete)));
-  });
   host.querySelector("#obWelcomeSkip").addEventListener("click", finish);
   host.querySelector("#obWelcomeCta").addEventListener("click", () => {
     _clearHost();
-    if (incomplete) _stepProfile(); else _stepConcept();
-  });
-}
-
-// ── Step 2: inline profile capture ────────────────────────────────────────
-function _stepProfile() {
-  document.getElementById("landingProfile")?.classList.add("ob-spotlight");
-  const unspotlight = () => document.getElementById("landingProfile")?.classList.remove("ob-spotlight");
-  // The guided 3-step wizard owns its own modal host; it saves (and broadcasts
-  // wb:profile-updated so the pill re-paints) on completion.
-  openProfileWizard(_env, {
-    onComplete: () => { unspotlight(); _mascotState("success"); _stepConcept(); },
-    onSkip: () => { unspotlight(); _stepConcept(); },
+    _stepConcept();
   });
 }
 

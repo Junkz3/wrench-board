@@ -65,9 +65,30 @@ const VERBOSITY = ["auto", "concise", "normal", "teaching"];
 const LEVELS = ["", "beginner", "intermediate", "confirmed", "expert"]; // "" = auto-derived
 
 // ── Section builders (shared by wizard + modal) ───────────────────────────
-function identityStepHTML(env) {
+
+// The four-language picker (live-switching buttons), shared by the welcome-era
+// markup, the identity step (wizard) and the posture step (quick modal).
+function langPickerHTML() {
+  const lang = i18n.locale;
+  return `
+        <div class="ob-lang-opts" role="group" aria-label="${escapeHtml(t("onboarding.menu.language"))}">
+          <button type="button" class="landing-lang-opt${lang === "en" ? " is-active" : ""}" data-lang="en">${t("onboarding.menu.lang_en")}</button>
+          <button type="button" class="landing-lang-opt${lang === "fr" ? " is-active" : ""}" data-lang="fr">${t("onboarding.menu.lang_fr")}</button>
+          <button type="button" class="landing-lang-opt${lang === "zh" ? " is-active" : ""}" data-lang="zh">${t("onboarding.menu.lang_zh")}</button>
+          <button type="button" class="landing-lang-opt${lang === "hi" ? " is-active" : ""}" data-lang="hi">${t("onboarding.menu.lang_hi")}</button>
+        </div>`;
+}
+
+// showLanguage: the wizard puts the picker FIRST in the identity step (language
+// is chosen before anything else); the quick modal keeps it in the posture step.
+function identityStepHTML(env, showLanguage = false) {
   const id = env?.profile?.identity || {};
   const level = id.level_override || "";
+  const langField = showLanguage ? `
+      <label class="ob-field">
+        <span class="ob-field-label">${t("onboarding.menu.language")}</span>
+        ${langPickerHTML()}
+      </label>` : "";
   const levelRow = (v) => {
     const labelKey = v === "" ? "onboarding.profile.level_auto" : `onboarding.profile.level_${v}`;
     const descKey = v === "" ? "onboarding.level.desc_auto" : `profile.ribbon.blurbs.${v}`;
@@ -82,6 +103,7 @@ function identityStepHTML(env) {
     <section class="ob-step" data-step="0">
       <h4 class="ob-step-title">${t("onboarding.wizard.step_identity")}</h4>
       <p class="ob-step-hint">${t("onboarding.wizard.identity_intro")}</p>
+      ${langField}
       <div class="ob-field-row">
         <label class="ob-field" style="flex:1">
           <span class="ob-field-label">${t("onboarding.profile.field_name")}</span>
@@ -96,6 +118,7 @@ function identityStepHTML(env) {
                  placeholder="${escapeHtml(t("onboarding.profile.avatar_placeholder"))}"/>
         </label>
       </div>
+      <span class="ob-field-error" id="obNameError" hidden>${t("onboarding.profile.name_required")}</span>
       <fieldset class="ob-radios">
         <legend class="ob-field-label">${t("onboarding.profile.field_level")}</legend>
         ${LEVELS.map(levelRow).join("")}
@@ -180,8 +203,8 @@ function wireCustomTools(root) {
   });
 }
 
-// `showLanguage`: the wizard hides the picker (language is chosen first, in the
-// welcome modal) and only carries the chosen locale via a hidden input; the
+// `showLanguage`: the wizard hides the picker here (language is chosen first, in
+// the identity step) and only carries the chosen locale via a hidden input; the
 // standalone config modal shows a live picker for later edits.
 function postureStepHTML(env, showLanguage = true) {
   const prefs = env?.profile?.preferences || {};
@@ -216,8 +239,10 @@ function postureStepHTML(env, showLanguage = true) {
     </section>`;
 }
 
-function sectionsHTML(env, showLanguage = true) {
-  return identityStepHTML(env) + workshopStepHTML(env) + postureStepHTML(env, showLanguage);
+// lang placement — "identity": the wizard shows the picker first (language is
+// chosen before everything); "posture": the quick modal keeps it in posture.
+function sectionsHTML(env, { lang = "posture" } = {}) {
+  return identityStepHTML(env, lang === "identity") + workshopStepHTML(env) + postureStepHTML(env, lang === "posture");
 }
 
 // ── Read + persist ────────────────────────────────────────────────────────
@@ -260,7 +285,11 @@ export async function saveProfileForm(form, env) {
 }
 
 // ── First-run wizard (paginated) ──────────────────────────────────────────
-export function openProfileWizard(env, { onComplete, onSkip } = {}) {
+// mandatory: first-connection gate — the Skip button is removed and the wizard
+// cannot be left until a name is entered (the identity step blocks advancing).
+// Language lives FIRST in the identity step (live-switching re-opens the wizard
+// in the new locale, preserving in-progress edits).
+export function openProfileWizard(env, { onComplete, onSkip, mandatory = false } = {}) {
   if (document.getElementById("obProfileConfig")) return;
   const host = document.createElement("div");
   host.className = "ob-host";
@@ -272,9 +301,9 @@ export function openProfileWizard(env, { onComplete, onSkip } = {}) {
           <span class="ob-wiz-title" id="obWizTitle">${t("onboarding.wizard.config_title")}</span>
           <span class="ob-progress" id="obWizProgress"></span>
         </header>
-        <form class="ob-form ob-config-body" id="obProfileForm">${sectionsHTML(env, false)}</form>
+        <form class="ob-form ob-config-body" id="obProfileForm">${sectionsHTML(env, { lang: "identity" })}</form>
         <footer class="ob-config-foot">
-          <button type="button" class="mascot-bubble-skip" id="obWizSkip">${t("onboarding.skip")}</button>
+          ${mandatory ? "" : `<button type="button" class="mascot-bubble-skip" id="obWizSkip">${t("onboarding.skip")}</button>`}
           <div class="ob-foot-right">
             <button type="button" class="ob-btn ob-btn-ghost" id="obWizBack">${t("onboarding.back")}</button>
             <button type="button" class="ob-btn ob-btn-primary" id="obWizNext">${t("onboarding.next")}</button>
@@ -291,8 +320,37 @@ export function openProfileWizard(env, { onComplete, onSkip } = {}) {
   const back = host.querySelector("#obWizBack");
   const next = host.querySelector("#obWizNext");
   const progress = host.querySelector("#obWizProgress");
+  const nameInput = form.querySelector('input[name="name"]');
+  const nameError = host.querySelector("#obNameError");
   const close = () => host.remove();
   let step = 0;
+
+  // Live language switch (identity step). Snapshot the in-progress form, persist
+  // the locale, then re-open the wizard rendered in the new language — same as
+  // the quick modal, so the tech never loses what they typed.
+  host.querySelectorAll('.ob-step[data-step="0"] .ob-lang-opts .landing-lang-opt').forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      if (btn.dataset.lang === i18n.locale) return;
+      const snap = readProfileForm(form, env);
+      const merged = {
+        ...env,
+        profile: {
+          ...(env?.profile || {}),
+          identity: snap.identity, tools: snap.tools, custom_tools: snap.customTools,
+          preferences: { ...(env?.profile?.preferences || {}), ...snap.prefs, language: btn.dataset.lang },
+        },
+      };
+      await i18n.setLocale(btn.dataset.lang);
+      try {
+        await apiSend("/profile/preferences", {
+          method: "PUT", headers: { "content-type": "application/json" },
+          body: JSON.stringify({ verbosity: snap.prefs.verbosity || "auto", language: btn.dataset.lang }),
+        });
+      } catch (err) { console.warn("[profile_wizard] persist language failed", err); }
+      host.remove();
+      openProfileWizard(merged, { onComplete, onSkip, mandatory });
+    });
+  });
 
   const render = () => {
     steps.forEach((s, i) => { s.hidden = i !== step; });
@@ -303,8 +361,22 @@ export function openProfileWizard(env, { onComplete, onSkip } = {}) {
     setTimeout(() => focusable?.focus(), 40);
   };
 
+  // Mandatory gate: a name is required before leaving the identity step (and
+  // therefore before finishing). Surfaces an inline error rather than a block.
+  const nameMissing = () => mandatory && step === 0 && !nameInput.value.trim();
+  const flagNameMissing = () => {
+    if (nameError) nameError.hidden = false;
+    nameInput.classList.add("is-invalid");
+    nameInput.focus();
+  };
+  nameInput?.addEventListener("input", () => {
+    if (nameError) nameError.hidden = true;
+    nameInput.classList.remove("is-invalid");
+  });
+
   back.addEventListener("click", () => { if (step > 0) { step--; render(); } });
   next.addEventListener("click", async () => {
+    if (nameMissing()) { flagNameMissing(); return; }
     if (step < total - 1) { step++; render(); return; }
     next.disabled = true;
     try {
@@ -318,7 +390,7 @@ export function openProfileWizard(env, { onComplete, onSkip } = {}) {
     close();
     onComplete?.();
   });
-  host.querySelector("#obWizSkip").addEventListener("click", () => { close(); onSkip?.(); });
+  host.querySelector("#obWizSkip")?.addEventListener("click", () => { close(); onSkip?.(); });
   render();
 }
 
@@ -337,7 +409,7 @@ function _renderModal(env) {
           <h3 class="ob-panel-title" id="obCfgTitle">${t("onboarding.modal.title")}</h3>
           <p class="ob-panel-intro--plain">${t("onboarding.modal.subtitle")}</p>
         </header>
-        <form class="ob-form ob-config-body ob-config-body--all" id="obProfileForm">${sectionsHTML(env)}</form>
+        <form class="ob-form ob-config-body ob-config-body--all" id="obProfileForm">${sectionsHTML(env, { lang: "posture" })}</form>
         <footer class="ob-config-foot">
           <a class="ob-modal-fulllink" href="#profile" id="obCfgFull">${t("onboarding.modal.full_profile")}</a>
           <div class="ob-foot-right">

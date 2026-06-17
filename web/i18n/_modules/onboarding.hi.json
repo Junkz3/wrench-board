@@ -15,6 +15,7 @@
     "panel_title": "आपकी टेक्निशियन प्रोफ़ाइल",
     "field_name": "नाम",
     "name_placeholder": "मैं आपको क्या कहकर बुलाऊँ?",
+    "name_required": "जारी रखने के लिए आपका नाम आवश्यक है।",
     "field_avatar": "अवतार",
     "avatar_placeholder": "2 अक्षर या एक इमोजी",
     "field_level": "अनुभव स्तर",
