@@ -18,7 +18,7 @@
 .modal-hint{font-family:var(--mono);font-size:10.5px;color:var(--text-3);line-height:1.45}
 .modal-error{padding:10px 12px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.35);border-radius:6px;color:var(--amber);font-size:12px;line-height:1.5;font-family:var(--mono)}
 .modal-error strong{color:var(--amber);font-weight:600;margin-right:6px}
-.modal-actions{display:flex;gap:10px;justify-content:flex-end;padding-top:4px}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;padding:12px 16px;border-top:1px solid var(--border-soft);background:var(--bg-deep)}
 .modal-actions .btn{flex:0 0 auto;padding:8px 14px;min-width:96px}
 .modal-submit[aria-busy="true"]{cursor:progress}
 .modal-spinner{display:inline-block;width:12px;height:12px;border:1.8px solid currentColor;border-top-color:transparent;border-radius:50%;animation:modal-spin .7s linear infinite;vertical-align:-1px}

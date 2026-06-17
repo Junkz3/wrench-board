@@ -690,7 +690,9 @@ own cross-file coherence and plausibility findings, and submit your verdict via
 # System prompt stays WRITER_SYSTEM; the user message frames the task.
 
 REVISER_USER_TEMPLATE = """\
-Revise the previous output for this writer role, based on the auditor's brief.
+Revise one writer artefact based on the auditor's brief. You do NOT re-emit the
+whole file — you emit a SURGICAL PATCH: only the records you add, update, or
+remove. Everything you do not name is preserved exactly as it is below.
 
 # Revision brief (from auditor)
 {revision_brief}
@@ -698,16 +700,46 @@ Revise the previous output for this writer role, based on the auditor's brief.
 # Current sibling files (READ-ONLY — align with them, you cannot edit them)
 {siblings_block}
 
-# Your previous output (THE BASELINE to revise)
+# Current artefact you are patching
 ```json
 {previous_output_json}
 ```
 
-Re-emit the complete, corrected output via `{tool_name}`.
-- Your previous output is the BASELINE: reproduce it integrally and change ONLY
-  what the brief flags. Dropping unflagged content is a regression.
-- Align cross-file references against the CURRENT sibling files above, not
+# How to patch
+{ops_help}
+
+Emit the patch via `{tool_name}`.
+- Touch ONLY what the brief requires. Address records by the stable identifier
+  exactly as it appears in the current artefact above.
+- An empty patch is valid and means "no change is needed".
+- To change a record, use the update op — it fully replaces that ONE record by
+  its identifier. Never re-emit records you are not changing.
+- Align any new cross-file reference against the CURRENT sibling files, not
   against memory.
-- When a `query_graph` tool is available, verify any doubtful existence (refdes,
-  net, rail, voltage, source) against the real schematic BEFORE writing it.
+- When a `query_graph` tool is available, verify any doubtful identifier (refdes,
+  net, rail, voltage, source) against the real schematic BEFORE adding it.
 """
+
+
+# Per-artefact op cheatsheet injected as `{ops_help}` above. Keyed by file_name.
+REVISER_OPS_HELP = {
+    "knowledge_graph": (
+        "- add_nodes / update_nodes (matched by `id`) / remove_node_ids\n"
+        "- add_edges / remove_edges (matched on source_id + target_id + relation)\n"
+        "Every edge endpoint must reference a node that exists after the patch. To\n"
+        "connect an orphan node, add_edges linking it to an existing node — do NOT\n"
+        "re-emit the node itself. To drop a node, also remove_edges for any edge that\n"
+        "touches it, or the patch dangles and is rejected."
+    ),
+    "rules": (
+        "- add_rules / update_rules (matched by `id`) / remove_rule_ids\n"
+        "To fix a rule (drop a wrong cause, reconcile a value, edit a step),\n"
+        "update_rules with the COMPLETE corrected rule under the same `id`."
+    ),
+    "dictionary": (
+        "- add_entries / update_entries (matched by `canonical_name`) /\n"
+        "  remove_entry_names\n"
+        "To fix a sheet, update_entries with the COMPLETE corrected sheet under the\n"
+        "same `canonical_name`."
+    ),
+}

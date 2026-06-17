@@ -27,6 +27,12 @@ if TYPE_CHECKING:
 from anthropic import AsyncAnthropic
 
 from api.config import get_settings
+from api.pipeline.patch import (
+    PatchApplyError,
+    apply_dictionary_patch,
+    apply_kg_patch,
+    apply_rules_patch,
+)
 from api.pipeline.prompts import (
     CARTOGRAPHE_TASK,
     CLINICIEN_TASK,
@@ -34,7 +40,15 @@ from api.pipeline.prompts import (
     WRITER_SHARED_USER_PREFIX_TEMPLATE,
     WRITER_SYSTEM,
 )
-from api.pipeline.schemas import Dictionary, KnowledgeGraph, Registry, RulesSet
+from api.pipeline.schemas import (
+    Dictionary,
+    DictionaryPatch,
+    KnowledgeGraph,
+    KnowledgeGraphPatch,
+    Registry,
+    RulesPatch,
+    RulesSet,
+)
 from api.pipeline.tool_call import call_with_forced_tool, call_with_query_tools
 
 if TYPE_CHECKING:
@@ -77,6 +91,38 @@ def _submit_dict_tool() -> dict:
 def _all_writer_tools() -> list[dict]:
     """Every writer receives the full set of 3 tools so the tools-layer cache is shared."""
     return [_submit_kg_tool(), _submit_rules_tool(), _submit_dict_tool()]
+
+
+# Reviser patch tools — the revise path forces ONE of these (per file_name)
+# instead of the full submit_* tool, so the reviser emits a surgical delta the
+# `api.pipeline.patch` applicator applies to the current artefact.
+SUBMIT_KG_PATCH_TOOL_NAME = "submit_knowledge_graph_patch"
+SUBMIT_RULES_PATCH_TOOL_NAME = "submit_rules_patch"
+SUBMIT_DICT_PATCH_TOOL_NAME = "submit_dictionary_patch"
+
+
+def _submit_kg_patch_tool() -> dict:
+    return {
+        "name": SUBMIT_KG_PATCH_TOOL_NAME,
+        "description": "Surgical delta over the knowledge graph — only the nodes/edges you change.",
+        "input_schema": KnowledgeGraphPatch.model_json_schema(),
+    }
+
+
+def _submit_rules_patch_tool() -> dict:
+    return {
+        "name": SUBMIT_RULES_PATCH_TOOL_NAME,
+        "description": "Surgical delta over the rules — only the rules you change.",
+        "input_schema": RulesPatch.model_json_schema(),
+    }
+
+
+def _submit_dict_patch_tool() -> dict:
+    return {
+        "name": SUBMIT_DICT_PATCH_TOOL_NAME,
+        "description": "Surgical delta over the dictionary — only the entries you change.",
+        "input_schema": DictionaryPatch.model_json_schema(),
+    }
 
 
 def _build_shared_user_messages(
@@ -276,23 +322,31 @@ async def run_writers_parallel(
     return kg, rules, dictionary
 
 
-# The reviser's sibling/source mapping. Each entry is the tool surface for that
-# writer role PLUS a closure that renders the CURRENT artefact of one of the OTHER
-# two roles as JSON — used to build the read-only `siblings_block`. Keyed by the
-# canonical file_name (knowledge_graph / rules / dictionary).
+# The reviser mapping. Each entry is the SURGICAL-PATCH surface for one writer
+# role: the patch tool name, the patch schema the reviser emits, and the
+# deterministic applicator that turns that patch into the new artefact. Keyed by
+# the canonical file_name (knowledge_graph / rules / dictionary). The reviser
+# emits a delta — not the whole artefact — so unflagged records are preserved
+# verbatim (no collateral-regression surface).
 _REVISE_MAPPING = {
-    "knowledge_graph": (SUBMIT_KG_TOOL_NAME, KnowledgeGraph, "Cartographe-Revise"),
-    "rules": (SUBMIT_RULES_TOOL_NAME, RulesSet, "Clinicien-Revise"),
-    "dictionary": (SUBMIT_DICT_TOOL_NAME, Dictionary, "Lexicographe-Revise"),
+    "knowledge_graph": (
+        SUBMIT_KG_PATCH_TOOL_NAME, KnowledgeGraphPatch, apply_kg_patch, "Cartographe-Revise"
+    ),
+    "rules": (
+        SUBMIT_RULES_PATCH_TOOL_NAME, RulesPatch, apply_rules_patch, "Clinicien-Revise"
+    ),
+    "dictionary": (
+        SUBMIT_DICT_PATCH_TOOL_NAME, DictionaryPatch, apply_dictionary_patch, "Lexicographe-Revise"
+    ),
 }
 
 
-def _submit_tool_for(file_name: str) -> dict:
-    """The single submit tool object for one writer role (by file_name)."""
+def _submit_patch_tool_for(file_name: str) -> dict:
+    """The single patch-submit tool object for one writer role (by file_name)."""
     return {
-        "knowledge_graph": _submit_kg_tool,
-        "rules": _submit_rules_tool,
-        "dictionary": _submit_dict_tool,
+        "knowledge_graph": _submit_kg_patch_tool,
+        "rules": _submit_rules_patch_tool,
+        "dictionary": _submit_dict_patch_tool,
     }[file_name]()
 
 
@@ -352,27 +406,42 @@ async def run_single_writer_revision(
     Must use the same model that produced the original output, so the revised
     artefact stays coherent with the first pass (same taste, same shape).
 
+    The reviser emits a SURGICAL PATCH (a typed delta), not the whole artefact:
+    it forces the role's `submit_*_patch` tool, and `apply_fn` applies that delta
+    to the current artefact. Records the reviser does not name are preserved
+    verbatim — that removes the full re-emit's collateral-regression surface.
+
     The reviser sees, as READ-ONLY context, the CURRENT versions of the two
     sibling files (`current_kg`/`current_rules`/`current_dictionary` minus its
     own) so it aligns cross-file references against reality — the RC1 fix (see
     `_build_siblings_block`). When a `graph_truth` is supplied it ALSO gets the
     mention-scoped ground-truth report + the `query_graph` tool to verify
     existence/voltage/source against the real schematic before writing.
+
+    A well-formed-but-inapplicable patch (`PatchApplyError`) degrades to a
+    no-op: the current artefact is returned unchanged and the re-audit re-flags.
+    Nothing corrupts — a previously-silent regression becomes a visible no-op.
     """
     # Import here to avoid circular import if orchestrator ever imports this module.
     from api.pipeline.graph_truth import QUERY_GRAPH_TOOL, handle_query_graph
-    from api.pipeline.prompts import REVISER_USER_TEMPLATE
+    from api.pipeline.prompts import REVISER_OPS_HELP, REVISER_USER_TEMPLATE
 
     model_for = {
         "knowledge_graph": cartographe_model,
         "rules": clinicien_model,
         "dictionary": lexicographe_model,
     }
+    current_for = {
+        "knowledge_graph": current_kg,
+        "rules": current_rules,
+        "dictionary": current_dictionary,
+    }
     if file_name not in _REVISE_MAPPING:
         raise ValueError(f"Unknown file_name for revision: {file_name!r}")
 
-    tool_name, output_schema, log_label = _REVISE_MAPPING[file_name]
+    tool_name, patch_schema, apply_fn, log_label = _REVISE_MAPPING[file_name]
     model = model_for[file_name]
+    current_artefact = current_for[file_name]
 
     # Read-only sibling context (the up-to-date OTHER two files) + optional
     # deterministic ground-truth. Both ride the revision SUFFIX — the shared
@@ -400,6 +469,7 @@ async def run_single_writer_revision(
         revision_brief=revision_brief,
         previous_output_json=previous_output_json,
         tool_name=tool_name,
+        ops_help=REVISER_OPS_HELP[file_name],
         ground_truth_block=ground_truth_block,
         siblings_block=siblings_block,
     )
@@ -420,40 +490,55 @@ async def run_single_writer_revision(
         }
     ]
 
-    logger.info("[Revise] Rewriting file=%r (graph=%s)", file_name, graph_truth is not None)
+    logger.info("[Revise] Patching file=%r (graph=%s)", file_name, graph_truth is not None)
 
     # Dispatch on the presence of a graph — mirrors the auditor. No graph → the
-    # legacy single forced-tool call (tools = ONLY this role's submit tool, so the
-    # reviser can't accidentally emit a sibling's shape). A graph → the capped
-    # agentic loop where the reviser may verify identifiers against the real
-    # schematic before it submits.
+    # single forced-tool call (tools = ONLY this role's patch tool, so the reviser
+    # can't accidentally emit a sibling's shape). A graph → the capped agentic
+    # loop where the reviser may verify identifiers against the real schematic
+    # before it submits. Either way the model returns a PATCH, not the artefact.
     if graph_truth is None:
-        return await call_with_forced_tool(
+        patch = await call_with_forced_tool(
             client=client,
             model=model,
             system=WRITER_SYSTEM,
             messages=messages,
-            tools=[_submit_tool_for(file_name)],
+            tools=[_submit_patch_tool_for(file_name)],
             forced_tool_name=tool_name,
-            output_schema=output_schema,
+            output_schema=patch_schema,
             max_attempts=2,
             log_label=log_label,
             stats=stats,
         )
-    return await call_with_query_tools(
-        client=client,
-        model=model,
-        system=WRITER_SYSTEM,
-        messages=messages,
-        query_tool=QUERY_GRAPH_TOOL,
-        # Closure binds the deterministic handler to this pack's graph — the loop
-        # hands us only the raw tool input, never the graph.
-        query_handler=lambda i: handle_query_graph(graph_truth, i),
-        submit_tool=_submit_tool_for(file_name),
-        submit_tool_name=tool_name,
-        output_schema=output_schema,
-        max_query_turns=max_query_turns,
-        max_attempts=2,
-        log_label=log_label,
-        stats=stats,
-    )
+    else:
+        patch = await call_with_query_tools(
+            client=client,
+            model=model,
+            system=WRITER_SYSTEM,
+            messages=messages,
+            query_tool=QUERY_GRAPH_TOOL,
+            # Closure binds the deterministic handler to this pack's graph — the
+            # loop hands us only the raw tool input, never the graph.
+            query_handler=lambda i: handle_query_graph(graph_truth, i),
+            submit_tool=_submit_patch_tool_for(file_name),
+            submit_tool_name=tool_name,
+            output_schema=patch_schema,
+            max_query_turns=max_query_turns,
+            max_attempts=2,
+            log_label=log_label,
+            stats=stats,
+        )
+
+    # Apply the delta deterministically. A well-formed-but-inapplicable patch
+    # (`PatchApplyError`) degrades to a no-op: keep the current artefact, log it,
+    # let the re-audit re-flag. This converts what used to be a silent re-emit
+    # regression into a visible, safe no-op.
+    try:
+        return apply_fn(current_artefact, patch)
+    except PatchApplyError as exc:
+        logger.warning(
+            "[Revise] file=%r patch inapplicable (%s) — keeping current artefact (no-op)",
+            file_name,
+            exc,
+        )
+        return current_artefact

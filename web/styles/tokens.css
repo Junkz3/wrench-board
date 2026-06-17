@@ -11,6 +11,11 @@
   --cyan:    oklch(0.82 0.14 210);
   --emerald: oklch(0.78 0.15 155);
   --violet:  oklch(0.78 0.14 295);
+  /* UI STATUS green — task/step completion ("done"). NOT a semantic data
+     color: --emerald stays locked to net/rail; this is the chrome success
+     state (e.g. the pipeline-timeline phase checkmarks). A distinct token so
+     the lock holds and the success color stays reusable. */
+  --ok: oklch(0.80 0.17 150);
   /* mascot-only danger red — NOT a semantic data color; scoped to the
      mascot's alert/error animations (see web/styles/mascot.css). */
   --mascot-danger: oklch(0.62 0.23 27);

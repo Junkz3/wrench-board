@@ -35,11 +35,14 @@ from api.pipeline.graph_truth import GraphTruth
 from api.pipeline.schemas import (
     ComponentSheet,
     Dictionary,
+    DictionaryPatch,
     KnowledgeGraph,
+    KnowledgeGraphPatch,
     KnowledgeNode,
     Registry,
     RegistryComponent,
     RegistrySignal,
+    RulesPatch,
     RulesSet,
 )
 from api.pipeline.schematic.schemas import (
@@ -69,11 +72,18 @@ def registry() -> Registry:
 
 @pytest.fixture
 def dummy_outputs():
-    """The 3 typed objects the fake `call_with_forced_tool` returns by schema."""
+    """The typed objects the fake `call_with_forced_tool` returns by schema.
+
+    Initial writers submit a full artefact; revisers submit a PATCH. Both shapes
+    are covered so a fake call keyed on `output_schema` resolves either path.
+    """
     return {
         KnowledgeGraph: KnowledgeGraph(nodes=[], edges=[]),
         RulesSet: RulesSet(rules=[]),
         Dictionary: Dictionary(entries=[]),
+        KnowledgeGraphPatch: KnowledgeGraphPatch(),
+        RulesPatch: RulesPatch(),
+        DictionaryPatch: DictionaryPatch(),
     }
 
 
@@ -549,8 +559,8 @@ async def test_revision_uses_same_cached_prefix_as_initial_writers(
     assert first_block.get("cache_control", {}).get("type") == "ephemeral"
     # Same shape as run_writers_parallel: 2 blocks, [cached prefix, task suffix].
     assert len(msg["content"]) == 2
-    # The forced tool must be the rules submitter (writer 2 surface).
-    assert captured[0]["forced_tool_name"] == writers_mod.SUBMIT_RULES_TOOL_NAME
+    # The forced tool must be the rules PATCH submitter (writer 2 revise surface).
+    assert captured[0]["forced_tool_name"] == writers_mod.SUBMIT_RULES_PATCH_TOOL_NAME
 
 
 # ---------------------------------------------------------------------------
@@ -727,7 +737,7 @@ async def test_reviser_tool_only_with_graph(monkeypatch, registry, dummy_outputs
 
     assert len(forced_captured) == 1
     tool_names = {t["name"] for t in forced_captured[0]["tools"]}
-    assert tool_names == {writers_mod.SUBMIT_RULES_TOOL_NAME}
+    assert tool_names == {writers_mod.SUBMIT_RULES_PATCH_TOOL_NAME}
 
     # --- graph present → query loop, query_graph + submit tool ---
     query_captured: dict[str, Any] = {}
@@ -757,7 +767,90 @@ async def test_reviser_tool_only_with_graph(monkeypatch, registry, dummy_outputs
     )
 
     names = {t["name"] for t in query_captured["tools"]}
-    assert names == {"query_graph", writers_mod.SUBMIT_RULES_TOOL_NAME}
+    assert names == {"query_graph", writers_mod.SUBMIT_RULES_PATCH_TOOL_NAME}
+
+
+async def test_reviser_applies_patch_and_preserves_unflagged_records(monkeypatch, registry):
+    """The reviser emits a PATCH; `run_single_writer_revision` applies it and
+    returns the resulting artefact. The records the patch does NOT name come out
+    byte-identical — the whole point of the surgical reviser."""
+    from api.pipeline.schemas import KnowledgeEdge
+
+    current_kg = KnowledgeGraph(
+        nodes=[
+            KnowledgeNode(id="N-U1", kind="component", label="U1"),
+            KnowledgeNode(id="N-RAIL", kind="net", label="3V3"),
+            KnowledgeNode(id="N-ORPHAN", kind="component", label="orphan"),
+        ],
+        edges=[KnowledgeEdge(source_id="N-U1", target_id="N-RAIL", relation="powers")],
+    )
+    before = {n.id: n.model_dump_json() for n in current_kg.nodes}
+
+    # The fake reviser connects the orphan via a single add_edges op.
+    async def fake_call(*, output_schema, **kwargs):
+        assert output_schema is KnowledgeGraphPatch
+        return KnowledgeGraphPatch(
+            add_edges=[KnowledgeEdge(source_id="N-ORPHAN", target_id="N-RAIL", relation="powers")]
+        )
+
+    monkeypatch.setattr(writers_mod, "call_with_forced_tool", fake_call)
+
+    result = await writers_mod.run_single_writer_revision(
+        client=MagicMock(),
+        cartographe_model="opus",
+        clinicien_model="opus",
+        lexicographe_model="haiku",
+        device_label="Demo",
+        raw_dump="# dump",
+        registry=registry,
+        file_name="knowledge_graph",
+        revision_brief="Connect the orphan node",
+        previous_output_json=current_kg.model_dump_json(),
+        current_kg=current_kg,
+        current_rules=RulesSet(rules=[]),
+        current_dictionary=Dictionary(entries=[]),
+    )
+
+    assert isinstance(result, KnowledgeGraph)
+    # Every node preserved verbatim; the orphan is now connected.
+    assert {n.id: n.model_dump_json() for n in result.nodes} == before
+    assert len(result.edges) == 2
+
+
+async def test_reviser_inapplicable_patch_degrades_to_noop(monkeypatch, registry):
+    """A well-formed-but-inapplicable patch (here: add of an id that already
+    exists) is NOT fatal — the reviser returns the current artefact unchanged so
+    the re-audit re-flags. Nothing corrupts."""
+    current_kg = KnowledgeGraph(
+        nodes=[KnowledgeNode(id="N-U1", kind="component", label="U1")], edges=[]
+    )
+
+    async def fake_call(*, output_schema, **kwargs):
+        # Adds a node that already exists → PatchApplyError inside the applicator.
+        return KnowledgeGraphPatch(
+            add_nodes=[KnowledgeNode(id="N-U1", kind="component", label="dupe")]
+        )
+
+    monkeypatch.setattr(writers_mod, "call_with_forced_tool", fake_call)
+
+    result = await writers_mod.run_single_writer_revision(
+        client=MagicMock(),
+        cartographe_model="opus",
+        clinicien_model="opus",
+        lexicographe_model="haiku",
+        device_label="Demo",
+        raw_dump="# dump",
+        registry=registry,
+        file_name="knowledge_graph",
+        revision_brief="...",
+        previous_output_json=current_kg.model_dump_json(),
+        current_kg=current_kg,
+        current_rules=RulesSet(rules=[]),
+        current_dictionary=Dictionary(entries=[]),
+    )
+
+    # Unchanged — the inapplicable patch was a no-op, not a crash.
+    assert result is current_kg
 
 
 def test_clinicien_task_id_example_matches_pattern():

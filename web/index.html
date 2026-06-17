@@ -1344,28 +1344,50 @@
   </div>
 </div>
 
-<!-- ============ MODAL — NOTIFY WHEN READY (long build, schematic attached) ============ -->
-<!-- Shown over the build timeline after launching a diagnostic on an uncovered
-     device WITH a schematic (the long vision build). Offers an email when the
-     device is ready. Wired by web/js/features/global/landing/index.js. -->
-<div class="modal-backdrop" id="landingNotifyBackdrop" aria-hidden="true">
-  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="landingNotifyTitle" aria-describedby="landingNotifyIntro">
+<!-- ============ MODAL — PRE-FLIGHT LAUNCH CONFIRMATION ============ -->
+<!-- Gates a fresh-device diagnostic launch (the full ~15-min build). Surfaces
+     the credit cost (cloud only), the build duration, a last-chance schematic
+     attach (the main intent — techs forget to load it), and an email-when-ready
+     opt-in (cloud only). Wired by web/js/features/global/landing/index.js.
+     Replaces the old post-submit "notify when ready" modal (consolidated). -->
+<div class="modal-backdrop" id="landingPreflightBackdrop" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="landingPreflightTitle" aria-describedby="landingPreflightIntro">
     <header class="modal-head">
       <div class="type-row">
-        <span class="type-badge action" data-i18n="landing.notify.badge">Preparation in progress</span>
+        <span class="type-badge action" data-i18n="landing.preflight.badge">New device</span>
       </div>
-      <h2 id="landingNotifyTitle" data-i18n="landing.notify.title">This device is being prepared</h2>
-      <button class="close-x" id="landingNotifyClose" type="button"
-              data-i18n-attr="aria-label:landing.notify.close">
+      <h2 id="landingPreflightTitle" data-i18n="landing.preflight.title">Start the diagnostic</h2>
+      <button class="close-x" id="landingPreflightClose" type="button"
+              data-i18n-attr="aria-label:landing.preflight.close">
         <svg class="icon" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
       </button>
     </header>
     <div class="modal-body">
-      <p class="modal-hint" id="landingNotifyIntro" data-i18n="landing.notify.intro">Building the knowledge sheet for a brand-new device can take a while. We can email you when the diagnostic is ready, so you don't have to wait here.</p>
+      <p class="modal-hint" id="landingPreflightIntro" data-i18n="landing.preflight.intro">No knowledge sheet exists for this device yet. Launching builds one from scratch.</p>
+      <ul class="landing-preflight-points">
+        <li id="landingPreflightCredit" hidden>
+          <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="M12 8v8M9.5 10.5h3.2a1.6 1.6 0 0 1 0 3.2H9.5"/></svg>
+          <span data-i18n="landing.preflight.credit">This diagnostic uses 1 credit to build the device knowledge pack.</span>
+        </li>
+        <li>
+          <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg>
+          <span data-i18n="landing.preflight.time">Building the full pack can take more than 15 minutes. You can close this page; it keeps building.</span>
+        </li>
+      </ul>
+      <div class="modal-field landing-preflight-schematic" id="landingPreflightSchematicField">
+        <label class="modal-label" data-i18n="landing.preflight.schematic_label">Schematic: now is the moment to add it</label>
+        <p class="modal-hint" id="landingPreflightSchematicHint" data-i18n="landing.preflight.schematic_none">No schematic provided. If you have the schematic PDF, add it now. It sharply improves the pack.</p>
+        <button type="button" class="modal-input landing-schematic-pick" id="landingPreflightSchematicPick" data-i18n="landing.schematic.cta">Attach a schematic PDF (optional)</button>
+        <span class="landing-schematic-name mono" id="landingPreflightSchematicName"></span>
+      </div>
+      <label class="landing-preflight-notify" id="landingPreflightNotifyRow" hidden>
+        <input type="checkbox" id="landingPreflightNotify">
+        <span data-i18n="landing.preflight.email_optin">Email me when the device is ready, so I don't have to wait here.</span>
+      </label>
     </div>
     <footer class="modal-actions">
-      <button type="button" class="btn" id="landingNotifyLater" data-i18n="landing.notify.later">Later</button>
-      <button type="button" class="btn primary" id="landingNotifyConfirm" data-i18n="landing.notify.confirm">Email me when ready</button>
+      <button type="button" class="btn" id="landingPreflightCancel" data-i18n="landing.preflight.cancel">Cancel</button>
+      <button type="button" class="btn primary" id="landingPreflightConfirm" data-i18n="landing.preflight.confirm">Start the diagnostic</button>
     </footer>
   </div>
 </div>
@@ -1402,11 +1424,11 @@
       <p class="modal-hint" id="protocolConfirmHint" data-i18n="protocol.confirm.hint">
         The agent is waiting for your decision before pushing the protocol.
       </p>
-      <footer class="modal-actions">
-        <button type="button" class="btn" id="protocolConfirmReject" data-i18n="protocol.confirm.reject">Reject</button>
-        <button type="button" class="btn primary" id="protocolConfirmAccept" data-i18n="protocol.confirm.accept">Accept</button>
-      </footer>
     </div>
+    <footer class="modal-actions">
+      <button type="button" class="btn" id="protocolConfirmReject" data-i18n="protocol.confirm.reject">Reject</button>
+      <button type="button" class="btn primary" id="protocolConfirmAccept" data-i18n="protocol.confirm.accept">Accept</button>
+    </footer>
   </div>
 </div>
 
@@ -1436,11 +1458,11 @@
                   data-i18n-placeholder="protocol.abandon.modal.reason_placeholder"
                   placeholder="Why abandon? (wrong hypothesis, dead end, customer left…)"></textarea>
       </div>
-      <footer class="modal-actions">
-        <button type="button" class="btn" id="protocolAbandonCancel" data-i18n="protocol.abandon.modal.cancel">Cancel</button>
-        <button type="button" class="btn primary" id="protocolAbandonConfirm" data-i18n="protocol.abandon.modal.confirm">Yes, abandon</button>
-      </footer>
     </div>
+    <footer class="modal-actions">
+      <button type="button" class="btn" id="protocolAbandonCancel" data-i18n="protocol.abandon.modal.cancel">Cancel</button>
+      <button type="button" class="btn primary" id="protocolAbandonConfirm" data-i18n="protocol.abandon.modal.confirm">Yes, abandon</button>
+    </footer>
   </div>
 </div>
 

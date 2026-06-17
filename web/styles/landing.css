@@ -444,9 +444,43 @@ body.pending-landing .statusbar { display: none !important; }
  * .modal-backdrop z-index (100) is meant for the chrome-level home view, so
  * lift this one above the hero or it opens invisibly behind it. */
 #landingKnowledgeBackdrop { z-index: 1100; }
-/* Same reason for the post-launch "notify when ready" modal (Lot 4) — it opens
- * over the build timeline on the landing hero, so it needs the same lift. */
-#landingNotifyBackdrop { z-index: 1100; }
+/* Same reason for the pre-flight launch-confirmation modal — it opens over the
+ * landing hero at submit, so it needs the same lift above the hero. */
+#landingPreflightBackdrop { z-index: 1100; }
+
+/* Pre-flight modal: the credit/time points list + the email opt-in row. */
+.landing-preflight-points {
+  list-style: none;
+  margin: 0 0 14px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.landing-preflight-points li {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  font-size: 13px;
+  color: var(--text-2);
+}
+.landing-preflight-points .icon-sm {
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+  margin-top: 1px;
+  color: var(--text-3);
+}
+.landing-preflight-notify {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  margin-top: 14px;
+  font-size: 13px;
+  color: var(--text-2);
+  cursor: pointer;
+}
+.landing-preflight-notify input { margin-top: 2px; cursor: pointer; }
 
 .landing-status {
   font-size: 12px;
@@ -594,32 +628,49 @@ body.pending-landing .statusbar { display: none !important; }
 .landing-phase-log[hidden] { display: none; }
 .landing-phase-log li { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-/* In-progress: dot pulses cyan */
+/* In-progress: the dot becomes a spinner — a faint cyan ring with one bright
+   cyan arc rotating. Reads as live work without the heavier pulse. */
 .landing-phase.is-running { color: var(--text-2); }
 .landing-phase.is-running .landing-phase-dot {
-  border-color: var(--cyan);
-  background: var(--cyan);
-  box-shadow: 0 0 0 4px rgba(125, 211, 252, 0.10);
-  animation: landing-pulse 1.4s ease-in-out infinite;
+  background: transparent;
+  border: 2px solid color-mix(in oklch, var(--cyan) 22%, transparent);
+  border-top-color: var(--cyan);
+  box-shadow: none;
+  animation: landing-spin 0.7s linear infinite;
 }
 
-/* Done: dot solid cyan, no pulse */
+/* Done: the spinner resolves into a green completion badge — a filled --ok
+   circle with a crisp checkmark (the ::after L rotated 45deg). */
 .landing-phase.is-done { color: var(--text); }
 .landing-phase.is-done .landing-phase-dot {
-  border-color: var(--cyan);
-  background: var(--cyan);
+  background: var(--ok);
+  border-color: var(--ok);
+  box-shadow: none;
+  animation: none;
+}
+.landing-phase.is-done .landing-phase-dot::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  width: 2.5px;
+  height: 5px;
+  border: solid var(--bg-deep);
+  border-width: 0 1.6px 1.6px 0;
+  transform: translate(-50%, -55%) rotate(45deg);
 }
 
 /* Failed: amber per project warning grammar (cf. pipeline_progress.css). */
 .landing-phase.is-failed .landing-phase-dot {
   border-color: var(--amber);
   background: var(--amber);
+  box-shadow: none;
+  animation: none;
 }
 .landing-phase.is-failed { color: var(--amber); }
 
-@keyframes landing-pulse {
-  0%, 100% { box-shadow: 0 0 0 4px rgba(125, 211, 252, 0.10); }
-  50%      { box-shadow: 0 0 0 8px rgba(125, 211, 252, 0.04); }
+@keyframes landing-spin {
+  to { transform: rotate(360deg); }
 }
 
 /* ============ Sidebar — recent repairs library ============
@@ -749,13 +800,51 @@ body.pending-landing .statusbar { display: none !important; }
 }
 
 .landing-sidebar-device {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-size: 12.5px;
   font-weight: 500;
   color: var(--text);
+}
+/* The device name truncates; the state badge (when present) never shrinks. */
+.landing-sidebar-device-name {
+  min-width: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+/* Build-state badge on a repair tile — only shown for non-ready packs. The
+ * three states map to the existing semantic accents (building=cyan/in-progress,
+ * paused=amber/needs-input, failed=amber-error). Building pulses to read as live. */
+.landing-sidebar-state {
+  flex: 0 0 auto;
+  font-size: 9px;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  padding: 1px 5px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  color: var(--text-3);
+}
+.landing-sidebar-state.is-building {
+  color: var(--cyan);
+  border-color: color-mix(in oklch, var(--cyan) 40%, transparent);
+  background: color-mix(in oklch, var(--cyan) 12%, transparent);
+  animation: landing-state-pulse 2.4s ease-in-out infinite;
+}
+.landing-sidebar-state.is-paused {
+  color: var(--amber);
+  border-color: color-mix(in oklch, var(--amber) 40%, transparent);
+}
+.landing-sidebar-state.is-failed {
+  color: var(--amber);
+  border-color: color-mix(in oklch, var(--amber) 50%, transparent);
+  background: color-mix(in oklch, var(--amber) 12%, transparent);
+}
+@keyframes landing-state-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
 }
 .landing-sidebar-symptom {
   display: block;
@@ -881,11 +970,12 @@ body.pending-landing .statusbar { display: none !important; }
 .landing-kind-confirm:hover { filter: brightness(1.1); }
 .landing-kind-confirm:active { transform: translateY(1px); }
 
-/* Paused/attention treatment on the device_kind phase row — neutral dot,
- * no semantic-color repurpose. */
+/* Paused/attention treatment on the device_kind phase row — a STATIC neutral
+ * dot (no spinner): it's awaiting the tech's input, not making progress. */
 .landing-phase[data-phase="device_kind"].is-running .landing-phase-dot {
-  border-color: var(--text-3);
+  border: 2px solid var(--text-3);
   background: var(--panel-2);
+  animation: none;
 }
 
 /* ============ Device-kind readiness badges (suggest meta) ============

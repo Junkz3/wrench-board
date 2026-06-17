@@ -39,7 +39,7 @@ class Via:
     text: str = ""
 
 @dataclass
-class XZZLine:  # Moved before Pin
+class XZZLine:  # Déplacé avant Pin
     layer: int
     x1: float
     y1: float
@@ -50,21 +50,21 @@ class XZZLine:  # Moved before Pin
 
 @dataclass
 class Pin:
-    name: bytes = b""  # Pin name (e.g. b"1" for pin 1)
-    pos: Point = field(default_factory=lambda: Point(0, 0))  # Position (x, y) in mm
-    side: str = "TOP"  # PCB side (TOP or BOTTOM)
-    net: str = ""  # Net the pin belongs to
-    net_index: int = 0  # Net index
-    probe: int = 0  # Test index (optional, for debugging or verification)
-    part_index: int = 0  # Parent component index
-    shape_type: int = 0  # Shape type (1165000 for pins 1/2, 1005000 for pins 3/4/5)
-    width: float = 0.0  # Pin width in mm (equals height for a square)
-    height: float = 0.0  # Pin height in mm (equals width for a square)
-    rotation: float = 0.0  # Rotation in degrees (e.g. 298.24° for pins 1/2, 257.28° for pins 3/4/5)
-    layer: int = 0  # PCB layer (optional)
-    unknown_bytes: str = None  # Attribute for the 8 unknown bytes
-    raw_shape_data: bytes = None  # Raw shape data
-    snum: str = ""  # Pin serial number
+    name: bytes = b""  # Nom du pin (par exemple, b"1" pour le pin 1)
+    pos: Point = field(default_factory=lambda: Point(0, 0))  # Position (x, y) en mm
+    side: str = "TOP"  # Côté du PCB (TOP ou BOTTOM)
+    net: str = ""  # Réseau auquel le pin appartient
+    net_index: int = 0  # Index du réseau
+    probe: int = 0  # Indice de test (optionnel, pour débogage ou vérification)
+    part_index: int = 0  # Indice du composant parent
+    shape_type: int = 0  # Type de forme (1165000 pour pins 1/2, 1005000 pour pins 3/4/5)
+    width: float = 0.0  # Largeur du pin en mm (pour un carré, égal à height)
+    height: float = 0.0  # Hauteur du pin en mm (pour un carré, égal à width)
+    rotation: float = 0.0  # Rotation en degrés (par exemple, 298.24° pour pins 1/2, 257.28° pour pins 3/4/5)
+    layer: int = 0  # Couche du PCB (optionnel)
+    unknown_bytes: str = None  # Attribut pour les 8 octets inconnus
+    raw_shape_data: bytes = None  # Données brutes de la forme
+    snum: str = ""  # Numéro de série de la pin
 
 @dataclass
 class XZZArc:
@@ -96,12 +96,12 @@ class XZZPart:
     part_type: str = "SMD"
     mounting_side: str = "TOP"
     name: bytes = b"Unknown"
-    category: str = ""  # Component category (U, L, R, C, D, Q, etc.)
+    category: str = ""  # Catégorie du composant (U, L, R, C, D, Q, etc.)
     pins: list[Pin] = field(default_factory=list)
     texts: list[Any] = field(default_factory=list)
     net_name: str = ""
     visibility: bool = False
-    group_name: str = ""  # Group name
+    group_name: str = ""  # Ajout du nom de groupe
 
 @dataclass
 class XZZTestPad:

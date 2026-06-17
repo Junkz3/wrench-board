@@ -9,7 +9,8 @@
     "state_building": "构建中",
     "state_paused": "需要确认",
     "state_failed": "构建失败",
-    "locked_hint": "正在准备 — 准备就绪后我们会通过邮件通知您"
+    "locked_hint": "知识包正在构建中。您可以关闭此页面，构建会继续。",
+    "resume_aria": "查看此次构建的进度"
   },
   "hero": {
     "title": "您的硬件维修助手。",
@@ -20,13 +21,20 @@
     "symptom_aria": "症状是什么",
     "submit": "开始诊断"
   },
-  "notify": {
-    "badge": "正在准备",
-    "title": "此设备正在准备中",
-    "intro": "为一个新设备构建知识页只需几分钟，且只需一次。您提供的原理图会丰富此设备的 WrenchBoard 知识库。准备就绪后我们会立即通过邮件通知您，您可以随意关闭此标签页。",
+  "preflight": {
+    "badge": "新设备",
+    "title": "开始诊断 · {device}",
+    "intro": "此设备尚无知识页。启动后将从零开始构建一份。",
+    "credit": "本次诊断将消耗 1 个额度，用于构建此设备的知识包。",
+    "time": "构建完整知识包可能需要 15 分钟以上。您可以关闭此页面，构建会继续进行。",
+    "schematic_label": "原理图：现在正是添加它的时机",
+    "schematic_none": "尚未提供原理图。如果您有原理图 PDF，请现在添加。它能显著提升知识包质量。",
+    "schematic_attached": "原理图已附上。它将被导入以优化知识包。",
+    "schematic_replace": "选择其他 PDF",
+    "email_optin": "设备就绪后通过邮件通知我，这样我无需在此等待。",
     "close": "关闭",
-    "later": "稍后",
-    "confirm": "就绪后邮件通知我"
+    "cancel": "取消",
+    "confirm": "开始诊断"
   },
   "timeline": {
     "title_default": "正在构建知识页…",

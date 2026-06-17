@@ -284,6 +284,16 @@ class RepairSummary(BaseModel):
         default=None,
         description="Board revision number (e.g. 820-02016) when the repair was created with one.",
     )
+    build_state: str | None = Field(
+        default=None,
+        description=(
+            "Knowledge-pack build state of this repair's device, mirrored from "
+            "the pack's `_build_state.json` marker: 'building' | 'complete' | "
+            "'failed' | 'paused'. None when no marker exists (legacy / self-host "
+            "packs built before the marker) — treated as ready. Drives the "
+            "home-library tile badge and the live-timeline resume on landing load."
+        ),
+    )
 
 
 # --- Pack expansion ---------------------------------------------------------

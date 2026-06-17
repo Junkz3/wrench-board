@@ -637,6 +637,100 @@ class Dictionary(BaseModel):
 
 
 # ======================================================================
+# PHASE 3.5 — Reviser patches (surgical revision deltas)
+# ======================================================================
+#
+# A reviser no longer re-emits an entire writer artefact. It emits a typed
+# DELTA of operations addressed by stable identifier, which the deterministic
+# applicator in `api.pipeline.patch` applies to the current artefact. Records
+# the reviser does not name are preserved verbatim — that removes the full
+# re-emit's collateral-regression surface (a large graph re-emitted to change
+# four orphan edges used to drop unflagged nodes and tank the consistency
+# score). Every list defaults empty, so an empty patch is a valid no-op.
+
+
+class KnowledgeGraphPatch(BaseModel):
+    """Surgical delta over a `KnowledgeGraph`. Nodes are addressed by `id`,
+    edges by their (source_id, target_id, relation) triple."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    add_nodes: list[KnowledgeNode] = Field(
+        default_factory=list,
+        description="New nodes to insert. Each `id` must NOT already exist.",
+    )
+    update_nodes: list[KnowledgeNode] = Field(
+        default_factory=list,
+        description=(
+            "Full replacements of existing nodes, matched by `id`. The `id` "
+            "must already exist. Carries the complete corrected node, not a diff."
+        ),
+    )
+    remove_node_ids: list[str] = Field(
+        default_factory=list,
+        description="`id`s of nodes to drop. Unknown ids are skipped.",
+    )
+    add_edges: list[KnowledgeEdge] = Field(
+        default_factory=list,
+        description=(
+            "New edges. Both endpoints must reference a node that exists once "
+            "the patch is applied. Re-adding an identical edge is a no-op."
+        ),
+    )
+    remove_edges: list[KnowledgeEdge] = Field(
+        default_factory=list,
+        description=(
+            "Edges to drop, matched on (source_id, target_id, relation). "
+            "Unknown edges are skipped."
+        ),
+    )
+
+
+class RulesPatch(BaseModel):
+    """Surgical delta over a `RulesSet`. Rules are addressed by `id`."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    add_rules: list[Rule] = Field(
+        default_factory=list,
+        description="New rules. Each `id` must NOT already exist.",
+    )
+    update_rules: list[Rule] = Field(
+        default_factory=list,
+        description=(
+            "Full replacements of existing rules, matched by `id`. The `id` "
+            "must already exist. Carries the complete corrected rule, not a diff."
+        ),
+    )
+    remove_rule_ids: list[str] = Field(
+        default_factory=list,
+        description="`id`s of rules to drop. Unknown ids are skipped.",
+    )
+
+
+class DictionaryPatch(BaseModel):
+    """Surgical delta over a `Dictionary`. Entries are addressed by `canonical_name`."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    add_entries: list[ComponentSheet] = Field(
+        default_factory=list,
+        description="New component sheets. Each `canonical_name` must NOT already exist.",
+    )
+    update_entries: list[ComponentSheet] = Field(
+        default_factory=list,
+        description=(
+            "Full replacements of existing sheets, matched by `canonical_name`. "
+            "Must already exist. Carries the complete corrected sheet, not a diff."
+        ),
+    )
+    remove_entry_names: list[str] = Field(
+        default_factory=list,
+        description="`canonical_name`s of entries to drop. Unknown names are skipped.",
+    )
+
+
+# ======================================================================
 # PHASE 4 — Audit verdict
 # ======================================================================
 

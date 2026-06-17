@@ -5,7 +5,12 @@
     "delete_aria": "Delete this repair",
     "delete_title": "Delete",
     "count_one": "{n} repair",
-    "count_many": "{n} repairs"
+    "count_many": "{n} repairs",
+    "state_building": "Building",
+    "state_paused": "Needs confirmation",
+    "state_failed": "Build failed",
+    "locked_hint": "Knowledge pack is building. You can close this page; it keeps going.",
+    "resume_aria": "Watch this build's progress"
   },
   "hero": {
     "title": "Your hardware repair assistant.",
@@ -16,13 +21,20 @@
     "symptom_aria": "What is the symptom",
     "submit": "Start diagnostic"
   },
-  "notify": {
-    "badge": "Preparation in progress",
-    "title": "This device is being prepared",
-    "intro": "Building the knowledge sheet for a brand-new device can take a while. We can email you when the diagnostic is ready, so you don't have to wait here.",
+  "preflight": {
+    "badge": "New device",
+    "title": "Start the diagnostic · {device}",
+    "intro": "No knowledge sheet exists for this device yet. Launching builds one from scratch.",
+    "credit": "This diagnostic uses 1 credit to build the device knowledge pack.",
+    "time": "Building the full pack can take more than 15 minutes. You can close this page; it keeps building.",
+    "schematic_label": "Schematic: now is the moment to add it",
+    "schematic_none": "No schematic provided. If you have the schematic PDF, add it now. It sharply improves the pack.",
+    "schematic_attached": "Schematic attached. It will be ingested to sharpen the pack.",
+    "schematic_replace": "Choose a different PDF",
+    "email_optin": "Email me when the device is ready, so I don't have to wait here.",
     "close": "Close",
-    "later": "Later",
-    "confirm": "Email me when ready"
+    "cancel": "Cancel",
+    "confirm": "Start the diagnostic"
   },
   "timeline": {
     "title_default": "Building the knowledge sheet…",

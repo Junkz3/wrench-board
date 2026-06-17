@@ -6,25 +6,25 @@ import numpy as np
 
 
 class PartMountingSide(Enum):
-    """Mounting side of a component."""
-    BOTH = 0    # Both sides
-    BOTTOM = 1  # Bottom side
-    TOP = 2     # Top side
+    """Face de montage d'un composant."""
+    BOTH = 0    # Les deux faces
+    BOTTOM = 1  # Face du dessous
+    TOP = 2     # Face du dessus
 
 class PartType(Enum):
-    """Component type."""
+    """Type de composant."""
     SMD = auto()
     THROUGH_HOLE = auto()
 
 class PinSide(Enum):
-    """Side of a pin."""
+    """Côté d'une broche."""
     BOTH = auto()
     BOTTOM = auto()
     TOP = auto()
 
 @dataclass
 class Point:
-    """Point in x, y coordinates."""
+    """Point en coordonnées x, y."""
     x: float = 0
     y: float = 0
 
@@ -34,7 +34,7 @@ class Point:
         return self.x == other.x and self.y == other.y
 
 class Part:
-    """A component on the board."""
+    """Un composant sur le circuit."""
     def __init__(self, name: str = "", mfg_code: str = "",
                  mounting_side: PartMountingSide = PartMountingSide.TOP,
                  part_type: PartType = PartType.THROUGH_HOLE):
@@ -42,20 +42,20 @@ class Part:
         self.mfg_code = mfg_code
         self.mounting_side = mounting_side
         self.part_type = part_type
-        self.end_of_pins = 0  # Expected number of pins
-        self.pins: list[Pin] = []  # List of pins
-        self.p1 = Point()  # Top-left point
-        self.p2 = Point()  # Bottom-right point
-        self._position = Point()  # Center position
-        self.component_type = "normal"  # can be "normal" or "dummy"
+        self.end_of_pins = 0  # Nombre de broches attendu
+        self.pins: list[Pin] = []  # Liste des broches
+        self.p1 = Point()  # Point en haut à gauche
+        self.p2 = Point()  # Point en bas à droite
+        self._position = Point()  # Position centrale
+        self.component_type = "normal"  # peut être "normal" ou "dummy"
 
     def is_dummy(self) -> bool:
-        """Check whether this is a dummy component (starting with ...)."""
+        """Vérifie si c'est un composant dummy (commençant par ...)"""
         return self.component_type == "dummy" or self.name.startswith("...")
 
     @property
     def position(self) -> Point:
-        """Center position of the component."""
+        """Position centrale du composant."""
         if not hasattr(self, '_position'):
             self._position = Point(
                 (self.p2.x + self.p1.x) / 2,
@@ -65,17 +65,17 @@ class Part:
 
     @position.setter
     def position(self, pos: Point):
-        """Set the center position of the component."""
+        """Définit la position centrale du composant."""
         self._position = pos
 
     @property
     def width(self) -> float:
-        """Component width."""
+        """Largeur du composant."""
         return abs(self.p2.x - self.p1.x)
 
     @property
     def height(self) -> float:
-        """Component height."""
+        """Hauteur du composant."""
         return abs(self.p2.y - self.p1.y)
 
     def __str__(self):
@@ -96,7 +96,7 @@ class Part:
                     self.part_type, self.p1.x, self.p1.y, self.p2.x, self.p2.y))
 
 class Pin:
-    """Represents a pin on a component."""
+    """Représente une broche sur un composant."""
     def __init__(self, position: Point, probe: int, part_index: int,
                  side: PinSide = PinSide.TOP, net: str = "UNCONNECTED",
                  number: str = "", name: str = "", radius: float = 0.5):
@@ -105,12 +105,12 @@ class Pin:
         self.part_index = part_index
         self.side = side
         self.net = net
-        self.number = number  # Pin number (e.g. "1", "2", "A1", "B2")
-        self.name = name  # Pin name (e.g. "GND", "VCC", "MOSI")
-        self.radius = radius  # Radius in millimetres
+        self.number = number  # Numéro de la broche (ex: "1", "2", "A1", "B2")
+        self.name = name  # Nom de la broche (ex: "GND", "VCC", "MOSI")
+        self.radius = radius  # Rayon en millimètres
 
     def __lt__(self, other):
-        """Sort pins by component, then by number."""
+        """Pour trier les broches par composant puis par numéro."""
         if not isinstance(other, Pin):
             return NotImplemented
         return (self.part_index, self.number or "") < (other.part_index, other.number or "")
@@ -132,7 +132,7 @@ class Pin:
                     self.number, self.name))
 
 class Nail:
-    """A test point on the board."""
+    """Un point de test sur le circuit."""
     def __init__(self, probe: int, position: Point, side: PartMountingSide,
                  net: str = "UNCONNECTED"):
         self.probe = probe
@@ -141,99 +141,99 @@ class Nail:
         self.net = net
 
 class Outline:
-    """Outline class."""
+    """Classe pour le contour."""
     def __init__(self):
-        self.points = []  # Outline points
-        self.segments = []  # Outline segments
+        self.points = []  # Points du contour
+        self.segments = []  # Segments du contour
 
     def add_point(self, point: Point):
-        """Add a point to the outline."""
+        """Ajoute un point au contour."""
         self.points.append(point)
 
     def add_segment(self, segment: tuple[Point, Point]):
-        """Add a segment to the outline."""
+        """Ajoute un segment au contour."""
         self.segments.append(segment)
 
 class BoardFormatBase:
-    """Base class for board file formats."""
+    """Classe de base pour les formats de fichier de circuit."""
 
     def __init__(self):
         self.valid = False
         self.error_msg = ""
         self.logger = logging.getLogger(self.__class__.__name__)
 
-        # Board data
-        self.format_points = []  # Format/outline points
-        self.outline_segments = []  # Outline segments
-        self.parts = []  # List of components
-        self.pins = []  # List of pins
-        self.nails = []  # List of test points
-        self.outline = Outline()  # Outline
+        # Données du circuit
+        self.format_points = []  # Points de format/contour
+        self.outline_segments = []  # Segments de contour
+        self.parts = []  # Liste des composants
+        self.pins = []  # Liste des broches
+        self.nails = []  # Liste des points de test
+        self.outline = Outline()  # Contour
 
     def generate_outline(self):
-        """Generate a rectangular outline based on the pin positions."""
+        """Génère un contour rectangulaire basé sur les positions des broches."""
         if len(self.outline_segments) >= 3 or len(self.format_points) >= 3:
-            return  # Outline already defined
+            return  # Déjà un contour défini
 
-        # Find the board bounds
-        margin = 200  # Margin in mils, as in OpenBoardView
+        # Trouve les limites du circuit
+        margin = 200  # Marge en mils comme dans OpenBoardView
         min_x = min_y = float('inf')
         max_x = max_y = float('-inf')
 
-        # Check the pins
+        # Vérifie les broches
         for pin in self.pins:
             min_x = min(min_x, pin.position.x)
             max_x = max(max_x, pin.position.x)
             min_y = min(min_y, pin.position.y)
             max_y = max(max_y, pin.position.y)
 
-        # Check the test points
+        # Vérifie les points de test
         for nail in self.nails:
             min_x = min(min_x, nail.position.x)
             max_x = max(max_x, nail.position.x)
             min_y = min(min_y, nail.position.y)
             max_y = max(max_y, nail.position.y)
 
-        # Add the margin
+        # Ajoute la marge
         min_x -= margin
         min_y -= margin
         max_x += margin
         max_y += margin
 
-        # Create the outline points
+        # Crée les points de contour
         self.format_points = [
-            Point(min_x, min_y),  # Top-left corner
-            Point(max_x, min_y),  # Top-right corner
-            Point(max_x, max_y),  # Bottom-right corner
-            Point(min_x, max_y),  # Bottom-left corner
+            Point(min_x, min_y),  # Coin supérieur gauche
+            Point(max_x, min_y),  # Coin supérieur droit
+            Point(max_x, max_y),  # Coin inférieur droit
+            Point(min_x, max_y),  # Coin inférieur gauche
         ]
 
-        # Create the outline segments
+        # Crée les segments de contour
         self.outline_segments = [
-            (self.format_points[0], self.format_points[1]),  # Top
-            (self.format_points[1], self.format_points[2]),  # Right
-            (self.format_points[2], self.format_points[3]),  # Bottom
-            (self.format_points[3], self.format_points[0]),  # Left
+            (self.format_points[0], self.format_points[1]),  # Haut
+            (self.format_points[1], self.format_points[2]),  # Droite
+            (self.format_points[2], self.format_points[3]),  # Bas
+            (self.format_points[3], self.format_points[0]),  # Gauche
         ]
 
-        self.logger.debug(f"Outline generated: ({min_x}, {min_y}) - ({max_x}, {max_y})")
+        self.logger.info(f"Contour généré: ({min_x}, {min_y}) - ({max_x}, {max_y})")
 
     @staticmethod
     def verify_format(data: bytes) -> bool:
-        """Check whether the data matches this format."""
-        raise NotImplementedError("This method must be implemented by derived classes")
+        """Vérifie si les données correspondent à ce format."""
+        raise NotImplementedError("Cette méthode doit être implémentée par les classes dérivées")
 
     def load(self, data: bytes) -> bool:
-        """Load the file data."""
-        raise NotImplementedError("This method must be implemented by derived classes")
+        """Charge les données du fichier."""
+        raise NotImplementedError("Cette méthode doit être implémentée par les classes dérivées")
 
     def add_nails_as_pins(self):
-        """Convert nails into pins for display."""
+        """Convertit les nails en pins pour l'affichage."""
         for nail in self.nails:
             self.pins.append(Pin(
                 position=nail.position,
                 probe=nail.probe,
-                part_index=len(self.parts),  # Nails are added as a new part
+                part_index=len(self.parts),  # Les nails sont ajoutés comme une nouvelle partie
                 side=PinSide.BOTH if nail.side == PartMountingSide.BOTH else
                      PinSide.BOTTOM if nail.side == PartMountingSide.BOTTOM else
                      PinSide.TOP,
@@ -244,7 +244,7 @@ class BoardFormatBase:
     def arc_to_segments(start_angle: float, end_angle: float, radius: float,
                        p1: Point, p2: Point, pc: Point,
                        slice_angle_rad: float = np.pi/18) -> list[tuple[Point, Point]]:
-        """Convert an arc into line segments."""
+        """Convertit un arc en segments de ligne."""
         segments = []
         angle = start_angle
         while angle < end_angle:
@@ -257,27 +257,27 @@ class BoardFormatBase:
             angle = next_angle
         return segments
 
-    def to_board(self) -> 'Board':  # noqa: F821 - fwd-ref; Board imported locally in body
+    def to_board(self) -> 'Board':  # noqa: F821 — fwd-ref; Board imported locally in body
         """
-        Convert this format into a normalized Board structure.
+        Convertit ce format vers une structure Board normalisée.
 
-        This method must be overridden by subclasses to handle the
-        quirks of each format.
+        Cette méthode doit être surchargée par les sous-classes pour
+        gérer les spécificités de chaque format.
         """
         from core.models.board import Board, BoardSide, Component, MountType, Net, PinType
         from core.models.board import Pin as NormalizedPin
         from core.models.board import Point as NormalizedPoint
 
-        # Create the normalized board
-        # Extract the format type from the class name (e.g. "BRDFile" -> "brd")
+        # Créer le board normalisé
+        # Extraire le type de format depuis le nom de classe (ex: "BRDFile" -> "brd")
         class_name = self.__class__.__name__
         format_type = class_name.replace("File", "").lower()
         board = Board(format_type=format_type)
 
-        # Convert the nets
+        # Convertir les nets
         nets_dict = {}  # name -> Net
 
-        # Collect all unique nets from the pins
+        # Collecter tous les nets uniques depuis les pins
         for pin in self.pins:
             net_name = getattr(pin, 'net', 'UNCONNECTED')
             if not net_name or net_name == "":
@@ -291,7 +291,7 @@ class BoardFormatBase:
                 nets_dict[net_name] = net
                 board.nets.append(net)
 
-        # Also add the nets from the nails (test points)
+        # Ajouter aussi les nets depuis les nails (points de test)
         for nail in self.nails:
             net_name = getattr(nail, 'net', 'UNCONNECTED')
             if not net_name or net_name == "":
@@ -305,9 +305,9 @@ class BoardFormatBase:
                 nets_dict[net_name] = net
                 board.nets.append(net)
 
-        # Convert the components and pins
+        # Convertir les composants et pins
         for part_idx, part in enumerate(self.parts):
-            # Convert the component
+            # Convertir le composant
             component = Component(
                 name=getattr(part, 'name', ''),
                 mfgcode=getattr(part, 'mfg_code', getattr(part, 'mfgcode', '')),
@@ -319,8 +319,8 @@ class BoardFormatBase:
                 rotation=getattr(part, 'rotation', 0.0)
             )
 
-            # Copy the dimensions (p1/p2) into bbox_min/bbox_max
-            # Make sure p1 and p2 exist and define a valid size (not just 0,0)
+            # Copier les dimensions (p1/p2) vers bbox_min/bbox_max
+            # Vérifier que p1 et p2 existent et définissent une taille valide (pas juste 0,0)
             if hasattr(part, 'p1') and hasattr(part, 'p2'):
                 has_valid_bbox = (part.p1.x != part.p2.x or part.p1.y != part.p2.y)
                 if has_valid_bbox:
@@ -329,19 +329,19 @@ class BoardFormatBase:
 
             board.components.append(component)
 
-            # Convert this component's pins
+            # Convertir les pins de ce composant
             part_pins = [p for p in self.pins if p.part_index == part_idx]
 
             for old_pin in part_pins:
-                # Compute the pin's absolute position
-                # XZZ: pin.pos (relative) + part.x/y (absolute)
-                # GenCAD: pin.position (already absolute)
+                # Calculer la position absolue du pin
+                # XZZ: pin.pos (relatif) + part.x/y (absolu)
+                # GenCAD: pin.position (absolu directement)
                 if hasattr(old_pin, 'position') and old_pin.position is not None:
-                    # GenCAD: position already absolute
+                    # GenCAD: position déjà absolue
                     pin_x = old_pin.position.x
                     pin_y = old_pin.position.y
                 elif hasattr(old_pin, 'pos') and old_pin.pos is not None:
-                    # XZZ: relative position, compute the absolute one
+                    # XZZ: position relative, calculer l'absolue
                     part_x = getattr(part, 'x', component.center.x)
                     part_y = getattr(part, 'y', component.center.y)
                     pin_x = part_x + old_pin.pos.x
@@ -351,14 +351,14 @@ class BoardFormatBase:
                     pin_x = component.center.x
                     pin_y = component.center.y
 
-                # Create the normalized pin with ABSOLUTE position
+                # Créer le pin normalisé avec position ABSOLUE
                 pin_number = getattr(old_pin, 'number', None) or getattr(old_pin, 'snum', None) or str(len(component.pins) + 1)
 
-                # Determine the pin type
+                # Déterminer le type de pin
                 is_dummy = getattr(part, 'is_dummy', lambda: False)()  if callable(getattr(part, 'is_dummy', None)) else False
                 pin_type = PinType.TEST_PAD if is_dummy else PinType.COMPONENT
 
-                # Determine the side
+                # Déterminer le side
                 old_side = getattr(old_pin, 'side', PinSide.BOTH)
                 board_side = (BoardSide.TOP if old_side == PinSide.TOP else
                              BoardSide.BOTTOM if old_side == PinSide.BOTTOM else
@@ -371,7 +371,7 @@ class BoardFormatBase:
                 new_pin = NormalizedPin(
                     position=NormalizedPoint(pin_x, pin_y),
                     number=pin_number,
-                    diameter=old_radius * 2,  # radius to diameter
+                    diameter=old_radius * 2,  # radius -> diameter
                     pin_type=pin_type,
                     board_side=board_side,
                     net=nets_dict.get(getattr(old_pin, 'net', 'UNCONNECTED'), nets_dict.get("UNCONNECTED")),
@@ -382,30 +382,30 @@ class BoardFormatBase:
                     shape_type=getattr(old_pin, 'shape_type', 0)
                 )
 
-                # Add the pin to the component and the board
+                # Ajouter le pin au composant et au board
                 component.pins.append(new_pin)
                 board.pins.append(new_pin)
 
-                # Add the pin to the net
+                # Ajouter le pin au net
                 if new_pin.net:
                     new_pin.net.pins.append(new_pin)
 
-        # Collect dummy-component pin positions to avoid duplicates
+        # Collecter les positions des pins des composants dummy pour éviter les doublons
         dummy_pin_positions = set()
         for part in self.parts:
             if getattr(part, 'component_type', 'normal') == 'dummy' or part.name.startswith('...'):
                 for pin in part.pins:
                     dummy_pin_positions.add((round(pin.position.x, 1), round(pin.position.y, 1)))
 
-        # Convert the nails (test pads) into pins, avoiding duplicates with dummy components
+        # Convertir les nails (test pads) en pins, en évitant les doublons avec les composants dummy
         for nail in self.nails:
-            # Check whether this position is already covered by a dummy component
+            # Vérifier si cette position est déjà couverte par un composant dummy
             nail_pos = (round(nail.position.x, 1), round(nail.position.y, 1))
             if nail_pos in dummy_pin_positions:
-                continue  # Skip - this nail is already represented by a dummy-component pin
+                continue  # Skip - ce nail est déjà représenté par un pin de composant dummy
 
             nail_side = getattr(nail, 'side', None)
-            # Handle both possible types: PinSide and PartMountingSide
+            # Gérer les deux types possibles: PinSide et PartMountingSide
             if nail_side == PinSide.TOP or nail_side == PartMountingSide.TOP:
                 board_side = BoardSide.TOP
             elif nail_side == PinSide.BOTTOM or nail_side == PartMountingSide.BOTTOM:
@@ -419,18 +419,18 @@ class BoardFormatBase:
             new_pin = NormalizedPin(
                 position=NormalizedPoint(nail.position.x, nail.position.y),
                 number=str(getattr(nail, 'probe', len(board.pins) + 1)),
-                diameter=20,  # Default size for test pads
+                diameter=20,  # Taille par défaut pour les test pads
                 pin_type=PinType.TEST_PAD,
                 board_side=board_side,
                 net=nail_net,
-                component=None,  # Nails have no parent component
+                component=None,  # Les nails n'ont pas de composant parent
             )
             board.pins.append(new_pin)
 
             if nail_net:
                 nail_net.pins.append(new_pin)
 
-        # Convert the outline
+        # Convertir le contour
         for point in self.format_points:
             board.outline_points.append(NormalizedPoint(point.x, point.y))
 
@@ -440,10 +440,10 @@ class BoardFormatBase:
                 NormalizedPoint(seg[1].x, seg[1].y)
             ))
 
-        # Build the indices
+        # Construire les index
         board.build_indices()
 
-        # Compute the dimensions
+        # Calculer les dimensions
         board.calculate_dimensions()
 
         return board

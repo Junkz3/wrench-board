@@ -18,7 +18,7 @@ import { escapeHtml as _escapeHtml } from '../../../shared/dom.js';
 import { initProfileMenu, refreshProfileMenu } from './profile_menu.js';
 import { maybeStartOnboarding, preGateOnboarding } from './onboarding.js';
 import { openInfoModal } from '../../../info_modal.js';
-import { packedOnly, hideUploads } from '../../../cloud_hints.js';
+import { packedOnly, hideUploads, planHints } from '../../../cloud_hints.js';
 
 const KNOWLEDGE_INFO_FLAG = 'wb_knowledge_info_seen';
 import { connectProgress, fetchPendingKind } from '../../../services/pipelineSocket.js';
@@ -45,6 +45,13 @@ const DEVICE_KIND_SHORT = { gpu_card:"GPU", laptop_logic_board:"PORTABLE", phone
 let isSubmitting = false;
 let progressConn = null;
 let _landingMascot = null;
+// Set by the pre-flight modal's email checkbox (cloud only); read after the
+// repair is created to arm the "email me when ready" opt-in. Reset per launch.
+let _preflightNotifyOptIn = false;
+// Whether the CURRENT progress subscription navigates into the workspace when
+// the build finishes. True for a fresh submit and an explicit tile-resume click;
+// false for a passive resume-on-load (we don't want to yank a browsing tech).
+let _autoNavOnFinish = true;
 // Set true while a build is parked on a device-kind disagreement
 // (pipeline_paused / needs_kind_confirmation). The build coroutine returns
 // deliberately and the WS closes — we must NOT treat that close as a failure.
@@ -120,20 +127,51 @@ async function loadAndRenderSidebar() {
     count.textContent = window.t ? window.t(key, { n: repairs.length }) : `${repairs.length} repairs`;
   }
 
+  const tFn = window.t || ((k) => k);
   list.innerHTML = "";
   for (const r of repairs) {
     const li = document.createElement("li");
     li.className = "landing-sidebar-item";
 
+    // Pack build state of this repair's device (from _build_state.json via the
+    // listing). Only the non-ready states get a tile badge — 'complete'/null is
+    // the normal case and stays unbadged.
+    const bs = r.build_state;
+    const badged = bs === "building" || bs === "failed" || bs === "paused";
+    if (badged) li.classList.add(`is-${bs}`);
+
     const a = document.createElement("a");
     a.className = "landing-sidebar-link";
     seedSlugForRepair(r.repair_id, r.device_slug);   // known slug — keep nav synchronous
     a.href = repairHash(r.repair_id, "diagnostic");
-    a.addEventListener("click", closeRepairsDrawer);  // close the mobile drawer on navigation
+    if (bs === "building") {
+      // A building tile routes to the LIVE timeline (resume), not the workspace
+      // whose pack isn't ready yet. autoNav: an explicit click means "I want to
+      // watch this", so navigate into the device when it finishes.
+      a.title = tFn("landing.sidebar.locked_hint");
+      a.setAttribute("aria-label", tFn("landing.sidebar.resume_aria"));
+      a.addEventListener("click", (ev) => {
+        ev.preventDefault();
+        closeRepairsDrawer();
+        resumeBuild(r.device_slug, r.repair_id, { autoNav: true });
+      });
+    } else {
+      a.addEventListener("click", closeRepairsDrawer);  // close the mobile drawer on navigation
+      if (bs === "failed" || bs === "paused") a.title = tFn(`landing.sidebar.state_${bs}`);
+    }
 
     const dev = document.createElement("span");
     dev.className = "landing-sidebar-device";
-    dev.textContent = prettifySlug(r.device_slug);
+    const devName = document.createElement("span");
+    devName.className = "landing-sidebar-device-name";
+    devName.textContent = prettifySlug(r.device_slug);
+    dev.appendChild(devName);
+    if (badged) {
+      const badge = document.createElement("span");
+      badge.className = `landing-sidebar-state mono is-${bs}`;
+      badge.textContent = tFn(`landing.sidebar.state_${bs}`);
+      dev.appendChild(badge);
+    }
 
     const sym = document.createElement("span");
     sym.className = "landing-sidebar-symptom";
@@ -170,6 +208,11 @@ async function loadAndRenderSidebar() {
   }
   sidebar.hidden = false;
   if (toggle) toggle.hidden = false;   // repairs exist → expose the mobile trigger
+
+  // A build was in flight when the page (re)loaded → resume its live timeline so
+  // a refresh mid-build doesn't lose the progress view. Passive (autoNav off) so
+  // a finish doesn't yank a tech who reopened the landing to start another job.
+  maybeResumeActiveBuild(repairs);
 }
 
 // Build a human-readable Error from a failed Response. Prefers the structured
@@ -319,6 +362,15 @@ function resetTimeline() {
   resetTimelineRows();
 }
 
+// A launch is a "fresh build" (full ~15-min pipeline, 1 credit on cloud) when
+// the tech did NOT pick an already-complete known pack. Free-text or an
+// incomplete pack → the backend will run the full pipeline. A complete pack
+// pick → cache hit or cheap background expand (no pre-flight gate). Mirrors the
+// free-lock predicate so the two stay consistent.
+function _isFreshBuild() {
+  return !(_selectedDeviceSlug && _selectedDeviceComplete);
+}
+
 async function onSubmit(ev) {
   ev.preventDefault();
   if (isSubmitting) return;
@@ -347,6 +399,21 @@ async function onSubmit(ev) {
     return;
   }
 
+  // Fresh build → gate behind the pre-flight modal (credit cost, ~15-min build,
+  // last-chance schematic, email opt-in). Confirming there calls _launchDiagnostic.
+  // Known-complete pack → no gate, launch straight away (cache hit / expand).
+  if (_isFreshBuild()) {
+    openPreflightModal(device);
+    return;
+  }
+  await _launchDiagnostic();
+}
+
+async function _launchDiagnostic() {
+  const t = window.t || ((k) => k);
+  const device = (document.getElementById("landingDevice")?.value || "").trim();
+  const symptom = (document.getElementById("landingSymptom")?.value || "").trim();
+
   setStatus(t("landing.status.checking"), STATUS_LOADING);
   setSubmitting(true);
   setLandingMascot("thinking");
@@ -373,9 +440,6 @@ async function onSubmit(ev) {
     // Signal the out-of-band schematic so the pipeline waits for its electrical
     // graph before device-kind classification (the upload fires below, post-create).
     if (_schematicFile) body.append("schematic_pending", "true");
-    // Remember whether a schematic rode this launch — the notify-when-ready modal
-    // (Lot 4) only offers itself for the long vision build a schematic triggers.
-    const hadSchematic = !!_schematicFile;
     const res = await fetch("/pipeline/repairs", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -450,10 +514,10 @@ async function onSubmit(ev) {
     showTimeline();
     setTimelineTitle(t("landing.timeline.title_build", { device: repair.device_label }));
     subscribeToProgress(slug, rid);
-    // Lot 4: a schematic was attached → this is the long vision build. Offer an
-    // email-when-ready modal over the timeline. Cloud-only (gated on the proxy's
-    // injected __wbPlanHints) so self-host never shows a cloud feature.
-    if (hadSchematic && window.__wbPlanHints) maybeOfferNotifyWhenReady(rid);
+    // Email-when-ready opt-in was chosen in the pre-flight modal. Arm it now that
+    // the repair exists. Cloud-only (the checkbox is hidden without plan hints,
+    // and /notify is a front-door route), so self-host never reaches the POST.
+    if (_preflightNotifyOptIn && planHints()) armNotify(rid);
   } catch (err) {
     console.error("[landing] submit failed", err);
     setStatus(t("landing.status.error_create", { error: err.message || err }), STATUS_ERROR);
@@ -462,39 +526,109 @@ async function onSubmit(ev) {
   }
 }
 
-// Lot 4 — post-dispatch "email me when ready" modal. Shown over the build
-// timeline only when a schematic rode the launch (the long vision build) and the
-// cloud front-door is in front (gated by the caller on window.__wbPlanHints).
-// "Préviens-moi" POSTs the opt-in to the cloud, which emails the tech at
-// pipeline_finished. Self-host never reaches here (no __wbPlanHints).
-function maybeOfferNotifyWhenReady(repairId) {
-  const bd = document.getElementById("landingNotifyBackdrop");
-  if (!bd) return;
+// Arm the "email me when ready" opt-in chosen in the pre-flight modal. POSTs to
+// the cloud front-door's /notify route, which emails the tech at
+// pipeline_finished. Best-effort: a failure is logged, never blocks the build.
+// Self-host never calls this (the checkbox is hidden without plan hints).
+async function armNotify(repairId) {
   const tt = window.t || ((k) => k);
-  const close = () => { bd.classList.remove("open"); bd.setAttribute("aria-hidden", "true"); };
-  // .onclick (not addEventListener) so re-opening rebinds the current repairId
-  // cleanly instead of stacking stale handlers.
-  document.getElementById("landingNotifyLater").onclick = close;
-  document.getElementById("landingNotifyClose").onclick = close;
-  document.getElementById("landingNotifyConfirm").onclick = async () => {
-    close();
-    try {
-      const res = await fetch(`/pipeline/repairs/${encodeURIComponent(repairId)}/notify`, { method: "POST" });
-      if (res.ok) setStatus(tt("landing.status.notify_armed"), STATUS_NEUTRAL);
-    } catch (err) {
-      console.warn("[landing] notify opt-in failed", err);
-    }
-  };
-  bd.classList.add("open");
-  bd.setAttribute("aria-hidden", "false");
+  try {
+    const res = await fetch(`/pipeline/repairs/${encodeURIComponent(repairId)}/notify`, { method: "POST" });
+    if (res.ok) setStatus(tt("landing.status.notify_armed"), STATUS_NEUTRAL);
+  } catch (err) {
+    console.warn("[landing] notify opt-in failed", err);
+  }
 }
 
-function subscribeToProgress(slug, repairId) {
+// ============================================================
+// Pre-flight launch-confirmation modal. Opened from onSubmit when the launch is
+// a fresh build (_isFreshBuild). Makes the cost explicit and gives the tech a
+// last chance to attach the schematic before a ~15-min build. The credit line
+// and the email opt-in are cloud-only (gated on planHints()); self-host still
+// sees the duration warning + schematic prompt. Confirm → _launchDiagnostic.
+// ============================================================
+
+let _preflightLastFocus = null;
+
+// Reflect the shared _schematicFile state inside the modal: either the
+// "attach it now" prompt or the "attached ✓" filename. Safe to call when the
+// modal is closed (the elements just aren't visible).
+function renderPreflightSchematic() {
+  const hint = document.getElementById("landingPreflightSchematicHint");
+  const name = document.getElementById("landingPreflightSchematicName");
+  const pick = document.getElementById("landingPreflightSchematicPick");
+  const t = window.t || ((k) => k);
+  if (name) name.textContent = _schematicFile ? _schematicFile.name : "";
+  if (hint) {
+    hint.textContent = _schematicFile
+      ? t("landing.preflight.schematic_attached")
+      : t("landing.preflight.schematic_none");
+  }
+  if (pick) {
+    pick.textContent = _schematicFile
+      ? t("landing.preflight.schematic_replace")
+      : t("landing.schematic.cta");
+  }
+}
+
+function openPreflightModal(deviceLabel) {
+  const bd = document.getElementById("landingPreflightBackdrop");
+  if (!bd) {
+    // No modal markup (shouldn't happen) — fail open rather than block a launch.
+    _launchDiagnostic();
+    return;
+  }
+  const t = window.t || ((k) => k);
+  _preflightLastFocus = document.activeElement;
+
+  const title = document.getElementById("landingPreflightTitle");
+  if (title) title.textContent = t("landing.preflight.title", { device: deviceLabel });
+
+  // Cloud-only rows: the credit line and the email opt-in. Hidden on self-host
+  // (no plan hints) — the engine must not surface a billing/email concept.
+  const cloud = !!planHints();
+  const credit = document.getElementById("landingPreflightCredit");
+  if (credit) credit.hidden = !cloud;
+  const notifyRow = document.getElementById("landingPreflightNotifyRow");
+  if (notifyRow) notifyRow.hidden = !cloud;
+  const notifyCb = document.getElementById("landingPreflightNotify");
+  if (notifyCb) notifyCb.checked = false;
+
+  // Schematic block: hidden on plans that can't upload (defensive — the free
+  // lock already blocks fresh-build launches before we get here).
+  const schemField = document.getElementById("landingPreflightSchematicField");
+  if (schemField) schemField.hidden = hideUploads();
+  renderPreflightSchematic();
+
+  bd.classList.add("open");
+  bd.setAttribute("aria-hidden", "false");
+  requestAnimationFrame(() => document.getElementById("landingPreflightConfirm")?.focus());
+}
+
+function closePreflightModal() {
+  const bd = document.getElementById("landingPreflightBackdrop");
+  if (!bd || !bd.classList.contains("open")) return;
+  bd.classList.remove("open");
+  bd.setAttribute("aria-hidden", "true");
+  if (_preflightLastFocus && typeof _preflightLastFocus.focus === "function") {
+    _preflightLastFocus.focus();
+  }
+}
+
+async function confirmPreflight() {
+  const cb = document.getElementById("landingPreflightNotify");
+  _preflightNotifyOptIn = !!(cb && !cb.hidden && cb.checked);
+  closePreflightModal();
+  await _launchDiagnostic();
+}
+
+function subscribeToProgress(slug, repairId, { autoNav = true } = {}) {
   if (progressConn) { progressConn.close(); progressConn = null; }
   // Remember the active build so confirmLandingKind() can re-subscribe to the
   // fresh build on the same slug after the tech resolves a kind disagreement.
   _activeSlug = slug;
   _activeRid = repairId;
+  _autoNavOnFinish = autoNav;
 
   progressConn = connectProgress(slug, {
     onEvent: (data) => handleProgressEvent(data, slug, repairId),
@@ -526,6 +660,36 @@ function subscribeToProgress(slug, repairId) {
       }, slug, repairId);
     }
   });
+}
+
+// Re-attach the live build timeline for a repair whose pack is still building.
+// The progress event bus replays its recent-event ring buffer on (re)subscribe,
+// so the timeline catches up to the phases already done instead of staring at a
+// blank until the next phase boundary. Shared by the tile-resume click (autoNav
+// true) and the passive resume-on-load (autoNav false).
+function resumeBuild(slug, repairId, { autoNav = true } = {}) {
+  // Both callers (tile click, passive resume-on-load) already run with the hero
+  // visible — do NOT call showLanding() here: it re-renders the sidebar, which
+  // re-enters maybeResumeActiveBuild before progressConn is set → recursion.
+  const t = window.t || ((k) => k);
+  resetTimeline();
+  showTimeline();
+  setTimelineTitle(t("landing.timeline.title_build", { device: prettifySlug(slug) }));
+  setStatus(t("landing.status.build_delay"), STATUS_NEUTRAL);
+  setLandingMascot("working");
+  subscribeToProgress(slug, repairId, { autoNav });
+}
+
+// On landing (re)load, if a build was in flight, resume its timeline passively.
+// Guarded so we never stomp an already-active connection (a fresh submit, or a
+// resume already running) and never auto-resume while the tech is submitting.
+function maybeResumeActiveBuild(repairs) {
+  if (progressConn || isSubmitting) return;
+  // Newest-first list (sorted by caller) → the first building repair is the most
+  // recent one. The build cap means there's normally at most one in flight.
+  const building = (repairs || []).find((r) => r.build_state === "building");
+  if (!building) return;
+  resumeBuild(building.device_slug, building.repair_id, { autoNav: false });
 }
 
 // Localize a live `phase_step` sub-step into the short line the timeline shows
@@ -604,9 +768,17 @@ function handleProgressEvent(ev, slug, repairId) {
       setStatus(t("landing.status.ready"), STATUS_NEUTRAL);
       stopEtaTicker();
       setLandingMascot("success");
-      // Short grace so the final audit sub-step + "ready" state render before
-      // we navigate away to the workspace.
-      setTimeout(() => goToWorkspace(repairId, slug), 2500);
+      if (_autoNavOnFinish) {
+        // Fresh submit / explicit tile-resume: take the tech into the now-ready
+        // device. Short grace so the final audit sub-step renders first.
+        setTimeout(() => goToWorkspace(repairId, slug), 2500);
+      } else {
+        // Passive resume-on-load: don't yank a browsing tech. Just refresh the
+        // sidebar so the tile flips from "building" to ready (clickable into the
+        // workspace), and drop the now-finished progress connection.
+        if (progressConn) { progressConn.close(); progressConn = null; }
+        loadAndRenderSidebar();
+      }
       break;
     }
     case "pipeline_paused":
@@ -1190,7 +1362,23 @@ export function initLanding() {
     if (n) n.textContent = _schematicFile ? _schematicFile.name : "";
     e.target.value = "";
     renderKnowledgeIndicators();
+    renderPreflightSchematic();   // keep the pre-flight modal's view in sync
   });
+  // Pre-flight modal: its schematic pick triggers the SAME hidden file input as
+  // the knowledge modal (single source of truth, _schematicFile). Cancel/confirm
+  // gate the actual launch; the backdrop + Escape dismiss like the other modals.
+  document.getElementById("landingPreflightSchematicPick")?.addEventListener("click", () => {
+    document.getElementById("landingSchematic")?.click();
+  });
+  document.getElementById("landingPreflightCancel")?.addEventListener("click", closePreflightModal);
+  document.getElementById("landingPreflightClose")?.addEventListener("click", closePreflightModal);
+  document.getElementById("landingPreflightConfirm")?.addEventListener("click", confirmPreflight);
+  const pfBackdrop = document.getElementById("landingPreflightBackdrop");
+  if (pfBackdrop) {
+    pfBackdrop.addEventListener("click", (ev) => {
+      if (ev.target === pfBackdrop) closePreflightModal();
+    });
+  }
   // Knowledge modal: trigger, close affordances, board-type change, chip removal.
   // First click explains what "Add knowledge" is for, then opens the modal;
   // afterwards it goes straight in. A persistent "?" reopens the explainer.
@@ -1214,7 +1402,7 @@ export function initLanding() {
     });
   }
   document.addEventListener("keydown", (ev) => {
-    if (ev.key === "Escape") { closeKnowledgeModal(); closeRepairsDrawer(); }
+    if (ev.key === "Escape") { closeKnowledgeModal(); closePreflightModal(); closeRepairsDrawer(); }
   });
   // Mobile recent-repairs drawer: toggle from the nav, dismiss via the scrim.
   document.getElementById("landingRepairsToggle")?.addEventListener("click", () => {

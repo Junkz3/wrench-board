@@ -5,7 +5,12 @@
     "delete_aria": "Supprimer cette réparation",
     "delete_title": "Supprimer",
     "count_one": "{n} réparation",
-    "count_many": "{n} réparations"
+    "count_many": "{n} réparations",
+    "state_building": "En construction",
+    "state_paused": "À confirmer",
+    "state_failed": "Échec du build",
+    "locked_hint": "Le pack de connaissances se construit. Tu peux fermer cette page, ça continue.",
+    "resume_aria": "Voir la progression de ce build"
   },
   "hero": {
     "title": "Ton assistant de réparation hardware.",
@@ -16,13 +21,20 @@
     "symptom_aria": "Quel est le symptôme",
     "submit": "Lancer le diagnostic"
   },
-  "notify": {
-    "badge": "Préparation en cours",
-    "title": "Cet appareil est en préparation",
-    "intro": "Construire la fiche de connaissances d'un appareil tout neuf peut prendre un moment. On peut t'envoyer un email quand le diagnostic est prêt, pour ne pas attendre ici.",
+  "preflight": {
+    "badge": "Nouvel appareil",
+    "title": "Lancer le diagnostic · {device}",
+    "intro": "Aucune fiche de connaissances n'existe encore pour cet appareil. Le lancement va en construire une de zéro.",
+    "credit": "Ce diagnostic consomme 1 crédit pour construire le pack de connaissances de l'appareil.",
+    "time": "La construction complète peut prendre plus de 15 minutes. Tu peux fermer cette page, ça continue de travailler.",
+    "schematic_label": "Schéma : c'est le moment de l'ajouter",
+    "schematic_none": "Aucun schéma fourni. Si tu as le PDF du schéma, ajoute-le maintenant. Il améliore nettement le pack.",
+    "schematic_attached": "Schéma joint. Il sera ingéré pour affiner le pack.",
+    "schematic_replace": "Choisir un autre PDF",
+    "email_optin": "Préviens-moi par email quand l'appareil est prêt, pour ne pas attendre ici.",
     "close": "Fermer",
-    "later": "Plus tard",
-    "confirm": "Préviens-moi par email"
+    "cancel": "Annuler",
+    "confirm": "Lancer le diagnostic"
   },
   "timeline": {
     "title_default": "Construction de la fiche…",

@@ -29,6 +29,7 @@ from pydantic import ValidationError
 import api.pipeline as _pkg  # noqa: PLC0415 — module-attribute lookups for patchability
 from api.agent.memory_stores import delete_repair_store
 from api.pipeline import events
+from api.pipeline.build_state import read_build_state
 from api.pipeline.device_registry import get_device_registry_store, resolve_device
 from api.pipeline.models import (
     DisambiguationCandidate,
@@ -76,7 +77,7 @@ def _should_autogenerate_delta(
     if not allow_expand:
         return False
     # Lazy import keeps the cold-path fast when board_delta is not needed.
-    from api.pipeline.board_delta.store import read_delta, normalize_board_number
+    from api.pipeline.board_delta.store import normalize_board_number, read_delta
     norm = normalize_board_number(board_number)
     if not norm:
         return False
@@ -110,7 +111,8 @@ async def _autogenerate_delta_task(
         )
         return
     try:
-        from datetime import UTC, datetime as _dt
+        from datetime import UTC
+        from datetime import datetime as _dt
         client = AsyncAnthropic(api_key=settings.anthropic_api_key, max_retries=settings.anthropic_max_retries)  # noqa: E501
         logger.info(
             "[BoardDelta] auto-generating delta for slug=%r board_number=%r",
@@ -333,6 +335,10 @@ async def list_repairs() -> list[RepairSummary]:
         repairs_dir = pack_dir / "repairs"
         if not repairs_dir.exists():
             continue
+        # Build state is per-PACK (per device_slug), shared by every repair on
+        # that device — read it once per pack_dir, not once per repair file.
+        marker = read_build_state(pack_dir)
+        build_state = marker.get("status") if marker else None
         for path in repairs_dir.glob("*.json"):
             try:
                 payload = json.loads(path.read_text())
@@ -348,6 +354,7 @@ async def list_repairs() -> list[RepairSummary]:
                     status=payload.get("status", "open"),
                     created_at=payload.get("created_at", ""),
                     board_number=payload.get("board_number") or None,
+                    build_state=build_state,
                 )
             )
     results.sort(key=lambda r: r.created_at, reverse=True)
@@ -367,6 +374,7 @@ async def get_repair(repair_id: str) -> RepairSummary:
         candidate = pack_dir / "repairs" / f"{repair_id}.json"
         if candidate.exists():
             payload = json.loads(candidate.read_text())
+            marker = read_build_state(pack_dir)
             return RepairSummary(
                 repair_id=payload.get("repair_id", repair_id),
                 device_slug=payload.get("device_slug", pack_dir.name),
@@ -375,6 +383,7 @@ async def get_repair(repair_id: str) -> RepairSummary:
                 status=payload.get("status", "open"),
                 created_at=payload.get("created_at", ""),
                 board_number=payload.get("board_number") or None,
+                build_state=marker.get("status") if marker else None,
             )
     raise HTTPException(status_code=404, detail=f"No repair {repair_id!r}")
 
