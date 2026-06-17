@@ -276,6 +276,19 @@ class Settings(BaseSettings):
             "token re-writes."
         ),
     )
+    pipeline_vision_concurrency: int = Field(
+        default=12,
+        ge=1,
+        le=128,
+        description=(
+            "Max concurrent per-page vision calls during schematic ingestion. The "
+            "binding limit on a large schematic is OTPM (800K/min on Opus tier-4) — "
+            "dense pages emit tens of thousands of output tokens each, so ~12-16 "
+            "concurrent saturates that budget without thrashing 429s. Firing every "
+            "page at once does not go faster (OTPM caps throughput either way) and "
+            "forfeits the shared-prefix cache. Raise toward 16 if pages are light."
+        ),
+    )
     pipeline_scout_min_symptoms: int = Field(
         default=3,
         ge=0,

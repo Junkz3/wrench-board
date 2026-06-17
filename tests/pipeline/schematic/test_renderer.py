@@ -18,6 +18,7 @@ import pytest
 from api.pipeline.schematic.renderer import (
     PdftoppmNotAvailableError,
     RenderedPage,
+    render_one_page,
     render_pages,
 )
 
@@ -61,6 +62,32 @@ def test_orientation_is_detected_per_page(rendered: list[RenderedPage]):
             assert r.orientation == "landscape", r
         else:
             assert r.orientation == "portrait", r
+
+
+def test_render_one_page_matches_bulk_render(
+    rendered: list[RenderedPage], tmp_path_factory
+):
+    """render_one_page (pdftoppm -singlefile) produces the same page-NN.png and
+    RenderedPage fields as the bulk renderer, for the pipeline path."""
+    out = tmp_path_factory.mktemp("mnt_render_one")
+    target = rendered[2]  # page 3
+    single = render_one_page(
+        FIXTURE_PDF,
+        out,
+        target.page_number,
+        len(rendered),
+        dpi=150,
+        width_pt=target.width_pt,
+        height_pt=target.height_pt,
+        char_count=10,  # non-zero → not scanned, like the native-vector fixture
+        line_count=5,
+    )
+    assert single.png_path.name == target.png_path.name  # identical padding/name
+    assert single.png_path.is_file()
+    assert single.png_path.stat().st_size > 50_000
+    assert single.orientation == target.orientation
+    assert single.is_scanned is False
+    assert (single.width_pt, single.height_pt) == (target.width_pt, target.height_pt)
     kinds = {r.orientation for r in rendered}
     assert kinds.issubset({"portrait", "landscape"})
     assert kinds  # at least one

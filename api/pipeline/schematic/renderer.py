@@ -134,12 +134,19 @@ def render_pages(
     output_dir: Path,
     *,
     dpi: int = 200,
+    metadata: list[dict] | None = None,
 ) -> list[RenderedPage]:
     """Render every page of `pdf_path` to `output_dir/page-XX.png`.
 
     Pages are numbered 1-based with zero-padded width matching the total page
     count (page-01.png ... page-12.png for a 12-page PDF — pdftoppm's default
     behaviour). Returns one `RenderedPage` per page in page-number order.
+
+    `metadata` lets a caller pass the per-page probe result (page / width /
+    height / char_count / line_count) it has already computed — e.g. via
+    `grounding.extract_all_pages`, which parses the PDF once for both scan
+    detection and grounding. When omitted, `_probe_pages` runs as before, so
+    standalone callers are unaffected.
     """
     pdf_path = Path(pdf_path)
     output_dir = Path(output_dir)
@@ -148,7 +155,7 @@ def render_pages(
     if not pdf_path.is_file():
         raise FileNotFoundError(pdf_path)
 
-    metadata = _probe_pages(pdf_path)
+    metadata = metadata if metadata is not None else _probe_pages(pdf_path)
     page_count = len(metadata)
 
     prefix = output_dir / "page"
@@ -202,6 +209,72 @@ def render_pages(
             len(rendered),
         )
     return rendered
+
+
+def render_one_page(
+    pdf_path: Path,
+    output_dir: Path,
+    page_number: int,
+    total_pages: int,
+    *,
+    dpi: int = 200,
+    width_pt: float,
+    height_pt: float,
+    char_count: int,
+    line_count: int,
+) -> RenderedPage:
+    """Rasterise exactly one page to `output_dir/page-NN.png` via pdftoppm.
+
+    Unlike `render_pages` (one pdftoppm over the whole PDF), this renders a
+    single page with `-singlefile -f N -l N`, so a caller can pipeline
+    render → vision per page and overlap pdftoppm CPU with the OTPM-bound
+    vision wait. `-singlefile` writes `<prefix>.png` with no page-number
+    suffix, removing the padding ambiguity of the bulk path.
+
+    Page metadata (dims + char/line counts for orientation + scan detection)
+    is supplied by the caller, which already parsed it via pdfplumber — this
+    function does no PDF parsing of its own. `page-NN` is zero-padded to the
+    same width the bulk renderer uses so the web viewer's glob sorts identically.
+    """
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    width = max(2, len(str(total_pages)))
+    prefix = output_dir / f"page-{page_number:0{width}d}"
+    try:
+        subprocess.run(
+            [
+                "pdftoppm", "-png", "-singlefile", "-r", str(dpi),
+                "-f", str(page_number), "-l", str(page_number),
+                str(pdf_path), str(prefix),
+            ],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+    except FileNotFoundError as exc:
+        raise PdftoppmNotAvailableError(
+            "pdftoppm not found — install poppler-utils (apt install poppler-utils)."
+        ) from exc
+    except subprocess.CalledProcessError as exc:
+        raise RuntimeError(
+            f"pdftoppm failed on {pdf_path} page {page_number}: "
+            f"{exc.stderr.strip() or exc}"
+        ) from exc
+
+    png_path = output_dir / f"page-{page_number:0{width}d}.png"
+    if not png_path.is_file():
+        raise RuntimeError(
+            f"pdftoppm did not produce expected PNG for page {page_number} "
+            f"(looked at {png_path})"
+        )
+    return RenderedPage(
+        page_number=page_number,
+        png_path=png_path,
+        orientation="landscape" if width_pt > height_pt else "portrait",
+        is_scanned=char_count == 0 and line_count == 0,
+        width_pt=width_pt,
+        height_pt=height_pt,
+    )
 
 
 def _probe_pages(pdf_path: Path) -> list[dict]:

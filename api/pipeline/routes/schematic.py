@@ -35,7 +35,7 @@ from api.pipeline.models import (
 from api.pipeline.orchestrator import _slugify
 from api.pipeline.routes._helpers import _validate_slug
 from api.pipeline.routes.packs import _read_optional_json
-from api.pipeline.schematic.grounding import extract_grounding
+from api.pipeline.schematic.grounding import extract_all_pages
 from api.pipeline.schematic.renderer import render_pages
 from api.pipeline.schematic.schemas import AnalyzedBootSequence, ElectricalGraph
 from api.pipeline.schematic.simulator import SimulationEngine
@@ -162,17 +162,32 @@ def _render_and_extract_pages(pdf_path: Path, pages_dir: Path, dpi: int = 150) -
     `page-NN.anchors.json` next to the PNG (same layout as the orchestrator).
     """
     pages_dir.mkdir(parents=True, exist_ok=True)
-    rendered = render_pages(pdf_path, pages_dir, dpi=dpi)
-    for rp in rendered:
-        try:
-            g = extract_grounding(pdf_path, rp.page_number)
-        except Exception:  # noqa: BLE001 — pdfplumber/extractor failures are page-local, skip + continue
-            logger.exception(
-                "grounding failed on page %d of %s — skipping anchors",
-                rp.page_number,
-                pdf_path,
-            )
-            continue
+    # Single pdfplumber pass: scan metadata for render + grounding anchors.
+    # pdftoppm then re-reads the PDF once for rasterisation; nothing parses it
+    # per page anymore (the old loop opened it once per page just for anchors).
+    # Anchors stay best-effort: if the grounding pass fails wholesale we still
+    # rasterise (render_pages probes internally) and skip the overlay JSONs.
+    try:
+        extracts = extract_all_pages(pdf_path)
+    except Exception:  # noqa: BLE001 — anchors are a non-critical search overlay
+        logger.exception(
+            "grounding pass failed on %s — rendering without anchors", pdf_path
+        )
+        render_pages(pdf_path, pages_dir, dpi=dpi)
+        return
+    render_meta = [
+        {
+            "page": e.page,
+            "width": e.width,
+            "height": e.height,
+            "char_count": e.char_count,
+            "line_count": e.line_count,
+        }
+        for e in extracts
+    ]
+    render_pages(pdf_path, pages_dir, dpi=dpi, metadata=render_meta)
+    for e in extracts:
+        g = e.grounding
         payload = {
             "page": g.page,
             "page_width_pt": g.page_width,
@@ -182,7 +197,7 @@ def _render_and_extract_pages(pdf_path: Path, pages_dir: Path, dpi: int = 150) -
                 for (rd, x0, top, x1, bot) in g.refdes_anchors
             ],
         }
-        (pages_dir / f"page-{rp.page_number:02d}.anchors.json").write_text(
+        (pages_dir / f"page-{g.page:02d}.anchors.json").write_text(
             json.dumps(payload, indent=2)
         )
 

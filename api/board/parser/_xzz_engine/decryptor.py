@@ -21,7 +21,7 @@ def hex_to_bytes(hex_string: str) -> bytes:
 
 
 def decrypt_with_des(encrypted_data: bytes, master_key: str) -> bytes:
-    """Décrypte des données avec DES (SANS unpadding car le format XZZ n'utilise pas de padding)."""
+    """Decrypt data with DES (NO unpadding, since the XZZ format uses no padding)."""
     key = hex_to_bytes(master_key)
     cipher = Cipher(TripleDES(key), modes.ECB())
     decryptor = cipher.decryptor()
@@ -41,21 +41,21 @@ def de_xor_data(data: bytearray, diode_pattern: bytes, logger=None) -> bytearray
         # Use Rust acceleration
         if pos == -1:
             if logger:
-                logger.debug("Motif diode non trouvé, XOR sur l'ensemble du fichier (Rust).")
-            return bytearray(_rust_xor(bytes(data), key))  # noqa: F821 — rust ext, only reachable when _USE_RUST
+                logger.debug("Diode pattern not found, XOR over the entire file (Rust).")
+            return bytearray(_rust_xor(bytes(data), key))  # noqa: F821 - rust ext, only reachable when _USE_RUST
         else:
             if logger:
-                logger.info(f"Motif diode trouvé à la position: {pos} (Rust)")
-            return bytearray(_rust_xor_pattern(bytes(data), key, diode_pattern))  # noqa: F821 — rust ext, only reachable when _USE_RUST
+                logger.debug(f"Diode pattern found at position: {pos} (Rust)")
+            return bytearray(_rust_xor_pattern(bytes(data), key, diode_pattern))  # noqa: F821 - rust ext, only reachable when _USE_RUST
     else:
         # Pure Python fallback
         if pos == -1:
             if logger:
-                logger.debug("Motif diode non trouvé, XOR sur l'ensemble du fichier.")
+                logger.debug("Diode pattern not found, XOR over the entire file.")
             return bytearray(a ^ key for a in data)
         else:
             if logger:
-                logger.info(f"Motif diode trouvé à la position: {pos}")
+                logger.debug(f"Diode pattern found at position: {pos}")
             return bytearray(a ^ key for a in data[:pos]) + data[pos:]
 
 
@@ -73,16 +73,16 @@ def decrypt_file(data: bytes, master_key: str, diode_pattern: bytes, logger=None
         XOR-decrypted bytes
     """
     if logger:
-        logger.info(f"Décryptage du fichier... {'(Rust)' if _USE_RUST else '(Python)'}")
+        logger.debug(f"Decrypting file... {'(Rust)' if _USE_RUST else '(Python)'}")
 
     data_array = bytearray(data)
 
     if data_array[0x10] != 0x00:
         if logger:
-            logger.info("Application du XOR sur les données...")
+            logger.debug("Applying XOR to the data...")
         data_array = de_xor_data(data_array, diode_pattern, logger)
     else:
         if logger:
-            logger.info("Fichier déjà décrypté (XOR non nécessaire).")
+            logger.debug("File already decrypted (XOR not needed).")
 
     return bytes(data_array)

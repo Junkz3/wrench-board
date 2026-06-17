@@ -135,15 +135,59 @@ body.pending-landing .statusbar { display: none !important; }
 
 .landing-mark {
   display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--text-2);
-  font-size: 13px;
-  letter-spacing: 0.5px;
-  margin-bottom: 32px;
+  align-items: baseline;
+  gap: 6px;
+  margin-bottom: 28px;
 }
 
-.landing-mark svg { color: var(--cyan); }
+/* Wordmark logotype — weight contrast carries the brand: "Wrench" recedes,
+   "Board" leads. Inter, not mono (this is the mark, not a workshop label). */
+.landing-mark__name {
+  font-family: 'Inter', sans-serif;
+  font-size: 19px;
+  line-height: 1;
+  letter-spacing: -0.2px;
+}
+.landing-mark__w { color: var(--text-2); font-weight: 500; }
+.landing-mark__b { color: var(--text);   font-weight: 700; }
+
+/* "Cloud" edition suffix — hosted product only (body.wb-hosted). The mark
+   becomes "WrenchBoardCloud" with "Cloud" in cyan; self-host shows just
+   "WrenchBoard". A small tilted cloud perches on the "d" like a crown. */
+.landing-mark__cloud {
+  display: none;
+  color: var(--cyan);
+  font-weight: 600;
+  margin-left: 2px;
+}
+body.wb-hosted .landing-mark__cloud { display: inline; }
+
+/* The "d" of Cloud anchors the perched cloud above it. */
+.landing-mark__d { position: relative; }
+.landing-mark__perch {
+  position: absolute;
+  left: 50%;
+  top: -0.56em;
+  width: 0.82em;
+  height: 0.82em;
+  color: var(--cyan);
+  transform: translateX(-42%) rotate(-18deg);
+  transform-origin: center bottom;
+  /* soft cyan halo, single-use decorative glow */
+  filter: drop-shadow(0 0 4px color-mix(in oklab, var(--cyan) 55%, transparent));
+  animation: mark-perch-bob 3.6s ease-in-out infinite;
+}
+.landing-mark__perch svg { display: block; width: 100%; height: 100%; }
+
+@keyframes mark-perch-bob {
+  0%, 100% { transform: translateX(-42%) rotate(-18deg) translateY(0); }
+  50%      { transform: translateX(-42%) rotate(-18deg) translateY(-2px); }
+}
+
+/* Respect reduced-motion: keep the perched cloud, drop the float. */
+@media (prefers-reduced-motion: reduce) {
+  .landing-mark__perch { animation: none; }
+}
 
 .landing-title {
   font-family: 'Inter', sans-serif;
@@ -868,6 +912,48 @@ body.pending-landing .statusbar { display: none !important; }
 }
 .landing-sidebar-item:hover .landing-sidebar-symptom { color: var(--text); }
 .landing-sidebar-item:hover .landing-sidebar-meta { color: var(--text-2); }
+
+/* Per-repair build-state badge (history list). Neutral/muted on purpose —
+   "building" is a process state, not one of the four locked semantic colors.
+   The badge + a `cursor: progress` link signal "not ready to open"; the click
+   gate (landing/index.js) opens the live build timeline instead. */
+.landing-sidebar-badge {
+  display: inline-block;
+  margin-top: 3px;
+  padding: 1px 6px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--text-3);
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+.landing-sidebar-badge.is-building { animation: landing-badge-pulse 2.4s ease-in-out infinite; }
+.landing-sidebar-badge.is-failed { color: var(--text-2); }
+.landing-sidebar-item.is-building .landing-sidebar-link,
+.landing-sidebar-item.is-paused .landing-sidebar-link,
+.landing-sidebar-item.is-failed .landing-sidebar-link { cursor: progress; }
+@keyframes landing-badge-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+
+/* Consent + contribution note under the schematic picker (Add-knowledge modal).
+   Reuses .modal-hint's muted style; just needs breathing room from the picker. */
+.landing-schematic-share {
+  margin-top: 8px;
+  line-height: 1.45;
+}
+
+/* Reassurance line under the build-timeline title (analyse unique + async). */
+.landing-timeline-note {
+  margin: 4px 0 0;
+  font-size: 11.5px;
+  color: var(--text-3);
+  line-height: 1.45;
+}
 
 /* ============ Hero mascot ============
  * Mounted by web/js/landing.js. State follows the pipeline: idle by

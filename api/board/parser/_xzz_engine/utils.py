@@ -23,25 +23,25 @@ def read_uint8(data: bytes, offset: int) -> tuple[int, int]:
 
 def read_uint32(buffer: bytes, offset: int) -> (int, int):
     if offset + 4 > len(buffer):
-        raise ValueError("Tentative de lire hors du buffer (uint32)")
+        raise ValueError("Attempt to read past the buffer (uint32)")
     value = struct.unpack_from('<I', buffer, offset)[0]
     return value, offset + 4
 
 def read_int32(buffer: bytes, offset: int) -> (int, int):
     if offset + 4 > len(buffer):
-        raise ValueError("Tentative de lire hors du buffer (int32)")
+        raise ValueError("Attempt to read past the buffer (int32)")
     value = struct.unpack_from('<i', buffer, offset)[0]
     return value, offset + 4
 
 def read_uint16(buffer: bytes, offset: int) -> (int, int):
     if offset + 2 > len(buffer):
-        raise ValueError("Tentative de lire hors du buffer (uint16)")
+        raise ValueError("Attempt to read past the buffer (uint16)")
     value = struct.unpack_from('<H', buffer, offset)[0]
     return value, offset + 2
 
 def read_bytes(buffer: bytes, offset: int, length: int) -> (bytes, int):
     if offset + length > len(buffer):
-        raise ValueError("Tentative de lire hors du buffer (bytes)")
+        raise ValueError("Attempt to read past the buffer (bytes)")
     data = buffer[offset:offset+length]
     return data, offset + length
 

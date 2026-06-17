@@ -19,6 +19,9 @@ from pathlib import Path
 
 import pdfplumber
 
+from api.config import get_settings
+from api.pipeline.schematic.renderer import SchematicPageLimitExceeded
+
 # Regexes used to bucket candidates. Deliberately permissive — the vision
 # pass is told to only use these as a truth set, not as the final list.
 _REFDES_RE = re.compile(r"^(?:U|R|C|L|D|Q|J|Y|TP|H|SW|F|FB|BT|K|M|X|Z)\d{1,4}[A-Z]?$")
@@ -62,6 +65,25 @@ class PageGrounding:
     )
 
 
+@dataclass(frozen=True)
+class PageExtract:
+    """One page's render/scan metadata + grounding, from a single PDF parse.
+
+    `page`/`width`/`height`/`char_count`/`line_count` mirror the dict
+    `renderer._probe_pages` produces (scan detection + orientation), so a
+    caller can hand them to `render_pages(metadata=...)` and skip a second
+    pdfplumber pass. `grounding` is the same `PageGrounding` the per-page
+    `extract_grounding` returns.
+    """
+
+    page: int
+    width: float
+    height: float
+    char_count: int
+    line_count: int
+    grounding: PageGrounding | None
+
+
 def extract_grounding(pdf_path: Path, page_number: int) -> PageGrounding:
     """Run pdfplumber on one page and bucket its texts for the vision prompt."""
     with pdfplumber.open(str(pdf_path)) as pdf:
@@ -69,12 +91,23 @@ def extract_grounding(pdf_path: Path, page_number: int) -> PageGrounding:
             raise ValueError(
                 f"page {page_number} out of range (PDF has {len(pdf.pages)} pages)"
             )
-        page = pdf.pages[page_number - 1]
-        words = page.extract_words(x_tolerance=2, y_tolerance=2)
-        wire_count = len(page.lines)
-        rect_count = len(page.rects)
-        page_width = float(page.width)
-        page_height = float(page.height)
+        return _grounding_from_page(pdf.pages[page_number - 1], page_number)
+
+
+def _grounding_from_page(page, page_number: int) -> PageGrounding:
+    """Bucket one already-open pdfplumber page into a PageGrounding.
+
+    Shared by the single-page `extract_grounding` and the single-pass
+    `extract_all_pages` so both paths produce byte-for-byte identical output
+    from one place. Touches `page.extract_words` / `page.lines` / `page.rects`
+    once; the caller owns opening the PDF and (for the multi-page pass)
+    flushing the page cache afterwards.
+    """
+    words = page.extract_words(x_tolerance=2, y_tolerance=2)
+    wire_count = len(page.lines)
+    rect_count = len(page.rects)
+    page_width = float(page.width)
+    page_height = float(page.height)
 
     tokens = [w["text"] for w in words]
 
@@ -178,6 +211,71 @@ def extract_grounding(pdf_path: Path, page_number: int) -> PageGrounding:
         page_height=page_height,
         refdes_anchors=refdes_anchors,
     )
+
+
+def extract_page_data(
+    pdf_path: Path, page_number: int, *, with_grounding: bool = True
+) -> PageExtract:
+    """Open the PDF and extract one page's scan metadata (+ optional grounding).
+
+    The single-page sibling of `extract_all_pages`, for the streaming ingest
+    pipeline that processes pages one at a time. `with_grounding=False` skips
+    the word/refdes extraction and returns metadata only (orientation + scan
+    detection), for callers that render without a grounding prompt.
+    """
+    with pdfplumber.open(str(pdf_path)) as pdf:
+        if not (1 <= page_number <= len(pdf.pages)):
+            raise ValueError(
+                f"page {page_number} out of range (PDF has {len(pdf.pages)} pages)"
+            )
+        page = pdf.pages[page_number - 1]
+        grounding = _grounding_from_page(page, page_number) if with_grounding else None
+        return PageExtract(
+            page=page_number,
+            width=float(page.width),
+            height=float(page.height),
+            char_count=len(page.chars),
+            line_count=len(page.lines),
+            grounding=grounding,
+        )
+
+
+def extract_all_pages(pdf_path: Path) -> list[PageExtract]:
+    """Open the PDF once and extract every page's scan metadata + grounding.
+
+    Replaces the old two-pass cost (a full `_probe_pages` parse for scan
+    detection, then one `pdfplumber.open` per page in the grounding loop) with
+    a single parse per page that feeds both. The page count cap
+    (`pipeline_schematic_max_pages`) is enforced up front, before any per-page
+    extraction, so an oversized PDF fails fast.
+
+    `page.flush_cache()` is called after each page: pdfplumber materialises and
+    caches the full object model on first touch (~hundreds of MB on a dense
+    vector sheet); without the flush all N pages stay resident at once. Every
+    value is read before the flush, so output is unchanged.
+    """
+    cap = get_settings().pipeline_schematic_max_pages
+    out: list[PageExtract] = []
+    with pdfplumber.open(str(pdf_path)) as pdf:
+        n = len(pdf.pages)
+        if n > cap:
+            raise SchematicPageLimitExceeded(
+                f"schematic has {n} pages, exceeds cap of {cap}"
+            )
+        for i, page in enumerate(pdf.pages, start=1):
+            grounding = _grounding_from_page(page, i)
+            out.append(
+                PageExtract(
+                    page=i,
+                    width=float(page.width),
+                    height=float(page.height),
+                    char_count=len(page.chars),
+                    line_count=len(page.lines),
+                    grounding=grounding,
+                )
+            )
+            page.flush_cache()
+    return out
 
 
 def format_grounding_for_prompt(g: PageGrounding) -> str:

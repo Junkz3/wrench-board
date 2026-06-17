@@ -92,20 +92,40 @@ def _fake_page_graph(page: int) -> SchematicPageGraph:
     )
 
 
-@pytest.mark.asyncio
-async def test_orchestrator_writes_artefacts_and_returns_electrical_graph(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-):
-    fake_rendered = _fake_rendered_pages(tmp_path / "render", 3)
+def _mock_vision_pipeline(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, count: int
+) -> None:
+    """Drive the synchronous (pipelined) ingest path without a real PDF.
 
-    monkeypatch.setattr(
-        orchestrator, "render_pages", lambda *_, **__: fake_rendered
-    )
+    Stubs the boundaries the pipeline crosses: probe_page_count → count,
+    ensure_renderable_pdf → identity (no ghostscript on the tiny fake PDF),
+    _prepare_page → a fake RenderedPage per page, extract_page → a fake graph.
+    """
+    fake_by_number = {
+        rp.page_number: rp
+        for rp in _fake_rendered_pages(tmp_path / "render", count)
+    }
+    monkeypatch.setattr(orchestrator, "ensure_renderable_pdf", lambda p, _d: p)
+    monkeypatch.setattr(orchestrator, "probe_page_count", lambda _p: count)
+
+    def _fake_prepare(
+        pdf_path, page_number, total_pages, pages_dir, render_dpi, use_grounding
+    ):
+        return fake_by_number[page_number], None
+
+    monkeypatch.setattr(orchestrator, "_prepare_page", _fake_prepare)
 
     async def _fake_extract_page(*, rendered, **_):
         return _fake_page_graph(rendered.page_number)
 
     monkeypatch.setattr(orchestrator, "extract_page", _fake_extract_page)
+
+
+@pytest.mark.asyncio
+async def test_orchestrator_writes_artefacts_and_returns_electrical_graph(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+):
+    _mock_vision_pipeline(monkeypatch, tmp_path, 3)
 
     memory_root = tmp_path / "memory"
     fake_pdf = tmp_path / "fake.pdf"
@@ -155,13 +175,7 @@ async def test_ingest_emits_phase_step_per_page(
     The landing UI renders "page 3/12" into the schematic-ingest line. Pages
     fan out in parallel, so the event carries a running done-count + total.
     """
-    fake_rendered = _fake_rendered_pages(tmp_path / "render", 3)
-    monkeypatch.setattr(orchestrator, "render_pages", lambda *_, **__: fake_rendered)
-
-    async def _fake_extract_page(*, rendered, **_):
-        return _fake_page_graph(rendered.page_number)
-
-    monkeypatch.setattr(orchestrator, "extract_page", _fake_extract_page)
+    _mock_vision_pipeline(monkeypatch, tmp_path, 3)
 
     steps: list[dict] = []
 
@@ -198,13 +212,7 @@ async def test_ingest_runs_without_on_event(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ):
     """on_event is optional — omitting it must not crash ingestion."""
-    fake_rendered = _fake_rendered_pages(tmp_path / "render", 2)
-    monkeypatch.setattr(orchestrator, "render_pages", lambda *_, **__: fake_rendered)
-
-    async def _fake_extract_page(*, rendered, **_):
-        return _fake_page_graph(rendered.page_number)
-
-    monkeypatch.setattr(orchestrator, "extract_page", _fake_extract_page)
+    _mock_vision_pipeline(monkeypatch, tmp_path, 2)
 
     fake_pdf = tmp_path / "fake.pdf"
     fake_pdf.write_bytes(b"%PDF-1.0\n")
@@ -225,17 +233,9 @@ async def test_ingest_runs_without_on_event(
 async def test_orchestrator_handles_single_page_pdf(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ):
-    """Single-page PDFs must skip the gather() branch and still produce
-    valid artefacts. No cache warmup sleep triggered."""
-    fake_rendered = _fake_rendered_pages(tmp_path / "render", 1)
-    monkeypatch.setattr(
-        orchestrator, "render_pages", lambda *_, **__: fake_rendered
-    )
-
-    async def _fake_extract_page(*, rendered, **_):
-        return _fake_page_graph(rendered.page_number)
-
-    monkeypatch.setattr(orchestrator, "extract_page", _fake_extract_page)
+    """Single-page PDFs must skip the warmup gather and still produce valid
+    artefacts."""
+    _mock_vision_pipeline(monkeypatch, tmp_path, 1)
 
     memory_root = tmp_path / "memory"
     fake_pdf = tmp_path / "fake.pdf"
@@ -333,13 +333,7 @@ async def test_batch_mode_off_never_touches_batch_vision(
 
     monkeypatch.setattr(batch_vision, "extract_pages_batch", _boom)
 
-    fake_rendered = _fake_rendered_pages(tmp_path / "render", 2)
-    monkeypatch.setattr(orchestrator, "render_pages", lambda *_, **__: fake_rendered)
-
-    async def _fake_extract_page(*, rendered, **_):
-        return _fake_page_graph(rendered.page_number)
-
-    monkeypatch.setattr(orchestrator, "extract_page", _fake_extract_page)
+    _mock_vision_pipeline(monkeypatch, tmp_path, 2)
 
     fake_pdf = tmp_path / "fake.pdf"
     fake_pdf.write_bytes(b"%PDF-1.0\n")
@@ -353,3 +347,104 @@ async def test_batch_mode_off_never_touches_batch_vision(
         cache_warmup_seconds=0.0,
     )
     assert len(result.components) == 2
+
+
+def _fake_prepare_page_factory(events: list[tuple[int, str]], render_dir: Path):
+    """Sync `_prepare_page` stand-in: records CPU spans, returns a fake page.
+
+    Runs on a worker thread (the orchestrator calls it via asyncio.to_thread),
+    so it uses a blocking sleep to occupy CPU time deterministically.
+    """
+    import time
+
+    def _prepare(pdf_path, page_number, total_pages, output_dir, dpi, use_grounding):
+        events.append((page_number, "cpu_start"))
+        time.sleep(0.005)
+        png = render_dir / f"page-{page_number:03d}.png"
+        png.parent.mkdir(parents=True, exist_ok=True)
+        png.write_bytes(b"\x89PNG")
+        rendered = RenderedPage(
+            page_number=page_number,
+            png_path=png,
+            orientation="portrait",
+            is_scanned=False,
+            width_pt=595.0,
+            height_pt=842.0,
+        )
+        events.append((page_number, "cpu_finish"))
+        return rendered, None
+
+    return _prepare
+
+
+@pytest.mark.asyncio
+async def test_vision_pipeline_overlaps_cpu_bounds_concurrency_and_warms_page_one(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+):
+    """Per-page render/ground (CPU) overlaps the vision wait, vision concurrency
+    is capped, and page 1's vision completes before the rest start (warmup).
+
+    The orchestrator pipelines each page through prepare (render + grounding,
+    on a thread) then vision, so the CPU work hides under the OTPM-bound vision
+    wait instead of running as a barrier before it. A semaphore caps vision
+    concurrency; page 1 lands first to warm the shared-prefix cache.
+    """
+    import asyncio
+
+    total = 6
+    monkeypatch.setattr(orchestrator, "ensure_renderable_pdf", lambda p, _d: p)
+    monkeypatch.setattr(orchestrator, "probe_page_count", lambda _p: total)
+
+    events: list[tuple[int, str]] = []
+    monkeypatch.setattr(
+        orchestrator,
+        "_prepare_page",
+        _fake_prepare_page_factory(events, tmp_path / "render"),
+    )
+
+    vis_in_flight = 0
+    max_vis_in_flight = 0
+
+    async def _tracking_extract_page(*, rendered, **_):
+        nonlocal vis_in_flight, max_vis_in_flight
+        events.append((rendered.page_number, "vis_start"))
+        vis_in_flight += 1
+        max_vis_in_flight = max(max_vis_in_flight, vis_in_flight)
+        await asyncio.sleep(0.02)  # vision is the long pole; CPU overlaps it
+        vis_in_flight -= 1
+        events.append((rendered.page_number, "vis_finish"))
+        return _fake_page_graph(rendered.page_number)
+
+    monkeypatch.setattr(orchestrator, "extract_page", _tracking_extract_page)
+
+    fake_pdf = tmp_path / "fake.pdf"
+    fake_pdf.write_bytes(b"%PDF-1.0\n")
+
+    await orchestrator.ingest_schematic(
+        device_slug="pipeline-device",
+        pdf_path=fake_pdf,
+        client=object(),
+        memory_root=tmp_path / "memory",
+        use_grounding=False,
+        cache_warmup_seconds=0.0,
+        vision_concurrency=3,
+    )
+
+    def _idx(target: tuple[int, str]) -> int:
+        return events.index(target)
+
+    # Concurrency cap respected and actually reached.
+    assert max_vis_in_flight == 3, (max_vis_in_flight, events)
+
+    # Warmup: page 1's vision finishes before any other page's vision starts.
+    page1_vis_finish = _idx((1, "vis_finish"))
+    other_vis_starts = [
+        i for i, (p, kind) in enumerate(events) if kind == "vis_start" and p != 1
+    ]
+    assert other_vis_starts, "expected vision on pages beyond page 1"
+    assert all(i > page1_vis_finish for i in other_vis_starts), events
+
+    # Overlap: a later page's CPU prep runs while page 1's vision is in flight
+    # (its CPU starts before page 1's vision finishes) — the whole point of the
+    # pipeline. A pure barrier would do all CPU before any vision.
+    assert _idx((2, "cpu_start")) < page1_vis_finish, events
