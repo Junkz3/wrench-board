@@ -48,9 +48,9 @@ def _load_graph(
     memory_root: Path,
     session: SessionState | None = None,
 ) -> tuple[dict | None, str | None]:
-    # graph = shared graph: the tenant reads ITS per-owner graph if it uploaded
-    # one (owner→hash→.cache_schematic/{hash}/), otherwise the slug's CANONICAL
-    # graph (root owner=None). owner None (self-host) → root, unchanged.
+    # T9/T6 — graphe = moat PARTAGÉ : le tenant lit SON graphe per-owner s'il a
+    # uploadé (owner→hash→.cache_schematic/{hash}/), sinon le graphe CANONIQUE du
+    # slug (racine owner=None). owner None (self-host) → racine, inchangé.
     pack_dir = memory_root / device_slug
     owner_ref = current_owner_ref()
     base = live_graph.resolve_graph_dir(pack_dir, owner_ref)
@@ -375,8 +375,8 @@ def _compute_blast_radius_all(graph: dict) -> list[dict[str, Any]]:
     adj: dict[str, list[str]] = {}
     all_nodes: set[str] = set()
 
-    # Internal IDs: N-NET_<label> for rails, N-<refdes> for components.
-    # Convention aligned on KnowledgeNode.id (^N-[A-Z0-9_-]{1,48}$).
+    # IDs internes : N-NET_<label> pour les rails, N-<refdes> pour les composants.
+    # Convention T8 alignée sur KnowledgeNode.id (^N-[A-Z0-9_-]{1,48}$).
     for label, rail in rails.items():
         rid = f"N-NET_{label.upper()}"
         all_nodes.add(rid)
@@ -409,7 +409,7 @@ def _compute_blast_radius_all(graph: dict) -> list[dict[str, Any]]:
         cas = blast(nid)
         rails_lost = sum(1 for x in cas if x.startswith("N-NET_"))
         comps_lost = sum(1 for x in cas if not x.startswith("N-NET_"))
-        # Determine the kind and display label from the prefix.
+        # Détermine le kind et le label d'affichage depuis le préfixe T8.
         if nid.startswith("N-NET_"):
             kind = "rail"
             label = nid[len("N-NET_"):]
@@ -740,8 +740,8 @@ def _simulate_query(
         }
 
     # Re-validate from disk so we get the real Pydantic shapes the engine expects.
-    # Re-resolve via the graph (per-owner OR shared canonical); consistent
-    # with _load_graph above which already resolved the same base.
+    # T9/T6 — re-resolve via le graphe (per-owner OU canonique partagé) ; cohérent
+    # avec _load_graph ci-dessus qui a déjà résolu la même base.
     pack = live_graph.resolve_graph_dir(memory_root / device_slug, current_owner_ref())
     if pack is None:
         return {"found": False, "reason": "no_schematic_graph"}

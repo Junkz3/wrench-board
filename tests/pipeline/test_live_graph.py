@@ -1,4 +1,4 @@
-"""résolution du graphe vif per-owner. Isolé : pas de pipeline, pas de LLM."""
+"""T9 — résolution du graphe vif per-owner. Isolé : pas de pipeline, pas de LLM."""
 
 import json
 from pathlib import Path
@@ -53,8 +53,8 @@ def test_anti_leak_two_tenants_different_pdfs(tmp_path):
     assert json.loads(gb.read_text())["nodes"] == ["B"]
 
 
-def test_shared_cache_same_pdf(tmp_path):
-    """Deux tenants, MÊME PDF (même hash) → littéralement les mêmes fichiers (cache partagé)."""
+def test_moat_same_pdf_same_cache(tmp_path):
+    """Deux tenants, MÊME PDF (même hash) → littéralement les mêmes fichiers."""
     pack = tmp_path / "iphone-x"
     pack.mkdir()
     _seed_cache(pack, "hashSAME", "S")

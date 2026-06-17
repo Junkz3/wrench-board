@@ -3,7 +3,7 @@
 // and injects it into #profileSection. Subsequent activations skip the fetch.
 // Consumes GET /profile and renders identity / tools / skills / preferences.
 // Tool toggles → PUT /profile/tools ; preference changes → PUT /profile/preferences
-// ; skill click opens the evidence drawer. Identity modal handler is wired separately.
+// ; skill click opens the evidence drawer. Identity modal handler lands in Task 12.
 
 import { escapeHtml as escHtml } from "./shared/dom.js";
 
@@ -12,7 +12,11 @@ let _partialLoaded = false;
 
 const STATUS_KEYS = ["mastered", "practiced", "learning", "unlearned"];
 const VERBOSITIES = ["auto", "concise", "normal", "teaching"];
-const LANGUAGES = ["fr", "en"];
+const LANGUAGES = ["en", "fr", "zh", "hi"];
+// Native display label per locale (the stored value stays the ISO code).
+const LANGUAGE_LABELS = { en: "English", fr: "Français", zh: "中文", hi: "हिन्दी" };
+// BCP-47 tag per locale for Intl date/number formatting.
+const DATE_LOCALES = { en: "en-US", fr: "fr-FR", zh: "zh-CN", hi: "hi-IN" };
 
 async function ensurePartial() {
   if (_partialLoaded) return;
@@ -46,7 +50,7 @@ function fmtUpdated(iso) {
   if (!iso) return "…";
   const d = new Date(iso);
   if (isNaN(d)) return "…";
-  const locale = currentLocale() === "fr" ? "fr-FR" : "en-US";
+  const locale = DATE_LOCALES[currentLocale()] || "en-US";
   const date = d.toLocaleDateString(locale, { day: "numeric", month: "short" });
   return window.t("profile.head.updated", { date });
 }
@@ -206,7 +210,7 @@ function renderPrefs() {
   host.innerHTML = "";
   const prefs = _state.profile.preferences;
 
-  const makeGroup = (label, key, options) => {
+  const makeGroup = (label, key, options, labels) => {
     const g = document.createElement("div");
     g.className = "profile-prefs-group";
     g.innerHTML = `<label>${label}</label><div class="opts"></div>`;
@@ -214,7 +218,7 @@ function renderPrefs() {
     for (const v of options) {
       const btn = document.createElement("button");
       btn.className = "profile-prefs-opt" + (prefs[key] === v ? " on" : "");
-      btn.textContent = v;
+      btn.textContent = labels ? (labels[v] || v) : v;
       btn.addEventListener("click", () => changePref(key, v));
       opts.appendChild(btn);
     }
@@ -222,7 +226,7 @@ function renderPrefs() {
   };
 
   host.appendChild(makeGroup(window.t("profile.prefs.verbosity"), "verbosity", VERBOSITIES));
-  host.appendChild(makeGroup(window.t("profile.prefs.language"), "language", LANGUAGES));
+  host.appendChild(makeGroup(window.t("profile.prefs.language"), "language", LANGUAGES, LANGUAGE_LABELS));
 }
 
 async function changePref(key, value) {

@@ -37,7 +37,7 @@ def clean_custom_tools(values: list[str]) -> list[str]:
 
 LevelValue = Literal["beginner", "intermediate", "confirmed", "expert"]
 VerbosityValue = Literal["auto", "concise", "normal", "teaching"]
-LanguageValue = Literal["fr", "en"]
+LanguageValue = Literal["fr", "en", "zh", "hi"]
 
 
 class Identity(BaseModel):

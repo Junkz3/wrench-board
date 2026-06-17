@@ -368,9 +368,14 @@ async function onSubmit(ev) {
     if (_selectedDeviceSlug) body.append("device_slug", _selectedDeviceSlug);
     const kind = document.getElementById("landingDeviceKind")?.value || "";
     if (kind) body.append("device_kind", kind);
+    const boardNumber = (document.getElementById("landingBoardNumber")?.value || "").trim();
+    if (boardNumber) body.append("board_number", boardNumber);
     // Signal the out-of-band schematic so the pipeline waits for its electrical
     // graph before device-kind classification (the upload fires below, post-create).
     if (_schematicFile) body.append("schematic_pending", "true");
+    // Remember whether a schematic rode this launch — the notify-when-ready modal
+    // (Lot 4) only offers itself for the long vision build a schematic triggers.
+    const hadSchematic = !!_schematicFile;
     const res = await fetch("/pipeline/repairs", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -379,7 +384,7 @@ async function onSubmit(ev) {
     if (!res.ok) throw await httpError(res);
     const repair = await res.json();
 
-    // confirm-on-uncertainty: a broad label matched several sibling boards.
+    // T9a confirm-on-uncertainty: a broad label matched several sibling boards.
     // No repair was created and no quota spent — show the candidate menu in the
     // suggest dropdown; picking one pins its device_slug, then the tech re-runs.
     if (repair && repair.needs_disambiguation) {
@@ -439,17 +444,49 @@ async function onSubmit(ev) {
       return;
     }
 
-    // Branch 1 — full pipeline on a fresh device (~5-10 min).
-    setStatus(t("landing.status.build_new"), STATUS_NEUTRAL);
+    // Branch 1 — full pipeline on a fresh device. Preparing a brand-new device
+    // can take a while (vision build, possibly queued), so be upfront about it.
+    setStatus(t("landing.status.build_delay"), STATUS_NEUTRAL);
     showTimeline();
     setTimelineTitle(t("landing.timeline.title_build", { device: repair.device_label }));
     subscribeToProgress(slug, rid);
+    // Lot 4: a schematic was attached → this is the long vision build. Offer an
+    // email-when-ready modal over the timeline. Cloud-only (gated on the proxy's
+    // injected __wbPlanHints) so self-host never shows a cloud feature.
+    if (hadSchematic && window.__wbPlanHints) maybeOfferNotifyWhenReady(rid);
   } catch (err) {
     console.error("[landing] submit failed", err);
     setStatus(t("landing.status.error_create", { error: err.message || err }), STATUS_ERROR);
     setLandingMascot("error");
     setSubmitting(false);
   }
+}
+
+// Lot 4 — post-dispatch "email me when ready" modal. Shown over the build
+// timeline only when a schematic rode the launch (the long vision build) and the
+// cloud front-door is in front (gated by the caller on window.__wbPlanHints).
+// "Préviens-moi" POSTs the opt-in to the cloud, which emails the tech at
+// pipeline_finished. Self-host never reaches here (no __wbPlanHints).
+function maybeOfferNotifyWhenReady(repairId) {
+  const bd = document.getElementById("landingNotifyBackdrop");
+  if (!bd) return;
+  const tt = window.t || ((k) => k);
+  const close = () => { bd.classList.remove("open"); bd.setAttribute("aria-hidden", "true"); };
+  // .onclick (not addEventListener) so re-opening rebinds the current repairId
+  // cleanly instead of stacking stale handlers.
+  document.getElementById("landingNotifyLater").onclick = close;
+  document.getElementById("landingNotifyClose").onclick = close;
+  document.getElementById("landingNotifyConfirm").onclick = async () => {
+    close();
+    try {
+      const res = await fetch(`/pipeline/repairs/${encodeURIComponent(repairId)}/notify`, { method: "POST" });
+      if (res.ok) setStatus(tt("landing.status.notify_armed"), STATUS_NEUTRAL);
+    } catch (err) {
+      console.warn("[landing] notify opt-in failed", err);
+    }
+  };
+  bd.classList.add("open");
+  bd.setAttribute("aria-hidden", "false");
 }
 
 function subscribeToProgress(slug, repairId) {
@@ -810,7 +847,7 @@ function _matchDevices(query) {
       const label = (d.label || "").toLowerCase();
       const sub = (d.subtitle || "").toLowerCase();
       const slug = (d.slug || "").toLowerCase();
-      // match carnet aliases too (board# / Apple model / EMC / codename /
+      // T9a: match carnet aliases too (board# / Apple model / EMC / codename /
       // marketing) so "820-2533" or "A1286" finds the MacBook Pro 15 pack.
       const aliases = (d.aliases || []).join(" ").toLowerCase();
       return label.includes(q) || sub.includes(q) || slug.includes(q) || aliases.includes(q);
@@ -891,7 +928,7 @@ function _renderSuggest(query) {
   _suggestActiveIdx = -1;
 }
 
-// render the disambiguation candidates into the suggest dropdown using the
+// T9a: render the disambiguation candidates into the suggest dropdown using the
 // SAME .landing-suggest-item markup, so the existing mousedown handler pins the
 // chosen device_slug (via _selectSuggest) with zero extra wiring.
 function _renderDisambiguation(candidates) {

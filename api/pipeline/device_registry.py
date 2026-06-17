@@ -1,4 +1,4 @@
-"""Device alias registry — the shared "carnet".
+"""Device alias registry — the shared "carnet" (T9a).
 
 Maps every way of naming a board (board# / Apple model / EMC / codename /
 marketing) onto ONE canonical identity, plus ``family`` links between sibling
@@ -7,7 +7,7 @@ boards (cousins). Storage is pluggable behind :class:`DeviceRegistryStore`:
 * :class:`JsonDeviceRegistryStore` — self-host, a local ``memory/_devices/
   registry.json``; each deployment grows its own carnet.
 * :class:`CloudDeviceRegistryStore` — managed mode, reads/writes the cloud's
-  Postgres via ``/internal/device-registry/*`` (the shared graph stays the operator's).
+  Postgres via ``/internal/device-registry/*`` (the moat stays the operator's).
 
 Both honor the same contract; identities use the cloud's camelCase wire shape
 ``{id, canonicalKey, family, facets, provenance, status, mergedInto}`` so the two
@@ -493,7 +493,7 @@ async def register_from_registry(
 
 def _pack_data_flags(pack_dir: Path) -> tuple[bool, bool]:
     """(has_data, has_graph) for a pack on disk. A built electrical graph is the
-    most useful fallback; a registry (baseline or legacy root) still carries
+    most useful fallback; a registry (T8 baseline or legacy root) still carries
     knowledge worth borrowing."""
     if (pack_dir / "electrical_graph.json").is_file():
         return True, True

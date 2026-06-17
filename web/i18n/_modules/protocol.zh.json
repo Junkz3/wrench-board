@@ -1,0 +1,63 @@
+{
+  "aria": {
+    "step_pin": "步骤定位",
+    "panel": "诊断检测流程",
+    "toggle": "折叠 / 展开",
+    "abandon": "放弃检测流程"
+  },
+  "title": {
+    "default": "(未命名)"
+  },
+  "history": {
+    "summary": "历史记录"
+  },
+  "toggle": {
+    "collapse": "折叠",
+    "expand": "展开"
+  },
+  "step": {
+    "value_placeholder": "数值",
+    "nominal_placeholder": "标称 {value}",
+    "observation_placeholder": "你观察到的现象…",
+    "yes": "是",
+    "no": "否",
+    "done": "完成",
+    "validate": "确认",
+    "skip": "跳过",
+    "skip_prompt": "为什么跳过此步骤？",
+    "result": {
+      "yes": "是",
+      "no": "否",
+      "done": "完成",
+      "empty": "不适用"
+    }
+  },
+  "abandon": {
+    "confirm": "放弃正在进行的检测流程？",
+    "modal": {
+      "badge": "放弃检测流程",
+      "title": "放弃正在进行的检测流程？",
+      "body": "智能体将收到通知，诊断序列将被标记为已放弃。已记录的步骤结果会保留在维修记录中。",
+      "reason_label": "原因（可选，会显示给智能体）",
+      "reason_placeholder": "为什么放弃？（假设错误、走入死路、客户离开…）",
+      "cancel": "取消",
+      "confirm": "确认放弃"
+    }
+  },
+  "system_event": {
+    "abandoned": "检测流程已放弃",
+    "completed": "检测流程已完成"
+  },
+  "confirm": {
+    "badge": "建议的检测流程",
+    "step_count_placeholder": "步骤数量",
+    "step_count": "{n} 个步骤",
+    "rationale_label": "依据",
+    "steps_label": "步骤",
+    "reject_reason_label": "拒绝原因（可选）",
+    "reject_reason_placeholder": "为什么拒绝此检测流程？智能体会将其纳入考虑。",
+    "hint": "智能体正在等待你的决定，然后才会推送检测流程。",
+    "reject": "拒绝",
+    "accept": "接受"
+  }
+}

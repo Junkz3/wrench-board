@@ -8,19 +8,19 @@ between them:
    format with `A!schema` / `S!data` rows. Implemented in
    `_fz_zlib.py`. No key required.
 
-2. **FZ-xor**. The same FZ-zlib container wrapped in an encoded outer
-   layer keyed by a 44 × uint32 expanded key. Decode with
-   `_fz_engine.cipher.decrypt_fz_xor`, then hand the recovered bytes
-   back through `parse_fz_zlib`.
+2. **FZ-xor**. The same FZ-zlib container wrapped in a 16-byte
+   sliding-window RC6-shaped cipher keyed by a 44 × uint32 expanded
+   key. Decrypt with `_fz_engine.cipher.decrypt_fz_xor`, then hand the
+   plaintext back through `parse_fz_zlib`.
 
 Dispatch: peek bytes 4-5 — a zlib magic (`78 9c` / `78 da` / `78 01`)
-routes to FZ-zlib directly; otherwise the bytes go through the decode
-step first and the result must surface a zlib magic at offset 4 of
-the recovered bytes (or the file is rejected as malformed).
+routes to FZ-zlib directly; otherwise the bytes go through the XOR
+decrypt first and the result must surface a zlib magic at offset 4 of
+the recovered plaintext (or the file is rejected as malformed).
 
-The key is loaded from `WRENCH_BOARD_FZ_KEY` (see `_fz_engine.cipher`).
-FZ-zlib parsing works without the key; FZ-xor files raise a clear error
-when the key is unset.
+The cipher key is loaded from `WRENCH_BOARD_FZ_KEY` (see
+`_fz_engine.cipher`). FZ-zlib parsing works without the key; FZ-xor
+files raise a clear error when the key is unset.
 """
 
 from __future__ import annotations

@@ -1,0 +1,36 @@
+{
+  "section": {
+    "home": "维修记录",
+    "pcb": "Boardview",
+    "schematic": "原理图",
+    "graphe": "记忆",
+    "stock": "库存与供体板",
+    "profile": "个人资料"
+  },
+  "mode": {
+    "journal_tag": "日志",
+    "journal_repairs": "维修",
+    "journal_session": "会话",
+    "tool_tag": "工具",
+    "tool_boardview": "Boardview",
+    "tool_schematic": "电气图",
+    "tool_stock": "库存与供体板",
+    "wait_tag": "等待中",
+    "wait_no_memory": "未加载记忆",
+    "wait_no_repair": "无进行中的维修",
+    "wait_unbuilt": "记忆尚未构建",
+    "memory_tag": "记忆",
+    "memory_graph": "知识图谱",
+    "build_tag": "构建中",
+    "build_in_progress": "记忆构建进行中",
+    "profile_tag": "个人资料",
+    "profile_sub": "技师"
+  },
+  "metabar": {
+    "no_repair": "无进行中的维修",
+    "no_memory_for_device": "此设备暂无记忆。创建一次维修以构建它。",
+    "memory_loaded_approved": "记忆已加载 · 审核已通过",
+    "memory_building_missing": "记忆构建中，缺少 {missing}",
+    "open_repair_to_view_graph": "从日志中打开一次维修以查看其知识图谱。"
+  }
+}

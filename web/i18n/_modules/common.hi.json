@@ -1,0 +1,64 @@
+{
+  "app": {
+    "title": "Wrench Board: नॉलेज ग्राफ"
+  },
+  "topbar": {
+    "brand": "wrench-board",
+    "repair_log": "रिपेयर लॉग",
+    "settings": "सेटिंग्स",
+    "agent": "एजेंट",
+    "agent_title": "डायग्नोस्टिक एजेंट (⌘J)"
+  },
+  "session": {
+    "tag": "सेशन",
+    "pill_aria": "सक्रिय सेशन, डैशबोर्ड खोलने के लिए क्लिक करें",
+    "pill_title": "सेशन डैशबोर्ड पर वापस जाएँ",
+    "leave": "सेशन छोड़ें"
+  },
+  "rail": {
+    "home": "रिपेयर",
+    "diagnostic": "डायग्नोस्टिक",
+    "pcb": "PCB",
+    "schematic": "स्कीमैटिक",
+    "memory": "मेमोरी",
+    "stock": "स्टॉक",
+    "profile": "प्रोफ़ाइल"
+  },
+  "metabar": {
+    "view_mode": "व्यू मोड",
+    "view_visual": "विज़ुअल",
+    "view_raw": "रॉ",
+    "filter_symptoms": "लक्षण",
+    "filter_components": "कॉम्पोनेन्ट",
+    "filter_nets": "नेट",
+    "filter_actions": "क्रियाएँ",
+    "search_placeholder": "नोड खोजें…"
+  },
+  "tweaks": {
+    "title": "ट्वीक्स",
+    "close": "बंद करें",
+    "relations_visible": "दृश्य संबंध",
+    "rel_causes": "कारण बनता है",
+    "rel_powers": "पावर देता है",
+    "rel_connected": "जुड़ा हुआ",
+    "rel_resolves": "हल करता है",
+    "edge_labels": "एज लेबल",
+    "label_hover": "होवर पर",
+    "label_all": "सभी",
+    "label_none": "कोई नहीं",
+    "min_confidence": "न्यूनतम कॉन्फिडेंस",
+    "particle_speed": "पार्टिकल गति",
+    "boardview_colors": "पिन रंग",
+    "color_signal": "सिग्नल",
+    "color_power": "पावर",
+    "color_ground": "ग्राउंड",
+    "color_clock": "क्लॉक",
+    "color_reset": "रीसेट",
+    "color_nc": "NC",
+    "color_testpad": "टेस्ट पैड",
+    "color_via": "Via",
+    "color_board_outline": "बोर्ड आउटलाइन",
+    "color_board_fill": "बोर्ड फ़िल",
+    "reset_colors": "रंग रीसेट करें"
+  }
+}

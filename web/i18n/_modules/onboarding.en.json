@@ -100,7 +100,9 @@
     "level_label": "Level",
     "language": "Language",
     "lang_en": "English",
-    "lang_fr": "Français"
+    "lang_fr": "Français",
+    "lang_zh": "中文",
+    "lang_hi": "हिन्दी"
   },
   "modal": {
     "title": "Your profile",

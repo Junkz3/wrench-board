@@ -550,7 +550,7 @@ def _create_index_entry(
     )
     _write_index(root, device_slug, repair_id, index)
     # One-shot migration of the legacy per-repair `ma_sessions` dict into
-    # the first conversation's per-tier files. Previously, MA session ids were
+    # the first conversation's per-tier files. Pre-T1, MA session ids were
     # stored under `memory/{slug}/repairs/{id}.json::ma_sessions[{tier}]`;
     # after the refactor they live at `conversations/{conv}/ma_session_{tier}.json`.
     # Without this hop, the first conv created on a legacy repair loses the

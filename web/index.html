@@ -1119,6 +1119,11 @@
 
     </section>
 
+    <!-- Board-delta card — revision-specific overlay (ICs, rails, pitfalls, cousins).
+         Hidden by default; renderBoardDeltaCard() shows it only when a delta exists. -->
+    <article class="rd-delta-card hidden" id="rdCardBoardDelta" aria-label="Board revision specs">
+    </article>
+
     <!-- Compatibility shim — the dashboard still derives an Electrical card.
          The "Graphe causal" tile above absorbs both the knowledge graph
          AND the electrical graph status; this hidden block keeps the JS
@@ -1319,6 +1324,13 @@
           <option value="other" data-i18n="repair.device_kind.options.other">Other board</option>
         </select>
       </div>
+      <div class="modal-field">
+        <label class="modal-label" for="landingBoardNumber" data-i18n="landing.board_number.label">Board number (optional)</label>
+        <input type="text" id="landingBoardNumber" class="modal-input" maxlength="64"
+               data-i18n-attr="placeholder:landing.board_number.placeholder,aria-label:landing.board_number.aria"
+               placeholder="820-02016" spellcheck="false" autocomplete="off">
+        <span class="modal-hint" data-i18n="landing.board_number.hint">Engraved on the PCB. Unlocks the known specifics of your exact revision.</span>
+      </div>
       <div class="modal-field landing-schematic" id="landingSchematicField">
         <label class="modal-label" data-i18n="repair.schematic.label">Schematic (optional, for a sharper pack)</label>
         <button type="button" class="modal-input landing-schematic-pick" id="landingSchematicPick" data-i18n="landing.schematic.cta">Attach a schematic PDF (optional)</button>
@@ -1328,6 +1340,32 @@
     </div>
     <footer class="modal-actions">
       <button type="button" class="btn primary" id="landingKnowledgeDone" data-i18n="landing.knowledge.done">Done</button>
+    </footer>
+  </div>
+</div>
+
+<!-- ============ MODAL — NOTIFY WHEN READY (long build, schematic attached) ============ -->
+<!-- Shown over the build timeline after launching a diagnostic on an uncovered
+     device WITH a schematic (the long vision build). Offers an email when the
+     device is ready. Wired by web/js/features/global/landing/index.js. -->
+<div class="modal-backdrop" id="landingNotifyBackdrop" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="landingNotifyTitle" aria-describedby="landingNotifyIntro">
+    <header class="modal-head">
+      <div class="type-row">
+        <span class="type-badge action" data-i18n="landing.notify.badge">Preparation in progress</span>
+      </div>
+      <h2 id="landingNotifyTitle" data-i18n="landing.notify.title">This device is being prepared</h2>
+      <button class="close-x" id="landingNotifyClose" type="button"
+              data-i18n-attr="aria-label:landing.notify.close">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </header>
+    <div class="modal-body">
+      <p class="modal-hint" id="landingNotifyIntro" data-i18n="landing.notify.intro">Building the knowledge sheet for a brand-new device can take a while. We can email you when the diagnostic is ready, so you don't have to wait here.</p>
+    </div>
+    <footer class="modal-actions">
+      <button type="button" class="btn" id="landingNotifyLater" data-i18n="landing.notify.later">Later</button>
+      <button type="button" class="btn primary" id="landingNotifyConfirm" data-i18n="landing.notify.confirm">Email me when ready</button>
     </footer>
   </div>
 </div>

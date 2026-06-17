@@ -1,5 +1,5 @@
 """POST /pipeline/resolve-device — the cloud resolves a free label to a canonical
-device identity (or gets the ambiguous candidate menu) BEFORE gating (Phase B)."""
+device identity (or gets the ambiguous candidate menu) BEFORE gating (T9a Phase B)."""
 import asyncio
 
 from api.pipeline.device_registry import JsonDeviceRegistryStore

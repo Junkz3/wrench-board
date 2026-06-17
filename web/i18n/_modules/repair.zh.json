@@ -1,0 +1,21 @@
+{
+  "demo_symptom": "无法开机：完全没有电",
+  "device_kind": {
+    "label": "电路板类型 (可选)",
+    "none": "(未声明)",
+    "options": {
+      "gpu_card": "显卡 (GPU)",
+      "laptop_logic_board": "笔记本主板",
+      "phone_logic_board": "智能手机主板",
+      "desktop_motherboard": "台式机主板",
+      "sbc_board": "单板计算机 (SBC)",
+      "power_charging_board": "电源 / 充电板",
+      "other": "其他"
+    }
+  },
+  "schematic": {
+    "label": "原理图 (可选，用于更精准的知识包)",
+    "cta": "附加原理图 PDF",
+    "already_ingested": "原理图已导入 ✓ (无需再附加)"
+  }
+}

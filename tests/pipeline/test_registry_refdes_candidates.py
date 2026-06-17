@@ -19,14 +19,14 @@ from api.pipeline.schemas import (
 
 def test_legacy_registry_component_has_null_candidates() -> None:
     """A component constructed without refdes_candidates is unaffected."""
-    # kind en majuscules (IC, non plus ic)
+    # T8 : kind en majuscules (IC, non plus ic)
     comp = RegistryComponent(canonical_name="U14", kind="IC")
     assert comp.refdes_candidates is None
 
 
 def test_legacy_registry_json_roundtrip_with_no_candidates() -> None:
     """Existing on-disk registry shape (no `refdes_candidates` key) loads."""
-    # canonical_name suit [A-Z0-9_./-]{2,64} et kind est en majuscules.
+    # T8 : canonical_name suit [A-Z0-9_./-]{2,64} et kind est en majuscules.
     # "LPC controller" → "LPC-CTRL" ; "ic" → "IC".
     payload = {
         "schema_version": "1.0",
@@ -49,7 +49,7 @@ def test_legacy_registry_json_roundtrip_with_no_candidates() -> None:
 
 
 def test_enriched_registry_accepts_refdes_candidates() -> None:
-    # canonical_name suit [A-Z0-9_./-]{2,64} et kind est en majuscules.
+    # T8 : canonical_name suit [A-Z0-9_./-]{2,64} et kind est en majuscules.
     payload = {
         "schema_version": "1.0",
         "device_label": "demo",

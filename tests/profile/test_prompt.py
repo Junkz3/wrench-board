@@ -61,6 +61,22 @@ def test_french_pref_declares_french_reply_language():
     assert "Reply language: English" not in block
 
 
+def test_chinese_pref_declares_chinese_reply_language():
+    p = TechnicianProfile.default()
+    p.preferences.language = "zh"
+    block = render_technician_block(p)
+    assert "Reply language: Chinese (Simplified)" in block
+    assert "Reply language: English" not in block
+
+
+def test_hindi_pref_declares_hindi_reply_language():
+    p = TechnicianProfile.default()
+    p.preferences.language = "hi"
+    block = render_technician_block(p)
+    assert "Reply language: Hindi" in block
+    assert "Reply language: English" not in block
+
+
 def test_system_prompt_includes_technician_block():
     from api.agent.manifest import render_system_prompt
     from api.session.state import SessionState

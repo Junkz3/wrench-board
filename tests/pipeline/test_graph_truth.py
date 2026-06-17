@@ -87,7 +87,7 @@ def _mini_graph() -> ElectricalGraph:
 
 
 # ======================================================================
-# GraphTruth read-only query index
+# Task 1 — GraphTruth read-only query index
 # ======================================================================
 
 
@@ -165,7 +165,7 @@ def test_search_strips_trailing_star_and_dedups():
 
 
 # ======================================================================
-# Mentions / extract_mentions / build_ground_truth_report
+# Task 2 — Mentions / extract_mentions / build_ground_truth_report
 # ======================================================================
 
 
@@ -303,7 +303,7 @@ def test_build_ground_truth_report_present_and_absent():
 
 
 # ======================================================================
-# QUERY_GRAPH_TOOL + handle_query_graph
+# Task 3 — QUERY_GRAPH_TOOL + handle_query_graph
 # ======================================================================
 
 
@@ -373,7 +373,7 @@ def test_handle_query_graph_unknown_op_never_raises():
 
 
 # ======================================================================
-# enrich_registry_from_graph
+# Task 5 — enrich_registry_from_graph
 # ======================================================================
 
 

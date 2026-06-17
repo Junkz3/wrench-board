@@ -159,11 +159,11 @@ async def render_board(
 ) -> dict:
     """Return the Three.js render payload for the active boardview of a slug.
 
-    Tenant-scoped: the cloud injects `X-Owner-Ref` (= tenant_id) on proxied
-    traffic. Managed → STRICTLY the boardview pinned by THIS tenant; a tenant
-    with no active boardview gets a 404 (never another tenant's board).
-    Self-host (header absent) → the legacy global chain (`active_sources.json` →
-    `board_assets/{slug}.<ext>` → `memory/{slug}/uploads/*-boardview-*`), unchanged.
+    Tenant-scopé (T9) : le cloud injecte `X-Owner-Ref` (= tenant_id) sur le trafic
+    proxifié. Managé → STRICTEMENT le boardview épinglé par CE tenant ; un tenant
+    sans boardview actif obtient 404 (jamais le board d'un autre — c'était la fuite).
+    Self-host (en-tête absent) → chaîne globale historique (`active_sources.json` →
+    `board_assets/{slug}.<ext>` → `memory/{slug}/uploads/*-boardview-*`), inchangé.
     Returns 404 when no boardview is on disk; 422 / 415 when the file fails to parse.
     """
     # Local imports — avoids dragging the pipeline package into the board

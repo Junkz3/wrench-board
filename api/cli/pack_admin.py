@@ -1,4 +1,4 @@
-"""CLI opérateur wrench-board — gestion du pack partagé (Option C).
+"""CLI opérateur wrench-board — gestion du pack partagé T8 (Option C).
 
 Exécution engine-side via SSH (pas d'exposition réseau) :
 
@@ -212,7 +212,7 @@ def _cmd_promote(_args: argparse.Namespace) -> int:
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="pack_admin",
-        description="CLI opérateur wrench-board — gestion du pack partagé (Option C).",
+        description="CLI opérateur wrench-board — gestion du pack partagé T8 (Option C).",
     )
     sub = parser.add_subparsers(dest="command", required=True)
 

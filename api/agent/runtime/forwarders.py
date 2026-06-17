@@ -700,7 +700,7 @@ async def _forward_session_to_ws(
                             model=model_label,
                             memory_root=memory_root,
                         )
-                    # Report this LLM call's raw token usage to the cloud
+                    # T13 — report this LLM call's raw token usage to the cloud
                     # (the tenant-private billing unit). Best-effort + no-op when
                     # unconfigured (self-host never phones home). The catch-up
                     # replay path already `continue`d above on `_already_seen`, so
@@ -861,9 +861,9 @@ async def _forward_session_to_ws(
                             )
 
                         try:
-                            # Propagate the session's owner_ref (curator
-                            # path) → added_by_tenant in the provenance of the
-                            # promoted facts.
+                            # T8 : propage l'owner_ref de la session (curator
+                            # path) → added_by_tenant dans la provenance des
+                            # facts promus. Ferme le résidu de fuite T6.
                             # (current_owner_ref is imported at module top.)
                             expand_result = await expand_pack(
                                 device_slug=device_slug,

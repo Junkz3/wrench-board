@@ -250,11 +250,11 @@ def test_invalidate_pack_cache_drops_component_entries(tmp_path: Path):
     assert (slug, "U2") not in session.component_cache
 
 
-# ---- Option C : _load_pack lit baseline+promoted ; owner_ref propagé -------
+# ---- T8 Option C : _load_pack lit baseline+promoted ; owner_ref propagé -------
 
 
 def test_load_pack_reads_migrated_baseline(tmp_path: Path):
-    """Après migration, _load_pack lit baseline/ (+ promoted/) et reconstruit
+    """Après migration T8, _load_pack lit baseline/ (+ promoted/) et reconstruit
     la forme {registry:{components,signals}, dictionary:{entries}, rules:{rules}}."""
     from api.agent.tools import mb_get_component
 

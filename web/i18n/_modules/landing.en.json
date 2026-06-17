@@ -16,6 +16,14 @@
     "symptom_aria": "What is the symptom",
     "submit": "Start diagnostic"
   },
+  "notify": {
+    "badge": "Preparation in progress",
+    "title": "This device is being prepared",
+    "intro": "Building the knowledge sheet for a brand-new device can take a while. We can email you when the diagnostic is ready, so you don't have to wait here.",
+    "close": "Close",
+    "later": "Later",
+    "confirm": "Email me when ready"
+  },
   "timeline": {
     "title_default": "Building the knowledge sheet…",
     "title_build": "Building the sheet · {device}",
@@ -53,6 +61,8 @@
     "device_known": "I already know {device}. Opening the diagnostic…",
     "expand": "I know {device}. Adding your specific symptom (~3 min).",
     "build_new": "New to me: building the sheet in the background. Feel free to watch.",
+    "build_delay": "New device: preparing its knowledge sheet. This can take a while. You can close this page and come back, it keeps building.",
+    "notify_armed": "Done. We'll email you as soon as the device is ready.",
     "ready": "All set. Opening the diagnostic…",
     "ws_lost": "Pipeline connection lost. Reload the page if nothing moves.",
     "error_create": "Creation failed: {error}",
@@ -78,6 +88,12 @@
     "close": "Close",
     "intro": "More context builds a sharper pack. Everything here is optional.",
     "done": "Done"
+  },
+  "board_number": {
+    "label": "Board number (optional)",
+    "placeholder": "820-02016",
+    "aria": "Board number",
+    "hint": "Engraved on the PCB. Unlocks the known specifics of your exact revision."
   },
   "schematic": {
     "cta": "Attach a schematic PDF (optional)",

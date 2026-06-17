@@ -1,12 +1,12 @@
-"""I/O for the pack topology (baseline + promoted + _staged + journal + audit).
+"""T8 — I/O de la topologie pack T8 (baseline + promoted + _staged + journal + audit).
 
-No business logic here: no sanitization, no LLM, no Provenance generation.
-This module receives write-ready Pydantic facts and persists them atomically
-(write-then-rename).
+Pas de logique métier ici : pas de sanitisation, pas de LLM, pas de génération
+de Provenance. Ce module reçoit des facts Pydantic prêts à écrire et les
+persiste atomiquement (write-then-rename).
 
-Why a dedicated module: (1) unit-testability without an LLM; (2) the topology
-is invariant while expansion.py changes often — storage operations are isolated
-here, like a repository in a hexagonal architecture.
+Pourquoi un module dédié : (1) testabilité unitaire sans LLM ; (2) la
+topologie est invariante alors que expansion.py change souvent — on isole
+les opérations de stockage ici, comme dans un repository en hexagonal.
 """
 
 from __future__ import annotations
@@ -31,7 +31,7 @@ _PACK_FILES = ("registry.json", "knowledge_graph.json", "rules.json", "dictionar
 
 
 def init_pack_layout(memory_root: Path, slug: str) -> None:
-    """Create the pack topology for a slug. Idempotent."""
+    """Crée la topologie T8 pour un slug. Idempotent."""
     base = memory_root / slug
     for sub in ("baseline", "promoted", "_staged", "expansions", "audit"):
         (base / sub).mkdir(parents=True, exist_ok=True)
@@ -114,15 +114,15 @@ def write_promoted_facts(
     file_name: str,
     new_facts: Iterable[BaseModel | dict],
 ) -> None:
-    """Merge facts (Pydantic models OR already-serialized dicts) into
-    promoted/{file_name}, by canonical key (_key_fn_for). A fact whose key
-    already exists OVERWRITES the old one (override — the expansion rebuilt a
-    newer version). Atomic.
+    """Fusionne des facts (Pydantic models OU dicts déjà sérialisés) dans
+    promoted/{file_name}, par clé canonique (_key_fn_for). Un fact dont la clé
+    existe déjà ÉCRASE l'ancien (override — l'expansion a reconstruit une
+    version plus récente). Atomique.
 
-    Used by the Option C expansion flow: direct write into the shared promoted/
-    layer, without going through staged → promote. The enrichments are shared
-    immediately (the shared graph) but PII-free + traced + revocable
-    (each fact carries its _provenance).
+    Utilisé par le flux d'expansion Option C : écriture directe dans la couche
+    partagée promoted/, sans passer par staged → promote. Les enrichissements
+    sont partagés immédiatement (le moat T6) mais PII-free + tracés + revocables
+    (chaque fact porte sa _provenance).
     """
     assert file_name in _PACK_FILES, f"unexpected pack file {file_name!r}"
     init_pack_layout(memory_root, slug)
@@ -352,7 +352,7 @@ def write_promoted(memory_root: Path, slug: str, *, expansion_id: str) -> None:
 
 
 def revoke_expansion(memory_root: Path, slug: str, *, expansion_id: str, reason: str | None = None) -> None:
-    """Remove an expansion's facts from staged AND promoted. Refuses baseline-pre-T8."""
+    """Retire les facts d'une expansion de staged ET promoted. Refuse baseline-pre-T8."""
     if expansion_id == "baseline-pre-T8":
         raise ValueError("baseline est non-revocable par design")
     with _SlugLock(_slug_lock_path(memory_root, slug)):

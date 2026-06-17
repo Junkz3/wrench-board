@@ -41,15 +41,12 @@ def recall_field_reports(
     query: str | None = None,
     refdes: str | None = None,
     limit: int = _DEFAULT_FIELD_REPORT_LIMIT,
-    owner_ref: str | None = None,
 ) -> list[dict[str, Any]]:
     """Recall confirmed field reports for THIS device, newest-first.
 
     Thin wrapper over `list_field_reports` (the disk-backed reader) that adds a
     free-text `query` filter (matched across every field) and caps the result.
-    `refdes` is pushed down to the underlying reader. `owner_ref` scopes recall
-    to the session's tenant so a confirmed repair never surfaces in another
-    tenant's session (None → shared/self-host). This is the direct-mode
+    `refdes` is pushed down to the underlying reader. This is the direct-mode
     equivalent of the managed agent grepping the device field_reports store.
     """
     # Pull a generous window first (refdes pushed down), then keyword-filter and
@@ -60,7 +57,6 @@ def recall_field_reports(
         memory_root=memory_root,
         limit=200,
         filter_refdes=refdes,
-        owner_ref=owner_ref,
     )
 
     q = (query or "").lower().strip()

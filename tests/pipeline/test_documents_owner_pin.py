@@ -1,7 +1,7 @@
-"""le write path écrit un pointeur per-owner en mode managé, sans clobber
+"""T9 — le write path écrit un pointeur per-owner en mode managé, sans clobber
 de la racine entre deux tenants. Owner None = comportement inchangé.
 
-Inclut aussi les tests du chemin de suppression managée :
+Inclut aussi les tests du chemin de suppression managée (Task 2 — T9) :
 DELETE /packs/{slug}/sources/{kind}/versions/{filename} avec X-Owner-Ref.
 """
 

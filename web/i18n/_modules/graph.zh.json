@@ -1,0 +1,67 @@
+{
+  "empty": {
+    "title": "未加载知识图谱",
+    "body": "对某个设备运行生成流水线：知识图谱将根据生成的知识包构建。"
+  },
+  "legend": {
+    "types_heading": "类型",
+    "type_symptom": "症状",
+    "type_symptom_desc": "客户观察到的现象",
+    "type_net": "网络 / 供电轨",
+    "type_net_desc": "信号或供电",
+    "type_component": "元件",
+    "type_component_desc": "芯片、连接器",
+    "type_action": "操作",
+    "type_action_desc": "可能的维修",
+    "relations_heading": "关系",
+    "rel_causes": "导致",
+    "rel_causes_desc": "因果连接",
+    "rel_powers": "供电",
+    "rel_powers_desc": "电源流向",
+    "rel_connected": "连接到",
+    "rel_connected_desc": "总线 / 接地",
+    "rel_resolves": "解决",
+    "rel_resolves_desc": "纠正操作"
+  },
+  "controls": {
+    "zoom_in": "放大",
+    "zoom_out": "缩小",
+    "fit": "适应窗口"
+  },
+  "inspector": {
+    "type_inferred": "· 模型推断",
+    "id_label": "id: {id}",
+    "confidence": "置信度",
+    "description": "描述",
+    "metadata": "元数据",
+    "relations": "关系",
+    "edge_weight": "{label} · 权重 {weight}",
+    "edge_outgoing": "→",
+    "edge_incoming": "←",
+    "rules_field": "规则",
+    "conf_high": "高置信度：由多个来源相互印证。",
+    "conf_low": "低置信度：单一来源或间接推断。",
+    "conf_medium": "中等置信度：部分交叉验证。"
+  },
+  "tooltip": {
+    "conf_pct": "置信度 {pct}%"
+  },
+  "subsystem": {
+    "fallback_label": "其他"
+  },
+  "type_label": {
+    "component": "元件",
+    "symptom": "症状",
+    "net": "网络 / 供电轨",
+    "action": "操作"
+  },
+  "rel_label": {
+    "causes": "导致",
+    "powers": "供电",
+    "connected_to": "连接到",
+    "resolves": "解决"
+  },
+  "stats": {
+    "summary": "{n} 个节点 · {e} 条连边"
+  }
+}

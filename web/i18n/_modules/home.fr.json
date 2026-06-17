@@ -208,6 +208,18 @@
       "empty": "Aucun pack. La mémoire du device n'est pas encore construite.",
       "status_approved": "APPROUVÉ",
       "status_building": "en construction"
+    },
+    "board_delta": {
+      "title": "Specs de cette révision",
+      "disclaimer_pre": "Connaissance dérivée du web, propre à",
+      "disclaimer_post": "Indicative, non validée au niveau refdes : confirme sur la carte chargée.",
+      "sec_ics": "ICs signature",
+      "sec_rails": "Rails notables",
+      "sec_pitfalls": "Pièges connus",
+      "sec_cousins": "Cartes voisines (cousins)",
+      "foot_pitfalls": "pièges",
+      "foot_cousins": "cousins",
+      "foot_sources": "sources"
     }
   },
   "toast": {

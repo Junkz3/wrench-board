@@ -1,0 +1,11 @@
+{
+  "picker": {
+    "none": "(无)",
+    "device_fallback": "摄像头 {id}…"
+  },
+  "preview": {
+    "title_prefix": "摄像头",
+    "label_fallback": "摄像头",
+    "close_aria": "关闭预览"
+  }
+}

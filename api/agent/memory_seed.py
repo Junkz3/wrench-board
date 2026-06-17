@@ -31,6 +31,45 @@ logger = logging.getLogger("wrench_board.agent.memory_seed")
 
 MARKER_FILENAME = "managed.json"
 
+_DELTA_MEMORY_PATH = "/knowledge/board_delta.md"
+
+
+def build_board_delta_block(
+    *, memory_root: Path | str, device_slug: str, board_number: str | None
+) -> str | None:
+    """Render the board delta as a seed context block, or None when absent/empty.
+
+    Returns None when board_number is not supplied (standalone / self-host),
+    when the stored delta has coverage='none', or when all lists are empty.
+    The returned text is injected into the agent's memory store at
+    ``_DELTA_MEMORY_PATH`` to surface revision-specific context.
+    """
+    if not board_number:
+        return None
+    # Lazy import to avoid a circular import: api.pipeline.__init__ imports the
+    # orchestrator, which imports this module. Importing read_delta at module top
+    # would cycle when memory_seed is imported before api.pipeline is initialized.
+    from api.pipeline.board_delta.store import read_delta  # noqa: PLC0415
+
+    delta = read_delta(
+        memory_root=Path(memory_root),
+        device_slug=device_slug,
+        board_number=board_number,
+    )
+    if delta is None or delta.coverage == "none" or delta.is_empty():
+        return None
+    lines = [
+        f"# Known specifics of board revision {delta.board_number} ({delta.device_label})",
+        "Contextual knowledge from web sources. NOT validated refdes; confirm against the loaded board.",
+    ]
+    for ic in delta.signature_ics:
+        lines.append(f"- IC: {ic.part or '?'} - {ic.role} ({ic.source_url})")
+    for r in delta.notable_rails:
+        lines.append(f"- Rail: {r.name} - {r.note}")
+    for p in delta.repair_pitfalls:
+        lines.append(f"- Pitfall: {p.title} - {p.detail}")
+    return "\n".join(lines)
+
 
 def read_seed_marker(pack_dir: Path) -> dict | None:
     """Return the seed marker dict, or None if missing/corrupt."""
@@ -216,4 +255,43 @@ async def seed_memory_store_from_pack(
             store_id=store_id,
             seeded_files=merged,
         )
+
+    # Inject the board-revision delta only on a FULL seed (only_files is None).
+    # Partial/auto seeds (only_files=[...]) must not add this extra key: they
+    # would produce an inconsistent status dict shape and trigger an unintended
+    # MA upsert on every post-expand sync and auto-seed call.
+    if only_files is not None:
+        return status
+
+    # Import here (not at module top) to avoid a circular-import risk: board_ref
+    # is a thin contextvars module, but memory_seed is imported early by the
+    # runtime init chain.
+    from api.agent.board_ref import current_board_ref  # noqa: PLC0415
+
+    memory_root = getattr(settings, "memory_root", None)
+    delta_block = build_board_delta_block(
+        memory_root=memory_root,
+        device_slug=device_slug,
+        board_number=current_board_ref(),
+    ) if memory_root is not None else None
+    if delta_block is not None:
+        delta_result = await upsert_memory(
+            client,
+            store_id=store_id,
+            path=_DELTA_MEMORY_PATH,
+            content=delta_block,
+            memory_id=known_ids.get(_DELTA_MEMORY_PATH),
+        )
+        if delta_result is None:
+            logger.warning(
+                "[MemorySeed] Failed to upsert board delta for slug=%s board_ref=%s",
+                device_slug, current_board_ref(),
+            )
+        else:
+            logger.info(
+                "[MemorySeed] Seeded board delta for slug=%s board_ref=%s bytes=%d",
+                device_slug, current_board_ref(), len(delta_block),
+            )
+        status[_DELTA_MEMORY_PATH] = "seeded" if delta_result is not None else "error:upsert_failed"
+
     return status

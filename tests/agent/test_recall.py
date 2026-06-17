@@ -78,35 +78,6 @@ def test_recall_field_reports_empty_when_none(tmp_path: Path) -> None:
     assert out == []
 
 
-def test_recall_field_reports_is_tenant_scoped(tmp_path: Path) -> None:
-    """Direct-mode recall must isolate tenants: owner A's report is invisible to
-    owner B and to the shared (owner=None) scope."""
-    from api.agent.field_reports import _reports_dir
-
-    d = _reports_dir("dev", tmp_path, "tenant-a")
-    d.mkdir(parents=True, exist_ok=True)
-    fr = FieldReport(
-        report_id="U13-rep",
-        device_slug="dev",
-        refdes="U13",
-        symptom="no boot",
-        confirmed_cause="buck dead",
-    )
-    (d / f"{fr.report_id}.md").write_text(fr.to_markdown(), encoding="utf-8")
-
-    assert (
-        recall_field_reports(
-            device_slug="dev", memory_root=tmp_path, owner_ref="tenant-b"
-        )
-        == []
-    )
-    assert recall_field_reports(device_slug="dev", memory_root=tmp_path) == []
-    own = recall_field_reports(
-        device_slug="dev", memory_root=tmp_path, owner_ref="tenant-a"
-    )
-    assert [r["refdes"] for r in own] == ["U13"]
-
-
 # --- patterns (real seed_data) -----------------------------------------------
 
 

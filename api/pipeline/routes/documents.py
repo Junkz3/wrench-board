@@ -315,7 +315,7 @@ async def get_pack_sources(device_slug: str) -> SourcesResponse:
     )
 
 
-# ── Per-slug ingestion serialisation (cross-tenant cache safety) ────────────
+# ── Per-slug ingestion serialisation (T9 — cross-tenant cache safety) ────────
 #
 # In managed mode the slug ROOT (`memory/{slug}/schematic.pdf` + derived files)
 # is used as transient build scratch: clear → copy the target PDF → ingest →
@@ -479,9 +479,9 @@ def _apply_schematic_pin(
       On `rebuilding`: copies the source PDF to `memory/{slug}/schematic.pdf`,
       drops stale derivatives, schedules a background ingestion task.
 
-    Managed (`owner_ref` set) — per-owner, NO root clobber:
+    Managé (`owner_ref` set) — T9 per-owner, NO root clobber:
       Writes the per-owner pointer (_sources/{owner}/) mapping schematic_pdf →
-      {filename, hash}; readers resolve owner→hash→.cache_schematic/
+      {filename, hash}; readers (Task 3) resolve owner→hash→.cache_schematic/
       {hash}/ directly. On a cache hit we do NOT restore to the root (that root
       copy is exactly what clobbered cross-tenant). On a miss we still ingest
       via the SAME background task — the root is mere build scratch in managed

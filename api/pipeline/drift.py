@@ -8,8 +8,8 @@ reference the Registry does not back.
 Keeping this pure Python keeps the LLM Auditor focused on what it judges well:
 cross-file coherence and plausibility.
 
-GROUND-TRUTH WIDENING
----------------------
+GROUND-TRUTH WIDENING (Task 4)
+------------------------------
 The Registry alone is a poor existence oracle: on real builds the web-derived
 glossary covers only ~2 % of a board, so REAL identifiers (rail `PP1V2_S2`,
 switch `SWV011`) read as drift and the revise-loop never converges. When a
@@ -90,16 +90,16 @@ def compute_drift(
     kg_unknown_net: list[str] = []
     for node in knowledge_graph.nodes:
         if node.kind == "component":
-            # IDs now follow the pattern N-[A-Z0-9_-]{1,48}.
-            # Strip the N- prefix to recover the canonical name.
+            # T8 : les IDs suivent désormais le pattern N-[A-Z0-9_-]{1,48}.
+            # On strip le préfixe N- pour retrouver le nom canonique.
             suffix = _strip_prefix(node.id, "N-")
             if suffix is not None and not _known_component(suffix):
                 kg_unknown_comp.append(node.id)
         elif node.kind == "net":
-            # The Cartographe emits nets as N-NET_<canonical_name>
-            # (e.g. N-NET_PP3V0). Strip "N-NET_" (6 chars) to recover the
-            # canonical_name to compare against registry.signals. Previously the
-            # strip was "N-" (2 chars), giving "NET_PP3V0" ≠ "PP3V0" → false drift.
+            # Le Cartographe émet les nets sous la forme N-NET_<canonical_name>
+            # (ex. N-NET_PP3V0). On strip "N-NET_" (6 chars) pour retrouver le
+            # canonical_name à comparer avec registry.signals. Avant T8, le strip
+            # était "N-" (2 chars) ce qui donnait "NET_PP3V0" ≠ "PP3V0" → faux drift.
             suffix = _strip_prefix(node.id, "N-NET_")
             if suffix is not None and not _known_signal(suffix):
                 kg_unknown_net.append(node.id)

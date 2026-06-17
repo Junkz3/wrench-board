@@ -242,7 +242,7 @@ async def test_pipeline_rejects_when_max_revise_rounds_exhausted(
             new=AsyncMock(side_effect=[rules]),
         ),
     ):
-        # The convergence refactor reworded the terminal message — it
+        # The convergence refactor (Task 10) reworded the terminal message — it
         # now reports "unrecoverable after N revise round(s)" with the
         # rounds-exhausted reason. Behaviour is unchanged: a NEEDS_REVISION that
         # never clears is still a hard REJECTED fail.

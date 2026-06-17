@@ -1,4 +1,4 @@
-"""Deterministic device-identity facet extraction (the "carnet").
+"""Deterministic device-identity facet extraction (T9a, the "carnet").
 
 Pulls structured ids out of free device text — board number, Apple model, EMC,
 codename — plus the whole label as a searchable marketing facet. Pure + free (no

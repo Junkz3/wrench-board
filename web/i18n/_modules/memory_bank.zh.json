@@ -1,0 +1,98 @@
+{
+  "title": "记忆库",
+  "subtitle": "由 V2 流水线生成的确定性知识包。浏览注册表、知识图谱、诊断规则、元件资料表和审计结论。",
+  "title_with_device": "记忆库 <span class=\"sub\" style=\"color:var(--text-3);font-weight:400;font-size:14px;margin-left:10px\">· {device}</span>{form}",
+  "picker": {
+    "label": "知识包",
+    "empty_option": "（无知识包）"
+  },
+  "search": {
+    "placeholder": "筛选知识包（元件位号、症状、机理…）",
+    "esc_hint": "ESC 清除"
+  },
+  "blocks": {
+    "registry_heading": "标准词汇表",
+    "graph_heading": "知识图谱",
+    "rules_heading": "诊断规则",
+    "dictionary_heading": "元件资料表",
+    "audit_heading": "审计结论"
+  },
+  "empty": {
+    "title": "无可用知识包",
+    "body_default": "没有可用的知识包。请运行流水线以生成一个。",
+    "load_failed": "无法加载知识包 «{slug}»。"
+  },
+  "verdict": {
+    "none_title": "尚未为此知识包编写审计。",
+    "none_label": "审计 · 未运行",
+    "approved_label": "审计 · 已批准",
+    "needs_revision_label": "审计 · 需修订",
+    "rejected_label": "审计 · 已拒绝",
+    "unknown_label": "审计 · 未知",
+    "consistency": "一致性"
+  },
+  "counts": {
+    "components": "元件",
+    "signals": "信号",
+    "nodes": "节点",
+    "edges": "边",
+    "rules": "规则",
+    "sheets": "资料表",
+    "rules_count": "<b>{n}</b> 条规则",
+    "rules_count_zero": "<b>0</b> 条规则",
+    "sheets_count": "<b>{n}</b> 份资料表",
+    "sheets_count_zero": "<b>0</b> 份资料表",
+    "registry_count": "<b>{c}</b> 个元件 · <b>{s}</b> 个信号",
+    "graph_count": "<b>{n}</b> 个节点 · <b>{e}</b> 条边"
+  },
+  "registry": {
+    "missing": "缺少 registry.json。流程未运行。",
+    "components_heading": "元件（{n}）",
+    "signals_heading": "信号（{n}）",
+    "no_components": "无元件。",
+    "no_signals": "无信号。",
+    "th_refdes": "元件位号",
+    "th_type": "类型",
+    "th_aliases": "别名",
+    "th_description": "说明",
+    "th_canonical": "标准名称",
+    "th_nominal_voltage": "标称电压"
+  },
+  "graph": {
+    "missing": "缺少 knowledge_graph.json。",
+    "no_edges": "图谱中无边。",
+    "stat_symptoms": "症状",
+    "stat_components": "元件",
+    "stat_nets": "网络",
+    "stat_edges": "边"
+  },
+  "rules": {
+    "missing": "缺少 rules.json。",
+    "none": "无诊断规则。",
+    "no_symptom": "（无症状）",
+    "h_symptoms": "症状",
+    "h_likely_causes": "可能原因",
+    "h_diagnostic_steps": "诊断步骤",
+    "h_sources": "来源",
+    "expected": "预期 {value}",
+    "conf_label": "置信度 {value}"
+  },
+  "dictionary": {
+    "missing": "缺少 dictionary.json。",
+    "none": "无元件资料表。",
+    "th_refdes": "元件位号",
+    "th_role": "作用",
+    "th_package": "封装",
+    "th_failure_modes": "失效模式",
+    "th_notes": "备注"
+  },
+  "audit": {
+    "missing": "缺少 audit_verdict.json。流程尚未审计此知识包。",
+    "headline_approved": "审计已批准：知识包与注册表一致。",
+    "headline_needs_revision": "审计：需要修订。检测到偏差，需进行修正。",
+    "headline_rejected": "审计已拒绝：知识包不一致，无法按原样使用。",
+    "headline_unknown": "审计状态未知。",
+    "files_to_rewrite": "待重写文件",
+    "drift_heading": "检测到偏差（{n}）"
+  }
+}

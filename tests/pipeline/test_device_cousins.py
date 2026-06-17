@@ -1,5 +1,5 @@
 """find_cousin_packs: sibling boards (same family) that carry usable data — the
-agent's fallback knowledge source when no exact graph exists (Phase B)."""
+agent's fallback knowledge source when no exact graph exists (T9a Phase B)."""
 import pytest
 
 from api.pipeline.device_registry import JsonDeviceRegistryStore, find_cousin_packs

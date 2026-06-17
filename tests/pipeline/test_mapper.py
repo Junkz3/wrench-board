@@ -35,7 +35,7 @@ from api.pipeline.schematic.schemas import (
 
 
 def _toy_registry() -> Registry:
-    # canonical_name suit [A-Z0-9_./-]{2,64} (pas d'espaces, majuscules) ;
+    # T8 : canonical_name suit [A-Z0-9_./-]{2,64} (pas d'espaces, majuscules) ;
     # kind en majuscules. "LPC controller" → "LPC-CTRL", "main buck" → "MAIN-BUCK".
     return Registry(
         device_label="demo",
@@ -83,7 +83,7 @@ def test_validator_drops_unknown_canonical() -> None:
         device_slug="demo",
         attributions=[
             RefdesAttribution(
-                # canonical_name suit [A-Z0-9_./-]{2,64} — on utilise un
+                # T8 : canonical_name suit [A-Z0-9_./-]{2,64} — on utilise un
                 # identifiant valide syntaxiquement mais absent du registre.
                 canonical_name="U99-GHOST",
                 refdes="U14",

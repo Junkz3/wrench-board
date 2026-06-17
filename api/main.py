@@ -14,6 +14,7 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from api import __version__
+from api.agent.board_ref import set_board_ref
 from api.agent.macros import macro_path_for
 from api.board.router import router as board_router
 from api.config import get_settings
@@ -276,6 +277,10 @@ async def diagnostic_session(websocket: WebSocket, device_slug: str) -> None:
     # Header absent → standalone/self-host → True (unrestricted). The cloud
     # always sends an explicit "true"/"false"; only "false" disables it.
     can_expand = (websocket.headers.get("X-Wb-Can-Expand") or "true").strip().lower() != "false"
+    # Optional board number (PCB revision, e.g. "820-02016") supplied by the
+    # client as a query param. Absent → None → no board-delta injection. No
+    # trust logic here: the public engine carries this as an opaque key only.
+    set_board_ref(websocket.query_params.get("board"))
 
     mode = os.environ.get("DIAGNOSTIC_MODE", "managed").lower()
     if mode == "direct":

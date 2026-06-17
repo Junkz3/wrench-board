@@ -2,11 +2,11 @@
 expected by web/index.html (frontend design v3).
 
 Carries component / net / symptom nodes and their relations from
-knowledge_graph verbatim. Node IDs follow the schema
-N-[A-Z0-9_-]{1,48} (symptoms: N-S_<SLUG>, nets: N-NET_<name>).
-Enriches component nodes from the dictionary / registry, and back-fills any
-symptom mentioned by a rule but absent from the knowledge_graph (so no rule
-is left orphaned in the UI).
+knowledge_graph verbatim. Depuis T8, les IDs de nœuds suivent le schéma
+N-[A-Z0-9_-]{1,48} (symptômes : N-S_<SLUG>, nets : N-NET_<nom>).
+Enrichit les nœuds composants depuis le dictionnaire / registre,
+et back-fille tout symptôme mentionné par une règle mais absent du
+knowledge_graph (pour qu'aucune règle ne soit orpheline dans l'UI).
 
 Synthesizes one `action` node per rule — the concrete microsoldering
 intervention (Replace / Reflow / Jumper / Lift / Reball / Hunt short)
@@ -108,17 +108,17 @@ def pack_to_graph_payload(
         )
 
     # 2. Back-fill symptom nodes that rules mention but the Cartographe didn't
-    #    emit. Keyed by label so we don't duplicate a Cartographe node. The IDs
-    #    follow the convention N-S_<UPPERCASE_SLUG> (pattern ^N-[A-Z0-9_-]{1,48}$).
+    #    emit. Keyed by label so we don't duplicate a Cartographe node. Les IDs
+    #    suivent la convention T8 : N-S_<SLUG_MAJUSCULES> (pattern ^N-[A-Z0-9_-]{1,48}$).
     symptom_id_by_label = {n["label"]: n["id"] for n in nodes if n["type"] == "symptom"}
     for rule in rules.get("rules", []):
         for symptom_text in rule.get("symptoms", []):
             if symptom_text in symptom_id_by_label:
                 continue
-            # Truncate the slug to 40 chars before assembly: reserve 4 chars for
-            # the "N-S_" prefix and 4 chars for the optional uniqueness suffix
-            # "_NNN", guaranteeing len(sid) ≤ 48 < 50 in all cases and conformance
-            # to the pattern ^N-[A-Z0-9_-]{1,48}$.
+            # Tronquer le slug à 40 chars avant assemblage : on réserve 4 chars pour
+            # le préfixe "N-S_" et 4 chars pour le suffixe d'unicité éventuel "_NNN",
+            # garantissant len(sid) ≤ 48 < 50 en toutes circonstances et la conformité
+            # au pattern ^N-[A-Z0-9_-]{1,48}$ (T8 fix B).
             slug_part = _slug(symptom_text).upper().replace("-", "_")[:40]
             sid = f"N-S_{slug_part}"
             # Ensure uniqueness when two different labels slugify to the same id.

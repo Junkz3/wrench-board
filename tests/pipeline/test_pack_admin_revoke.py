@@ -1,4 +1,4 @@
-"""CLI pack-admin revoke (Option C)."""
+"""T8 — CLI pack-admin revoke (Option C)."""
 
 import json
 from datetime import UTC, datetime

@@ -1,0 +1,191 @@
+{
+  "demo": {
+    "read_only": "演示模式：示例设备为只读。请创建你自己的诊断，向智能体提出真实问题。"
+  },
+  "panel": {
+    "aria": "诊断智能体",
+    "badge": "智能体",
+    "title": "诊断",
+    "subline_empty": "(空闲)"
+  },
+  "header": {
+    "camera_chip_title": "用于 cam_capture 的摄像头 (流程 B)",
+    "camera_chip_none": "(无)",
+    "camera_preview_title": "显示 / 隐藏摄像头预览",
+    "camera_preview_aria": "切换摄像头预览",
+    "tier_title": "模型档位",
+    "tier_fast": "快速 · Haiku 4.5",
+    "tier_normal": "普通 · Sonnet 4.6",
+    "tier_deep": "深度 · Opus 4.8",
+    "close_aria": "关闭面板"
+  },
+  "status": {
+    "idle": "空闲",
+    "connecting": "连接中 · {slug} · {tier}",
+    "connected": "已连接 · {slug} · {tier}",
+    "closed": "已关闭",
+    "error_socket": "套接字错误",
+    "url_invalid": "URL 无效"
+  },
+  "conv": {
+    "title": "对话",
+    "label_empty": "CONV 0/0",
+    "label_count": "CONV {idx}/{total}",
+    "new": "新建对话",
+    "default_title": "对话 {idx}",
+    "turns_one": "{n} 轮",
+    "turns_many": "{n} 轮",
+    "ago_seconds": "{n} 秒前",
+    "ago_minutes": "{n} 分钟前",
+    "ago_hours": "{n} 小时前",
+    "ago_days": "{n} 天前",
+    "ago_unknown": "未知",
+    "switching": "→ 切换对话：{id}",
+    "delete_aria": "删除对话",
+    "delete_confirm": "删除此对话？\n消息历史以及关联的智能体会话将被清除。此操作无法撤销。",
+    "delete_failed": "删除失败。请重试。"
+  },
+  "input": {
+    "placeholder": "向智能体提问…（Enter 发送，Shift+Enter 换行）",
+    "upload_title": "上传微距照片 (PNG/JPEG，最大 5MB)",
+    "upload_aria": "上传微距照片",
+    "stop_title": "中断智能体 (Esc)",
+    "stop_aria": "停止",
+    "send_title": "发送 (Enter)",
+    "send_aria": "发送"
+  },
+  "dropzone": {
+    "label": "将照片拖放到此处"
+  },
+  "roles": {
+    "user": "你",
+    "agent": "智能体",
+    "replay_suffix": " · 回放"
+  },
+  "pending": {
+    "thinking": "智能体正在思考"
+  },
+  "step": {
+    "expand_title": "查看参数",
+    "no_result": "(结果不可用：未由运行时渲染)"
+  },
+  "tool": {
+    "mb_get_component": "查询 <span class=\"refdes\">{refdes}</span>",
+    "mb_get_rules_for_symptoms": "读取「{symptoms}」的规则",
+    "mb_list_findings": "查看发现",
+    "mb_list_findings_for": "查看 <span class=\"refdes\">{device}</span> 的发现",
+    "mb_record_finding": "记录一条发现",
+    "mb_expand_knowledge": "扩展知识包",
+    "mb_expand_knowledge_scope": "扩展知识包：{scope}",
+    "mb_schematic_graph": "读取原理图图谱",
+    "bv_highlight": "高亮 <span class=\"refdes\">{refdes}</span>",
+    "bv_focus": "聚焦 <span class=\"refdes\">{refdes}</span>",
+    "bv_reset_view": "重置视图",
+    "bv_highlight_net": "高亮网络 <span class=\"net\">{net}</span>",
+    "bv_flip": "翻转电路板",
+    "bv_annotate_near": "在 <span class=\"refdes\">{refdes}</span> 附近标注",
+    "bv_annotate_at": "在 ({x}, {y}) 处标注",
+    "bv_annotate_blank": "标注",
+    "bv_filter_by_type": "按类型过滤：{prefix}",
+    "bv_draw_arrow": "从 <span class=\"refdes\">{from}</span> 到 <span class=\"refdes\">{to}</span> 画箭头",
+    "bv_measure": "测量 <span class=\"refdes\">{a}</span> 与 <span class=\"refdes\">{b}</span> 之间",
+    "bv_show_pin": "显示 <span class=\"refdes\">{refdes}</span> 的引脚 {pin}",
+    "bv_dim_unrelated": "淡化无关元素",
+    "bv_layer_visibility": "图层可见性 {layer}",
+    "bv_scene_empty": "场景 (空)",
+    "bv_scene": "场景：{parts}",
+    "scene_highlight_one": "{n} 处高亮",
+    "scene_highlight_many": "{n} 处高亮",
+    "scene_annotation_one": "{n} 条标注",
+    "scene_annotation_many": "{n} 条标注",
+    "scene_arrow_one": "{n} 个箭头",
+    "scene_arrow_many": "{n} 个箭头",
+    "scene_focus": "聚焦 <span class=\"refdes\">{refdes}</span>",
+    "scene_dim": "淡化",
+    "scene_reset": "重置",
+    "stock_search": "在库存中搜索 <span class=\"refdes\">{type} {value}</span>",
+    "stock_search_minimal": "搜索库存",
+    "stock_consume": "从 <span class=\"refdes\">{donor_id}</span> 取用 <span class=\"refdes\">{refdes}</span>",
+    "stock_mark_donor": "将 <span class=\"refdes\">{device_slug}</span> 标记为供体",
+    "stock_unmark_donor": "移除供体 <span class=\"refdes\">{donor_id}</span>",
+    "stock_list_donors": "列出库存中的供体"
+  },
+  "memtool": {
+    "read": "内存读取：{path}",
+    "write": "内存写入：{path}",
+    "edit": "内存编辑：{path}",
+    "view": "内存查看：{path}",
+    "grep": "grep <code class=\"mem-path\">{pattern}</code>",
+    "grep_in": "在 {path} 中 grep <code class=\"mem-path\">{pattern}</code>",
+    "glob": "glob <code class=\"mem-path\">{pattern}</code>",
+    "list": "内存列表",
+    "list_at": "内存列表：{path}"
+  },
+  "context_lost": {
+    "title": "轮次历史已丢失",
+    "reason_ma_empty": "上一会话已被 Managed Agents 后端归档 (events.list 为空)，且没有可用的本地 JSONL 备份。",
+    "reason_generic": "上一会话无法恢复，也无法生成摘要。",
+    "preserved_label": "已从磁盘恢复并重新注入智能体",
+    "preserved_none": "未找到此维修的持久化产物 (无测量值、无检测流程、无结果)。",
+    "context_reinject": "设备、症状和你的资料将自动在下方重新注入：智能体将知道你正在处理的内容。",
+    "lost_explainer": "仍然丢失的是：<strong>对话线索</strong> (智能体推理、提出的假设、自由交流)。如果你讨论过线索或做出过偏离检测流程的决定，请用一行重述，以便它重新对齐。",
+    "preserved_measurements_one": "{n} 个测量值",
+    "preserved_measurements_many": "{n} 个测量值",
+    "preserved_protocol": "检测流程「{title}」({completed}/{total})",
+    "preserved_outcome": "最终结果"
+  },
+  "resume": {
+    "title": "会话恢复",
+    "meta_summary": "Haiku 摘要 · {tok_in}→{tok_out} tok"
+  },
+  "session": {
+    "ready": "会话就绪 · {mode} · {model}",
+    "ready_with_repair": "会话就绪 · {mode} · {model} · 维修 {repair}",
+    "subline": "{model} · {mode}",
+    "subline_with_repair": "{model} · {mode} · 维修 {repair}",
+    "device_label_simple": "{slug}",
+    "device_label_with_repair": "{slug} · {repair}",
+    "tier_auto_align": "→ 自动对齐到此对话的档位：{tier}",
+    "tier_switch": "→ 切换档位：{tier}。新建对话。",
+    "replay_count": "回放 · {n} 个先前事件",
+    "replay_done": "回放完成，从上次中断处继续",
+    "context_loaded": "设备 + 症状上下文已加载 · 智能体正在等待你的第一条消息",
+    "session_resumed": "会话已恢复 · 历史与智能体记忆已还原",
+    "session_terminated": "会话已终止",
+    "interrupt_sent": "已发送中断 · 智能体正在停止"
+  },
+  "image_bubble": {
+    "alt": "微距照片",
+    "macro_caption": "技师发送的微距照片。",
+    "capture_caption": "捕获 · {label}"
+  },
+  "capture": {
+    "no_camera": "智能体请求捕获，但未选择摄像头",
+    "requested": "智能体请求捕获 · {reason}",
+    "no_reason": "无原因",
+    "failed": "捕获失败：{error}"
+  },
+  "upload": {
+    "too_large": "照片过大 ({size}MB > 5MB)",
+    "unsupported": "不支持的格式：{mime} · 仅限 PNG 或 JPEG",
+    "socket_closed": "无法上传：套接字未打开",
+    "failed": "上传失败：{error}",
+    "rejected": "上传被拒绝 · {reason}"
+  },
+  "preview": {
+    "select_camera_first": "请先在选择器中选择摄像头",
+    "open_failed": "预览打开失败，请检查权限"
+  },
+  "send": {
+    "socket_closed": "无法发送：套接字未打开",
+    "connect_failed": "连接失败：{error}"
+  },
+  "error": {
+    "generic": "错误：{text}",
+    "unknown_reason": "未知原因"
+  },
+  "fix": {
+    "validated_one": "已验证 ({n} 项修复)",
+    "validated_many": "已验证 ({n} 项修复)"
+  }
+}

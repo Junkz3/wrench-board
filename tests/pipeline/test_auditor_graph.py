@@ -1,4 +1,4 @@
-"""Graph-grounded auditor.
+"""Graph-grounded auditor (Task 7).
 
 On the real macbook-air-m1 build the auditor — anchored only on the thin
 web-derived registry — flagged REAL schematic identifiers (SWV011, the PP1V2_S2

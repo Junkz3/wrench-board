@@ -10,7 +10,7 @@ from fastapi.testclient import TestClient
 def client(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> TestClient:
     monkeypatch.setenv("MEMORY_ROOT", str(tmp_path))
     import api.config as _cfg
-    _cfg._settings = None  # reset settings cache
+    _cfg._settings = None  # reset settings cache (see T4 for pattern)
     from api.main import app
     with TestClient(app) as c:
         yield c

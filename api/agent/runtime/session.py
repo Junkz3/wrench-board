@@ -680,7 +680,7 @@ async def run_diagnostic_session_managed(
         from api.profile.store import load_profile
 
         device_intro = build_session_intro(device_slug=device_slug, repair_id=repair_id)
-        # When this board has no schematic of its own, point the agent
+        # T9a Phase B: when this board has no schematic of its own, point the agent
         # at a same-family sibling pack as an indicative fallback (parity with the
         # direct runtime, which injects this into its system prompt). Best-effort.
         cousin_block = (

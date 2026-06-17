@@ -94,7 +94,7 @@ def _dedup(items) -> list[str]:
 
 
 # ======================================================================
-# GraphTruth: read-only existence/query index
+# Task 1 — GraphTruth: read-only existence/query index
 # ======================================================================
 
 
@@ -210,7 +210,7 @@ class GraphTruth:
 
 
 # ======================================================================
-# Mentions / extract_mentions / build_ground_truth_report
+# Task 2 — Mentions / extract_mentions / build_ground_truth_report
 # ======================================================================
 
 
@@ -345,7 +345,7 @@ def build_ground_truth_report(gt: GraphTruth, mentions: Mentions) -> str:
 
 
 # ======================================================================
-# QUERY_GRAPH_TOOL + handle_query_graph
+# Task 3 — QUERY_GRAPH_TOOL + handle_query_graph
 # ======================================================================
 
 
@@ -424,7 +424,7 @@ def handle_query_graph(gt: GraphTruth, tool_input: dict) -> dict:
 
 
 # ======================================================================
-# enrich_registry_from_graph (deterministic Phase 2.6)
+# Task 5 — enrich_registry_from_graph (deterministic Phase 2.6)
 # ======================================================================
 
 

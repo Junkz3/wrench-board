@@ -1,4 +1,4 @@
-"""Best-effort token-usage reporting to the wrenchboard-cloud.
+"""Best-effort token-usage reporting to the wrenchboard-cloud (T13).
 
 The diagnostic agent's per-LLM-call token cost is the tenant-private billing
 unit. At each ``span.model_request_end`` the live forwarder fires

@@ -51,11 +51,11 @@ def _emit(event: dict[str, Any]) -> None:
 def _known_refdes(memory_root: Path, device_slug: str) -> set[str] | None:
     """Return the refdes set from the device's electrical_graph, or None if absent.
 
-    Per-owner: read the graph of the current tenant's active PDF
-    (current_owner_ref → hash → .cache_schematic/{hash}/), not the slug's
-    shared root (= build scratch, potentially another tenant's PDF →
-    cross-tenant leak). owner None (self-host) → root, unchanged.
-    Fail-soft preserved: graph absent / not pinned → None."""
+    T9 — per-owner : on lit le graphe du PDF actif du tenant courant
+    (current_owner_ref → hash → .cache_schematic/{hash}/), pas la racine
+    partagée du slug (= scratch de build, potentiellement le PDF d'un autre
+    tenant → fuite cross-tenant). owner None (self-host) → racine, inchangé.
+    Fail-soft conservé : graphe absent / non épinglé → None."""
     from api.agent.owner_ref import current_owner_ref
     from api.pipeline import live_graph
 

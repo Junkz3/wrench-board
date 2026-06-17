@@ -75,6 +75,11 @@ class PackSummary(BaseModel):
     # Built at the end of schematic ingestion — flags whether `stock_search`
     # can match this device's components against the donor inventory.
     has_parts_index: bool
+    # Build-state marker (api/pipeline/build_state.py): "building" | "complete" |
+    # "failed" | "paused", or None for a legacy pack with no marker (completeness
+    # is trusted on file presence alone). Lets the hosted front-door / UI show a
+    # per-repair "analyse en cours / prête" badge without re-deriving completeness.
+    build_state: str | None = None
 
 
 # --- Taxonomy ---------------------------------------------------------------
@@ -94,7 +99,7 @@ class TaxonomyPackEntry(BaseModel):
     # "ready" vs "waiting for graph" (a pack can exist with no parts_index yet).
     has_parts_index: bool = False
     device_kind: str | None = None
-    # Every carnet alias of this device (board# / Apple model / EMC /
+    # T9a: every carnet alias of this device (board# / Apple model / EMC /
     # codename / marketing) so the new-repair autocomplete matches any of them,
     # not just the label. Empty when the device has no registry fiche yet.
     aliases: list[str] = Field(default_factory=list)
@@ -163,15 +168,15 @@ class RepairRequest(BaseModel):
             "complete-pack + uncovered-symptom request must NOT fire the targeted "
             "expand round (it is LLM spend) — the engine answers expand_blocked=True, "
             "removes the just-persisted ticket, and the front-door maps that to its "
-            "own access policy. The engine just honors the flag (like owner_ref, "
-            "this is NOT a security boundary). Default "
+            "paywall. Plan policy lives in the front-door; the engine just honors "
+            "the flag (like owner_ref, this is NOT a security boundary). Default "
             "True = standalone/self-host behaviour unchanged."
         ),
     )
 
 
 class DisambiguationCandidate(BaseModel):
-    """One candidate board when a free-text device label is ambiguous: the
+    """One candidate board when a free-text device label is ambiguous (T9a): the
     term fans out to several same-family siblings and the tech must pick one."""
 
     device_slug: str
@@ -181,7 +186,7 @@ class DisambiguationCandidate(BaseModel):
 
 class ResolveDeviceRequest(BaseModel):
     """Resolve a free device label to a canonical identity without creating a
-    repair or starting a build. The cloud calls this BEFORE its quota gate
+    repair or starting a build (T9a). The cloud calls this BEFORE its quota gate
     so it can adopt the canonical slug and surface ambiguity for free."""
 
     device_label: str = Field(min_length=1, max_length=200)
@@ -250,7 +255,7 @@ class RepairResponse(BaseModel):
             "caller sent allow_expand=false: no expand was launched and the ticket "
             "was NOT kept (repair_id is empty) so a later allowed retry re-enters "
             "the normal flow instead of dedup-reusing a dead ticket. The front-door "
-            "maps this to its own access policy."
+            "maps this to its paywall."
         ),
     )
     needs_disambiguation: bool = Field(
@@ -275,6 +280,10 @@ class RepairSummary(BaseModel):
     symptom: str
     status: str
     created_at: str
+    board_number: str | None = Field(
+        default=None,
+        description="Board revision number (e.g. 820-02016) when the repair was created with one.",
+    )
 
 
 # --- Pack expansion ---------------------------------------------------------

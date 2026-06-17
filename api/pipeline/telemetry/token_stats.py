@@ -28,7 +28,7 @@ class PhaseTokenStats:
     call_count: int = 0
     # The model that served this phase's calls (last-wins if a phase ever mixes
     # tiers — close enough for pricing). Carried so the cloud build-metering
-    # report (kind='build') can price each phase; None on legacy stats files.
+    # report (T13 kind='build') can price each phase; None on legacy stats files.
     model: str | None = None
 
     def record(

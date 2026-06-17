@@ -1,12 +1,13 @@
-"""Build-side reporting: POST the pipeline's per-phase token usage to the
-metering ledger with ``kind='build'``.
+"""T13 build-side reporting: POST the pipeline's per-phase token usage to the
+wrenchboard-cloud metering ledger with ``kind='build'``.
 
-The pack build is the expensive one-shot LLM pass and was the blind spot of
-the cost telemetry: only the interactive agent reported. The orchestrator
-calls :func:`report_build_phases` in its terminal ``finally`` (right where it
-persists ``token_stats.json``), so success AND failure spend both land in the
-ledger. ``kind='build'`` is bucketed apart from the chat budget so a build
-does not eat a tenant's chat ceiling.
+The pack build is the expensive one-shot (10-40 € of LLM spend) and was the
+blind spot of the cloud's cost telemetry — only the interactive agent reported.
+The orchestrator calls :func:`report_build_phases` in its terminal ``finally``
+(right where it persists ``token_stats.json``), so success AND failure spend
+both land in the ledger. The cloud buckets ``kind='build'`` apart from the
+chat budget (a build must not eat the tenant's monthly chat ceiling — builds
+are slot-gated by the cloud's NovelBuildGuard instead).
 
 Self-host integrity: rides :mod:`api.agent.cloud_metering`, which is a hard
 no-op when ``cloud_metering_url``/``cloud_metering_token`` are unset — the
@@ -68,3 +69,36 @@ def report_build_phases(
             "[BuildMetering] reported %d phase(s) · repair=%s owner=%s run=%s",
             reported, engine_repair_id, owner_ref, rid,
         )
+
+
+def report_delta_usage(
+    *,
+    owner_ref: str | None,
+    model: str,
+    input_tokens: int,
+    output_tokens: int,
+    event_id: str,
+    kind: str = "delta",
+    engine_repair_id: str | None = None,
+) -> None:
+    """Fire one ``kind='delta'`` metering report for a board-delta generation.
+
+    No-op when cloud metering is unconfigured (self-host) — so the engine
+    never phones home outside a managed deployment. Best-effort like every
+    metering path: a dropped report only costs a ledger row.
+    """
+    if not cloud_metering_enabled():
+        return
+    fire_and_forget_report(
+        owner_ref=owner_ref,
+        model=model,
+        input_tokens=input_tokens,
+        output_tokens=output_tokens,
+        engine_repair_id=engine_repair_id,
+        event_id=event_id,
+        kind=kind,
+    )
+    logger.info(
+        "[BuildMetering] delta reported · event_id=%s owner=%s kind=%s",
+        event_id, owner_ref, kind,
+    )

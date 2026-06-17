@@ -1,0 +1,98 @@
+{
+  "title": "मेमोरी बैंक",
+  "subtitle": "V2 पाइपलाइन द्वारा निर्मित डिटरमिनिस्टिक नॉलेज पैक। रजिस्ट्री, नॉलेज ग्राफ, डायग्नोस्टिक नियम, कॉम्पोनेन्ट शीट और ऑडिट निर्णय ब्राउज़ करें।",
+  "title_with_device": "मेमोरी बैंक <span class=\"sub\" style=\"color:var(--text-3);font-weight:400;font-size:14px;margin-left:10px\">· {device}</span>{form}",
+  "picker": {
+    "label": "पैक",
+    "empty_option": "(कोई पैक नहीं)"
+  },
+  "search": {
+    "placeholder": "पैक फ़िल्टर करें (रेफरेंस डेज़िग्नेटर, लक्षण, तंत्र…)",
+    "esc_hint": "ESC साफ़ करता है"
+  },
+  "blocks": {
+    "registry_heading": "कैनोनिकल शब्दावली",
+    "graph_heading": "नॉलेज ग्राफ",
+    "rules_heading": "डायग्नोस्टिक नियम",
+    "dictionary_heading": "कॉम्पोनेन्ट शीट",
+    "audit_heading": "ऑडिट निर्णय"
+  },
+  "empty": {
+    "title": "कोई पैक उपलब्ध नहीं",
+    "body_default": "कोई नॉलेज पैक उपलब्ध नहीं है। एक बनाने के लिए पाइपलाइन चलाएँ।",
+    "load_failed": "पैक «{slug}» लोड नहीं हो सका।"
+  },
+  "verdict": {
+    "none_title": "इस पैक के लिए अभी तक कोई ऑडिट नहीं लिखा गया है।",
+    "none_label": "ऑडिट · नहीं चला",
+    "approved_label": "ऑडिट · स्वीकृत",
+    "needs_revision_label": "ऑडिट · संशोधन",
+    "rejected_label": "ऑडिट · अस्वीकृत",
+    "unknown_label": "ऑडिट · अज्ञात",
+    "consistency": "संगति"
+  },
+  "counts": {
+    "components": "कॉम्पोनेन्ट",
+    "signals": "सिग्नल",
+    "nodes": "नोड",
+    "edges": "एज",
+    "rules": "नियम",
+    "sheets": "शीट",
+    "rules_count": "<b>{n}</b> नियम",
+    "rules_count_zero": "<b>0</b> नियम",
+    "sheets_count": "<b>{n}</b> शीट",
+    "sheets_count_zero": "<b>0</b> शीट",
+    "registry_count": "<b>{c}</b> कॉम्पोनेन्ट · <b>{s}</b> सिग्नल",
+    "graph_count": "<b>{n}</b> नोड · <b>{e}</b> एज"
+  },
+  "registry": {
+    "missing": "registry.json गायब है। पाइपलाइन नहीं चली।",
+    "components_heading": "कॉम्पोनेन्ट ({n})",
+    "signals_heading": "सिग्नल ({n})",
+    "no_components": "कोई कॉम्पोनेन्ट नहीं।",
+    "no_signals": "कोई सिग्नल नहीं।",
+    "th_refdes": "रेफरेंस डेज़िग्नेटर",
+    "th_type": "प्रकार",
+    "th_aliases": "उपनाम",
+    "th_description": "विवरण",
+    "th_canonical": "कैनोनिकल नाम",
+    "th_nominal_voltage": "नॉमिनल वोल्टेज"
+  },
+  "graph": {
+    "missing": "knowledge_graph.json गायब है।",
+    "no_edges": "ग्राफ में कोई एज नहीं।",
+    "stat_symptoms": "लक्षण",
+    "stat_components": "कॉम्पोनेन्ट",
+    "stat_nets": "नेट",
+    "stat_edges": "एज"
+  },
+  "rules": {
+    "missing": "rules.json गायब है।",
+    "none": "कोई डायग्नोस्टिक नियम नहीं।",
+    "no_symptom": "(कोई लक्षण नहीं)",
+    "h_symptoms": "लक्षण",
+    "h_likely_causes": "संभावित कारण",
+    "h_diagnostic_steps": "डायग्नोस्टिक चरण",
+    "h_sources": "स्रोत",
+    "expected": "अपेक्षित {value}",
+    "conf_label": "कॉन्फिडेंस {value}"
+  },
+  "dictionary": {
+    "missing": "dictionary.json गायब है।",
+    "none": "कोई कॉम्पोनेन्ट शीट नहीं।",
+    "th_refdes": "रेफरेंस डेज़िग्नेटर",
+    "th_role": "भूमिका",
+    "th_package": "पैकेज",
+    "th_failure_modes": "फेलियर मोड",
+    "th_notes": "नोट्स"
+  },
+  "audit": {
+    "missing": "audit_verdict.json गायब है। पाइपलाइन ने अभी तक इस पैक का ऑडिट नहीं किया है।",
+    "headline_approved": "ऑडिट स्वीकृत: पैक रजिस्ट्री के साथ संगत है।",
+    "headline_needs_revision": "ऑडिट: संशोधन का अनुरोध किया गया। ड्रिफ्ट पाया गया, सुधार अपेक्षित हैं।",
+    "headline_rejected": "ऑडिट अस्वीकृत: पैक असंगत है, मौजूदा रूप में उपयोग योग्य नहीं।",
+    "headline_unknown": "अज्ञात ऑडिट स्थिति।",
+    "files_to_rewrite": "पुनर्लेखन हेतु फ़ाइलें",
+    "drift_heading": "ड्रिफ्ट पाया गया ({n})"
+  }
+}

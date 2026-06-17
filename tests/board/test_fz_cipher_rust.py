@@ -1,7 +1,6 @@
-"""The optional Rust module `wb_fz_cipher` must produce output that is
-BYTE-IDENTICAL to the reference Python `decrypt_fz_xor` (the shared decode
-cache relies on determinism: same input + key produces the same bytes,
-whichever engine runs).
+"""Le module Rust optionnel `wb_fz_cipher` doit produire une sortie
+BYTE-IDENTIQUE au `decrypt_fz_xor` Python de référence (le moat de cache T9
+dépend du déterminisme : même cipher+clé ⇒ mêmes octets, quel que soit le moteur).
 """
 from __future__ import annotations
 
@@ -10,16 +9,16 @@ from pathlib import Path
 
 import pytest
 
-# OPTIONAL Rust/PyO3 module: if it was not built (self-host without a Rust
-# toolchain) the whole file is skipped — the engine works without it.
+# Module Rust/PyO3 OPTIONNEL : si le build n'a pas été fait (self-host sans
+# toolchain Rust), tout ce fichier est skip — le moteur fonctionne sans lui.
 wb_fz_cipher = pytest.importorskip("wb_fz_cipher")
 
-# Imports after the importorskip: intentional, the module under test only
-# makes sense when the Rust extension is present.
+# Imports après l'importorskip : volontaire, le module testé n'a de sens
+# que si l'extension Rust est présente.
 from api.board.parser._fz_engine.cipher import _decrypt_core_py  # noqa: E402
 from api.board.parser._fz_engine.cipher import decrypt_fz_xor as py_decrypt  # noqa: E402
 
-# Arbitrary 44-word uint32 key (independent of any corpus or .env).
+# Clé arbitraire de 44 mots uint32 (indépendante du corpus / d'un .env).
 KEY = tuple((i * 2654435761) & 0xFFFFFFFF for i in range(44))
 
 _CORPUS = [os.path.expanduser("~/Documents/Boardview XZZ"),
@@ -31,8 +30,8 @@ _CORPUS = [os.path.expanduser("~/Documents/Boardview XZZ"),
     [
         b"",
         b"\x00",
-        bytes(range(16)),  # exactly one window
-        bytes((i * 37) & 0xFF for i in range(1000)),  # > window, varied pattern
+        bytes(range(16)),  # exactement une fenêtre
+        bytes((i * 37) & 0xFF for i in range(1000)),  # > fenêtre, motif varié
     ],
 )
 def test_rust_matches_python(data):
@@ -45,14 +44,14 @@ def test_rust_rejects_wrong_key_length():
 
 
 def test_public_decrypt_identical_rust_vs_python_fallback(monkeypatch):
-    """The public `decrypt_fz_xor` must give a byte-identical result whether it
-    delegates to Rust (the default path when the module is installed) or falls
-    back to the Python core (self-host without a Rust toolchain)."""
+    """La fonction publique `decrypt_fz_xor` doit donner un résultat byte-identique
+    qu'elle délègue au Rust (chemin par défaut quand le module est installé) ou
+    qu'elle retombe sur le cœur Python (self-hoster sans toolchain Rust)."""
     import api.board.parser._fz_engine.cipher as mod
 
     cipher = bytes((i * 37) & 0xFF for i in range(500))
-    rust_out = mod.decrypt_fz_xor(cipher, KEY)            # Rust path (installed)
-    monkeypatch.setattr(mod, "_rust_decrypt", None)        # force the Python fallback
+    rust_out = mod.decrypt_fz_xor(cipher, KEY)            # chemin Rust (installé)
+    monkeypatch.setattr(mod, "_rust_decrypt", None)        # force le fallback Python
     py_out = mod.decrypt_fz_xor(cipher, KEY)
     assert rust_out == py_out
 
@@ -89,13 +88,13 @@ def _find_real_xor_fz():
 
 
 def test_rust_matches_python_on_real_fz_file():
-    """End-to-end golden: on a REAL XOR-flavoured `.fz` file from the corpus, the
-    Rust core must produce exactly the same bytes as the Python core."""
+    """Golden de bout en bout : sur un VRAI fichier `.fz` chiffré du corpus, le
+    cœur Rust doit produire exactement les mêmes octets que le cœur Python."""
     key = _real_key()
     if key is None:
-        pytest.skip("WRENCH_BOARD_FZ_KEY not present in .env")
+        pytest.skip("clé WRENCH_BOARD_FZ_KEY absente de .env")
     path = _find_real_xor_fz()
     if path is None:
-        pytest.skip("no XOR-flavoured .fz in the local corpus")
+        pytest.skip("aucun .fz XOR dans le corpus local")
     raw = path.read_bytes()
     assert wb_fz_cipher.decrypt_fz_xor(raw, list(key)) == _decrypt_core_py(raw, key)

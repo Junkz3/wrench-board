@@ -14,7 +14,7 @@ from typing import Annotated, Literal, TypeVar, get_args
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 # ======================================================================
-# Provenance & strict identifiers
+# T8 — Provenance & identifiants stricts
 # ======================================================================
 
 # --- Patterns regex pour les identifiants canoniques ---
@@ -90,17 +90,17 @@ class SanitizerAction(BaseModel):
         "redacted_customer_mention",
         "dropped_invalid_identifier",
     ]
-    count: int = Field(..., ge=1, description="Number of redacted occurrences in this field.")
+    count: int = Field(..., ge=1, description="Nombre d'occurrences redactées dans ce champ.")
 
 
 class Provenance(BaseModel):
-    """Metadata attached to each fact (component, rule, node, …)."""
+    """Métadonnées attachées à chaque fact post-T8 (composant, règle, node, …)."""
 
     model_config = ConfigDict(extra="forbid")
 
-    expansion_id: str = Field(..., description="ID of the expansion that produced this fact, or 'baseline-pre-T8'.")
+    expansion_id: str = Field(..., description="ID de l'expansion qui a produit ce fact, ou 'baseline-pre-T8'.")
     added_at: datetime
-    added_by_tenant: str | None = Field(default=None, description="Tenant ID (null for baseline / anonymous self-host).")
+    added_by_tenant: str | None = Field(default=None, description="Tenant ID (null pour baseline / self-host anonyme).")
     confidence: float = Field(..., ge=0.0, le=1.0)
     source_kind: Literal["baseline", "agent_expansion", "operator_seed"]
     sanitizer_actions: list[SanitizerAction] = Field(default_factory=list)
@@ -108,14 +108,14 @@ class Provenance(BaseModel):
 
 
 class WithProvenance(BaseModel):
-    """Pydantic mixin: adds an optional provenance field to existing schemas.
+    """Mixin Pydantic : ajoute un champ provenance optionnel aux schémas existants.
 
-    Optional for backward-compatible reading of older packs (the migration
-    attaches a synthetic 'baseline-pre-T8' provenance, see pack_migrate.py).
+    Optionnel pour rétro-compat lecture des packs pré-T8 (la migration attachera
+    une provenance synthétique 'baseline-pre-T8', cf. pack_migrate.py — Task 4).
 
-    All subclasses inherit `populate_by_name=True` in their model_config: this
-    setting lets you use `provenance=` in addition to the alias `_provenance=`
-    during Python construction (both forms are accepted).
+    Toutes les sous-classes héritent de `populate_by_name=True` dans leur
+    model_config : ce réglage permet d'utiliser `provenance=` en plus de l'alias
+    `_provenance=` lors de la construction Python (les deux formes sont acceptées).
     """
 
     provenance: Provenance | None = Field(default=None, alias="_provenance")
@@ -125,21 +125,23 @@ _T = TypeVar("_T", bound=BaseModel)
 
 
 def load_with_tolerant_baseline(model_cls: type[_T], raw: dict) -> _T:
-    """Load a fact in tolerant mode if its provenance says source_kind=='baseline'.
+    """Charge un fact en mode tolérant si sa provenance dit source_kind=='baseline'.
 
-    The goal: the identifier patterns were hardened, but migrated legacy packs
-    contain facts that do not match. We do not want to reject them on read.
+    Le but : on a durci les patterns d'identifiants en T8, mais les packs
+    legacy migrés contiennent des facts qui ne matchent pas. On ne veut pas
+    les rejeter en lecture.
 
-    IMPORTANT CAVEAT: `model_construct` bypasses ALL Pydantic validation (regex
-    patterns, Literal membership, type coercion, presence of required fields).
-    The returned object can therefore hold values that violate the schema —
-    including wrong types or missing fields. The caller (typically the
-    migration or the baseline loader) MUST NOT assume the type/format
-    correctness of the returned object.
+    ⚠ CAVEAT IMPORTANT : `model_construct` bypass TOUTE la validation Pydantic
+    (patterns regex, appartenance aux Literal, coercion de type, présence des
+    champs requis). L'objet retourné peut donc avoir des valeurs qui violent
+    le schéma — y compris des types incorrects ou des champs manquants. Le
+    caller (typiquement la migration Task 4 ou le loader de baseline) NE DOIT
+    PAS supposer la correctness de type/format de l'objet retourné.
 
-    This function is designed specifically for defensive reading of an older
-    baseline whose data is assumed historically sound even if it does not match
-    the hardened patterns. Do NOT use it to validate agent or tenant content.
+    Cette fonction est conçue spécifiquement pour la lecture défensive d'une
+    baseline pré-T8 dont on assume que les données sont historiquement saines
+    même si elles ne matchent pas les patterns durcis. NE PAS l'utiliser pour
+    valider du contenu agent ou tenant.
     """
     prov_raw = raw.get("_provenance") or raw.get("provenance")
     if prov_raw and prov_raw.get("source_kind") == "baseline":

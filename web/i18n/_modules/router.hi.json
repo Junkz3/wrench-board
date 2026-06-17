@@ -1,0 +1,36 @@
+{
+  "section": {
+    "home": "रिपेयर लॉग",
+    "pcb": "Boardview",
+    "schematic": "स्कीमैटिक",
+    "graphe": "मेमोरी",
+    "stock": "स्टॉक और डोनर",
+    "profile": "प्रोफ़ाइल"
+  },
+  "mode": {
+    "journal_tag": "जर्नल",
+    "journal_repairs": "रिपेयर",
+    "journal_session": "सेशन",
+    "tool_tag": "टूल",
+    "tool_boardview": "Boardview",
+    "tool_schematic": "इलेक्ट्रिकल ग्राफ",
+    "tool_stock": "स्टॉक और डोनर",
+    "wait_tag": "प्रतीक्षारत",
+    "wait_no_memory": "कोई मेमोरी लोड नहीं",
+    "wait_no_repair": "कोई सक्रिय रिपेयर नहीं",
+    "wait_unbuilt": "मेमोरी नहीं बनी",
+    "memory_tag": "मेमोरी",
+    "memory_graph": "नॉलेज ग्राफ",
+    "build_tag": "बन रहा है",
+    "build_in_progress": "मेमोरी बन रही है",
+    "profile_tag": "प्रोफ़ाइल",
+    "profile_sub": "टेक्निशियन"
+  },
+  "metabar": {
+    "no_repair": "कोई सक्रिय रिपेयर नहीं",
+    "no_memory_for_device": "इस डिवाइस के लिए कोई मेमोरी नहीं। इसे बनाने के लिए एक रिपेयर बनाएँ।",
+    "memory_loaded_approved": "मेमोरी लोड हुई · ऑडिट स्वीकृत",
+    "memory_building_missing": "मेमोरी बन रही है, {missing} गायब है",
+    "open_repair_to_view_graph": "इसका ग्राफ देखने के लिए जर्नल से एक रिपेयर खोलें।"
+  }
+}

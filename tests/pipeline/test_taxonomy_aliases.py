@@ -1,5 +1,5 @@
 """GET /pipeline/taxonomy carries each pack's carnet aliases so the new-repair
-autocomplete matches by board# / Apple model / EMC, not just the label (Phase B)."""
+autocomplete matches by board# / Apple model / EMC, not just the label (T9a Phase B)."""
 import asyncio
 import json
 

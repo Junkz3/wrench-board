@@ -257,7 +257,7 @@ export const SimulationController = {
 
     // Nodes — we rely on the existing graph renderer having attached
     // `data-refdes` / `data-rail` / `data-signal` on each selectable element.
-    // If the attributes aren't wired yet, this is a no-op for those
+    // If the attributes aren't wired yet (Task 13), this is a no-op for those
     // classes; the scrubber itself still renders.
     for (const [refdes, st] of Object.entries(state.components || {})) {
       document.querySelectorAll(`[data-refdes="${CSS.escape(refdes)}"]`).forEach((el) => {
@@ -362,7 +362,7 @@ export const SimulationController = {
       // Keep the latest event per target (events are stored in insertion order).
       const latest = new Map();
       for (const ev of events) latest.set(ev.target, ev);
-      this.measurementHistory = events;  // full journal, used by the timeline
+      this.measurementHistory = events;  // full journal, used by T19 timeline
       const COMP_MODES = new Set(["dead", "alive", "anomalous", "hot"]);
       const RAIL_MODES = new Set(["dead", "alive", "shorted", "stuck_on"]);
       for (const [target, ev] of latest) {

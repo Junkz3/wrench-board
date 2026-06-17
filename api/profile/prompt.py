@@ -18,7 +18,7 @@ def _group_skill_ids_with_usages(
     return out
 
 
-_LANG_LABEL = {"fr": "French", "en": "English"}
+_LANG_LABEL = {"fr": "French", "en": "English", "zh": "Chinese (Simplified)", "hi": "Hindi"}
 
 
 def render_technician_block(profile: TechnicianProfile) -> str:

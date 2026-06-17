@@ -1,12 +1,12 @@
-"""Live graph resolution by (slug, owner_ref).
+"""T9 — résolution du graphe vif (live) par (slug, owner_ref).
 
-Managed mode (owner set): a per-owner pointer _sources/{owner_ref}/active_sources.json
-maps kind → {filename, hash}; readers resolve owner→hash→shared cache
-.cache_schematic/{hash}/. Self-host (owner None): current root path, unchanged.
+Mode managé (owner set) : un pointeur per-owner _sources/{owner_ref}/active_sources.json
+mappe kind → {filename, hash} ; les lecteurs résolvent owner→hash→cache partagé
+.cache_schematic/{hash}/. Self-host (owner None) : chemin racine actuel, inchangé.
 
-The .cache_schematic/{hash}/ cache stays SHARED by PDF hash: two tenants
-with the same PDF read the same files, zero duplication. Mirrors the
-owner-scoping patterns of stock/store.py + conversation_log.py.
+Le cache .cache_schematic/{hash}/ reste PARTAGÉ par hash de PDF (le moat) : deux tenants
+avec le même PDF lisent les mêmes fichiers, zéro duplication. Calque les patrons
+owner-scoping de stock/store.py + conversation_log.py.
 """
 
 from __future__ import annotations
@@ -21,7 +21,7 @@ _SAFE_OWNER = re.compile(r"^[A-Za-z0-9_-]+$")
 
 # Slugs we deliberately publish as demo devices: their rendered pages + cache
 # are SHARED (read-only) with every tenant, so the first-run example tour shows
-# full schematic pages without a per-owner upload. The shared cache is unaffected — only
+# full schematic pages without a per-owner upload. The moat is unaffected — only
 # these explicitly-listed slugs get the page fallback.
 PUBLIC_DEMO_SLUGS = {"mnt-reform-motherboard"}
 
@@ -120,18 +120,18 @@ def resolve_cache_dir(pack_dir: Path, owner_ref: str | None) -> Path | None:
 
 
 def resolve_graph_dir(pack_dir: Path, owner_ref: str | None) -> Path | None:
-    """Directory to read the parsed graph DATA from — the shared graph.
+    """Répertoire d'où lire les DONNÉES analysées du graphe — le moat PARTAGÉ (T6).
 
-    - Owner with an active pin → their per-owner base (override: their own PDF).
-    - Managed WITHOUT a pin → CANONICAL fallback = the slug root (owner=None),
-      which is the shared/curated device graph → a tenant can diagnose a known
-      board without uploading their PDF (the shared graph). Only served if a
-      canonical graph actually exists (otherwise None → 404).
-    - Self-host (owner None) → root (resolve_cache_dir == pack_dir), unchanged.
+    - Owner avec pin actif → sa base per-owner (override : son propre PDF).
+    - Managé SANS pin → fallback CANONIQUE = la racine du slug (owner=None), qui
+      est le graphe partagé/curé du device → un tenant peut diaguer une carte
+      connue sans uploader son PDF (le moat). N'est servi que si un graphe
+      canonique existe réellement (sinon None → 404).
+    - Self-host (owner None) → racine (resolve_cache_dir == pack_dir), inchangé.
 
-    RESERVED for parsed DATA (electrical_graph.json & co.). RENDERS of the raw
-    file (PDF page PNGs, boardview) stay PRIVATE → they go through
-    resolve_cache_dir (strict, NO fallback) / resolve_owner_boardview.
+    RÉSERVÉ aux DONNÉES analysées (electrical_graph.json & co.). Les RENDUS du
+    fichier brut (pages PNG du PDF, boardview) restent PRIVÉS → ils passent par
+    resolve_cache_dir (strict, AUCUN fallback) / resolve_owner_boardview.
     """
     base = resolve_cache_dir(pack_dir, owner_ref)
     if base is not None:

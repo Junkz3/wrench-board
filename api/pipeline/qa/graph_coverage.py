@@ -27,8 +27,13 @@ Verdict thresholds (net coverage is the diagnostic backbone):
 
 from __future__ import annotations
 
+import json
+import logging
 import re
 from dataclasses import dataclass, field
+from pathlib import Path
+
+logger = logging.getLogger("wrench_board.pipeline.qa.graph_coverage")
 
 # Physical artefacts present on the PCB but legitimately absent from a
 # schematic's component set: test pads (TP/TPU), bare power pads (PP),
@@ -175,3 +180,51 @@ def compare_graph_to_board(
         ghosts=ghosts,
         excluded_families=excluded_counts,
     )
+
+
+def run_coverage_gate(pack_dir: Path, boardview_path: Path | None) -> str | None:
+    """Lot 3 — post-build QA gate, wired into the orchestrator.
+
+    When a build produced an electrical graph AND the technician supplied a
+    boardview, compare the two (the boardview is the independent physical ground
+    truth) and write `coverage_report.json` to the pack. Returns the verdict
+    (PASS / WARN / FAIL) so the orchestrator can keep a FAIL pack out of the
+    shared commons (an incomplete source PDF must not become the authoritative
+    pack). Returns None when there is nothing to compare (no graph or no
+    boardview). Best-effort: any parse/IO error logs and returns None — the QA
+    gate must NEVER crash a build.
+    """
+    pack_dir = Path(pack_dir)
+    graph_path = pack_dir / "electrical_graph.json"
+    if not graph_path.is_file():
+        return None
+    if boardview_path is None or not Path(boardview_path).is_file():
+        return None
+    try:
+        from api.board.parser import parser_for  # local — heavy registry import
+
+        graph = json.loads(graph_path.read_text(encoding="utf-8"))
+        bv_path = Path(boardview_path)
+        board = parser_for(bv_path).parse(
+            bv_path.read_bytes(), file_hash="coverage-gate", board_id=pack_dir.name
+        )
+        report = compare_graph_to_board(
+            graph=graph,
+            board_refdes=[p.refdes for p in board.parts],
+            board_nets=[n.name for n in board.nets],
+        )
+        (pack_dir / "coverage_report.json").write_text(
+            json.dumps(report.to_dict(), indent=2), encoding="utf-8"
+        )
+        logger.info(
+            "[Coverage] %s vs %s → %s (nets %.1f%%, missing-critical %d)",
+            pack_dir.name,
+            bv_path.name,
+            report.verdict,
+            report.net_coverage * 100,
+            len(report.missing_critical),
+        )
+        return report.verdict
+    except Exception:  # noqa: BLE001 — the QA gate must never crash a build
+        logger.exception("[Coverage] gate failed for %s — skipping", pack_dir.name)
+        return None

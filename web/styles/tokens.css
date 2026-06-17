@@ -3,7 +3,10 @@
   --panel:#142030; --panel-2:#1a283d;
   --border:#22324d; --border-soft:#1a2840; --border-hover:#2e4468;
   --text:#e6edf7; --text-2:#a9b6cc; --text-3:#6e7d96;
-  --mono:'JetBrains Mono', ui-monospace, monospace;
+  /* CJK + Devanagari names trail the Latin faces: the browser falls back
+     per-glyph for Chinese / Hindi without loading any extra web font
+     (system-ui covers Windows/macOS, the Noto names cover Linux/Android). */
+  --mono:'JetBrains Mono', ui-monospace, 'Noto Sans CJK SC', 'Noto Sans Devanagari', monospace;
   --amber:   oklch(0.82 0.16 75);
   --cyan:    oklch(0.82 0.14 210);
   --emerald: oklch(0.78 0.15 155);
@@ -14,4 +17,4 @@
 }
 *{box-sizing:border-box}
 html,body{height:100%}
-body{margin:0;background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;font-size:13px;overflow:hidden;-webkit-font-smoothing:antialiased}
+body{margin:0;background:var(--bg);color:var(--text);font-family:'Inter',system-ui,'Noto Sans CJK SC','Noto Sans Devanagari',sans-serif;font-size:13px;overflow:hidden;-webkit-font-smoothing:antialiased}

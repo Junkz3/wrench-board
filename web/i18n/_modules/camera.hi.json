@@ -1,0 +1,11 @@
+{
+  "picker": {
+    "none": "(कोई नहीं)",
+    "device_fallback": "कैमरा {id}…"
+  },
+  "preview": {
+    "title_prefix": "कैमरा",
+    "label_fallback": "कैमरा",
+    "close_aria": "प्रीव्यू बंद करें"
+  }
+}

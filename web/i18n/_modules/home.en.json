@@ -208,6 +208,18 @@
       "empty": "No pack. The device memory is not built yet.",
       "status_approved": "APPROVED",
       "status_building": "building"
+    },
+    "board_delta": {
+      "title": "Specs de cette révision",
+      "disclaimer_pre": "Web-derived knowledge, specific to",
+      "disclaimer_post": "Indicative, not validated at refdes level: confirm on the loaded board.",
+      "sec_ics": "Signature ICs",
+      "sec_rails": "Notable rails",
+      "sec_pitfalls": "Known pitfalls",
+      "sec_cousins": "Neighbouring boards (cousins)",
+      "foot_pitfalls": "pitfalls",
+      "foot_cousins": "cousins",
+      "foot_sources": "sources"
     }
   },
   "toast": {

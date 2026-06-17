@@ -48,6 +48,93 @@ logger = logging.getLogger("wrench_board.pipeline.api")
 router = APIRouter()
 
 
+# ---------------------------------------------------------------------------
+# Board-delta auto-generation helpers
+# ---------------------------------------------------------------------------
+
+def _should_autogenerate_delta(
+    *,
+    is_new: bool,
+    board_number: str | None,
+    allow_expand: bool,
+    memory_root: Path,
+    slug: str,
+) -> bool:
+    """Pure decision function: should we fire a board-delta auto-generation?
+
+    Returns True only when ALL conditions hold:
+    - this is a brand-new repair (``is_new=True``);
+    - a board_number was supplied;
+    - generation is allowed (``allow_expand=True`` — the front-door plan signal;
+      self-host always sends True / omits the field, so it defaults to True);
+    - no delta already exists on disk for (slug, board_number) — avoid respend.
+    """
+    if not is_new:
+        return False
+    if not board_number:
+        return False
+    if not allow_expand:
+        return False
+    # Lazy import keeps the cold-path fast when board_delta is not needed.
+    from api.pipeline.board_delta.store import read_delta, normalize_board_number
+    norm = normalize_board_number(board_number)
+    if not norm:
+        return False
+    existing = read_delta(memory_root=memory_root, device_slug=slug, board_number=norm)
+    return existing is None
+
+
+async def _autogenerate_delta_task(
+    *,
+    device_label: str,
+    board_number: str,
+    slug: str,
+    memory_root: Path,
+    owner_ref: str | None,
+) -> None:
+    """Fire-and-forget background coroutine: generate and write a board delta.
+
+    Mirrors the style of ``_run_pipeline_with_events``: best-effort, logs and
+    swallows all exceptions so a delta failure never breaks the repair session.
+    The AsyncAnthropic client MUST carry ``max_retries`` on the same line
+    (governance grep in tests/agent/test_client_config.py).
+    """
+    from api.pipeline.board_delta.agent import generate_board_delta
+    from api.pipeline.board_delta.store import write_delta
+
+    settings = _pkg.get_settings()
+    if not settings.anthropic_api_key:
+        logger.info(
+            "[BoardDelta] auto-gen skipped for slug=%r board=%r: no API key configured",
+            slug, board_number,
+        )
+        return
+    try:
+        from datetime import UTC, datetime as _dt
+        client = AsyncAnthropic(api_key=settings.anthropic_api_key, max_retries=settings.anthropic_max_retries)  # noqa: E501
+        logger.info(
+            "[BoardDelta] auto-generating delta for slug=%r board_number=%r",
+            slug, board_number,
+        )
+        delta = await generate_board_delta(
+            client=client,
+            model=settings.anthropic_model_main,
+            device_label=device_label,
+            board_number=board_number,
+        )
+        delta.generated_at = _dt.now(UTC).isoformat()
+        delta.generated_by_tenant = owner_ref
+        write_delta(memory_root=memory_root, device_slug=slug, delta=delta)
+        logger.info(
+            "[BoardDelta] auto-gen complete for slug=%r board=%r coverage=%s",
+            slug, board_number, delta.coverage,
+        )
+    except Exception:  # noqa: BLE001 — best-effort; never break repair creation
+        logger.exception(
+            "[BoardDelta] auto-gen failed for slug=%r board=%r", slug, board_number
+        )
+
+
 # Registry of in-flight pipeline tasks, keyed by device slug. The engine holds
 # the only handle on a running pipeline, so cooperative cancellation lives here:
 # POST /repairs/{slug}/cancel cancels the task and publishes a terminal event.
@@ -260,6 +347,7 @@ async def list_repairs() -> list[RepairSummary]:
                     symptom=payload.get("symptom", ""),
                     status=payload.get("status", "open"),
                     created_at=payload.get("created_at", ""),
+                    board_number=payload.get("board_number") or None,
                 )
             )
     results.sort(key=lambda r: r.created_at, reverse=True)
@@ -286,6 +374,7 @@ async def get_repair(repair_id: str) -> RepairSummary:
                 symptom=payload.get("symptom", ""),
                 status=payload.get("status", "open"),
                 created_at=payload.get("created_at", ""),
+                board_number=payload.get("board_number") or None,
             )
     raise HTTPException(status_code=404, detail=f"No repair {repair_id!r}")
 
@@ -536,7 +625,7 @@ async def _run_pipeline_with_events(
             confirmed_device_kind=confirmed_device_kind,
             user_device_kind=user_device_kind,
             expect_schematic=expect_schematic,
-            # Build metering: the build's per-phase token spend is reported
+            # T13 build metering: the build's per-phase token spend is reported
             # to the cloud ledger as kind='build' under this tenant + repair
             # (no-op self-host — see api/pipeline/build_metering.py).
             owner_ref=owner_ref,
@@ -637,6 +726,7 @@ async def create_repair(
     owner_ref: str | None = Form(default=None),
     allow_expand: bool = Form(default=True),
     schematic_pending: bool = Form(default=False),
+    board_number: str | None = Form(default=None),
     file: UploadFile | None = File(default=None),  # noqa: B008 — FastAPI DI idiom
 ) -> RepairResponse:
     """Register a repair and kick off the pipeline in the background.
@@ -664,7 +754,7 @@ async def create_repair(
 
     settings = _pkg.get_settings()
     memory_root = Path(settings.memory_root)
-    # Device alias registry: when the slug isn't explicitly pinned, resolve
+    # T9a device alias registry: when the slug isn't explicitly pinned, resolve
     # the free label to a canonical device identity so aliases of the same board
     # (board# / Apple model / EMC / marketing) land on ONE pack instead of N.
     # Best-effort: any registry hiccup degrades to the naive slugify (today's
@@ -682,7 +772,7 @@ async def create_repair(
             logger.warning("[API] device resolution failed for %r — using slug=%r",
                            request.device_label, slug, exc_info=True)
 
-    # Confirm-on-uncertainty: a broad term that fans out to several siblings —
+    # T9a confirm-on-uncertainty: a broad term that fans out to several siblings —
     # don't guess. Return the candidate menu; no repair created, no build started.
     if resolution is not None and resolution.get("ambiguous"):
         return RepairResponse(
@@ -710,8 +800,46 @@ async def create_repair(
     repair_id, is_new = _persist_repair(
         memory_root, slug, request.device_label, request.symptom, request.owner_ref
     )
+    # Persist board_number on the repair record when supplied. Only on a new
+    # repair (is_new=True): a reused ticket keeps the board_number it was
+    # created with so older sessions stay consistent. Normalised via
+    # normalize_board_number (strips whitespace, canonical separator).
+    if board_number and is_new:
+        from api.pipeline.board_delta.store import normalize_board_number as _nbn
+        repair_path = memory_root / slug / "repairs" / f"{repair_id}.json"
+        try:
+            payload = json.loads(repair_path.read_text(encoding="utf-8"))
+            payload["board_number"] = _nbn(board_number)
+            repair_path.write_text(
+                json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8"
+            )
+        except (OSError, json.JSONDecodeError, ValueError) as exc:
+            logger.warning("[API] could not persist board_number on repair=%s: %s", repair_id, exc)
 
-    pack_complete = _pack_is_complete(pack_dir)
+    # Auto-generate board delta when a board_number is supplied on a NEW repair
+    # and the plan allows it. Fire-and-forget: the POST returns immediately;
+    # the delta lands on disk in the background without blocking the tech.
+    if _should_autogenerate_delta(
+        is_new=is_new,
+        board_number=board_number,
+        allow_expand=allow_expand,
+        memory_root=memory_root,
+        slug=slug,
+    ):
+        asyncio.create_task(
+            _autogenerate_delta_task(
+                device_label=request.device_label,
+                board_number=board_number,  # type: ignore[arg-type] — guarded by _should_autogenerate_delta
+                slug=slug,
+                memory_root=memory_root,
+                owner_ref=request.owner_ref,
+            )
+        )
+
+    # Lot 2 : owner-aware. Un build web-only mis en staging pour CE tenant compte
+    # comme complet POUR LUI (il rouvre son repair sans relancer un build), mais
+    # reste incomplet pour le commons → un autre tenant rebuild proprement.
+    pack_complete = _pack_is_complete(pack_dir, owner_ref=request.owner_ref)
 
     # Branch 0 — the tech resubmitted the form for an already-open ticket
     # on the same (device, symptom). On a COMPLETE pack, reuse the existing

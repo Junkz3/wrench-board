@@ -121,6 +121,7 @@ export async function renderRepairDashboard(session) {
   renderDashboardHeader(repair, taxEntry, slug, rid);
   renderDashboardData(slug, rid, pack, sourcesData);
   renderCapabilities(pack);
+  await renderBoardDeltaCard(slug, repair?.board_number || null);
   renderDashboardConvs(convs.conversations || [], rid);
   renderDashboardFindings(findings, rid);
   renderDashboardTimeline(repair, convs.conversations || [], findings, pack);
@@ -1150,6 +1151,135 @@ function showToast(tone, title, sub) {
   if (tone !== "info") {
     _toastTimer = setTimeout(() => toast.classList.add("hidden"), 3600);
   }
+}
+
+// ───────────────────────────────────────────────────────────────
+// Board-delta card — revision-specific overlay surfacing what the
+// agent knows about this exact board number: signature ICs, notable
+// rails, repair pitfalls, kinship hints (cousin boards). Hidden when
+// no board_number on the repair or when the delta endpoint 404s / returns
+// coverage "none".
+// ───────────────────────────────────────────────────────────────
+async function renderBoardDeltaCard(slug, boardNumber) {
+  const card = document.getElementById("rdCardBoardDelta");
+  if (!card) return;
+
+  // No board number on this repair — hide card and bail.
+  if (!boardNumber) {
+    card.classList.add("hidden");
+    return;
+  }
+
+  let delta;
+  try {
+    delta = await apiGet(
+      `/pipeline/packs/${encodeURIComponent(slug)}/board-delta/${encodeURIComponent(boardNumber)}`,
+    );
+  } catch (_) {
+    // 404 or network error — hide the card.
+    card.classList.add("hidden");
+    return;
+  }
+
+  // Coverage "none" means the delta exists as a record but carries no data.
+  if (!delta || delta.coverage === "none") {
+    card.classList.add("hidden");
+    return;
+  }
+
+  // De-duplicate ICs by (part, role) — same logic as the approved mockup.
+  const seen = new Set();
+  const ics = [];
+  for (const ic of (delta.signature_ics || [])) {
+    const k = `${ic.part}|${ic.role}`;
+    if (seen.has(k)) continue;
+    seen.add(k);
+    ics.push(ic);
+  }
+
+  const rails   = (delta.notable_rails    || []).slice(0, 8);
+  const pitfalls = delta.repair_pitfalls  || [];
+  const cousins  = delta.kinship_hints    || [];
+  const sources  = delta.sources          || [];
+
+  const icRows = ics.map(ic =>
+    `<div class="rd-delta-row">` +
+      `<span class="rd-delta-mono rd-delta-cyan">${escapeHtml(ic.part || "?")}</span>` +
+      `<span class="rd-delta-role">${escapeHtml(ic.role)}</span>` +
+    `</div>`,
+  ).join("");
+
+  const railRows = rails.map(r =>
+    `<div class="rd-delta-row">` +
+      `<span class="rd-delta-mono rd-delta-emerald">${escapeHtml(r.name)}</span>` +
+      `<span class="rd-delta-note">${escapeHtml(r.note)}</span>` +
+    `</div>`,
+  ).join("");
+
+  const pitRows = pitfalls.map(p =>
+    `<div class="rd-delta-pit">` +
+      `<div class="rd-delta-pit-title rd-delta-amber">${escapeHtml(p.title)}</div>` +
+      `<div class="rd-delta-pit-detail">${escapeHtml(p.detail)}</div>` +
+    `</div>`,
+  ).join("");
+
+  const cousinRows = cousins.map(k =>
+    `<div class="rd-delta-row">` +
+      `<span class="rd-delta-mono">${escapeHtml(k.board_number)}</span>` +
+      `<span class="rd-delta-note">${escapeHtml(k.relation)}</span>` +
+    `</div>`,
+  ).join("");
+
+  const covLabel = escapeHtml(delta.coverage || "");
+  const boardLabel = escapeHtml(boardNumber);
+  const deviceLabel = escapeHtml(delta.device_label || "");
+
+  card.innerHTML =
+    `<header class="rd-delta-head">` +
+      `<span class="rd-delta-dot" aria-hidden="true"></span>` +
+      `<span class="rd-delta-title" data-i18n="home.dashboard.board_delta.title">${escapeHtml(t("home.dashboard.board_delta.title"))}</span>` +
+      `<span class="rd-delta-cov">${covLabel}</span>` +
+      `<span class="rd-delta-board-num">${boardLabel}</span>` +
+    `</header>` +
+    `<div class="rd-delta-disclaimer">` +
+      escapeHtml(t("home.dashboard.board_delta.disclaimer_pre")) +
+      ` <strong>${deviceLabel} · ${boardLabel}</strong>. ` +
+      escapeHtml(t("home.dashboard.board_delta.disclaimer_post")) +
+    `</div>` +
+    (ics.length ? (
+      `<div class="rd-delta-sec">` +
+        `<div class="rd-delta-sec-head">${escapeHtml(t("home.dashboard.board_delta.sec_ics"))}</div>` +
+        icRows +
+      `</div>`
+    ) : "") +
+    (rails.length ? (
+      `<div class="rd-delta-sec">` +
+        `<div class="rd-delta-sec-head">${escapeHtml(t("home.dashboard.board_delta.sec_rails"))}</div>` +
+        railRows +
+      `</div>`
+    ) : "") +
+    (pitfalls.length ? (
+      `<div class="rd-delta-sec">` +
+        `<div class="rd-delta-sec-head">${escapeHtml(t("home.dashboard.board_delta.sec_pitfalls"))}</div>` +
+        pitRows +
+      `</div>`
+    ) : "") +
+    (cousins.length ? (
+      `<div class="rd-delta-sec">` +
+        `<div class="rd-delta-sec-head">${escapeHtml(t("home.dashboard.board_delta.sec_cousins"))}</div>` +
+        cousinRows +
+      `</div>`
+    ) : "") +
+    `<div class="rd-delta-foot">` +
+      `${ics.length} ICs · ${rails.length} rails · ${pitfalls.length} ` +
+      escapeHtml(t("home.dashboard.board_delta.foot_pitfalls")) +
+      ` · ${cousins.length} ` +
+      escapeHtml(t("home.dashboard.board_delta.foot_cousins")) +
+      ` · ${sources.length} ` +
+      escapeHtml(t("home.dashboard.board_delta.foot_sources")) +
+    `</div>`;
+
+  card.classList.remove("hidden");
 }
 
 async function deleteConversation(rid, convId) {

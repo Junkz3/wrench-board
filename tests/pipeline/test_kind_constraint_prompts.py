@@ -1,4 +1,4 @@
-"""Scout + Registry inject a device-kind constraint into their prompts.
+"""Task 6 — Scout + Registry inject a device-kind constraint into their prompts.
 
 These tests assert that the authoritative one-line constraint produced by
 `device_kind_constraint(device_kind)` reaches the model-bound prompt:

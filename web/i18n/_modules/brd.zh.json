@@ -1,0 +1,121 @@
+{
+  "minimap": {
+    "title": "关系",
+    "close": "关闭",
+    "empty_click": "点击一个电路板元件。",
+    "no_device": "URL 中没有设备。",
+    "no_schematic": "此设备没有导入原理图。",
+    "unknown_in_schematic": "原理图中未知：{refdes}",
+    "loading": "加载中…",
+    "loading_short": "加载中…",
+    "kind": {
+      "comp": "COMP",
+      "net": "NET"
+    },
+    "subhead": {
+      "rail": "供电轨",
+      "ground": "接地",
+      "signal": "信号",
+      "voltage": "{volt} V",
+      "pins_count": "{n} 个引脚",
+      "pin_count": "{n} 个引脚",
+      "nostuff": "NOSTUFF"
+    },
+    "tooltip": {
+      "open_rail_with_voltage": "{label} · {volt} V（在原理图中打开）",
+      "open_rail": "{label}（在原理图中打开）",
+      "decouple_cap": "{label}：此供电轨上的去耦电容",
+      "open_rail_focus": "在原理图中打开并聚焦供电轨",
+      "pin_role_type": "{refdes}.{pin} · {role}",
+      "pin_role_type_full": "{refdes}.{pin} · {role} · {type}",
+      "comp_type": "{refdes} · {type}",
+      "comp_type_mpn": "{refdes} · {type} · {mpn}",
+      "pins_of_ref": "{refdes} · {type} · 引脚 {pins}",
+      "pin_of_ref": "{refdes} · {type} · 引脚 {pins}",
+      "pins_of_ref_no_type": "{refdes} · 引脚 {pins}",
+      "pin_of_ref_no_type": "{refdes} · 引脚 {pins}"
+    },
+    "rail": {
+      "label": "供电轨",
+      "open_in_schematic": "在原理图中打开",
+      "source": "源：{refdes}",
+      "no_peers": "未列出对端",
+      "no_power_role": "未识别供电角色",
+      "more_pins_on_net": "{net} 上还有 +{n} 个引脚"
+    },
+    "section": {
+      "pins": "引脚（{n}）",
+      "powered_by": "供电来源",
+      "powers": "供电对象",
+      "decouples": "去耦（{n}）",
+      "more": "+{n}",
+      "more_others": "（另外 {n} 个）"
+    },
+    "spof": "为 {n} 个消耗端供电",
+    "spof_one": "为 {n} 个消耗端供电",
+    "pin": {
+      "ground_count": "{n} 个引脚",
+      "ground_count_one": "{n} 个引脚",
+      "ground_list": "（{pins}）",
+      "no_net": "（无网络）"
+    }
+  },
+  "loader": {
+    "status": "正在加载电路板",
+    "row": {
+      "board_id": "board_id",
+      "format": "格式",
+      "components": "元件",
+      "pins": "引脚",
+      "nets": "网络"
+    }
+  },
+  "error": {
+    "default_code": "ERROR",
+    "default_msg": "未知错误",
+    "fetch_failed_msg": "{url} 上的 HTTP {status}"
+  },
+  "empty": {
+    "code": "NO BOARDVIEW",
+    "msg_with_slug": "未为 {slug} 加载 Boardview。从维修页面上传 .brd / .kicad_pcb / .fz 文件以启用 PCB 视图。",
+    "msg_no_slug": "未加载 Boardview。从维修页面上传 .brd / .kicad_pcb / .fz 文件以启用 PCB 视图。"
+  },
+  "toolbar": {
+    "side_top": "顶层",
+    "side_bottom": "底层",
+    "annot_title": "显示 / 隐藏丝印标注",
+    "fit_title": "适应视图",
+    "minimap_title": "点击时显示原理图关系小地图"
+  },
+  "badge": {
+    "summary": "{parts} 个元件 · {pins} 个引脚"
+  },
+  "inspector": {
+    "close": "关闭",
+    "value_dash": "N/A",
+    "footprint_dash": "N/A",
+    "rotation": "旋转 {deg}",
+    "rotation_dash": "N/A",
+    "smd": "SMD",
+    "tht": "THT",
+    "layer_top": "TOP",
+    "layer_bottom": "BOTTOM",
+    "layer_both": "BOTH",
+    "size": "{w} × {h} mm · {n} 个引脚",
+    "size_one": "{w} × {h} mm · {n} 个引脚",
+    "nets_section": "元件网络（{n}）",
+    "linked_section": "关联元件（{n}）",
+    "net_count": "×{n}",
+    "link_count": "{n} 个网络",
+    "link_count_one": "{n} 个网络"
+  },
+  "net": {
+    "no_net_pin": "{refdes}.{pin} · 无网络",
+    "with_count": "{net} · {n} 个引脚",
+    "with_count_one": "{net} · {n} 个引脚"
+  },
+  "cursor": {
+    "empty": "·",
+    "xy": "x: {x}  y: {y}"
+  }
+}

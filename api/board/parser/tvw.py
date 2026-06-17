@@ -3,8 +3,9 @@
 **Two TVW layouts coexist in circulation, both supported here.**
 
 1. Some redistributions carry a Test_Link-shape ASCII body wrapped in a
-   symmetric per-character encoding within each character class; literal
-   separators pass through untouched. This parser reverses the encoding
+   symmetric per-character rotation cipher: digits rotate by 3 within
+   `0-9`, Latin letters rotate by 10 within their case class. Literal
+   separators pass through untouched. This parser decodes the cipher
    then hands off to the shared Test_Link ASCII shape walker.
 
 2. The *production* `.tvw` format emitted by production tools (3.0 / 4.0) is
@@ -12,17 +13,20 @@
    strings, per-layer aperture (D-code) tables, and per-layer placement
    records. We dispatch this flavour to `_tvw_engine` which produces a
    dimensionally-accurate `Board` with real refdes / footprints / net
-   names (read from the trailing component + network-name sections).
+   names (decoded from the trailing component + network-name sections).
 
    This binary container ships from **multiple CAD vendors** that all
-   emit the *same* grammar — only the (encoded) header vendor / build
-   strings differ. The magic check keys only on the shared,
-   vendor-independent format signature + version, so any vendor's
-   production binary routes here (see `_tvw_engine/magic.py`).
+   emit the *same* grammar — only the (cipher-encoded) header vendor /
+   build strings differ. Two vendor families are decoded so far:
+   vendor A (`G5u9k8s` → "vendor A") and vendor B (`G34vS4z` → "vendor B",
+   the dominant `\\x13 4f 39 35` family, ~10.7% of the corpus). The magic
+   check keys only on the shared, vendor-independent format
+   signature + version, so any vendor's production binary routes
+   here (see `_tvw_engine/magic.py`).
 
 Dispatch: the production-binary magic at the head of the file (see
 `_tvw_engine/magic.py`) routes the production-binary path; otherwise
-we reverse the header encoding and try the Test_Link walker.
+we apply the rotation cipher and try the Test_Link walker.
 """
 
 from __future__ import annotations
@@ -74,16 +78,17 @@ def _obfuscate(text: str) -> bytes:
 def _looks_binary_tvw(raw: bytes) -> bool:
     """Detect the production binary-layout TVW container.
 
-    The header encoding maps every alphanumeric input byte to another
-    alphanumeric in the same class, so an encoded Test_Link payload
-    stays overwhelmingly printable-ASCII. The binary TVW container (per
-    `fileformat-tvw.txt`) packs little-endian 32-bit integers, RGBA
-    colour values, and Pascal-string length prefixes outside the
-    printable range. Anything with more than ~35 % non-printable bytes
-    in the first 2 KB is almost certainly the binary layout.
+    The rotation cipher maps every alphanumeric input byte to another
+    alphanumeric in the same class, so a cipher-encoded plaintext
+    Test_Link payload stays overwhelmingly printable-ASCII. The
+    binary TVW container (per `fileformat-tvw.txt`) packs
+    little-endian 32-bit integers, RGBA colour values, and Pascal-
+    string length prefixes outside the printable range. Anything with
+    more than ~35 % non-printable bytes in the first 2 KB is almost
+    certainly the binary layout.
 
     Line-break bytes (`\n`, `\r`, `\t`) count as printable here — the
-    encoding preserves them, so their presence is neutral.
+    rotation cipher preserves them, so their presence is neutral.
     """
     if not raw:
         return False
@@ -110,13 +115,13 @@ class TVWParser(BoardParser):
             tvw_file = walk_tvw(raw)
             return to_board(tvw_file, board_id=board_id, file_hash=file_hash)
 
-        # Fallback path 1: encoded ASCII variant.
+        # Fallback path 1: rotation-cipher ASCII variant.
         if _looks_binary_tvw(raw):
             raise ObfuscatedFileError(
                 "tvw: looks like a binary-layout TVW container but does not "
                 "match the production-binary magic. Unknown TVW "
-                "variant; the ASCII parser cannot read binary "
-                "containers. See docs/superpowers/specs/"
+                "variant; the rotation-cipher ASCII parser cannot decode "
+                "binary containers. See docs/superpowers/specs/"
                 "2026-04-25-boardview-formats-v1.md."
             )
         try:

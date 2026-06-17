@@ -92,7 +92,7 @@ def test_deep_unwrap_handles_stringified_inside_nested_dict():
         "schema_version": "1.0",
         "rules": [
             {
-                # Rule.id suit le pattern R-[A-Z0-9_-]{1,48}
+                # T8 : Rule.id suit le pattern R-[A-Z0-9_-]{1,48}
                 "id": "R-001",
                 "symptoms": '["x","y"]',  # stringified list, nested
                 "likely_causes": [

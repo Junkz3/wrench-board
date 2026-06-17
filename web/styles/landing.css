@@ -444,6 +444,9 @@ body.pending-landing .statusbar { display: none !important; }
  * .modal-backdrop z-index (100) is meant for the chrome-level home view, so
  * lift this one above the hero or it opens invisibly behind it. */
 #landingKnowledgeBackdrop { z-index: 1100; }
+/* Same reason for the post-launch "notify when ready" modal (Lot 4) — it opens
+ * over the build timeline on the landing hero, so it needs the same lift. */
+#landingNotifyBackdrop { z-index: 1100; }
 
 .landing-status {
   font-size: 12px;

@@ -1,4 +1,4 @@
-"""PackSanitizer : tests unitaires regex+listes.
+"""T8 — PackSanitizer : tests unitaires regex+listes.
 
 Module pur. Pas d'I/O. Un test par pattern (positif + négatif + multi-occ).
 """

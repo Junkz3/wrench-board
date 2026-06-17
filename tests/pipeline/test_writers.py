@@ -56,7 +56,7 @@ from api.pipeline.schematic.schemas import (
 @pytest.fixture
 def registry() -> Registry:
     """Minimal registry with a couple of entries to give the prefix non-trivial JSON."""
-    # kind en majuscules (PMIC, CAPACITOR, POWER_RAIL)
+    # T8 : kind en majuscules (PMIC, CAPACITOR, POWER_RAIL)
     return Registry(
         device_label="Demo Device",
         components=[

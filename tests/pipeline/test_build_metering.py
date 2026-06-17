@@ -1,4 +1,4 @@
-"""Build metering — the pipeline's per-phase token spend is reported to the
+"""T13 build metering — the pipeline's per-phase token spend is reported to the
 cloud ledger as kind='build' (the agent's chat reports stay kind='agent').
 
 Invariants:

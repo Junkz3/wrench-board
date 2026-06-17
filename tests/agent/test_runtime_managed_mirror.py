@@ -1,4 +1,4 @@
-"""Tests for durable mirror outcomes (D1).
+"""Tests for durable mirror outcomes — Task 5 (D1).
 
 Covers:
   - mirror_outcome_to_memory retries on transient upsert failures.

@@ -1,0 +1,67 @@
+{
+  "empty": {
+    "title": "कोई ग्राफ लोड नहीं हुआ",
+    "body": "किसी डिवाइस पर जनरेशन पाइपलाइन चलाएँ: ग्राफ परिणामी pack से बनाया जाएगा।"
+  },
+  "legend": {
+    "types_heading": "प्रकार",
+    "type_symptom": "लक्षण",
+    "type_symptom_desc": "ग्राहक जो देखता है",
+    "type_net": "नेट / पावर रेल",
+    "type_net_desc": "सिग्नल या सप्लाई",
+    "type_component": "कॉम्पोनेन्ट",
+    "type_component_desc": "चिप, कनेक्टर",
+    "type_action": "क्रिया",
+    "type_action_desc": "संभावित रिपेयर",
+    "relations_heading": "संबंध",
+    "rel_causes": "कारण बनता है",
+    "rel_causes_desc": "कारण-संबंध",
+    "rel_powers": "पावर देता है",
+    "rel_powers_desc": "पावर प्रवाह",
+    "rel_connected": "से जुड़ा",
+    "rel_connected_desc": "बस / ग्राउंड",
+    "rel_resolves": "हल करता है",
+    "rel_resolves_desc": "सुधारात्मक क्रिया"
+  },
+  "controls": {
+    "zoom_in": "ज़ूम इन",
+    "zoom_out": "ज़ूम आउट",
+    "fit": "फ़िट करें"
+  },
+  "inspector": {
+    "type_inferred": "· मॉडल अनुमान",
+    "id_label": "id: {id}",
+    "confidence": "कॉन्फिडेंस",
+    "description": "विवरण",
+    "metadata": "मेटाडेटा",
+    "relations": "संबंध",
+    "edge_weight": "{label} · वज़न {weight}",
+    "edge_outgoing": "→",
+    "edge_incoming": "←",
+    "rules_field": "नियम",
+    "conf_high": "उच्च कॉन्फिडेंस: कई स्रोतों से पुष्ट।",
+    "conf_low": "निम्न कॉन्फिडेंस: एकल स्रोत या अप्रत्यक्ष अनुमान।",
+    "conf_medium": "मध्यम कॉन्फिडेंस: आंशिक क्रॉस-रेफरेंस।"
+  },
+  "tooltip": {
+    "conf_pct": "कॉन्फि. {pct}%"
+  },
+  "subsystem": {
+    "fallback_label": "अन्य"
+  },
+  "type_label": {
+    "component": "कॉम्पोनेन्ट",
+    "symptom": "लक्षण",
+    "net": "नेट / पावर रेल",
+    "action": "क्रिया"
+  },
+  "rel_label": {
+    "causes": "कारण बनता है",
+    "powers": "पावर देता है",
+    "connected_to": "से जुड़ा",
+    "resolves": "हल करता है"
+  },
+  "stats": {
+    "summary": "{n} नोड · {e} एज"
+  }
+}

@@ -1,4 +1,4 @@
-"""Cousin-fallback hint for the diagnostic agent.
+"""Cousin-fallback hint for the diagnostic agent (T9a Phase B).
 
 When the current board has no schematic of its own, the agent can still lean on a
 sibling pack (same device family, a nearby board revision) as an INDICATIVE

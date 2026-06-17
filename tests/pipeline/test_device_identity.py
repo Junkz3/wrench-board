@@ -1,4 +1,4 @@
-"""Deterministic device-facet extraction. Pure, fast — no LLM."""
+"""Deterministic device-facet extraction (T9a). Pure, fast — no LLM."""
 from api.pipeline.device_identity import (
     STRONG_KINDS,
     extract_facets,

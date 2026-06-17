@@ -81,7 +81,7 @@ class Settings(BaseSettings):
         ),
     )
 
-    # --- Cloud token-usage metering -------------------------------------------
+    # --- Cloud token-usage metering (T13) -------------------------------------
     # When the engine runs behind wrenchboard-cloud, each diagnostic-agent LLM
     # call best-effort reports its raw token usage to the cloud's metering
     # endpoint (the cloud prices it per-tenant and keeps the billing ledger).
@@ -106,7 +106,7 @@ class Settings(BaseSettings):
         ),
     )
 
-    # --- Cloud device registry (the "carnet") ---------------------------------
+    # --- Cloud device registry (T9a, the "carnet") ----------------------------
     # When set with cloud_device_registry_token, the device alias registry is
     # backed by the cloud's Postgres (source of truth in managed mode) via
     # {url}/internal/device-registry/*. Unset → the engine uses a local JSON

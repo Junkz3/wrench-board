@@ -5,7 +5,7 @@ its board ONCE at WS open (`SessionState.from_device`). A boardview uploaded
 or switched *after* the session opened was invisible to the `bv_*` tools — the
 tech saw the board in the viewer (which reads disk live, per request) while the
 agent reported `no-board-loaded`. Two defects, one root cause (the board-load
-was never aligned with the per-owner live-graph model):
+was never aligned with T9's per-owner live-graph model):
 
   1. Staleness — no reload mid-session; only a WS reconnect picked up an upload.
   2. Owner-blindness — `from_device(slug)` read the ROOT pin + scanned the SHARED
@@ -34,7 +34,7 @@ def _seed_owner_boardview(
     memory_root: Path, slug: str, owner: str, filename: str, src: Path = MINIMAL_BRD
 ) -> None:
     """Drop a parseable boardview into the shared uploads dir and pin it for
-    `owner` via the per-owner pointer (`_sources/{owner}/active_sources.json`)."""
+    `owner` via the T9 per-owner pointer (`_sources/{owner}/active_sources.json`)."""
     uploads = memory_root / slug / "uploads"
     uploads.mkdir(parents=True, exist_ok=True)
     shutil.copyfile(src, uploads / filename)

@@ -3,8 +3,8 @@
 Avant le fix, `render_board` appelait `_find_boardview(slug, pack_dir)` qui scanne le
 pin GLOBAL / `board_assets/` / `memory/{slug}/uploads/` de la RACINE → un tenant qui
 n'a rien uploadé récupérait le board d'un autre tenant du même slug (fuite confirmée
-empiriquement : 200 + payload board complet). Miroir du patron de
-`test_schematic_routes_owner.py` : owner set → pin per-owner via `X-Owner-Ref` ;
+empiriquement : 200 + payload board complet). Miroir du patron T9
+(`test_schematic_routes_owner.py`) : owner set → pin per-owner via `X-Owner-Ref` ;
 pas de pin → 404 (PAS la racine) ; pas d'en-tête (self-host) → racine inchangée.
 """
 

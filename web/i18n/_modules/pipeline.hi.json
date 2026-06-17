@@ -1,0 +1,61 @@
+{
+  "drawer": {
+    "header_label": "मेमोरी बना रहे हैं",
+    "device_placeholder": "...",
+    "close_aria": "प्रगति पैनल बंद करें"
+  },
+  "phase": {
+    "scout": {
+      "label": "स्काउट",
+      "sub": "वेब रिसर्च"
+    },
+    "registry": {
+      "label": "रजिस्ट्री",
+      "sub": "कैनोनिकल शब्दावली"
+    },
+    "writers": {
+      "label": "राइटर्स",
+      "sub": "ग्राफ · नियम · डिक्शनरी"
+    },
+    "audit": {
+      "label": "ऑडिटर",
+      "sub": "QA और संगति"
+    },
+    "schematic_ingest": {
+      "label": "स्कीमैटिक इन्जेस्ट हुआ",
+      "sub": "पेज-दर-पेज विज़न"
+    },
+    "device_kind": {
+      "label": "डिवाइस प्रकार",
+      "sub": "ग्राफ वर्गीकरण"
+    }
+  },
+  "step": {
+    "time_placeholder": "...",
+    "in_progress": "चल रहा है…",
+    "failed": "विफल"
+  },
+  "status": {
+    "waiting": "पहले इवेंट की प्रतीक्षा हो रही है…",
+    "connecting": "पाइपलाइन से कनेक्ट हो रहा है…",
+    "started": "पाइपलाइन शुरू हुई…",
+    "queued": "कतार में · स्थान <b>{position}</b> ({ahead} आगे) · स्लॉट खाली होने पर अपने आप शुरू होगा",
+    "phase_running": "चरण चल रहा है · <b>{phase}</b>",
+    "ready": "मेमोरी तैयार · ऑडिट <b>{status}</b> · संगति <b>{score}</b>",
+    "failed": "पाइपलाइन विफल · <b>{status}</b>",
+    "lost_connection": "प्रगति स्ट्रीम से कनेक्शन टूट गया।",
+    "closed_early": "पाइपलाइन पूरी होने से पहले कनेक्शन बंद हो गया।"
+  },
+  "cta": {
+    "view_memory_bank": "मेमोरी बैंक खोलें",
+    "close": "बंद करें"
+  },
+  "kind": {
+    "declared": "घोषित",
+    "detected": "पता लगाया गया",
+    "recommended": "अनुशंसित",
+    "confirm": "पुष्टि करें और जारी रखें",
+    "confirmed": "पुष्ट",
+    "undeclared": "अघोषित"
+  }
+}

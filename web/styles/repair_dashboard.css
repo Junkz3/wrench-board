@@ -1428,4 +1428,133 @@ body.llm-open .rd-body { grid-template-columns: 1fr; }
   background: color-mix(in oklch, var(--emerald) 22%, transparent);
   border-color: var(--emerald);
 }
+
+/* ─────────────────────────────────────────────────────────────
+ * Board-delta card — revision-specific specs overlay. Sits
+ * between the 4-card data grid and the rd-body columns.
+ * ───────────────────────────────────────────────────────────── */
+.rd-delta-card {
+  background: linear-gradient(180deg, var(--panel), var(--bg-2));
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.rd-delta-card.hidden { display: none; }
+
+.rd-delta-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-soft);
+  background: linear-gradient(180deg, var(--panel-2), transparent);
+}
+.rd-delta-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--cyan);
+  box-shadow: 0 0 8px var(--cyan);
+}
+.rd-delta-title {
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: .2px;
+  color: var(--text);
+}
+.rd-delta-cov {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: var(--emerald);
+  border: 1px solid color-mix(in oklch, var(--emerald), transparent 70%);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+.rd-delta-board-num {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  color: var(--text-2);
+  background: var(--bg-deep);
+  border: 1px solid var(--border);
+  padding: 3px 8px;
+  border-radius: 5px;
+}
+
+.rd-delta-disclaimer {
+  padding: 8px 16px;
+  font-size: 11px;
+  color: var(--text-3);
+  border-bottom: 1px solid var(--border-soft);
+  background: var(--bg-deep);
+  line-height: 1.45;
+}
+.rd-delta-disclaimer strong {
+  color: var(--amber);
+  font-weight: 500;
+}
+
+.rd-delta-sec {
+  padding: 11px 16px;
+  border-bottom: 1px solid var(--border-soft);
+}
+.rd-delta-sec:last-of-type { border-bottom: none; }
+.rd-delta-sec-head {
+  font-family: var(--mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: var(--text-3);
+  margin-bottom: 8px;
+}
+.rd-delta-row {
+  display: flex;
+  gap: 12px;
+  padding: 3px 0;
+  align-items: baseline;
+}
+.rd-delta-mono {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  min-width: 170px;
+  flex-shrink: 0;
+  color: var(--text-2);
+}
+.rd-delta-cyan    { color: var(--cyan); }
+.rd-delta-emerald { color: var(--emerald); }
+.rd-delta-amber   { color: var(--amber); }
+.rd-delta-role,
+.rd-delta-note {
+  font-size: 12px;
+  color: var(--text-2);
+  min-width: 0;
+  line-height: 1.45;
+}
+
+.rd-delta-pit {
+  padding: 6px 0;
+}
+.rd-delta-pit-title {
+  font-weight: 500;
+  font-size: 12px;
+  margin-bottom: 2px;
+}
+.rd-delta-pit-detail {
+  font-size: 11.5px;
+  color: var(--text-2);
+  line-height: 1.45;
+}
+
+.rd-delta-foot {
+  padding: 8px 16px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: .3px;
+  color: var(--text-3);
+}
 .rd-fix-btn.hidden { display: none; }

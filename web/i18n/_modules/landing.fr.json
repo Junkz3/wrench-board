@@ -16,6 +16,14 @@
     "symptom_aria": "Quel est le symptôme",
     "submit": "Lancer le diagnostic"
   },
+  "notify": {
+    "badge": "Préparation en cours",
+    "title": "Cet appareil est en préparation",
+    "intro": "Construire la fiche de connaissances d'un appareil tout neuf peut prendre un moment. On peut t'envoyer un email quand le diagnostic est prêt, pour ne pas attendre ici.",
+    "close": "Fermer",
+    "later": "Plus tard",
+    "confirm": "Préviens-moi par email"
+  },
   "timeline": {
     "title_default": "Construction de la fiche…",
     "title_build": "Construction de la fiche · {device}",
@@ -53,6 +61,8 @@
     "device_known": "Je connais déjà {device}. J'ouvre le diagnostic…",
     "expand": "Je connais {device}. J'ajoute ton symptôme spécifique (~3 min).",
     "build_new": "Nouveau pour moi : je construis la fiche en arrière-plan. Tu peux regarder.",
+    "build_delay": "Nouvel appareil : je prépare sa fiche de connaissances. Ça peut prendre un moment. Tu peux fermer cette page et revenir, la préparation continue.",
+    "notify_armed": "C'est noté. On t'envoie un email dès que l'appareil est prêt.",
     "ready": "C'est prêt. J'ouvre le diagnostic…",
     "ws_lost": "Connexion au pipeline interrompue. Recharge la page si rien ne bouge.",
     "error_create": "Échec de la création : {error}",
@@ -78,6 +88,12 @@
     "close": "Fermer",
     "intro": "Plus de contexte affine le pack. Tout ici est optionnel.",
     "done": "OK"
+  },
+  "board_number": {
+    "label": "Numéro de carte (optionnel)",
+    "placeholder": "820-02016",
+    "aria": "Numéro de carte",
+    "hint": "Gravé sur le PCB. Débloque les specs connues de ta révision exacte."
   },
   "schematic": {
     "cta": "Joindre un PDF de schéma (optionnel)",

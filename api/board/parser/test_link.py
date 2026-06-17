@@ -161,7 +161,7 @@ def _parse_parts(lines: list[str], n: int) -> list[tuple[str, int, int]]:
     Returns a list of `(refdes, type_layer, end_of_pins)` tuples.
 
     `end_of_pins` is the 1-based exclusive upper bound of pin indices owned by
-    this part (used for pin-to-part linkage). Part k owns pins in
+    this part (used in Task 7 for pin-to-part linkage). Part k owns pins in
     [prev_end, end_of_pins_k), with prev_end starting at 0.
 
     Real-world `.brd` files from some exporters append extra whitespace-separated
@@ -232,7 +232,7 @@ def _parse_pins_and_patch_parts(
     """
     if num_pins == 0:
         # No pins — leave parts unchanged (bbox / pin_refs stay as the
-        # zero placeholder). Empty boards are degenerate but valid.
+        # zero placeholder from Task 6). Empty boards are degenerate but valid.
         return [], parts
 
     try:

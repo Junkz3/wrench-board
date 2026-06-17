@@ -1,7 +1,7 @@
-"""The engine reports per-LLM-call agent token usage back to the cloud.
+"""T13 — the engine reports per-LLM-call agent token usage back to the cloud.
 
 The diagnostic agent's token cost is the tenant-private billing unit (the
-shared pipeline pack build is the amortized shared graph, not metered here). At each
+shared pipeline pack build is the amortized moat, not metered here). At each
 `span.model_request_end` the live forwarder fires a best-effort POST to the
 cloud's `/internal/metering/diagnostic` endpoint. It must:
 

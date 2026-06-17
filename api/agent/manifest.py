@@ -1182,8 +1182,8 @@ def build_tools_manifest(session: SessionState) -> list[dict]:
 
 
 def _has_electrical_graph(device_slug: str) -> bool:
-    # Per-owner: presence of the graph for the current tenant (its active
-    # PDF), not the slug's shared root. owner None → root, unchanged.
+    # T9 — per-owner : présence du graphe pour le tenant courant (son PDF
+    # actif), pas la racine partagée du slug. owner None → racine, inchangé.
     from api.agent.owner_ref import current_owner_ref
     from api.pipeline import live_graph
 
@@ -1199,7 +1199,7 @@ def render_system_prompt(
     The Managed runtime carries its prompt server-side via managed_ids.json
     and doesn't call this function.
 
-    ``cousin_line``: when this board has no schematic of its own,
+    ``cousin_line`` (T9a Phase B): when this board has no schematic of its own,
     the caller may pass a one-line hint pointing the agent at a sibling pack
     (same family) it can lean on as an indicative reference.
     """

@@ -1,0 +1,33 @@
+{
+  "page_title": "Wrench Board: परिचय",
+  "mascot": {
+    "aria": "Wrench Board मैस्कट"
+  },
+  "sidebar": {
+    "aria": "हाल की रिपेयर",
+    "title": "हाल की",
+    "item1_symptom": "चालू नहीं होता",
+    "item1_meta": "2 घंटे पहले",
+    "item2_symptom": "बूट नहीं, ब्लैक स्क्रीन",
+    "item2_meta": "कल",
+    "item3_symptom": "स्टार्टअप पर ब्लैक स्क्रीन",
+    "item3_meta": "3 दिन पहले"
+  },
+  "hero": {
+    "mark": "Wrench Board",
+    "title": "आपका हार्डवेयर रिपेयर सहायक।",
+    "sub": "मुझे अपना डिवाइस और लक्षण बताएँ: मैं नॉलेज तैयार करूँगा और डायग्नोस्टिक शुरू करूँगा।"
+  },
+  "form": {
+    "device_placeholder": "डिवाइस (जैसे MNT Reform मदरबोर्ड, iPhone 11, Framework 13)",
+    "device_aria": "कौन सा डिवाइस",
+    "symptom_placeholder": "लक्षण (जैसे चालू नहीं होता, चार्ज नहीं होता, ब्लैक स्क्रीन)",
+    "symptom_aria": "लक्षण क्या है",
+    "submit": "डायग्नोस्टिक शुरू करें"
+  },
+  "chips": {
+    "chip1": "MNT Reform: बूट नहीं",
+    "chip2": "iPhone 11: चार्ज नहीं",
+    "chip3": "Framework: ब्लैक स्क्रीन"
+  }
+}

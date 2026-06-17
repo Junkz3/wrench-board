@@ -1,0 +1,121 @@
+{
+  "minimap": {
+    "title": "संबंध",
+    "close": "बंद करें",
+    "empty_click": "किसी बोर्ड कॉम्पोनेन्ट पर क्लिक करें।",
+    "no_device": "URL में कोई डिवाइस नहीं।",
+    "no_schematic": "इस डिवाइस के लिए कोई स्कीमैटिक इन्जेस्ट नहीं किया गया।",
+    "unknown_in_schematic": "स्कीमैटिक में अज्ञात: {refdes}",
+    "loading": "लोड हो रहा है…",
+    "loading_short": "लोड हो रहा है…",
+    "kind": {
+      "comp": "COMP",
+      "net": "NET"
+    },
+    "subhead": {
+      "rail": "पावर रेल",
+      "ground": "ग्राउंड",
+      "signal": "सिग्नल",
+      "voltage": "{volt} V",
+      "pins_count": "{n} पिन",
+      "pin_count": "{n} पिन",
+      "nostuff": "NOSTUFF"
+    },
+    "tooltip": {
+      "open_rail_with_voltage": "{label} · {volt} V (स्कीमैटिक में खोलें)",
+      "open_rail": "{label} (स्कीमैटिक में खोलें)",
+      "decouple_cap": "{label}: इस रेल पर डिकपलिंग कैप",
+      "open_rail_focus": "रेल फोकस के साथ स्कीमैटिक में खोलें",
+      "pin_role_type": "{refdes}.{pin} · {role}",
+      "pin_role_type_full": "{refdes}.{pin} · {role} · {type}",
+      "comp_type": "{refdes} · {type}",
+      "comp_type_mpn": "{refdes} · {type} · {mpn}",
+      "pins_of_ref": "{refdes} · {type} · पिन {pins}",
+      "pin_of_ref": "{refdes} · {type} · पिन {pins}",
+      "pins_of_ref_no_type": "{refdes} · पिन {pins}",
+      "pin_of_ref_no_type": "{refdes} · पिन {pins}"
+    },
+    "rail": {
+      "label": "रेल",
+      "open_in_schematic": "स्कीमैटिक में खोलें",
+      "source": "src: {refdes}",
+      "no_peers": "कोई पीयर सूचीबद्ध नहीं",
+      "no_power_role": "कोई पावर रोल पहचाना नहीं गया",
+      "more_pins_on_net": "{net} पर +{n} और पिन"
+    },
+    "section": {
+      "pins": "पिन ({n})",
+      "powered_by": "इससे संचालित",
+      "powers": "संचालित करता है",
+      "decouples": "डिकपल करता है ({n})",
+      "more": "+{n}",
+      "more_others": "({n} अन्य)"
+    },
+    "spof": "{n} कंज़्यूमर को संचालित करता है",
+    "spof_one": "{n} कंज़्यूमर को संचालित करता है",
+    "pin": {
+      "ground_count": "{n} पिन",
+      "ground_count_one": "{n} पिन",
+      "ground_list": "({pins})",
+      "no_net": "(नो-नेट)"
+    }
+  },
+  "loader": {
+    "status": "बोर्ड लोड हो रहा है",
+    "row": {
+      "board_id": "board_id",
+      "format": "फ़ॉर्मैट",
+      "components": "कॉम्पोनेन्ट",
+      "pins": "पिन",
+      "nets": "नेट"
+    }
+  },
+  "error": {
+    "default_code": "ERROR",
+    "default_msg": "अज्ञात त्रुटि",
+    "fetch_failed_msg": "{url} पर HTTP {status}"
+  },
+  "empty": {
+    "code": "NO BOARDVIEW",
+    "msg_with_slug": "{slug} के लिए कोई Boardview लोड नहीं है। PCB व्यू सक्षम करने के लिए रिपेयर पृष्ठ से .brd / .kicad_pcb / .fz फ़ाइल अपलोड करें।",
+    "msg_no_slug": "कोई Boardview लोड नहीं है। PCB व्यू सक्षम करने के लिए रिपेयर पृष्ठ से .brd / .kicad_pcb / .fz फ़ाइल अपलोड करें।"
+  },
+  "toolbar": {
+    "side_top": "ऊपर",
+    "side_bottom": "नीचे",
+    "annot_title": "सिल्कस्क्रीन एनोटेशन दिखाएं / छिपाएं",
+    "fit_title": "व्यू में फिट करें",
+    "minimap_title": "क्लिक पर स्कीमैटिक संबंध मिनिमैप"
+  },
+  "badge": {
+    "summary": "{parts} कॉम्पोनेन्ट · {pins} पिन"
+  },
+  "inspector": {
+    "close": "बंद करें",
+    "value_dash": "N/A",
+    "footprint_dash": "N/A",
+    "rotation": "rot {deg}",
+    "rotation_dash": "N/A",
+    "smd": "SMD",
+    "tht": "THT",
+    "layer_top": "TOP",
+    "layer_bottom": "BOTTOM",
+    "layer_both": "BOTH",
+    "size": "{w} × {h} mm · {n} पिन",
+    "size_one": "{w} × {h} mm · {n} पिन",
+    "nets_section": "कॉम्पोनेन्ट नेट ({n})",
+    "linked_section": "लिंक्ड कॉम्पोनेन्ट ({n})",
+    "net_count": "×{n}",
+    "link_count": "{n} नेट",
+    "link_count_one": "{n} नेट"
+  },
+  "net": {
+    "no_net_pin": "{refdes}.{pin} · नो-नेट",
+    "with_count": "{net} · {n} पिन",
+    "with_count_one": "{net} · {n} पिन"
+  },
+  "cursor": {
+    "empty": "·",
+    "xy": "x: {x}  y: {y}"
+  }
+}

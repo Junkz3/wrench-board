@@ -32,7 +32,7 @@ def _load_pack(
     on failure it is the machine-readable reason string that mb_hypothesize
     surfaces to the caller.
 
-    `base` is the per-owner-resolved graph directory: self-host → slug root,
+    `base` is the per-owner-resolved graph directory (T9): self-host → slug root,
     managed → the tenant's active-PDF cache dir. `None` means the managed tenant
     has no active schematic pinned → no graph for them."""
     if base is None:
@@ -104,10 +104,10 @@ def mb_hypothesize(
     Returns `HypothesizeResult.model_dump() + {"found": True}` on success,
     or `{"found": False, "reason", ...}` on any validation failure.
 
-    The electrical graph is resolved PER-OWNER: the agent-tool path inherits
+    T9 — the electrical graph is resolved PER-OWNER: the agent-tool path inherits
     the session's tenant from the `current_owner_ref()` ContextVar (when `owner_ref`
     is left unset); the HTTP route passes the `X-Owner-Ref` header value explicitly.
-    owner None (self-host) → the slug root, byte-identical to the non-tenant path. The measurement
+    owner None (self-host) → the slug root, byte-identical to pre-T9. The measurement
     journal (below) stays at the slug root — it is per-repair, already tenant-scoped
     by repair ownership.
     """
@@ -117,7 +117,7 @@ def mb_hypothesize(
     # (agent-tool path). owner None → slug root (self-host, unchanged).
     if owner_ref is ...:
         owner_ref = current_owner_ref()
-    # graph = shared graph: per-owner if uploaded, otherwise the slug's canonical one.
+    # T9/T6 — graphe = moat PARTAGÉ : per-owner si uploadé, sinon canonique du slug.
     graph_base = live_graph.resolve_graph_dir(pack, owner_ref)
     eg, ab, err = _load_pack(graph_base)
     if err is not None:

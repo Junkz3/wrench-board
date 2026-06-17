@@ -35,6 +35,7 @@ from pydantic import ValidationError
 
 from api.config import get_settings
 from api.pipeline import pack_storage
+from api.pipeline.expand_metering import report_expand_phases
 from api.pipeline.pack_migrate import migrate_pack_if_needed
 from api.pipeline.pack_sanitizer import PackSanitizer
 from api.pipeline.pack_storage import (
@@ -62,6 +63,7 @@ from api.pipeline.schemas import (
     RulesSet,
     SanitizerAction,
 )
+from api.pipeline.telemetry.token_stats import PhaseTokenStats
 from api.pipeline.tool_call import call_with_forced_tool
 from api.pipeline.writers import SUBMIT_RULES_TOOL_NAME, _submit_rules_tool
 
@@ -124,6 +126,7 @@ async def _run_targeted_scout(
     focus_symptoms: list[str],
     focus_refdes: list[str],
     device_kind: str | None = None,
+    stats: PhaseTokenStats | None = None,
 ) -> str:
     """Run a Scout turn focused on specific symptoms, return the Markdown chunk.
 
@@ -147,6 +150,21 @@ async def _run_targeted_scout(
         device_label, focus_symptoms, focus_refdes,
     )
 
+    def _record(resp) -> None:
+        # Best-effort token capture for cloud metering (kind='expand'). The Scout
+        # runs its own messages.create (web_search), outside the shared tool_call
+        # helper, so we record here what registry/clinicien record via `stats`.
+        if stats is None or resp is None:
+            return
+        u = resp.usage
+        stats.record(
+            input_tokens=u.input_tokens,
+            output_tokens=u.output_tokens,
+            cache_read=getattr(u, "cache_read_input_tokens", 0) or 0,
+            cache_write=getattr(u, "cache_creation_input_tokens", 0) or 0,
+            model=model,
+        )
+
     # Single pass; we don't expect long pause_turn chains on a narrow scope.
     attempt = 0
     response = None
@@ -161,6 +179,7 @@ async def _run_targeted_scout(
             thinking={"type": "adaptive", "display": "summarized"},
             output_config={"effort": effort},
         )
+        _record(response)
         if response.stop_reason == "pause_turn":
             messages = [
                 {"role": "user", "content": user_prompt},
@@ -190,6 +209,7 @@ async def _run_targeted_scout(
             thinking={"type": "adaptive", "display": "summarized"},
             output_config={"effort": effort},
         )
+        _record(response)
         text_parts = [block.text for block in response.content if block.type == "text"]
         chunk = "\n\n".join(t for t in text_parts if t.strip())
         if not chunk:
@@ -200,11 +220,10 @@ async def _run_targeted_scout(
 
 
 def _audit_dump_path(pack_dir: Path) -> Path:
-    """Path of the cumulative dump after migration → audit/raw_research_dump.md.
+    """Chemin du dump cumulatif après migration T8 → audit/raw_research_dump.md.
 
-    The dump is private/audit (never re-served to tenants): PII is tolerated
-    there. The control point is the sanitization of the FACTS on output
-    (promoted/).
+    Le dump est privé/audit (jamais re-servi aux tenants) : la PII y est tolérée
+    — le point de contrôle est la sanitisation des FACTS à la sortie (promoted/).
     """
     return pack_dir / "audit" / "raw_research_dump.md"
 
@@ -242,6 +261,7 @@ async def _run_clinicien_on_full_dump(
     device_label: str,
     raw_dump: str,
     registry: Registry,
+    stats: PhaseTokenStats | None = None,
 ) -> RulesSet:
     """Re-run the Clinicien on the FULL (cumulative) dump + merged registry.
 
@@ -278,6 +298,7 @@ async def _run_clinicien_on_full_dump(
         output_schema=RulesSet,
         max_attempts=2,
         log_label="Clinicien-Expand",
+        stats=stats,
     )
 
 
@@ -487,13 +508,14 @@ async def expand_pack(
 ) -> dict[str, Any]:
     """Grow the on-disk pack for `device_slug` around a focus symptom area.
 
-    Option C: instead of overwriting registry.json/rules.json at the root, the
-    DELTA (facts new or modified vs the current effective pack) is written to
-    the shared `promoted/` layer, with owner_ref attribution + PII sanitization
-    + provenance + journal. No tenant-local staging in V1 (the enrichments are
-    shared immediately — the shared graph — but PII-free, traced and revocable).
+    Option C (T8) : au lieu d'écraser registry.json/rules.json à la racine,
+    on écrit le DELTA (facts nouveaux ou modifiés vs le pack effectif courant)
+    dans la couche partagée `promoted/`, avec attribution owner_ref + sanitisation
+    PII + provenance + journal. Pas de staging tenant-local en V1 (les
+    enrichissements sont partagés immédiatement — le moat T6 — mais PII-free,
+    tracés et revocables).
 
-    Documented trade-off: an "improvement" of the Registry-Builder description
+    Trade-off documenté : une "amélioration" du Registry-Builder à la description
     d'un fact baseline est captée comme MODIFIED et écrite dans promoted/, où elle
     écrasera la baseline au merge (load_effective_pack : promoted > baseline).
 
@@ -524,8 +546,8 @@ async def expand_pack(
             raise RuntimeError("ANTHROPIC_API_KEY not set")
         client = AsyncAnthropic(api_key=settings.anthropic_api_key, max_retries=settings.anthropic_max_retries)
 
-    # 0. Idempotent legacy migration (baseline/ + audit/). After it, the root
-    #    files no longer exist: state is read via the effective pack.
+    # 0. Migration idempotente legacy → T8 (baseline/ + audit/). Après ça, les
+    #    fichiers racine n'existent plus : on lit l'état via le pack effectif.
     migrate_pack_if_needed(memory_root, device_slug)
 
     # 1. État "avant" = pack effectif partagé (baseline + promoted). owner_ref=None
@@ -541,11 +563,11 @@ async def expand_pack(
         name = it.get("canonical_name")
         if name is None:
             continue
-        # Case-insensitive: legacy packs have lowercase kinds (pmic/power_rail)
-        # while the convention is UPPERCASE. Must match _unflatten_effective
-        # (tools.py) + _effective_registry (routes/packs.py), otherwise a
-        # mis-classified legacy component would be seen as NEW and re-promoted
-        # (write amplification + wrong provenance).
+        # Case-insensitive : les packs legacy ont des kinds en minuscules
+        # (pmic/power_rail) alors que la convention T8 est UPPERCASE. Doit
+        # matcher _unflatten_effective (tools.py) + _effective_registry
+        # (routes/packs.py) sinon un composant legacy mal classe serait vu
+        # comme NEW et re-promu (write amplification + mauvaise provenance).
         if str(it.get("kind", "")).upper() in COMPONENT_KINDS:
             before_comp_by_key[name] = it
         else:
@@ -555,67 +577,91 @@ async def expand_pack(
     # device_label : baseline/_meta le préserve ; fallback sur le slug.
     device_label = _device_label_from(memory_root, device_slug) or device_slug
 
-    # 2. Targeted Scout → new chunk (appended to the audit/ dump).
-    #    Read the pre-existing taxonomy BEFORE the Scout to re-inject the known
-    #    device_kind as a class constraint (same helper as creation), avoiding a
-    #    single-symptom focus drifting onto another use of the same board code.
+    # 2. Targeted Scout → new chunk (appended au dump audit/).
+    #    On lit la taxonomy pré-existante AVANT le Scout pour réinjecter le
+    #    device_kind connu comme contrainte de classe (même helper que la
+    #    création — Task 6), évitant qu'un focus mono-symptôme dérive sur une
+    #    autre utilisation du même board code.
     model_sonnet = settings.anthropic_model_sonnet
     model_main = settings.anthropic_model_main
     prior_tax = _prior_taxonomy(memory_root, device_slug)
     prior_kind = prior_tax.device_kind if prior_tax else None
-    if chunk_provider is not None:
-        logger.info("[Expand] using injected chunk_provider (MA curator)")
-        chunk = await chunk_provider(
-            device_label=device_label,
-            focus_symptoms=focus_symptoms,
-            focus_refdes=focus_refdes,
-        )
-    else:
-        chunk = await _run_targeted_scout(
-            client=client,
-            model=model_sonnet,
-            device_label=device_label,
-            focus_symptoms=focus_symptoms,
-            focus_refdes=focus_refdes,
-            device_kind=prior_kind,
-        )
-    dump_start, dump_end = _append_scout_chunk(pack_dir, chunk, focus_symptoms)
-    dump_bytes_added = len(chunk)
 
-    # 3. Re-run Registry + Clinicien on the FULL cumulative dump → whole objects.
-    #    prior_tax / prior_kind are already read in step 2 (re-injected into the
-    #    Registry Builder as a constraint — same mechanism as creation —
-    #    avoiding a single-symptom focus reclassifying the board).
-    full_dump = _audit_dump_path(pack_dir).read_text(encoding="utf-8")
-    new_registry = await run_registry_builder(
-        client=client, model=model_sonnet,
-        device_label=device_label, raw_dump=full_dump,
-        device_kind=prior_kind,
-    )
-    # Préserve la taxonomy pré-existante si la re-run a régressé à tout-null
-    # (un focus mono-symptôme peut affamer le signal de marque). La taxonomy est
-    # une métadonnée registry-level, persistée dans baseline/registry.json _meta —
-    # Option C ne la réécrit jamais, mais on la réinjecte ici pour que le Clinicien
-    # la voie. Cf. test_expand_pack_preserves_taxonomy.
-    if prior_tax and not any(
-        getattr(new_registry.taxonomy, field)
-        for field in ("brand", "model", "version", "form_factor")
-    ):
-        new_registry.taxonomy = prior_tax.model_copy()
-    if prior_tax:
-        # device_kind est une dimension orthogonale (la re-run peut peupler
-        # brand/model mais perdre la classe résolue) : on la reporte toujours
-        # depuis le prior si la re-run l'a laissée nulle.
-        new_registry.taxonomy.device_kind = (
-            new_registry.taxonomy.device_kind or prior_tax.device_kind
+    # T13 metering (kind='expand'): one PhaseTokenStats per LLM-calling phase.
+    # expansion_id is minted HERE (not at step 4) so the finally can key the
+    # cloud report even when a later phase raises. The report fires in `finally`
+    # so the spend lands for partial expansions too (success AND failure), like
+    # the build path — expand_pack makes its own paid calls outside the agent turn.
+    expansion_id = f"E-{uuid.uuid4().hex[:8]}"
+    scout_stats = PhaseTokenStats(phase="scout", model=model_sonnet)
+    registry_stats = PhaseTokenStats(phase="registry", model=model_sonnet)
+    clinicien_stats = PhaseTokenStats(phase="clinicien", model=model_main)
+
+    try:
+        if chunk_provider is not None:
+            logger.info("[Expand] using injected chunk_provider (MA curator)")
+            chunk = await chunk_provider(
+                device_label=device_label,
+                focus_symptoms=focus_symptoms,
+                focus_refdes=focus_refdes,
+            )
+        else:
+            chunk = await _run_targeted_scout(
+                client=client,
+                model=model_sonnet,
+                device_label=device_label,
+                focus_symptoms=focus_symptoms,
+                focus_refdes=focus_refdes,
+                device_kind=prior_kind,
+                stats=scout_stats,
+            )
+        dump_start, dump_end = _append_scout_chunk(pack_dir, chunk, focus_symptoms)
+        dump_bytes_added = len(chunk)
+
+        # 3. Re-run Registry + Clinicien sur le dump cumulatif COMPLET → objets entiers.
+        #    prior_tax / prior_kind sont déjà lus en étape 2 (réinjectés au Registry
+        #    Builder comme contrainte — même mécanisme que la création, Task 6 —
+        #    évitant qu'un focus mono-symptôme reclasse le board).
+        full_dump = _audit_dump_path(pack_dir).read_text(encoding="utf-8")
+        new_registry = await run_registry_builder(
+            client=client, model=model_sonnet,
+            device_label=device_label, raw_dump=full_dump,
+            device_kind=prior_kind,
+            stats=registry_stats,
         )
-    new_rules = await _run_clinicien_on_full_dump(
-        client=client, model=model_main,
-        device_label=device_label, raw_dump=full_dump, registry=new_registry,
-    )
+        # Préserve la taxonomy pré-existante si la re-run a régressé à tout-null
+        # (un focus mono-symptôme peut affamer le signal de marque). La taxonomy est
+        # une métadonnée registry-level, persistée dans baseline/registry.json _meta —
+        # Option C ne la réécrit jamais, mais on la réinjecte ici pour que le Clinicien
+        # la voie. Cf. test_expand_pack_preserves_taxonomy.
+        if prior_tax and not any(
+            getattr(new_registry.taxonomy, field)
+            for field in ("brand", "model", "version", "form_factor")
+        ):
+            new_registry.taxonomy = prior_tax.model_copy()
+        if prior_tax:
+            # device_kind est une dimension orthogonale (la re-run peut peupler
+            # brand/model mais perdre la classe résolue) : on la reporte toujours
+            # depuis le prior si la re-run l'a laissée nulle.
+            new_registry.taxonomy.device_kind = (
+                new_registry.taxonomy.device_kind or prior_tax.device_kind
+            )
+        new_rules = await _run_clinicien_on_full_dump(
+            client=client, model=model_main,
+            device_label=device_label, raw_dump=full_dump, registry=new_registry,
+            stats=clinicien_stats,
+        )
+    finally:
+        # Best-effort, no-op on self-host (cloud metering unconfigured). Reports
+        # whatever spend was captured even if a later phase raised.
+        report_expand_phases(
+            owner_ref=owner_ref,
+            device_slug=device_slug,
+            stats=[scout_stats, registry_stats, clinicien_stats],
+            expansion_id=expansion_id,
+        )
 
     # 4. Calcul du DELTA + sanitisation + provenance + re-validation stricte.
-    expansion_id = f"E-{uuid.uuid4().hex[:8]}"
     delta_dropped: list[dict] = []
 
     comp_facts, comp_new, comp_mod = _build_delta_facts(

@@ -1,0 +1,61 @@
+{
+  "drawer": {
+    "header_label": "正在构建记忆",
+    "device_placeholder": "...",
+    "close_aria": "关闭进度面板"
+  },
+  "phase": {
+    "scout": {
+      "label": "侦察",
+      "sub": "网络研究"
+    },
+    "registry": {
+      "label": "词表",
+      "sub": "规范词汇"
+    },
+    "writers": {
+      "label": "编写器",
+      "sub": "图谱 · 规则 · 词典"
+    },
+    "audit": {
+      "label": "审核器",
+      "sub": "质量与一致性"
+    },
+    "schematic_ingest": {
+      "label": "原理图已导入",
+      "sub": "逐页视觉识别"
+    },
+    "device_kind": {
+      "label": "设备类型",
+      "sub": "图谱分类"
+    }
+  },
+  "step": {
+    "time_placeholder": "...",
+    "in_progress": "运行中…",
+    "failed": "失败"
+  },
+  "status": {
+    "waiting": "正在等待首批事件…",
+    "connecting": "正在连接流水线…",
+    "started": "流水线已启动…",
+    "queued": "已排队 · 位置 <b>{position}</b>（前面 {ahead} 个）· 有空闲槽位时自动开始",
+    "phase_running": "阶段运行中 · <b>{phase}</b>",
+    "ready": "记忆就绪 · 审核 <b>{status}</b> · 一致性 <b>{score}</b>",
+    "failed": "流水线失败 · <b>{status}</b>",
+    "lost_connection": "已断开与进度流的连接。",
+    "closed_early": "连接在流水线完成前已关闭。"
+  },
+  "cta": {
+    "view_memory_bank": "打开记忆库",
+    "close": "关闭"
+  },
+  "kind": {
+    "declared": "已声明",
+    "detected": "已检测",
+    "recommended": "推荐",
+    "confirm": "确认并继续",
+    "confirmed": "已确认",
+    "undeclared": "未声明"
+  }
+}

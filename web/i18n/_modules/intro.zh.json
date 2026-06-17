@@ -1,0 +1,33 @@
+{
+  "page_title": "Wrench Board：简介",
+  "mascot": {
+    "aria": "Wrench Board 吉祥物"
+  },
+  "sidebar": {
+    "aria": "最近的维修",
+    "title": "最近",
+    "item1_symptom": "无法开机",
+    "item1_meta": "2 小时前",
+    "item2_symptom": "无法启动，黑屏",
+    "item2_meta": "昨天",
+    "item3_symptom": "开机时黑屏",
+    "item3_meta": "3 天前"
+  },
+  "hero": {
+    "mark": "Wrench Board",
+    "title": "您的硬件维修助手。",
+    "sub": "告诉我您的设备和症状：我会构建知识并开始诊断。"
+  },
+  "form": {
+    "device_placeholder": "设备（例如 MNT Reform 主板、iPhone 11、Framework 13）",
+    "device_aria": "哪台设备",
+    "symptom_placeholder": "症状（例如无法开机、不充电、黑屏）",
+    "symptom_aria": "症状是什么",
+    "submit": "开始诊断"
+  },
+  "chips": {
+    "chip1": "MNT Reform：无法启动",
+    "chip2": "iPhone 11：不充电",
+    "chip3": "Framework：黑屏"
+  }
+}

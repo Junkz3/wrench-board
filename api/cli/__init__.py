@@ -1,4 +1,4 @@
-"""CLI opérateur wrench-board — sous-commandes de gestion du pack partagé.
+"""CLI opérateur wrench-board — sous-commandes de gestion du pack partagé (T8).
 
 Utilisation engine-side (SSH sur le serveur) :
 

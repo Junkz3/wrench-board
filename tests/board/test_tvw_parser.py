@@ -72,7 +72,7 @@ def test_rejects_production_binary_tvw_with_clear_hint(tmp_path: Path):
     """A binary-layout production TVW file (production-binary 3.0/4.0 native
     output — little-endian ints + Pascal strings + layer sections) must
     get a clear error pointing the user at the format-scope note. The
-    ASCII parser cannot read the binary container."""
+    rotation-cipher parser cannot decode the binary container."""
     from api.board.parser.base import ObfuscatedFileError
 
     # Synthetic binary-TVW-looking payload: Pascal string "ICTBoard" then
@@ -90,4 +90,4 @@ def test_rejects_production_binary_tvw_with_clear_hint(tmp_path: Path):
         TVWParser().parse_file(f)
     msg = str(exc.value)
     assert "binary-layout" in msg or "binary" in msg
-    assert "ASCII parser" in msg or "ASCII variant" in msg
+    assert "rotation-cipher" in msg or "ASCII variant" in msg

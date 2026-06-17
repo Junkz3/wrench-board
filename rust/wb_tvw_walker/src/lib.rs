@@ -1,17 +1,17 @@
-//! Rust/PyO3 accelerator for the `.tvw` pin-walk hot loop.
+//! Accélérateur Rust/PyO3 du hot-loop de walk des pins `.tvw`.
 //!
-//! Mirrors `api/board/parser/_tvw_engine/walker.py` exactly:
-//!   - `_read_pin_record` (variable-length pin record, sub_a/sub_b/sub_c extension)
+//! Réplique EXACTEMENT `api/board/parser/_tvw_engine/walker.py` :
+//!   - `_read_pin_record` (record pin variable, avec extension sub_a/sub_b/sub_c)
 //!   - `_is_plausible_pin`
-//!   - `_try_walk_pins_at` (section header + record loop + partial walk)
+//!   - `_try_walk_pins_at` (header de section + boucle de records + walk partiel)
 //!
-//! Python profile: `_try_walk_pins_at` is called ~32,686 times (brute-force
-//! offset scan), `_read_pin_record` ~1.96 s, with millions of `_u8`/`_u32`/`_i32`.
-//! This runs in native u32/i32. The buffer is borrowed ZERO-COPY (`&[u8]`) —
-//! crucial, since the function is re-called tens of thousands of times on the
-//! same multi-MB buffer (copying it each call would erase the gain).
+//! Le profil Python : `_try_walk_pins_at` appelé ~32 686 fois (scan brute-force
+//! d'offsets), `_read_pin_record` ~1,96 s, des millions de `_u8`/`_u32`/`_i32`.
+//! Ici en u32/i32 natif. Le buffer est emprunté ZÉRO-COPIE (`&[u8]`) — crucial,
+//! car la fonction est rappelée des dizaines de milliers de fois sur le même
+//! buffer multi-Mo (le copier à chaque appel ruinerait le gain).
 //!
-//! Output is record-identical to the Python (the Board mapping depends on it).
+//! Sortie record-identique au Python (le mapping Board en dépend).
 
 use pyo3::prelude::*;
 use pyo3::types::{PyList, PyTuple};

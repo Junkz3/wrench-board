@@ -1,4 +1,4 @@
-"""Option C — expand_pack écrit le DELTA dans promoted/ (couche partagée),
+"""T8 Option C — expand_pack écrit le DELTA dans promoted/ (couche partagée),
 avec provenance + owner_ref + sanitisation PII + journal.
 
 On ne teste PAS les appels LLM : on mocke `_run_targeted_scout` (Scout),

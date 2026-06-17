@@ -137,6 +137,30 @@ def test_complete_marker_does_not_override_missing_files(tmp_path):
 
 
 # ---------------------------------------------------------------------------
+# Lot 2 — owner-aware completeness: a web-only pack staged under one owner is
+# complete FOR THAT OWNER but never for the shared commons / other tenants.
+# ---------------------------------------------------------------------------
+
+def _seed_staged_pack(pack_dir, owner):
+    staged = pack_dir / "_staged" / owner
+    staged.mkdir(parents=True, exist_ok=True)
+    for name in _PACK_FILES:
+        (staged / name).write_text('{"items": []}', encoding="utf-8")
+    build_state.mark_complete(pack_dir)
+
+
+def test_staged_pack_complete_for_its_owner(tmp_path):
+    _seed_staged_pack(tmp_path / "p", "tenant-A")
+    assert _pack_is_complete(tmp_path / "p", owner_ref="tenant-A") is True
+
+
+def test_staged_pack_not_complete_for_commons_or_other_tenant(tmp_path):
+    _seed_staged_pack(tmp_path / "p", "tenant-A")
+    assert _pack_is_complete(tmp_path / "p") is False  # commons (owner_ref=None)
+    assert _pack_is_complete(tmp_path / "p", owner_ref="tenant-B") is False
+
+
+# ---------------------------------------------------------------------------
 # Orchestrator wiring — the marker follows the real pipeline outcomes
 # ---------------------------------------------------------------------------
 

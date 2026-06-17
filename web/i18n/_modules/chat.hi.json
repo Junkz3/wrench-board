@@ -1,0 +1,191 @@
+{
+  "demo": {
+    "read_only": "डेमो मोड: उदाहरण डिवाइस केवल-पढ़ने के लिए है। एजेंट से असली सवाल पूछने के लिए अपना खुद का डायग्नोस्टिक बनाएं।"
+  },
+  "panel": {
+    "aria": "डायग्नोस्टिक एजेंट",
+    "badge": "एजेंट",
+    "title": "डायग्नोस्टिक",
+    "subline_empty": "(निष्क्रिय)"
+  },
+  "header": {
+    "camera_chip_title": "cam_capture के लिए कैमरा (फ़्लो B)",
+    "camera_chip_none": "(कोई नहीं)",
+    "camera_preview_title": "कैमरा प्रीव्यू दिखाएं / छिपाएं",
+    "camera_preview_aria": "कैमरा प्रीव्यू टॉगल करें",
+    "tier_title": "मॉडल टियर",
+    "tier_fast": "तेज़ · Haiku 4.5",
+    "tier_normal": "सामान्य · Sonnet 4.6",
+    "tier_deep": "गहरा · Opus 4.8",
+    "close_aria": "पैनल बंद करें"
+  },
+  "status": {
+    "idle": "निष्क्रिय",
+    "connecting": "कनेक्ट हो रहा है · {slug} · {tier}",
+    "connected": "कनेक्टेड · {slug} · {tier}",
+    "closed": "बंद",
+    "error_socket": "सॉकेट त्रुटि",
+    "url_invalid": "अमान्य URL"
+  },
+  "conv": {
+    "title": "बातचीत",
+    "label_empty": "CONV 0/0",
+    "label_count": "CONV {idx}/{total}",
+    "new": "नई बातचीत",
+    "default_title": "बातचीत {idx}",
+    "turns_one": "{n} टर्न",
+    "turns_many": "{n} टर्न",
+    "ago_seconds": "{n} सेकंड पहले",
+    "ago_minutes": "{n} मिनट पहले",
+    "ago_hours": "{n} घंटे पहले",
+    "ago_days": "{n} दिन पहले",
+    "ago_unknown": "अज्ञात",
+    "switching": "→ बातचीत बदली जा रही है: {id}",
+    "delete_aria": "बातचीत हटाएं",
+    "delete_confirm": "यह बातचीत हटाएं?\nसंदेश इतिहास और जुड़ा हुआ एजेंट सेशन मिटा दिया जाएगा। इसे पूर्ववत नहीं किया जा सकता।",
+    "delete_failed": "हटाना विफल। पुनः प्रयास करें।"
+  },
+  "input": {
+    "placeholder": "एजेंट से पूछें… (भेजने के लिए Enter, नई लाइन के लिए Shift+Enter)",
+    "upload_title": "मैक्रो फ़ोटो अपलोड करें (PNG/JPEG, अधिकतम 5MB)",
+    "upload_aria": "मैक्रो अपलोड करें",
+    "stop_title": "एजेंट को रोकें (Esc)",
+    "stop_aria": "रोकें",
+    "send_title": "भेजें (Enter)",
+    "send_aria": "भेजें"
+  },
+  "dropzone": {
+    "label": "फ़ोटो यहां छोड़ें"
+  },
+  "roles": {
+    "user": "आप",
+    "agent": "एजेंट",
+    "replay_suffix": " · रीप्ले"
+  },
+  "pending": {
+    "thinking": "एजेंट सोच रहा है"
+  },
+  "step": {
+    "expand_title": "पेलोड देखें",
+    "no_result": "(परिणाम अनुपलब्ध: रनटाइम द्वारा रेंडर नहीं किया गया)"
+  },
+  "tool": {
+    "mb_get_component": "<span class=\"refdes\">{refdes}</span> को देख रहे हैं",
+    "mb_get_rules_for_symptoms": "« {symptoms} » के नियम पढ़ रहे हैं",
+    "mb_list_findings": "निष्कर्षों की समीक्षा",
+    "mb_list_findings_for": "<span class=\"refdes\">{device}</span> के निष्कर्षों की समीक्षा",
+    "mb_record_finding": "एक निष्कर्ष दर्ज कर रहे हैं",
+    "mb_expand_knowledge": "पैक का विस्तार कर रहे हैं",
+    "mb_expand_knowledge_scope": "पैक का विस्तार: {scope}",
+    "mb_schematic_graph": "स्कीमैटिक ग्राफ पढ़ रहे हैं",
+    "bv_highlight": "<span class=\"refdes\">{refdes}</span> को हाइलाइट कर रहे हैं",
+    "bv_focus": "<span class=\"refdes\">{refdes}</span> पर फ़ोकस कर रहे हैं",
+    "bv_reset_view": "व्यू रीसेट कर रहे हैं",
+    "bv_highlight_net": "नेट <span class=\"net\">{net}</span> को हाइलाइट कर रहे हैं",
+    "bv_flip": "बोर्ड पलट रहे हैं",
+    "bv_annotate_near": "<span class=\"refdes\">{refdes}</span> के पास एनोटेशन",
+    "bv_annotate_at": "({x}, {y}) पर एनोटेशन",
+    "bv_annotate_blank": "एनोटेशन",
+    "bv_filter_by_type": "प्रकार से फ़िल्टर: {prefix}",
+    "bv_draw_arrow": "<span class=\"refdes\">{from}</span> से <span class=\"refdes\">{to}</span> तक तीर",
+    "bv_measure": "<span class=\"refdes\">{a}</span> और <span class=\"refdes\">{b}</span> के बीच माप",
+    "bv_show_pin": "<span class=\"refdes\">{refdes}</span> का पिन {pin}",
+    "bv_dim_unrelated": "असंबंधित तत्वों को मंद कर रहे हैं",
+    "bv_layer_visibility": "लेयर दृश्यता {layer}",
+    "bv_scene_empty": "सीन (खाली)",
+    "bv_scene": "सीन: {parts}",
+    "scene_highlight_one": "{n} हाइलाइट",
+    "scene_highlight_many": "{n} हाइलाइट",
+    "scene_annotation_one": "{n} एनोटेशन",
+    "scene_annotation_many": "{n} एनोटेशन",
+    "scene_arrow_one": "{n} तीर",
+    "scene_arrow_many": "{n} तीर",
+    "scene_focus": "फ़ोकस <span class=\"refdes\">{refdes}</span>",
+    "scene_dim": "मंद",
+    "scene_reset": "रीसेट",
+    "stock_search": "स्टॉक में <span class=\"refdes\">{type} {value}</span> खोज रहे हैं",
+    "stock_search_minimal": "स्टॉक खोज रहे हैं",
+    "stock_consume": "<span class=\"refdes\">{donor_id}</span> से <span class=\"refdes\">{refdes}</span> ले रहे हैं",
+    "stock_mark_donor": "<span class=\"refdes\">{device_slug}</span> को डोनर के रूप में चिह्नित कर रहे हैं",
+    "stock_unmark_donor": "डोनर <span class=\"refdes\">{donor_id}</span> को हटा रहे हैं",
+    "stock_list_donors": "स्टॉक में डोनर सूचीबद्ध कर रहे हैं"
+  },
+  "memtool": {
+    "read": "मेमोरी रीड: {path}",
+    "write": "मेमोरी राइट: {path}",
+    "edit": "मेमोरी एडिट: {path}",
+    "view": "मेमोरी व्यू: {path}",
+    "grep": "grep <code class=\"mem-path\">{pattern}</code>",
+    "grep_in": "{path} में grep <code class=\"mem-path\">{pattern}</code>",
+    "glob": "glob <code class=\"mem-path\">{pattern}</code>",
+    "list": "मेमोरी सूची",
+    "list_at": "मेमोरी सूची: {path}"
+  },
+  "context_lost": {
+    "title": "टर्न इतिहास खो गया",
+    "reason_ma_empty": "पिछला सेशन Managed Agents बैकएंड द्वारा संग्रहित कर दिया गया (events.list खाली), और कोई स्थानीय JSONL बैकअप उपलब्ध नहीं है।",
+    "reason_generic": "पिछला सेशन पुनर्स्थापित नहीं किया जा सका और कोई सारांश नहीं बनाया जा सका।",
+    "preserved_label": "डिस्क से पुनर्प्राप्त और एजेंट में पुनः इंजेक्ट किया गया",
+    "preserved_none": "इस रिपेयर के लिए कोई स्थायी आर्टिफैक्ट नहीं मिला (कोई माप नहीं, कोई प्रोटोकॉल नहीं, कोई परिणाम नहीं)।",
+    "context_reinject": "डिवाइस, लक्षण और आपकी प्रोफ़ाइल नीचे स्वचालित रूप से पुनः इंजेक्ट की जाती है: एजेंट को पता होगा कि आप किस पर काम कर रहे हैं।",
+    "lost_explainer": "जो खोया रहता है: <strong>संवादात्मक थ्रेड</strong> (एजेंट तर्क, उठाई गई परिकल्पनाएं, मुक्त आदान-प्रदान)। यदि आपने सुराग पर चर्चा की या प्रोटोकॉल से बाहर निर्णय लिए, तो उन्हें एक पंक्ति में दोबारा बताएं ताकि वह फिर से संरेखित हो सके।",
+    "preserved_measurements_one": "{n} माप",
+    "preserved_measurements_many": "{n} माप",
+    "preserved_protocol": "प्रोटोकॉल « {title} » ({completed}/{total})",
+    "preserved_outcome": "अंतिम परिणाम"
+  },
+  "resume": {
+    "title": "सेशन रिज़्यूम",
+    "meta_summary": "Haiku सारांश · {tok_in}→{tok_out} tok"
+  },
+  "session": {
+    "ready": "सेशन तैयार · {mode} · {model}",
+    "ready_with_repair": "सेशन तैयार · {mode} · {model} · रिपेयर {repair}",
+    "subline": "{model} · {mode}",
+    "subline_with_repair": "{model} · {mode} · रिपेयर {repair}",
+    "device_label_simple": "{slug}",
+    "device_label_with_repair": "{slug} · {repair}",
+    "tier_auto_align": "→ इस बातचीत के टियर पर स्वतः संरेखित: {tier}",
+    "tier_switch": "→ टियर बदला जा रहा है: {tier}। नई बातचीत।",
+    "replay_count": "रीप्ले · {n} पूर्व इवेंट",
+    "replay_done": "रीप्ले पूर्ण, जहां छोड़ा था वहीं से जारी रखें",
+    "context_loaded": "डिवाइस + लक्षण संदर्भ लोड हुआ · एजेंट आपके पहले संदेश की प्रतीक्षा कर रहा है",
+    "session_resumed": "सेशन फिर शुरू · इतिहास और एजेंट मेमोरी पुनर्स्थापित",
+    "session_terminated": "सेशन समाप्त",
+    "interrupt_sent": "इंटरप्ट भेजा गया · एजेंट रुक रहा है"
+  },
+  "image_bubble": {
+    "alt": "मैक्रो",
+    "macro_caption": "तकनीशियन द्वारा भेजी गई मैक्रो फ़ोटो।",
+    "capture_caption": "कैप्चर · {label}"
+  },
+  "capture": {
+    "no_camera": "एजेंट ने कैप्चर का अनुरोध किया लेकिन कोई कैमरा चयनित नहीं",
+    "requested": "एजेंट द्वारा कैप्चर अनुरोधित · {reason}",
+    "no_reason": "कोई कारण नहीं",
+    "failed": "कैप्चर विफल: {error}"
+  },
+  "upload": {
+    "too_large": "फ़ोटो बहुत बड़ी ({size}MB > 5MB)",
+    "unsupported": "असमर्थित प्रारूप: {mime} · केवल PNG या JPEG",
+    "socket_closed": "अपलोड नहीं हो सकता: सॉकेट खुला नहीं है",
+    "failed": "अपलोड विफल: {error}",
+    "rejected": "अपलोड अस्वीकृत · {reason}"
+  },
+  "preview": {
+    "select_camera_first": "पहले पिकर में एक कैमरा चुनें",
+    "open_failed": "प्रीव्यू खुलने में विफल, अनुमतियां जांचें"
+  },
+  "send": {
+    "socket_closed": "भेजा नहीं जा सकता: सॉकेट खुला नहीं है",
+    "connect_failed": "कनेक्शन विफल: {error}"
+  },
+  "error": {
+    "generic": "त्रुटि: {text}",
+    "unknown_reason": "अज्ञात कारण"
+  },
+  "fix": {
+    "validated_one": "सत्यापित ({n} सुधार)",
+    "validated_many": "सत्यापित ({n} सुधार)"
+  }
+}

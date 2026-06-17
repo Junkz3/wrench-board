@@ -41,15 +41,16 @@ logger = logging.getLogger("wrench_board.pipeline.api")
 router = APIRouter()
 
 
-# --- Migration-aware pack reading --------------------------------------------
+# --- T8 — lecture migration-aware du pack ------------------------------------
 #
-# The migration (pack_migrate) moves registry.json/rules.json/
-# knowledge_graph.json/dictionary.json from the root into baseline/ (format
-# {items:[...]} + _meta for non-list keys). The endpoints below must follow:
-# on a migrated pack (.migrated_t8 present), read the effective view
-# (baseline + promoted) and rebuild the legacy shape expected by consumers
-# (UI / graph_transform). On a non-migrated pack (tests that still write the
-# root, pre-migration self-host), keep the historical root reader.
+# La migration T8 (pack_migrate) déplace registry.json/rules.json/
+# knowledge_graph.json/dictionary.json de la racine vers baseline/ (format
+# {items:[...]} + _meta pour les clés non-liste). Les endpoints ci-dessous
+# doivent suivre : sur un pack migré (.migrated_t8 présent), on lit la vue
+# effective (baseline + promoted) et on reconstruit la forme legacy attendue
+# par les consommateurs (UI / graph_transform). Sur un pack non-migré (tests
+# qui écrivent encore la racine, self-host pré-migration), on garde le reader
+# racine historique.
 
 
 def _is_migrated(pack_dir: Path) -> bool:
@@ -69,10 +70,12 @@ def _baseline_meta(pack_dir: Path, file_name: str) -> dict:
     return data.get("_meta") or {}
 
 
-def _effective_registry(memory_root: Path, slug: str, pack_dir: Path) -> dict:
+def _effective_registry(memory_root: Path, slug: str, pack_dir: Path, owner_ref: str | None = None) -> dict:
     """Registry legacy-shape {schema_version, device_label, taxonomy, components,
-    signals} reconstruit depuis la vue effective d'un pack migré."""
-    eff = load_effective_pack(memory_root, slug, owner_ref=None)
+    signals} reconstruit depuis la vue effective d'un pack migré.
+
+    Lot 2 : owner_ref inclut la couche privée _staged/{owner} (build web-only)."""
+    eff = load_effective_pack(memory_root, slug, owner_ref=owner_ref)
     items = eff["registry"]["items"]
     components = [it for it in items if str(it.get("kind", "")).upper() in COMPONENT_KINDS]
     signals = [it for it in items if str(it.get("kind", "")).upper() not in COMPONENT_KINDS]
@@ -82,31 +85,53 @@ def _effective_registry(memory_root: Path, slug: str, pack_dir: Path) -> dict:
     return out
 
 
-def _pack_file_present(pack_dir: Path, file_name: str) -> bool:
+def _pack_file_present(pack_dir: Path, file_name: str, owner_ref: str | None = None) -> bool:
     """Un fichier pack est "présent" sur un pack migré ssi il existe dans
     baseline/ ou promoted/ (la migration crée baseline/{fname} pour chaque
-    fichier legacy qui existait)."""
-    return (
+    fichier legacy qui existait).
+
+    Lot 2 : avec un owner_ref, la couche PRIVÉE `_staged/{owner}/` compte aussi —
+    un build web-only mis en staging pour ce tenant est "présent" POUR LUI sans
+    jamais l'être pour le commons (owner None) ni pour un autre tenant."""
+    if (
         (pack_dir / "baseline" / file_name).is_file()
         or (pack_dir / "promoted" / file_name).is_file()
-    )
+    ):
+        return True
+    return bool(owner_ref) and (pack_dir / "_staged" / owner_ref / file_name).is_file()
 
 
-def _effective_pack_files(memory_root: Path, slug: str, pack_dir: Path) -> dict:
+def _writer_present(pack_dir: Path, file_name: str, migrated: bool, owner_ref: str | None) -> bool:
+    """Presence d'un fichier writer pour le bitmask du résumé, owner-aware (Lot 2).
+
+    Migré : baseline/promoted (+ _staged/{owner}). Non-migré : fichier racine
+    historique (+ _staged/{owner} pour un build web-only mis en staging, qui ne
+    pose pas le flag .migrated_t8)."""
+    if migrated:
+        return _pack_file_present(pack_dir, file_name, owner_ref)
+    if (pack_dir / file_name).exists():
+        return True
+    return bool(owner_ref) and (pack_dir / "_staged" / owner_ref / file_name).is_file()
+
+
+def _effective_pack_files(memory_root: Path, slug: str, pack_dir: Path, owner_ref: str | None = None) -> dict:
     """Reconstruit les 4 fichiers pack en forme legacy depuis la vue effective.
     Renvoie {registry, knowledge_graph, rules, dictionary} (dicts), avec None
     pour un fichier absent (ni baseline ni promoted) — fidèle à la sémantique
-    hard-rule #5 de get_pack_full."""
-    eff = load_effective_pack(memory_root, slug, owner_ref=None)
+    hard-rule #5 de get_pack_full.
+
+    Lot 2 : owner_ref inclut la couche privée _staged/{owner} (build web-only)
+    pour que le tenant demandeur voie son pack dans la Memory Bank."""
+    eff = load_effective_pack(memory_root, slug, owner_ref=owner_ref)
 
     out: dict = {}
 
-    if _pack_file_present(pack_dir, "registry.json"):
-        out["registry"] = _effective_registry(memory_root, slug, pack_dir)
+    if _pack_file_present(pack_dir, "registry.json", owner_ref):
+        out["registry"] = _effective_registry(memory_root, slug, pack_dir, owner_ref)
     else:
         out["registry"] = None
 
-    if _pack_file_present(pack_dir, "knowledge_graph.json"):
+    if _pack_file_present(pack_dir, "knowledge_graph.json", owner_ref):
         kg_items = eff["knowledge_graph"]["items"]
         out["knowledge_graph"] = {
             "nodes": [it for it in kg_items if "relation" not in it],
@@ -116,12 +141,12 @@ def _effective_pack_files(memory_root: Path, slug: str, pack_dir: Path) -> dict:
     else:
         out["knowledge_graph"] = None
 
-    if _pack_file_present(pack_dir, "rules.json"):
+    if _pack_file_present(pack_dir, "rules.json", owner_ref):
         out["rules"] = {"rules": eff["rules"]["items"], **_baseline_meta(pack_dir, "rules.json")}
     else:
         out["rules"] = None
 
-    if _pack_file_present(pack_dir, "dictionary.json"):
+    if _pack_file_present(pack_dir, "dictionary.json", owner_ref):
         out["dictionary"] = {
             "entries": eff["dictionary"]["items"],
             **_baseline_meta(pack_dir, "dictionary.json"),
@@ -185,17 +210,17 @@ def _find_boardview(slug: str, pack_dir: Path) -> Path | None:
 
 
 def _find_owner_boardview(slug: str, pack_dir: Path, owner_ref: str | None) -> Path | None:
-    """Per-owner boardview path (closes the `/api/board/render` leak).
+    """Per-owner boardview path (T9 — clôt la fuite `/api/board/render`).
 
-    Self-host (owner None) → historical global chain `_find_boardview` (unchanged).
-    Managed (owner set) → STRICTLY the tenant's per-owner pin
-    (`_sources/{owner}/active_sources.json` → `uploads/{filename}`); no fallback
-    to root / `board_assets` / `uploads/` scan → a tenant with no active
-    boardview gets None (the route returns 404, never another tenant's board).
+    Self-host (owner None) → chaîne globale historique `_find_boardview` (inchangé).
+    Managé (owner set) → STRICTEMENT le pin per-owner du tenant
+    (`_sources/{owner}/active_sources.json` → `uploads/{filename}`) ; aucun fallback
+    racine / `board_assets` / scan `uploads/` → un tenant sans boardview actif
+    obtient None (la route répond 404, jamais le board d'un autre tenant).
     """
     if owner_ref is None:
         return _find_boardview(slug, pack_dir)
-    from api.pipeline import live_graph  # local — avoids any cycle at package load
+    from api.pipeline import live_graph  # local — évite tout cycle au chargement du package
 
     active = live_graph.read_owner_active(pack_dir, owner_ref)
     bv = active.get(sources.BOARDVIEW_KIND)
@@ -214,8 +239,8 @@ def _find_owner_boardview(slug: str, pack_dir: Path, owner_ref: str | None) -> P
 def _detect_boardview(slug: str, pack_dir: Path, owner_ref: str | None = None) -> tuple[bool, str | None]:
     """Return (present, extension) for a slug's boardview — bitmask helper.
 
-    Per-owner: managed → the boardview pinned by THIS tenant; self-host
-    (owner None) → global chain. Returns the dotted extension (e.g. ".kicad_pcb")
+    Per-owner (T9) : managé → le boardview épinglé par CE tenant ; self-host
+    (owner None) → chaîne globale. Returns the dotted extension (e.g. ".kicad_pcb")
     so the UI can label the format on the boardview card.
     """
     path = _find_owner_boardview(slug, pack_dir, owner_ref)
@@ -227,9 +252,9 @@ def _detect_boardview(slug: str, pack_dir: Path, owner_ref: str | None = None) -
 def _detect_schematic_pdf(slug: str, pack_dir: Path, owner_ref: str | None = None) -> bool:
     """True when a source schematic PDF exists for this slug.
 
-    Per-owner: managed (owner set) → True iff THIS tenant has an active
-    schematic pin (`_sources/{owner}/active_sources.json`); no fallback to
-    root / board_assets → a tenant with no upload sees `has_schematic_pdf=false`.
+    Per-owner (T9) : managé (owner set) → True ssi CE tenant a un pin schematic
+    actif (`_sources/{owner}/active_sources.json`) ; pas de fallback racine/
+    board_assets → un tenant sans upload voit `has_schematic_pdf=false`.
     Self-host (owner None) → chaîne globale historique :
       1. Active pin from `active_sources.json`.
       2. `memory/{slug}/schematic.pdf` (canonical post-ingest copy).
@@ -259,18 +284,17 @@ def _summarize_pack(pack_dir: Path, owner_ref: str | None = None) -> PackSummary
     slug = pack_dir.name
     bv_present, bv_ext = _detect_boardview(slug, pack_dir, owner_ref)
     migrated = _is_migrated(pack_dir)
-    # PRIVATE artefacts (electrical graph, boardview, schematic PDF) resolve
-    # per-owner; the shared pack (registry/kg/rules/dictionary/parts_index)
-    # stays SHARED. A tenant with no upload therefore sees the private cards
-    # as "absent".
+    # T9 : les artefacts PRIVÉS (graphe électrique, boardview, schematic PDF) se
+    # résolvent per-owner ; le pack partagé (registry/kg/rules/dictionary/parts_index)
+    # reste SHARED. Un tenant sans upload voit donc les cartes privées en « absent ».
     if owner_ref is not None:
-        from api.pipeline import live_graph  # local — avoids any cycle at load
+        from api.pipeline import live_graph  # local — évite tout cycle au chargement
 
         has_graph = live_graph.resolve_graph_path(pack_dir, owner_ref) is not None
     else:
         has_graph = (pack_dir / "electrical_graph.json").exists()
-    # On a migrated pack, the presence bitmask reads baseline/+promoted/;
-    # the dump is under audit/. Otherwise, the historical root files.
+    # T8 : sur un pack migré, le bitmask de présence lit baseline/+promoted/ ;
+    # le dump est sous audit/. Sinon, les fichiers racine historiques.
     return PackSummary(
         device_slug=slug,
         disk_path=str(pack_dir),
@@ -279,28 +303,17 @@ def _summarize_pack(pack_dir: Path, owner_ref: str | None = None) -> PackSummary
             if migrated
             else (pack_dir / "raw_research_dump.md").exists()
         ),
-        has_registry=(
-            _pack_file_present(pack_dir, "registry.json") if migrated
-            else (pack_dir / "registry.json").exists()
-        ),
-        has_knowledge_graph=(
-            _pack_file_present(pack_dir, "knowledge_graph.json") if migrated
-            else (pack_dir / "knowledge_graph.json").exists()
-        ),
-        has_rules=(
-            _pack_file_present(pack_dir, "rules.json") if migrated
-            else (pack_dir / "rules.json").exists()
-        ),
-        has_dictionary=(
-            _pack_file_present(pack_dir, "dictionary.json") if migrated
-            else (pack_dir / "dictionary.json").exists()
-        ),
+        has_registry=_writer_present(pack_dir, "registry.json", migrated, owner_ref),
+        has_knowledge_graph=_writer_present(pack_dir, "knowledge_graph.json", migrated, owner_ref),
+        has_rules=_writer_present(pack_dir, "rules.json", migrated, owner_ref),
+        has_dictionary=_writer_present(pack_dir, "dictionary.json", migrated, owner_ref),
         has_audit_verdict=(pack_dir / "audit_verdict.json").exists(),
         has_boardview=bv_present,
         boardview_format=bv_ext,
         has_schematic_pdf=_detect_schematic_pdf(slug, pack_dir, owner_ref),
         has_electrical_graph=has_graph,
         has_parts_index=(pack_dir / "parts_index.json").exists(),
+        build_state=(read_build_state(pack_dir) or {}).get("status"),
     )
 
 
@@ -320,11 +333,17 @@ def _read_optional_json(path: Path) -> dict | None:
         ) from exc
 
 
-def _pack_is_complete(pack_dir: Path) -> bool:
+def _pack_is_complete(pack_dir: Path, owner_ref: str | None = None) -> bool:
     """A pack is 'complete' when the 4 writer files are present — audit is optional.
 
-    On a migrated pack, "present" = baseline/ or promoted/ (see
-    _pack_file_present); otherwise, the historical root file.
+    T8 : sur un pack migré, "présent" = baseline/ ou promoted/ (cf.
+    _pack_file_present) ; sinon, fichier racine historique.
+
+    Lot 2 : avec un owner_ref, la couche PRIVÉE `_staged/{owner}/` compte aussi.
+    Un build web-only mis en staging pour ce tenant est donc 'complet' POUR LUI
+    (il ré-ouvre son repair sans relancer un build) mais reste INCOMPLET pour le
+    commons (owner None → free gate fermé, autres tenants → rebuild propre, pas
+    de pack web-only servi ni de verrou de slug).
 
     Build-state veto: the orchestrator writes the files incrementally, so a
     failed build leaves a partial-but-plausible pack behind (surviving rules →
@@ -338,8 +357,15 @@ def _pack_is_complete(pack_dir: Path) -> bool:
         return False
     files = ("registry.json", "knowledge_graph.json", "rules.json", "dictionary.json")
     if _is_migrated(pack_dir):
-        return all(_pack_file_present(pack_dir, name) for name in files)
-    return all((pack_dir / name).exists() for name in files)
+        return all(_pack_file_present(pack_dir, name, owner_ref) for name in files)
+    # Non-migré : fichiers racine historiques OU la couche privée de ce tenant
+    # (un build web-only mis en staging n'écrit pas la racine et ne pose pas le
+    # flag .migrated_t8).
+    return all(
+        (pack_dir / name).exists()
+        or (bool(owner_ref) and (pack_dir / "_staged" / owner_ref / name).is_file())
+        for name in files
+    )
 
 
 @router.get("/packs", response_model=list[PackSummary])
@@ -371,7 +397,7 @@ async def get_taxonomy() -> TaxonomyTree:
     if not root.exists():
         return tree
 
-    # One carnet read → map each device's aliases so the autocomplete can
+    # T9a: one carnet read → map each device's aliases so the autocomplete can
     # match by board#/model/EMC. Best-effort: a registry hiccup just leaves
     # aliases empty (the label-based filter still works).
     aliases_by_slug: dict[str, list[str]] = {}
@@ -389,8 +415,8 @@ async def get_taxonomy() -> TaxonomyTree:
     for pack_dir in sorted(root.iterdir(), key=lambda p: p.name):
         if not pack_dir.is_dir():
             continue
-        # On a migrated pack, taxonomy/device_label live in the registry
-        # rebuilt from baseline/_meta + effective view.
+        # T8 : sur un pack migré, taxonomy/device_label vivent dans la registry
+        # reconstruite depuis baseline/_meta + vue effective.
         if _is_migrated(pack_dir):
             if not _pack_file_present(pack_dir, "registry.json"):
                 continue
@@ -441,11 +467,18 @@ async def get_pack(
 
 
 @router.get("/packs/{device_slug}/full")
-async def get_pack_full(device_slug: str) -> dict:
+async def get_pack_full(
+    device_slug: str,
+    x_owner_ref: str | None = Header(default=None, alias="X-Owner-Ref"),
+) -> dict:
     """Return every JSON artefact of a pack in a single payload.
 
     Missing files become `null` — never fabricated (hard rule #4). Consumed by
     the Memory Bank UI so it can render all five sections in one fetch.
+
+    Lot 2 : owner-aware. Un build web-only mis en staging pour ce tenant
+    (`_staged/{owner}`) est servi via la vue effective ; le commons (sans header)
+    ne voit rien (pack privé).
     """
     settings = _pkg.get_settings()
     slug = _slugify(device_slug)
@@ -453,8 +486,9 @@ async def get_pack_full(device_slug: str) -> dict:
     if not pack_dir.exists():
         raise HTTPException(status_code=404, detail=f"No pack for device_slug={slug!r}")
 
-    if _is_migrated(pack_dir):
-        files = _effective_pack_files(Path(settings.memory_root), slug, pack_dir)
+    owner_has_staged = bool(x_owner_ref) and (pack_dir / "_staged" / x_owner_ref).is_dir()
+    if _is_migrated(pack_dir) or owner_has_staged:
+        files = _effective_pack_files(Path(settings.memory_root), slug, pack_dir, x_owner_ref)
         registry = files["registry"]
         knowledge_graph = files["knowledge_graph"]
         rules = files["rules"]
@@ -480,22 +514,14 @@ async def get_pack_full(device_slug: str) -> dict:
 
 
 @router.get("/packs/{device_slug}/findings")
-async def list_device_findings(
-    device_slug: str,
-    limit: int = 50,
-    x_owner_ref: str | None = Header(default=None, alias="X-Owner-Ref"),
-) -> list[dict]:
+async def list_device_findings(device_slug: str, limit: int = 50) -> list[dict]:
     """Return every field report recorded for this device, newest first.
 
-    Scoped to the caller's tenant (`X-Owner-Ref`) so the Journal dashboard only
-    renders that tenant's own confirmed repairs — never another tenant's. None
-    (self-host) → the shared store. Strictly JSON-on-disk — no MA memory-store.
+    Same content the agent reads via grep on the FUSE mount, exposed to
+    the web UI so the Journal dashboard can render cross-session memory
+    without a WS round-trip. Strictly JSON-on-disk — no MA memory-store.
     """
-    return list_field_reports(
-        device_slug=_validate_slug(device_slug),
-        limit=limit,
-        owner_ref=x_owner_ref,
-    )
+    return list_field_reports(device_slug=_validate_slug(device_slug), limit=limit)
 
 
 @router.post("/packs/{device_slug}/expand")
@@ -511,8 +537,8 @@ async def expand_device_pack(
     Scout + Registry + Clinicien mini-pipeline and merges the output into
     the existing pack. See api/pipeline/expansion.py for the mechanics.
 
-    The X-Owner-Ref header (injected by the cloud, opaque to the engine) scopes
-    the enrichment to the tenant (added_by_tenant in the provenance). Absent →
+    T8 : l'en-tête X-Owner-Ref (injecté par le cloud, opaque côté moteur) scope
+    l'enrichissement au tenant (added_by_tenant dans la provenance). Absent →
     None (self-host).
     """
     slug = _slugify(device_slug)
@@ -634,8 +660,8 @@ async def confirm_pack_kind(
     # Recover the original device_label so the rerun targets the same pack dir.
     # `generate_knowledge_pack` re-slugifies its first arg internally; the slug
     # round-trips to itself, so the slug is a safe fallback when no registry
-    # device_label is on disk. On a migrated pack, device_label lives in the
-    # registry rebuilt (baseline/_meta + effective view), not at the root.
+    # device_label is on disk. T8 : sur un pack migré, device_label vit dans la
+    # registry reconstruite (baseline/_meta + vue effective), pas à la racine.
     if _is_migrated(pack_dir):
         registry = _effective_registry(memory_root, slug, pack_dir)
     else:
@@ -676,7 +702,7 @@ async def confirm_pack_kind(
     # `pipeline_failed` event on the bus, and register the task (counted against
     # the build cap) so POST /repairs/{slug}/cancel can cancel it cooperatively.
     def _launch():
-        # The rebuild's spend is attributed to the confirming tenant (the
+        # T13: the rebuild's spend is attributed to the confirming tenant (the
         # cloud injects X-Owner-Ref on all proxied traffic); no single repair_id
         # backs a kind-confirmation rebuild → build_metering keys on the slug.
         return _run_pipeline_with_events(

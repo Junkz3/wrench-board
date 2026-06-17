@@ -2,7 +2,8 @@
 
 Calls `call_with_forced_tool` with the `propose_scenarios` tool and
 validates the output as a `ProposalsPayload`. Optionally (via
-`rescue_with_opus`) re-submits specific rejected drafts to Opus.
+`rescue_with_opus`, added in Task 11) re-submits specific rejected
+drafts to Opus.
 """
 
 from __future__ import annotations

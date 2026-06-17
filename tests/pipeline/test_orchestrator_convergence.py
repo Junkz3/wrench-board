@@ -15,7 +15,7 @@ The policy under test (why it exists):
     and, when it stops without an APPROVED, falls back to that best snapshot
     instead of the last (possibly-regressed) rewrite.
   * ACCEPTANCE FLOOR — a 0.78 pack whose DETERMINISTIC drift is empty beats a
-    hard build failure. When the best snapshot clears
+    hard ~$100 build failure. When the best snapshot clears
     `pipeline_accept_score` AND has no deterministic drift, the pack is accepted
     WITH WARNINGS (the residual brief persisted to pack_quality for audit)
     rather than rejected. floor=0 restores the legacy hard-fail.
@@ -427,7 +427,7 @@ async def test_explicit_rejected_still_terminal(tmp_path, monkeypatch):
 
 
 # ----------------------------------------------------------------------
-# 7. graph wiring
+# 7. graph wiring — Task 9
 # ----------------------------------------------------------------------
 
 

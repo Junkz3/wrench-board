@@ -41,6 +41,7 @@ from api.pipeline.graph_truth import (
 )
 from api.pipeline.mapper import run_mapper
 from api.pipeline.pack_lint import LintFinding, lint_pack
+from api.pipeline.qa import graph_coverage
 from api.pipeline.registry import run_registry_builder
 from api.pipeline.schemas import (
     AuditVerdict,
@@ -153,6 +154,49 @@ def scan_uploads(uploads_dir: Path) -> UploadedDocuments:
     )
 
 
+def _stage_if_private(
+    memory_root: Path,
+    pack_dir: Path,
+    slug: str,
+    owner_ref: str | None,
+    coverage_verdict: str | None = None,
+) -> bool:
+    """Lot 2 + Lot 3 — after a build completes, decide SHARED vs per-owner PRIVATE.
+
+    A build is kept PRIVATE (relocated to `_staged/{owner_ref}/`) in a managed
+    context (`owner_ref` set) when EITHER:
+      - it is web-only (no electrical graph was produced = no schematic), OR
+      - the graph↔boardview QA gate returned FAIL (Lot 3) — an incomplete source
+        PDF must not become the authoritative shared pack.
+
+    Private packs are seen only by the requesting tenant
+    (`load_effective_pack(owner_ref)`); the slug stays free for a future clean
+    build and other tenants never get served the unverified pack. A
+    schematic-backed build that PASSes/WARNs, or self-host (owner_ref None),
+    stays at the root → migrated to the shared `baseline/` as before.
+
+    Returns True when the pack was staged private (caller then SKIPS the shared
+    MA device-store seed — that mount is cross-tenant).
+    """
+    if owner_ref is None:
+        return False  # self-host: always shared, byte-identical legacy behaviour
+    web_only = not (pack_dir / "electrical_graph.json").exists()
+    coverage_failed = coverage_verdict == "FAIL"
+    if not (web_only or coverage_failed):
+        return False
+    from api.pipeline.pack_migrate import stage_web_only_pack
+
+    stage_web_only_pack(memory_root, slug, owner_ref=owner_ref)
+    logger.info(
+        "[Pipeline] managed build for slug=%r staged PRIVATE to owner=%s "
+        "(reason=%s, commons untouched)",
+        slug,
+        owner_ref,
+        "web_only" if web_only else "coverage_fail",
+    )
+    return True
+
+
 def _load_existing_electrical_graph(pack_dir: Path) -> ElectricalGraph | None:
     """Load `electrical_graph.json` if present and parseable. None otherwise."""
     path = pack_dir / "electrical_graph.json"
@@ -204,7 +248,7 @@ async def generate_knowledge_pack(
     user_device_kind: str | None = None,
     confirmed_device_kind: str | None = None,
     expect_schematic: bool = False,
-    # Build metering: tenant + repair identity for the kind='build' usage
+    # T13 build metering: tenant + repair identity for the kind='build' usage
     # reports (None = self-host / untracked → reports no-op or land as anon).
     owner_ref: str | None = None,
     engine_repair_id: str | None = None,
@@ -579,7 +623,7 @@ async def generate_knowledge_pack(
             registry.model_dump_json(indent=2), encoding="utf-8"
         )
         logger.info("[Pipeline] Phase 2 complete · registry.json written")
-        # Enrich the device alias registry (the "carnet") with the facets
+        # T9a: enrich the device alias registry (the "carnet") with the facets
         # Scout/Registry discovered (board#/model/EMC/marketing + family) so a
         # later input by ANY of them resolves to this pack — the cross-facet
         # dedup bridge. Best-effort; never disturbs a build.
@@ -687,8 +731,8 @@ async def generate_knowledge_pack(
         })
 
         # -------- Phase 4 — Audit + self-healing loop ---------------------------
-        # CONVERGENCE POLICY. The naive loop revised until APPROVED or
-        # max-rounds, then hard-failed — losing an expensive build over a near-miss the
+        # CONVERGENCE POLICY (Task 10). The naive loop revised until APPROVED or
+        # max-rounds, then hard-failed — losing a ~$100 build over a near-miss the
         # auditor had a precise brief for, and worse, sometimes shipping a rewrite
         # that scored LOWER than an earlier round (the macbook-air-m1 0.78 → 0.42
         # collapse). Three rules fix that:
@@ -962,13 +1006,33 @@ async def generate_knowledge_pack(
         logger.info("Pipeline end · pack=%s · rounds=%d", pack_dir, rounds_used)
         logger.info("=" * 72)
 
+        # Lot 3 — graph↔boardview QA gate. When the build produced a graph AND a
+        # boardview was supplied, write coverage_report.json + get a PASS/WARN/FAIL
+        # verdict. Best-effort (never crashes the build).
+        coverage_verdict = graph_coverage.run_coverage_gate(pack_dir, uploads.boardview)
+
+        # Lot 2 + Lot 3 — a web-only managed build (no graph) OR a schematic build
+        # that FAILED coverage is relocated to the requesting tenant's PRIVATE
+        # staging layer instead of the shared commons. Done after mark_complete
+        # (pipeline finished reading root) and before the seed (which mounts the
+        # SHARED device store — must not mirror a private pack). Self-host /
+        # schematic-backed builds that PASS/WARN stay shared.
+        staged_private = _stage_if_private(
+            memory_root, pack_dir, slug, owner_ref, coverage_verdict
+        )
+
         # Seed the device's Managed-Agents memory store with the freshly
         # approved pack so diagnostic sessions read canonical knowledge via
         # the /mnt/memory/ filesystem mount instead of re-loading JSON on
-        # every tool call. No-op when ma_memory_store_enabled is False.
-        seed_status = await seed_memory_store_from_pack(
-            client=client, device_slug=slug, pack_dir=pack_dir
-        )
+        # every tool call. No-op when ma_memory_store_enabled is False. SKIPPED
+        # for a private web-only pack — the device store is cross-tenant; the
+        # owning tenant's agent reads its staged pack live via load_effective_pack.
+        if staged_private:
+            seed_status = "skipped_web_only_private"
+        else:
+            seed_status = await seed_memory_store_from_pack(
+                client=client, device_slug=slug, pack_dir=pack_dir
+            )
         logger.info("[Pipeline] Memory-store seed status=%s", seed_status)
 
         # Le verdict adopté sur le chemin accept-with-warnings est le snapshot
@@ -1027,7 +1091,7 @@ async def generate_knowledge_pack(
                 )
         except Exception as exc:  # noqa: BLE001
             logger.warning("[Pipeline] Failed to write token_stats.json: %s", exc)
-        # Build metering: report the build's per-phase spend to the cloud
+        # T13 build metering: report the build's per-phase spend to the cloud
         # ledger (kind='build'). In-memory stats — never re-read from disk, so a
         # re-run can't double-report a previous run's file. Hard no-op when the
         # cloud target is unconfigured (self-host); best-effort otherwise.

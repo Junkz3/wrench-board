@@ -1,13 +1,12 @@
-//! Rust/PyO3 accelerator for the FZ-xor boardview decoder (`.fz`).
+//! Accélérateur Rust/PyO3 du cipher FZ-xor (boardview `.fz`).
 //!
-//! Mirrors `api/board/parser/_fz_engine/cipher.py::decrypt_fz_xor` exactly
-//! — byte-identical output is guaranteed (the shared decode cache relies on
-//! determinism: same input + key produces the same bytes whether Python or
-//! Rust runs the inner loop).
+//! Réplique EXACTEMENT `api/board/parser/_fz_engine/cipher.py::decrypt_fz_xor`
+//! — sortie byte-identique garantie (le moat de cache T9 dépend du déterminisme :
+//! même cipher+clé ⇒ mêmes octets, que ce soit Python ou Rust qui décrypte).
 //!
-//! The transform runs per byte over a sliding 16-byte window. The pure-Python
-//! hot loop made tens of millions of `_rol32` (rotate-32) calls (~0.02 MB/s);
-//! this runs in native u32.
+//! Le cipher est RC6-shaped, appliqué par octet sur une fenêtre glissante de
+//! 16 octets de ciphertext. Le hot-loop Python faisait des dizaines de millions
+//! d'appels à `_rol32` (rotate-32) → ~0,02 Mo/s ; ici en u32 natif.
 
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
@@ -16,8 +15,8 @@ use pyo3::types::PyBytes;
 const WINDOW: usize = 16;
 const ROUNDS: usize = 20;
 
-/// 32-bit left rotate. Exact mirror of the Python `_rol32`: only the low 5 bits
-/// of the count matter, and a count of 0 is the identity.
+/// Rotation gauche 32 bits. Mirroir exact de `_rol32` Python : seuls les 5 bits
+/// bas du compte comptent, et un compte de 0 est l'identité.
 #[inline(always)]
 fn rol32(v: u32, s: u32) -> u32 {
     let s = s & 31;
@@ -28,7 +27,7 @@ fn rol32(v: u32, s: u32) -> u32 {
     }
 }
 
-/// Decode an FZ-xor payload. `k` must hold 44 uint32 words (the expanded key).
+/// Décrypte un payload FZ-xor. `k` doit contenir 44 mots uint32 (clé étendue).
 fn decrypt(cipher: &[u8], k: &[u32]) -> Vec<u8> {
     let mut window = [0u8; WINDOW];
     let (mut n5, mut n4, mut n3, mut n2): (u32, u32, u32, u32) = (0, 0, 0, 0);
@@ -44,7 +43,7 @@ fn decrypt(cipher: &[u8], k: &[u32]) -> Vec<u8> {
             let mix2 = rol32(t2, 5);
             let new_n5 = rol32(n5 ^ mix4, mix2 & 0xff).wrapping_add(k[r * 2]);
             let new_n3 = rol32(n3 ^ mix2, mix4 & 0xff).wrapping_add(k[r * 2 + 1]);
-            // State rotate: (n2, n3, n4, n5) <- (new_n5, old_n2, new_n3, old_n4)
+            // Rotation d'état : (n2, n3, n4, n5) ← (new_n5, old_n2, new_n3, old_n4)
             let saved_n5 = new_n5;
             n5 = n4;
             n4 = new_n3;
@@ -54,10 +53,10 @@ fn decrypt(cipher: &[u8], k: &[u32]) -> Vec<u8> {
         n5 = n5.wrapping_add(k[42]);
         out[i] = b ^ (n5 & 0xff) as u8;
 
-        // Slide the window left; the new input byte lands at slot 15.
+        // Glisse la fenêtre à gauche ; nouvel octet de ciphertext au slot 15.
         window.copy_within(1..WINDOW, 0);
         window[WINDOW - 1] = b;
-        // Reload the 4 accumulators as little-endian uint32s from the window.
+        // Recharge les 4 accumulateurs comme uint32 little-endian de la fenêtre.
         n5 = u32::from_le_bytes([window[0], window[1], window[2], window[3]]);
         n4 = u32::from_le_bytes([window[4], window[5], window[6], window[7]]);
         n3 = u32::from_le_bytes([window[8], window[9], window[10], window[11]]);

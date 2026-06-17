@@ -1,0 +1,77 @@
+{
+  "title": "技师档案",
+  "head": {
+    "tag": "技师",
+    "no_name": "未命名",
+    "no_specialty": "无专长",
+    "edit_identity": "编辑身份",
+    "years_one": "{n} 年经验",
+    "years_other": "{n} 年经验",
+    "years_zero": "0 年",
+    "updated": "更新于 {date}"
+  },
+  "ribbon": {
+    "tag": "进阶",
+    "title": "等级 {level}",
+    "default_blurb": "等级由已掌握的技能数量推导得出。",
+    "blurbs": {
+      "beginner": "您才刚刚起步。智能体会在每一步操作前向您讲解。",
+      "intermediate": "您正在进步。智能体会精简讲解，让您更多地主导。",
+      "confirmed": "您已熟练。智能体会把决策交给您，并确认您的假设。",
+      "expert": "您是专家。智能体保持简洁，并在复杂故障上跟随您。"
+    },
+    "rungs": {
+      "beginner": "初学者",
+      "intermediate": "中级",
+      "confirmed": "熟练",
+      "expert": "专家"
+    }
+  },
+  "stats": {
+    "tag_mastered": "已精通",
+    "tag_practiced": "已实践",
+    "tag_learning": "学习中",
+    "tag_tools": "工具",
+    "sub_skills": "共 {total} 项已编录技能",
+    "sub_tools": "共 {total} 件目录工具",
+    "block_skills_total": "{n} 项技能",
+    "block_tools_total": "{on} / {total} 件已启用"
+  },
+  "blocks": {
+    "skills_tag": "技能",
+    "skills_heading": "操作档案",
+    "tools_tag": "工具",
+    "tools_heading": "已申报的工作台",
+    "prefs_tag": "诊断偏好",
+    "prefs_heading": "智能体姿态"
+  },
+  "status": {
+    "mastered": "已精通",
+    "practiced": "已实践",
+    "learning": "学习中",
+    "unlearned": "未实践"
+  },
+  "drawer": {
+    "close": "关闭",
+    "no_history": "此技能暂无历史记录。一旦智能体检测到确认的使用，便会开始跟踪。"
+  },
+  "prefs": {
+    "verbosity": "详尽程度",
+    "language": "语言"
+  },
+  "modal": {
+    "kicker": "技师档案",
+    "title": "编辑您的身份",
+    "close": "关闭",
+    "field_name": "姓名",
+    "field_avatar": "头像（2 个字母或表情符号）",
+    "field_years": "工作年限",
+    "field_specialties": "专长（用逗号分隔）",
+    "specialties_placeholder": "apple、游戏机、笔记本电脑",
+    "field_level": "强制等级（可选）",
+    "level_auto": "（自动推导）",
+    "cancel": "取消",
+    "save": "保存",
+    "save_failed": "无法保存：{error}"
+  }
+}

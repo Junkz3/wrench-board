@@ -2,7 +2,7 @@
 name = "wb_fz_cipher"
 version = "0.1.0"
 edition = "2021"
-description = "Rust/PyO3 accelerator for the FZ-xor boardview decoder (byte-identical to the Python reference)."
+description = "Rust/PyO3 accelerator for the FZ-xor boardview cipher (byte-identical to the Python reference)."
 
 [lib]
 name = "wb_fz_cipher"

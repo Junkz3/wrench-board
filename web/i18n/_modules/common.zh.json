@@ -1,0 +1,64 @@
+{
+  "app": {
+    "title": "Wrench Board：知识图谱"
+  },
+  "topbar": {
+    "brand": "wrench-board",
+    "repair_log": "维修记录",
+    "settings": "设置",
+    "agent": "智能体",
+    "agent_title": "诊断智能体 (⌘J)"
+  },
+  "session": {
+    "tag": "会话",
+    "pill_aria": "活动会话，点击打开仪表盘",
+    "pill_title": "返回会话仪表盘",
+    "leave": "离开会话"
+  },
+  "rail": {
+    "home": "维修",
+    "diagnostic": "诊断",
+    "pcb": "PCB",
+    "schematic": "原理图",
+    "memory": "记忆",
+    "stock": "库存",
+    "profile": "个人资料"
+  },
+  "metabar": {
+    "view_mode": "视图模式",
+    "view_visual": "可视化",
+    "view_raw": "原始数据",
+    "filter_symptoms": "症状",
+    "filter_components": "元件",
+    "filter_nets": "网络",
+    "filter_actions": "操作",
+    "search_placeholder": "搜索节点…"
+  },
+  "tweaks": {
+    "title": "调整",
+    "close": "关闭",
+    "relations_visible": "可见关系",
+    "rel_causes": "导致",
+    "rel_powers": "供电",
+    "rel_connected": "已连接",
+    "rel_resolves": "解决",
+    "edge_labels": "连边标签",
+    "label_hover": "悬停时",
+    "label_all": "全部",
+    "label_none": "无",
+    "min_confidence": "最低置信度",
+    "particle_speed": "粒子速度",
+    "boardview_colors": "引脚颜色",
+    "color_signal": "信号",
+    "color_power": "电源",
+    "color_ground": "接地",
+    "color_clock": "时钟",
+    "color_reset": "复位",
+    "color_nc": "NC",
+    "color_testpad": "测试焊盘",
+    "color_via": "过孔",
+    "color_board_outline": "电路板轮廓",
+    "color_board_fill": "电路板填充",
+    "reset_colors": "重置颜色"
+  }
+}

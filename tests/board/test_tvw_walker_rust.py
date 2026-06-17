@@ -1,10 +1,10 @@
-"""The optional Rust module `wb_tvw_walker` must reproduce `_try_walk_pins_at`
-EXACTLY (the binary `.tvw` hot loop: ~0.3 MB/s, dominated by `_read_pin_record`
-plus millions of `_u8`/`_u32`).
+"""Le module Rust optionnel `wb_tvw_walker` doit reproduire EXACTEMENT
+`_try_walk_pins_at` (le hot-loop binaire `.tvw` : ~0,3 Mo/s, dominé par
+`_read_pin_record` + des millions de `_u8`/`_u32`).
 
-Test strategy: replay the REAL `_try_walk_pins_at` calls captured during a Python
-parse of a real `.tvw`, and require identical results from the Rust side. Plus an
-end-to-end equivalence: identical Board with Rust on vs off.
+Stratégie de test : on rejoue les VRAIS appels `_try_walk_pins_at` capturés
+pendant un parse Python d'un vrai `.tvw`, et on exige des résultats identiques
+côté Rust. Plus une équivalence end-to-end : Board identique Rust-on vs Rust-off.
 """
 from __future__ import annotations
 
@@ -15,8 +15,8 @@ import pytest
 
 wb_tvw_walker = pytest.importorskip("wb_tvw_walker")
 
-# Imports after the importorskip: intentional, the module under test only
-# makes sense when the Rust extension is present.
+# Imports après l'importorskip : volontaire, le module testé n'a de sens
+# que si l'extension Rust est présente.
 import api.board.parser._tvw_engine.walker as W  # noqa: E402
 from api.board.parser import parser_for  # noqa: E402
 
@@ -42,13 +42,13 @@ def _pin_tuple(rec):
 def test_rust_try_walk_matches_python_on_real_calls(monkeypatch):
     path = _find_real_tvw()
     if path is None:
-        pytest.skip("no .tvw in the local corpus")
+        pytest.skip("aucun .tvw dans le corpus local")
 
-    # Capture the Python calls (buf, off, region_end) that find pins.
+    # Capture les appels Python (buf, off, region_end) qui trouvent des pins.
     calls = []
     orig = W._try_walk_pins_at_py if hasattr(W, "_try_walk_pins_at_py") else None
     if orig is None:
-        pytest.skip("_try_walk_pins_at_py wiring absent")
+        pytest.skip("câblage _try_walk_pins_at_py absent")
 
     def spy(buf, off, region_end, max_pin_count=200_000, min_partial_ratio=0.5):
         res = orig(buf, off, region_end, max_pin_count, min_partial_ratio)
@@ -60,7 +60,7 @@ def test_rust_try_walk_matches_python_on_real_calls(monkeypatch):
     parser_for(path).parse_file(path)
     monkeypatch.undo()
 
-    assert calls, "no pin-walk call captured on this .tvw"
+    assert calls, "aucun appel pin-walk capturé sur ce .tvw"
     for buf, off, region_end, mpc, mpr, py_res in calls:
         rust_res = wb_tvw_walker.try_walk_pins_at(buf, off, region_end, mpc, mpr)
         assert rust_res is not None
@@ -79,14 +79,14 @@ def _norm_scan(r):
 
 
 def test_rust_scan_matches_python_on_real_calls(monkeypatch):
-    """The full brute-force scan (triage + try_walk + best candidate) ported to
-    Rust must give the SAME best (offset, pins, end, declared) as the Python
-    core, on the real calls captured from a `.tvw` parse."""
+    """Le scan brute-force complet (triage + try_walk + meilleur candidat) porté
+    en Rust doit donner le MÊME meilleur (offset, pins, end, declared) que le
+    cœur Python, sur les vrais appels capturés d'un parse `.tvw`."""
     path = _find_real_tvw()
     if path is None:
-        pytest.skip("no .tvw in the local corpus")
+        pytest.skip("aucun .tvw dans le corpus local")
     if not hasattr(W, "_scan_best_pin_section_py"):
-        pytest.skip("scan wiring absent")
+        pytest.skip("câblage scan absent")
 
     calls = []
     py_ref = W._scan_best_pin_section_py
@@ -100,20 +100,20 @@ def test_rust_scan_matches_python_on_real_calls(monkeypatch):
     parser_for(path).parse_file(path)
     monkeypatch.undo()
 
-    assert calls, "no scan call captured"
+    assert calls, "aucun appel de scan capturé"
     for buf, ss, se, re_, step, mpc, mpr, py_r in calls:
         rust_r = wb_tvw_walker.scan_best_pin_section(buf, ss, se, re_, step, mpc, mpr)
         assert _norm_scan(rust_r) == _norm_scan(py_r)
 
 
 def test_rust_netnames_matches_python_on_real_calls(monkeypatch):
-    """The net-names scan (`_try_read_network_names`, ~58% of the parse of a large
-    .tvw) ported to Rust must return exactly the same list of names."""
+    """Le scan des net-names (`_try_read_network_names`, ~58% du parse d'un gros
+    .tvw) porté en Rust doit retourner exactement la même liste de noms."""
     path = _find_real_tvw()
     if path is None:
-        pytest.skip("no .tvw in the local corpus")
+        pytest.skip("aucun .tvw dans le corpus local")
     if not hasattr(W, "_try_read_network_names_py") or not hasattr(wb_tvw_walker, "try_read_network_names"):
-        pytest.skip("net-names wiring absent")
+        pytest.skip("câblage net-names absent")
 
     calls = []
     py_ref = W._try_read_network_names_py
@@ -127,24 +127,24 @@ def test_rust_netnames_matches_python_on_real_calls(monkeypatch):
     parser_for(path).parse_file(path)
     monkeypatch.undo()
 
-    assert calls, "no net-names call captured"
+    assert calls, "aucun appel net-names capturé"
     for buf, after_layers, py_r in calls:
         assert wb_tvw_walker.try_read_network_names(buf, after_layers) == py_r
 
 
 def test_board_identical_rust_vs_python_fallback(monkeypatch):
-    """End-to-end: the parsed Board is identical whether the walker goes through
-    Rust (default) or falls back entirely to the Python core (self-host without Rust)."""
+    """Bout en bout : le Board parsé est identique que le walker passe par le
+    Rust (défaut) ou retombe entièrement sur le cœur Python (self-host sans Rust)."""
     path = _find_real_tvw()
     if path is None:
-        pytest.skip("no .tvw in the local corpus")
+        pytest.skip("aucun .tvw dans le corpus local")
 
     board_rust = parser_for(path).parse_file(path)
-    monkeypatch.setattr(W, "_rust_walk", None)  # force the Python fallback (pin-walk)
+    monkeypatch.setattr(W, "_rust_walk", None)  # force le fallback Python (pin-walk)
     if hasattr(W, "_rust_scan"):
-        monkeypatch.setattr(W, "_rust_scan", None)  # ... and the scan
+        monkeypatch.setattr(W, "_rust_scan", None)  # ... et le scan
     if hasattr(W, "_rust_netnames"):
-        monkeypatch.setattr(W, "_rust_netnames", None)  # ... and the net-names
+        monkeypatch.setattr(W, "_rust_netnames", None)  # ... et les net-names
     board_py = parser_for(path).parse_file(path)
 
     assert len(board_rust.parts) == len(board_py.parts)

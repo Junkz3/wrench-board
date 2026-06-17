@@ -31,7 +31,7 @@ from api.pipeline.schematic.schemas import (
 
 
 def _base_registry() -> Registry:
-    # kind en majuscules (PMIC, CAPACITOR), canonical_name toujours uppercase
+    # T8 : kind en majuscules (PMIC, CAPACITOR), canonical_name toujours uppercase
     return Registry(
         device_label="Demo",
         components=[
@@ -46,7 +46,7 @@ def test_drift_empty_when_everything_matches():
     registry = _base_registry()
     kg = KnowledgeGraph(
         nodes=[
-            # KnowledgeNode.id doit suivre le pattern N-[A-Z0-9_-]{1,48}.
+            # T8 : KnowledgeNode.id doit suivre le pattern N-[A-Z0-9_-]{1,48}.
             # Les nets suivent le sous-pattern N-NET_<canonical_name> (le Cartographe
             # émet N-NET_PP3V0, etc.) — compute_drift doit strip "N-NET_" pour
             # retrouver le canonical_name "3V3_RAIL" dans registry.signals.
@@ -66,7 +66,7 @@ def test_drift_empty_when_everything_matches():
     rules = RulesSet(
         rules=[
             Rule(
-                # Rule.id doit suivre le pattern R-[A-Z0-9_-]{1,48}
+                # T8 : Rule.id doit suivre le pattern R-[A-Z0-9_-]{1,48}
                 id="R-DEMO-001",
                 symptoms=["3V3 dead"],
                 likely_causes=[Cause(refdes="U7", probability=0.8, mechanism="short")],
@@ -105,14 +105,14 @@ def test_drift_detects_unknown_component_in_graph():
     )
     assert len(drift) == 1
     assert drift[0].file == "knowledge_graph"
-    # les IDs suivent le pattern N-[A-Z0-9_-]{1,48}
+    # T8 : les IDs suivent le pattern N-[A-Z0-9_-]{1,48}
     assert drift[0].mentions == ["N-U99"]
 
 
 def test_drift_detects_unknown_net_in_graph():
     registry = _base_registry()
     kg = KnowledgeGraph(
-        # les nets suivent le pattern N-NET_<canonical_name> (le Cartographe
+        # T8 : les nets suivent le pattern N-NET_<canonical_name> (le Cartographe
         # émet N-NET_PP3V0, N-NET_1V8_UNREGISTERED, etc.).
         nodes=[
             KnowledgeNode(id="N-NET_1V8_UNREGISTERED", kind="net", label="1.8V"),
@@ -145,7 +145,7 @@ def test_drift_detects_unknown_cause_refdes():
     rules = RulesSet(
         rules=[
             Rule(
-                # Rule.id suit le pattern R-[A-Z0-9_-]{1,48}
+                # T8 : Rule.id suit le pattern R-[A-Z0-9_-]{1,48}
                 id="R-BOOT-001",
                 symptoms=["boot loop"],
                 likely_causes=[
@@ -185,7 +185,7 @@ def test_drift_dedups_repeated_mentions():
     registry = _base_registry()
     kg = KnowledgeGraph(
         nodes=[
-            # IDs conformes au pattern N-[A-Z0-9_-]{1,48}
+            # T8 : IDs conformes au pattern N-[A-Z0-9_-]{1,48}
             KnowledgeNode(id="N-U99", kind="component", label="a"),
             KnowledgeNode(id="N-U99", kind="component", label="b"),
             # A registry-known net so N-U99 is wired to a real other node (no
@@ -210,7 +210,7 @@ def test_drift_dedups_repeated_mentions():
 def test_drift_ignores_symptom_nodes():
     registry = _base_registry()
     kg = KnowledgeGraph(
-        # ID conforme au pattern N-[A-Z0-9_-]{1,48}
+        # T8 : ID conforme au pattern N-[A-Z0-9_-]{1,48}
         nodes=[
             KnowledgeNode(id="N-SYM-ANYTHING", kind="symptom", label="x"),
             # A registry-known net so the symptom indicates a real other node (no
@@ -236,7 +236,7 @@ def test_drift_ignores_symptom_nodes():
 
 
 # ======================================================================
-# graph-truth widening + free-text rail scan + kg orphan check
+# Task 4 — graph-truth widening + free-text rail scan + kg orphan check
 # ======================================================================
 
 

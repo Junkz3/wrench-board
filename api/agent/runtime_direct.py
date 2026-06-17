@@ -327,7 +327,7 @@ async def _run_agent_turn(
         cost = cost_from_response(model, response.usage)
         await ws.send_json({"type": "turn_cost", **cost})
 
-        # Report this LLM call's raw token usage to the cloud (the
+        # T13/T16 — report this LLM call's raw token usage to the cloud (the
         # tenant-private billing unit), keeping the direct runtime at parity
         # with runtime_managed's span.model_request_end hook. Without it,
         # `DIAGNOSTIC_MODE=direct` would spend API credit while the cloud's
@@ -974,7 +974,6 @@ async def _dispatch_mb_tool(
             query=payload.get("query"),
             refdes=payload.get("refdes"),
             limit=payload.get("limit", 8),
-            owner_ref=current_owner_ref(),
         )
         return {"ok": True, "reports": reports, "count": len(reports)}
     if name == "mb_search_patterns":
@@ -1340,7 +1339,7 @@ async def run_diagnostic_session_direct(
     # NOTE: prompt + manifest are a snapshot of the session at open time.
     # The user-turn loop below re-checks the active boardview each turn
     # (`refresh_board_if_changed`) and recomputes both when it changed.
-    # When this board has no schematic of its own, offer the agent a
+    # T9a Phase B: when this board has no schematic of its own, offer the agent a
     # same-family sibling pack as an indicative fallback reference.
     cousin_line = None
     if not _has_electrical_graph(device_slug):

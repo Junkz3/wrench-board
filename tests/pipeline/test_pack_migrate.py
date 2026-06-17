@@ -1,4 +1,4 @@
-"""pack_migrate : migration in-place idempotente du layout legacy."""
+"""T8 — pack_migrate : migration in-place idempotente du layout legacy → T8."""
 
 import json
 from pathlib import Path
@@ -10,7 +10,7 @@ SLUG = "iphone-12-legacy"
 
 
 def _legacy_pack(memory_root: Path) -> Path:
-    """Crée un pack pré-migration avec les VRAIES clés des fichiers legacy.
+    """Crée un pack pré-T8 avec les VRAIES clés des fichiers legacy.
 
     Fixture corrigée :
     - registry.json  : schema_version + device_label + taxonomy + components + signals
@@ -153,8 +153,8 @@ def test_migrate_preserves_dictionary_entries(tmp_path):
 def test_migrate_preserves_top_level_metadata(tmp_path):
     """schema_version et autres métadonnées top-level survivent dans _meta.
 
-    Le câblage taxonomy/device_label à partir de _meta viendra plus tard ; pour
-    l'instant _meta est préservé-mais-pas-encore-consommé.
+    Task 5 câblera taxonomy/device_label à partir de _meta ; pour l'instant
+    _meta est préservé-mais-pas-encore-consommé.
     """
     _legacy_pack(tmp_path)
     migrate_pack_if_needed(tmp_path, SLUG)
@@ -229,3 +229,48 @@ def test_migrated_facts_load_through_tolerant_baseline(tmp_path):
         # matcher les patterns stricts — c'est le but de load_with_tolerant_baseline)
         obj = load_with_tolerant_baseline(RegistryComponent, it)
         assert obj.provenance.source_kind == "baseline"
+
+
+# ---------------------------------------------------------------------------
+# stage_web_only_pack — Lot 2 : isolation per-owner d'un build web-only
+# ---------------------------------------------------------------------------
+
+def test_stage_web_only_pack_isolates_to_owner_staged(tmp_path):
+    from api.pipeline.pack_migrate import stage_web_only_pack
+    from api.pipeline.pack_storage import load_effective_pack
+
+    pack = _legacy_pack(tmp_path)
+    stage_web_only_pack(tmp_path, SLUG, owner_ref="tenant-A")
+
+    # Root writer files relocated → the shared commons stays clean (jamais
+    # migrable vers baseline/, jamais servi aux autres tenants).
+    for fname in ("registry.json", "rules.json", "knowledge_graph.json", "dictionary.json"):
+        assert not (pack / fname).exists(), f"{fname} devrait avoir quitté la racine"
+        assert not (pack / "baseline" / fname).exists(), f"{fname} ne doit PAS aller en baseline (partagé)"
+        assert (pack / "_staged" / "tenant-A" / fname).is_file(), f"{fname} doit être en _staged/owner"
+
+    # raw_research_dump → audit/ (privé moteur)
+    assert (pack / "audit" / "raw_research_dump.md").is_file()
+    assert not (pack / "raw_research_dump.md").exists()
+
+    # L'owner voit le pack via la vue effective ; les autres (None) ne voient rien.
+    eff_owner = load_effective_pack(tmp_path, SLUG, owner_ref="tenant-A")
+    names = [c["canonical_name"] for c in eff_owner["registry"]["items"]]
+    assert "U1300" in names and "PP3V0" in names
+    eff_shared = load_effective_pack(tmp_path, SLUG, owner_ref=None)
+    assert eff_shared["registry"]["items"] == []
+
+
+def test_stage_web_only_pack_attaches_owner_provenance(tmp_path):
+    from api.pipeline.pack_migrate import stage_web_only_pack
+
+    _legacy_pack(tmp_path)
+    stage_web_only_pack(tmp_path, SLUG, owner_ref="tenant-A")
+
+    items = json.loads(
+        (tmp_path / SLUG / "_staged" / "tenant-A" / "registry.json").read_text()
+    )["items"]
+    prov = items[0]["_provenance"]
+    assert prov["added_by_tenant"] == "tenant-A"
+    assert prov["source_kind"] == "web_only_build"
+    assert prov["status"] == "staged"

@@ -1,6 +1,6 @@
-"""les endpoints pack lisent encore correctement APRÈS migration.
+"""T8 — les endpoints pack lisent encore correctement APRÈS migration.
 
-La migration déplace registry.json/rules.json/knowledge_graph.json/
+La migration T8 déplace registry.json/rules.json/knowledge_graph.json/
 dictionary.json de la racine vers baseline/. Les readers de routes/packs.py
 (taxonomy, /full, /graph, presence bitmask) doivent suivre — sinon un pack
 expandé/touché par l'agent renvoie vide.
@@ -73,3 +73,30 @@ def test_summary_after_migration_reports_complete(memory_root, client):
     assert s["has_rules"] is True
     assert s["has_dictionary"] is True
     assert s["has_knowledge_graph"] is True
+
+
+# ---------------------------------------------------------------------------
+# Lot 2 — /full owner-aware: a staged web-only pack shows for its owner only.
+# ---------------------------------------------------------------------------
+
+def test_full_pack_staged_visible_only_to_owner(memory_root, client):
+    from api.pipeline.pack_migrate import stage_web_only_pack
+
+    dst = memory_root / "webonly-x"
+    dst.mkdir(parents=True)
+    for name in ("registry.json", "knowledge_graph.json", "rules.json", "dictionary.json"):
+        shutil.copy(FIXTURE_ROOT / name, dst / name)
+    stage_web_only_pack(memory_root, "webonly-x", owner_ref="tenant-A")
+    from api.pipeline import build_state
+    build_state.mark_complete(dst)
+
+    # Owner sees the pack content.
+    res_owner = client.get("/pipeline/packs/webonly-x/full", headers={"X-Owner-Ref": "tenant-A"})
+    assert res_owner.status_code == 200
+    assert res_owner.json()["registry"] is not None
+    assert {c["canonical_name"] for c in res_owner.json()["registry"]["components"]} >= {"U7"}
+
+    # Commons (no header) sees nothing — the staged pack is private.
+    res_commons = client.get("/pipeline/packs/webonly-x/full")
+    assert res_commons.status_code == 200
+    assert res_commons.json()["registry"] is None

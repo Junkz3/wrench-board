@@ -1,4 +1,4 @@
-"""The live forwarder reports per-LLM-call token usage to the cloud.
+"""T13 — the live forwarder reports per-LLM-call token usage to the cloud.
 
 At each `span.model_request_end`, `_forward_session_to_ws` must fire
 `cloud_metering.fire_and_forget_report` with the tenant (owner_ref), the model,

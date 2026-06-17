@@ -52,7 +52,7 @@ def test_repairs_endpoint_returns_id_and_slug(memory_root, client):
 
 
 def test_create_repair_adopts_board_number_as_canonical_slug(memory_root, client):
-    # free text with a board# resolves to the board# as canonical slug,
+    # T9a: free text with a board# resolves to the board# as canonical slug,
     # not the naive slugify of the whole label.
     with patch("api.pipeline.generate_knowledge_pack", new=AsyncMock(side_effect=_fake_pipeline)):
         res = client.post(
@@ -90,7 +90,7 @@ def test_create_repair_honors_explicit_device_slug(memory_root, client):
 
 
 def test_create_repair_returns_disambiguation_for_ambiguous_label(memory_root, client):
-    # confirm-on-uncertainty: a broad free-text term matching several siblings
+    # T9a confirm-on-uncertainty: a broad free-text term matching several siblings
     # returns the candidate menu WITHOUT creating a repair or starting a build.
     from api.pipeline.device_registry import JsonDeviceRegistryStore
 
@@ -508,7 +508,7 @@ def _seed_repair(memory_root, slug, *, repair_id, symptom, status, label="Demo P
 async def test_cancel_running_pipeline_cancels_task_and_publishes_terminal():
     """cancel_repair cancels the running pipeline task and publishes a terminal
     pipeline_failed(CANCELLED) so subscribers (the cloud progress relay) stop
-    waiting — the cooperative-cancel half of the cloud's cancellation (the
+    waiting — the cooperative-cancel half of the cloud's T5 cancellation (the
     engine holds the only handle on the task).
 
     Driven by calling the handler directly in one event loop: a background task
@@ -1021,7 +1021,7 @@ def test_repairs_allow_expand_false_no_longer_blocks_or_drops_ticket(memory_root
 
 def test_repairs_allow_expand_false_still_matches_covered_rule(memory_root, client, monkeypatch):
     """allow_expand=false ne touche PAS le chemin couvert : un symptôme matché
-    par une règle existante répond normalement (rule match, pas de blocage)."""
+    par une règle existante répond normalement (rule match, pas de paywall)."""
     monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-test-fake-for-mocked-call")
     monkeypatch.setattr(config_mod, "_settings", None)
     slug_dir = memory_root / "demo-pi"
