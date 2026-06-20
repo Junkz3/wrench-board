@@ -121,5 +121,31 @@
   "free": {
     "locked_hint": "免费方案：从列表中选择一个已分析的设备（✓）来开始诊断。",
     "upgrade_cta": "升级到 Pro 以分析新设备 →"
+  },
+  "catalogue": {
+    "button": "浏览设备",
+    "aria": "浏览可用设备",
+    "title": "可用设备",
+    "search_placeholder": "搜索设备、品牌或板号…",
+    "filter_aria": "按设备类型筛选",
+    "filter_all": "全部",
+    "empty": "未找到匹配的设备。",
+    "draft": "草稿",
+    "graph": "图谱",
+    "fiche_back": "所有设备",
+    "fiche_known": "已知内容",
+    "fiche_registry": "注册表",
+    "fiche_graph": "知识图谱",
+    "fiche_rules": "诊断规则",
+    "fiche_dictionary": "词汇表",
+    "fiche_boardview": "板图",
+    "fiche_schematic": "原理图",
+    "fiche_symptom_placeholder": "描述问题（例如 无法开机、不充电）",
+    "fiche_launch": "开始诊断",
+    "fiche_draft_locked": "此设备仍在构建中，诊断功能暂不可用。",
+    "present": "是",
+    "absent": "否",
+    "button_short": "浏览",
+    "crumb_types": "类型"
   }
 }

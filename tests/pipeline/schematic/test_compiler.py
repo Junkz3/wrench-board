@@ -15,6 +15,7 @@ from api.pipeline.schematic.compiler import (
     compile_electrical_graph,
 )
 from api.pipeline.schematic.schemas import (
+    Ambiguity,
     ComponentNode,
     ComponentValue,
     NetNode,
@@ -281,6 +282,51 @@ def test_quality_degraded_mode_defaults_off_with_no_confidences():
     g = _mnt_regulator_graph()
     elec = compile_electrical_graph(g)
     assert elec.quality.confidence_global == 1.0
+    assert elec.quality.degraded_mode is False
+
+
+def test_orphan_cross_page_counts_only_unstitched_refs_not_net_naming_notes():
+    """`orphan_cross_page_refs` must count unstitched cross-page connectors
+    only — not every ambiguity that happens to name a net.
+
+    The vision pass emits rich, honest net-naming notes ("GND symbol drawn
+    but no GND label", "PP04xx are probe pads, couldn't tell if pad+signal
+    are one net"). Each carries `related_nets`, but none is a broken cross-page
+    connector. Counting them inflated iphone-11 to 222 orphans (5 real) and
+    falsely flagged DEGRADED."""
+    g = _mnt_regulator_graph()
+    g.ambiguities.extend(
+        [
+            # Two genuine merger-emitted cross-page orphans.
+            Ambiguity(
+                description=(
+                    "Cross-page ref 'wifi_mlb' on page 73 has no matching net "
+                    "or counter-ref on other pages"
+                ),
+                page=73,
+                related_nets=["wifi_mlb"],
+            ),
+            Ambiguity(
+                description=(
+                    "Cross-page connector with unreadable label on page 90"
+                ),
+                page=90,
+            ),
+            # Net-naming notes with related_nets — NOT cross-page orphans.
+            Ambiguity(
+                description="GND label is not present in the grounding net set",
+                page=12,
+                related_nets=["GND"],
+            ),
+            Ambiguity(
+                description="PP04xx labels are probe/test pad identifiers",
+                page=14,
+                related_nets=["PP0453", "PP0413"],
+            ),
+        ]
+    )
+    elec = compile_electrical_graph(g)
+    assert elec.quality.orphan_cross_page_refs == 2
     assert elec.quality.degraded_mode is False
 
 

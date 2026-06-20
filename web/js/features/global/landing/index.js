@@ -16,12 +16,14 @@ import { prettifySlug, repairHash, seedSlugForRepair } from '../../../router.js'
 import i18n from '../../../i18n.js';
 import { escapeHtml as _escapeHtml } from '../../../shared/dom.js';
 import { initProfileMenu, refreshProfileMenu } from './profile_menu.js';
+import { initCatalogue, closeCatalogue } from './catalogue.js';
 import { maybeStartOnboarding, preGateOnboarding } from './onboarding.js';
 import { openInfoModal } from '../../../info_modal.js';
 import { packedOnly, hideUploads, planHints } from '../../../cloud_hints.js';
 
 const KNOWLEDGE_INFO_FLAG = 'wb_knowledge_info_seen';
 import { connectProgress, fetchPendingKind } from '../../../services/pipelineSocket.js';
+import { loadDevices } from '../../../services/deviceCatalog.js';
 import {
   PHASE_ORDER,
   LANDING_DYNAMIC_PHASES,
@@ -40,7 +42,7 @@ const STATUS_ERROR = "error";
 
 // Short device-kind codes for the suggest chip — not i18n'd (compact mono
 // codes, same in every locale). Mirrors the backend device_kind enum.
-const DEVICE_KIND_SHORT = { gpu_card:"GPU", laptop_logic_board:"PORTABLE", phone_logic_board:"TÉLÉPHONE", desktop_motherboard:"BUREAU", sbc_board:"SBC", power_charging_board:"ALIM", other:"AUTRE" };
+export const DEVICE_KIND_SHORT = { gpu_card:"GPU", laptop_logic_board:"PORTABLE", phone_logic_board:"TÉLÉPHONE", desktop_motherboard:"BUREAU", sbc_board:"SBC", power_charging_board:"ALIM", other:"AUTRE" };
 
 let isSubmitting = false;
 let progressConn = null;
@@ -305,6 +307,22 @@ export function hideLanding() {
   if (progressConn) { progressConn.close(); progressConn = null; }
 }
 
+// Called by the catalogue modal's fiche "Start diagnostic" button. Pins the
+// chosen device into the landing state + form, then runs the standard submit
+// so ALL existing gating (free-lock, fresh-build preflight, disambiguation,
+// navigation) applies unchanged — no POST duplication.
+export async function launchFromCatalogue({ slug, label, complete, device_kind, symptom }) {
+  _selectedDeviceSlug = slug || null;
+  _selectedDeviceComplete = Boolean(complete);
+  const deviceEl = document.getElementById("landingDevice");
+  const symptomEl = document.getElementById("landingSymptom");
+  const kindEl = document.getElementById("landingDeviceKind");
+  if (deviceEl) deviceEl.value = label || "";
+  if (symptomEl) symptomEl.value = symptom || "";
+  if (kindEl) kindEl.value = device_kind || "";
+  await submitDiagnostic();
+}
+
 function setStatus(msg, kind) {
   const el = document.getElementById("landingStatus");
   if (!el) return;
@@ -372,7 +390,11 @@ function _isFreshBuild() {
 }
 
 async function onSubmit(ev) {
-  ev.preventDefault();
+  ev?.preventDefault();
+  return submitDiagnostic();
+}
+
+async function submitDiagnostic() {
   if (isSubmitting) return;
   const t = window.t || ((k) => k);
   const deviceEl = document.getElementById("landingDevice");
@@ -947,66 +969,11 @@ let _selectedDeviceSlug = null;
 let _selectedDeviceComplete = false;
 let _schematicFile = null;
 
-// Flatten a TaxonomyTree into a plain list with one entry per
-// (brand, model) — picks the most-complete pack as the canonical
-// representative. Uncategorized packs become individual entries.
-function _flattenTaxonomy(tree) {
-  const out = [];
-  const brands = (tree && tree.brands) || {};
-  for (const [brand, models] of Object.entries(brands)) {
-    for (const [model, packs] of Object.entries(models || {})) {
-      if (!Array.isArray(packs) || packs.length === 0) continue;
-      // Prefer a complete pack; fall back to the first one.
-      const canonical = packs.find((p) => p && p.complete) || packs[0];
-      out.push({
-        label: model,
-        subtitle: brand,
-        slug: canonical.device_slug,
-        device_label: canonical.device_label || model,
-        complete: Boolean(canonical.complete),
-        has_electrical_graph: Boolean(canonical.has_electrical_graph),
-        device_kind: canonical.device_kind || null,
-        version: canonical.version || null,
-        form_factor: canonical.form_factor || null,
-        aliases: Array.isArray(canonical.aliases) ? canonical.aliases : [],
-      });
-    }
-  }
-  for (const p of (tree && tree.uncategorized) || []) {
-    if (!p || !p.device_slug) continue;
-    out.push({
-      label: p.device_label || prettifySlug(p.device_slug),
-      subtitle: null,
-      slug: p.device_slug,
-      device_label: p.device_label || prettifySlug(p.device_slug),
-      complete: Boolean(p.complete),
-      has_electrical_graph: Boolean(p.has_electrical_graph),
-      device_kind: p.device_kind || null,
-      version: p.version || null,
-      form_factor: p.form_factor || null,
-      aliases: Array.isArray(p.aliases) ? p.aliases : [],
-    });
-  }
-  // Sort: complete first, then alphabetical by label.
-  out.sort((a, b) => {
-    if (a.complete !== b.complete) return a.complete ? -1 : 1;
-    return a.label.localeCompare(b.label);
-  });
-  return out;
-}
-
 async function loadPacksForSuggest() {
   try {
-    const res = await fetch("/pipeline/taxonomy");
-    if (res.ok) {
-      const tree = await res.json();
-      _devicesCache = _flattenTaxonomy(tree);
-    } else {
-      _devicesCache = [];
-    }
+    _devicesCache = await loadDevices();
   } catch (err) {
     console.warn("[landing] loadPacksForSuggest failed", err);
-    _devicesCache = [];
   }
 }
 
@@ -1022,7 +989,12 @@ function _matchDevices(query) {
       // T9a: match carnet aliases too (board# / Apple model / EMC / codename /
       // marketing) so "820-2533" or "A1286" finds the MacBook Pro 15 pack.
       const aliases = (d.aliases || []).join(" ").toLowerCase();
-      return label.includes(q) || sub.includes(q) || slug.includes(q) || aliases.includes(q);
+      // Also match the version line shown on the suggestion (the Apple model
+      // number(s) / board# live there, e.g. "A1984" finds the iPhone XR) —
+      // carnet aliases are empty for packs not registered in it.
+      const version = (d.version || "").toLowerCase();
+      return label.includes(q) || sub.includes(q) || slug.includes(q)
+        || aliases.includes(q) || version.includes(q);
     })
     .slice(0, 6);
 }
@@ -1402,7 +1374,7 @@ export function initLanding() {
     });
   }
   document.addEventListener("keydown", (ev) => {
-    if (ev.key === "Escape") { closeKnowledgeModal(); closePreflightModal(); closeRepairsDrawer(); }
+    if (ev.key === "Escape") { closeKnowledgeModal(); closePreflightModal(); closeRepairsDrawer(); closeCatalogue(); }
   });
   // Mobile recent-repairs drawer: toggle from the nav, dismiss via the scrim.
   document.getElementById("landingRepairsToggle")?.addEventListener("click", () => {
@@ -1415,5 +1387,6 @@ export function initLanding() {
   if (kChips) kChips.addEventListener("click", onKnowledgeChipClick);
   _initSuggest();
   renderKnowledgeIndicators();
+  initCatalogue();
   initProfileMenu();
 }

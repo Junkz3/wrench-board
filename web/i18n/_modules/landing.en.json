@@ -124,5 +124,31 @@
   "free": {
     "locked_hint": "Free plan: pick an already-analyzed device (✓) from the list to start a diagnostic.",
     "upgrade_cta": "Upgrade to Pro to analyze a new device →"
+  },
+  "catalogue": {
+    "button": "Browse devices",
+    "aria": "Browse available devices",
+    "title": "Available devices",
+    "search_placeholder": "Search a device, brand, board number…",
+    "filter_aria": "Filter by device type",
+    "filter_all": "All",
+    "empty": "No device matches.",
+    "draft": "draft",
+    "graph": "graph",
+    "fiche_back": "All devices",
+    "fiche_known": "What we know",
+    "fiche_registry": "Registry",
+    "fiche_graph": "Knowledge graph",
+    "fiche_rules": "Diagnostic rules",
+    "fiche_dictionary": "Glossary",
+    "fiche_boardview": "Boardview",
+    "fiche_schematic": "Schematic",
+    "fiche_symptom_placeholder": "Describe the problem (e.g. won't power on, no charge)",
+    "fiche_launch": "Start diagnostic",
+    "fiche_draft_locked": "This device is still being built — diagnostic unavailable yet.",
+    "present": "yes",
+    "absent": "no",
+    "button_short": "Browse",
+    "crumb_types": "Types"
   }
 }

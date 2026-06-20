@@ -366,3 +366,86 @@ async def test_protocol_miss_with_tool_use_gets_stub_results():
     stub = next(b for b in follow_up if b.get("type") == "tool_result")
     assert stub["tool_use_id"] == "tu_orphan1"
     assert stub["is_error"] is True
+
+
+async def test_misrouted_query_payload_in_submit_is_rerouted_not_failed():
+    """Opus under tool_choice='any' sometimes calls the SUBMIT tool with a
+    query_graph payload (e.g. {refdes:...} / {op:...}). That is a misrouted
+    query, NOT a failed submit: it must be run through the query handler and the
+    loop continue — WITHOUT burning a submit attempt. With max_attempts=1, the
+    old behaviour (count it as a failed submit) would raise immediately."""
+    calls: list[dict] = []
+    handled: list[dict] = []
+
+    def handler(inp):
+        handled.append(inp)
+        return {"exists": True, "refdes": inp.get("refdes")}
+
+    client = _Client([
+        _Resp([_submit_block(payload={"refdes": "U9"}, id="tu_misroute")]),  # query in disguise
+        _Resp([_submit_block()]),  # then a real submit
+    ], calls)
+
+    result = await call_with_query_tools(
+        **_args(client, query_handler=handler, max_attempts=1)
+    )
+
+    assert isinstance(result, RulesSet)
+    # The misrouted payload was handled as a query, not a failed submit.
+    assert handled == [{"refdes": "U9"}]
+    # The misrouted submit_use id was answered (no orphan → no 400 on retry).
+    follow_up = calls[1]["messages"][-1]["content"]
+    answered_ids = {b["tool_use_id"] for b in follow_up if b.get("type") == "tool_result"}
+    assert "tu_misroute" in answered_ids
+
+
+async def test_misrouted_query_in_submit_rerouted_within_grace_after_cap():
+    """After the query cap is reached the model is FORCED to submit, but a dense
+    pack often makes it route ONE more graph verification into the submit tool
+    (a query-shaped payload). Punishing that (the old `not cap_reached` gate)
+    starved the reviser into a no-op — the exact 12-Pro-Max failure. A small
+    post-cap grace re-routes the disguised query through the handler so the model
+    gets its answer and can then submit. With max_attempts=1 the OLD behaviour
+    (count it as a failed submit) would raise immediately."""
+    calls: list[dict] = []
+    handled: list[dict] = []
+
+    def handler(inp):
+        handled.append(inp)
+        return {"exists": True, "refdes": inp.get("refdes")}
+
+    client = _Client([
+        _Resp([_query_block("U1")]),                                  # turn 1: query → cap hit
+        _Resp([_submit_block(payload={"refdes": "U2"}, id="tu_mis")]),  # turn 2: forced submit, query in disguise
+        _Resp([_submit_block()]),                                     # turn 3: real valid submit
+    ], calls)
+
+    result = await call_with_query_tools(
+        **_args(client, query_handler=handler, max_query_turns=1, max_attempts=1)
+    )
+
+    assert isinstance(result, RulesSet)
+    # Both queries ran (the post-cap one was re-routed, not failed) — proof the
+    # grace answered it: with max_attempts=1 a failed submit would have raised.
+    assert handled == [{"refdes": "U1"}, {"refdes": "U2"}]
+    # Turn 2 was forced to submit (cap exhausted) yet still got re-routed.
+    assert calls[1]["tool_choice"] == {"type": "tool", "name": "submit_rules"}
+
+
+async def test_post_cap_query_reroute_grace_is_bounded():
+    """The post-cap re-route grace must be finite: a model that ONLY ever sends
+    query-shaped payloads to the submit tool after the cap still terminates by
+    raising, never loops forever."""
+    calls: list[dict] = []
+    responses = [_Resp([_query_block("U0")])]  # turn 1: query → cap (max_query_turns=1)
+    # Then it ALWAYS misroutes a query into submit, never a real submit.
+    responses += [
+        _Resp([_submit_block(payload={"refdes": f"U{i}"}, id=f"m{i}")]) for i in range(30)
+    ]
+    client = _Client(responses, calls)
+
+    with pytest.raises(RuntimeError, match="submit_rules"):
+        await call_with_query_tools(**_args(client, max_query_turns=1, max_attempts=2))
+
+    # Bounded: cap + finite grace re-routes + max_attempts misses, far below 30.
+    assert len(calls) < 30

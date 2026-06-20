@@ -21,6 +21,9 @@ _GPU_MARK = re.compile(r"\b(gpu|pcie|graphics card|12\s?v\s?pex)\b", re.I)
 _RAIL_TOKEN = re.compile(r"\b([0-9]?[A-Z]{2,}[A-Z0-9_]*|[0-9]V[0-9]?[A-Z0-9_]*)\b")
 _DIGIT = re.compile(r"\d")
 _RAIL_KEYWORD = re.compile(r"V|VDD|RAIL|PEX|VBAT|VIN", re.I)
+# A bare voltage value (3V, 0V, 12V, 2V7) cited as an expected MEASUREMENT is a
+# reading, not a rail label — the rail itself is named in the step's action.
+_BARE_VOLTAGE = re.compile(r"\d+V\d*\Z")
 
 
 @dataclass(frozen=True)
@@ -43,16 +46,29 @@ def lint_pack(
 
     if graph_rails:
         cited = set(_RAIL_TOKEN.findall(rules_text))
+        # Underscore-insensitive view of the graph rails: a writer that drops the
+        # underscore (PP3V3G3H) still names the real PP3V3_G3H rail.
+        rails_squashed = {r.replace("_", "") for r in graph_rails}
         # Only treat tokens that *look* like rails (contain a digit or 'V') and
         # are absent from the graph as phantom — avoids flagging prose words.
         for tok in sorted(cited):
             if tok in graph_rails:
                 continue
-            if _DIGIT.search(tok) and _RAIL_KEYWORD.search(tok):
-                findings.append(LintFinding(
-                    "phantom_rail", "warn",
-                    f"Rule cites rail {tok!r} absent from the schematic graph.",
-                ))
+            if not (_DIGIT.search(tok) and _RAIL_KEYWORD.search(tok)):
+                continue
+            # A bare voltage reading (3V, 0V) is a measurement, not a rail.
+            if _BARE_VOLTAGE.match(tok):
+                continue
+            # Family shorthand (PPBUS → PPBUS_G3H) names a real rail family.
+            if any(r.startswith(tok + "_") for r in graph_rails):
+                continue
+            # Underscore-dropped spelling of a real rail (PP3V3G3H → PP3V3_G3H).
+            if tok.replace("_", "") in rails_squashed:
+                continue
+            findings.append(LintFinding(
+                "phantom_rail", "warn",
+                f"Rule cites rail {tok!r} absent from the schematic graph.",
+            ))
 
     if graph_rails and registry.taxonomy.device_kind in (None, "unknown"):
         findings.append(LintFinding(

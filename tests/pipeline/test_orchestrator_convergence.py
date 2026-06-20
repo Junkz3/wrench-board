@@ -34,7 +34,9 @@ from api.pipeline.schemas import (
     AuditVerdict,
     Cause,
     Dictionary,
+    KnowledgeEdge,
     KnowledgeGraph,
+    KnowledgeNode,
     Registry,
     RegistryComponent,
     Rule,
@@ -115,6 +117,7 @@ async def _drive(
     on_event=None,
     writers_outputs=None,
     write_graph=False,
+    graph=None,
     captured_auditor=None,
 ):
     """Run the pipeline with all phases mocked. `verdicts` is the scripted list
@@ -132,7 +135,7 @@ async def _drive(
         pack = tmp_path / "demo"
         pack.mkdir(parents=True, exist_ok=True)
         (pack / "electrical_graph.json").write_text(
-            _mini_graph().model_dump_json(), encoding="utf-8"
+            (graph or _mini_graph()).model_dump_json(), encoding="utf-8"
         )
 
     auditor_mock = AsyncMock(side_effect=list(verdicts))
@@ -515,3 +518,93 @@ async def test_no_graph_means_no_graph_truth(tmp_path, monkeypatch):
     pack = tmp_path / "demo"
     reg_on_disk = json.loads((pack / "registry.json").read_text(encoding="utf-8"))
     assert reg_on_disk["signals"] == []
+
+
+# ----------------------------------------------------------------------
+# 4. edge-contradiction backstop (graph-contradicted power edges)
+# ----------------------------------------------------------------------
+
+
+def _two_ic_graph() -> ElectricalGraph:
+    """Rail PP1V8_X is sourced by the dedicated regulator U200; U100 is a real IC
+    that does NOT produce it — the over-attribution shape (a kg `U100 powers
+    PP1V8_X` edge is graph-contradicted)."""
+    return ElectricalGraph(
+        device_slug="demo",
+        components={
+            "U100": ComponentNode(refdes="U100", type="ic", kind="ic", pages=[1]),
+            "U200": ComponentNode(refdes="U200", type="ic", kind="ic", pages=[2]),
+        },
+        nets={"PP1V8_X": NetNode(label="PP1V8_X", is_power=True)},
+        power_rails={
+            "PP1V8_X": PowerRail(label="PP1V8_X", voltage_nominal=1.8, source_refdes="U200"),
+        },
+        typed_edges=[TypedEdge(src="U200", dst="PP1V8_X", kind="powers")],
+        quality=SchematicQualityReport(total_pages=2, pages_parsed=2),
+    )
+
+
+def _contradicted_kg() -> KnowledgeGraph:
+    return KnowledgeGraph(
+        nodes=[
+            KnowledgeNode(id="N-U100", kind="component", label="pmic"),
+            KnowledgeNode(id="N-NET_PP1V8_X", kind="net", label="1.8V"),
+        ],
+        edges=[KnowledgeEdge(source_id="N-U100", target_id="N-NET_PP1V8_X", relation="powers")],
+    )
+
+
+def _no_contra_edge(pack_dir) -> bool:
+    kg = json.loads((pack_dir / "knowledge_graph.json").read_text())
+    return not any(
+        e["source_id"] == "N-U100" and e["target_id"] == "N-NET_PP1V8_X"
+        for e in kg["edges"]
+    )
+
+
+async def test_backstop_prunes_contradicted_edge_on_floor_path(tmp_path, monkeypatch):
+    """A graph-contradicted edge survives the LLM revise-loop. Without the
+    backstop it reads as residual drift at the acceptance gate and sinks an
+    otherwise-shippable 0.78 pack to REJECTED. WITH it, the edge is pruned before
+    the gate → the pack ships APPROVED_WITH_WARNINGS and the on-disk kg is clean."""
+    _patch_settings(monkeypatch, pipeline_accept_score=0.70, pipeline_max_revise_rounds=1)
+    registry = Registry(device_label="Demo", components=[], signals=[])
+    kg = _contradicted_kg()
+    verdicts = [
+        _verdict("NEEDS_REVISION", 0.78, brief="fix edges"),
+        _verdict("NEEDS_REVISION", 0.78, brief="fix edges"),
+    ]
+    revisions = [RulesSet(rules=[])]  # reviser touches rules; the bad kg edge persists
+    await _drive(
+        tmp_path,
+        registry=registry,
+        verdicts=verdicts,
+        revisions=revisions,
+        writers_outputs=(kg, RulesSet(rules=[]), Dictionary(entries=[])),
+        write_graph=True,
+        graph=_two_ic_graph(),
+    )
+    av = json.loads((tmp_path / "demo" / "audit_verdict.json").read_text())
+    assert av["overall_status"] == "APPROVED_WITH_WARNINGS"
+    assert _no_contra_edge(tmp_path / "demo")
+
+
+async def test_backstop_prunes_contradicted_edge_on_approved_path(tmp_path, monkeypatch):
+    """Even if the auditor returns APPROVED despite the contradiction, the
+    post-loop backstop guarantees the shipped kg carries no graph-contradicted
+    edge."""
+    _patch_settings(monkeypatch, pipeline_accept_score=0.70, pipeline_max_revise_rounds=2)
+    registry = Registry(device_label="Demo", components=[], signals=[])
+    kg = _contradicted_kg()
+    verdicts = [_verdict("APPROVED", 0.95)]
+    await _drive(
+        tmp_path,
+        registry=registry,
+        verdicts=verdicts,
+        writers_outputs=(kg, RulesSet(rules=[]), Dictionary(entries=[])),
+        write_graph=True,
+        graph=_two_ic_graph(),
+    )
+    av = json.loads((tmp_path / "demo" / "audit_verdict.json").read_text())
+    assert av["overall_status"] == "APPROVED"
+    assert _no_contra_edge(tmp_path / "demo")

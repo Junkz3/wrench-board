@@ -124,6 +124,12 @@ memory/*
 !fixtures/
 !fixtures/**
 
+# Device-specific bench scenarios built from real boards — local-only, never
+# public. The frozen human oracle (benchmark/scenarios.jsonl) and the generic
+# benchmark/agent_scenarios.jsonl stay tracked; per-device suffixed variants
+# (agent_scenarios_macbook_m1.jsonl, …) carry real-board data and stay local.
+benchmark/agent_scenarios_*.jsonl
+
 # --- Binary boardview / schematic dumps (local-only) ---
 # The product runs on any board at runtime. Binary dumps (encrypted .pcb,
 # .fz, anything dropped in `private/`) stay on the local disk and never

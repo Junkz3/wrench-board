@@ -18,6 +18,7 @@ import { updatePreviewDevice } from './camera_preview.js';
 import { closeSchematicInspector } from './schematic.js?v=fitzoom';
 import { initLanding, showLanding, hideLanding } from './features/global/landing/index.js';
 import { hydrateOnboardingState } from './onboarding_state.js';
+import { planHints } from './cloud_hints.js';
 import { mountMascot } from './mascot.js';
 import { sendDiagnostic } from './services/diagnosticSocket.js';
 import { sendCapabilities } from './features/repair/diagnostic/filesVision.js';
@@ -98,6 +99,10 @@ if (!window.Boardview) {
     }
   }).catch(() => {});
   mountMascot(document.getElementById("brandMascot"), { size: "xs", state: "idle" });
+  // Hosted edition: the cloud front-door injects window.__wbPlanHints. Flip the
+  // wordmark to "WrenchBoardCloud" (the "Cloud" suffix + perched cloud reveal
+  // under body.wb-hosted); self-host stays plain "WrenchBoard". Cosmetic only.
+  if (planHints()) document.body.classList.add("wb-hosted");
   wireRouter({ maybeLoadGraph });
   syncContextFromUrl();   // Phase C.1: populate store.device/repair before any view mounts
   initHome();             // wires the dashboard locale-refresh (new-repair modal removed in D.2)

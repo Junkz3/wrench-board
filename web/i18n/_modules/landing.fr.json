@@ -124,5 +124,31 @@
   "free": {
     "locked_hint": "Plan gratuit : choisis un appareil déjà analysé (✓) dans la liste pour lancer un diagnostic.",
     "upgrade_cta": "Passer à Pro pour analyser un nouvel appareil →"
+  },
+  "catalogue": {
+    "button": "Parcourir les appareils",
+    "aria": "Parcourir les appareils disponibles",
+    "title": "Appareils disponibles",
+    "search_placeholder": "Cherche un appareil, une marque, un numéro de carte…",
+    "filter_aria": "Filtrer par type d'appareil",
+    "filter_all": "Tous",
+    "empty": "Aucun appareil ne correspond.",
+    "draft": "brouillon",
+    "graph": "graphe",
+    "fiche_back": "Tous les appareils",
+    "fiche_known": "Ce qu'on connaît",
+    "fiche_registry": "Registre",
+    "fiche_graph": "Graphe de connaissances",
+    "fiche_rules": "Règles de diagnostic",
+    "fiche_dictionary": "Glossaire",
+    "fiche_boardview": "Boardview",
+    "fiche_schematic": "Schéma",
+    "fiche_symptom_placeholder": "Décris le problème (ex. ne s'allume pas, ne charge pas)",
+    "fiche_launch": "Lancer le diagnostic",
+    "fiche_draft_locked": "Cet appareil est encore en construction : diagnostic indisponible pour l'instant.",
+    "present": "oui",
+    "absent": "non",
+    "button_short": "Parcourir",
+    "crumb_types": "Types"
   }
 }

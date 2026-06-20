@@ -313,6 +313,28 @@ def _answer_query_blocks(
     return results
 
 
+def _looks_like_query(payload: object, query_tool: dict) -> bool:
+    """True when a payload sent to the SUBMIT tool is in fact a query_graph
+    call (all its keys belong to the query tool's input schema). Opus under
+    tool_choice='any' sometimes routes a verification into the submit tool
+    (e.g. {op:'who_powers', net:'X'}); recognising it lets the loop answer it
+    as a query instead of burning a submit attempt and crashing the build."""
+    if not isinstance(payload, dict) or not payload:
+        return False
+    qprops = set(query_tool.get("input_schema", {}).get("properties", {}))
+    return bool(qprops) and set(payload).issubset(qprops)
+
+
+# Once the soft query cap is hit the model is forced to submit, but a reviser on
+# a dense pack often routes ONE last graph verification into the submit tool (a
+# query-shaped payload). We answer that disguised query for a few more turns
+# instead of failing it — the lookup is deterministic and free, and starving the
+# model of it was what no-op'd the reviser. The grace is finite so a model that
+# ONLY ever misroutes still terminates (then the payload falls through to the
+# normal submit-validation / protocol-miss path, bounded by `max_attempts`).
+_POST_CAP_QUERY_REROUTE_GRACE = 3
+
+
 async def call_with_query_tools(
     *,
     client: AsyncAnthropic,
@@ -361,6 +383,7 @@ async def call_with_query_tools(
     convo: list[dict] = list(messages)  # local copy — we grow it as the agent works
     queries_used = 0
     submit_attempts = 0
+    post_cap_reroutes = 0  # disguised queries answered AFTER the cap (bounded grace)
     last_error: str | None = None
     tools = [query_tool, submit_tool]
 
@@ -407,6 +430,34 @@ async def call_with_query_tools(
         # we return the object and never issue another request, so the parallel
         # query blocks can't be orphaned (there is no "next" call to reject them).
         if submit_use is not None:
+            # Re-route a misrouted query: under tool_choice="any" the model
+            # sometimes calls the SUBMIT tool with a query_graph payload (all keys
+            # belong to the query tool). That is a verification, not a failed
+            # submit — answer it via the query handler and continue, burning a
+            # query turn, not a submit attempt. Allowed freely while the budget is
+            # open; allowed for `_POST_CAP_QUERY_REROUTE_GRACE` more turns after
+            # the cap, because a reviser on a dense pack often needs one last
+            # lookup before it can emit a correct patch — failing it there is what
+            # starved the reviser into a no-op. The grace is bounded so a model
+            # that ONLY ever misroutes still terminates.
+            reroute_ok = _looks_like_query(submit_use.input, query_tool) and (
+                not cap_reached or post_cap_reroutes < _POST_CAP_QUERY_REROUTE_GRACE
+            )
+            if reroute_ok:
+                tool_results = _answer_query_blocks(query_uses, query_handler, log_label)
+                rerouted = _answer_query_blocks([submit_use], query_handler, log_label)
+                tool_results.extend(rerouted)
+                queries_used += len(query_uses) + 1
+                if cap_reached:
+                    post_cap_reroutes += 1
+                logger.warning(
+                    "[%s] re-routed a query payload mis-sent to %s (op/keys=%s)%s",
+                    log_label, submit_tool_name, sorted(submit_use.input),
+                    " [post-cap grace]" if cap_reached else "",
+                )
+                convo.append({"role": "assistant", "content": response.content})
+                convo.append({"role": "user", "content": tool_results})
+                continue
             submit_attempts += 1
             try:
                 return output_schema.model_validate(submit_use.input)

@@ -247,6 +247,40 @@ body.wb-hosted .landing-mark__cloud { display: inline; }
 
 .landing-input::placeholder { color: var(--text-3); }
 
+/* The device input reserves room on the right for the docked "Browse"
+   affordance so typed text and the placeholder clear the pill. */
+.landing-input-wrap .landing-input { padding-right: 118px; }
+
+/* Trailing catalogue affordance — a subtle pill tucked into the right edge
+   of the device input, for a tech who doesn't know the model name to type.
+   Cyan (component family) on hover, matching the rest of the workbench. */
+.landing-browse-btn {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 11px;
+  background: var(--bg-2);
+  border: 1px solid var(--border-soft);
+  border-radius: 7px;
+  color: var(--text-3);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  cursor: pointer;
+  transition: color .15s, border-color .15s, background .15s;
+}
+.landing-browse-btn svg { flex-shrink: 0; }
+.landing-browse-btn:hover {
+  color: var(--cyan);
+  border-color: var(--border-hover);
+  background: var(--panel-2);
+}
+
 /* ============ Device autocomplete ============
  * Lazy-loaded list of packs already on disk, surfaced under the device
  * input as the tech types. Glass panel style matching the rest of the
@@ -1145,3 +1179,137 @@ body.wb-hosted .landing-mark__cloud { display: inline; }
   color: var(--teal, #64d2de);
   text-decoration: underline;
 }
+
+/* Device catalogue modal — glass overlay, grouped device grid, fiche. */
+.landing-catalogue-backdrop {
+  /* z-index 1100: the modal block is a sibling of .landing (z-index 1000), not
+     a child, so it must sit above the landing overlay — matches the knowledge
+     and preflight modals (#landingKnowledgeBackdrop / #landingPreflightBackdrop). */
+  position: fixed; inset: 0; z-index: 1100;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(0, 0, 0, .5); backdrop-filter: blur(2px); padding: 4vh 4vw;
+}
+.landing-catalogue-backdrop[hidden] { display: none; }
+.landing-catalogue {
+  display: flex; flex-direction: column;
+  width: min(960px, 100%); max-height: 92vh;
+  background: var(--panel); border: 1px solid var(--border); border-radius: 10px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, .5); overflow: hidden;
+}
+.landing-catalogue-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 18px; border-bottom: 1px solid var(--border-soft);
+}
+.landing-catalogue-title { font-size: 14px; margin: 0; color: var(--text); }
+.landing-catalogue-close {
+  background: none; border: none; color: var(--text-3); cursor: pointer; padding: 4px;
+}
+.landing-catalogue-close:hover { color: var(--text); }
+.landing-catalogue-controls {
+  display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+  padding: 12px 18px; border-bottom: 1px solid var(--border-soft);
+}
+.landing-catalogue-search {
+  flex: 1 1 220px; min-width: 180px;
+  background: var(--bg-2); border: 1px solid var(--border); border-radius: 6px;
+  color: var(--text); padding: 7px 10px; font-size: 13px;
+}
+.landing-catalogue-kinds { display: flex; gap: 6px; flex-wrap: wrap; }
+.landing-catalogue-kind-chip {
+  font: 10.5px/1 "JetBrains Mono", monospace; text-transform: uppercase; letter-spacing: .4px;
+  padding: 5px 9px; border-radius: 5px; cursor: pointer;
+  background: var(--bg-2); border: 1px solid var(--border); color: var(--text-2);
+}
+.landing-catalogue-kind-chip.is-active { background: var(--panel-2); color: var(--text); border-color: var(--border-hover); }
+.landing-catalogue-list { overflow-y: auto; padding: 12px 18px 18px; }
+
+/* Stepped chooser — breadcrumb + type/brand vignettes. */
+.landing-catalogue-breadcrumb {
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+  margin-bottom: 14px;
+  font-family: 'JetBrains Mono', monospace; font-size: 10.5px;
+  text-transform: uppercase; letter-spacing: .4px;
+}
+.landing-catalogue-crumb {
+  background: none; border: none; padding: 2px 0; cursor: pointer;
+  font: inherit; text-transform: inherit; letter-spacing: inherit;
+  color: var(--text-3); transition: color .15s;
+}
+.landing-catalogue-crumb:hover { color: var(--cyan); }
+.landing-catalogue-crumb.is-current { color: var(--text); cursor: default; }
+.landing-catalogue-crumb-sep { color: var(--text-3); opacity: .6; }
+.landing-catalogue-tiles {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px;
+}
+.landing-catalogue-tile {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 10px;
+  text-align: left; background: var(--bg-2); border: 1px solid var(--border);
+  border-radius: 9px; padding: 16px; cursor: pointer;
+  transition: background .15s, border-color .15s;
+}
+.landing-catalogue-tile:hover { background: var(--panel-2); border-color: var(--border-hover); }
+.landing-catalogue-tile-icon { color: var(--cyan); display: inline-flex; }
+.landing-catalogue-tile-label { font-size: 13px; color: var(--text); }
+.landing-catalogue-tile-count {
+  font-family: 'JetBrains Mono', monospace; font-size: 10px;
+  color: var(--text-3); text-transform: uppercase; letter-spacing: .4px;
+}
+.landing-catalogue-group { margin-top: 14px; }
+.landing-catalogue-group:first-child { margin-top: 0; }
+.landing-catalogue-group-head {
+  font: 10.5px/1 "JetBrains Mono", monospace; text-transform: uppercase; letter-spacing: .5px;
+  color: var(--text-3); margin: 0 0 8px; padding-bottom: 4px; border-bottom: 1px solid var(--border-soft);
+}
+.landing-catalogue-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; }
+.landing-catalogue-card {
+  text-align: left; background: var(--bg-2); border: 1px solid var(--border); border-radius: 7px;
+  padding: 10px 12px; cursor: pointer; transition: background .15s, border-color .15s;
+}
+.landing-catalogue-card:hover { background: var(--panel-2); border-color: var(--border-hover); }
+.landing-catalogue-card.is-draft { opacity: .72; }
+.landing-catalogue-card-label { font-size: 13px; color: var(--text); }
+.landing-catalogue-card-brand { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+/* Board identifier (model / board number from `version`) — mono, the line that
+   distinguishes two revisions sharing a model name. */
+.landing-catalogue-card-id {
+  font-family: 'JetBrains Mono', monospace; font-size: 10.5px;
+  color: var(--text-2); margin-top: 4px; letter-spacing: .2px;
+}
+.landing-catalogue-badges { display: flex; gap: 5px; margin-top: 7px; flex-wrap: wrap; }
+.landing-catalogue-badge {
+  font: 9.5px/1 "JetBrains Mono", monospace; text-transform: uppercase; letter-spacing: .4px;
+  padding: 3px 6px; border-radius: 4px; background: var(--bg); border: 1px solid var(--border); color: var(--text-2);
+}
+.landing-catalogue-badge.is-on { color: var(--emerald); border-color: var(--emerald); }
+.landing-catalogue-badge.is-draft { color: var(--amber); border-color: var(--amber); }
+/* Fiche */
+.landing-catalogue-fiche { overflow-y: auto; padding: 14px 18px 18px; }
+.landing-catalogue-fiche[hidden] { display: none; }
+.landing-catalogue-fiche-back {
+  background: none; border: none; color: var(--text-3); cursor: pointer; font-size: 12px; padding: 0 0 10px;
+}
+.landing-catalogue-fiche-back:hover { color: var(--text); }
+.landing-catalogue-pastilles { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px; margin: 10px 0 16px; }
+.landing-catalogue-pastille {
+  display: flex; justify-content: space-between; gap: 8px; font-size: 12px;
+  padding: 6px 9px; border-radius: 5px; background: var(--bg-2); border: 1px solid var(--border); color: var(--text-3);
+}
+.landing-catalogue-pastille.is-on { color: var(--text); }
+.landing-catalogue-pastille-state { font: 10px/1 "JetBrains Mono", monospace; text-transform: uppercase; }
+.landing-catalogue-pastille.is-on .landing-catalogue-pastille-state { color: var(--emerald); }
+.landing-catalogue-fiche-launch { display: flex; flex-direction: column; gap: 8px; }
+.landing-catalogue-fiche-launch input {
+  background: var(--bg-2); border: 1px solid var(--border); border-radius: 6px; color: var(--text); padding: 8px 10px; font-size: 13px;
+}
+/* Mirrors the hero's primary CTA (.landing-submit): cyan fill + dark text.
+   White-on-cyan/violet washes out — the accent palette is light OKLCH, built
+   for dark text. Same "Start diagnostic" action, same look across surfaces. */
+.landing-catalogue-fiche-launch button {
+  align-self: flex-start; background: var(--cyan); color: var(--bg-deep); border: none;
+  border-radius: 6px; padding: 9px 18px; font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: filter .15s;
+}
+.landing-catalogue-fiche-launch button:hover { filter: brightness(1.1); }
+.landing-catalogue-fiche-launch button[disabled] { opacity: .45; cursor: not-allowed; }
+.landing-catalogue-fiche-locked { font-size: 12px; color: var(--amber); }
+.landing-catalogue-empty { color: var(--text-3); font-size: 12px; padding: 14px 18px; }

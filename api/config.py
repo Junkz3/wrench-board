@@ -255,13 +255,18 @@ class Settings(BaseSettings):
         ),
     )
     pipeline_graph_query_turns_reviser: int = Field(
-        default=4,
+        default=16,
         ge=0,
         le=32,
         description=(
             "Max query_graph tool turns each writer reviser may take to ground a revision "
-            "against the compiled schematic. Lower than the auditor's budget: a reviser fixes "
-            "one file, the auditor judges the whole pack. 0 = no graph queries."
+            "against the compiled schematic. History: 4 was too low for dense packs — a "
+            "177-page knowledge_graph (iPhone 12 Pro Max) re-flagged the same fictions every "
+            "round because the reviser spent its whole budget verifying rails/refdes before it "
+            "could submit a correct patch, and never converged (REJECTED at 0.55). Raising it "
+            "to 16 let the reviser ground its revision and reach APPROVED first try. It may "
+            "exceed the auditor's budget: the auditor judges one pass, a reviser may need many "
+            "lookups to rewrite a large flagged file. 0 = no graph queries."
         ),
     )
     pipeline_cache_warmup_seconds: float = Field(

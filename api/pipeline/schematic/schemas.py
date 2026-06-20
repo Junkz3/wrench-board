@@ -499,6 +499,25 @@ class PowerRail(BaseModel):
         default=None,
         description="Free-form producer kind ('buck', 'ldo', 'battery', 'external').",
     )
+    source_provenance: Literal[
+        "direct", "through_pass_element", "fet_controller", "unresolved"
+    ] | None = Field(
+        default=None,
+        description=(
+            "How source_refdes was determined: 'direct' producer edge/pin, "
+            "'through_pass_element' (traced across an in-line fuse/series-R/"
+            "ferrite/inductor), 'fet_controller' (a controlled load-switch "
+            "resolved to its driving IC), or 'unresolved'."
+        ),
+    )
+    source_confidence: Literal["high", "medium", "low"] | None = Field(
+        default=None,
+        description=(
+            "Confidence in source_refdes: 'high' for a direct producer or a "
+            "deterministic pass-element trace, 'medium' for a FET-controller "
+            "inference, None when unresolved."
+        ),
+    )
     enable_net: str | None = Field(
         default=None,
         description="Net that gates the producer's EN pin, when applicable.",

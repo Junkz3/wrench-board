@@ -141,6 +141,17 @@ class GraphTruth:
         also be present in power_rails without a plain net entry, so check both."""
         return label in self._nets or label in self._rails
 
+    def has_net_family(self, token: str) -> bool:
+        """True when `token` names a rail FAMILY whose concrete members in the
+        graph carry a suffix — i.e. some net/rail starts with `token_`.
+        Technicians write the family name in prose (`PPBUS`) while the graph
+        only attests members (`PPBUS_G3H`). The `_` separator is required so a
+        bare character prefix (`PP1V`) does NOT match `PP1V2_S2`."""
+        prefix = f"{token}_"
+        return any(n.startswith(prefix) for n in self._nets) or any(
+            r.startswith(prefix) for r in self._rails
+        )
+
     # ---- info ----------------------------------------------------------
 
     def component_info(self, refdes: str) -> dict | None:

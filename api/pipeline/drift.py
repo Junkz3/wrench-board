@@ -30,6 +30,7 @@ from __future__ import annotations
 from collections.abc import Iterable
 
 from api.pipeline.graph_truth import _RAIL_RE, GraphTruth
+from api.pipeline.reconcile import find_contradicted_edges
 from api.pipeline.schemas import (
     Dictionary,
     DriftItem,
@@ -183,6 +184,31 @@ def compute_drift(
                 )
             )
 
+    # --- Contradicted power edges (graph mode only) -----------------------
+    # A kg `powers`/`drives` edge the compiled graph attributes to a DIFFERENT
+    # source-capable IC is a precision defect — the Cartographe over-credited a
+    # salient PMIC for a rail a dedicated regulator actually sources (the
+    # U7800→PP1V8_S0 / real-source-U8200 class). This needs the connectivity
+    # authority, so it only runs with a graph. Each mention names the offending
+    # edge AND the graph's real source, so the reviser can RE-ATTRIBUTE rather
+    # than guess. The in-line-passive false positives (fuse/series-R/rectifier as
+    # "source") are filtered inside find_contradicted_edges, never surfaced here.
+    if graph_truth is not None:
+        contradicted = find_contradicted_edges(knowledge_graph, graph_truth)
+        if contradicted:
+            drifts.append(
+                DriftItem(
+                    file="knowledge_graph",
+                    mentions=[
+                        f"{c.src} {c.relation} {c.rail} — graph source: "
+                        f"{'/'.join(c.graph_sources)}"
+                        for c in contradicted
+                    ],
+                    reason="edge contradicted by the schematic graph: the rail is "
+                    "sourced by a different component than the kg claims",
+                )
+            )
+
     # --- Orphan kg nodes (always — graph or not) --------------------------
     # A node referenced by no edge contributes nothing to the typed graph; it is
     # a dangling assertion the Cartographe forgot to wire. This is a structural
@@ -234,7 +260,11 @@ def _scan_free_text_rails(
         if not text:
             continue
         for tok in _RAIL_RE.findall(text):
-            if tok in signal_names or graph_truth.has_net(tok):
+            if (
+                tok in signal_names
+                or graph_truth.has_net(tok)
+                or graph_truth.has_net_family(tok)
+            ):
                 continue
             unknown.add(tok)
     return sorted(unknown)

@@ -185,7 +185,7 @@ async def _run_single_writer(
         tools=_all_writer_tools(),
         forced_tool_name=forced_tool_name,
         output_schema=output_schema,
-        max_attempts=2,
+        max_attempts=5,
         log_label=log_label,
         stats=stats,
     )
@@ -497,37 +497,51 @@ async def run_single_writer_revision(
     # can't accidentally emit a sibling's shape). A graph → the capped agentic
     # loop where the reviser may verify identifiers against the real schematic
     # before it submits. Either way the model returns a PATCH, not the artefact.
-    if graph_truth is None:
-        patch = await call_with_forced_tool(
-            client=client,
-            model=model,
-            system=WRITER_SYSTEM,
-            messages=messages,
-            tools=[_submit_patch_tool_for(file_name)],
-            forced_tool_name=tool_name,
-            output_schema=patch_schema,
-            max_attempts=2,
-            log_label=log_label,
-            stats=stats,
+    # A reviser that can't produce a valid patch must NEVER crash the whole
+    # build: keep the current artefact (no-op) and let the re-audit re-flag,
+    # exactly like an inapplicable patch below. The 5-attempt budget gives the
+    # model room to recover (a misrouted query is already absorbed upstream by
+    # the loop's re-route, so these attempts count only genuine submit misses).
+    try:
+        if graph_truth is None:
+            patch = await call_with_forced_tool(
+                client=client,
+                model=model,
+                system=WRITER_SYSTEM,
+                messages=messages,
+                tools=[_submit_patch_tool_for(file_name)],
+                forced_tool_name=tool_name,
+                output_schema=patch_schema,
+                max_attempts=5,
+                log_label=log_label,
+                stats=stats,
+            )
+        else:
+            patch = await call_with_query_tools(
+                client=client,
+                model=model,
+                system=WRITER_SYSTEM,
+                messages=messages,
+                query_tool=QUERY_GRAPH_TOOL,
+                # Closure binds the deterministic handler to this pack's graph —
+                # the loop hands us only the raw tool input, never the graph.
+                query_handler=lambda i: handle_query_graph(graph_truth, i),
+                submit_tool=_submit_patch_tool_for(file_name),
+                submit_tool_name=tool_name,
+                output_schema=patch_schema,
+                max_query_turns=max_query_turns,
+                max_attempts=5,
+                log_label=log_label,
+                stats=stats,
+            )
+    except RuntimeError as exc:
+        logger.warning(
+            "[Revise] file=%r reviser produced no valid patch (%s) — keeping "
+            "current artefact (no-op)",
+            file_name,
+            exc,
         )
-    else:
-        patch = await call_with_query_tools(
-            client=client,
-            model=model,
-            system=WRITER_SYSTEM,
-            messages=messages,
-            query_tool=QUERY_GRAPH_TOOL,
-            # Closure binds the deterministic handler to this pack's graph — the
-            # loop hands us only the raw tool input, never the graph.
-            query_handler=lambda i: handle_query_graph(graph_truth, i),
-            submit_tool=_submit_patch_tool_for(file_name),
-            submit_tool_name=tool_name,
-            output_schema=patch_schema,
-            max_query_turns=max_query_turns,
-            max_attempts=2,
-            log_label=log_label,
-            stats=stats,
-        )
+        return current_artefact
 
     # Apply the delta deterministically. A well-formed-but-inapplicable patch
     # (`PatchApplyError`) degrades to a no-op: keep the current artefact, log it,

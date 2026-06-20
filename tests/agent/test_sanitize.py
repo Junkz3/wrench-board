@@ -78,6 +78,32 @@ def test_protocol_blocklist_contains_common_buses() -> None:
         )
 
 
+def test_does_not_wrap_apple_device_model_number() -> None:
+    """Apple/device model numbers (A2337, A1989, A2338) match the refdes regex
+    (A + 4 digits) but are NEVER components — wrapping ⟨?A2337⟩ when the agent
+    names the device is a false positive on every Apple pack. Zero `A####`
+    components exist across the packs, so excluding them is collision-free.
+    A real unknown refdes in the same sentence must still be wrapped."""
+    board = _board_with_parts(["U7"])
+    clean, unknown = sanitize_agent_text(
+        "On the MacBook Air A2337 (820-02016), check U999.", board
+    )
+    assert "A2337" in clean
+    assert "⟨?A2337⟩" not in clean
+    assert "⟨?U999⟩" in clean
+    assert unknown == ["U999"]
+
+
+def test_model_number_pattern_is_collision_free_shape() -> None:
+    """The exclusion is A + exactly 4 digits (A2337). A 1-3 digit `A#` token
+    keeps the normal refdes treatment — it is NOT a model number and could be a
+    real (if rare) component, so it is still wrapped when unknown."""
+    board = _board_with_parts([])
+    clean, unknown = sanitize_agent_text("check A12 here", board)
+    assert "⟨?A12⟩" in clean
+    assert unknown == ["A12"]
+
+
 def test_real_refdes_still_wrapped_when_unknown() -> None:
     """Regression check: introducing the protocol blocklist must not
     weaken the core anti-hallucination guard. Plain refdes tokens

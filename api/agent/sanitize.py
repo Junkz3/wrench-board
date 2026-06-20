@@ -15,6 +15,15 @@ from api.board.validator import is_valid_refdes
 
 REFDES_RE = re.compile(r"\b[A-Z]{1,3}\d{1,4}\b")
 
+# Device model numbers (Apple `A####` — A2337, A1989, A2338, A2179…) match the
+# refdes shape but are NEVER board components: the agent names them when it
+# states the device ("MacBook Air A2337"), and wrapping ⟨?A2337⟩ is a
+# trust-eroding false positive on every Apple pack. Anchored A + exactly four
+# digits — verified collision-free (zero `A####` components across all packs and
+# the parsed boards). A 1-3 digit `A#` token is NOT excluded: it keeps the normal
+# refdes treatment since a short `A`-prefixed designator could be a real part.
+_DEVICE_MODEL_RE = re.compile(r"^A\d{4}$")
+
 
 # Bus / interface / standard names that match the refdes regex
 # (`[A-Z]{1,3}\d{1,4}`) but are NOT references to physical components.
@@ -138,7 +147,7 @@ def sanitize_agent_text(text: str, board: Board | None) -> tuple[str, list[str]]
         token = match.group(0)
         if is_valid_refdes(board, token):
             return token
-        if token in PROTOCOL_BLOCKLIST:
+        if token in PROTOCOL_BLOCKLIST or _DEVICE_MODEL_RE.match(token):
             return token
         unknown.append(token)
         return f"⟨?{token}⟩"

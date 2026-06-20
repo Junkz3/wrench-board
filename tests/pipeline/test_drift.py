@@ -420,6 +420,53 @@ class TestGraphTruthWidening:
         )
         assert all("PP1V2_S2" not in m for d in drift for m in d.mentions)
 
+    def test_free_text_rail_family_shorthand_is_not_drift(self):
+        """A rail FAMILY shorthand in prose (PP1V2) whose only concrete member
+        in the graph carries a suffix (PP1V2_S2) must NOT drift — technicians
+        name the rail family, the graph attests a member `PP1V2_*`."""
+        registry = _base_registry()  # signals = {3V3_RAIL}, no PP1V2*
+        gt = GraphTruth(_mini_graph())  # graph net = PP1V2_S2
+        dictionary = Dictionary(
+            entries=[
+                ComponentSheet(
+                    canonical_name="U7",
+                    role="Regulator feeding the PP1V2 rail family under load.",
+                )
+            ]
+        )
+        drift = compute_drift(
+            registry=registry,
+            knowledge_graph=KnowledgeGraph(nodes=[], edges=[]),
+            rules=RulesSet(rules=[]),
+            dictionary=dictionary,
+            graph_truth=gt,
+        )
+        assert all("PP1V2" not in m for d in drift for m in d.mentions)
+
+    def test_free_text_rail_partial_prefix_without_separator_still_drifts(self):
+        """A token that is a bare character prefix of a net but NOT a family
+        shorthand (PP1V — no `PP1V_*` member, only PP1V2_S2) must still drift:
+        the `_` separator guard stops PP1V from masquerading as PP1V2_S2's
+        family."""
+        registry = _base_registry()
+        gt = GraphTruth(_mini_graph())
+        dictionary = Dictionary(
+            entries=[
+                ComponentSheet(
+                    canonical_name="U7",
+                    role="Feeds the PP1V rail.",
+                )
+            ]
+        )
+        drift = compute_drift(
+            registry=registry,
+            knowledge_graph=KnowledgeGraph(nodes=[], edges=[]),
+            rules=RulesSet(rules=[]),
+            dictionary=dictionary,
+            graph_truth=gt,
+        )
+        assert any("PP1V" in m for d in drift for m in d.mentions)
+
     def test_orphan_node_without_graph_drifts(self):
         """A kg node touched by NO edge is an orphan → drift, independent of any
         graph. Here every id is registry-known so ONLY the orphan check fires."""
@@ -491,3 +538,64 @@ class TestGraphTruthWidening:
         assert drift[0].mentions == ["Q42"]
         assert drift[0].reason == "Cause.refdes not in registry.components[canonical_name]"
         assert "schematic" not in drift[0].reason
+
+
+def _two_regulator_graph() -> ElectricalGraph:
+    """A board where rail PP1V8_X is sourced by the dedicated regulator U200,
+    while U100 (also a real IC) exists but does NOT produce it — the shape the
+    Cartographe over-attributes to the salient PMIC."""
+    return ElectricalGraph(
+        device_slug="mini",
+        components={
+            "U100": ComponentNode(refdes="U100", type="ic", kind="ic", pages=[1]),
+            "U200": ComponentNode(refdes="U200", type="ic", kind="ic", pages=[2]),
+        },
+        nets={"PP1V8_X": NetNode(label="PP1V8_X", is_power=True)},
+        power_rails={
+            "PP1V8_X": PowerRail(label="PP1V8_X", voltage_nominal=1.8, source_refdes="U200"),
+        },
+        typed_edges=[TypedEdge(src="U200", dst="PP1V8_X", kind="powers")],
+        quality=SchematicQualityReport(total_pages=2, pages_parsed=2),
+    )
+
+
+def _contradicted_kg() -> KnowledgeGraph:
+    """U100 wrongly credited for PP1V8_X (graph source is U200)."""
+    return KnowledgeGraph(
+        nodes=[
+            KnowledgeNode(id="N-U100", kind="component", label="pmic"),
+            KnowledgeNode(id="N-NET_PP1V8_X", kind="net", label="1.8V"),
+        ],
+        edges=[KnowledgeEdge(source_id="N-U100", target_id="N-NET_PP1V8_X", relation="powers")],
+    )
+
+
+class TestEdgeContradictionDrift:
+    def test_contradicted_power_edge_is_drift_in_graph_mode(self):
+        gt = GraphTruth(_two_regulator_graph())
+        drift = compute_drift(
+            registry=Registry(device_label="Demo", components=[], signals=[]),
+            knowledge_graph=_contradicted_kg(),
+            rules=RulesSet(rules=[]),
+            dictionary=Dictionary(entries=[]),
+            graph_truth=gt,
+        )
+        edge_items = [d for d in drift if d.file == "knowledge_graph" and "contradict" in d.reason.lower()]
+        assert len(edge_items) == 1
+        # the mention must name the offending edge so the reviser can re-attribute
+        joined = " ".join(edge_items[0].mentions)
+        assert "U100" in joined and "PP1V8_X" in joined
+        # and point at the graph's real source so the fix is actionable
+        assert "U200" in joined
+
+    def test_no_edge_contradiction_drift_without_graph(self):
+        """Web-only packs (graph_truth=None) keep the legacy path — no edge
+        contradiction check, since there is no connectivity authority to judge."""
+        drift = compute_drift(
+            registry=Registry(device_label="Demo", components=[], signals=[]),
+            knowledge_graph=_contradicted_kg(),
+            rules=RulesSet(rules=[]),
+            dictionary=Dictionary(entries=[]),
+            graph_truth=None,
+        )
+        assert all("contradict" not in d.reason.lower() for d in drift)

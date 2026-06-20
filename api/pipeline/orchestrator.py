@@ -42,6 +42,11 @@ from api.pipeline.graph_truth import (
 from api.pipeline.mapper import run_mapper
 from api.pipeline.pack_lint import LintFinding, lint_pack
 from api.pipeline.qa import graph_coverage
+from api.pipeline.reconcile import (
+    find_registry_fictions,
+    load_seen_refdes,
+    prune_contradicted_edges,
+)
 from api.pipeline.registry import run_registry_builder
 from api.pipeline.schemas import (
     AuditVerdict,
@@ -619,6 +624,26 @@ async def generate_knowledge_pack(
                     len(added_signals),
                     added_signals,
                 )
+            # -------- Phase 2.7 — drop web-registry fictions ------------------
+            # When a schematic is the authority, a component the registry names
+            # but the graph AND the raw vision/OCR attest NOWHERE is a web
+            # fiction (e.g. U6903 on a MacBook whose 3V3 rail is really sourced
+            # by R6999). Left in, the Cartographe trusts it and wires a phantom
+            # `powers` edge the auditor then rejects. The triple-negative
+            # (graph ∪ vision) makes the purge safe against vision recall gaps:
+            # a real-but-untraced part still shows in the page vision and stays.
+            seen = load_seen_refdes(pack_dir)
+            fictions = set(find_registry_fictions(registry, graph_truth, seen))
+            if fictions:
+                registry.components = [
+                    c for c in registry.components if c.canonical_name not in fictions
+                ]
+                logger.info(
+                    "[Pipeline] Phase 2.7 · dropped %d registry fiction(s) "
+                    "(unattested by graph+vision): %s",
+                    len(fictions),
+                    sorted(fictions),
+                )
         (pack_dir / "registry.json").write_text(
             registry.model_dump_json(indent=2), encoding="utf-8"
         )
@@ -841,6 +866,21 @@ async def generate_knowledge_pack(
 
             if rounds_used >= max_revise_rounds or regression:
                 score, b_kg, b_rules, b_dict, b_verdict = best
+                # EDGE BACKSTOP. The revise-loop saw every graph-contradicted power
+                # edge as drift and got its chance to re-attribute; whatever survived
+                # must be pruned DETERMINISTICALLY before the gate, or it reads as
+                # residual drift and sinks an otherwise-shippable pack to REJECTED
+                # (the macbook U7800→PP1V8_S0 class). Same discipline as the registry
+                # fiction purge — drop the false edge, never invent the right one.
+                if graph_truth is not None:
+                    b_kg, pruned_edges = prune_contradicted_edges(b_kg, graph_truth)
+                    if pruned_edges:
+                        logger.warning(
+                            "[Pipeline] Edge backstop pruned %d graph-contradicted "
+                            "edge(s) from the best snapshot: %s",
+                            len(pruned_edges),
+                            [f"{c.src}->{c.rail}" for c in pruned_edges],
+                        )
                 # ACCEPTANCE FLOOR. The best snapshot is shippable WITH WARNINGS
                 # iff (a) the floor is enabled (>0), (b) it clears the floor, and
                 # (c) it has ZERO deterministic drift — the registry∪graph set-diff
@@ -949,6 +989,22 @@ async def generate_knowledge_pack(
                 round_index=rounds_used,
             )
             _write_writer_outputs(pack_dir, kg, rules, dictionary)
+
+        # Post-loop edge backstop — covers the APPROVED path (the floor path
+        # already pruned its snapshot before the gate). If the auditor approved a
+        # pack that still carries a graph-contradicted edge, drop it now so the
+        # shipped kg never contradicts the schematic. Idempotent → a no-op when the
+        # floor branch already cleaned the snapshot.
+        if graph_truth is not None:
+            kg, post_pruned = prune_contradicted_edges(kg, graph_truth)
+            if post_pruned:
+                logger.warning(
+                    "[Pipeline] Edge backstop pruned %d graph-contradicted edge(s) "
+                    "post-acceptance: %s",
+                    len(post_pruned),
+                    [f"{c.src}->{c.rail}" for c in post_pruned],
+                )
+                _write_writer_outputs(pack_dir, kg, rules, dictionary)
 
         await emit({
             "type": "phase_finished",

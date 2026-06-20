@@ -240,7 +240,7 @@
     <main class="landing-hero">
     <div class="landing-mascot" id="landingMascot" aria-hidden="true"></div>
     <div class="landing-mark">
-      <span>Wrench Board</span>
+      <span class="landing-mark__name"><span class="landing-mark__w">Wrench</span><span class="landing-mark__b">Board</span><span class="landing-mark__cloud">Clou<span class="landing-mark__d">d<span class="landing-mark__perch" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 18.5h10a4 4 0 0 0 .55-7.96 5.6 5.6 0 0 0-10.74-1.1A4.3 4.3 0 0 0 7 18.5z"/></svg></span></span></span></span>
     </div>
     <h1 class="landing-title" data-ob-reveal data-i18n="landing.hero.title">Your hardware repair assistant.</h1>
     <p class="landing-sub" data-ob-reveal data-i18n="landing.hero.sub">Give me your device and the symptom: I'll build the knowledge and open the diagnostic.</p>
@@ -254,6 +254,18 @@
                aria-autocomplete="list"
                aria-controls="landingSuggest"
                maxlength="200" required />
+        <!-- Trailing affordance docked inside the device input: a tech who
+             doesn't know the device name browses the catalogue from here. -->
+        <button type="button" class="landing-browse-btn" id="landingBrowseBtn"
+                aria-haspopup="dialog" aria-controls="landingCatalogueBackdrop"
+                data-i18n-attr="aria-label:landing.catalogue.aria,title:landing.catalogue.aria">
+          <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor"
+               stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+            <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+          </svg>
+          <span data-i18n="landing.catalogue.button_short">Browse</span>
+        </button>
         <div class="landing-suggest" id="landingSuggest" role="listbox"
              data-i18n-attr="aria-label:landing.suggest.aria"
              aria-label="Device suggestions" hidden></div>
@@ -761,14 +773,18 @@
   <!-- inspector (slides in on click) -->
   <aside class="sch-inspector" id="schInspector">
     <header class="sch-insp-head">
-      <button class="sch-insp-close" id="schInspClose" data-i18n-attr="aria-label:schematic.inspector.close" aria-label="Close">
-        <svg class="icon icon-sm" viewBox="0 0 24 24" width="14" height="14">
-          <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-        </svg>
-      </button>
-      <span class="sch-type-badge" id="schInspType">RAIL</span>
+      <div class="sch-insp-topbar">
+        <span class="sch-type-badge" id="schInspType">RAIL</span>
+        <button class="sch-insp-close" id="schInspClose" data-i18n-attr="aria-label:schematic.inspector.close" aria-label="Close">
+          <svg class="icon icon-sm" viewBox="0 0 24 24" width="15" height="15">
+            <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
       <h2 id="schInspTitle">…</h2>
       <div class="sub" id="schInspSub">…</div>
+      <div class="sch-insp-stats" id="schInspStats"></div>
+      <div class="sch-insp-actions" id="schInspActions"></div>
     </header>
     <div class="sch-insp-body" id="schInspBody"></div>
   </aside>
@@ -1343,6 +1359,33 @@
     </footer>
   </div>
 </div>
+
+<!-- ============ MODAL — DEVICE CATALOGUE ============ -->
+  <!-- Device catalogue modal: discover available packs, open a device card,
+       launch a diagnostic. Rendered by features/global/landing/catalogue.js. -->
+  <div class="landing-catalogue-backdrop" id="landingCatalogueBackdrop" hidden>
+    <div class="landing-catalogue" role="dialog" aria-modal="true"
+         data-i18n-attr="aria-label:landing.catalogue.title">
+      <header class="landing-catalogue-head">
+        <h2 class="landing-catalogue-title" data-i18n="landing.catalogue.title">Available devices</h2>
+        <button type="button" class="landing-catalogue-close" id="landingCatalogueClose"
+                data-i18n-attr="aria-label:common.close">
+          <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor"
+               stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+      </header>
+      <div class="landing-catalogue-controls">
+        <input class="landing-catalogue-search" id="landingCatalogueSearch" type="text"
+               data-i18n-attr="placeholder:landing.catalogue.search_placeholder"
+               aria-label="Search devices" maxlength="100" />
+        <div class="landing-catalogue-kinds" id="landingCatalogueKinds" role="group"
+             data-i18n-attr="aria-label:landing.catalogue.filter_aria"></div>
+      </div>
+      <div class="landing-catalogue-list" id="landingCatalogueList" role="list"></div>
+      <div class="landing-catalogue-fiche" id="landingCatalogueFiche" hidden></div>
+    </div>
+  </div>
 
 <!-- ============ MODAL — PRE-FLIGHT LAUNCH CONFIRMATION ============ -->
 <!-- Gates a fresh-device diagnostic launch (the full ~15-min build). Surfaces

@@ -45,10 +45,13 @@ const STATE = {
   killswitch: false,         // when true, focus mode shows the full cascade
   showSignals: false,
   showAllPins: false,
+  // Declutter the full-board layouts (powertree / grid): hide the decoupling
+  // caps / sense resistors (≈60% of nodes) so rails + functional ICs read.
+  hidePassives: ((typeof localStorage !== "undefined" && localStorage.getItem("schHidePassives")) ?? "1") !== "0",
   // "railfocus" (default, one rail at a time), "powertree" (all rails stacked),
   // "grid" (phase × voltage 2D). Persisted to localStorage so the user's
   // choice sticks.
-  layoutMode: (typeof localStorage !== "undefined" && localStorage.getItem("schLayoutMode")) || "railfocus",
+  layoutMode: (typeof localStorage !== "undefined" && localStorage.getItem("schLayoutMode")) || "boot",
   // In railfocus mode, which rail is currently shown in the canvas.
   selectedRailId: (typeof localStorage !== "undefined" && localStorage.getItem("schSelectedRail")) || null,
   // "graph" (default, derived views) or "pdf" (original schematic pages).
@@ -145,97 +148,69 @@ export const SimulationController = {
   },
 
   render() {
-    this._ensureScrubber();
-    // Only paint the graph with phase state when the scrubber is open —
-    // if the user dismissed the timeline, keep the graph in its default look.
-    const stored = (typeof localStorage !== "undefined" && localStorage.getItem("simScrubberVisible")) ?? "1";
-    if (stored !== "0") {
+    // Repaint the unified boot player (transport label, active pip, active
+    // card) and the graph state-classes for the current cursor. The player
+    // DOM scaffold itself is built by renderBootTimeline() on fullRender.
+    this._syncPlayer();
+    const on = ((typeof localStorage !== "undefined" && localStorage.getItem("simStatesVisible")) ?? "1") !== "0";
+    if (on && this.timeline) {
       this._applyStateClasses();
     } else {
       this._clearStateClasses();
     }
-    this._updateScrubberLabel();
   },
 
-  _ensureScrubber() {
-    const host = document.querySelector("#schematicSection") || document.body;
-    // Mount the toggle-to-open chip once; it's always present and flips
-    // visibility depending on whether the scrubber itself is open.
-    let chip = document.querySelector(".sim-scrubber-toggle");
-    if (!chip) {
-      chip = document.createElement("button");
-      chip.className = "sim-scrubber-toggle";
-      chip.title = t("schematic.simulator.show_timeline_title");
-      chip.textContent = `▸ ${t("schematic.simulator.show_timeline")}`;
-      host.appendChild(chip);
-      chip.addEventListener("click", () => this._setVisible(true));
-    }
-
-    let el = document.querySelector(".sim-scrubber");
-    if (!el) {
-      el = document.createElement("div");
-      el.className = "sim-scrubber";
-      el.innerHTML = `
-        <button data-act="rewind" title="${t("schematic.simulator.rewind_title")}">⏮</button>
-        <button data-act="step-back" title="${t("schematic.simulator.step_back_title")}">◀</button>
-        <button data-act="play-pause">▶</button>
-        <button data-act="step-fwd" title="${t("schematic.simulator.step_fwd_title")}">▶</button>
-        <input type="range" min="0" max="0" step="1" value="0" />
-        <span class="sim-phase-label">…</span>
-        <span class="sim-blocked-overlay" hidden></span>
-        <button data-act="close" class="sim-scrubber-close" title="${t("schematic.simulator.close_title")}">×</button>
-      `;
-      host.appendChild(el);
-      el.addEventListener("click", (ev) => {
-        const act = ev.target?.dataset?.act;
-        if (!act) return;
-        if (act === "rewind") this.seek(0);
-        else if (act === "step-back") this.seek(this.cursor - 1);
-        else if (act === "step-fwd") this.seek(this.cursor + 1);
-        else if (act === "play-pause") this.playing ? this.pause() : this.play();
-        else if (act === "close") this._setVisible(false);
-      });
-      el.querySelector("input[type=range]").addEventListener("input", (ev) => {
-        this.seek(Number(ev.target.value));
-      });
-    }
-    const total = (this.timeline?.states?.length ?? 1) - 1;
-    const range = el.querySelector("input[type=range]");
-    range.max = Math.max(0, total);
-    range.value = this.cursor;
-    // Scrubber is shown only when there's a timeline AND the user hasn't
-    // explicitly closed it. `visible` persists across reloads via localStorage.
-    const hasTl = !!(this.timeline && this.timeline.states.length > 0);
-    const stored = (typeof localStorage !== "undefined" && localStorage.getItem("simScrubberVisible")) ?? "1";
-    const visible = hasTl && stored !== "0";
-    el.hidden = !visible;
-    chip.hidden = !hasTl || visible;
-  },
-
-  _setVisible(on) {
-    try { localStorage.setItem("simScrubberVisible", on ? "1" : "0"); } catch (_) {}
-    if (!on) {
-      this.pause();
-      this._clearStateClasses();
-    }
-    this._ensureScrubber();
-    if (on) this._applyStateClasses();
-  },
-
-  _updateScrubberLabel() {
-    const el = document.querySelector(".sim-scrubber");
-    if (!el) return;
+  // The boot phase index (model.boot[].index) the cursor points at, or null.
+  currentPhaseIndex() {
     const state = this.timeline?.states?.[this.cursor];
-    const label = state ? `Φ${state.phase_index} · ${state.phase_name}` : "…";
-    el.querySelector(".sim-phase-label").textContent = label;
-    const overlay = el.querySelector(".sim-blocked-overlay");
-    if (state?.blocked) {
-      overlay.textContent = t("schematic.simulator.blocked", { reason: state.blocked_reason ?? t("schematic.simulator.blocked_default") });
-      overlay.hidden = false;
-    } else {
-      overlay.hidden = true;
+    return state ? state.phase_index : null;
+  },
+
+  // Drive the player from a boot phase index (what the pips carry). Maps the
+  // phase onto its simulation state when a timeline exists; otherwise just
+  // focuses the graph and refreshes the card (navigation without sim data).
+  seekToPhase(phaseIndex) {
+    if (this.timeline) {
+      const idx = this.timeline.states.findIndex(s => s.phase_index === phaseIndex);
+      if (idx >= 0) { this.seek(idx); return; }
     }
-    el.querySelector("[data-act=play-pause]").textContent = this.playing ? "⏸" : "▶";
+    if (STATE.model) {
+      focusPhaseGraph(STATE.model, phaseIndex);
+      renderBootActive(STATE.model, phaseIndex, null);
+      this._markActivePip(phaseIndex);
+    }
+  },
+
+  _markActivePip(phaseIdx) {
+    document.querySelectorAll(".sch-player-pip").forEach(p => {
+      p.classList.toggle("active", Number(p.dataset.phase) === phaseIdx);
+    });
+  },
+
+  // Reflect cursor state into the player chrome without touching graph focus
+  // (focus is driven explicitly by seek/seekToPhase so playback can dim).
+  _syncPlayer() {
+    const phaseIdx = this.currentPhaseIndex();
+    this._markActivePip(phaseIdx);
+    if (STATE.model && phaseIdx != null) {
+      renderBootActive(STATE.model, phaseIdx, this.timeline?.states?.[this.cursor] || null);
+    }
+    const pp = document.querySelector(".sch-player [data-act=play-pause]");
+    if (pp) pp.textContent = this.playing ? "⏸" : "▶";
+    const transport = document.querySelector(".sch-player-transport");
+    if (transport) transport.classList.toggle("no-sim", !this.timeline);
+    const states = document.querySelector(".sch-player [data-act=toggle-states]");
+    if (states) {
+      const on = ((typeof localStorage !== "undefined" && localStorage.getItem("simStatesVisible")) ?? "1") !== "0";
+      states.classList.toggle("on", on);
+    }
+  },
+
+  // Toggle whether the graph carries the per-phase sim-* state overlay.
+  toggleStates() {
+    const on = ((typeof localStorage !== "undefined" && localStorage.getItem("simStatesVisible")) ?? "1") !== "0";
+    try { localStorage.setItem("simStatesVisible", on ? "0" : "1"); } catch (_) {}
+    this.render();
   },
 
   _clearStateClasses() {
@@ -299,6 +274,8 @@ export const SimulationController = {
   seek(idx) {
     const max = (this.timeline?.states?.length ?? 1) - 1;
     this.cursor = Math.max(0, Math.min(idx, max));
+    const phaseIdx = this.currentPhaseIndex();
+    if (STATE.model && phaseIdx != null) focusPhaseGraph(STATE.model, phaseIdx);
     this.render();
   },
   play() {
@@ -310,13 +287,13 @@ export const SimulationController = {
       if (this.cursor >= max) { this.pause(); return; }
       this.seek(this.cursor + 1);
     }, this.speedMs);
-    this._updateScrubberLabel();
+    this._syncPlayer();
   },
   pause() {
     this.playing = false;
     clearInterval(this._timer);
     this._timer = null;
-    this._updateScrubberLabel();
+    this._syncPlayer();
   },
 
   // ---- Observations ----
@@ -699,21 +676,18 @@ function buildModel(graph) {
     nodes.push(n); nodeById.set(n.id, n);
   }
 
-  // Components to include:
-  //   - always: nodes referenced by a rail (as source, consumer, or
-  //     decoupling cap) — the backbone of the power tree
-  //   - always: resistors, inductors, ferrites whose pins touch a power
-  //     rail (pull-ups on EN lines, sense resistors, filter inductors —
-  //     invisible otherwise but useful for diagnosing a bias failure)
-  //   - when STATE.showPassives is on: every remaining component from
-  //     graph.components (~380 signal-only passives on MNT)
+  // Components to include — this view is the power tree, not the full board:
+  //   - nodes referenced by a rail (as source, consumer, or decoupling cap)
+  //     — the backbone of the power tree
+  //   - resistors, inductors, ferrites whose pins touch a power rail
+  //     (pull-ups on EN lines, sense resistors, filter inductors — invisible
+  //     otherwise but useful for diagnosing a bias failure)
+  // Signal-only passives (no power-rail pin) are deliberately excluded; they
+  // carry no boot/power edge and would only add disconnected noise. The
+  // `hidePassives` toggle declutters the modelled passives at render time.
   const railReferenced = new Set([...sourceRefs, ...consumerRefs, ...decouplingRefs]);
   const all = new Set(railReferenced);
   for (const [refdes, comp] of Object.entries(components)) {
-    if (STATE.showPassives) {
-      all.add(refdes);
-      continue;
-    }
     if (ALWAYS_RL_TYPES_GLOBAL.has(comp.type) && touchesPowerRail(comp, rails)) {
       all.add(refdes);
     }
@@ -965,17 +939,9 @@ function buildModel(graph) {
     if (sortedByBlast[i].blastRadius >= 2) sortedByBlast[i].isSpof = true;
   }
 
-  // Totals for stat ratios (displayed/total, so the tech sees how much
-  // is filtered vs. what the pack actually contains).
+  // Boot-phase count for the stat bar.
   const totals = {
-    components: Object.keys(components).length,
-    rails: Object.keys(rails).length,
-    sources: Object.values(rails).filter(r => r.source_refdes).length,
     phases: (graph.boot_sequence || []).length,
-    signals_available: (graph.typed_edges || []).filter(e =>
-      ["enables", "clocks", "resets", "produces_signal",
-       "consumes_signal", "feedback_in"].includes(e.kind)
-    ).length,
   };
 
   return { rails, boot, nodes, nodeById, edges, depth,
@@ -1096,269 +1062,175 @@ function assignGridCoords(model) {
   }
 }
 
+const GRID_CPC = 4;        // chips per row inside a phase×voltage cell
+const GRID_SLOT_W = 70;
+const GRID_SLOT_H = 32;
+const GRID_CELL_PAD = 24;  // headroom inside a cell
+const GRID_ROW_GAP = 28;
+
 function computeGridLayout(model) {
   assignGridCoords(model);
+  model.layoutMode = "grid";
 
-  // Discover which phases are actually present. Phases come from
-  // model.boot (Opus-analyzed when available) — each node has .phase set
-  // during buildModel. Nodes with .phase==null (not assigned to any
-  // phase) land in a synthetic "pre-boot" column at index -1.
   const phasesPresent = Array.from(new Set(
     model.nodes.map(n => n.phase).filter(p => p != null)
   )).sort((a, z) => a - z);
   if (model.nodes.some(n => n.phase == null)) phasesPresent.unshift(null);
-
   const phaseColIndex = new Map();
   phasesPresent.forEach((p, i) => phaseColIndex.set(p, i));
-
-  const rowIndex = new Map();
-  V_ROWS.forEach((r, i) => rowIndex.set(r.id, i));
-
   const colX = (phase) => GRID_LEFT + (phaseColIndex.get(phase) ?? 0) * COL_W;
-  const rowY = (vr) => GRID_TOP + (rowIndex.get(vr) ?? V_ROWS.length - 1) * ROW_H;
 
-  // Assign target positions.
-  for (const n of model.nodes) {
-    const cx = colX(n.phase ?? null);
-    const cy = rowY(n.voltageRow);
-    // Offset by role: rails centered; sources slightly left; consumers spread right.
-    let ox = 0;
-    if (n.kind === "component") {
-      if (n.role === "source") ox = -COL_W * 0.22;
-      else if (n.role === "consumer") ox = COL_W * 0.18;
-      else if (n.role === "decoupling") ox = COL_W * 0.32;
-    }
-    n._tx = cx + ox;
-    n._ty = cy;
-    n.x = n._tx + (Math.random() - 0.5) * 30;
-    n.y = n._ty + (Math.random() - 0.5) * 30;
+  // Only the rendered nodes participate (passives hidden by default).
+  const considered = model.nodes.filter(n => !(STATE.hidePassives && isHideablePassive(n)));
+  const cellKey = (p, vr) => `${p ?? "null"}|${vr || "vSig"}`;
+  const byCell = new Map();
+  for (const n of considered) {
+    const k = cellKey(n.phase ?? null, n.voltageRow);
+    if (!byCell.has(k)) byCell.set(k, []);
+    byCell.get(k).push(n);
+  }
+  for (const arr of byCell.values()) {
+    arr.sort((a, z) => (a.kind === z.kind)
+      ? (a.refdes || a.label || "").localeCompare(z.refdes || z.label || "", undefined, { numeric: true })
+      : (a.kind === "rail" ? -1 : 1));
   }
 
-  // Force refinement — strong X/Y anchors (keep the grid structure) +
-  // collide to avoid overlap within a cell.
-  const simEdges = model.edges.map(e => ({
-    source: e.sourceId, target: e.targetId, kind: e.kind,
-  }));
-  const radius = (d) => {
-    const w = d.width || 40, h = d.height || 40;
-    return Math.max(w, h) / 2 + 7;
-  };
-  const sim = d3.forceSimulation(model.nodes)
-    .force("x", d3.forceX(d => d._tx).strength(0.6))
-    .force("y", d3.forceY(d => d._ty).strength(0.5))
-    .force("collide", d3.forceCollide(radius).strength(1).iterations(3))
-    .force("link", d3.forceLink(simEdges).id(d => d.id)
-      .distance(d => d.kind === "decouples" ? 30 : 60)
-      .strength(d => d.kind === "decouples" ? 0.35 : 0.08))
-    .stop();
-  for (let i = 0; i < 350; i++) sim.tick();
+  // Each voltage row is as tall as its fullest cell — no force sim, no sprawl.
+  const gridRows = [];
+  let yCursor = GRID_TOP;
+  for (const vr of V_ROWS) {
+    let maxRows = 0;
+    for (const p of phasesPresent) {
+      const arr = byCell.get(cellKey(p, vr.id));
+      if (arr) maxRows = Math.max(maxRows, Math.ceil(arr.length / GRID_CPC));
+    }
+    if (maxRows === 0) continue;
+    const h = maxRows * GRID_SLOT_H + GRID_CELL_PAD;
+    gridRows.push({ id: vr.id, label: vr.label, top: yCursor, h });
+    yCursor += h + GRID_ROW_GAP;
+  }
+  const rowTop = new Map(gridRows.map(r => [r.id, r.top]));
 
-  const TOTAL_W = GRID_LEFT + phasesPresent.length * COL_W + 60;
-  const TOTAL_H = GRID_TOP + V_ROWS.length * ROW_H + 40;
-  const xs = model.nodes.map(n => n.x);
-  const ys = model.nodes.map(n => n.y);
+  for (const r of gridRows) {
+    for (const p of phasesPresent) {
+      const arr = byCell.get(cellKey(p, r.id));
+      if (!arr || !arr.length) continue;
+      const cx = colX(p);
+      const top = r.top + GRID_CELL_PAD;
+      const innerW = (GRID_CPC - 1) * GRID_SLOT_W;
+      arr.forEach((n, i) => {
+        const col = i % GRID_CPC, row = Math.floor(i / GRID_CPC);
+        n._tx = cx - innerW / 2 + col * GRID_SLOT_W;
+        n._ty = top + row * GRID_SLOT_H;
+        n.x = n._tx; n.y = n._ty;
+        if (n.kind === "rail") { n.width = 80; n.height = 24; }
+        else { n.width = 54; n.height = 26; }
+        n.showPins = false;
+      });
+    }
+  }
+  // Park hidden passives off-canvas.
+  for (const n of model.nodes) {
+    if (STATE.hidePassives && isHideablePassive(n)) { n.x = -1e5; n.y = -1e5; }
+  }
+
   model.bounds = {
-    minX: Math.min(...xs, 40) - 80,
-    maxX: Math.max(...xs, TOTAL_W) + 80,
-    minY: Math.min(...ys, 40) - 80,
-    maxY: Math.max(...ys, TOTAL_H) + 80,
+    minX: GRID_LEFT - COL_W / 2 - 40,
+    minY: GRID_TOP - 60,
+    maxX: GRID_LEFT + (phasesPresent.length - 1) * COL_W + COL_W / 2 + 40,
+    maxY: yCursor + 20,
   };
   model.phasesPresent = phasesPresent;
   model.phaseColIndex = phaseColIndex;
   model.colX = colX;
-  model.rowY = rowY;
-  model.rows = V_ROWS;
-  model.layoutMode = "grid";
+  model._gridRows = gridRows;
 }
 
 /* ---------------------------------------------------------------------- *
- * POWER-TREE LAYOUT — 1 axis (voltage). Each rail gets its own horizontal
- * "bus" with its regulator to the left, decouples as small dots, and
- * consumer chips laid out to the right. No 2D grid, no edge spaghetti.
+ * POWER-TREE LAYOUT — a compact rail map. Rails are packed into a wrapping
+ * multi-column grid, grouped by voltage band (≥12V → ≤1V2 → signals). The
+ * old "one full-width row + consumers per rail" sprawled to ~20k px tall
+ * with 350+ rails; this keeps the whole rail set on a pannable canvas.
+ * Components are hidden here — click a rail to drill into rail-focus.
  * ---------------------------------------------------------------------- */
 
-const PT_ROW_H = 56;
-const PT_TOP = 80;
-const PT_RAIL_X = 140;
-const PT_SOURCE_X = 280;
-const PT_CONSUMER_START_X = 470;
-const PT_CONSUMER_STEP_X = 70;
-const PT_CONSUMERS_PER_LINE = 14;
-const PT_DECOUP_Y_OFFSET = 20;
-const PT_DECOUP_STEP_X = 16;
+const PT_RAIL_W = 108;
+const PT_RAIL_H = 28;
+const PT_GAP_X = 12;
+const PT_GAP_Y = 9;
+const PT_COLS = 12;          // wide grid — the canvas is wide and short
+const PT_GRID_X0 = 150;
+const PT_TOP = 74;
+const PT_BAND_GAP = 36;
 
 function computePowertreeLayout(model) {
   assignGridCoords(model); // keeps voltageRow for consistency + fallback
-
-  const rails = model.rails || {};
-
-  // 1) Stack rails vertically, ordered by voltage descending.
-  const railNodes = model.nodes.filter(n => n.kind === "rail");
-  railNodes.sort((a, z) => {
-    const va = a.voltage_nominal ?? -1;
-    const vz = z.voltage_nominal ?? -1;
-    if (vz !== va) return vz - va;
-    return a.label.localeCompare(z.label);
-  });
-  railNodes.forEach((rail, i) => {
-    rail._tx = PT_RAIL_X;
-    rail._ty = PT_TOP + i * PT_ROW_H;
-  });
-
-  // 2) Anchor each component to one rail (primary power relation).
-  const producesByRefdes = new Map();
-  for (const [label, r] of Object.entries(rails)) {
-    if (r.source_refdes) {
-      if (!producesByRefdes.has(r.source_refdes)) producesByRefdes.set(r.source_refdes, []);
-      producesByRefdes.get(r.source_refdes).push(label);
-    }
-  }
-
-  const byRailRole = new Map();
-  const anchorKey = (rail, role) => `${rail || "__orphan__"}|${role}`;
-
-  for (const n of model.nodes) {
-    if (n.kind !== "component") continue;
-    let anchor = null;
-    if (n.role === "source") {
-      anchor = producesByRefdes.get(n.refdes)?.[0] ?? null;
-    } else if (n.role === "decoupling") {
-      const e = (model.edges || []).find(x => x.kind === "decouples" && x.sourceId === n.id);
-      anchor = e?.netLabel ?? null;
-    } else if (n.role === "consumer") {
-      anchor = n.rail_primary ?? null;
-    }
-    n._anchorRail = anchor;
-    const key = anchorKey(anchor, n.role);
-    if (!byRailRole.has(key)) byRailRole.set(key, []);
-    byRailRole.get(key).push(n);
-  }
-  for (const [, arr] of byRailRole) arr.sort((a, z) => a.refdes.localeCompare(z.refdes));
-
-  // 3) Place components on their anchor rail's row.
-  for (const rail of railNodes) {
-    const y = rail._ty;
-
-    // Source (regulator) just left of the rail hexagon. We compact to
-    // 50×36 by default so multiple sources fit side-by-side, BUT when
-    // "Toutes pins" is on we respect the auto-computed size (built by
-    // buildModel from the pin count) so every pin has the room to be
-    // drawn with a leader line.
-    const sources = byRailRole.get(anchorKey(rail.label, "source")) || [];
-    sources.forEach((s, i) => {
-      s._tx = PT_SOURCE_X - i * 90; // stack leftward if multiple sources
-      s._ty = y;
-      if (!STATE.showAllPins) { s.width = 50; s.height = 36; }
-    });
-
-    // Decoupling caps — small dots just below the rail line.
-    const decs = byRailRole.get(anchorKey(rail.label, "decoupling")) || [];
-    decs.forEach((d, i) => {
-      d._tx = PT_CONSUMER_START_X + i * PT_DECOUP_STEP_X;
-      d._ty = y + PT_DECOUP_Y_OFFSET;
-      d.width = 10; d.height = 10;
-    });
-
-    // Consumers — chips to the right, wrap onto extra rows if many.
-    // Same logic: compact by default, full size when all pins are shown.
-    const consumers = byRailRole.get(anchorKey(rail.label, "consumer")) || [];
-    consumers.forEach((c, i) => {
-      const col = i % PT_CONSUMERS_PER_LINE;
-      const row = Math.floor(i / PT_CONSUMERS_PER_LINE);
-      c._tx = PT_CONSUMER_START_X + col * PT_CONSUMER_STEP_X;
-      c._ty = y - 14 + row * 26;
-      if (!STATE.showAllPins) { c.width = 56; c.height = 28; }
-    });
-  }
-
-  // 4) Orphans — components without a power-rail anchor. With the "Passifs
-  // signal" toggle on, this is where the ~380 routing passives land. Dense
-  // grid (20 per row, 28px vertical) so we can show a LOT without
-  // exploding the canvas.
-  const orphans = model.nodes.filter(n => n.kind === "component" && n._tx == null);
-  // Sort by refdes letter then number so R1...R200, then C1...C200, etc.
-  orphans.sort((a, z) => (a.refdes || "").localeCompare(z.refdes || "", undefined, { numeric: true }));
-  const orphanTop = PT_TOP + railNodes.length * PT_ROW_H + 60;
-  const perRow = 22;
-  orphans.forEach((n, i) => {
-    n._tx = 160 + (i % perRow) * 52;
-    n._ty = orphanTop + Math.floor(i / perRow) * 30;
-    // Slim them down — they're tiny signal passives, make them unobtrusive.
-    n.width = Math.min(n.width || 20, 22);
-    n.height = Math.min(n.height || 20, 16);
-  });
-  model._orphanStripY = orphans.length ? orphanTop - 30 : null;
-  model._orphanCount = orphans.length;
-
-  // 5) Commit positions (no force simulation — the grid IS the layout).
-  for (const n of model.nodes) {
-    n.x = n._tx ?? PT_RAIL_X;
-    n.y = n._ty ?? PT_TOP;
-  }
-
-  // 6) Bounds.
-  const xs = model.nodes.map(n => n.x);
-  const ys = model.nodes.map(n => n.y);
-  model.bounds = {
-    minX: Math.min(...xs) - 80,
-    maxX: Math.max(...xs) + 180,
-    minY: Math.min(...ys) - 100,
-    maxY: Math.max(...ys) + 120,
-  };
   model.layoutMode = "powertree";
+
+  const railNodes = model.nodes.filter(n => n.kind === "rail");
+  const byBand = new Map();
+  for (const r of railNodes) {
+    const b = r.voltageRow || "vSig";
+    if (!byBand.has(b)) byBand.set(b, []);
+    byBand.get(b).push(r);
+  }
+  for (const arr of byBand.values()) {
+    arr.sort((a, z) => {
+      const va = a.voltage_nominal ?? -1, vz = z.voltage_nominal ?? -1;
+      if (vz !== va) return vz - va;
+      return a.label.localeCompare(z.label);
+    });
+  }
+
+  model._ptBands = [];
+  let y = PT_TOP;
+  for (const band of V_ROWS) {
+    const arr = byBand.get(band.id);
+    if (!arr || !arr.length) continue;
+    const bandTop = y;
+    arr.forEach((r, i) => {
+      const col = i % PT_COLS, row = Math.floor(i / PT_COLS);
+      r._tx = PT_GRID_X0 + col * (PT_RAIL_W + PT_GAP_X);
+      r._ty = y + row * (PT_RAIL_H + PT_GAP_Y);
+      r.width = PT_RAIL_W;
+      r.height = PT_RAIL_H;
+    });
+    const rows = Math.ceil(arr.length / PT_COLS);
+    const bandH = rows * (PT_RAIL_H + PT_GAP_Y);
+    model._ptBands.push({ label: band.label, y: bandTop, h: bandH, count: arr.length });
+    y += bandH + PT_BAND_GAP;
+  }
+
+  // Rails on the grid; everything else parked off-canvas (and not rendered).
+  for (const n of model.nodes) {
+    if (n.kind === "rail" && n._tx != null) { n.x = n._tx; n.y = n._ty; }
+    else { n.x = -1e5; n.y = -1e5; }
+  }
+
+  model.bounds = {
+    minX: 0,
+    minY: PT_TOP - 52,
+    maxX: PT_GRID_X0 + PT_COLS * (PT_RAIL_W + PT_GAP_X) + 40,
+    maxY: y + 20,
+  };
   model.railOrder = railNodes.map(r => r.id);
 }
 
 function renderPowertreeHeads(model) {
   const g = d3.select("#schBucketHeads");
   g.selectAll("*").remove();
-
-  const railNodes = model.nodes.filter(n => n.kind === "rail");
-  const maxX = model.bounds.maxX - 40;
-
-  // 1) Voltage-class tinted bands — group rails of the same class.
-  const byBand = new Map();
-  for (const r of railNodes) {
-    const band = voltageRowFor(r.voltage_nominal);
-    if (!byBand.has(band)) byBand.set(band, []);
-    byBand.get(band).push(r);
-  }
-  for (const [bandId, group] of byBand) {
-    if (!group.length) continue;
-    const idx = V_ROWS.findIndex(v => v.id === bandId);
-    const yTop = Math.min(...group.map(r => r.y)) - PT_ROW_H / 2 + 4;
-    const yBot = Math.max(...group.map(r => r.y)) + PT_ROW_H / 2 - 4;
+  const bands = model._ptBands || [];
+  const maxX = model.bounds.maxX - 20;
+  bands.forEach((b, i) => {
     g.append("rect")
-      .attr("class", `sch-vrow-band vrow-${idx % 4}`)
-      .attr("x", 40).attr("y", yTop)
-      .attr("width", maxX - 20).attr("height", yBot - yTop).attr("rx", 10);
-    // Label on the left
+      .attr("class", `sch-vrow-band vrow-${i % 4}`)
+      .attr("x", 24).attr("y", b.y - 26)
+      .attr("width", maxX).attr("height", b.h + 22).attr("rx", 10);
     g.append("text")
       .attr("class", "sch-pt-band-label")
-      .attr("x", 70).attr("y", (yTop + yBot) / 2 + 4)
-      .text(V_ROWS[idx]?.label ?? bandId);
-  }
-
-  // 2) Horizontal dashed bus line across each rail's row.
-  railNodes.forEach(rail => {
-    g.append("line")
-      .attr("class", "sch-pt-busline")
-      .attr("x1", PT_RAIL_X + 40).attr("x2", maxX - 20)
-      .attr("y1", rail.y).attr("y2", rail.y);
+      .attr("x", 36).attr("y", b.y - 10)
+      .text(`${b.label} · ${b.count}`);
   });
-
-  // 3) If there's an orphan strip (signal-only passives activated via the
-  // "Passifs signal" toggle), separate it visually with a divider + label.
-  if (model._orphanStripY != null && model._orphanCount > 0) {
-    g.append("line")
-      .attr("class", "sch-pt-orphan-divider")
-      .attr("x1", 60).attr("x2", maxX - 20)
-      .attr("y1", model._orphanStripY).attr("y2", model._orphanStripY);
-    g.append("text")
-      .attr("class", "sch-pt-orphan-label")
-      .attr("x", 80).attr("y", model._orphanStripY - 8)
-      .text(t("schematic.powertree.orphan_strip", { count: model._orphanCount }));
-  }
 }
 
 /* ---------------------------------------------------------------------- *
@@ -1914,7 +1786,7 @@ function edgeAnchors(e, model) {
   if (!s || !tn) return null;
   let sx = s.x, sy = s.y, tx = tn.x, ty = tn.y;
 
-  const isCleanLayout = model.layoutMode === "powertree" || model.layoutMode === "railfocus";
+  const isCleanLayout = model.layoutMode === "powertree" || model.layoutMode === "railfocus" || model.layoutMode === "boot";
   // In power-tree / rail-focus modes, skip fine pin-level anchoring (nodes
   // are small, layout is already clean) — anchor on the box edge facing the
   // other endpoint so the line is short and unambiguous.
@@ -1959,42 +1831,36 @@ function renderGridHeads(model) {
   const g = d3.select("#schBucketHeads");
   g.selectAll("*").remove();
 
-  const phases = model.phasesPresent;
-  const rows = model.rows;
+  const phases = model.phasesPresent || [];
+  const rows = model._gridRows || [];
+  if (!phases.length || !rows.length) return;
   const xFirst = model.colX(phases[0]);
   const xLast = model.colX(phases[phases.length - 1]);
-  const yFirst = model.rowY(rows[0].id);
-  const yLast = model.rowY(rows[rows.length - 1].id);
-  const gridPadX = 40;
-  const gridPadY = 60;
-  const gridL = xFirst - COL_W / 2 - gridPadX;
-  const gridR = xLast + COL_W / 2 + gridPadX;
-  const gridT = yFirst - ROW_H / 2 - 30;
-  const gridB = yLast + ROW_H / 2 + 40;
+  const gridL = xFirst - COL_W / 2 - 40;
+  const gridR = xLast + COL_W / 2 + 40;
+  const gridT = rows[0].top - 34;
+  const gridB = rows[rows.length - 1].top + rows[rows.length - 1].h + 10;
 
-  // 1) Voltage-row horizontal bands (backdrop)
+  // 1) Voltage-row horizontal bands (variable height = fullest cell).
   rows.forEach((r, i) => {
-    const cy = model.rowY(r.id);
     g.append("rect")
       .attr("class", `sch-vrow-band vrow-${i % 4}`)
-      .attr("x", gridL + 60).attr("y", cy - ROW_H / 2 + 4)
-      .attr("width", gridR - gridL - 60).attr("height", ROW_H - 8).attr("rx", 10);
+      .attr("x", gridL + 60).attr("y", r.top - 6)
+      .attr("width", gridR - gridL - 60).attr("height", r.h + 4).attr("rx", 10);
   });
 
-  // 2) Phase-column vertical bands (semi-transparent over voltage bands)
+  // 2) Phase-column vertical bands.
   phases.forEach((p) => {
     const cx = model.colX(p);
     g.append("rect")
       .attr("class", `sch-phase-col ${p == null ? "col-none" : ""}`)
       .attr("x", cx - COL_W / 2 + 8).attr("y", gridT + 30)
-      .attr("width", COL_W - 16).attr("height", gridB - gridT - 60).attr("rx", 8);
+      .attr("width", COL_W - 16).attr("height", gridB - gridT - 30).attr("rx", 8);
   });
 
-  // 3) Voltage-row labels on the left (sticky-ish: always at the leftmost
-  // grid edge — the user can pan but they always live before the first
-  // phase column)
+  // 3) Voltage-row labels on the left edge.
   rows.forEach((r) => {
-    const cy = model.rowY(r.id);
+    const cy = r.top + r.h / 2;
     const lbl = g.append("g").attr("transform", `translate(${gridL + 30}, ${cy})`);
     lbl.append("rect")
       .attr("class", "sch-vrow-head")
@@ -2002,7 +1868,7 @@ function renderGridHeads(model) {
     lbl.append("text").attr("class", "sch-vrow-label").attr("y", 4).text(r.label);
   });
 
-  // 4) Phase-column headers on top
+  // 4) Phase-column headers on top.
   phases.forEach((p) => {
     const cx = model.colX(p);
     const head = g.append("g").attr("transform", `translate(${cx}, ${gridT})`);
@@ -2011,7 +1877,7 @@ function renderGridHeads(model) {
       .attr("x", -80).attr("y", -16).attr("width", 160).attr("height", 32).attr("rx", 8);
     const label = p == null ? t("schematic.boot.phase_pre_boot") : `Φ${p}`;
     head.append("text").attr("class", "sch-phase-label").attr("y", -1).text(label);
-    const count = model.nodes.filter(n => (n.phase ?? null) === p).length;
+    const count = model.nodes.filter(n => (n.phase ?? null) === p && n.x > -1e4).length;
     const nodeLbl = count === 1
       ? t("schematic.boot.phase_count_one", { n: count })
       : t("schematic.boot.phase_count_many", { n: count });
@@ -2019,12 +1885,36 @@ function renderGridHeads(model) {
   });
 }
 
+// A passive (decoupling cap / sense resistor / ferrite / diode) that can be
+// hidden to declutter the full-board layouts. SPOF passives stay — they matter.
+function isHideablePassive(n) {
+  return n.kind === "component" && !n.isSpof
+    && typeof n.compKind === "string" && n.compKind.startsWith("passive");
+}
+
+// Single source of truth for "does this node render in the current mode?".
+// Used by renderNodes, renderEdges, and updateStats so the canvas and the
+// stat-bar counts never disagree — in particular both react to hidePassives.
+function isNodeRendered(n, model) {
+  if (model.layoutMode === "railfocus" || model.layoutMode === "boot") {
+    // `_visible` is set from boot/rail membership and ignores hidePassives;
+    // layer the toggle on top so it isn't inert in the two default views.
+    return n._visible && !(STATE.hidePassives && isHideablePassive(n));
+  }
+  if (model.layoutMode === "powertree") {
+    // Compact rail map — rails only; components live in rail-focus.
+    return n.kind === "rail" && n.x > -1e4;
+  }
+  // Full-board layouts (grid): drop passive R/C/L/D/FB when decluttering so
+  // the board reads as rails + functional ICs. SPOF/source passives stay.
+  if (STATE.hidePassives) return !isHideablePassive(n);
+  return true;
+}
+
 function renderNodes(model) {
   const g = d3.select("#schLayerNodes");
   g.selectAll("*").remove();
-  const nodesData = model.layoutMode === "railfocus"
-    ? model.nodes.filter(n => n._visible)
-    : model.nodes;
+  const nodesData = model.nodes.filter(n => isNodeRendered(n, model));
   const sel = g.selectAll("g.sch-node").data(nodesData, d => d.id).join("g")
     .attr("class", d => `sch-node sch-node-${d.kind} role-${d.role || "rail"} ${d.missing ? "missing" : ""} ${d.populated === false ? "nostuff" : ""} ${d.isSpof ? "spof" : ""} ${d.compKind && d.compKind.startsWith("passive") ? "passive-node" : ""}`)
     .attr("transform", d => `translate(${d.x},${d.y})`)
@@ -2142,13 +2032,20 @@ function renderEdges(model) {
   // data-signal deferred: edges carry e.netLabel but the simulator's signals
   // state maps user-visible signal names; hook when signal-level sim is added.
   // In rail-focus mode we only draw edges between currently visible nodes.
-  const edgesData = model.layoutMode === "railfocus"
-    ? model.edges.filter(e => {
-        const s = model.nodeById.get(e.sourceId);
-        const tn = model.nodeById.get(e.targetId);
-        return s && tn && s._visible && tn._visible;
-      })
-    : model.edges;
+  let edgesData;
+  if (model.layoutMode === "powertree" || model.layoutMode === "grid") {
+    // The compact rail map / phase×voltage matrix read by placement, not
+    // edges — cross-cell beziers would just be spaghetti, so draw none.
+    edgesData = [];
+  } else {
+    // Only draw an edge when both endpoints actually render — otherwise it
+    // dangles to a hidden/parked node.
+    edgesData = model.edges.filter(e => {
+      const s = model.nodeById.get(e.sourceId);
+      const tn = model.nodeById.get(e.targetId);
+      return s && tn && isNodeRendered(s, model) && isNodeRendered(tn, model);
+    });
+  }
   g.selectAll("path").data(edgesData, d => d.id).join("path")
     .attr("class", d => `sch-link sch-link-${d.kind}`)
     .attr("data-subkind", d => d.subkind || null)
@@ -2166,97 +2063,244 @@ function renderEdges(model) {
  * BOOT TIMELINE                                                          *
  * ---------------------------------------------------------------------- */
 
+/* ---------------------------------------------------------------------- *
+ * BOOT LAYOUT — the protocol, laid out across components                 *
+ *                                                                        *
+ * Drops the full board graph and places ONLY the boot-relevant nodes in  *
+ * left-to-right phase columns (Φ0 → Φn). Each column stacks that phase's  *
+ * stabilising rails + entering components; real powers/produces edges     *
+ * between visible nodes draw the propagation. Sparse and readable — the   *
+ * protocol IS the picture. Driven by the boot player.                    *
+ * ---------------------------------------------------------------------- */
+
+const BOOT_X0 = 160;
+const BOOT_Y0 = 130;          // first row, below the column header band
+const BOOT_ROW_H = 46;
+const BOOT_ROWS_MAX = 8;      // wrap into a sub-column past this many rows
+const BOOT_SUBCOL_W = 92;
+const BOOT_COL_GAP = 84;      // gap between phase blocks
+const BOOT_HEAD_Y = 64;
+
+function computeBootLayout(model) {
+  for (const n of model.nodes) n._visible = false;
+  model.layoutMode = "boot";
+  const phases = model.boot || [];
+  model._bootCols = [];
+  const assigned = new Set();   // a rail stable across phases belongs to its first
+  let curX = BOOT_X0;
+  let maxRows = 0;
+
+  phases.forEach((p) => {
+    const ids = [
+      ...(p.rails_stable || []).map(r => `rail:${r}`),
+      ...(p.components_entering || []).map(r => `comp:${r}`),
+    ];
+    const colNodes = [];
+    for (const id of ids) {
+      if (assigned.has(id)) continue;
+      const n = model.nodeById.get(id);
+      if (!n) continue;
+      assigned.add(id);
+      colNodes.push(n);
+    }
+    colNodes.forEach((n, j) => {
+      const subcol = Math.floor(j / BOOT_ROWS_MAX);
+      const row = j % BOOT_ROWS_MAX;
+      n._visible = true;
+      n._tx = curX + subcol * BOOT_SUBCOL_W;
+      n._ty = BOOT_Y0 + row * BOOT_ROW_H;
+      n.width = n.kind === "rail" ? 100 : 56;
+      n.height = n.kind === "rail" ? 26 : 30;
+      n.showPins = false;
+    });
+    // Each phase block is as wide as its sub-column count — lay phases out
+    // cumulatively so a fat phase never overlaps the next one.
+    const nSub = Math.max(1, Math.ceil(colNodes.length / BOOT_ROWS_MAX));
+    const colW = nSub * BOOT_SUBCOL_W;
+    model._bootCols.push({ index: p.index, name: p.name, x: curX, w: colW, count: colNodes.length });
+    maxRows = Math.max(maxRows, Math.min(colNodes.length, BOOT_ROWS_MAX));
+    curX += colW + BOOT_COL_GAP;
+  });
+
+  for (const n of model.nodes) {
+    if (n._visible) { n.x = n._tx; n.y = n._ty; }
+    else { n.x = -1e5; n.y = -1e5; }
+  }
+
+  model.bounds = {
+    minX: BOOT_X0 - 140,
+    minY: BOOT_HEAD_Y - 40,
+    maxX: curX + 100,
+    maxY: BOOT_Y0 + maxRows * BOOT_ROW_H + 50,
+  };
+}
+
+function renderBootHeads(model) {
+  const g = d3.select("#schBucketHeads");
+  g.selectAll("*").remove();
+  const cols = model._bootCols || [];
+  const bandTop = BOOT_HEAD_Y - 34;
+  const bandBot = model.bounds ? model.bounds.maxY - 10 : BOOT_Y0 + 300;
+  cols.forEach((c, i) => {
+    // Faint lane band on alternating phases so the eye reads phases as columns.
+    if (i % 2 === 1) {
+      g.append("rect")
+        .attr("class", "sch-boot-lane")
+        .attr("x", c.x - 42).attr("y", bandTop)
+        .attr("width", c.w + 4).attr("height", bandBot - bandTop)
+        .attr("rx", 8);
+    }
+    g.append("text")
+      .attr("class", "sch-boot-colhead-n")
+      .attr("x", c.x - 30).attr("y", BOOT_HEAD_Y)
+      .text(`Φ${c.index}`);
+    // Truncate the phase name to the space before the next column's header so
+    // long names don't run across it. Measure-based (font width varies).
+    const full = c.name || t("schematic.boot.phase_default_name", { n: c.index });
+    const avail = (i < cols.length - 1) ? (cols[i + 1].x - c.x - 16) : (c.w + 60);
+    const nameEl = g.append("text")
+      .attr("class", "sch-boot-colhead-name")
+      .attr("x", c.x - 30).attr("y", BOOT_HEAD_Y + 16)
+      .text(full);
+    let txt = full;
+    while (txt.length > 6 && nameEl.node().getComputedTextLength() > avail) {
+      txt = txt.slice(0, -2);
+      nameEl.text(`${txt}…`);
+    }
+    nameEl.append("title").text(full);
+  });
+}
+
+/* ---------------------------------------------------------------------- *
+ * BOOT PLAYER — unified sequence reader                                  *
+ *                                                                        *
+ * One bottom bar replaces the old floating scrubber + standalone boot    *
+ * grid. Three bands: A) transport, B) phase track (pips), C) active-     *
+ * phase card. Scrubbing a phase auto-frames the graph on its nets        *
+ * (focusPhaseGraph) and, when a SimulationTimeline exists, plays the     *
+ * per-phase sim-* state. The full phase grid moves behind the [grid]     *
+ * button as an overview overlay.                                         *
+ * ---------------------------------------------------------------------- */
+
 function renderBootTimeline(model) {
   const wrap = el("schBootTimeline");
   if (!wrap) return;
   wrap.innerHTML = "";
   const phases = model.boot || [];
   if (phases.length === 0) {
+    wrap.classList.remove("sch-player");
     wrap.innerHTML = `<div class="sch-boot-empty">${escHtml(t("schematic.boot.empty"))}</div>`;
     return;
   }
+  wrap.classList.add("sch-player");
 
-  // Source badge — verified Opus (cyan) vs topology-deduced (amber).
-  const headBar = document.createElement("div");
-  headBar.className = "sch-boot-headbar";
+  // The full-board layouts don't use the phase track/card — collapse the
+  // player to its transport bar and give the canvas back ~140px of height.
+  const collapsed = STATE.layoutMode === "powertree" || STATE.layoutMode === "grid";
+  wrap.classList.toggle("collapsed", collapsed);
+  document.body.classList.toggle("sch-collapsed-player", collapsed);
+
   const isAnalyzed = model.bootSource === "analyzer";
-  const seq = model.analyzerMeta?.sequencer_refdes;
-  const conf = model.analyzerMeta?.global_confidence;
-  headBar.innerHTML = `
+  const srcBadge = `
     <span class="sch-boot-src ${isAnalyzed ? 'analyzer' : 'compiler'}">
       ${isAnalyzed ? `${ICON_CHECK} ${escHtml(t("schematic.boot.verified_opus"))}` : `${ICON_DIAMOND} ${escHtml(t("schematic.boot.deduced_topology"))}`}
     </span>
-    ${isAnalyzed && seq ? `<span class="sch-boot-seq">${escHtml(t("schematic.boot.sequencer"))} <span class="mono">${escHtml(seq)}</span></span>` : ''}
-    ${isAnalyzed && conf != null ? `<span class="sch-boot-conf">${escHtml(t("schematic.boot.confidence"))} <span class="mono">${conf.toFixed(2)}</span></span>` : ''}
-    ${!isAnalyzed ? `<button class="sch-reanalyze" id="schReanalyzeBtn" title="${escHtml(t("schematic.boot.reanalyze_title"))}">↻ ${escHtml(t("schematic.boot.reanalyze"))}</button>` : ''}
-  `;
-  wrap.appendChild(headBar);
+    ${!isAnalyzed ? `<button class="sch-reanalyze" id="schReanalyzeBtn" title="${escHtml(t("schematic.boot.reanalyze_title"))}">↻ ${escHtml(t("schematic.boot.reanalyze"))}</button>` : ''}`;
 
-  // Pre-compute the board-wide max blast so we can normalize phase-level
-  // criticality against the same reference that drives SPOF pulsing.
-  const boardMaxBlast = model.maxBlast || 1;
+  // ---- Band A : transport ----
+  const transport = document.createElement("div");
+  transport.className = "sch-player-transport";
+  transport.innerHTML = `
+    <div class="sch-player-ctrls">
+      <button data-act="rewind" title="${escHtml(t("schematic.simulator.rewind_title"))}">⏮</button>
+      <button data-act="step-back" title="${escHtml(t("schematic.simulator.step_back_title"))}">◀</button>
+      <button data-act="play-pause" title="${escHtml(t("schematic.player.play_title"))}">▶</button>
+      <button data-act="step-fwd" title="${escHtml(t("schematic.simulator.step_fwd_title"))}">▶▏</button>
+    </div>
+    <div class="sch-player-now">
+      <span class="sch-player-phase mono"></span>
+      <span class="sch-player-name"></span>
+      <span class="sch-player-conf mono"></span>
+    </div>
+    <div class="sch-player-trigger" hidden></div>
+    <div class="sch-player-tools">
+      <label class="sch-player-layoutsel"><span>${escHtml(t("schematic.player.layout_label"))}</span><select data-act="layoutsel">
+        <option value="boot">${escHtml(t("schematic.player.layout_protocol"))}</option>
+        <option value="railfocus">${escHtml(t("schematic.player.layout_rail"))}</option>
+        <option value="powertree">${escHtml(t("schematic.player.layout_tree"))}</option>
+        <option value="grid">${escHtml(t("schematic.player.layout_grid"))}</option>
+      </select></label>
+      <label class="sch-player-netsel"><span>${escHtml(t("schematic.player.net_label"))}</span><select data-act="netsel"></select></label>
+      <button data-act="toggle-states" class="sch-player-toggle" title="${escHtml(t("schematic.player.states_title"))}">${escHtml(t("schematic.player.states"))}</button>
+      <button data-act="toggle-passives" class="sch-player-toggle" title="${escHtml(t("schematic.player.passives_title"))}">${escHtml(t("schematic.player.passives"))}</button>
+      <button data-act="grid" class="sch-player-toggle" title="${escHtml(t("schematic.player.grid_title"))}">▦</button>
+      ${srcBadge}
+    </div>`;
+  wrap.appendChild(transport);
 
-  const grid = document.createElement("div");
-  grid.className = "sch-boot-grid";
-  grid.style.gridTemplateColumns = `repeat(${phases.length}, minmax(0, 1fr))`;
+  // ---- Band B : phase track (pips) ----
+  const track = document.createElement("div");
+  track.className = "sch-player-track";
   phases.forEach((p) => {
-    // Find the top SPOF among the nodes of this phase (rails + components).
-    const candidates = [
-      ...(p.components_entering || []).map(r => model.nodeById.get(`comp:${r}`)),
-      ...(p.rails_stable || []).map(r => model.nodeById.get(`rail:${r}`)),
-    ].filter(Boolean);
-    candidates.sort((a, b) => (b.blastRadius || 0) - (a.blastRadius || 0));
-    const top = candidates[0];
-    const phaseMaxBlast = top ? top.blastRadius || 0 : 0;
-    const phaseMaxPct = top ? top.impactPct || 0 : 0;
-    const critLevel = phaseMaxPct >= 25 ? "hi" : phaseMaxPct >= 10 ? "mid" : "lo";
-    const critFill = boardMaxBlast > 0 ? Math.min(100, Math.round(100 * phaseMaxBlast / boardMaxBlast)) : 0;
-
-    const col = document.createElement("div");
-    col.className = `sch-boot-col crit-${critLevel}`;
-    col.dataset.phase = p.index;
-    const kindBadge = p.kind ? `<span class="sch-boot-kind kind-${p.kind.replace(/[^a-z]/gi,'')}">${escHtml(p.kind)}</span>` : '';
-    const confBadge = p.confidence != null ? `<span class="sch-boot-phase-conf">${p.confidence.toFixed(2)}</span>` : '';
-    const critBadge = top ? `
-      <div class="sch-boot-crit">
-        <div class="sch-boot-crit-bar"><div class="sch-boot-crit-fill crit-${critLevel}" style="width:${critFill}%"></div></div>
-        <div class="sch-boot-crit-lbl">
-          <span class="sch-boot-crit-icon">${critLevel === "hi" ? ICON_WARNING : critLevel === "mid" ? ICON_DOT_FILLED : "·"}</span>
-          SPOF : <span class="mono clickable" data-refdes="${escHtml(top.refdes || top.label)}">${escHtml(top.refdes || top.label)}</span>
-          · <strong>${phaseMaxPct}%</strong> du board
-        </div>
-      </div>
-    ` : "";
-    // Ultra-compact card: head line (title tronqué), SPOF one-liner,
-    // R: chips then C: chips all on single lines with overflow ellipsis.
-    col.innerHTML = `
-      <div class="sch-boot-head">
-        <span class="sch-boot-phase">Φ${p.index}</span>
-        <span class="sch-boot-name">${escHtml(p.name || t("schematic.boot.phase_default_name", { n: p.index }))}</span>
-        ${kindBadge}
-        ${confBadge}
-      </div>
-      ${top ? `<div class="sch-boot-spof crit-${critLevel}">
-        <span class="sch-boot-spof-icon">${critLevel === 'hi' ? ICON_WARNING : critLevel === 'mid' ? ICON_DOT_FILLED : "·"}</span>
-        <span class="sch-boot-spof-label">${escHtml(t("schematic.boot.spof_label"))}</span>
-        <span class="mono clickable sch-boot-spof-ref" data-refdes="${escHtml(top.refdes || top.label)}">${escHtml(top.refdes || top.label)}</span>
-        <span class="sch-boot-spof-pct">${phaseMaxPct}%</span>
-      </div>` : ''}
-      <div class="sch-boot-line">
-        <span class="sch-boot-line-label">${escHtml(t("schematic.boot.rails_label"))}</span>
-        ${(p.rails_stable || []).slice(0, 8).map(r => `<span class="mono chip emerald" data-rail="${escHtml(r)}">${escHtml(r)}</span>`).join("")}
-        ${(p.rails_stable || []).length > 8 ? `<span class="sch-boot-more">${escHtml(t("schematic.boot.more", { n: p.rails_stable.length - 8 }))}</span>` : ""}
-      </div>
-      <div class="sch-boot-line">
-        <span class="sch-boot-line-label">${escHtml(t("schematic.boot.components_label"))}</span>
-        ${(p.components_entering || []).slice(0, 6).map(c => `<span class="mono chip cyan" data-refdes="${escHtml(c)}">${escHtml(c)}</span>`).join("")}
-        ${(p.components_entering || []).length > 6 ? `<span class="sch-boot-more">${escHtml(t("schematic.boot.more", { n: p.components_entering.length - 6 }))}</span>` : ""}
-      </div>
-    `;
-    col.addEventListener("click", () => highlightPhase(model, p.index));
-    grid.appendChild(col);
+    const pip = document.createElement("button");
+    pip.className = "sch-player-pip";
+    pip.dataset.phase = p.index;
+    pip.innerHTML = `<span class="sch-player-pip-n mono">Φ${p.index}</span><span class="sch-player-pip-name">${escHtml(p.name || t("schematic.boot.phase_default_name", { n: p.index }))}</span>`;
+    pip.addEventListener("click", () => SimulationController.seekToPhase(p.index));
+    track.appendChild(pip);
   });
-  wrap.appendChild(grid);
+  wrap.appendChild(track);
+
+  // ---- Band C : active-phase card (filled by renderBootActive) ----
+  const active = document.createElement("div");
+  active.className = "sch-player-active";
+  active.id = "schPlayerActive";
+  wrap.appendChild(active);
+
+  // ---- Overview overlay scaffold (filled on demand by openBootGrid) ----
+  let overlay = el("schBootGridOverlay");
+  if (!overlay) {
+    overlay = document.createElement("div");
+    overlay.className = "sch-boot-gridoverlay";
+    overlay.id = "schBootGridOverlay";
+    overlay.hidden = true;
+    (document.querySelector("#schematicSection") || document.body).appendChild(overlay);
+  }
+
+  // Transport interactions (event-delegated so the source badge / reanalyze
+  // button inside .sch-player-tools don't need their own wiring here).
+  transport.addEventListener("click", (ev) => {
+    const act = ev.target?.closest("[data-act]")?.dataset?.act;
+    if (!act) return;
+    if (act === "rewind") SimulationController.seek(0);
+    else if (act === "step-back") SimulationController.seek(SimulationController.cursor - 1);
+    else if (act === "step-fwd") SimulationController.seek(SimulationController.cursor + 1);
+    else if (act === "play-pause") SimulationController.playing ? SimulationController.pause() : SimulationController.play();
+    else if (act === "toggle-states") SimulationController.toggleStates();
+    else if (act === "toggle-passives") {
+      STATE.hidePassives = !STATE.hidePassives;
+      try { localStorage.setItem("schHidePassives", STATE.hidePassives ? "1" : "0"); } catch (_) {}
+      if (STATE.graph) fullRender(STATE.graph);
+    }
+    else if (act === "grid") openBootGrid(model);
+  });
+  // Reflect the passives toggle state (lit = passives shown).
+  transport.querySelector("[data-act=toggle-passives]")?.classList.toggle("on", !STATE.hidePassives);
+  transport.querySelector("[data-act=netsel]")?.addEventListener("change", (ev) => {
+    const railId = ev.target.value;
+    if (railId) selectRailFromPlayer(railId);
+  });
+  const layoutSel = transport.querySelector("[data-act=layoutsel]");
+  if (layoutSel) {
+    layoutSel.value = STATE.layoutMode;
+    layoutSel.addEventListener("change", (ev) => {
+      const mode = ev.target.value;
+      STATE.layoutMode = mode;
+      try { localStorage.setItem("schLayoutMode", mode); } catch (_) {}
+      document.body.classList.toggle("sch-mode-railfocus", mode === "railfocus");
+      if (STATE.graph) fullRender(STATE.graph);
+    });
+  }
 
   // Re-analyze button fires POST /analyze-boot and reloads when done.
   el("schReanalyzeBtn")?.addEventListener("click", async (ev) => {
@@ -2285,26 +2329,39 @@ function renderBootTimeline(model) {
       btn.disabled = false;
     }
   });
-  // Click on individual chip → focus that node.
-  wrap.querySelectorAll("[data-rail]").forEach(el => {
-    el.addEventListener("click", (ev) => {
-      ev.stopPropagation();
-      const n = model.nodeById.get(`rail:${el.dataset.rail}`);
-      if (n) { STATE.selectedId = n.id; updateInspector(n); applyFocus(n.id, model); }
-    });
-  });
-  wrap.querySelectorAll("[data-refdes]").forEach(el => {
-    el.addEventListener("click", (ev) => {
-      ev.stopPropagation();
-      const n = model.nodeById.get(`comp:${el.dataset.refdes}`);
-      if (n) { STATE.selectedId = n.id; updateInspector(n); applyFocus(n.id, model); }
-    });
-  });
+
+  // Seed the player. With a SimulationTimeline, render() repaints the cursor
+  // phase + its sim-* state on the freshly rebuilt graph; without one, just
+  // seed the card on phase 0 (no graph focus — keep the full graph visible
+  // until the user plays or picks a phase).
+  if (SimulationController.timeline) {
+    SimulationController.render();
+  } else {
+    renderBootActive(model, phases[0].index, null);
+    SimulationController._markActivePip(null);
+  }
 }
 
-function highlightPhase(model, phaseIdx) {
+// Graph-only phase focus: dim everything except the phase's rails + comps and
+// light the internal links. No inspector side-effect, so playback can scrub
+// the focus cheaply. Mirrors the .has-focus dimming pattern.
+function focusPhaseGraph(model, phaseIdx) {
   const phase = (model.boot || []).find(p => p.index === phaseIdx);
   if (!phase) return;
+
+  // Railfocus mode shows one rail at a time, so a multi-rail "soft focus"
+  // can't render here. Land the user on the phase's most critical rail
+  // instead — that turns "you must hunt for the right net" into "the player
+  // already put you on it". The net selector then flips rails within the phase.
+  if (STATE.layoutMode === "railfocus") {
+    const rails = (phase.rails_stable || [])
+      .map(r => model.nodeById.get(`rail:${r}`))
+      .filter(Boolean)
+      .sort((a, b) => (b.blastRadius || 0) - (a.blastRadius || 0));
+    if (rails[0]) setSelectedRail(rails[0].id);
+    return;
+  }
+
   const ids = new Set();
   (phase.rails_stable || []).forEach(r => ids.add(`rail:${r}`));
   (phase.components_entering || []).forEach(r => ids.add(`comp:${r}`));
@@ -2312,16 +2369,200 @@ function highlightPhase(model, phaseIdx) {
   d3.select("#schGraph").classed("has-focus", true);
   d3.selectAll("#schLayerNodes g.sch-node")
     .classed("focus", d => ids.has(d.id))
-    .classed("neighbor", false);
+    .classed("neighbor", false)
+    .classed("downstream", false)
+    .classed("upstream", false);
   d3.selectAll("#schLayerLinks path")
     .classed("active-link", d => ids.has(d.sourceId) && ids.has(d.targetId));
 
-  // Update boot col visual.
-  el("schBootTimeline").querySelectorAll(".sch-boot-col").forEach(c => {
+  // Frame the phase's nodes so the protocol is readable, not a tiny cluster.
+  fitToPhaseNodes(model, ids);
+
+  // Keep the overview grid (if open) in sync.
+  el("schBootGridOverlay")?.querySelectorAll(".sch-boot-col").forEach(c => {
     c.classList.toggle("active", Number(c.dataset.phase) === phaseIdx);
   });
+}
 
-  // Update inspector to describe the phase.
+// Fill band A's label + band C's card for the active phase. simState (when a
+// SimulationTimeline exists) carries the per-phase blocking cause.
+function renderBootActive(model, phaseIdx, simState) {
+  const phase = (model.boot || []).find(p => p.index === phaseIdx);
+  const host = el("schPlayerActive");
+  if (!phase || !host) return;
+
+  // Band A label.
+  const ph = document.querySelector(".sch-player-phase");
+  const nm = document.querySelector(".sch-player-name");
+  const cf = document.querySelector(".sch-player-conf");
+  if (ph) ph.textContent = `Φ${phase.index}`;
+  if (nm) nm.textContent = phase.name || t("schematic.boot.phase_default_name", { n: phase.index });
+  if (cf) cf.textContent = phase.confidence != null ? phase.confidence.toFixed(2) : "";
+
+  // Band A trigger summary (▸ triggers NET ← driver → Φn) or blocked cause.
+  const trg = document.querySelector(".sch-player-trigger");
+  if (trg) {
+    if (simState?.blocked) {
+      trg.innerHTML = `<span class="sch-player-blocked">${escHtml(t("schematic.simulator.blocked", { reason: simState.blocked_reason ?? t("schematic.simulator.blocked_default") }))}</span>`;
+      trg.hidden = false;
+    } else {
+      const next = (phase.triggers_next || [])[0];
+      if (next) {
+        const label = typeof next === "string" ? next : next.net_label;
+        const driver = (typeof next === "object" && next.from_refdes) ? ` <span class="mono">${escHtml(next.from_refdes)}</span>` : "";
+        trg.innerHTML = `<span class="sch-player-trigger-arrow">▸</span> ${escHtml(t("schematic.player.triggers"))} <span class="mono chip amber">${escHtml(label)}</span>${driver} <span class="sch-player-trigger-to">→ Φ${phase.index + 1}</span>`;
+        trg.hidden = false;
+      } else {
+        trg.innerHTML = "";
+        trg.hidden = true;
+      }
+    }
+  }
+
+  // Band A net selector — rails stabilising in this phase.
+  const sel = document.querySelector(".sch-player [data-act=netsel]");
+  if (sel) {
+    const rails = phase.rails_stable || [];
+    sel.innerHTML = `<option value="">${escHtml(t("schematic.player.net_all"))}</option>`
+      + rails.map(r => `<option value="rail:${escHtml(r)}">${escHtml(r)}</option>`).join("");
+    // In railfocus mode, reflect the rail currently on the canvas.
+    if (STATE.layoutMode === "railfocus" && STATE.selectedRailId
+        && rails.includes(STATE.selectedRailId.replace(/^rail:/, ""))) {
+      sel.value = STATE.selectedRailId;
+    }
+  }
+
+  // Band C card body.
+  const rails = phase.rails_stable || [];
+  const comps = phase.components_entering || [];
+  const cand = [
+    ...comps.map(r => model.nodeById.get(`comp:${r}`)),
+    ...rails.map(r => model.nodeById.get(`rail:${r}`)),
+  ].filter(Boolean).sort((a, b) => (b.blastRadius || 0) - (a.blastRadius || 0));
+  const top = cand[0];
+  const narration = (phase.evidence && phase.evidence[0]) ? phase.evidence[0] : "";
+
+  // Cap chips to one line per row (the rest live in the details inspector and
+  // the grid overview) so the card never overflows its band and gets clipped.
+  const RMAX = 12, CMAX = 10;
+  const railChips = rails.slice(0, RMAX).map(r => `<span class="mono chip emerald clickable" data-rail="${escHtml(r)}">${escHtml(r)}</span>`).join("")
+    + (rails.length > RMAX ? `<span class="sch-boot-more">${escHtml(t("schematic.boot.more", { n: rails.length - RMAX }))}</span>` : "");
+  const compChips = comps.slice(0, CMAX).map(c => `<span class="mono chip cyan clickable" data-refdes="${escHtml(c)}">${escHtml(c)}</span>`).join("")
+    + (comps.length > CMAX ? `<span class="sch-boot-more">${escHtml(t("schematic.boot.more", { n: comps.length - CMAX }))}</span>` : "");
+
+  host.innerHTML = `
+    <div class="sch-player-row">
+      <span class="sch-player-col-label">${escHtml(t("schematic.player.rails_up"))}</span>
+      <div class="sch-player-chips">${railChips || `<span class="muted">${escHtml(t("schematic.inspector.none"))}</span>`}</div>
+      <button class="sch-player-details" data-act="details" title="${escHtml(t("schematic.player.details_title"))}">${escHtml(t("schematic.player.details"))}</button>
+    </div>
+    <div class="sch-player-row">
+      <span class="sch-player-col-label">${escHtml(t("schematic.player.comps_in"))}</span>
+      <div class="sch-player-chips">${compChips || `<span class="muted">${escHtml(t("schematic.inspector.none"))}</span>`}</div>
+      ${top ? `<span class="sch-player-spof-wrap">${escHtml(t("schematic.boot.spof_label"))} <span class="mono chip clickable sch-player-spof" data-refdes="${escHtml(top.refdes || top.label)}">${ICON_WARNING} ${escHtml(top.refdes || top.label)}</span><span class="sch-player-spof-pct">${top.impactPct || 0}%</span></span>` : ""}
+    </div>
+    ${narration ? `<div class="sch-player-narr">${escHtml(narration)}</div>` : ""}`;
+
+  host.querySelector("[data-act=details]")?.addEventListener("click", () => showPhaseDetails(model, phase.index));
+  host.querySelectorAll("[data-rail]").forEach(c => c.addEventListener("click", () => {
+    const n = model.nodeById.get(`rail:${c.dataset.rail}`);
+    if (n) { STATE.selectedId = n.id; updateInspector(n); applyFocus(n.id, model); }
+  }));
+  host.querySelectorAll("[data-refdes]").forEach(c => c.addEventListener("click", () => {
+    const n = model.nodeById.get(`comp:${c.dataset.refdes}`);
+    if (n) { STATE.selectedId = n.id; updateInspector(n); applyFocus(n.id, model); }
+  }));
+}
+
+// Isolate one rail of the active phase. In railfocus mode this drives the
+// real one-rail layout (setSelectedRail); in the full-graph modes it falls
+// back to the cascade-focus highlight.
+function selectRailFromPlayer(railId) {
+  if (STATE.layoutMode === "railfocus") { setSelectedRail(railId); return; }
+  const n = STATE.model?.nodeById?.get(railId);
+  if (n) { STATE.selectedId = railId; updateInspector(n); applyFocus(railId, STATE.model); }
+}
+
+// Overview overlay: the full phase grid (every phase side by side), opened
+// from the transport [grid] button. Clicking a column seeks the player there.
+function openBootGrid(model) {
+  const overlay = el("schBootGridOverlay");
+  if (!overlay) return;
+  overlay.innerHTML = `
+    <div class="sch-boot-gridoverlay-panel">
+      <div class="sch-boot-gridoverlay-head">
+        <span>${escHtml(t("schematic.player.grid_overview"))}</span>
+        <button class="sch-boot-gridoverlay-close" title="${escHtml(t("schematic.simulator.close_title"))}">×</button>
+      </div>
+      <div class="sch-boot-grid" id="schBootGridInner"></div>
+    </div>`;
+  renderBootGrid(model, el("schBootGridInner"));
+  overlay.hidden = false;
+  overlay.querySelector(".sch-boot-gridoverlay-close").addEventListener("click", () => { overlay.hidden = true; });
+  overlay.addEventListener("click", (ev) => { if (ev.target === overlay) overlay.hidden = true; });
+}
+
+function renderBootGrid(model, grid) {
+  if (!grid) return;
+  const phases = model.boot || [];
+  const boardMaxBlast = model.maxBlast || 1;
+  grid.style.gridTemplateColumns = `repeat(${phases.length}, minmax(180px, 1fr))`;
+  phases.forEach((p) => {
+    const candidates = [
+      ...(p.components_entering || []).map(r => model.nodeById.get(`comp:${r}`)),
+      ...(p.rails_stable || []).map(r => model.nodeById.get(`rail:${r}`)),
+    ].filter(Boolean);
+    candidates.sort((a, b) => (b.blastRadius || 0) - (a.blastRadius || 0));
+    const top = candidates[0];
+    const phaseMaxBlast = top ? top.blastRadius || 0 : 0;
+    const phaseMaxPct = top ? top.impactPct || 0 : 0;
+    const critLevel = phaseMaxPct >= 25 ? "hi" : phaseMaxPct >= 10 ? "mid" : "lo";
+    const critFill = boardMaxBlast > 0 ? Math.min(100, Math.round(100 * phaseMaxBlast / boardMaxBlast)) : 0;
+
+    const col = document.createElement("div");
+    col.className = `sch-boot-col crit-${critLevel}`;
+    col.dataset.phase = p.index;
+    const kindBadge = p.kind ? `<span class="sch-boot-kind kind-${p.kind.replace(/[^a-z]/gi,'')}">${escHtml(p.kind)}</span>` : '';
+    const confBadge = p.confidence != null ? `<span class="sch-boot-phase-conf">${p.confidence.toFixed(2)}</span>` : '';
+    col.innerHTML = `
+      <div class="sch-boot-head">
+        <span class="sch-boot-phase">Φ${p.index}</span>
+        <span class="sch-boot-name">${escHtml(p.name || t("schematic.boot.phase_default_name", { n: p.index }))}</span>
+        ${kindBadge}
+        ${confBadge}
+      </div>
+      ${top ? `<div class="sch-boot-spof crit-${critLevel}">
+        <span class="sch-boot-spof-icon">${critLevel === 'hi' ? ICON_WARNING : critLevel === 'mid' ? ICON_DOT_FILLED : "·"}</span>
+        <span class="sch-boot-spof-label">${escHtml(t("schematic.boot.spof_label"))}</span>
+        <span class="mono sch-boot-spof-ref">${escHtml(top.refdes || top.label)}</span>
+        <span class="sch-boot-spof-pct">${phaseMaxPct}%</span>
+      </div>` : ''}
+      <div class="sch-boot-crit">
+        <div class="sch-boot-crit-bar"><div class="sch-boot-crit-fill crit-${critLevel}" style="width:${critFill}%"></div></div>
+      </div>
+      <div class="sch-boot-line">
+        <span class="sch-boot-line-label">${escHtml(t("schematic.boot.rails_label"))}</span>
+        ${(p.rails_stable || []).slice(0, 8).map(r => `<span class="mono chip emerald">${escHtml(r)}</span>`).join("")}
+        ${(p.rails_stable || []).length > 8 ? `<span class="sch-boot-more">${escHtml(t("schematic.boot.more", { n: p.rails_stable.length - 8 }))}</span>` : ""}
+      </div>
+      <div class="sch-boot-line">
+        <span class="sch-boot-line-label">${escHtml(t("schematic.boot.components_label"))}</span>
+        ${(p.components_entering || []).slice(0, 6).map(c => `<span class="mono chip cyan">${escHtml(c)}</span>`).join("")}
+        ${(p.components_entering || []).length > 6 ? `<span class="sch-boot-more">${escHtml(t("schematic.boot.more", { n: p.components_entering.length - 6 }))}</span>` : ""}
+      </div>`;
+    col.addEventListener("click", () => {
+      SimulationController.seekToPhase(p.index);
+      el("schBootGridOverlay").hidden = true;
+    });
+    grid.appendChild(col);
+  });
+}
+
+// Full phase write-up in the side inspector (rails, comps, all triggers with
+// rationale, evidence list) — opened from the card's "details" button.
+function showPhaseDetails(model, phaseIdx) {
+  const phase = (model.boot || []).find(p => p.index === phaseIdx);
+  if (!phase) return;
   const insp = el("schInspector");
   insp.classList.add("open");
   el("schInspType").textContent = t("schematic.inspector.type_phase");
@@ -2400,6 +2641,61 @@ function clearFocus() {
   d3.selectAll("#schLayerNodes g.sch-node").classed("focus", false).classed("downstream", false).classed("upstream", false).classed("neighbor", false);
   d3.selectAll("#schLayerLinks path").classed("active-link", false);
   el("schBootTimeline")?.querySelectorAll(".sch-boot-col.active").forEach(c => c.classList.remove("active"));
+}
+
+// Fill the inspector header chrome: a stat strip (the headline facts) and a
+// quick-action bar (center the graph, jump to the board, copy the id) so the
+// tech doesn't have to scroll the body to act.
+function populateInspectorChrome(node) {
+  const statsEl = el("schInspStats");
+  const actsEl = el("schInspActions");
+  if (!statsEl || !actsEl) return;
+  const tx = window.t;
+
+  const pills = [];
+  const pill = (k, v, cls = "") =>
+    `<span class="sch-insp-pill ${cls}"><span class="k">${escHtml(k)}</span><span class="v">${escHtml(String(v))}</span></span>`;
+  if (node.kind === "rail") {
+    if (node.voltage_nominal != null) pills.push(pill(tx("schematic.inspector.stat_voltage"), `${node.voltage_nominal} V`, "emerald"));
+  } else if (node.role) {
+    pills.push(pill(tx("schematic.inspector.stat_role"), node.role, "cyan"));
+  }
+  if (node.impactPct != null && node.blastRadius != null) {
+    const sev = node.impactPct >= 25 ? "crit-hi" : node.impactPct >= 10 ? "crit-mid" : "";
+    pills.push(pill(tx("schematic.inspector.stat_impact"), `${node.impactPct}%`, sev));
+  }
+  if (node.phase != null) pills.push(pill(tx("schematic.inspector.stat_phase"), `Φ${node.phase}`, "amber"));
+  statsEl.innerHTML = pills.join("");
+
+  actsEl.innerHTML = "";
+  const addAction = (label, title, fn) => {
+    const b = document.createElement("button");
+    b.className = "sch-insp-action-btn";
+    b.textContent = label;
+    b.title = title;
+    b.addEventListener("click", fn);
+    actsEl.appendChild(b);
+    return b;
+  };
+  addAction(tx("schematic.inspector.action_center"), tx("schematic.inspector.action_center_title"), () => {
+    if (!STATE.model) return;
+    applyFocus(node.id, STATE.model);
+    fitToPhaseNodes(STATE.model, new Set([node.id]));
+  });
+  if (node.kind === "component" && node.refdes && window.Boardview && typeof window.Boardview.focus === "function") {
+    addAction(tx("schematic.inspector.action_board"), tx("schematic.inspector.action_board_title"), () => {
+      try { window.Boardview.focus(node.refdes); } catch (_) { /* board may not be loaded */ }
+    });
+  }
+  const copyKey = node.kind === "rail" ? node.label : node.refdes;
+  if (copyKey) {
+    const copyBtn = addAction(tx("schematic.inspector.action_copy"), tx("schematic.inspector.action_copy_title"), () => {
+      navigator.clipboard?.writeText(copyKey).then(() => {
+        copyBtn.textContent = tx("schematic.inspector.action_copied");
+        setTimeout(() => { copyBtn.textContent = tx("schematic.inspector.action_copy"); }, 1200);
+      }).catch(() => {});
+    });
+  }
 }
 
 function updateInspector(node) {
@@ -2551,6 +2847,8 @@ function updateInspector(node) {
     `;
   }
 
+  populateInspectorChrome(node);
+
   // --- Observation row (reverse-diagnostic input, contextual per node kind) ---
   const obsKind = node.kind === "component" ? "comp" : node.kind === "rail" ? "rail" : null;
   const obsKey = node.kind === "component" ? node.refdes : node.kind === "rail" ? node.label : null;
@@ -2565,6 +2863,14 @@ function updateInspector(node) {
       ? SimulationController.observations.state_rails
       : SimulationController.observations.state_comps;
     const current = stateMap.get(obsKey) || "unknown";
+
+    // Group the reverse-diagnostic tools (state picker + metric + history) in
+    // one clearly-headed section instead of bare rows floating at the bottom.
+    const diagSec = document.createElement("section");
+    diagSec.className = "sch-insp-section sch-insp-diag";
+    diagSec.innerHTML = `<h3>${escHtml(t("schematic.inspector.diag_title"))}</h3>`
+      + `<p class="sch-insp-hint">${escHtml(t("schematic.inspector.diag_hint"))}</p>`;
+    body.appendChild(diagSec);
 
     const row = document.createElement("div");
     row.className = "sim-obs-row";
@@ -2586,7 +2892,7 @@ function updateInspector(node) {
     }
     row.innerHTML = `<span class="sim-obs-label">${escHtml(t("schematic.inspector.observation"))}</span>`;
     row.appendChild(picker);
-    body.appendChild(row);
+    diagSec.appendChild(row);
 
     // --- Metric input row ---
     const unitForKind = obsKind === "rail" ? "V" : "°C";
@@ -2652,13 +2958,13 @@ function updateInspector(node) {
     inputEl.addEventListener("keydown", ev => { if (ev.key === "Enter") doRecord(); });
     inputEl.addEventListener("blur", doRecord);
     recordBtn.addEventListener("click", doRecord);
-    body.appendChild(metricRow);
+    diagSec.appendChild(metricRow);
 
     // --- Measurement history (async fetch, replaces on reopen) ---
     const historyBox = document.createElement("div");
     historyBox.className = "sim-measurement-history";
     historyBox.innerHTML = `<div class="sim-mh-title">${escHtml(t("schematic.inspector.history_title", { target: obsKey }))}</div><div class="sim-mh-list"></div>`;
-    body.appendChild(historyBox);
+    diagSec.appendChild(historyBox);
     (async () => {
       const target = `${obsKind === "comp" ? "comp" : "rail"}:${obsKey}`;
       const events = await SimulationController.loadMeasurementHistory(target);
@@ -2724,8 +3030,13 @@ function updateInspector(node) {
   // cascade immediately.
   if (node.kind !== "rail" && node.refdes) {
     const already = SimulationController.killedRefdes.includes(node.refdes);
+    const faultSec = document.createElement("section");
+    faultSec.className = "sch-insp-section sch-insp-faults";
+    faultSec.innerHTML = `<h3>${escHtml(t("schematic.inspector.faults_title"))}</h3>`;
+    body.appendChild(faultSec);
+
     const faultBtn = document.createElement("button");
-    faultBtn.className = "sim-inspector-action sim-inspector-action--danger";
+    faultBtn.className = `sim-inspector-action sim-inspector-action--danger${already ? " active" : ""}`;
     faultBtn.textContent = already
       ? t("schematic.inspector.remove_fault", { refdes: node.refdes })
       : t("schematic.inspector.simulate_fault", { refdes: node.refdes });
@@ -2742,8 +3053,9 @@ function updateInspector(node) {
         if (idx >= 0) SimulationController.seek(idx);
         SimulationController.pause();
       }
+      updateInspector(node);   // reflect armed/disarmed state + reset button
     });
-    body.appendChild(faultBtn);
+    faultSec.appendChild(faultBtn);
 
     // Reset button — only when at least one fault is active.
     if (SimulationController.killedRefdes.length > 0) {
@@ -2756,8 +3068,9 @@ function updateInspector(node) {
         SimulationController.killedRefdes = [];
         await SimulationController.refresh(STATE.slug);
         SimulationController.seek(0);
+        updateInspector(node);
       });
-      body.appendChild(resetBtn);
+      faultSec.appendChild(resetBtn);
     }
   }
 
@@ -2823,6 +3136,37 @@ function fitToBounds(model) {
   const scale = Math.min(availW / bw, availH / bh, 1.4);
   const tx = FIT_PAD + (availW - bw * scale) / 2 - minX * scale;
   const ty = FIT_TOP_INSET + (availH - bh * scale) / 2 - minY * scale;
+  d3.select("#schGraph").transition().duration(400).call(STATE.zoom.transform, d3.zoomIdentity.translate(tx, ty).scale(scale));
+}
+
+// Zoom/pan to frame just a set of node ids — used by the boot player so that
+// picking a phase frames that phase's nodes instead of leaving them as a tiny
+// cluster inside the full board graph.
+function fitToPhaseNodes(model, ids) {
+  if (!STATE.zoom) return;
+  // Read positions from the rendered D3 selection — the laid-out coordinates
+  // live on the bound data, not necessarily on the model.nodeById objects.
+  const pts = [];
+  d3.selectAll("#schLayerNodes g.sch-node").each(function (d) {
+    if (d && ids.has(d.id) && isFinite(d.x) && isFinite(d.y)) pts.push(d);
+  });
+  if (pts.length === 0) return;
+  const PAD = 64;
+  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  pts.forEach(n => {
+    minX = Math.min(minX, n.x); maxX = Math.max(maxX, n.x);
+    minY = Math.min(minY, n.y); maxY = Math.max(maxY, n.y);
+  });
+  const canvas = el("schCanvas");
+  const W = canvas.clientWidth, H = canvas.clientHeight;
+  const bw = Math.max(1, (maxX - minX) + PAD * 2);
+  const bh = Math.max(1, (maxY - minY) + PAD * 2);
+  const availW = W - FIT_PAD * 2;
+  const availH = H - FIT_TOP_INSET - FIT_PAD;
+  const scale = Math.min(availW / bw, availH / bh, 1.6);
+  const cx = (minX + maxX) / 2, cy = (minY + maxY) / 2;
+  const tx = FIT_PAD + availW / 2 - cx * scale;
+  const ty = FIT_TOP_INSET + availH / 2 - cy * scale;
   d3.select("#schGraph").transition().duration(400).call(STATE.zoom.transform, d3.zoomIdentity.translate(tx, ty).scale(scale));
 }
 
@@ -2963,48 +3307,92 @@ function runFilter(q, model) {
  * ---------------------------------------------------------------------- */
 
 function updateStats(model, graph) {
-  const compCount = model.nodes.filter(n => n.kind === "component").length;
-  const railCount = model.nodes.filter(n => n.kind === "rail").length;
-  const sourceShown = model.nodes.filter(
+  // Count only what's actually on the canvas in the current mode, via the
+  // same predicate the renderer uses — so the counts track the layout mode
+  // and the passives toggle instead of reporting a fixed model total.
+  const rendered = model.nodes.filter(n => isNodeRendered(n, model));
+  const compCount = rendered.filter(n => n.kind === "component").length;
+  const railCount = rendered.filter(n => n.kind === "rail").length;
+  const sourceShown = rendered.filter(
     n => n.kind === "component" && n.role === "source"
   ).length;
   const tot = model.totals || {};
 
-  // Stats show "affiché / total" so the tech knows what's filtered. A
-  // grey-out helper styles the denominator in CSS.
-  const ratio = (shown, total) => total && shown < total
-    ? `${shown}<span class="sch-stat-total">/${total}</span>`
-    : `${shown}`;
-  el("schStatComps").innerHTML  = ratio(compCount,   tot.components ?? compCount);
-  el("schStatRails").innerHTML  = ratio(railCount,   tot.rails      ?? railCount);
-  el("schStatRegs").innerHTML   = ratio(sourceShown, tot.sources    ?? sourceShown);
+  // Plain counts of what the view renders. No "shown/total" ratio: the
+  // denominator (full board incl. signal-only passives) is not reachable in
+  // this view and only read as missing data.
+  el("schStatComps").textContent  = compCount;
+  el("schStatRails").textContent  = railCount;
+  el("schStatRegs").textContent   = sourceShown;
   el("schStatPhases").textContent = tot.phases ?? (graph.boot_sequence || []).length;
   const q = graph.quality || {};
   el("schStatConf").textContent   = q.confidence_global != null ? q.confidence_global.toFixed(2) : "n/a";
   el("schStatPages").textContent  = q.pages_parsed != null ? `${q.pages_parsed}/${q.total_pages}` : "n/a";
 
-  // Dégradé badge + tooltip explaining WHICH threshold triggered it
-  // (compiler criteria: confidence_global < 0.7 OR orphan_cross_page > 5).
+  // Dégradé badge — click to open a detail popover (compiler trigger:
+  // confidence_global < 0.7 OR orphan_cross_page > 5).
   const deg = el("schStatDegraded");
   deg.classList.toggle("on", Boolean(q.degraded_mode));
   if (q.degraded_mode) {
-    const reasons = [];
-    if (q.confidence_global != null && q.confidence_global < 0.7) {
-      reasons.push(t("schematic.degraded.reason_confidence", { value: q.confidence_global.toFixed(2) }));
-    }
-    if (q.orphan_cross_page_refs != null && q.orphan_cross_page_refs > 5) {
-      reasons.push(t("schematic.degraded.reason_orphans", { count: q.orphan_cross_page_refs }));
-    }
-    if (q.nets_unresolved) {
-      reasons.push(t("schematic.degraded.reason_unresolved_nets", { count: q.nets_unresolved }));
-    }
-    deg.title = t("schematic.degraded.title", {
-      reasons: reasons.join("\n• "),
-      parsed: q.pages_parsed ?? "?",
-      total: q.total_pages ?? "?",
-    });
+    deg.classList.add("clickable");
+    deg.title = t("schematic.degraded.hint_click");
+    wireDegradedPopover(q);
   } else {
+    deg.classList.remove("clickable");
     deg.title = "";
+    deg.onclick = null;
+    el("schDegradedPop")?.classList.remove("open");
+  }
+}
+
+// Build + wire the degraded-mode detail popover anchored under the stats bar.
+// Lists each quality metric; the ones that actually tripped degraded_mode
+// (confidence < 0.7, orphan cross-page > 5) are flagged in amber.
+function wireDegradedPopover(q) {
+  const host = document.querySelector("#schematicSection") || document.body;
+  let pop = el("schDegradedPop");
+  if (!pop) {
+    pop = document.createElement("div");
+    pop.className = "sch-degraded-pop";
+    pop.id = "schDegradedPop";
+    host.appendChild(pop);
+  }
+  const tx = window.t;
+  const orphTrig = (q.orphan_cross_page_refs ?? 0) > 5;
+  const confTrig = q.confidence_global != null && q.confidence_global < 0.7;
+  const row = (label, val, trigger) =>
+    `<div class="sch-degp-row${trigger ? " trigger" : ""}"><span class="sch-degp-k">${escHtml(label)}</span><span class="sch-degp-v">${escHtml(String(val))}</span></div>`;
+  const rows = [
+    row(tx("schematic.degraded.metric_orphans"), `${q.orphan_cross_page_refs ?? 0}${orphTrig ? "  (> 5)" : ""}`, orphTrig),
+    row(tx("schematic.degraded.metric_unresolved"), q.nets_unresolved ?? 0, false),
+    row(tx("schematic.degraded.metric_confidence"), q.confidence_global != null ? q.confidence_global.toFixed(2) : "n/a", confTrig),
+    row(tx("schematic.degraded.metric_no_value"), q.components_without_value ?? 0, false),
+    row(tx("schematic.degraded.metric_no_mpn"), q.components_without_mpn ?? 0, false),
+    row(tx("schematic.degraded.metric_untraced"), q.components_untraced ?? 0, false),
+    row(tx("schematic.degraded.metric_pages"), `${q.pages_parsed ?? "?"}/${q.total_pages ?? "?"}`, false),
+  ];
+  pop.innerHTML = `
+    <div class="sch-degp-head">
+      <span>${escHtml(tx("schematic.degraded.pop_title"))}</span>
+      <button class="sch-degp-close" title="${escHtml(tx("schematic.simulator.close_title"))}">×</button>
+    </div>
+    <p class="sch-degp-why">${escHtml(tx("schematic.degraded.pop_why"))}</p>
+    <div class="sch-degp-rows">${rows.join("")}</div>
+    <p class="sch-degp-fix">${escHtml(tx("schematic.degraded.pop_fix"))}</p>`;
+  pop.querySelector(".sch-degp-close").addEventListener("click", () => pop.classList.remove("open"));
+  deg_onclick(pop);
+}
+
+function deg_onclick(pop) {
+  const deg = el("schStatDegraded");
+  deg.onclick = (ev) => { ev.stopPropagation(); pop.classList.toggle("open"); };
+  if (!pop._outsideWired) {
+    document.addEventListener("click", (ev) => {
+      if (pop.classList.contains("open") && !pop.contains(ev.target) && ev.target !== deg) {
+        pop.classList.remove("open");
+      }
+    });
+    pop._outsideWired = true;
   }
 }
 
@@ -3040,7 +3428,12 @@ function fullRender(graph) {
   // canvas 240px right in railfocus mode.
   document.body.classList.toggle("sch-mode-railfocus", STATE.layoutMode === "railfocus");
 
-  if (STATE.layoutMode === "railfocus") {
+  // Boot mode falls back to grid when the pack has no analyzed boot sequence.
+  const bootReady = STATE.layoutMode === "boot" && (model.boot || []).length > 0;
+  if (bootReady) {
+    computeBootLayout(model);
+    renderBootHeads(model);
+  } else if (STATE.layoutMode === "railfocus") {
     renderRailBar(model);
     // Drop a stale selection if the rail no longer exists in this pack.
     let rid = STATE.selectedRailId;
