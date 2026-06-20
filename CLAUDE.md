@@ -107,19 +107,34 @@ session in `managed` mode):
 
 ```
 api/
-  main.py            FastAPI app: /health, /ws/diagnostic/{slug}, mounts
-                     web/ static, includes pipeline + board + profile routers
+  main.py            FastAPI app: /health, /ws/diagnostic/{slug},
+                     /api/macros image serving, mounts web/ static, includes
+                     pipeline + board + profile + stock routers
   config.py          Pydantic-settings Settings loaded from .env (cached)
   logging_setup.py   Single stdout handler, idempotent
-  pipeline/          Knowledge factory — Scout → Registry → Writers(×3) → Auditor
+  env_bootstrap.py   .env loading + startup env checks
+  http_security.py / ws_security.py / _token_check.py
+                     service-token + WS auth guards (honored behind the
+                     hosted front-door; no-ops standalone)
+  cli/               pack_admin.py — pack administration CLI
+  pipeline/          Knowledge factory — Scout → Registry → Writers(×3) → Auditor.
+                     Many support modules beyond the 4 phases (device_kind,
+                     expansion, metering, pack lint/migrate/storage, reconcile)
+    routes/          FastAPI routers (generate, repairs, packs, progress,
+                     documents, schematic, measurements, board_delta)
     schematic/       PDF schematic → page vision → merge → ElectricalGraph,
                      plus simulator + hypothesize (deterministic engines)
     bench_generator/ Auto-generates simulator scenarios from a knowledge pack,
                      writes memory/{slug}/simulator_reliability.json
-  board/             Boardview domain: model, parser registry (13 formats),
-                     validator, /api/board/parse router, WS event envelopes
+    board_delta/     Per-board-revision context overlay (agent/prompts/schemas/store)
+    telemetry/       token_stats.py — build metering
+    qa/              graph_coverage.py — pack graph coverage check
+  board/             Boardview domain: model, parser registry (16 formats),
+                     validator, /api/board/parse + /api/board/render routers,
+                     WS event envelopes
   agent/             Diagnostic runtime — managed (default) + direct fallback,
-                     tool manifest (MB + BV), sanitizer, chat history, memory,
+                     tool manifest (MB + BV + Profile + Stock + Camera + Consult),
+                     sanitizer, chat history, memory,
                      reliability-line injector (from simulator_reliability.json)
   profile/           Technician profile — catalog/derive/model/prompt/router/
                      store/tools; backs memory/_profile/technician.json
@@ -130,17 +145,18 @@ api/
                      filter; backs the `stock_*` agent tools and
                      /api/stock/* HTTP endpoints
   session/           Per-session state (board, highlights, annotations)
-  tools/             boardview.py — bv_* side-effect functions; ws_events.py
+  tools/             boardview.py (bv_* side-effects), ws_events.py, plus
+                     hypothesize / measurements / protocol / schematic /
+                     validation tool helpers
   vision/            Stub — reserved for image helpers
   telemetry/         Stub — reserved for structured logs / metrics
 web/                 Static frontend served by FastAPI
   index.html         Shell (topbar/rail/metabar/workspace/statusbar)
-  brd_viewer.js      Legacy D3 fallback renderer (kept for non-XZZ formats)
-  js/pcb_viewer.js   Three.js WebGL boardview (InstancedMesh renderer)
-                     — consumed via /api/board/render
+  js/pcb_viewer.js   Three.js WebGL boardview (InstancedMesh renderer), the
+                     sole boardview renderer — consumed via /api/board/render
   js/pcb_viewer_bridge.js  Bridges window.Boardview / window.initBoardview
-                           to the WebGL viewer; falls back to brd_viewer.js
-                           when the render endpoint is unavailable
+                           to the WebGL viewer (the old D3 brd_viewer.js was
+                           retired; there is no D3 fallback)
   js/                main, router, graph, memory_bank, pipeline_progress, llm,
                      schematic, stock, profile, protocol, camera, mascot, i18n
   js/features/       global/landing (home/landing), repair/ (workspace, diagnostic)
@@ -152,7 +168,9 @@ tests/               pytest suite mirroring api/ layout (agent/, board/, pipelin
 memory/              Generated knowledge packs + repair sessions. One directory
                      per device_slug (canonical store). See §memory-layout below.
 board_assets/        Input boards (.brd / .kicad_pcb / schematic .pdf) + ATTRIBUTIONS.md
-scripts/             bootstrap_managed_agent.py — one-off MA environment setup
+scripts/             operational tooling: bootstrap_managed_agent.py (MA setup),
+                     plus eval_* / bench_* / smoke_* / evolve runners, doctor,
+                     seed/reset utilities (~70 scripts)
 managed_ids.json     (gitignored) Environment + tier→agent IDs written by bootstrap
 docs/superpowers/    specs/ and plans/ — read these before structural changes
 ```
@@ -168,6 +186,10 @@ memory/{device_slug}/
   dictionary.json          # Lexicographe output (glossary)
   audit_verdict.json       # Auditor verdict (APPROVED / NEEDS_REVISION / REJECTED)
   pack_quality.json        # optional: pre-persist lint findings ({"lint_findings": [{code,severity,detail},...]}), written after APPROVED
+  device_kind.json         # optional: device-type classifier verdict + provenance
+  active_sources.json      # optional: pinned source set used to build the pack
+  refdes_attributions.json # optional: per-refdes provenance
+  token_stats.json         # optional: build metering (token spend per phase)
   schematic_pages/         # optional: page_NNN.json from schematic sub-pipeline
   schematic_graph.json     # optional: post-merge, pre-compile
   nets_classified.json     # optional: net classifier output (power/logic/connector)
@@ -264,7 +286,7 @@ an LLM at runtime; both operate on the compiled `ElectricalGraph`.
   fallback); takes failures (refdes + mode) + optional rail overrides, emits a
   `SimulationTimeline` (dead rails/components, signal states, per-phase blocking
   cause). Exposed via `mb_schematic_graph(query="simulate", …)` and
-  `POST /schematic/simulate`.
+  `POST /pipeline/packs/{slug}/schematic/simulate`.
 - **`hypothesize.py`** — reverse-diagnostic: from a partial observation
   (dead/alive components + rails), enumerates refdes-kill candidates that
   explain it — single-fault exhaustive + 2-fault pruned (seeded from top-K
@@ -292,7 +314,7 @@ engine is weak on the loaded device. Don't skip writing it — the prompt path
 degrades gracefully but the agent loses self-awareness of its accuracy.
 
 CLI: `scripts/generate_bench_from_pack.py --slug=…`. Frozen human oracle
-lives separately at `benchmark/scenarios.jsonl` (17 scenarios, validated
+lives separately at `benchmark/scenarios.jsonl` (23 scenarios, validated
 by hand, provenance contract per `benchmark/README.md`). Never merge
 auto-generated scenarios into the frozen oracle.
 
@@ -314,29 +336,53 @@ Implications:
 
 ### HTTP + WebSocket surface
 
-Pipeline (`api/pipeline/__init__.py`):
+The route groups live under `api/pipeline/routes/`, `api/board/router.py`,
+`api/profile/router.py`, `api/stock/router.py`, and app-level in `api/main.py`.
+Representative paths below; the routers are the source of truth.
+
+App-level (`api/main.py`):
+- `GET  /health`
+- `GET  /api/macros/{slug}/{repair_id}/{filename}` — serves stored macro images
+- `WS   /ws/diagnostic/{device_slug}?tier={fast|normal|deep}&repair={id}` —
+  tier-selectable diagnostic conversation, optional repair scoping (replays
+  prior messages). `DIAGNOSTIC_MODE` env var picks `managed` (default) vs `direct`.
+- static mount of `web/` at `/`
+
+Pipeline (prefix `/pipeline`, routers in `api/pipeline/routes/`):
 - `POST /pipeline/generate` — run the full factory synchronously (~30–120 s)
-- `POST /pipeline/repairs` — create a repair session + fire-and-forget pack
-  generation (when the device is new). A repair is a persistent client
-  session; packs are shared device knowledge reused across repairs.
-- `WS   /pipeline/progress/{slug}` — live progress events for an in-flight
-  pipeline (phase started / progress / completed / finished)
-- `GET  /pipeline/packs` — list packs on disk with a presence bitmask
-- `GET  /pipeline/packs/{slug}` — pack metadata
-- `GET  /pipeline/packs/{slug}/full` — all JSON artefacts bundled (Memory Bank)
-- `GET  /pipeline/taxonomy` — packs grouped `brand > model > version` (home view)
+- `POST /pipeline/resolve-device` — resolve a free-text device label to a slug
+- `POST /pipeline/repairs`, `GET /pipeline/repairs`, `GET|DELETE /pipeline/repairs/{repair_id}`,
+  `GET|DELETE /pipeline/repairs/{repair_id}/conversations[/{conv_id}]`,
+  `GET /pipeline/repairs/{repair_id}/protocol`,
+  `POST /pipeline/repairs/{device_slug}/cancel` — repair CRUD (persistent sessions)
+- `WS   /pipeline/progress/{slug}` — live pipeline progress events
+- `GET  /pipeline/packs`, `GET /pipeline/packs/{slug}`, `GET /pipeline/packs/{slug}/full`,
+  `GET /pipeline/taxonomy`, `GET /pipeline/packs/{slug}/findings`,
+  `GET /pipeline/packs/{slug}/graph`, `POST /pipeline/packs/{slug}/expand`,
+  `POST /pipeline/packs/{slug}/confirm-kind`, `GET /pipeline/packs/{slug}/pending-kind`
+- Documents/sources: `POST|GET /pipeline/packs/{slug}/documents`,
+  `GET /pipeline/packs/{slug}/sources`, `PUT /pipeline/packs/{slug}/sources/{kind}`,
+  `DELETE /pipeline/packs/{slug}/sources/{kind}/versions/{filename}`
+  (upload stays `multipart`)
+- Schematic: `POST /pipeline/ingest-schematic`,
+  `GET /pipeline/packs/{slug}/schematic[/pages|/boot|/passives]`,
+  `POST /pipeline/packs/{slug}/schematic/{analyze-boot|classify-nets|simulate|hypothesize}`
+- Board-delta: `POST /pipeline/packs/{slug}/board-delta`,
+  `GET /pipeline/packs/{slug}/board-delta/{board}`
+- Measurements: `POST|GET /pipeline/packs/{slug}/repairs/{repair_id}/measurements`
 
-Board:
+Board (prefix `/api/board`):
 - `POST /api/board/parse` — upload + parse via `parser_for(path)` → `Board` JSON
+- `GET  /api/board/render` — server-side render payload for the WebGL viewer
 
-Schematic:
-- `POST /schematic/simulate` — drives `SimulationEngine` with `failures` +
-  `rail_overrides`; same payload shape as `mb_schematic_graph(query="simulate")`
+Profile (prefix `/profile`):
+- `GET /profile`, `PUT /profile/{identity|tools|custom-tools|preferences|state}`
 
-Diagnostic:
-- `WS   /ws/diagnostic/{device_slug}?tier={fast|normal|deep}&repair={id}`
-  — tier-selectable, optional repair scoping (replays prior messages).
-  `DIAGNOSTIC_MODE` env var picks `managed` (default) vs `direct`.
+Stock (prefix `/api/stock`):
+- `GET|POST /api/stock/donors`, `DELETE /api/stock/donors/{donor_id}`,
+  `POST /api/stock/donors/{donor_id}/consume`,
+  `DELETE /api/stock/donors/{donor_id}/consume/{refdes}`,
+  `GET /api/stock/donors/{donor_id}/parts`, `POST /api/stock/search`
 
 ### Diagnostic runtime (`api/agent/`)
 
@@ -358,8 +404,9 @@ Two siblings, same WS protocol:
 
 Custom tools (`manifest.py`):
 
-- **MB** — memory bank + board aggregation (14 tools): `mb_get_component`
-  (Levenshtein-validated refdes anti-hallucination), `mb_get_rules_for_symptoms`,
+- **MB** — memory bank + board aggregation (17 tools): `mb_get_component`
+  (prefix-letter closest-matches on the memory bank; Levenshtein neighbours
+  only on the parsed board when one is loaded), `mb_get_rules_for_symptoms`,
   `mb_record_finding` (canonical archival API; mirrors to the device mount),
   `mb_record_session_log`, `mb_record_measurement`, `mb_list_measurements`,
   `mb_compare_measurements`, `mb_observations_from_measurements`,
@@ -367,9 +414,13 @@ Custom tools (`manifest.py`):
   `mb_schematic_graph` (drives the simulator + boot sequence views),
   `mb_hypothesize` (reverse-diagnostic enumeration), `mb_expand_knowledge`
   (self-extends the pack when rules return empty — focused Scout + Clinicien
-  pass, `pipeline/expansion.py`). Impl in `agent/tools.py`. Field-report
-  listing is no longer a tool — the agent greps
-  `/mnt/memory/wrench-board-{slug}/field_reports/` via `agent_toolset_20260401`.
+  pass, `pipeline/expansion.py`), `mb_recall_field_reports` (confirmed
+  findings from past repairs of this device), `mb_search_patterns` (global
+  cross-device failure archetypes), `mb_search_playbooks` (global diagnostic
+  protocol templates; call before `bv_propose_protocol`). Impl in
+  `agent/tools.py`. The agent can also grep
+  `/mnt/memory/wrench-board-{slug}/field_reports/` directly via
+  `agent_toolset_20260401`.
 - **BV** — boardview control (17 tools): `bv_highlight`, `bv_highlight_net`,
   `bv_focus`, `bv_reset_view`, `bv_flip`, `bv_annotate`, `bv_filter_by_type`,
   `bv_draw_arrow`, `bv_measure`, `bv_show_pin`, `bv_dim_unrelated`,
@@ -377,7 +428,7 @@ Custom tools (`manifest.py`):
   `bv_update_protocol`, `bv_record_step_result`. Conditional —
   `build_tools_manifest(session)` strips BV when no board is loaded.
   Dispatched by `dispatch_bv.py` to `api/tools/boardview.py`; each call
-  mutates `session` and emits a WS event consumed by `brd_viewer.js`.
+  mutates `session` and emits a WS event consumed by `pcb_viewer_bridge.js`.
 - **Profile** (3 tools): `profile_get`, `profile_check_skills`,
   `profile_track_skill` — read/update the technician profile under
   `memory/_profile/technician.json`.
@@ -406,11 +457,13 @@ available.
 - `parser/base.py` — abstract `BoardParser`, **extension-based registry**:
   concrete parsers use `@register` + declare `extensions = (...)`; dispatch via
   `parser_for(path)`. New format = one new file in `parser/`, no base changes.
-- Implemented parsers (all independent, Apache 2.0): `test_link.py`
-  (OpenBoardView `.brd` v3; refuses obfuscated files via `ObfuscatedFileError`),
-  `brd2.py` (KiCad BRD2, content-sniffed from `.brd`), `kicad.py`
-  (`.kicad_pcb`), plus `asc.py`, `bdv.py`, `bv.py`, `cad.py`, `cst.py`,
-  `f2b.py`, `fz.py`, `gr.py`, `tvw.py` (legacy boardview formats). Shared
+- Implemented parsers (16 concrete, all independent, Apache 2.0): `kicad.py`
+  (`.kicad_pcb`), `xzz.py` (`.pcb`), and a `.brd` family routed by
+  content-sniffing in `base.py` — `test_link.py` (OpenBoardView `.brd` v3;
+  refuses obfuscated files via `ObfuscatedFileError`), `brd2.py` (KiCad BRD2),
+  `brd_packed.py` (packed-binary), `brd_subst.py` (substitution-encoded) —
+  plus the legacy boardview formats `asc.py`, `bdv.py`, `bv.py`, `bvr.py`,
+  `cad.py`, `cst.py`, `f2b.py`, `fz.py`, `gr.py`, `tvw.py`. Shared
   helpers in underscore siblings: `_kicad_extract.py` (kicad token reader),
   `_ascii_boardview.py` (Test_Link ASCII dialect, reused by several text
   formats), `_fz_zlib.py` (zlib + pipe-delimited scanner for `.fz`),
@@ -451,7 +504,12 @@ Entrypoint: `web/index.html` loads `web/js/main.js` which wires:
 | `js/graph.js`          | D3 force-layout knowledge graph (Actions→Components→Nets→Symptoms) |
 | `js/pipeline_progress.js` | WS consumer of `/pipeline/progress/{slug}` — drawer UI      |
 | `js/llm.js`            | Diagnostic chat panel; opens WS `/ws/diagnostic/{slug}?…`, auto-opens on `?repair=` URL |
-| `brd_viewer.js`        | D3 boardview renderer; consumes WS boardview events; exposes public `window.Boardview` API for the agent-state split (see commit 7a44108) |
+| `js/pcb_viewer.js` + `js/pcb_viewer_bridge.js` | Three.js WebGL boardview (sole renderer); the bridge exposes `window.Boardview` / `window.initBoardview` and consumes WS boardview events |
+| `js/features/repair/`  | The repair workbench: workspace + diagnostic (dashboard, chatLog, costDisplay, coaching, filesVision, demoReplay) |
+| `js/schematic.js`      | Schematic viewer vue (+ `schematic_minimap.js`) |
+| `js/stock.js`          | Stock / donor inventory section |
+| `js/mascot.js`         | Mascot UX subsystem (bubble / gallery / states) |
+| `js/i18n.js`           | Translation layer (loaded directly in `index.html`) |
 
 Shared layer (no view of their own): `shared/dom.js` (escapeHtml /
 prettifySlug / relativeTime), `shared/api.js` (`apiGet`/`apiSend` — the single
@@ -485,16 +543,20 @@ Pro-tool chrome — do not break this skeleton:
 | Band       | Size    | Role                                                   |
 |------------|---------|--------------------------------------------------------|
 | Top bar    | 48 px   | brand · breadcrumbs · mode pill · global actions       |
-| Left rail  | 52 px   | canonical section switcher (5 entries, hash-routed)    |
+| Left rail  | 52 px   | canonical section switcher (6 SECTIONS, hash-routed)   |
 | Metabar    | 44 px   | device context · filter chips · search                 |
 | Workspace  | flex    | the view for the current section                       |
 | Status bar | 28 px   | agent state · counts · zoom readout (mono)             |
 
-Sections are URL-hash routed via `SECTIONS` / `navigate()`: `#home`, `#pcb`,
-`#schematic`, `#graphe`, `#profile`. The legacy `#memory-bank` redirects to
-`#graphe?view=md` (raw memory-bank view inside the graph section). Adding a
-section = append to `SECTIONS`, add a rail button with `data-section="…"`, and
-ship a real DOM block or a `<section class="stub">` placeholder.
+Routing is via `SECTIONS` / `navigate()` in `router.js`. `SECTIONS` =
+`home`, `pcb`, `schematic`, `graphe`, `stock`, `profile` (6). The global
+entry points are `#home`, `#stock`, `#profile`; `pcb` / `schematic` / `graphe`
+are **repair-scoped vues** reached under `#repair/{id}/{vue}` (`REPAIR_VUES`),
+not standalone global sections. A bare `#memory-bank` (no repair) falls back to
+`#home`; inside a repair it maps to the `graph` vue with `view=md` preserved in
+the query string. Adding a section = append to `SECTIONS`, add a rail button
+with `data-section="…"`, and ship a real DOM block or a `<section
+class="stub">` placeholder.
 
 ### Typography
 
