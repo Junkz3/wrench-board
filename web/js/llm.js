@@ -134,6 +134,21 @@ let userPickedTier = false;
 let currentConvId = null;
 let conversationsCache = [];
 let pendingConvParam = null;
+// Auto-reconnect after an UNEXPECTED socket drop (idle-cut by an upstream proxy,
+// a brief network blip, a cloud redeploy). The cloud relay now keep-alives the
+// tunnel, so these are rare — but when one slips through we resume the same
+// conversation transparently instead of stranding the tech on "erreur socket"
+// with a manual reload. Voluntary closes (tier/conv switch, route change, panel
+// teardown) reassign or null the module `ws`, so the closing socket is no longer
+// the live one and we DON'T reconnect it. Capped exponential backoff; after the
+// last attempt we surface the error and stop.
+let _reconnectT = null;
+let _reconnectAttempts = 0;
+const _RECONNECT_DELAYS_MS = [1000, 2000, 4000, 8000, 15000];
+function _clearReconnect() {
+  if (_reconnectT) { clearTimeout(_reconnectT); _reconnectT = null; }
+  _reconnectAttempts = 0;
+}
 import { ICON_CHECK } from './icons.js';
 
 function el(id) { return document.getElementById(id); }
@@ -178,6 +193,9 @@ function interruptAgent() {
 }
 
 function connect() {
+  // Any fresh dial supersedes a queued reconnect (tier/conv switch, route
+  // change all funnel through here).
+  _clearReconnect();
   const slug = currentDeviceSlug();
   if (!slug) {
     console.warn("[llm] connect() called without ?device= in the URL — aborting.");
@@ -227,6 +245,8 @@ function connect() {
       { tier: currentTier, repairId, conv },
       {
         onOpen: () => {
+          // A clean open clears any pending reconnect: we're live again.
+          _clearReconnect();
           statusTone("connected", t('chat.status.connected', { slug, tier: currentTier }));
           setSendEnabled(true);
           // Files+Vision : announce camera availability so the backend gates
@@ -234,10 +254,14 @@ function connect() {
           // empty captures (managed runtime).
           sendCapabilities();
         },
-        onClose: () => {
+        onClose: (ev) => {
           statusTone("closed", t('chat.status.closed'));
           setSendEnabled(false);
           setPanelMascot("idle");
+          // Reconnect only if THIS is still the live socket (a voluntary close
+          // reassigned/nulled `ws` first) — see scheduleReconnect for the rest
+          // of the guards (panel open + same route).
+          if (ev && ev.target === ws) scheduleReconnect();
         },
         onError: () => {
           statusTone("error", t('chat.status.error_socket'));
@@ -258,6 +282,36 @@ function connect() {
     catch { payload = { type: "message", role: "assistant", text: ev.data }; }
     handleDiagnosticFrame(payload);
   });
+}
+
+// Schedule a reconnect after an unexpected drop. Bails (no reconnect) when the
+// panel is closed (reopening dials fresh) or the live route has moved on since
+// the socket was dialed — reconnecting then would resume the WRONG session.
+// Otherwise it redials on a capped backoff, resuming the SAME conversation
+// (pendingConvParam = currentConvId), and gives up after the last delay.
+function scheduleReconnect() {
+  if (_reconnectT) return; // a retry is already queued
+  const panelOpen = el("llmPanel")?.classList.contains("open");
+  const sameRoute = wsScope
+    && wsScope.slug === currentDeviceSlug()
+    && wsScope.repairId === (currentRepairId() || null);
+  if (!panelOpen || !sameRoute) return;
+  if (_reconnectAttempts >= _RECONNECT_DELAYS_MS.length) {
+    // Out of attempts — leave the tech on the socket error so a manual reload
+    // is the clear next step.
+    statusTone("error", t('chat.status.error_socket'));
+    return;
+  }
+  const delay = _RECONNECT_DELAYS_MS[_reconnectAttempts++];
+  statusTone("connecting", t('chat.status.connecting', { slug: currentDeviceSlug(), tier: currentTier }));
+  _reconnectT = setTimeout(() => {
+    _reconnectT = null;
+    // Resume the same thread; connect() consumes pendingConvParam then resets
+    // currentConvId, so capture it here first.
+    pendingConvParam = currentConvId || null;
+    ws = null;
+    connect();
+  }, delay);
 }
 
 // Dispatch a single diagnostic-WS frame (boardview/protocol/simulation routing
@@ -601,6 +655,7 @@ function closePanel() {
 // from sitting on a dead conv_id and trying to send to a now-404 session.
 export function closePanelIfConv(convId) {
   if (!convId || convId !== currentConvId) return;
+  _clearReconnect();
   if (ws && ws.readyState <= 1) {
     try { ws.close(); } catch (_) { /* ignore */ }
   }
