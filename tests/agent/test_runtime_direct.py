@@ -411,6 +411,75 @@ async def test_unknown_tool_name_returns_unknown_tool_to_agent(
     assert decoded.get("reason") == "unknown-tool"
 
 
+async def test_stock_tool_dispatch_runs_and_feeds_result_back(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path,
+) -> None:
+    """Regression: stock_* tools must dispatch in direct mode (the prod default).
+
+    Before the fix they fell into _dispatch_mb_tool's else branch and came back
+    as {'ok': False, 'reason': 'unknown-tool'} — the agent reported success to
+    the tech but nothing was written. Here we script a stock_mark_donor call and
+    assert the runtime actually ran the stock tool (created donor_id returned),
+    not the unknown-tool fallback.
+    """
+    _stub_session(monkeypatch)
+    _patch_settings(monkeypatch, memory_root=tmp_path)
+    # The stock package reads get_settings().memory_root through its own module
+    # bindings (it `from api.config import get_settings`), so the rt-level patch
+    # doesn't reach it — patch both stock modules at the tmp_path.
+    import api.stock.store as stock_store
+    import api.stock.tools as stock_tools
+    settings = MagicMock(memory_root=str(tmp_path))
+    monkeypatch.setattr(stock_store, "get_settings", lambda: settings)
+    monkeypatch.setattr(stock_tools, "get_settings", lambda: settings)
+    # mark_donor requires memory/{device_slug}/ to exist.
+    (tmp_path / "macbook-air-m1").mkdir(parents=True)
+
+    import api.agent.runtime_direct as rt
+    captured: list[list[dict]] = []
+
+    iter_scripted = iter([
+        _stream_tool_use(
+            "stock_mark_donor",
+            {"device_slug": "macbook-air-m1", "label": "bench donor #1"},
+            tool_id="toolu_donor1",
+        ),
+        _stream_text("Marked the board as a donor."),
+    ])
+    client = MagicMock()
+
+    def _stream_factory(**kwargs):
+        captured.append(list(kwargs["messages"]))
+        events, final = next(iter_scripted)
+        return _FakeStream(events, final)
+    client.messages.stream = _stream_factory
+    monkeypatch.setattr(rt, "AsyncAnthropic", lambda **_kw: client)
+
+    ws = FakeWS(["I have a MacBook Air M1 board on my bench as a donor"])
+    await rt.run_diagnostic_session_direct(ws, "macbook-air-m1", tier="fast")
+
+    assert len(captured) == 2, "stock tool result was never fed back to the agent"
+    tool_results = [
+        block
+        for msg in captured[1]
+        for block in (msg.get("content") if isinstance(msg.get("content"), list) else [])
+        if isinstance(block, dict) and block.get("type") == "tool_result"
+    ]
+    assert tool_results, "no tool_result block on the second turn"
+    decoded = json.loads(tool_results[0]["content"])
+    # Proof the real stock tool ran end-to-end (not the unknown-tool fallback).
+    assert decoded.get("created") is True
+    assert decoded.get("donor_id"), "stock_mark_donor returned no donor_id"
+    assert "unknown-tool" not in json.dumps(decoded)
+    assert tool_results[0]["tool_use_id"] == "toolu_donor1"
+    # And the inventory was actually persisted on disk.
+    inv = json.loads((tmp_path / "_stock" / "inventory.json").read_text())
+    assert any(
+        d.get("device_slug") == "macbook-air-m1"
+        for d in inv.get("donors", {}).values()
+    ), "donor was not persisted to inventory.json"
+
+
 async def test_chat_history_persisted_to_jsonl_under_repair(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path,
 ) -> None:

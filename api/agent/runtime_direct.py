@@ -447,6 +447,15 @@ async def _run_agent_turn(
                 result = dispatch_bv(session, block.name, block.input or {})
             elif block.name.startswith("profile_"):
                 result = _dispatch_profile_tool(block.name, block.input or {}, session=session)
+            elif block.name.startswith("stock_"):
+                # Donor inventory / salvage tools. Parity with the managed
+                # runtime (tool_dispatch._dispatch_stock) — without this branch
+                # they fell into _dispatch_mb_tool's "unknown mb_* tool" else,
+                # so the agent could never mark/search/consume donors in direct
+                # mode (the prod default). owner_ref scoping is already bound
+                # via set_owner_ref() at session open; the stock tools read the
+                # ContextVar internally.
+                result = _dispatch_stock_tool(block.name, block.input or {})
             else:
                 result = await _dispatch_mb_tool(
                     block.name,
@@ -1164,6 +1173,36 @@ def _dispatch_profile_tool(name: str, payload: dict, session=None) -> dict:
             payload.get("evidence", {}),
         )
     logger.warning("unknown profile_* tool: %s", name)
+    return {"ok": False, "reason": "unknown-tool"}
+
+
+def _dispatch_stock_tool(name: str, payload: dict) -> dict:
+    """Run one of the stock_* donor-inventory tools.
+
+    Mirrors ``tool_dispatch._dispatch_stock`` (the managed path). Lazy-imports
+    ``api.stock.tools`` to keep the optional package decoupled from the runtime,
+    same as the profile dispatcher. The tools scope to the session tenant via
+    ``current_owner_ref()`` internally — the ContextVar is set at session open.
+    """
+    from api.stock.tools import (
+        stock_consume,
+        stock_list_donors,
+        stock_mark_donor,
+        stock_search,
+        stock_unmark_donor,
+    )
+
+    if name == "stock_search":
+        return stock_search(payload)
+    if name == "stock_consume":
+        return stock_consume(payload)
+    if name == "stock_mark_donor":
+        return stock_mark_donor(payload)
+    if name == "stock_unmark_donor":
+        return stock_unmark_donor(payload)
+    if name == "stock_list_donors":
+        return stock_list_donors(payload)
+    logger.warning("unknown stock_* tool: %s", name)
     return {"ok": False, "reason": "unknown-tool"}
 
 
