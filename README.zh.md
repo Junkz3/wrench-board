@@ -17,6 +17,8 @@
 
 **📺 演示视频（3 分钟）：** https://youtu.be/OZ2D_p82z6w
 
+**在线试用：** [在浏览器中打开 boardview，免费](https://wrenchboard.cloud/zh/boardview-viewer)。无需账号，无需安装：`.brd`、`.fz`、`.tvw`、`.pcb` 等，原生解析。
+
 ![Wrench Board：在 MNT Reform 主板上运行的点位图与诊断智能体](docs/assets/screenshot-workbench.png)
 
 ## 它是什么

@@ -26,6 +26,8 @@
 
 **📺 Demo video (3 min):** https://youtu.be/OZ2D_p82z6w
 
+**Try it online:** [open a boardview in the browser, free](https://wrenchboard.cloud/boardview-viewer). No account, no install: `.brd`, `.fz`, `.tvw`, `.pcb` and more, parsed natively.
+
 ![Wrench Board: boardview + diagnostic agent on an MNT Reform motherboard](docs/assets/screenshot-workbench.png)
 
 ## What it is

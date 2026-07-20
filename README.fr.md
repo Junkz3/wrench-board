@@ -19,6 +19,8 @@
 
 **📺 Vidéo de démo (3 min) :** https://youtu.be/OZ2D_p82z6w
 
+**Essayer en ligne :** [ouvrir un boardview dans le navigateur, gratuit](https://wrenchboard.cloud/fr/lecteur-boardview). Sans compte, sans installation : `.brd`, `.fz`, `.tvw`, `.pcb` et plus, parsés nativement.
+
 ![Wrench Board : boardview + agent de diagnostic sur une carte mère MNT Reform](docs/assets/screenshot-workbench.png)
 
 ## Ce que c'est

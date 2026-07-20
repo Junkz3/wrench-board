@@ -19,6 +19,8 @@
 
 **📺 डेमो वीडियो (3 मिनट):** https://youtu.be/OZ2D_p82z6w
 
+**ऑनलाइन आज़माएँ:** [ब्राउज़र में boardview खोलें, मुफ़्त](https://wrenchboard.cloud/hi/boardview-viewer)। बिना अकाउंट, बिना इंस्टॉल: `.brd`, `.fz`, `.tvw`, `.pcb` और अन्य, natively पार्स।
+
 ![Wrench Board: boardview + diagnostic agent on an MNT Reform motherboard](docs/assets/screenshot-workbench.png)
 
 ## यह क्या है
