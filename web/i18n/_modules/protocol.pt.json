@@ -1,0 +1,63 @@
+{
+  "aria": {
+    "step_pin": "pino da etapa",
+    "panel": "protocolo de diagnóstico",
+    "toggle": "Recolher / expandir",
+    "abandon": "Abandonar protocolo"
+  },
+  "title": {
+    "default": "(sem título)"
+  },
+  "history": {
+    "summary": "histórico"
+  },
+  "toggle": {
+    "collapse": "Recolher",
+    "expand": "Expandir"
+  },
+  "step": {
+    "value_placeholder": "valor",
+    "nominal_placeholder": "nominal {value}",
+    "observation_placeholder": "o que você observa…",
+    "yes": "Sim",
+    "no": "Não",
+    "done": "Concluído",
+    "validate": "Validar",
+    "skip": "Pular",
+    "skip_prompt": "Por que pular esta etapa?",
+    "result": {
+      "yes": "sim",
+      "no": "não",
+      "done": "concluído",
+      "empty": "n/a"
+    }
+  },
+  "abandon": {
+    "confirm": "Abandonar o protocolo em execução?",
+    "modal": {
+      "badge": "Abandonar protocolo",
+      "title": "Abandonar o protocolo em execução?",
+      "body": "O agente será notificado e a sequência de diagnóstico será marcada como abandonada. Os resultados das etapas já registrados serão mantidos no histórico de reparo.",
+      "reason_label": "Motivo (opcional, visível para o agente)",
+      "reason_placeholder": "Por que abandonar? (hipótese incorreta, beco sem saída, cliente desistiu…)",
+      "cancel": "Cancelar",
+      "confirm": "Sim, abandonar"
+    }
+  },
+  "system_event": {
+    "abandoned": "Protocolo abandonado",
+    "completed": "Protocolo concluído"
+  },
+  "confirm": {
+    "badge": "Protocolo proposto",
+    "step_count_placeholder": "número de etapas",
+    "step_count": "{n} etapas",
+    "rationale_label": "Justificativa",
+    "steps_label": "Etapas",
+    "reject_reason_label": "Motivo da rejeição (opcional)",
+    "reject_reason_placeholder": "Por que rejeitar este protocolo? O agente levará isso em conta.",
+    "hint": "O agente aguarda sua decisão antes de iniciar o protocolo.",
+    "reject": "Rejeitar",
+    "accept": "Aceitar"
+  }
+}

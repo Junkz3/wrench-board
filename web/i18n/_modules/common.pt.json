@@ -1,0 +1,64 @@
+{
+  "app": {
+    "title": "Wrench Board: Grafo de conhecimento"
+  },
+  "topbar": {
+    "brand": "wrench-board",
+    "repair_log": "Log de reparos",
+    "settings": "Configurações",
+    "agent": "Agente",
+    "agent_title": "Agente de diagnóstico (⌘J)"
+  },
+  "session": {
+    "tag": "SESSÃO",
+    "pill_aria": "Sessão ativa, clique para abrir o painel",
+    "pill_title": "Voltar ao painel da sessão",
+    "leave": "Sair da sessão"
+  },
+  "rail": {
+    "home": "Reparos",
+    "diagnostic": "Diagnóstico",
+    "pcb": "PCB",
+    "schematic": "Esquemático",
+    "memory": "Memória",
+    "stock": "Estoque",
+    "profile": "Perfil"
+  },
+  "metabar": {
+    "view_mode": "Modo de visualização",
+    "view_visual": "Visual",
+    "view_raw": "Bruto",
+    "filter_symptoms": "Sintomas",
+    "filter_components": "Componentes",
+    "filter_nets": "Nets",
+    "filter_actions": "Ações",
+    "search_placeholder": "Pesquisar um nó…"
+  },
+  "tweaks": {
+    "title": "Ajustes",
+    "close": "Fechar",
+    "relations_visible": "Relações visíveis",
+    "rel_causes": "causa",
+    "rel_powers": "alimenta",
+    "rel_connected": "conectado",
+    "rel_resolves": "resolve",
+    "edge_labels": "Rótulos das arestas",
+    "label_hover": "Ao passar o mouse",
+    "label_all": "Todos",
+    "label_none": "Nenhum",
+    "min_confidence": "Confiança mínima",
+    "particle_speed": "Velocidade das partículas",
+    "boardview_colors": "Cores dos pinos",
+    "color_signal": "Sinal",
+    "color_power": "Alimentação",
+    "color_ground": "GND",
+    "color_clock": "Clock",
+    "color_reset": "Reset",
+    "color_nc": "NC",
+    "color_testpad": "Ponto de teste",
+    "color_via": "Via",
+    "color_board_outline": "Contorno da placa",
+    "color_board_fill": "Preenchimento da placa",
+    "reset_colors": "Redefinir cores"
+  }
+}

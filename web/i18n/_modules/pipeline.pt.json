@@ -1,0 +1,61 @@
+{
+  "drawer": {
+    "header_label": "Construindo memória",
+    "device_placeholder": "...",
+    "close_aria": "Fechar painel de progresso"
+  },
+  "phase": {
+    "scout": {
+      "label": "Scout",
+      "sub": "Pesquisa web"
+    },
+    "registry": {
+      "label": "Registry",
+      "sub": "Vocabulário canônico"
+    },
+    "writers": {
+      "label": "Writers",
+      "sub": "Grafo · Regras · Dicionário"
+    },
+    "audit": {
+      "label": "Auditor",
+      "sub": "QA e consistência"
+    },
+    "schematic_ingest": {
+      "label": "Esquemático ingerido",
+      "sub": "Visão página a página"
+    },
+    "device_kind": {
+      "label": "Tipo de dispositivo",
+      "sub": "Classificação do grafo"
+    }
+  },
+  "step": {
+    "time_placeholder": "...",
+    "in_progress": "em execução…",
+    "failed": "falhou"
+  },
+  "status": {
+    "waiting": "Aguardando primeiros eventos…",
+    "connecting": "Conectando ao pipeline…",
+    "started": "Pipeline iniciado…",
+    "queued": "Na fila · posição <b>{position}</b> ({ahead} à frente) · inicia automaticamente quando uma vaga liberar",
+    "phase_running": "Fase em execução · <b>{phase}</b>",
+    "ready": "Memória pronta · auditoria <b>{status}</b> · consistência <b>{score}</b>",
+    "failed": "Pipeline falhou · <b>{status}</b>",
+    "lost_connection": "Conexão com o fluxo de progresso perdida.",
+    "closed_early": "Conexão fechada antes do pipeline concluir."
+  },
+  "cta": {
+    "view_memory_bank": "Abrir Memory Bank",
+    "close": "Fechar"
+  },
+  "kind": {
+    "declared": "Declarado",
+    "detected": "Detectado",
+    "recommended": "recomendado",
+    "confirm": "Confirmar e retomar",
+    "confirmed": "confirmado",
+    "undeclared": "não declarado"
+  }
+}

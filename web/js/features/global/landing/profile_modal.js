@@ -76,6 +76,7 @@ function langPickerHTML() {
           <button type="button" class="landing-lang-opt${lang === "fr" ? " is-active" : ""}" data-lang="fr">${t("onboarding.menu.lang_fr")}</button>
           <button type="button" class="landing-lang-opt${lang === "zh" ? " is-active" : ""}" data-lang="zh">${t("onboarding.menu.lang_zh")}</button>
           <button type="button" class="landing-lang-opt${lang === "hi" ? " is-active" : ""}" data-lang="hi">${t("onboarding.menu.lang_hi")}</button>
+          <button type="button" class="landing-lang-opt${lang === "pt" ? " is-active" : ""}" data-lang="pt">${t("onboarding.menu.lang_pt")}</button>
         </div>`;
 }
 
@@ -224,6 +225,7 @@ function postureStepHTML(env, showLanguage = true) {
           <button type="button" class="landing-lang-opt${lang === "fr" ? " is-active" : ""}" data-lang="fr">${t("onboarding.menu.lang_fr")}</button>
           <button type="button" class="landing-lang-opt${lang === "zh" ? " is-active" : ""}" data-lang="zh">${t("onboarding.menu.lang_zh")}</button>
           <button type="button" class="landing-lang-opt${lang === "hi" ? " is-active" : ""}" data-lang="hi">${t("onboarding.menu.lang_hi")}</button>
+          <button type="button" class="landing-lang-opt${lang === "pt" ? " is-active" : ""}" data-lang="pt">${t("onboarding.menu.lang_pt")}</button>
         </div>
       </div>` : "";
   return `

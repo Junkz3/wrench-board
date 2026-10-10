@@ -1,0 +1,121 @@
+{
+  "minimap": {
+    "title": "Relações",
+    "close": "Fechar",
+    "empty_click": "Clique em um componente da placa.",
+    "no_device": "Nenhum dispositivo na URL.",
+    "no_schematic": "Nenhum esquemático importado para este dispositivo.",
+    "unknown_in_schematic": "Desconhecido no esquemático: {refdes}",
+    "loading": "Carregando…",
+    "loading_short": "carregando…",
+    "kind": {
+      "comp": "COMP",
+      "net": "NET"
+    },
+    "subhead": {
+      "rail": "linha",
+      "ground": "terra",
+      "signal": "sinal",
+      "voltage": "{volt} V",
+      "pins_count": "{n} pinos",
+      "pin_count": "{n} pino",
+      "nostuff": "NOSTUFF"
+    },
+    "tooltip": {
+      "open_rail_with_voltage": "{label} · {volt} V (abrir no esquemático)",
+      "open_rail": "{label} (abrir no esquemático)",
+      "decouple_cap": "{label}: capacitor de desacoplamento nesta linha",
+      "open_rail_focus": "Abrir no esquemático com foco na linha",
+      "pin_role_type": "{refdes}.{pin} · {role}",
+      "pin_role_type_full": "{refdes}.{pin} · {role} · {type}",
+      "comp_type": "{refdes} · {type}",
+      "comp_type_mpn": "{refdes} · {type} · {mpn}",
+      "pins_of_ref": "{refdes} · {type} · pinos {pins}",
+      "pin_of_ref": "{refdes} · {type} · pino {pins}",
+      "pins_of_ref_no_type": "{refdes} · pinos {pins}",
+      "pin_of_ref_no_type": "{refdes} · pino {pins}"
+    },
+    "rail": {
+      "label": "Linha",
+      "open_in_schematic": "Abrir no esquemático",
+      "source": "src: {refdes}",
+      "no_peers": "nenhum par listado",
+      "no_power_role": "Nenhuma função de alimentação identificada",
+      "more_pins_on_net": "+{n} mais pinos em {net}"
+    },
+    "section": {
+      "pins": "Pinos ({n})",
+      "powered_by": "Alimentado por",
+      "powers": "Alimenta",
+      "decouples": "Desacopla ({n})",
+      "more": "+{n}",
+      "more_others": "({n} outros)"
+    },
+    "spof": "alimenta {n} consumidores",
+    "spof_one": "alimenta {n} consumidor",
+    "pin": {
+      "ground_count": "{n} pinos",
+      "ground_count_one": "{n} pino",
+      "ground_list": "({pins})",
+      "no_net": "(sem net)"
+    }
+  },
+  "loader": {
+    "status": "Carregando placa",
+    "row": {
+      "board_id": "board_id",
+      "format": "formato",
+      "components": "componentes",
+      "pins": "pinos",
+      "nets": "nets"
+    }
+  },
+  "error": {
+    "default_code": "ERRO",
+    "default_msg": "Erro desconhecido",
+    "fetch_failed_msg": "HTTP {status} em {url}"
+  },
+  "empty": {
+    "code": "SEM BOARDVIEW",
+    "msg_with_slug": "Nenhum boardview carregado para {slug}. Envie um arquivo .brd / .kicad_pcb / .fz pela página de reparo para habilitar a visualização da PCB.",
+    "msg_no_slug": "Nenhum boardview carregado. Envie um arquivo .brd / .kicad_pcb / .fz pela página de reparo para habilitar a visualização da PCB."
+  },
+  "toolbar": {
+    "side_top": "Superior",
+    "side_bottom": "Inferior",
+    "annot_title": "Mostrar / ocultar anotações de serigrafia",
+    "fit_title": "Ajustar à visualização",
+    "minimap_title": "Minimapa de relações do esquemático ao clicar"
+  },
+  "badge": {
+    "summary": "{parts} componentes · {pins} pinos"
+  },
+  "inspector": {
+    "close": "Fechar",
+    "value_dash": "N/A",
+    "footprint_dash": "N/A",
+    "rotation": "rot {deg}",
+    "rotation_dash": "N/A",
+    "smd": "SMD",
+    "tht": "THT",
+    "layer_top": "TOP",
+    "layer_bottom": "BOTTOM",
+    "layer_both": "BOTH",
+    "size": "{w} × {h} mm · {n} pinos",
+    "size_one": "{w} × {h} mm · {n} pino",
+    "nets_section": "Nets do componente ({n})",
+    "linked_section": "Componentes vinculados ({n})",
+    "net_count": "×{n}",
+    "link_count": "{n} nets",
+    "link_count_one": "{n} net"
+  },
+  "net": {
+    "no_net_pin": "{refdes}.{pin} · sem-net",
+    "with_count": "{net} · {n} pinos",
+    "with_count_one": "{net} · {n} pino"
+  },
+  "cursor": {
+    "empty": "·",
+    "xy": "x: {x}  y: {y}"
+  }
+}

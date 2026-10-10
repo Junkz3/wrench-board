@@ -2,25 +2,25 @@
 //
 // Loads per-module JSON dictionaries from /i18n/_modules/{module}.{lang}.json
 // and exposes a global `i18n` API. Default locale: English. French, Simplified
-// Chinese and Hindi are offered as alternate locales. New locales = drop a
+// Chinese, Hindi and Brazilian Portuguese are offered as alternate locales. New locales = drop a
 // `_modules/{module}.{lang}.json` alongside the existing ones, add the lang to
 // SUPPORTED, and seed an empty bucket in `dicts`.
 //
 // Public API:
 //   i18n.t(key, params?)       → translated string, params interpolate {name}
-//   i18n.locale                → current 'en' | 'fr' | 'zh' | 'hi'
+//   i18n.locale                → current 'en' | 'fr' | 'zh' | 'hi' | 'pt'
 //   i18n.setLocale(lang)       → switch + persist + re-apply DOM
 //   i18n.applyDom(root?)       → re-translate `[data-i18n]` / `[data-i18n-attr]`
 //   i18n.ready                 → Promise resolved once first dictionary loaded
 //   i18n.onReady(fn)           → run fn once dictionaries are loaded
 //   i18n.onChange(fn)          → notify on locale switch (re-render hook)
 
-const SUPPORTED = ['en', 'fr', 'zh', 'hi'];
+const SUPPORTED = ['en', 'fr', 'zh', 'hi', 'pt'];
 const DEFAULT_LOCALE = 'en';
 const STORAGE_KEY = 'wb.locale';
 
 // Static module list — keep alphabetic. Each entry expects one file per
-// supported locale: web/i18n/_modules/{name}.{en,fr,zh,hi}.json
+// supported locale: web/i18n/_modules/{name}.{en,fr,zh,hi,pt}.json
 const MODULES = [
   'brd',
   'camera',
@@ -42,7 +42,7 @@ const MODULES = [
   'stock',
 ];
 
-const dicts = { en: {}, fr: {}, zh: {}, hi: {} };
+const dicts = { en: {}, fr: {}, zh: {}, hi: {}, pt: {} };
 const changeListeners = new Set();
 let currentLocale = pickInitialLocale();
 let readyResolve;

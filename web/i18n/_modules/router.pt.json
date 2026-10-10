@@ -1,0 +1,36 @@
+{
+  "section": {
+    "home": "Registro de reparos",
+    "pcb": "Boardview",
+    "schematic": "Esquemático",
+    "graphe": "Memória",
+    "stock": "Estoque e doadores",
+    "profile": "Perfil"
+  },
+  "mode": {
+    "journal_tag": "REGISTRO",
+    "journal_repairs": "Reparos",
+    "journal_session": "Sessão",
+    "tool_tag": "FERRAMENTA",
+    "tool_boardview": "Boardview",
+    "tool_schematic": "Grafo elétrico",
+    "tool_stock": "Estoque e doadores",
+    "wait_tag": "AGUARDANDO",
+    "wait_no_memory": "Nenhuma memória carregada",
+    "wait_no_repair": "Nenhum reparo ativo",
+    "wait_unbuilt": "Memória não construída",
+    "memory_tag": "MEMÓRIA",
+    "memory_graph": "Grafo de conhecimento",
+    "build_tag": "CONSTRUINDO",
+    "build_in_progress": "Memória em construção",
+    "profile_tag": "PERFIL",
+    "profile_sub": "Técnico"
+  },
+  "metabar": {
+    "no_repair": "Nenhum reparo ativo",
+    "no_memory_for_device": "Sem memória para este dispositivo. Crie um reparo para construí-la.",
+    "memory_loaded_approved": "Memória carregada · auditoria APROVADA",
+    "memory_building_missing": "Construindo memória, faltando {missing}",
+    "open_repair_to_view_graph": "Abra um reparo no registro para visualizar seu grafo."
+  }
+}

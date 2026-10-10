@@ -1,0 +1,33 @@
+{
+  "page_title": "Wrench Board: Introdução",
+  "mascot": {
+    "aria": "Mascote do Wrench Board"
+  },
+  "sidebar": {
+    "aria": "Reparos recentes",
+    "title": "Recentes",
+    "item1_symptom": "não liga",
+    "item1_meta": "há 2 h",
+    "item2_symptom": "não dá boot, tela preta",
+    "item2_meta": "ontem",
+    "item3_symptom": "tela preta ao iniciar",
+    "item3_meta": "há 3 d"
+  },
+  "hero": {
+    "mark": "Wrench Board",
+    "title": "Seu assistente de reparo de hardware.",
+    "sub": "Me passe o seu dispositivo e o sintoma: vou gerar o conhecimento e abrir o diagnóstico."
+  },
+  "form": {
+    "device_placeholder": "Dispositivo (ex: placa do MNT Reform, iPhone 11, Framework 13)",
+    "device_aria": "Qual dispositivo",
+    "symptom_placeholder": "Sintoma (ex: não liga, não carrega, tela preta)",
+    "symptom_aria": "Qual é o sintoma",
+    "submit": "Iniciar diagnóstico"
+  },
+  "chips": {
+    "chip1": "MNT Reform: não dá boot",
+    "chip2": "iPhone 11: não carrega",
+    "chip3": "Framework: tela preta"
+  }
+}

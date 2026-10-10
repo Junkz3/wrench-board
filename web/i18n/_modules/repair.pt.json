@@ -1,0 +1,21 @@
+{
+  "demo_symptom": "Não liga: sem energia alguma",
+  "device_kind": {
+    "label": "Tipo de placa (opcional)",
+    "none": "(não declarado)",
+    "options": {
+      "gpu_card": "Placa de vídeo (GPU)",
+      "laptop_logic_board": "Placa lógica de notebook",
+      "phone_logic_board": "Placa lógica de smartphone",
+      "desktop_motherboard": "Placa-mãe de desktop",
+      "sbc_board": "Computador de placa única (SBC)",
+      "power_charging_board": "Placa de alimentação / carregamento",
+      "other": "Outra"
+    }
+  },
+  "schematic": {
+    "label": "Esquemático (opcional, para um pacote mais preciso)",
+    "cta": "Anexar um PDF do esquemático",
+    "already_ingested": "Esquemático já processado ✓ (não precisa anexar)"
+  }
+}

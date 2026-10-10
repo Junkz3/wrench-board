@@ -1,0 +1,154 @@
+{
+  "sidebar": {
+    "title": "Recentes",
+    "aria": "Reparos recentes",
+    "delete_aria": "Excluir este reparo",
+    "delete_title": "Excluir",
+    "count_one": "{n} reparo",
+    "count_many": "{n} reparos",
+    "state_building": "Gerando",
+    "state_paused": "Precisa de confirmação",
+    "state_failed": "Falha na geração",
+    "locked_hint": "O pacote de conhecimento está sendo gerado. Você pode fechar esta página; o processo continua.",
+    "resume_aria": "Acompanhar o progresso desta geração"
+  },
+  "hero": {
+    "title": "Seu assistente de reparo de hardware.",
+    "sub": "Informe o dispositivo e o defeito: eu gero o conhecimento e abro o diagnóstico.",
+    "device_placeholder": "Dispositivo (ex.: placa-mãe MNT Reform, iPhone 11, Framework 13)",
+    "device_aria": "Qual é o dispositivo",
+    "symptom_placeholder": "Defeito (ex.: não liga, não carrega, tela preta)",
+    "symptom_aria": "Qual é o defeito",
+    "submit": "Iniciar diagnóstico"
+  },
+  "preflight": {
+    "badge": "Novo dispositivo",
+    "title": "Iniciar diagnóstico · {device}",
+    "intro": "Ainda não existe uma ficha de conhecimento para este dispositivo. O início do processo vai criar uma do zero.",
+    "credit": "Este diagnóstico consome 1 crédito para gerar o pacote de conhecimento do dispositivo.",
+    "time": "Gerar o pacote completo pode levar mais de 15 minutos. Você pode fechar esta página; a geração continua.",
+    "schematic_label": "Esquemático: agora é a hora de adicioná-lo",
+    "schematic_none": "Nenhum esquemático fornecido. Se você tiver o PDF do esquemático, adicione-o agora. Isso melhora muito o pacote.",
+    "schematic_attached": "Esquemático anexado. Ele será processado para refinar o pacote.",
+    "schematic_replace": "Escolher outro PDF",
+    "email_optin": "Avise-me por e-mail quando o dispositivo estiver pronto, para eu não precisar esperar aqui.",
+    "close": "Fechar",
+    "cancel": "Cancelar",
+    "confirm": "Iniciar diagnóstico"
+  },
+  "timeline": {
+    "title_default": "Criando a ficha de conhecimento…",
+    "title_build": "Criando a ficha · {device}",
+    "title_expand": "Enriquecimento direcionado · {device}",
+    "title_loading": "Carregando ficha · {device}",
+    "title_ready": "Ficha pronta · {status}",
+    "title_failed": "Falha no pipeline",
+    "title_queued": "Na fila · posição {position}",
+    "elapsed": "Decorrido · {n}s",
+    "phase_scout": "Scout · pesquisa na web",
+    "phase_registry": "Registry · vocabulário canônico",
+    "phase_mapper": "Mapper · refdes ↔ grafo",
+    "phase_writers": "Writers · grafo + regras + glossário",
+    "phase_audit": "Auditor · validação",
+    "phase_schematic_ingest": "Esquemático · visão página a página",
+    "phase_device_kind": "Tipo de placa · classificação",
+    "phase_expand": "Pesquisa direcionada sobre o seu sintoma",
+    "detail": "detalhe",
+    "detail_hide": "ocultar",
+    "step": {
+      "search_round": "pesquisa web · rodada {index}",
+      "page": "página {index}/{total}",
+      "writer_graph": "grafo ✓ {count} nós",
+      "writer_rules": "regras ✓ {count}",
+      "writer_dict": "glossário ✓ {count}",
+      "audit": "auditando",
+      "revision": "revisão {index}"
+    }
+  },
+  "status": {
+    "pipeline_started": "Pipeline iniciado em {device}.",
+    "queued": "Aguardando: posição {position} na fila ({ahead} à frente). O diagnóstico começa automaticamente assim que um slot for liberado.",
+    "checking": "Salvando seu reparo e verificando se já conheço esta placa…",
+    "rule_match": "Já conheço este caso ({rule_id}). Abrindo o diagnóstico…",
+    "device_known": "Já conheço {device}. Abrindo o diagnóstico…",
+    "expand": "Conheço {device}. Adicionando seu sintoma específico (~3 min).",
+    "build_new": "Novidade para mim: criando a ficha em segundo plano. Fique à vontade para acompanhar.",
+    "build_delay": "Placa nova: preparando a ficha de conhecimento. Isso pode levar um tempo. Você pode fechar esta página e voltar depois; a criação continua.",
+    "notify_armed": "Pronto. Enviaremos um e-mail assim que a placa estiver pronta.",
+    "ready": "Tudo pronto. Abrindo o diagnóstico…",
+    "ws_lost": "Conexão com o pipeline perdida. Recarregue a página se nada acontecer.",
+    "error_create": "Falha ao criar: {error}",
+    "error_pipeline": "Erro: {error}.",
+    "error_unknown": "desconhecido",
+    "error_invalid_response": "resposta inválida do servidor",
+    "error_delete": "Falha ao excluir: {error}",
+    "validation_device": "Seja mais específico sobre a placa (pelo menos algumas palavras).",
+    "validation_symptom": "Descreva o sintoma com um pouco mais de detalhes."
+  },
+  "delete": {
+    "confirm": "Excluir este reparo? A conversa e as anotações do agente serão apagadas permanentemente."
+  },
+  "kind": {
+    "none": "(tipo de placa, opcional)",
+    "aria": "Tipo de placa"
+  },
+  "knowledge": {
+    "button": "Adicionar conhecimento",
+    "aria": "Adicionar conhecimento sobre o dispositivo",
+    "badge": "Opcional",
+    "title": "Adicionar conhecimento sobre o dispositivo",
+    "close": "Fechar",
+    "intro": "Mais contexto gera um pacote mais preciso. Tudo aqui é opcional.",
+    "done": "Concluído"
+  },
+  "board_number": {
+    "label": "Número da placa (opcional)",
+    "placeholder": "820-02016",
+    "aria": "Número da placa",
+    "hint": "Gravado na PCB. Libera as especificações conhecidas da sua revisão exata."
+  },
+  "schematic": {
+    "cta": "Anexar PDF do esquemático (opcional)",
+    "aria": "PDF do esquemático",
+    "already_ingested": "Esquemático já ingerido ✓ (não precisa anexar)"
+  },
+  "suggest": {
+    "aria": "Sugestões de dispositivos",
+    "draft": "rascunho",
+    "graph_label": "grafo",
+    "graph_title": "Grafo elétrico pronto"
+  },
+  "tools": {
+    "stock": "Estoque"
+  },
+  "free": {
+    "locked_hint": "Plano gratuito: escolha um dispositivo já analisado (✓) na lista para iniciar um diagnóstico.",
+    "upgrade_cta": "Faça upgrade para Pro para analisar um novo dispositivo →"
+  },
+  "catalogue": {
+    "button": "Explorar dispositivos",
+    "aria": "Explorar dispositivos disponíveis",
+    "title": "Dispositivos disponíveis",
+    "search_placeholder": "Buscar dispositivo, marca, número da placa…",
+    "filter_aria": "Filtrar por tipo de dispositivo",
+    "filter_all": "Todos",
+    "empty": "Nenhum dispositivo encontrado.",
+    "draft": "rascunho",
+    "graph": "grafo",
+    "fiche_back": "Todos os dispositivos",
+    "fiche_known": "O que sabemos",
+    "fiche_registry": "Registro",
+    "fiche_graph": "Grafo de conhecimento",
+    "fiche_rules": "Regras de diagnóstico",
+    "fiche_dictionary": "Glossário",
+    "fiche_boardview": "Boardview",
+    "fiche_schematic": "Esquemático",
+    "fiche_symptom_placeholder": "Descreva o problema (ex.: não liga, não carrega)",
+    "fiche_launch": "Iniciar diagnóstico",
+    "fiche_draft_locked": "Este dispositivo ainda está em construção — diagnóstico indisponível por enquanto.",
+    "present": "sim",
+    "absent": "não",
+    "button_short": "Explorar",
+    "crumb_types": "Tipos"
+  }
+}

@@ -6,7 +6,8 @@
   <a href="README.md">English</a> ·
   <a href="README.fr.md">Français</a> ·
   <strong>中文</strong> ·
-  <a href="README.hi.md">हिन्दी</a>
+  <a href="README.hi.md">हिन्दी</a> ·
+  <a href="README.pt-BR.md">Português</a>
 </p>
 
 # Wrench Board

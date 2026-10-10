@@ -1,0 +1,98 @@
+{
+  "title": "Banco de Memória",
+  "subtitle": "Pacote de conhecimento determinístico gerado pelo pipeline V2. Navegue pelo registro, grafo de conhecimento, regras de diagnóstico, fichas de componentes e veredicto da auditoria.",
+  "title_with_device": "Banco de Memória <span class=\"sub\" style=\"color:var(--text-3);font-weight:400;font-size:14px;margin-left:10px\">· {device}</span>{form}",
+  "picker": {
+    "label": "Pacote",
+    "empty_option": "(sem pacote)"
+  },
+  "search": {
+    "placeholder": "Filtrar o pacote (refdes, sintoma, mecanismo…)",
+    "esc_hint": "ESC limpa"
+  },
+  "blocks": {
+    "registry_heading": "Vocabulário canônico",
+    "graph_heading": "Grafo de conhecimento",
+    "rules_heading": "Regras de diagnóstico",
+    "dictionary_heading": "Fichas de componentes",
+    "audit_heading": "Veredicto da auditoria"
+  },
+  "empty": {
+    "title": "Nenhum pacote disponível",
+    "body_default": "Nenhum pacote de conhecimento está disponível. Execute o pipeline para gerar um.",
+    "load_failed": "Não foi possível carregar o pacote « {slug} »."
+  },
+  "verdict": {
+    "none_title": "Nenhuma auditoria foi registrada para este pacote ainda.",
+    "none_label": "AUDITORIA · não executada",
+    "approved_label": "AUDITORIA · aprovada",
+    "needs_revision_label": "AUDITORIA · revisão",
+    "rejected_label": "AUDITORIA · rejeitada",
+    "unknown_label": "AUDITORIA · desconhecida",
+    "consistency": "consistência"
+  },
+  "counts": {
+    "components": "componentes",
+    "signals": "sinais",
+    "nodes": "nós",
+    "edges": "arestas",
+    "rules": "regras",
+    "sheets": "fichas",
+    "rules_count": "<b>{n}</b> regras",
+    "rules_count_zero": "<b>0</b> regras",
+    "sheets_count": "<b>{n}</b> fichas",
+    "sheets_count_zero": "<b>0</b> fichas",
+    "registry_count": "<b>{c}</b> componentes · <b>{s}</b> sinais",
+    "graph_count": "<b>{n}</b> nós · <b>{e}</b> arestas"
+  },
+  "registry": {
+    "missing": "registry.json ausente. Pipeline não executado.",
+    "components_heading": "Componentes ({n})",
+    "signals_heading": "Sinais ({n})",
+    "no_components": "Nenhum componente.",
+    "no_signals": "Nenhum sinal.",
+    "th_refdes": "Refdes",
+    "th_type": "Tipo",
+    "th_aliases": "Alias",
+    "th_description": "Descrição",
+    "th_canonical": "Nome canônico",
+    "th_nominal_voltage": "Tensão nominal"
+  },
+  "graph": {
+    "missing": "knowledge_graph.json ausente.",
+    "no_edges": "Nenhuma aresta no grafo.",
+    "stat_symptoms": "Sintomas",
+    "stat_components": "Componentes",
+    "stat_nets": "Nets",
+    "stat_edges": "Arestas"
+  },
+  "rules": {
+    "missing": "rules.json ausente.",
+    "none": "Nenhuma regra de diagnóstico.",
+    "no_symptom": "(sem sintoma)",
+    "h_symptoms": "Sintomas",
+    "h_likely_causes": "Causas prováveis",
+    "h_diagnostic_steps": "Etapas de diagnóstico",
+    "h_sources": "Fontes",
+    "expected": "esperado {value}",
+    "conf_label": "conf {value}"
+  },
+  "dictionary": {
+    "missing": "dictionary.json ausente.",
+    "none": "Nenhuma ficha de componente.",
+    "th_refdes": "Refdes",
+    "th_role": "Função",
+    "th_package": "Encapsulamento",
+    "th_failure_modes": "Modos de falha",
+    "th_notes": "Observações"
+  },
+  "audit": {
+    "missing": "audit_verdict.json ausente. O pipeline ainda não auditou este pacote.",
+    "headline_approved": "Auditoria aprovada: o pacote está consistente com o registro.",
+    "headline_needs_revision": "Auditoria: revisão solicitada. Desvio detectado, correções necessárias.",
+    "headline_rejected": "Auditoria rejeitada: pacote inconsistente, inutilizável no estado atual.",
+    "headline_unknown": "Status da auditoria desconhecido.",
+    "files_to_rewrite": "Arquivos a reescrever",
+    "drift_heading": "Desvios detectados ({n})"
+  }
+}

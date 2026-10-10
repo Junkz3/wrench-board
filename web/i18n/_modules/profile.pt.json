@@ -1,0 +1,77 @@
+{
+  "title": "Perfil do técnico",
+  "head": {
+    "tag": "técnico",
+    "no_name": "Sem nome",
+    "no_specialty": "Sem especialidade",
+    "edit_identity": "Editar identidade",
+    "years_one": "{n} ano de XP",
+    "years_other": "{n} anos de XP",
+    "years_zero": "0 ano",
+    "updated": "Atualizado em {date}"
+  },
+  "ribbon": {
+    "tag": "progressão",
+    "title": "Nível {level}",
+    "default_blurb": "O nível é derivado do número de habilidades praticadas.",
+    "blurbs": {
+      "beginner": "Você está começando. O agente explicará cada etapa antes de pedir que você aja.",
+      "intermediate": "Você está progredindo. O agente simplificará as explicações e deixará você assumir mais o controle.",
+      "confirmed": "Você é confirmado. O agente passa as decisões para você e confirma suas hipóteses.",
+      "expert": "Você é especialista. O agente é conciso e acompanha você em falhas complexas."
+    },
+    "rungs": {
+      "beginner": "Iniciante",
+      "intermediate": "Intermediário",
+      "confirmed": "Confirmado",
+      "expert": "Especialista"
+    }
+  },
+  "stats": {
+    "tag_mastered": "dominadas",
+    "tag_practiced": "praticadas",
+    "tag_learning": "aprendendo",
+    "tag_tools": "ferramentas",
+    "sub_skills": "de {total} habilidades catalogadas",
+    "sub_tools": "de {total} ferramentas catalogadas",
+    "block_skills_total": "{n} habilidades",
+    "block_tools_total": "{on} / {total} ativas"
+  },
+  "blocks": {
+    "skills_tag": "habilidades",
+    "skills_heading": "Perfil operacional",
+    "tools_tag": "ferramentas",
+    "tools_heading": "Bancada declarada",
+    "prefs_tag": "preferências de diag",
+    "prefs_heading": "Postura do agente"
+  },
+  "status": {
+    "mastered": "Dominada",
+    "practiced": "Praticada",
+    "learning": "Em aprendizado",
+    "unlearned": "Não praticada"
+  },
+  "drawer": {
+    "close": "Fechar",
+    "no_history": "Ainda não há histórico para esta habilidade. Ela será rastreada assim que o agente detectar um uso confirmado."
+  },
+  "prefs": {
+    "verbosity": "Verbosidade",
+    "language": "Idioma"
+  },
+  "modal": {
+    "kicker": "Perfil do técnico",
+    "title": "Edite sua identidade",
+    "close": "Fechar",
+    "field_name": "Nome",
+    "field_avatar": "Avatar (2 letras ou emoji)",
+    "field_years": "Anos de experiência",
+    "field_specialties": "Especialidades (separadas por vírgula)",
+    "specialties_placeholder": "apple, consoles, laptops",
+    "field_level": "Forçar nível (opcional)",
+    "level_auto": "(derivado automaticamente)",
+    "cancel": "Cancelar",
+    "save": "Salvar",
+    "save_failed": "Não foi possível salvar: {error}"
+  }
+}

@@ -1,0 +1,67 @@
+{
+  "empty": {
+    "title": "Nenhum grafo carregado",
+    "body": "Execute o pipeline de geração em um dispositivo: o grafo será construído a partir do pack resultante."
+  },
+  "legend": {
+    "types_heading": "Tipos",
+    "type_symptom": "Sintoma",
+    "type_symptom_desc": "o que o cliente observa",
+    "type_net": "Net / Linha",
+    "type_net_desc": "sinal ou alimentação",
+    "type_component": "Componente",
+    "type_component_desc": "chip, conector",
+    "type_action": "Ação",
+    "type_action_desc": "reparo possível",
+    "relations_heading": "Relações",
+    "rel_causes": "causa",
+    "rel_causes_desc": "ligação causal",
+    "rel_powers": "alimenta",
+    "rel_powers_desc": "fluxo de energia",
+    "rel_connected": "conectado a",
+    "rel_connected_desc": "barramento / terra",
+    "rel_resolves": "resolve",
+    "rel_resolves_desc": "ação corretiva"
+  },
+  "controls": {
+    "zoom_in": "Mais zoom",
+    "zoom_out": "Menos zoom",
+    "fit": "Ajustar"
+  },
+  "inspector": {
+    "type_inferred": "· inferência do modelo",
+    "id_label": "id: {id}",
+    "confidence": "Confiança",
+    "description": "Descrição",
+    "metadata": "Metadados",
+    "relations": "Relações",
+    "edge_weight": "{label} · peso {weight}",
+    "edge_outgoing": "→",
+    "edge_incoming": "←",
+    "rules_field": "rules",
+    "conf_high": "Alta confiança: corroborado por múltiplas fontes.",
+    "conf_low": "Baixa confiança: fonte única ou inferência indireta.",
+    "conf_medium": "Confiança moderada: referência cruzada parcial."
+  },
+  "tooltip": {
+    "conf_pct": "conf. {pct}%"
+  },
+  "subsystem": {
+    "fallback_label": "OUTROS"
+  },
+  "type_label": {
+    "component": "Componente",
+    "symptom": "Sintoma",
+    "net": "Net / Linha",
+    "action": "Ação"
+  },
+  "rel_label": {
+    "causes": "causa",
+    "powers": "alimenta",
+    "connected_to": "conectado a",
+    "resolves": "resolve"
+  },
+  "stats": {
+    "summary": "{n} nós · {e} arestas"
+  }
+}

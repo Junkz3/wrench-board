@@ -12,11 +12,11 @@ let _partialLoaded = false;
 
 const STATUS_KEYS = ["mastered", "practiced", "learning", "unlearned"];
 const VERBOSITIES = ["auto", "concise", "normal", "teaching"];
-const LANGUAGES = ["en", "fr", "zh", "hi"];
+const LANGUAGES = ["en", "fr", "zh", "hi", "pt"];
 // Native display label per locale (the stored value stays the ISO code).
-const LANGUAGE_LABELS = { en: "English", fr: "Français", zh: "中文", hi: "हिन्दी" };
+const LANGUAGE_LABELS = { en: "English", fr: "Français", zh: "中文", hi: "हिन्दी", pt: "Português" };
 // BCP-47 tag per locale for Intl date/number formatting.
-const DATE_LOCALES = { en: "en-US", fr: "fr-FR", zh: "zh-CN", hi: "hi-IN" };
+const DATE_LOCALES = { en: "en-US", fr: "fr-FR", zh: "zh-CN", hi: "hi-IN", pt: "pt-BR" };
 
 async function ensurePartial() {
   if (_partialLoaded) return;

@@ -1,0 +1,183 @@
+{
+  "skip": "Pular",
+  "next": "Próximo",
+  "back": "Voltar",
+  "done": "Vamos lá",
+  "welcome": {
+    "kicker": "Primeira vez aqui",
+    "title": "Bem-vindo ao Wrench Board.",
+    "body": "Sou seu assistente de bancada. Me diga o dispositivo e o sintoma, e eu monto a ficha técnica e conduzo o diagnóstico com você: boardview, esquemático, raciocínio causal, tudo isso.",
+    "cta": "Me mostre como funciona",
+    "skip": "Pular, vou explorar por conta própria"
+  },
+  "profile": {
+    "bubble": "Primeiro, vamos te configurar. Alguns passos rápidos para que eu possa ajustar minha ajuda a você e à sua bancada.",
+    "panel_title": "Seu perfil de técnico",
+    "field_name": "Nome",
+    "name_placeholder": "Como devo te chamar?",
+    "name_required": "Seu nome é obrigatório para continuar.",
+    "field_avatar": "Avatar",
+    "avatar_placeholder": "2 letras ou um emoji",
+    "field_level": "Nível de experiência",
+    "level_auto": "Deixe-me deduzir",
+    "level_beginner": "Iniciante",
+    "level_intermediate": "Intermediário",
+    "level_confirmed": "Avançado",
+    "level_expert": "Especialista",
+    "field_specialties": "Especialidades",
+    "specialties_placeholder": "apple, consoles, notebooks",
+    "field_tools": "Ferramentas da bancada",
+    "tool_soldering_iron": "Ferro de solda",
+    "tool_hot_air": "Ar quente",
+    "tool_bga_rework": "Retrabalho BGA",
+    "tool_preheater": "Pré-aquecedor",
+    "tool_microscope": "Microscópio",
+    "tool_thermal_camera": "Câmera térmica",
+    "tool_uv_lamp": "Lâmpada UV",
+    "tool_multimeter": "Multímetro",
+    "tool_oscilloscope": "Osciloscópio",
+    "tool_bench_psu": "Fonte de bancada",
+    "tool_reballing_kit": "Kit de reballing",
+    "tool_stencil_printer": "Impressora de estêncil",
+    "save": "Salvar e continuar",
+    "skip_step": "Pular por enquanto",
+    "save_failed": "Não foi possível salvar seu perfil: {error}"
+  },
+  "wizard": {
+    "config_title": "Configuração",
+    "step_identity": "Sobre você",
+    "step_workshop": "Sua oficina",
+    "step_posture": "Como devo ajudar",
+    "identity_intro": "Para que eu possa ajustar meu tom ao seu nível.",
+    "workshop_intro": "Marque o que você tem. Só sugerirei procedimentos que sua bancada possa realizar.",
+    "posture_intro": "Defina o quanto eu explico. Você pode alterar isso a qualquer momento.",
+    "progress": "Passo {n} de {total}"
+  },
+  "level": {
+    "desc_auto": "Vou deduzir seu nível com base nas habilidades que você registrar ao longo do tempo."
+  },
+  "workshop": {
+    "group_soldering": "Soldagem",
+    "group_rework": "Retrabalho",
+    "group_inspection": "Inspeção",
+    "group_measurement": "Medição",
+    "group_power": "Alimentação",
+    "group_supplies": "Insumos",
+    "group_custom": "Minhas outras ferramentas",
+    "custom_placeholder": "ex.: pistola de cola, microscópio estéreo…",
+    "custom_add": "Adicionar",
+    "custom_remove": "Remover esta ferramenta"
+  },
+  "posture": {
+    "verbosity_label": "Nível de explicação",
+    "mode_auto": "Auto",
+    "mode_concise": "Conciso",
+    "mode_normal": "Normal",
+    "mode_teaching": "Didático",
+    "desc_auto": "Adapto a profundidade ao seu nível.",
+    "desc_concise": "Respostas curtas, direto ao próximo passo.",
+    "desc_normal": "Raciocínio e etapas equilibrados.",
+    "desc_teaching": "Explico o motivo de cada etapa, como um mentor."
+  },
+  "concept": {
+    "bubble": "A ideia é a seguinte: cada reparo é uma sessão persistente, como um chamado que você pode pausar e retomar depois. Quando você informa o dispositivo, eu pesquiso, monto a ficha técnica e abro o diagnóstico bem aqui."
+  },
+  "example": {
+    "bubble": "Quer ver isso em uma placa real primeiro? Tenho um exemplo completo à mão: a placa-mãe MNT Reform. Deixo você dar uma olhada rápida e depois você roda o seu próprio.",
+    "cta": "Mostrar o exemplo"
+  },
+  "firstdiag": {
+    "bubble_device": "Vamos tentar um. Solte um dispositivo aqui. O nome do modelo já basta, eu encontro o resto.",
+    "bubble_symptom": "Agora o sintoma: o que a placa está apresentando de errado?",
+    "bubble_launch": "É só isso que preciso. Clique em iniciar e veja-me aprender sobre o dispositivo, fase por fase. Ou toque em uma sugestão abaixo."
+  },
+  "finish": {
+    "bubble": "Tudo pronto. Estarei por aqui sempre que você abrir um reparo. Bom trabalho na bancada."
+  },
+  "menu": {
+    "open_aria": "Abrir configurações do perfil",
+    "incomplete": "Configure seu perfil",
+    "view_profile": "Ver perfil",
+    "level_label": "Nível",
+    "language": "Idioma",
+    "lang_en": "English",
+    "lang_fr": "Français",
+    "lang_zh": "中文",
+    "lang_hi": "हिन्दी",
+    "lang_pt": "Português"
+  },
+  "modal": {
+    "title": "Seu perfil",
+    "subtitle": "Ajuste como eu trabalho com você.",
+    "section_identity": "Identidade",
+    "section_workshop": "Oficina",
+    "section_posture": "Postura do agente",
+    "full_profile": "Abrir perfil completo (progresso e habilidades)",
+    "save": "Salvar",
+    "cancel": "Cancelar"
+  },
+  "infohint": "O que é isso?",
+  "info": {
+    "cta": "Entendi",
+    "knowledge": {
+      "title": "Adicionar conhecimento",
+      "intro": "Forneça as fontes do próprio dispositivo para que o agente raciocine sobre a placa real, não apenas com conhecimento genérico.",
+      "p1": "Esquemático em PDF: analisado página por página em um grafo elétrico. Libera o simulador, mb_hypothesize e o raciocínio causal no nível das linhas.",
+      "p2": "Boardview (.brd / .kicad_pcb / .fz): libera o destaque no nível dos pads, o rastreamento de nets e o foco em componentes na placa 3D.",
+      "p3": "Sem eles, o agente ainda ajuda, mas não consegue raciocinar sobre a causalidade desta placa. Adicione o que tiver, mesmo que seja apenas um."
+    },
+    "stock": {
+      "title": "Estoque de doadoras",
+      "intro": "Busque peças de reposição nas suas placas doadoras em vez de encomendar, com o agente selecionando apenas equivalentes seguros.",
+      "p1": "Funciona em dispositivos com um pack analisado (um grafo elétrico): as peças são tipadas, valoradas e classificadas por segurança em um índice pesquisável.",
+      "p2": "Marque placas mortas como doadoras. Suas peças tornam-se pesquisáveis; o uso de uma peça é registrado para manter seu inventário preciso.",
+      "p3": "Ganho potencial: reutilize em segundos uma peça que você já tem, encontre equivalentes nos quais não pensou e reduza atrasos de pedidos.",
+      "p4": "Com o agente: assim que uma causa raiz exigir substituição, ele chama stock_search sob um filtro de segurança rigoroso (recusa funções tuned / feedback / RF / SMPS / IC) e sugere correspondências doadoras."
+    },
+    "repair": {
+      "title": "Como funciona um reparo",
+      "intro": "Um reparo é uma sessão persistente: eu aprendo sobre seu dispositivo e conduzo o diagnóstico junto com você.",
+      "p1": "Ficha de conhecimento: quando você nomeia um dispositivo, eu o pesquiso e crio sua base de conhecimento elétrico (a linha do tempo que você viu ao iniciar).",
+      "p2": "Visualizações: o painel à esquerda alterna entre o dashboard de diagnóstico, o boardview da PCB, o esquemático e o grafo de conhecimento.",
+      "p3": "Os recursos crescem com os dados: carregue um esquemático ou boardview e eu libero o simulador, hipóteses e raciocínio no nível dos pads.",
+      "p4": "Diagnostique conversando: descreva o sintoma e suas medições no chat. Eu proponho protocolos, suspeitos e o próximo passo, registrando as descobertas ao longo do processo."
+    }
+  },
+  "tour": {
+    "knowledge": "Viu isso? Adicione um esquemático ou arquivo de board aqui para liberar o simulador e o raciocínio no nível dos pads. Toque no ? a qualquer momento.",
+    "stock": "E aqui em cima: seu estoque de doadoras. Reutilize peças de placas mortas em vez de encomendar. Toque no ? para ver como."
+  },
+  "coach": {
+    "skip": "Pular o tour",
+    "done": "Entendi",
+    "demo_done": "Entendi, minha vez",
+    "session": "Você está em um reparo agora: uma sessão persistente que você pode sair e retomar a qualquer momento. Acabei de analisar este dispositivo: esquemático, componentes, linhas de alimentação, tudo na memória.",
+    "cap": "Veja o que posso fazer nesta placa agora. Quanto mais dados você me der (um esquemático, um boardview), maior fica a pontuação e mais ferramentas são liberadas.",
+    "cards": "Os dados do dispositivo que coletei. Você pode adicionar mais (um esquemático ou um boardview) para ir além.",
+    "pcb": "Visualização PCB: sua placa real. Destaque uma parte e eu isolo seus pads, seu net e o que há ao redor.",
+    "demo_pcb": "Visualização PCB: o MNT Reform real. Destaquei U14, o regulador que fornece a linha de standby 3V3, geralmente o primeiro componente a medir quando a placa não liga.",
+    "schematic": "Visualização Esquemático: o esquemático elétrico navegável, base para o simulador e hipóteses de falha.",
+    "demo_schematic": "Visualização Esquemático: clico na linha LPC_VCC (a alimentação de standby). O esquemático isola a linha e toda a sua cascata. É assim que rastreio uma falha até sua causa.",
+    "graph": "Visualização Memória: a placa inteira como um grafo (componentes, conexões e regras inferidas).",
+    "demo_graph": "Visualização Memória: tudo o que sei sobre esta placa, em forma de grafo. Clico em um nó: o painel à direita abre os detalhes (o que é, a confiança e como se conecta ao resto).",
+    "demo_graph_raw": "E a aba Raw: a mesma memória em texto (regras, fatos, observações). Essa é minha matéria-prima, é com isso que raciocino para diagnosticar.",
+    "chat": "Para diagnosticar, basta conversar comigo: descreva o sintoma e suas medições, e eu te guio passo a passo.",
+    "demo_chat": "O coração da ferramenta: você descreve a falha, o agente faz o diagnóstico. Acompanhe um caso real, passo a passo.",
+    "demo_play": "Ver o agente trabalhar",
+    "demo_q1": "Me explique a sequência de inicialização desta placa: quais linhas sobem e em que ordem. Mostre na placa.",
+    "demo_c1_explore": "Você faz sua pergunta. O agente lê o que já sabe sobre esta placa: esquemático, componentes, linhas de alimentação.",
+    "demo_c1_board": "Ele desenha a sequência direto na placa: a cascata de alimentação, do conector de entrada até o módulo CPU, com setas e rótulos.",
+    "demo_c1_done": "E explica fase por fase: qual regulador ativa qual linha, e em que ordem. É assim que se conhece uma placa.",
+    "demo_switch": "Agora observe: abro o seletor de conversas e crio uma nova. A conversa anterior é deixada de lado e a placa limpa, mas o agente mantém este dispositivo na memória.",
+    "demo_conv1_title": "MNT Reform: sequência de inicialização",
+    "demo_new_conv_title": "Nova conversa",
+    "demo_q2": "A placa está morta: sem linha, sem LED. Faça o diagnóstico e me dê um protocolo de medição.",
+    "demo_c2_diag": "Nova conversa, novo defeito: \"placa morta\". O agente explora a memória, valida os componentes e expõe seu raciocínio: a cadeia de entrada J1 → F1 → VIN → U14.",
+    "demo_c2_protocol": "Ele desenha a cadeia na placa e propõe um protocolo de medição em 6 etapas. Segurança primeiro: começamos a frio, nada conectado.",
+    "demo_c2_cold": "A frio e sem riscos: o fusível F1 está bom e não há curto em VIN. Duas pistas descartadas.",
+    "demo_c2_power": "Agora energizada: os 24 V do adaptador chegam corretamente à placa.",
+    "demo_c2_u14": "VIN está saudável até o barramento do sistema → o agente muda seu suspeito para U14, o regulador de standby de 3.3 V, e mostra onde fazer a sondagem.",
+    "demo_c2_verdict": "A reviravolta: U14 realmente entrega 3.3 V. Todas as linhas de alimentação estão saudáveis! Não é uma placa morta, é um problema de sequenciamento. Medir e depois revisar a hipótese: isso é um bom diagnóstico.",
+    "demo_after": "Isso é um diagnóstico completo: raciocínio, anotações na placa, protocolo de medição e veredito. Sua vez: descreva seu defeito e eu farei o mesmo na sua placa."
+  }
+}
